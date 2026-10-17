@@ -1,0 +1,72 @@
+{
+  "$schema": "https://v2-11-8.turborepo.dev/schema.json",
+  "globalDependencies": ["tsconfig.base.json", ".node-version"],
+  "globalEnv": ["CI"],
+  "globalPassThroughEnv": ["NEXT_TELEMETRY_DISABLED"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!**/*.test.{ts,tsx}",
+        "!**/__screenshots__/**",
+        "!test/**",
+        "!README.md",
+        "!CHANGELOG.md"
+      ],
+      "outputs": ["dist/**"]
+    },
+    "docs#build": {
+      "dependsOn": ["^build", "registry:build"],
+      "env": ["SITE_URL"],
+      "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**"]
+    },
+    "registry:build": {
+      "cache": false,
+      "env": ["SITE_URL"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "env": ["OWSEM_BROWSERS"],
+      "passThroughEnv": ["PLAYWRIGHT_BROWSERS_PATH", "OWSEM_CHROMIUM_PATH", "XDG_CACHE_HOME"]
+    },
+    "owsem#test": {
+      "dependsOn": ["^build", "build"]
+    },
+    "test:e2e": {
+      "dependsOn": ["build"],
+      "passThroughEnv": [
+        "PLAYWRIGHT_BROWSERS_PATH",
+        "OWSEM_CHROMIUM_PATH",
+        "XDG_CACHE_HOME",
+        "PORT"
+      ]
+    },
+    "size": {
+      "dependsOn": ["build"]
+    },
+    "lint:pkg": {
+      "dependsOn": ["build"]
+    },
+    "dev": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true,
+      "passThroughEnv": ["PORT"]
+    },
+    "owsem-ui#dev": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "persistent": true
+    },
+    "docs#dev": {
+      "dependsOn": ["^build", "registry:build"],
+      "cache": false,
+      "persistent": true,
+      "passThroughEnv": ["PORT"]
+    }
+  }
+}

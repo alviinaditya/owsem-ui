@@ -1,0 +1,95 @@
+{
+  "name": "owsem-ui",
+  "version": "0.0.0",
+  "description": "React components in the Base and Owsem families, built on Base UI",
+  "keywords": [
+    "react",
+    "components",
+    "base-ui",
+    "design-system"
+  ],
+  "license": "MIT",
+  "author": "Alvin A. Rahman",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alviinaditya/owsem-ui.git",
+    "directory": "packages/ui"
+  },
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./base": {
+      "types": "./dist/base.d.ts",
+      "default": "./dist/base.js"
+    },
+    "./owsem": {
+      "types": "./dist/owsem.d.ts",
+      "default": "./dist/owsem.js"
+    },
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "default": "./dist/core/index.js"
+    },
+    "./styles.css": "./dist/styles.css",
+    "./tokens.css": "./dist/tokens.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "browserslist": [
+    "baseline 2023"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch --no-clean",
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.build.json && tsc -p tsconfig.node.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "size": "size-limit",
+    "lint:pkg": "rm -rf .pack && pnpm pack --pack-destination .pack && publint --strict .pack/*.tgz && attw .pack/*.tgz --profile esm-only --exclude-entrypoints ./styles.css ./tokens.css"
+  },
+  "peerDependencies": {
+    "@types/react": "^18.2.7 || ^19.0.0",
+    "react": "^18.2.0 || ^19.0.0",
+    "react-dom": "^18.2.0 || ^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@base-ui/react": "catalog:"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@size-limit/preset-small-lib": "^14.2.0",
+    "@tsdown/css": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitest/browser-playwright": "catalog:",
+    "axe-core": "catalog:",
+    "lightningcss": "catalog:",
+    "playwright": "catalog:",
+    "publint": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "size-limit": "^14.2.0",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:",
+    "vitest-browser-react": "catalog:"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

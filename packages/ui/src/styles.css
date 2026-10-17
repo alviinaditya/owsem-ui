@@ -1,0 +1,5 @@
+/* Layer order, repeated at the top of every component CSS file (FR-8). */
+@layer owsem.tokens, owsem.components;
+
+/* Plain @import without layer(): each file wraps itself in @layer. */
+@import "./core/tokens/tokens.css";

@@ -1,0 +1,39 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * Theme tokens (TK-5). Without data-theme the system theme applies; data-theme="light" or "dark"
+ * forces a theme on any subtree. The dark set appears twice and must stay identical (tested).
+ * Neutral values are placeholders until the phase 1 token set.
+ */
+@layer owsem.tokens {
+  :root,
+  [data-theme="light"] {
+    color-scheme: light;
+    --ow-bg: #fbfbfc;
+    --ow-fg: #18181b;
+    --ow-muted: #5f5f6b;
+    --ow-line: #d9d9e0;
+  }
+
+  :root {
+    --ow-accent: #d4cbe5;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --ow-bg: #111114;
+      --ow-fg: #ededf0;
+      --ow-muted: #a0a0ab;
+      --ow-line: #2e2e35;
+    }
+  }
+
+  [data-theme="dark"] {
+    color-scheme: dark;
+    --ow-bg: #111114;
+    --ow-fg: #ededf0;
+    --ow-muted: #a0a0ab;
+    --ow-line: #2e2e35;
+  }
+}

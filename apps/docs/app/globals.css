@@ -1,0 +1,35 @@
+/* Unlayered on purpose, so docs styles always beat @layer owsem.* (FR-8). */
+
+/* Base UI global setup: portaled popups above the app, and backdrops on iOS Safari 26+. */
+.app-root {
+  isolation: isolate;
+}
+
+body {
+  position: relative;
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background-color: var(--ow-bg);
+  color: var(--ow-fg);
+}
+
+/* Shiki only emits CSS variables; without fumadocs-ui they are mapped here. */
+.shiki,
+.shiki span {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
+}
+
+:root[data-theme="dark"] .shiki,
+:root[data-theme="dark"] .shiki span {
+  color: var(--shiki-dark);
+  background-color: var(--shiki-dark-bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .shiki,
+  :root:not([data-theme="light"]) .shiki span {
+    color: var(--shiki-dark);
+    background-color: var(--shiki-dark-bg);
+  }
+}

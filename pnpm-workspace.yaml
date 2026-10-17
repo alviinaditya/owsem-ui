@@ -1,0 +1,44 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Versions shared across packages. For runtime deps these become the published ranges.
+# Peer dependencies are written in package.json directly, not via the catalog.
+catalog:
+  "@base-ui/react": ~1.9.0
+  react: ^19.3.1
+  react-dom: ^19.3.1
+  "@types/react": ^19.3.0
+  "@types/react-dom": ^19.3.0
+  # Lowest supported major (root and CLI engines): Node 22.
+  "@types/node": ^22.20.5
+  # Held at 7.0 until rolldown-plugin-dts (used by tsdown) supports 7.1.
+  typescript: ~7.0.2
+  # @tsdown/css peers on this exact tsdown version: bump both together.
+  tsdown: 0.23.1
+  "@tsdown/css": 0.23.1
+  lightningcss: ^1.33.0
+  zod: ^4.6.7
+  publint: ^0.3.25
+  # vitest and @vitest/browser-playwright peer on each other exactly: pin together.
+  vitest: 5.0.5
+  "@vitest/browser-playwright": 5.0.5
+  vitest-browser-react: ^2.3.0
+  vite: ^8.3.4
+  axe-core: ^4.14.0
+  # Must match so both share one browser download. Bump together with the VRT baselines.
+  playwright: 1.64.1
+  "@playwright/test": 1.64.1
+
+# pnpm 11+ replaced onlyBuiltDependencies with allowBuilds. esbuild works without postinstall.
+allowBuilds:
+  esbuild: false
+
+# Explicit, so releases younger than 24 h fail loudly instead of being silently excluded.
+minimumReleaseAge: 1440
+trustPolicy: no-downgrade
+# Only check the last 30 days; older releases cause false positives.
+trustPolicyIgnoreAfter: 43200
+
+# Without this pnpm 12 does not reject Node versions outside engines.
+engineStrict: true

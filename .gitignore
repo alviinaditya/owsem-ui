@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+
+# pnpm
+.pnpm-debug.log*
+*.tgz
+.pack/
+
+# Turborepo
+.turbo/
+
+# Build output (tsdown, Next.js, fumadocs-mdx)
+dist/
+*.tsbuildinfo
+.next/
+out/
+next-env.d.ts
+.source/
+
+# Rebuilt by registry:build
+apps/docs/.registry/
+apps/docs/public/r/
+
+# Tests. __screenshots__/ and __snapshots__/ hold committed baselines.
+coverage/
+.vitest/
+**/__traces__/
+test-results/
+playwright-report/
+blob-report/
+playwright/.auth/
+
+# Env and deploy
+.env*
+!.env.example
+.vercel/
+
+# Misc
+*.log
+*.pem
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json

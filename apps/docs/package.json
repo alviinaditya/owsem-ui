@@ -1,0 +1,32 @@
+{
+  "name": "docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "next typegen && tsc --noEmit",
+    "registry:build": "node scripts/build-registry.ts && shadcn registry validate --cwd .registry && shadcn build --cwd .registry --output ../public/r",
+    "test:e2e": "playwright test",
+    "clean": "rm -rf .next .source .registry public/r"
+  },
+  "dependencies": {
+    "fumadocs-core": "^16.17.3",
+    "fumadocs-mdx": "^15.4.7",
+    "next": "^16.4.1",
+    "owsem-ui": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@playwright/test": "catalog:",
+    "@types/mdx": "^2.0.14",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "shadcn": "4.21.5",
+    "typescript": "catalog:"
+  }
+}

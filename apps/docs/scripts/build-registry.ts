@@ -6,9 +6,10 @@
 import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import type { Registry, RegistryItem } from "shadcn/schema";
-import type { ComponentMeta } from "../../../packages/ui/src/components/meta.ts";
+import { catalog, isAvailable } from "../lib/catalog.ts";
+import { en } from "../lib/dictionaries/en.ts";
 import { RESERVED_SLUGS } from "../lib/reserved-slugs.ts";
 import { siteUrl } from "../lib/site.ts";
 
@@ -49,7 +50,7 @@ function rewriteImports(name: string, code: string, uses: Set<string>): string {
 const npmDependencies = (code: string): string[] =>
   code.includes('from "@base-ui/react') ? [`@base-ui/react@~${baseUiVersion}`] : [];
 
-const isSource = (file: string) => /\.(tsx?|css)$/.test(file) && !/\.(test|meta)\.tsx?$/.test(file);
+const isSource = (file: string) => /\.(tsx?|css)$/.test(file) && !/\.test\.tsx?$/.test(file);
 
 function assertValidItem(item: RegistryItem): void {
   if (item.name.includes("/") || RESERVED_SLUGS.has(item.name)) {
@@ -101,11 +102,22 @@ const componentNames = readdirSync(join(uiSrc, "components"), { withFileTypes: t
   .filter((entry) => entry.isDirectory())
   .map((entry) => entry.name);
 
+// The catalog is the source of truth: a folder needs an available entry and vice versa.
+for (const entry of catalog.filter(isAvailable)) {
+  if (!componentNames.includes(entry.name)) {
+    throw new Error(`${entry.name} is available in lib/catalog.ts but has no packages/ui folder.`);
+  }
+}
+
 for (const name of componentNames) {
-  const metaPath = join(uiSrc, "components", name, `${name}.meta.ts`);
-  const { meta } = (await import(pathToFileURL(metaPath).href)) as { meta: ComponentMeta };
+  const entry = catalog.find((e) => e.name === name);
+  if (!entry || !isAvailable(entry)) {
+    throw new Error(
+      `packages/ui/src/components/${name} needs an available entry in lib/catalog.ts.`,
+    );
+  }
   // Needs a flavor-default rewrite per item; arrives with Button.
-  if (meta.family === "base+owsem") {
+  if (entry.family === "base+owsem") {
     throw new Error(`${name}: base+owsem registry items are not supported yet.`);
   }
 
@@ -125,12 +137,12 @@ for (const name of componentNames) {
   items.push({
     name,
     type: "registry:ui",
-    title: meta.title,
-    description: meta.description,
+    title: entry.title,
+    description: en.components[entry.name],
     dependencies: [...dependencies],
     registryDependencies: [...uses],
     files,
-    meta: { family: meta.family, status: meta.status },
+    meta: { family: entry.family, status: entry.status },
   });
 }
 

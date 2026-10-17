@@ -24,7 +24,8 @@ for (const [acceptLanguage, lang] of [
 test("renders each language with its own lang, text, and hreflang links", async ({ page }) => {
   await page.goto("/en/docs");
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
-  await expect(page.getByRole("navigation", { name: "Documentation" })).toBeVisible();
+  const header = page.getByRole("navigation", { name: "Main navigation" });
+  await expect(header.getByRole("link", { name: "Documentation" })).toBeVisible();
   await expect(page.locator('link[rel="alternate"][hreflang="id"]')).toHaveAttribute(
     "href",
     /\/id\/docs$/,
@@ -37,7 +38,11 @@ test("renders each language with its own lang, text, and hreflang links", async 
   await page.getByRole("link", { name: "Bahasa Indonesia" }).click();
   await expect(page).toHaveURL(/\/id\/docs$/);
   await expect(page.locator("html")).toHaveAttribute("lang", "id");
-  await expect(page.getByRole("navigation", { name: "Dokumentasi" })).toBeVisible();
+  await expect(
+    page
+      .getByRole("navigation", { name: "Navigasi utama" })
+      .getByRole("link", { name: "Dokumentasi" }),
+  ).toBeVisible();
 });
 
 test("unknown pages return 404", async ({ request }) => {

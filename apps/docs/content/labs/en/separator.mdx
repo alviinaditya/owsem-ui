@@ -1,14 +1,31 @@
 ---
 title: Separator
-description: An etched line between sections, horizontal or vertical.
 ---
 
 import { Separator } from "owsem-ui/base";
+
+## Overview
+
+Separator divides content with an etched line: a 1 px dark line with a 1 px light line beside it,
+as if cut into the surface with light from above.
 
 <div className="lab-demo">
   <p>Profile</p>
   <Separator />
   <p>Security</p>
+</div>
+
+## Anatomy
+
+A single part. Base UI renders `<div role="separator">` with `aria-orientation` and
+`data-orientation`; OwsemUI adds the `ow-separator` class and draws both lines as borders.
+
+## States and variants
+
+`orientation` is `horizontal` (default) or `vertical`. A vertical separator fills the row height
+inside a flex or grid container, and stays 2 px thick even when the container stretches it.
+
+<div className="lab-demo">
   <div className="lab-demo-row">
     <span>Draft</span>
     <Separator orientation="vertical" />
@@ -18,7 +35,13 @@ import { Separator } from "owsem-ui/base";
   </div>
 </div>
 
-## Usage
+## Keyboard and accessibility
+
+Separator is not focusable and has no keyboard interaction. Screen readers announce it as a
+separator through `role="separator"`. In forced colors (Windows High Contrast), both lines use the
+system color so the line stays visible.
+
+## Ship it
 
 ```sh
 pnpm add owsem-ui
@@ -38,21 +61,6 @@ export function Sections() {
   );
 }
 ```
-
-A vertical separator fills the row height inside a flex or grid container.
-
-## Appearance
-
-Separator uses the etched line material: a 1 px dark line with a 1 px light line beside it, as if
-cut into the surface with light from above. In forced colors (Windows High Contrast), both lines
-use the system color so the line stays visible.
-
-## Accessibility
-
-Base UI renders `<div role="separator">` with `aria-orientation`, so screen readers announce it as
-a separator. It is not focusable.
-
-## Tokens
 
 | Component token | Default | Purpose |
 | --- | --- | --- |

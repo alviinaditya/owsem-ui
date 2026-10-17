@@ -1,11 +1,90 @@
 ---
 title: Getting Started
-description: Installation, theming, the CLI, and moving from Base to Owsem.
+description: Installation, themes, copying components, and moving from Base to Owsem.
 ---
 
-OwsemUI is at an early stage. This page will cover installation, theming, the CLI, and moving
-from Base to Owsem (DS-8).
+OwsemUI provides React components in two families, Base and Owsem, built on
+[Base UI](https://base-ui.com). Use them from the npm package or copy them into your project.
+
+## Installation
+
+Requires React 18.2 or 19.
 
 ```sh
 pnpm add owsem-ui
 ```
+
+Load the CSS once in your app entry, then import components from their family:
+
+```tsx
+import "owsem-ui/styles.css";
+import { Separator } from "owsem-ui/base";
+```
+
+`styles.css` holds the tokens and every component's CSS. To load only what you use, import
+`owsem-ui/tokens.css` plus `owsem-ui/css/<component>.css`.
+
+## Global setup
+
+Base UI asks for two global styles: `isolation: isolate` on your app's root element, so portaled
+popups appear above the page, and `position: relative` on `body` for backdrops in iOS Safari 26 and
+later.
+
+```css
+.root {
+  isolation: isolate;
+}
+
+body {
+  position: relative;
+}
+```
+
+## Themes
+
+Without a `data-theme` attribute, the theme follows the system setting (`prefers-color-scheme`).
+Set `data-theme="light"` or `data-theme="dark"` on `<html>` or any element to force a theme for
+that subtree. Every color is an `--ow-*` token, so you can recolor components without touching their
+CSS:
+
+```css
+:root {
+  --ow-accent: #c9b8f0;
+}
+```
+
+## Tailwind CSS v4
+
+Tailwind's utilities live in `@layer`, and the first stylesheet that names a layer fixes its order.
+So load OwsemUI from your global CSS, after the layer order line, rather than from JavaScript:
+
+```css
+@layer theme, base, owsem, components, utilities;
+@import "tailwindcss";
+@import "owsem-ui/styles.css";
+```
+
+## Copy into your project
+
+Components are also published as a shadcn registry, so the code becomes yours. Register the
+`@owsem` namespace once, then add components:
+
+```sh
+npx shadcn registry add @owsem=https://owsem.dev/r/{name}.json
+npx shadcn add @owsem/separator
+```
+
+Component files go to `components/owsem/`, and tokens to `lib/owsem/tokens.css`. Import
+`@/lib/owsem/tokens.css` once in your app's CSS entry. The `owsem` CLI, with your own token prefix
+and isolated mode, comes later.
+
+## Base and Owsem
+
+Base is the calm family for dashboards; Owsem adds richer motion and effects with the same API.
+Components in both families take a `flavor` prop, so switching is a single prop:
+
+```tsx
+<Button flavor="owsem">Save</Button>
+```
+
+See the [component page](/en) for what is available.

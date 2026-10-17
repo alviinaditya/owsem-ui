@@ -1,4 +1,7 @@
+import type { Category, ComponentName, Family } from "../catalog";
+
 // Source language: its shape defines the `Dictionary` type every other language must match.
+// "{name}" placeholders are filled in by `format()`.
 export const id = {
   site: {
     description: "Komponen React keluarga Base dan Owsem di atas Base UI.",
@@ -6,6 +9,9 @@ export const id = {
   nav: {
     main: "Navigasi utama",
     docs: "Dokumentasi",
+    sidebar: "Navigasi dokumentasi",
+    menu: "Menu",
+    skip: "Lewati ke konten",
   },
   language: {
     label: "Bahasa",
@@ -16,6 +22,79 @@ export const id = {
     dark: "Gelap",
     system: "Sistem",
   },
+  catalog: {
+    available: "Tersedia",
+    comingSoon: "Segera hadir",
+    soon: "Segera",
+    progress: "{available} dari {total} komponen tersedia.",
+    filter: "Keluarga",
+    all: "Semua",
+    phase: "Fase {phase}",
+    families: {
+      base: "Base",
+      owsem: "Owsem",
+      "base+owsem": "Base + Owsem",
+    } satisfies Record<Family, string>,
+    categories: {
+      action: "Aksi",
+      form: "Form",
+      overlay: "Overlay",
+      navigation: "Menu dan navigasi",
+      disclosure: "Pengungkap",
+      display: "Tampilan",
+    } satisfies Record<Category, string>,
+  },
+  comingSoon: {
+    body: "Komponen ini belum dibuat. Begitu tersedia, halaman ini berisi Lab interaktif, contoh kode, dan cara memasangnya.",
+    baseUi: "Perilaku dan API-nya mengikuti {link} dari Base UI.",
+    owsemOnly: "Komponen baru di keluarga Owsem, tanpa padanan di Base UI.",
+  },
+  lab: {
+    toc: "Di halaman ini",
+  },
+  components: {
+    button: "Tombol aksi dengan ikon dan state loading yang tidak mengubah lebar.",
+    separator: "Garis terukir pemisah antarbagian, horizontal atau vertikal.",
+    field: "Label, deskripsi, dan pesan error yang terhubung ke kontrolnya.",
+    fieldset: "Grup field dengan legend dan jarak yang konsisten.",
+    form: "Validasi native dan dari server, dengan fokus ke field pertama yang error.",
+    input: "Input teks yang sejajar dengan Button, dengan ikon di depan atau belakang.",
+    checkbox: "Kotak centang dengan state indeterminate yang ber-morph.",
+    "radio-group": "Satu pilihan dari beberapa opsi, dengan indikator ber-spring.",
+    switch: "Saklar on/off dengan thumb yang bergerak dengan spring.",
+    select: "Pilihan dari daftar dalam popup, dengan trigger setinggi kontrol lain.",
+    dialog: "Jendela modal yang masuk dan keluar dengan transisi CSS.",
+    popover: "Panel melayang dengan panah, diposisikan oleh Base UI.",
+    tooltip: "Label singkat saat hover atau fokus, dengan delay bersama per grup.",
+    menu: "Daftar aksi dalam popup, dengan submenu dan shortcut.",
+    tabs: "Panel yang berpindah lewat tab, dengan indikator yang mengikuti pilihan.",
+    "scroll-area": "Area gulir dengan scrollbar tipis yang muncul saat hover.",
+    toggle: "Tombol dua state yang tetap tertekan saat aktif.",
+    "toggle-group": "Sekumpulan toggle; flavor Owsem-nya adalah Segmented Control.",
+    toolbar: "Grup tombol dan toggle dengan navigasi keyboard.",
+    "checkbox-group": "Sekumpulan checkbox dengan opsi pilih semua.",
+    "number-field": "Input angka dengan tombol tambah dan kurang, serta scrub dengan drag.",
+    slider: "Pemilih nilai pada rentang, dengan label nilai berangka tabular.",
+    combobox: "Input dengan daftar opsi yang tersaring saat mengetik.",
+    autocomplete: "Input teks dengan saran langsung di bawahnya.",
+    "alert-dialog": "Dialog konfirmasi yang memfokuskan aksi yang aman.",
+    toast: "Notifikasi singkat yang bertumpuk dan bisa di-swipe.",
+    accordion: "Bagian yang bisa dibuka dan ditutup, dengan tinggi beranimasi.",
+    collapsible: "Satu panel yang bisa dibuka dan ditutup.",
+    "otp-field": "Slot kode sekali pakai yang menerima paste kode utuh.",
+    drawer: "Panel yang masuk dari sisi layar dan bisa di-swipe untuk menutup.",
+    "preview-card": "Pratinjau isi link saat di-hover.",
+    "context-menu": "Menu yang muncul dari klik kanan.",
+    menubar: "Baris menu seperti di bar aplikasi desktop.",
+    "navigation-menu": "Navigasi situs dengan panel lebar.",
+    avatar: "Gambar profil dengan fallback inisial.",
+    progress: "Kemajuan tugas, dengan nilai pasti atau tak tentu.",
+    meter: "Nilai dalam rentang, dengan warna status.",
+    "lumen-rail-nav": "Navigasi sidebar dengan cahaya yang berjalan di sepanjang rail.",
+    "command-menu": "Palet perintah dengan pencarian, dibangun dari Dialog dan Combobox.",
+    "number-ticker": "Angka yang digitnya bergulir saat nilainya berubah.",
+    "spotlight-card": "Kartu dengan border dan cahaya yang mengikuti kursor.",
+  } satisfies Record<ComponentName, string>,
 };
 
 export type Dictionary = typeof id;

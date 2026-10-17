@@ -1,6 +1,6 @@
 /*
  * Unlayered on purpose, so docs styles always beat @layer owsem.* (FR-8).
- * A minimal shell until the Lab and Classic layouts are built from OwsemUI components.
+ * An interim shell on the theme tokens until the Lab and Classic layouts use OwsemUI components.
  */
 
 /* Base UI global setup: portaled popups above the app, and backdrops on iOS Safari 26+. */
@@ -22,9 +22,44 @@ a {
   text-underline-offset: 0.2em;
 }
 
+button,
 select {
   font: inherit;
+  color: inherit;
 }
+
+:focus-visible {
+  outline: 2px solid var(--ow-fg);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Hidden until focused, so keyboard users can jump past the sidebar. */
+.skip-link {
+  position: absolute;
+  inset-block-start: 8px;
+  inset-inline-start: 8px;
+  z-index: 1;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background-color: var(--ow-fg);
+  color: var(--ow-bg);
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+/* Top bar */
 
 .site-header {
   display: flex;
@@ -32,7 +67,6 @@ select {
   align-items: center;
   gap: 8px 24px;
   padding: 12px 16px;
-  border-block-end: 1px solid var(--ow-line);
 }
 
 .site-nav {
@@ -70,12 +104,168 @@ select {
   text-decoration: none;
 }
 
+/* Sidebar and content. Below 900 px the sidebar sits behind the Menu button. */
+
+.site-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.sidebar-toggle {
+  display: block;
+  inline-size: 100%;
+  padding: 10px 16px;
+  border: 0;
+  border-block-end: 1px solid var(--ow-line);
+  background: none;
+  text-align: start;
+  cursor: pointer;
+}
+
+.sidebar-panel {
+  padding: 8px 12px 24px;
+}
+
+@media (max-width: 899px) {
+  .sidebar-panel {
+    border-block-end: 1px solid var(--ow-line);
+  }
+
+  .sidebar:not([data-open]) .sidebar-panel {
+    display: none;
+  }
+}
+
+@media (min-width: 900px) {
+  .site-body {
+    grid-template-columns: 248px minmax(0, 1fr);
+  }
+
+  /* The column spans the page for the border; the panel inside sticks. */
+  .sidebar {
+    border-inline-end: 1px solid var(--ow-line);
+  }
+
+  .sidebar-panel {
+    position: sticky;
+    inset-block-start: 0;
+    max-block-size: 100vh;
+    box-sizing: border-box;
+    overflow-y: auto;
+  }
+
+  .sidebar-toggle {
+    display: none;
+  }
+}
+
+.sidebar-nav ul,
+.toc ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sidebar-heading {
+  margin: 20px 8px 4px;
+  color: var(--ow-muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.sidebar-nav a {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.sidebar-nav a:hover {
+  background-color: color-mix(in oklab, var(--ow-fg) 6%, transparent);
+}
+
+.sidebar-nav a[aria-current="page"] {
+  background-color: color-mix(in oklab, var(--ow-fg) 10%, transparent);
+  font-weight: 600;
+}
+
+/* Links inherit this color; the "Soon" tag carries the status without color. */
+.sidebar-nav [data-planned] {
+  color: var(--ow-muted);
+}
+
+.soon {
+  padding-inline: 6px;
+  border: 1px solid var(--ow-line);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 18px;
+}
+
 .site-content {
-  box-sizing: border-box;
-  max-inline-size: 72rem;
-  margin-inline: auto;
+  min-inline-size: 0;
   padding: 32px 16px 64px;
 }
+
+@media (min-width: 900px) {
+  .site-content {
+    padding-inline: 40px;
+  }
+}
+
+.site-content > main {
+  max-inline-size: 68rem;
+}
+
+/* Pages with an "On this page" column on wide screens */
+
+.with-toc {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 48px;
+}
+
+.toc {
+  display: none;
+}
+
+@media (min-width: 1200px) {
+  .with-toc {
+    grid-template-columns: minmax(0, 1fr) 180px;
+  }
+
+  .toc {
+    display: block;
+    position: sticky;
+    inset-block-start: 24px;
+    align-self: start;
+  }
+}
+
+.toc .sidebar-heading {
+  margin-inline: 0;
+}
+
+.toc a {
+  display: block;
+  padding-block: 2px;
+  color: var(--ow-muted);
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.toc a:hover {
+  color: var(--ow-fg);
+}
+
+/* Text */
 
 h1 {
   margin-block: 0 8px;
@@ -88,62 +278,168 @@ h2 {
   font-size: 1.25rem;
 }
 
+.page-header {
+  margin-block-end: 32px;
+}
+
 .lead {
-  margin-block: 0 24px;
+  margin-block: 0 12px;
   color: var(--ow-muted);
+  font-size: 1.125rem;
 }
 
-/* minmax(0, ...) lets wide code blocks scroll inside the column instead of the page (DS-9). */
-.docs-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 32px;
-}
+/* Badges: the dot shape shows the family (DS-1). */
 
-@media (min-width: 900px) {
-  .docs-layout {
-    grid-template-columns: 200px minmax(0, 1fr);
-  }
-}
-
-.docs-sidebar ul {
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-inline: 8px;
+  border: 1px solid var(--ow-line);
+  border-radius: 999px;
+  color: var(--ow-muted);
+  font-size: 12px;
+  line-height: 22px;
+}
+
+.badge[data-status="available"] {
+  border-color: transparent;
+  background-color: var(--ow-accent);
+  color: #18181b;
+}
+
+.badge[data-family]::before {
+  content: "";
+  inline-size: 7px;
+  block-size: 7px;
+  border-radius: 1px;
+  background-color: currentColor;
+}
+
+.badge[data-family="owsem"]::before {
+  border-radius: 50%;
+}
+
+.badge[data-family="base+owsem"]::before {
+  border-start-end-radius: 50%;
+  border-end-end-radius: 50%;
+}
+
+/* Index */
+
+.filter {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  margin: 0 0 8px;
+  padding: 3px;
+  border: 1px solid var(--ow-line);
+  border-radius: 999px;
+}
+
+.filter legend {
+  float: inline-start;
+  padding-inline: 10px 6px;
+  color: var(--ow-muted);
+  font-size: 14px;
+}
+
+.filter label {
+  position: relative;
+  padding: 2px 12px;
+  border-radius: 999px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.filter input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.filter label:has(:checked) {
+  background-color: var(--ow-fg);
+  color: var(--ow-bg);
+  font-weight: 600;
+}
+
+@media (forced-colors: active) {
+  .filter label:has(:checked) {
+    outline: 2px solid Highlight;
+  }
+}
+
+.filter label:has(:focus-visible) {
+  outline: 2px solid var(--ow-fg);
+  outline-offset: 2px;
 }
 
 .component-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
   gap: 12px;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.component-list li {
+.component-list > li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   padding: 16px;
   border: 1px solid var(--ow-line);
-  border-radius: 12px;
+  border-radius: 10px;
+  background-color: color-mix(in oklab, var(--ow-fg) 2%, var(--ow-bg));
+}
+
+.component-list > li:hover {
+  border-color: var(--ow-muted);
 }
 
 .component-list a {
   font-weight: 600;
+  text-decoration: none;
+}
+
+/* The whole card is the link. */
+.component-list a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
 }
 
 .component-list p {
-  margin: 4px 0 0;
+  flex: 1;
+  margin: 0;
   color: var(--ow-muted);
   font-size: 14px;
 }
 
-/* Live examples in Lab pages. */
+/* Component pages */
+
 .lab-demo {
   display: grid;
   gap: 16px;
   margin-block: 16px;
   padding: 24px;
   border: 1px solid var(--ow-line);
-  border-radius: 12px;
+  border-radius: 10px;
 }
 
 .lab-demo p {
@@ -156,6 +452,22 @@ h2 {
   gap: 12px;
   block-size: 24px;
 }
+
+.coming-soon {
+  padding: 20px 24px;
+  border: 1px dashed var(--ow-line);
+  border-radius: 10px;
+}
+
+.coming-soon p {
+  margin: 0;
+}
+
+.coming-soon p + p {
+  margin-block-start: 8px;
+}
+
+/* Code and tables */
 
 figure[data-code-block] {
   margin: 16px 0;

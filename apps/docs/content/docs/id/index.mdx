@@ -1,11 +1,92 @@
 ---
 title: Getting Started
-description: Instalasi, theming, CLI, dan cara berpindah dari Base ke Owsem.
+description: Instalasi, tema, salin komponen, dan cara berpindah dari Base ke Owsem.
 ---
 
-OwsemUI masih dalam tahap awal. Halaman ini akan berisi instalasi, theming, CLI, dan cara
-berpindah dari Base ke Owsem (DS-8).
+OwsemUI berisi komponen React dalam dua keluarga, Base dan Owsem, di atas
+[Base UI](https://base-ui.com). Komponen bisa dipakai lewat package npm atau disalin ke project.
+
+## Instalasi
+
+Butuh React 18.2 atau 19.
 
 ```sh
 pnpm add owsem-ui
 ```
+
+Muat CSS sekali di entry app, lalu import komponen dari keluarganya:
+
+```tsx
+import "owsem-ui/styles.css";
+import { Separator } from "owsem-ui/base";
+```
+
+`styles.css` memuat token dan CSS semua komponen. Untuk memuat seperlunya, pakai
+`owsem-ui/tokens.css` ditambah `owsem-ui/css/<komponen>.css`.
+
+## Setup global
+
+Base UI meminta dua style global: `isolation: isolate` di elemen root app, supaya popup yang
+di-portal tampil di atas halaman, dan `position: relative` di `body` untuk backdrop di Safari iOS 26
+ke atas.
+
+```css
+.root {
+  isolation: isolate;
+}
+
+body {
+  position: relative;
+}
+```
+
+## Tema
+
+Tanpa atribut `data-theme`, tema mengikuti pengaturan sistem (`prefers-color-scheme`). Pasang
+`data-theme="light"` atau `data-theme="dark"` di `<html>` atau elemen mana pun untuk memaksa tema
+di subtree itu. Semua warna adalah token `--ow-*`, jadi warna bisa diganti tanpa menyentuh CSS
+komponen:
+
+```css
+:root {
+  --ow-accent: #c9b8f0;
+}
+```
+
+## Tailwind CSS v4
+
+Utility Tailwind berada di dalam `@layer`, dan urutan layer ditentukan oleh stylesheet pertama yang
+menyebutnya. Karena itu, muat OwsemUI dari CSS global, setelah baris urutan layer, bukan dari
+JavaScript:
+
+```css
+@layer theme, base, owsem, components, utilities;
+@import "tailwindcss";
+@import "owsem-ui/styles.css";
+```
+
+## Salin ke project
+
+Komponen juga tersedia sebagai registry shadcn, sehingga kodenya menjadi milik project Anda.
+Daftarkan namespace `@owsem` sekali, lalu tambahkan komponen:
+
+```sh
+npx shadcn registry add @owsem=https://owsem.dev/r/{name}.json
+npx shadcn add @owsem/separator
+```
+
+File komponen masuk ke `components/owsem/`, dan token ke `lib/owsem/tokens.css`. Import
+`@/lib/owsem/tokens.css` sekali di CSS entry app. CLI `owsem`, dengan prefix token sendiri dan mode
+isolated, menyusul.
+
+## Base dan Owsem
+
+Base adalah komponen tenang untuk dashboard; Owsem menambah motion dan efek yang lebih kaya dengan
+API yang sama. Komponen yang ada di kedua keluarga dipilih lewat prop `flavor`, jadi berpindah cukup
+dengan satu prop:
+
+```tsx
+<Button flavor="owsem">Simpan</Button>
+```
+
+Komponen yang tersedia ada di [halaman komponen](/id).

@@ -1,0 +1,50 @@
+import { type CatalogEntry, isAvailable } from "@/lib/catalog";
+import { type Dictionary, format } from "@/lib/dictionaries";
+
+const EXPRESSION_LABELS = {
+  lumen: "Lumen",
+  kinetic: "Kinetic",
+  tactile: "Tactile",
+  surface: "Surface",
+};
+
+/** Status, family, phase, and Owsem expression labels for a component. */
+export function ComponentBadges({ entry, dict }: { entry: CatalogEntry; dict: Dictionary }) {
+  const available = isAvailable(entry);
+  return (
+    <ul className="badges">
+      <li className="badge" data-status={available ? "available" : "planned"}>
+        {available ? dict.catalog.available : dict.catalog.comingSoon}
+      </li>
+      <li className="badge" data-family={entry.family}>
+        {dict.catalog.families[entry.family]}
+      </li>
+      {entry.phase ? (
+        <li className="badge">{format(dict.catalog.phase, { phase: entry.phase })}</li>
+      ) : null}
+      {entry.expressions?.map((expression) => (
+        <li key={expression} className="badge">
+          {EXPRESSION_LABELS[expression]}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export function ComponentHeader({
+  entry,
+  description,
+  dict,
+}: {
+  entry: CatalogEntry;
+  description: string;
+  dict: Dictionary;
+}) {
+  return (
+    <header className="page-header">
+      <h1>{entry.title}</h1>
+      <p className="lead">{description}</p>
+      <ComponentBadges entry={entry} dict={dict} />
+    </header>
+  );
+}

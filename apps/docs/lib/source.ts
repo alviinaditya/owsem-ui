@@ -5,7 +5,7 @@ import { i18n } from "@/lib/i18n";
 
 const docs = defineDocs({ dir: "content/docs" });
 
-// The component family comes from <component>.meta.ts, not Lab frontmatter.
+// Lab frontmatter only holds the title Fumadocs needs; component data comes from lib/catalog.ts.
 const labs = defineCollections({
   type: "doc",
   dir: "content/labs",

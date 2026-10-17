@@ -76,7 +76,7 @@ starts with the language (`/id/docs`, `/en/docs`); `proxy.ts` redirects unprefix
 
 1. Add its code to `languages` and `languageNames` in `apps/docs/lib/i18n.ts`.
 2. Add `apps/docs/lib/dictionaries/<code>.ts` and register it in `lib/dictionaries/index.ts`; the
-   type check fails until every string exists.
+   type check fails until every string exists, including each component's description.
 3. Translate pages into `content/docs/<code>/` and `content/labs/<code>/`. Untranslated pages fall
    back to Indonesian.
 
@@ -91,27 +91,31 @@ starts with the language (`/id/docs`, `/en/docs`); `proxy.ts` redirects unprefix
 
 ## Adding components
 
-Each component is one folder, `packages/ui/src/components/<name>/`; Separator is the reference.
+Every v1.0 component is listed in `apps/docs/lib/catalog.ts` (name, family, category, phase,
+status), and its one-line description is in each docs dictionary. Planned components get a Coming
+soon page; the docs and registry builds fail if an available component lacks its folder or Lab.
 
-| File | Contents |
-| --- | --- |
-| `<name>.tsx` | Styled Base UI parts. Imports its own CSS; class names are constants (FR-6a) |
-| `<name>.css` | Layer order first, rules in `@layer owsem.components`, tokens read as component token, then theme token, then a literal |
-| `<name>.meta.ts` | Title, description, family, and status, read by the registry build |
-| `<name>.test.tsx` | Behavior, tokens in light and dark, forced colors, axe, and idle cost |
-| `index.ts` | Public exports |
+To build one, use Separator as the reference:
 
-The package build and the registry build pick up the folder automatically. Registry copies rewrite
-imports that leave the folder: Core to `@/lib/owsem/...` and other components to
-`@/components/owsem/<name>/...` (CLI-6 in the PRD). Then:
+1. Create `packages/ui/src/components/<name>/`:
 
-- export it from `src/base.ts` or `src/owsem.ts`, and import its CSS in `src/styles.css`;
-- add a size budget to `.size-limit.mjs` (Base 3 kB, Owsem 8 kB);
-- write its Lab in `apps/docs/content/labs/<lang>/<name>.mdx` for every language;
-- add a changeset.
+   | File | Contents |
+   | --- | --- |
+   | `<name>.tsx` | Styled Base UI parts. Imports its own CSS; class names are constants (FR-6a) |
+   | `<name>.css` | Layer order first, rules in `@layer owsem.components`, tokens read as component token, then theme token, then a literal |
+   | `<name>.test.tsx` | Behavior, tokens in light and dark, forced colors, axe, and idle cost |
+   | `index.ts` | Public exports |
 
-The registry build does not support `base+owsem` components (two items from one source) yet; that
-arrives with Button.
+2. Export it from `src/base.ts` or `src/owsem.ts`, import its CSS in `src/styles.css`, and add a
+   size budget to `.size-limit.mjs` (Base 3 kB, Owsem 8 kB).
+3. Write its Lab in `apps/docs/content/labs/<lang>/<name>.mdx` for every language, with these
+   sections (DS-2): Overview, Anatomy, States and variants, Keyboard and accessibility, Ship it.
+4. Set its `status` in the catalog to `prototype`, and add a changeset.
+
+The package and registry builds pick up the folder automatically. Registry copies rewrite imports
+that leave the folder: Core to `@/lib/owsem/...` and other components to
+`@/components/owsem/<name>/...` (CLI-6 in the PRD). The registry build does not support
+`base+owsem` components (two items from one source) yet; that arrives with Button.
 
 ## Commits
 

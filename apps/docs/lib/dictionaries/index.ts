@@ -10,3 +10,8 @@ const dictionaries: Record<Lang, Dictionary> = { id, en };
 export function getDictionary(lang: Lang): Dictionary {
   return dictionaries[lang];
 }
+
+/** Fills "{name}" placeholders in a dictionary string. */
+export function format(text: string, values: Record<string, string | number>): string {
+  return text.replace(/\{(\w+)\}/g, (match, key: string) => String(values[key] ?? match));
+}

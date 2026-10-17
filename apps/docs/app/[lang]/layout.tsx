@@ -4,7 +4,10 @@ import { NextProvider } from "fumadocs-core/framework/next";
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Separator } from "owsem-ui/base";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { Sidebar } from "@/components/sidebar";
+import { SidebarShell } from "@/components/sidebar-shell";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { getDictionary } from "@/lib/dictionaries";
 import { i18n, isLang } from "@/lib/i18n";
@@ -45,6 +48,9 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
       <body>
         <NextProvider>
           <div className="app-root">
+            <a className="skip-link" href="#content">
+              {dict.nav.skip}
+            </a>
             <header className="site-header">
               <nav aria-label={dict.nav.main} className="site-nav">
                 <Link href={`/${lang}`}>OwsemUI</Link>
@@ -55,7 +61,15 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
                 <ThemeSwitcher labels={dict.theme} />
               </div>
             </header>
-            <div className="site-content">{children}</div>
+            <Separator />
+            <div className="site-body">
+              <SidebarShell label={dict.nav.menu}>
+                <Sidebar lang={lang} />
+              </SidebarShell>
+              <div id="content" className="site-content">
+                {children}
+              </div>
+            </div>
           </div>
         </NextProvider>
       </body>

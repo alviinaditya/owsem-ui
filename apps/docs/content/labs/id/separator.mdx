@@ -1,14 +1,31 @@
 ---
 title: Separator
-description: Garis terukir pemisah antarbagian, horizontal atau vertikal.
 ---
 
 import { Separator } from "owsem-ui/base";
+
+## Ikhtisar
+
+Separator memisahkan bagian konten dengan garis terukir: garis gelap 1 px dengan garis terang 1 px
+di sebelahnya, seolah ditoreh ke permukaan dengan cahaya dari atas.
 
 <div className="lab-demo">
   <p>Profil</p>
   <Separator />
   <p>Keamanan</p>
+</div>
+
+## Anatomi
+
+Satu bagian saja. Base UI merender `<div role="separator">` dengan `aria-orientation` dan
+`data-orientation`; OwsemUI menambahkan class `ow-separator` dan kedua garisnya sebagai border.
+
+## State dan varian
+
+`orientation` bernilai `horizontal` (bawaan) atau `vertical`. Separator vertikal mengisi tinggi baris
+di dalam container flex atau grid, dan ketebalannya tetap 2 px walaupun container meregangkannya.
+
+<div className="lab-demo">
   <div className="lab-demo-row">
     <span>Draf</span>
     <Separator orientation="vertical" />
@@ -18,7 +35,13 @@ import { Separator } from "owsem-ui/base";
   </div>
 </div>
 
-## Pemakaian
+## Keyboard dan aksesibilitas
+
+Separator tidak bisa difokus dan tidak punya interaksi keyboard. Screen reader mengenalinya sebagai
+pemisah lewat `role="separator"`. Di mode forced colors (Windows High Contrast), kedua garis memakai
+warna sistem sehingga tetap terlihat.
+
+## Ship it
 
 ```sh
 pnpm add owsem-ui
@@ -38,21 +61,6 @@ export function Sections() {
   );
 }
 ```
-
-Separator vertikal mengisi tinggi baris di dalam container flex atau grid.
-
-## Tampilan
-
-Separator memakai material garis terukir: garis gelap 1 px dengan garis terang 1 px di sebelahnya,
-seolah ditoreh ke permukaan dengan cahaya dari atas. Di mode forced colors (Windows High Contrast),
-keduanya memakai warna sistem sehingga garis tetap terlihat.
-
-## Aksesibilitas
-
-Base UI merender `<div role="separator">` dengan `aria-orientation`, sehingga screen reader
-mengenalinya sebagai pemisah. Separator tidak bisa difokus.
-
-## Token
 
 | Token komponen | Bawaan | Fungsi |
 | --- | --- | --- |

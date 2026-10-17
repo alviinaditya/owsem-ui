@@ -3,3 +3,4 @@
 
 /* Plain @import without layer(): each file wraps itself in @layer. */
 @import "./core/tokens/tokens.css";
+@import "./components/separator/separator.css";

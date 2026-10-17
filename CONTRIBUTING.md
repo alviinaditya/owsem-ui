@@ -35,14 +35,17 @@ Do not add a script named `ci`: `pnpm ci` always runs pnpm's built-in command.
 
 ## Tests
 
-Vitest in `packages/ui` has two projects:
+Vitest in `packages/ui` has three projects:
 
 | Project | Files | Engines |
 | --- | --- | --- |
 | `unit` | `*.test.tsx` | Chromium |
+| `react18` | `src/**/*.test.tsx` on React 18.2 (aliased `react-18`, `react-dom-18`), the lowest peer | Chromium |
 | `geometry` | `*.geometry.test.tsx` | `OWSEM_BROWSERS`, default `chromium,firefox`; CI uses `chromium,firefox,webkit` |
 
-WebKit does not run on Arch; leave it to CI. Visual regression tests (a Chromium-only `vrt`
+WebKit does not run on Arch; leave it to CI. The first run after importing a new Base UI entry point
+can fail with `Cannot read properties of null (reading 'useRef')`: Vite re-bundled dependencies
+mid-run. Run the tests again. Visual regression tests (a Chromium-only `vrt`
 project for `*.vrt.test.tsx`) arrive with the first visual test, together with the
 `workflow_dispatch` job that updates the baselines in CI. Baselines are never created locally,
 since rendering differs between machines.
@@ -88,14 +91,27 @@ starts with the language (`/id/docs`, `/en/docs`); `proxy.ts` redirects unprefix
 
 ## Adding components
 
-Components live in `packages/ui/src/components/<component>/`, and the build (`tsdown.config.ts`)
-picks up this folder automatically. With the **first** component:
+Each component is one folder, `packages/ui/src/components/<name>/`; Separator is the reference.
 
-- add the `./components/*` and `./css/*.css` subpaths to `exports` in `packages/ui/package.json`
-  (publint rejects wildcard patterns that match no file);
-- add per-component size budgets to `.size-limit.mjs` (Base 3 kB, Owsem 8 kB);
-- extend `apps/docs/scripts/build-registry.ts` with component items (`<name>` and `<name>-owsem`),
-  including rewriting Core imports to `@/lib/owsem` (CLI-6 in the PRD).
+| File | Contents |
+| --- | --- |
+| `<name>.tsx` | Styled Base UI parts. Imports its own CSS; class names are constants (FR-6a) |
+| `<name>.css` | Layer order first, rules in `@layer owsem.components`, tokens read as component token, then theme token, then a literal |
+| `<name>.meta.ts` | Title, description, family, and status, read by the registry build |
+| `<name>.test.tsx` | Behavior, tokens in light and dark, forced colors, axe, and idle cost |
+| `index.ts` | Public exports |
+
+The package build and the registry build pick up the folder automatically. Registry copies rewrite
+imports that leave the folder: Core to `@/lib/owsem/...` and other components to
+`@/components/owsem/<name>/...` (CLI-6 in the PRD). Then:
+
+- export it from `src/base.ts` or `src/owsem.ts`, and import its CSS in `src/styles.css`;
+- add a size budget to `.size-limit.mjs` (Base 3 kB, Owsem 8 kB);
+- write its Lab in `apps/docs/content/labs/<lang>/<name>.mdx` for every language;
+- add a changeset.
+
+The registry build does not support `base+owsem` components (two items from one source) yet; that
+arrives with Button.
 
 ## Commits
 

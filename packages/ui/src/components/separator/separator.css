@@ -1,0 +1,28 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * Etched line (depth material): a dark line with a light line beside it. Borders rather than
+ * backgrounds, so the line stays visible in forced colors (DP-8).
+ */
+@layer owsem.components {
+  /* Zero thickness keeps the two borders together; flex and grid stretch only the length. */
+  .ow-separator {
+    --_dark: var(--ow-separator-line-dark, var(--ow-line-dark, #d9d9e0));
+    --_light: var(--ow-separator-line-light, var(--ow-line-light, #ffffff));
+    flex: none;
+    align-self: stretch;
+    border: 0 solid;
+  }
+
+  .ow-separator[data-orientation="horizontal"] {
+    block-size: 0;
+    border-block-width: 1px;
+    border-block-color: var(--_dark) var(--_light);
+  }
+
+  .ow-separator[data-orientation="vertical"] {
+    inline-size: 0;
+    border-inline-width: 1px;
+    border-inline-color: var(--_dark) var(--_light);
+  }
+}

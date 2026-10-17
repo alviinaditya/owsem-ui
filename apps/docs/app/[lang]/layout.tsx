@@ -45,15 +45,17 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
       <body>
         <NextProvider>
           <div className="app-root">
-            <header>
-              <nav aria-label={dict.nav.main}>
-                <Link href={`/${lang}`}>OwsemUI</Link>{" "}
+            <header className="site-header">
+              <nav aria-label={dict.nav.main} className="site-nav">
+                <Link href={`/${lang}`}>OwsemUI</Link>
                 <Link href={`/${lang}/docs`}>{dict.nav.docs}</Link>
               </nav>
-              <LanguageSwitcher lang={lang} label={dict.language.label} />
-              <ThemeSwitcher labels={dict.theme} />
+              <div className="site-tools">
+                <LanguageSwitcher lang={lang} label={dict.language.label} />
+                <ThemeSwitcher labels={dict.theme} />
+              </div>
             </header>
-            {children}
+            <div className="site-content">{children}</div>
           </div>
         </NextProvider>
       </body>

@@ -42,3 +42,9 @@ trustPolicyIgnoreAfter: 43200
 
 # Without this pnpm 12 does not reject Node versions outside engines.
 engineStrict: true
+
+# react-dom-18 (an alias in packages/ui) only runs in the React 18 test project, where Vite
+# aliases react to react-18.
+peerDependencyRules:
+  allowedVersions:
+    react-dom@18>react: "19"

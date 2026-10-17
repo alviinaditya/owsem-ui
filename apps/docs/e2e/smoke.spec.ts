@@ -5,12 +5,22 @@ test("serves the registry at /r without a language prefix (DS-7)", async ({ requ
   expect(catalog.ok()).toBe(true);
   expect(catalog.headers()["access-control-allow-origin"]).toBe("*");
 
-  const core = await request.get("/r/core.json", { maxRedirects: 0 });
-  expect(core.ok()).toBe(true);
-  expect((await core.json()).name).toBe("core");
+  for (const name of ["core", "separator"]) {
+    const item = await request.get(`/r/${name}.json`, { maxRedirects: 0 });
+    expect(item.ok()).toBe(true);
+    expect((await item.json()).name).toBe(name);
+  }
 });
 
-for (const path of ["/id", "/en/docs"]) {
+test("renders a component Lab in each language", async ({ page }) => {
+  for (const lang of ["id", "en"]) {
+    await page.goto(`/${lang}/separator`);
+    await expect(page.getByRole("heading", { level: 1, name: "Separator" })).toBeVisible();
+    await expect(page.getByRole("separator").first()).toBeVisible();
+  }
+});
+
+for (const path of ["/id", "/en/docs", "/id/separator"]) {
   test(`${path} has no horizontal scroll (DS-9)`, async ({ page }) => {
     await page.goto(path);
     const overflow = await page.evaluate(

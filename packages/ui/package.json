@@ -36,8 +36,13 @@
       "types": "./dist/core/index.d.ts",
       "default": "./dist/core/index.js"
     },
+    "./components/*": {
+      "types": "./dist/components/*/index.d.ts",
+      "default": "./dist/components/*/index.js"
+    },
     "./styles.css": "./dist/styles.css",
     "./tokens.css": "./dist/tokens.css",
+    "./css/*.css": "./dist/css/*.css",
     "./package.json": "./package.json"
   },
   "files": [
@@ -81,7 +86,9 @@
     "playwright": "catalog:",
     "publint": "catalog:",
     "react": "catalog:",
+    "react-18": "npm:react@18.2.0",
     "react-dom": "catalog:",
+    "react-dom-18": "npm:react-dom@18.2.0",
     "size-limit": "^14.2.0",
     "tsdown": "catalog:",
     "typescript": "catalog:",

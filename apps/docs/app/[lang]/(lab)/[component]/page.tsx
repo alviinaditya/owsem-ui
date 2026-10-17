@@ -28,6 +28,7 @@ export default async function LabPage(props: PageProps<"/[lang]/[component]">) {
   return (
     <main>
       <h1>{page.data.title}</h1>
+      {page.data.description ? <p className="lead">{page.data.description}</p> : null}
       <Mdx components={getMDXComponents()} />
     </main>
   );

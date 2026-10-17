@@ -16,9 +16,6 @@ export const id = {
     dark: "Gelap",
     system: "Sistem",
   },
-  lab: {
-    empty: "Belum ada komponen.",
-  },
 };
 
 export type Dictionary = typeof id;

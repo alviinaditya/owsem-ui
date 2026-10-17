@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+import type { Metadata, Route } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDictionary } from "@/lib/dictionaries";
 import { isLang, localeAlternates } from "@/lib/i18n";
@@ -14,19 +15,18 @@ export async function generateMetadata(props: PageProps<"/[lang]">): Promise<Met
 export default async function IndexPage(props: PageProps<"/[lang]">) {
   const { lang } = await props.params;
   if (!isLang(lang)) notFound();
-  const pages = labSource.getPages(lang);
   return (
     <main>
       <h1>OwsemUI</h1>
-      {pages.length === 0 ? (
-        <p>{getDictionary(lang).lab.empty}</p>
-      ) : (
-        <ul>
-          {pages.map((page) => (
-            <li key={page.url}>{page.data.title}</li>
-          ))}
-        </ul>
-      )}
+      <p className="lead">{getDictionary(lang).site.description}</p>
+      <ul className="component-list">
+        {labSource.getPages(lang).map((page) => (
+          <li key={page.url}>
+            <Link href={page.url as Route}>{page.data.title}</Link>
+            {page.data.description ? <p>{page.data.description}</p> : null}
+          </li>
+        ))}
+      </ul>
     </main>
   );
 }

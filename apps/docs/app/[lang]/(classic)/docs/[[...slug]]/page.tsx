@@ -18,6 +18,7 @@ export default async function DocsPage(props: PageProps<"/[lang]/docs/[[...slug]
   return (
     <main>
       <h1>{page.data.title}</h1>
+      {page.data.description ? <p className="lead">{page.data.description}</p> : null}
       <Mdx components={getMDXComponents()} />
     </main>
   );

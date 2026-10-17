@@ -109,8 +109,8 @@ feat(ui): add Switch
 fix(cli): reject prefixes that start with a digit
 ```
 
-The `pre-commit` hook runs Biome on staged files. CI runs the same checks, including on PR titles
-(used for squash merges).
+The `pre-commit` hook runs Biome on staged files. PRs are squash-merged with the PR title as the
+commit message on `main`, so CI lints the PR title rather than each commit.
 
 ## Changesets
 

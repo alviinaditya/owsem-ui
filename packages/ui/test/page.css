@@ -1,0 +1,5 @@
+/* Components are tested on a themed page, as in an app; otherwise axe sees dark text colors on white. */
+body {
+  background-color: var(--ow-bg);
+  color: var(--ow-fg);
+}

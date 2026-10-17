@@ -32,3 +32,18 @@ test("stores the chosen theme and restores it on load", async ({ page }) => {
   expect(await page.evaluate(() => localStorage.getItem("owsem-theme"))).toBeNull();
   expect(errors).toEqual([]);
 });
+
+test("keeps the chosen theme when switching language", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") errors.push(message.text());
+  });
+
+  await page.goto("/en/docs");
+  await page.getByRole("combobox", { name: "Theme" }).selectOption("dark");
+  await page.getByRole("link", { name: "Bahasa Indonesia" }).click();
+  await expect(page).toHaveURL(/\/id\/docs$/);
+  await expect(html(page)).toHaveAttribute("data-theme", "dark");
+  await expect(page.getByRole("combobox", { name: "Tema" })).toHaveValue("dark");
+  expect(errors).toEqual([]);
+});

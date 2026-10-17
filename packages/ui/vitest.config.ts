@@ -1,6 +1,6 @@
 import { playwright } from "@vitest/browser-playwright";
 import { defineConfig } from "vitest/config";
-import { setColorScheme } from "./test/commands.ts";
+import { setColorScheme, setForcedColors } from "./test/commands.ts";
 
 type BrowserName = "chromium" | "firefox" | "webkit";
 
@@ -27,7 +27,7 @@ export default defineConfig({
       provider: playwright(),
       headless: true,
       viewport: { width: 1280, height: 800 },
-      commands: { setColorScheme },
+      commands: { setColorScheme, setForcedColors },
       // Traces are off: Vitest 5.0.5 names them by test name, so parallel files overwrite each
       // other. Debug with --browser.trace=retain-on-failure --no-file-parallelism <file>.
       // Keep ad-hoc screenshots out of __screenshots__/ (committed VRT baselines).
@@ -39,6 +39,21 @@ export default defineConfig({
         test: {
           name: "unit",
           include: ["src/**/*.test.{ts,tsx}", "test/**/*.test.{ts,tsx}"],
+          exclude: ["**/*.geometry.test.{ts,tsx}"],
+          browser: { instances: [instance("chromium")] },
+        },
+      },
+      {
+        // FR-5: component tests again on React 18.2, the lowest peer, where `ref` is not a prop.
+        resolve: {
+          alias: [
+            { find: /^react(\/.*)?$/, replacement: "react-18$1" },
+            { find: /^react-dom(\/.*)?$/, replacement: "react-dom-18$1" },
+          ],
+        },
+        test: {
+          name: "react18",
+          include: ["src/**/*.test.tsx"],
           exclude: ["**/*.geometry.test.{ts,tsx}"],
           browser: { instances: [instance("chromium")] },
         },

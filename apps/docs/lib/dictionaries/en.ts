@@ -17,7 +17,4 @@ export const en = {
     dark: "Dark",
     system: "System",
   },
-  lab: {
-    empty: "No components yet.",
-  },
 } satisfies Dictionary;

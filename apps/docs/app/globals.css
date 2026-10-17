@@ -1,4 +1,7 @@
-/* Unlayered on purpose, so docs styles always beat @layer owsem.* (FR-8). */
+/*
+ * Unlayered on purpose, so docs styles always beat @layer owsem.* (FR-8).
+ * A minimal shell until the Lab and Classic layouts are built from OwsemUI components.
+ */
 
 /* Base UI global setup: portaled popups above the app, and backdrops on iOS Safari 26+. */
 .app-root {
@@ -9,8 +12,183 @@ body {
   position: relative;
   margin: 0;
   font-family: system-ui, sans-serif;
+  line-height: 1.6;
   background-color: var(--ow-bg);
   color: var(--ow-fg);
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
+
+select {
+  font: inherit;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 24px;
+  padding: 12px 16px;
+  border-block-end: 1px solid var(--ow-line);
+}
+
+.site-nav {
+  display: flex;
+  gap: 16px;
+}
+
+.site-nav a {
+  text-decoration: none;
+}
+
+.site-nav a:first-child {
+  font-weight: 600;
+}
+
+.site-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-inline-start: auto;
+  font-size: 14px;
+}
+
+.language-switcher ul {
+  display: flex;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.language-switcher a[aria-current="page"] {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.site-content {
+  box-sizing: border-box;
+  max-inline-size: 72rem;
+  margin-inline: auto;
+  padding: 32px 16px 64px;
+}
+
+h1 {
+  margin-block: 0 8px;
+  font-size: 2rem;
+  line-height: 1.2;
+}
+
+h2 {
+  margin-block: 40px 12px;
+  font-size: 1.25rem;
+}
+
+.lead {
+  margin-block: 0 24px;
+  color: var(--ow-muted);
+}
+
+/* minmax(0, ...) lets wide code blocks scroll inside the column instead of the page (DS-9). */
+.docs-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 32px;
+}
+
+@media (min-width: 900px) {
+  .docs-layout {
+    grid-template-columns: 200px minmax(0, 1fr);
+  }
+}
+
+.docs-sidebar ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.component-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.component-list li {
+  padding: 16px;
+  border: 1px solid var(--ow-line);
+  border-radius: 12px;
+}
+
+.component-list a {
+  font-weight: 600;
+}
+
+.component-list p {
+  margin: 4px 0 0;
+  color: var(--ow-muted);
+  font-size: 14px;
+}
+
+/* Live examples in Lab pages. */
+.lab-demo {
+  display: grid;
+  gap: 16px;
+  margin-block: 16px;
+  padding: 24px;
+  border: 1px solid var(--ow-line);
+  border-radius: 12px;
+}
+
+.lab-demo p {
+  margin: 0;
+}
+
+.lab-demo-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  block-size: 24px;
+}
+
+figure[data-code-block] {
+  margin: 16px 0;
+}
+
+figure[data-code-block] pre {
+  margin: 0;
+  padding: 12px 16px;
+  overflow-x: auto;
+  border: 1px solid var(--ow-line);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+code {
+  font-family: ui-monospace, monospace;
+  font-size: 0.9em;
+}
+
+/* Scrolls inside itself so wide tables never scroll the page (DS-9). */
+table {
+  display: block;
+  max-inline-size: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+th,
+td {
+  padding: 8px 12px;
+  border-block-end: 1px solid var(--ow-line);
+  text-align: start;
 }
 
 /* Shiki only emits CSS variables; without fumadocs-ui they are mapped here. */

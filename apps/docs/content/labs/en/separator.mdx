@@ -1,0 +1,68 @@
+---
+title: Separator
+description: An etched line between sections, horizontal or vertical.
+---
+
+import { Separator } from "owsem-ui/base";
+
+<div className="lab-demo">
+  <p>Profile</p>
+  <Separator />
+  <p>Security</p>
+  <div className="lab-demo-row">
+    <span>Draft</span>
+    <Separator orientation="vertical" />
+    <span>Published</span>
+    <Separator orientation="vertical" />
+    <span>Archived</span>
+  </div>
+</div>
+
+## Usage
+
+```sh
+pnpm add owsem-ui
+```
+
+```tsx
+import "owsem-ui/styles.css";
+import { Separator } from "owsem-ui/base";
+
+export function Sections() {
+  return (
+    <>
+      <p>Profile</p>
+      <Separator />
+      <p>Security</p>
+    </>
+  );
+}
+```
+
+A vertical separator fills the row height inside a flex or grid container.
+
+## Appearance
+
+Separator uses the etched line material: a 1 px dark line with a 1 px light line beside it, as if
+cut into the surface with light from above. In forced colors (Windows High Contrast), both lines
+use the system color so the line stays visible.
+
+## Accessibility
+
+Base UI renders `<div role="separator">` with `aria-orientation`, so screen readers announce it as
+a separator. It is not focusable.
+
+## Tokens
+
+| Component token | Default | Purpose |
+| --- | --- | --- |
+| `--ow-separator-line-dark` | `--ow-line-dark` | Dark line |
+| `--ow-separator-line-light` | `--ow-line-light` | Light line beside it |
+
+Component tokens override the theme tokens for separators inside that element only:
+
+```css
+.sidebar {
+  --ow-separator-line-dark: #c8c8d0;
+}
+```

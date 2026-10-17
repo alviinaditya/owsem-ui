@@ -32,8 +32,8 @@ export default async function DocsLayout({ children, params }: LayoutProps<"/[la
   const { lang } = await params;
   if (!isLang(lang)) notFound();
   return (
-    <div>
-      <nav aria-label={getDictionary(lang).nav.docs}>
+    <div className="docs-layout">
+      <nav aria-label={getDictionary(lang).nav.docs} className="docs-sidebar">
         <TreeItems items={source.getPageTree(lang).children} />
       </nav>
       {children}

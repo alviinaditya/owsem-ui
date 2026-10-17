@@ -8,8 +8,11 @@ React components in the Base and Owsem families, built on [Base UI](https://base
 pnpm add owsem-ui
 ```
 
-```ts
+```tsx
 import "owsem-ui/styles.css";
+import { Separator } from "owsem-ui/base";
+
+<Separator orientation="vertical" />;
 ```
 
 The package is ESM-only. JavaScript never imports CSS: load `owsem-ui/styles.css` once, or

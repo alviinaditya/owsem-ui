@@ -13,6 +13,8 @@
     --ow-fg: #18181b;
     --ow-muted: #5f5f6b;
     --ow-line: #d9d9e0;
+    --ow-line-dark: #d9d9e0;
+    --ow-line-light: #ffffff;
   }
 
   :root {
@@ -26,6 +28,8 @@
       --ow-fg: #ededf0;
       --ow-muted: #a0a0ab;
       --ow-line: #2e2e35;
+      --ow-line-dark: #050506;
+      --ow-line-light: #2c2c33;
     }
   }
 
@@ -35,5 +39,7 @@
     --ow-fg: #ededf0;
     --ow-muted: #a0a0ab;
     --ow-line: #2e2e35;
+    --ow-line-dark: #050506;
+    --ow-line-light: #2c2c33;
   }
 }

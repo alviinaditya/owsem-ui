@@ -113,6 +113,23 @@ body { position: relative; } /* backdrops in iOS Safari 26 and later */
   @import "owsem-ui/styles.css";
   ```
 
+## Glide (Core)
+
+`owsem-ui/core` also exports **Glide**: one hover highlight that glides to the item nearest the
+pointer, for menus, lists, and rows of tabs. Registry projects have it in `lib/owsem/glide/`.
+
+```tsx
+import { GlideHighlight, useGlide } from "owsem-ui/core"; // or "@/lib/owsem/glide/use-glide"
+const glide = useGlide<HTMLDivElement>({ axis: "y" }); // "x" for a row
+<div ref={glide.ref}>
+  <GlideHighlight glide={glide} />
+  <button type="button" data-glide-item>Profile</button>
+</div>
+```
+
+Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`. Restyle it with
+`--ow-glide-bg` and `--ow-glide-radius`, not by overriding `.ow-glide`.
+
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill, only

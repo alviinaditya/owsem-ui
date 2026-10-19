@@ -1,6 +1,6 @@
 import { playwright } from "@vitest/browser-playwright";
 import { defineConfig } from "vitest/config";
-import { setColorScheme, setForcedColors } from "./test/commands.ts";
+import { setColorScheme, setForcedColors, setReducedMotion } from "./test/commands.ts";
 
 type BrowserName = "chromium" | "firefox" | "webkit";
 
@@ -27,7 +27,7 @@ export default defineConfig({
       provider: playwright(),
       headless: true,
       viewport: { width: 1280, height: 800 },
-      commands: { setColorScheme, setForcedColors },
+      commands: { setColorScheme, setForcedColors, setReducedMotion },
       // Traces are off: Vitest 5.0.5 names them by test name, so parallel files overwrite each
       // other. Debug with --browser.trace=retain-on-failure --no-file-parallelism <file>.
       // Keep ad-hoc screenshots out of __screenshots__/ (committed VRT baselines).

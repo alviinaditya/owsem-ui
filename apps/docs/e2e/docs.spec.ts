@@ -14,6 +14,7 @@ test("the sidebar lists the docs pages in order", async ({ page }, testInfo) => 
   await expect(page.getByRole("list", { name: "Dokumentasi" }).getByRole("link")).toHaveText([
     "Getting Started",
     "Tema",
+    "Glide",
     "Aksesibilitas",
     "Skills",
     "Changelog",
@@ -89,4 +90,34 @@ test("changesets are read the way Changesets reads them", () => {
   expect(() =>
     readChangesets([{ file: "c.md", source: '---\n"owsem-ui": huge\n---\n\nX' }]),
   ).toThrow(/huge/);
+});
+
+test("Glide lights the item nearest the pointer, in the sidebar and the demo", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name === "mobile-390", "hover needs a mouse and a visible sidebar");
+  await page.goto("/en/docs/glide");
+  const sidebar = page.getByRole("navigation", { name: "Documentation navigation" });
+  const theming = sidebar.getByRole("link", { name: "Theming" });
+  const link = await theming.boundingBox();
+  if (!link) throw new Error("no sidebar link");
+  await page.mouse.move(link.x + 20, link.y + link.height / 2);
+  await expect(theming).toHaveAttribute("data-glide-active", "");
+  await expect(sidebar.locator(".ow-glide")).toHaveAttribute("data-visible", "");
+
+  // The disabled item is skipped.
+  const list = page.locator(".glide-demo-list");
+  const [profile, billing] = await Promise.all(
+    ["Profile", "Billing"].map((name) => list.getByRole("button", { name }).boundingBox()),
+  );
+  if (!profile || !billing) throw new Error("no demo items");
+  await page.mouse.move(billing.x + 20, billing.y + billing.height / 2);
+  await expect(list.getByRole("button", { name: "Billing" })).not.toHaveAttribute(
+    "data-glide-active",
+  );
+  // A click goes to the item that is lit: Profile, still lit 2px into the gap below it.
+  await page.mouse.move(profile.x + 20, profile.y + profile.height / 2);
+  await page.mouse.click(profile.x + 20, profile.y + profile.height + 2);
+  await expect(page.locator(".glide-demo-status")).toHaveText("Picked: Profile");
+  await expect(theming).not.toBeFocused();
 });

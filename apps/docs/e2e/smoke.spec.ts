@@ -26,6 +26,7 @@ for (const path of [
   "/id",
   "/en/docs",
   "/id/docs/theming",
+  "/id/docs/glide",
   "/en/docs/accessibility",
   "/id/docs/skills",
   "/en/docs/changelog",

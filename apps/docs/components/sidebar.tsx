@@ -3,6 +3,7 @@ import { CATEGORIES, catalog, isAvailable } from "@/lib/catalog";
 import { getDictionary } from "@/lib/dictionaries";
 import type { Lang } from "@/lib/i18n";
 import { source } from "@/lib/source";
+import { GlideNav } from "./glide-nav";
 import type { SceneInfo } from "./lab/lab-shell";
 import { SceneLinks } from "./lab/scene-links";
 import { NavLink } from "./nav-link";
@@ -44,7 +45,7 @@ export function Sidebar({
 }) {
   const dict = getDictionary(lang);
   return (
-    <nav aria-label={dict.nav.sidebar} className="sidebar-nav">
+    <GlideNav aria-label={dict.nav.sidebar} className="sidebar-nav">
       <p className="sidebar-heading" id="sidebar-docs">
         {dict.nav.docs}
       </p>
@@ -76,6 +77,6 @@ export function Sidebar({
           </ul>
         </div>
       ))}
-    </nav>
+    </GlideNav>
   );
 }

@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ComponentBadges } from "@/components/component-header";
 import { Icon } from "@/components/icons/icon";
 import { InstallCommand } from "@/components/install";
-import { Scene } from "@/components/lab/lab-shell";
+import { Scene, StageShortcuts } from "@/components/lab/lab-shell";
 import { getMDXComponents } from "@/components/mdx";
 import { TokenChip } from "@/components/token-setup";
 import { labs } from "@/labs";
@@ -96,14 +96,7 @@ function Intro({
           <TokenChip item={entry.name} lang={lang} />
         </>
       ) : null}
-      {shortcuts ? (
-        <p className="lab-hint">
-          {dict.lab.shortcuts}
-          {["T", "P", "C"].map((key) => (
-            <kbd key={key}>{key}</kbd>
-          ))}
-        </p>
-      ) : null}
+      {shortcuts ? <StageShortcuts /> : null}
     </header>
   );
 }

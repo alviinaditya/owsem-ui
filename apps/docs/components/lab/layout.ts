@@ -14,3 +14,15 @@ export const paneOpenHeight = (): number => Math.min(520, Math.max(280, innerHei
 
 /** The narrow pane's etched bottom line, below the stage (.lab-stage-frame). */
 export const PANE_CHROME = 2;
+
+/** Room Inspect keeps beside the demo for its part names (.lab-ichip). */
+export const INSPECT_CHIPS = 128;
+
+/** Room for Inspect's part card (.lab-part-card), on the other side, when the stage has it. */
+export const INSPECT_CARD = 268;
+
+/** Stage width from which the part card sits beside the demo; below it, under the demo. */
+export const INSPECT_CARD_MIN = 680;
+
+/** Space between the demo and the part card under it. */
+export const INSPECT_CARD_GAP = 28;

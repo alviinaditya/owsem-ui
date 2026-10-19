@@ -6,7 +6,7 @@ const robots = (page: import("@playwright/test").Page) => page.locator('meta[nam
 test("the sidebar lists every catalog component", async ({ page }, testInfo) => {
   await page.goto("/en/docs");
   if (testInfo.project.name === "mobile-390") {
-    await page.getByRole("button", { name: "Menu" }).click();
+    await page.getByRole("button", { name: "Menu", exact: true }).click();
   }
   const sidebar = page.getByRole("navigation", { name: "Documentation navigation" });
   for (const entry of catalog) {
@@ -18,7 +18,7 @@ test("the sidebar lists every catalog component", async ({ page }, testInfo) => 
 test("the sidebar fades the edges that have more to scroll", async ({ page }, testInfo) => {
   await page.goto("/en/docs");
   if (testInfo.project.name === "mobile-390") {
-    await page.getByRole("button", { name: "Menu" }).click();
+    await page.getByRole("button", { name: "Menu", exact: true }).click();
   }
   const scroller = page.locator("#site-sidebar");
   await expect(scroller).not.toHaveAttribute("data-fade-top");
@@ -72,7 +72,7 @@ test("the index filters components by family", async ({ page }) => {
 test("the mobile menu opens and closes after navigating", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "mobile-390", "the menu button only shows below 900 px");
   await page.goto("/id/docs");
-  const menu = page.getByRole("button", { name: "Menu" });
+  const menu = page.getByRole("button", { name: "Menu", exact: true });
   const sidebar = page.getByRole("navigation", { name: "Navigasi dokumentasi" });
   await expect(sidebar).toBeHidden();
 
@@ -93,4 +93,52 @@ test("the mobile menu opens and closes after navigating", async ({ page }, testI
   await expect(page).toHaveURL(/\/id\/docs$/);
   await expect(sidebar).toBeHidden();
   await expect(menu).toHaveAttribute("aria-expanded", "false");
+});
+
+test("the sidebar's trail runs to the page, then to the scene being read (DS-14)", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name === "mobile-390", "the sidebar is a menu panel below 1100 px");
+  await page.goto("/en/separator");
+  const sidebar = page.locator("#site-sidebar");
+  await expect(sidebar.getByRole("link", { name: "Separator", exact: true })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
+  // The deepest current row wins: the scene, under its component.
+  await expect(sidebar.locator("[data-arrived]")).toContainText("Overview");
+  await page.evaluate(() => document.getElementById("scene-states")?.scrollIntoView());
+  await expect(sidebar.locator("[data-arrived]")).toContainText("States and variants", {
+    timeout: 4000,
+  });
+});
+
+test("sidebar groups close and open again (DS-14)", async ({ page }, testInfo) => {
+  await page.goto("/en/docs");
+  if (testInfo.project.name === "mobile-390") {
+    await page.getByRole("button", { name: "Menu", exact: true }).click();
+  }
+  const sidebar = page.getByRole("navigation", { name: "Documentation navigation" });
+  const actions = sidebar.getByRole("button", { name: "Actions" });
+  const button = sidebar.getByRole("link", { name: "Button Soon" });
+  await expect(actions).toHaveAttribute("aria-expanded", "true");
+  await actions.click();
+  await expect(actions).toHaveAttribute("aria-expanded", "false");
+  await expect(button).toBeHidden();
+  await actions.click();
+  await expect(button).toBeVisible();
+});
+
+test("the sidebar stays mounted from the docs to a Lab, so the trail travels there", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name === "mobile-390", "the sidebar is a menu panel below 1100 px");
+  await page.goto("/en/docs/glide");
+  const sidebar = page.locator("#site-sidebar");
+  await sidebar.evaluate((el) => el.setAttribute("data-mark", "before"));
+  await sidebar.getByRole("link", { name: "Separator", exact: true }).click();
+  await expect(page).toHaveURL(/\/en\/separator$/);
+  // Same element: not remounted by the change of layout.
+  await expect(sidebar).toHaveAttribute("data-mark", "before");
+  await expect(sidebar.locator("[data-arrived]")).toContainText("Overview", { timeout: 4000 });
 });

@@ -18,6 +18,8 @@ export interface CatalogEntry {
   phase?: 1 | 2 | 3;
   /** Owsem expressions (PRD, Owsem scope). */
   expressions?: readonly Expression[];
+  /** False for a Base component that Base UI does not have (PRD, Outside Base UI). */
+  baseUi?: false;
   /** "planned" shows a Coming soon page; the others need a Lab and a packages/ui folder. */
   status: "planned" | "prototype" | "done";
 }
@@ -70,6 +72,7 @@ export const catalog = [
   { name: "avatar", title: "Avatar", family: "base", category: "display", phase: 3, status: "planned" },
   { name: "progress", title: "Progress", family: "base", category: "display", phase: 3, status: "planned" },
   { name: "meter", title: "Meter", family: "base", category: "display", phase: 3, status: "planned" },
+  { name: "tree-rail-nav", title: "Tree Rail Nav", family: "base+owsem", category: "navigation", phase: 3, baseUi: false, expressions: ["kinetic"], status: "prototype" },
   { name: "lumen-rail-nav", title: "Lumen Rail Nav", family: "owsem", category: "navigation", expressions: ["lumen", "kinetic"], status: "planned" },
   { name: "command-menu", title: "Command Menu", family: "owsem", category: "navigation", expressions: ["kinetic", "surface"], status: "planned" },
   { name: "number-ticker", title: "Number Ticker", family: "owsem", category: "display", expressions: ["kinetic"], status: "planned" },
@@ -87,4 +90,6 @@ export const isAvailable = (entry: CatalogEntry): boolean => entry.status !== "p
 
 /** Base UI docs for components built on a Base UI counterpart. */
 export const baseUiUrl = (entry: CatalogEntry): string | undefined =>
-  entry.family === "owsem" ? undefined : `https://base-ui.com/react/components/${entry.name}`;
+  entry.family === "owsem" || entry.baseUi === false
+    ? undefined
+    : `https://base-ui.com/react/components/${entry.name}`;

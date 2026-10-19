@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Fragment,
   type KeyboardEvent,
   type ReactNode,
   useEffect,
@@ -17,9 +18,24 @@ import { ScrollFade } from "../scroll-fade";
 import { useTokenSetup } from "../token-setup";
 import { ColorField } from "./color-field";
 import { CopyButton } from "./copy-button";
-import { SIDE_BY_SIDE, SIDE_PANEL_MIN, SIDE_PANEL_WIDTH } from "./layout";
+import { Inspect } from "./inspect";
+import {
+  INSPECT_CARD,
+  INSPECT_CARD_GAP,
+  INSPECT_CARD_MIN,
+  INSPECT_CHIPS,
+  SIDE_BY_SIDE,
+  SIDE_PANEL_MIN,
+  SIDE_PANEL_WIDTH,
+} from "./layout";
 import { LiveCode } from "./live-code";
-import type { CodeFile, Config, LabDefinition } from "./types";
+import { createScriptStage } from "./script-stage";
+import type { CodeFile, Config, LabDefinition, SceneScript } from "./types";
+
+type CardPlace = "side" | "below" | "none";
+
+/** A script starts this long after its scene settles, once the stage has taken the scene's shape. */
+const SCRIPT_LEAD_MS = 400;
 
 export interface StageState {
   cfg: Config;
@@ -34,6 +50,21 @@ export interface StageState {
   /** Set only when the visitor or a scene picks one; otherwise the stage follows the site. */
   theme: "light" | "dark" | undefined;
   toggleTheme: () => void;
+  inspect: boolean;
+  setInspect: (on: boolean) => void;
+  /** The part Inspect shows in its card. */
+  part: string;
+  setPart: (name: string) => void;
+  /** The settled scene, when it shows its own demo. */
+  view: string | undefined;
+  /** The settled scene's script, if it has one. */
+  script: SceneScript | undefined;
+  /** A new value starts a run; undefined ends one. */
+  playToken: string | undefined;
+  playing: boolean;
+  setPlaying: (playing: boolean) => void;
+  replay: () => void;
+  stop: () => void;
 }
 
 interface StageProps {
@@ -63,10 +94,15 @@ export function Stage({ lab, lang, labels, title, state, item, pane }: StageProp
   const controlsRef = useRef<HTMLElement>(null);
   const drawerRef = useRef<HTMLElement>(null);
   const paneToggleRef = useRef<HTMLButtonElement>(null);
+  const ghostRef = useRef<HTMLSpanElement>(null);
   const toolRefs = useRef(new Map<string, HTMLButtonElement | null>());
   const [paneHidden, togglePane] = pane;
   // Whether the stage is wide enough for the controls beside the demo (same as the container query).
   const [wide, setWide] = useState(true);
+  // Where Inspect's part card has room, and the height it keeps for it (its tallest card).
+  const [card, setCard] = useState<CardPlace>("none");
+  const [cardHeight, setCardHeight] = useState(0);
+  const inspect = state.inspect && Boolean(lab.parts?.length);
 
   // A narrow stage has one slot for the controls and the code.
   const both = state.code && state.controls && !wide;
@@ -96,14 +132,29 @@ export function Stage({ lab, lang, labels, title, state, item, pane }: StageProp
       const padY = Number.parseFloat(style.paddingBlockStart) * 2;
       const side = controls && isWide ? SIDE_PANEL_WIDTH : 0;
       const lower = code || (controls && !isWide);
-      const width = body.clientWidth - padX - side;
-      const height = (lower ? body.clientHeight * 0.52 : body.clientHeight) - padY;
+      // Inspect keeps a column for the part names on the end side. Its part card goes on the
+      // start side when the stage is wide enough, else under the demo when that leaves the demo
+      // most of its size, else nowhere.
+      const chips = inspect ? INSPECT_CHIPS : 0;
+      const free = inspect && !lower && cardHeight > 0;
+      const below = cardHeight + INSPECT_CARD_GAP;
+      const place: CardPlace =
+        free && body.clientWidth - side >= INSPECT_CARD_MIN
+          ? "side"
+          : free && body.clientHeight - padY - below >= demo.offsetHeight * 0.6
+            ? "below"
+            : "none";
+      setCard(place);
+      const start = place === "side" ? INSPECT_CARD : 0;
+      const under = place === "below" ? below : 0;
+      const width = body.clientWidth - padX - side - chips - start;
+      const height = (lower ? body.clientHeight * 0.52 : body.clientHeight) - padY - under;
       const scale = Math.max(
         0.4,
         Math.min(1, (width - 24) / demo.offsetWidth, (height - 16) / demo.offsetHeight),
       );
-      const x = -side / 2;
-      const y = lower ? -body.clientHeight * 0.24 : 0;
+      const x = (start - side - chips) / 2;
+      const y = lower ? -body.clientHeight * 0.24 : -under / 2;
       fit.style.transform = `translate(${x}px, ${y.toFixed(1)}px) scale(${scale.toFixed(3)})`;
     };
     apply();
@@ -111,13 +162,16 @@ export function Stage({ lab, lang, labels, title, state, item, pane }: StageProp
     observer.observe(body);
     observer.observe(demo);
     return () => observer.disconnect();
-  }, [code, controls]);
+  }, [code, controls, inspect, cardHeight]);
 
   // Single-key shortcuts only while focus is inside the stage (WCAG 2.1.4). A shortcut that
   // hides the focused element hands focus to its own button, so the next press still works.
   const shortcuts = useRef<Record<string, Shortcut>>({});
+  const replay = state.playing ? state.stop : state.replay;
   useLayoutEffect(() => {
     shortcuts.current = {
+      ...(lab.parts?.length ? { i: { run: () => state.setInspect(!inspect) } } : {}),
+      ...(state.script ? { r: { run: replay } } : {}),
       t: { run: state.toggleTheme },
       p: {
         run: toggleControls,
@@ -156,6 +210,52 @@ export function Stage({ lab, lang, labels, title, state, item, pane }: StageProp
     return () => stage.removeEventListener("keydown", onKey);
   }, []);
 
+  // Scene scripts (DS-11), one run per token. The visitor's own press or key stops a run where it
+  // is; a new token (another scene, Replay, Stop) stops it and remounts the demo as it was.
+  const [mount, setMount] = useState(0);
+  const player = useRef({ script: state.script, setPlaying: state.setPlaying });
+  useLayoutEffect(() => {
+    player.current = { script: state.script, setPlaying: state.setPlaying };
+  });
+  const runs = useRef(0);
+  const { playToken } = state;
+  useEffect(() => {
+    const body = bodyRef.current;
+    const demo = demoRef.current;
+    const ghost = ghostRef.current;
+    const { script, setPlaying } = player.current;
+    if (!playToken || !script || !body || !demo || !ghost) return;
+    const run = ++runs.current;
+    const controller = new AbortController();
+    let done = false;
+    const onVisitor = (event: Event) => {
+      if (event.isTrusted) controller.abort();
+    };
+    body.addEventListener("pointerdown", onVisitor, true);
+    body.addEventListener("keydown", onVisitor, true);
+    const stage = createScriptStage(body, demo, ghost, controller.signal);
+    setPlaying(true);
+    stage
+      .wait(SCRIPT_LEAD_MS)
+      .then(() => script(stage))
+      .catch((error: unknown) => {
+        if (!controller.signal.aborted) throw error;
+      })
+      .finally(() => {
+        done = true;
+        stage.release();
+        if (runs.current === run) player.current.setPlaying(false);
+      });
+    return () => {
+      body.removeEventListener("pointerdown", onVisitor, true);
+      body.removeEventListener("keydown", onVisitor, true);
+      if (!done) {
+        controller.abort();
+        setMount((n) => n + 1);
+      }
+    };
+  }, [playToken]);
+
   const setup = useTokenSetup();
   const files = lab.code(state.cfg, setup);
   const tools: {
@@ -166,6 +266,17 @@ export function Stage({ lab, lang, labels, title, state, item, pane }: StageProp
     controls?: string;
     act: () => void;
   }[] = [
+    ...(lab.parts?.length
+      ? [
+          {
+            key: "I",
+            label: labels.inspect,
+            icon: "scan" as const,
+            pressed: inspect,
+            act: () => state.setInspect(!inspect),
+          },
+        ]
+      : []),
     { key: "T", label: labels.theme, icon: "contrast", act: state.toggleTheme },
     {
       key: "P",
@@ -183,10 +294,19 @@ export function Stage({ lab, lang, labels, title, state, item, pane }: StageProp
       controls: `${id}-code`,
       act: toggleCode,
     },
+    ...(state.script
+      ? [
+          state.playing
+            ? { key: "R", label: labels.stop, icon: "square" as const, act: replay }
+            : { key: "R", label: labels.replay, icon: "rotate-ccw" as const, act: replay },
+        ]
+      : []),
   ];
 
   return (
-    <section ref={stageRef} className="lab-stage" aria-label={labels.stage}>
+    // tabIndex -1: a click anywhere on the stage focuses it, so its shortcuts work right away;
+    // it stays out of the tab order.
+    <section ref={stageRef} className="lab-stage" aria-label={labels.stage} tabIndex={-1}>
       <div className="lab-stage-bar">
         <p className="lab-stage-title">
           <span className="lab-live" aria-hidden="true" />
@@ -235,9 +355,38 @@ export function Stage({ lab, lang, labels, title, state, item, pane }: StageProp
       >
         <div ref={fitRef} className="lab-fit">
           <div ref={demoRef} className="lab-demo">
-            {lab.demo(state.cfg, lang)}
+            <Fragment key={`${state.view ?? ""}:${mount}`}>
+              {(state.view && lab.scenes?.[state.view]?.demo?.(state.cfg, lang)) ||
+                lab.demo(state.cfg, lang)}
+            </Fragment>
           </div>
         </div>
+
+        {inspect && lab.parts ? (
+          <Inspect
+            parts={lab.parts}
+            lang={lang}
+            labels={labels}
+            selected={state.part}
+            onSelect={state.setPart}
+            bodyRef={bodyRef}
+            demoRef={demoRef}
+            card={card}
+            onCardHeight={setCardHeight}
+          />
+        ) : null}
+
+        <span ref={ghostRef} className="lab-ghost" aria-hidden="true">
+          <svg
+            className="lab-ghost-arrow"
+            viewBox="0 0 24 24"
+            width="22"
+            height="22"
+            aria-hidden="true"
+          >
+            <path d="M4 3v15.5l4.2-4 2.7 6.2 2.7-1.2-2.7-6.1H16.6z" />
+          </svg>
+        </span>
 
         <aside
           ref={controlsRef}

@@ -14,6 +14,7 @@
   "dependencies": {
     "fumadocs-core": "^16.17.3",
     "fumadocs-mdx": "^15.4.7",
+    "motion": "^14.3.0",
     "next": "^16.4.1",
     "owsem-ui": "workspace:*",
     "react": "catalog:",

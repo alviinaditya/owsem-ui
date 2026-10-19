@@ -154,8 +154,10 @@ keyboard calls `setActive()`.
 
 The package and registry builds pick up the folder automatically. Registry copies rewrite imports
 that leave the folder: Core to `@/lib/owsem/...` and other components to
-`@/components/owsem/<name>/...` (CLI-6 in the PRD). The registry build does not support
-`base+owsem` components (two items from one source) yet; that arrives with Button.
+`@/components/owsem/<name>/...` (CLI-6 in the PRD). A `base+owsem` component ships as two items
+from one source, `<name>` and `<name>-owsem`: its main file declares
+`const DEFAULT_FLAVOR: <Type> = "base";` on one line, and the `-owsem` item rewrites that line to
+`"owsem"` (Tree Rail Nav is the reference).
 
 ## Labs
 
@@ -169,8 +171,9 @@ component and marks the one being read. Separator is the reference. A Lab has tw
   `anatomy`, `states`, `keyboard`, `customization` (only for components with tokens), and `ship`.
 - **Stage:** `apps/docs/labs/<name>.tsx`, a client module whose default export renders
   `LabShell` with a `defineLab` definition (the demo, the controls, the code files generated from
-  the controls and the visitor's token setup, and per scene what the stage shows: `cfg`, `code`,
-  `controls`, `theme`), and is
+  the controls and the visitor's token setup, the `parts` Inspect outlines, and per scene what the
+  stage shows: `cfg`, `code`, `controls`, `theme`, `inspect`, a `play` script, and a `demo` of
+  its own), and is
   registered in `labs/index.ts`. A scene borrows the stage: the visitor's own changes win and stay
   after the scene. Controls are `choice` (a segmented radio group) or `color` (a hex field and the
   browser's picker; `token` names the theme token the component uses until a color is chosen).
@@ -184,8 +187,26 @@ Code is highlighted by Shiki with one theme, `apps/docs/lib/code-theme.ts`, in M
 and in the stage's live code alike; its colors are the `--tk-*` tokens in `globals.css`. The code
 drawer ends with an Install tab built from the component's registry name.
 
-Stage shortcuts (T, P, C, and H for the pane) work only while focus is on the stage. Play scene
-and Replay appear only for scenes with an animation; scripted motion uses Motion
+The docs CSS is unlayered, so docs chrome beats `@layer owsem.*`. Element defaults (`a`, `button`,
+`:focus-visible`, headings, tables) are the exception: they sit in `@layer docs-base`, ordered
+under owsem-ui by `app/layers.css`, so a component on the stage keeps its own colors and focus
+ring. Style the docs by class; a new element default goes in `docs-base`.
+
+The `states` scene compares rather than describes: its `demo` returns a `Matrix`
+(`components/lab/matrix.tsx`) of live cells, such as flavors by states or variants by sizes.
+
+Each part in `parts` has a selector into the demo, a note, and its public tokens, each mapped to
+the private property that holds the value in use (a public token is empty until someone sets it).
+In the anatomy table, `<Part name="Root" />` names a part and picks it on the stage.
+
+A `play` script drives the demo through `ScriptStage`: `click` and `point` move a drawn pointer
+that sends real pointer events (hover effects react; focus stays put), and `wait` pauses. It plays
+once its scene settles, except under reduced motion, where it waits for Play scene or Replay. The
+visitor's own press or key stops it where it is; Stop and a scene change remount the demo, so end
+a script where it started.
+
+Stage shortcuts (I, T, P, C, R for Replay, and H for the pane) work only while focus is on the
+stage; a click anywhere on it puts focus there, and the page header names the ones a Lab has. Play scene and Replay appear only for scenes with an animation; scripted motion uses Motion
 (`motion/react`), everything else CSS transitions, and never GSAP. Every animation follows
 `prefers-reduced-motion`.
 

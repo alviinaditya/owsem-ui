@@ -1,3 +1,4 @@
+import "../layers.css";
 import "owsem-ui/styles.css";
 import "../globals.css";
 import { NextProvider } from "fumadocs-core/framework/next";
@@ -7,6 +8,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { SidebarToggle } from "@/components/sidebar-toggle";
+import { SiteShell } from "@/components/site-shell";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { TokenSetupMenu } from "@/components/token-setup";
 import { getDictionary } from "@/lib/dictionaries";
@@ -69,7 +71,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
                 <ThemeSwitcher labels={dict.theme} />
               </div>
             </header>
-            {children}
+            <SiteShell lang={lang}>{children}</SiteShell>
           </div>
         </NextProvider>
       </body>

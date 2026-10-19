@@ -2,6 +2,7 @@
 title: Separator
 ---
 
+import { Part } from "@/components/lab/lab-shell";
 import { ForMode, TokenChip } from "@/components/token-setup";
 
 Separator memisahkan bagian konten dengan garis terukir: garis gelap 1 px dengan garis terang 1 px
@@ -12,11 +13,11 @@ mengikuti setiap bagian.
 
 Satu bagian saja. Base UI merender `<div role="separator">` dengan `aria-orientation` dan
 `data-orientation`; OwsemUI menambahkan class `ow-separator` dan menggambar kedua garis sebagai
-border.
+border. Inspeksi (I) menandainya di stage, beserta tokennya.
 
 | Bagian | Elemen | Token |
 | --- | --- | --- |
-| Root | `div.ow-separator` | `--ow-separator-line-dark`, `--ow-separator-line-light` |
+| <Part name="Root" /> | `div.ow-separator` | `--ow-separator-line-dark`, `--ow-separator-line-light` |
 
 ## State dan varian [#states]
 

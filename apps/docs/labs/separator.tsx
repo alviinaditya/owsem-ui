@@ -51,6 +51,21 @@ const separatorLab = defineLab({
     },
   ],
 
+  parts: [
+    {
+      name: "Root",
+      selector: ".ow-separator",
+      note: {
+        id: "Garis gelap dan terang, digambar sebagai border. Base UI memberinya role separator.",
+        en: "The dark and light lines, drawn as borders. Base UI gives it the separator role.",
+      },
+      tokens: {
+        "--ow-separator-line-dark": "--_dark",
+        "--ow-separator-line-light": "--_light",
+      },
+    },
+  ],
+
   demo(cfg, lang) {
     const t = TEXT[lang];
     const style = {
@@ -135,6 +150,7 @@ const separatorLab = defineLab({
   },
 
   scenes: {
+    anatomy: { inspect: true },
     states: { cfg: { orientation: "vertical" } },
     customization: { controls: true },
     ship: { code: true },

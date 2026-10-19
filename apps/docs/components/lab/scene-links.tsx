@@ -1,21 +1,36 @@
 "use client";
 
+import { TreeRailNav } from "owsem-ui/base";
 import type { SceneInfo } from "./lab-shell";
 import { useActiveScene } from "./scene-store";
 
-/** The current Lab's scenes, nested under its entry in the sidebar; the one being read is marked. */
-export function SceneLinks({ scenes, label }: { scenes: SceneInfo[]; label: string }) {
+/**
+ * A Lab's scenes, under its row in the sidebar. While its page is shown (`live`), the scene being
+ * read is the current step.
+ */
+export function SceneLinks({
+  scenes,
+  label,
+  live,
+}: {
+  scenes: SceneInfo[];
+  label: string;
+  live: boolean;
+}) {
   const active = useActiveScene();
   return (
-    <ol className="sidebar-scenes" aria-label={label}>
+    <TreeRailNav.List aria-label={label} aria-labelledby={undefined}>
       {scenes.map((scene, i) => (
-        <li key={scene.id}>
-          <a href={`#scene-${scene.id}`} aria-current={scene.id === active ? "step" : undefined}>
+        <TreeRailNav.Node key={scene.id}>
+          <TreeRailNav.Link
+            href={`#scene-${scene.id}`}
+            current={live && scene.id === active ? "step" : undefined}
+          >
             <span className="sidebar-scene-n">{String(i).padStart(2, "0")}</span>
-            {scene.title}
-          </a>
-        </li>
+            <TreeRailNav.Label>{scene.title}</TreeRailNav.Label>
+          </TreeRailNav.Link>
+        </TreeRailNav.Node>
       ))}
-    </ol>
+    </TreeRailNav.List>
   );
 }

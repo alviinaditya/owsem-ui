@@ -1,0 +1,152 @@
+---
+title: Tree Rail Nav
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Tree Rail Nav is sidebar navigation in up to three levels. A rail runs down each level, and a trail
+follows the rails from the top to the page you are on. Scroll to start the tour; the stage follows
+each part.
+
+## The trail [#trail]
+
+The stage shows the Owsem flavor. A rail runs down each level, with a dot for every row. The trail
+starts at the origin dot at the top and runs down through each parent's rail, curving onto the
+next level, until it reaches the current row. Each dot lights up as the trail passes it.
+
+The stage plays it: a pointer picks a few pages in turn. Each time, the trail backs up to the
+branch both routes share, then runs down to the new row and pulses when it lands, while a tint
+sweeps in behind the row. Play scene runs it again; click a row to take over.
+
+## Opening and closing [#groups]
+
+A group's row is a disclosure button. Each Node is a Base UI Collapsible, so its Toggle opens and
+closes the Panel that holds the next level. Rails and the trail follow a panel while it animates
+open or shut.
+
+The stage closes the group that holds the current row. The trail stops at the group's row and
+the marker turns hollow, so you still see where the page is. Then the group opens again, and the
+trail runs on to the row.
+
+## Anatomy [#anatomy]
+
+Nine parts, three levels at most, one rail per level. A script draws the rail into an SVG inside
+Root; the rows are plain HTML. Inspect (I) outlines each part on the stage; pick a name, here or
+on the stage, to see its tokens.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `nav.ow-tree-rail-nav` | Holds the rail SVG and the hover highlight |
+| <Part name="List" /> | `ul` | A nested List is labelled by its row (`aria-labelledby`) |
+| <Part name="Node" /> | `li` | A Base UI `Collapsible.Root` |
+| <Part name="Toggle" /> | `button` | A group's row: `Collapsible.Trigger`, with `aria-expanded` |
+| <Part name="Link" /> | `a` | `render` swaps in a router link; `current` sets `aria-current` |
+| <Part name="Panel" /> | `div` | `Collapsible.Panel`, kept mounted so the rail can end at its row |
+| <Part name="Icon" /> | `span` | Decorative (`aria-hidden`); the row's font size plus 2px, any icon inside it filled to fit |
+| <Part name="Label" /> | `span` | One line; text that does not fit fades, and runs left in a loop while its row is hovered or focused |
+| <Part name="Origin" /> | `div` | Optional label at the top; the trail starts beside it |
+
+## States and variants [#states]
+
+The stage puts the two flavors side by side, each with its group open and closed. Both have the
+same parts and keys; only the trail differs. The pointer picks Installation in each: Base's trail
+is there at once, Owsem's travels and pulses when it lands. Density is disabled in every cell.
+
+| Flavor | Trail |
+| --- | --- |
+| `flavor="base"` (default) | Neutral, drawn at once, no pulse |
+| `flavor="owsem"` | Accent; travels along the rail and pulses on arrival (Kinetic) |
+
+Owsem adds no glow, so the Lumen budget stays at three components.
+
+`current` marks the row of the page shown: `true` or `"page"` sets `aria-current="page"`, and
+`"step"` sets `aria-current="step"`, for the section being read on a long page. If several rows are
+current, the trail goes to the deepest one.
+
+Disabled links get `aria-disabled` and do not navigate; arrow keys and the hover highlight skip
+them. On hover, one highlight glides to the nearest row: it is Glide from `owsem-ui/core`.
+
+## Keyboard and accessibility [#keyboard]
+
+Tab moves through the links and toggles as usual. Arrow keys move within the tree:
+
+| Key | Action |
+| --- | --- |
+| Arrow Down, Arrow Up | Next or previous visible row, skipping disabled ones |
+| Home, End | First or last visible row |
+| Arrow Right | Opens a closed group, or moves into an open one |
+| Arrow Left | Closes an open group, or moves to the parent row |
+
+The rail is an SVG with `aria-hidden`; screen readers get the structure from the lists,
+`aria-expanded`, and `aria-current`. With `prefers-reduced-motion`, the trail does not travel, the
+tint does not sweep, and panels open at once. In forced colors (Windows High Contrast), the rail
+uses `GrayText`, the trail `Highlight`, and the current row is underlined. Right to left, the rail
+is mirrored.
+
+## Customization [#customization]
+
+The stage controls are open; switch the flavor to compare the two trails. Colors and rail positions
+are component tokens that you set in your own CSS.
+
+<ForMode mode="theme">
+
+Component tokens override the theme tokens for every Tree Rail Nav inside the element that sets
+them, such as `.sidebar`.
+
+| Component token | Default | Purpose |
+| --- | --- | --- |
+| `--ow-tree-rail-trail` | `--ow-fg` in Base, `--ow-accent` in Owsem | Trail, lit dots, marker, and the current row's tint |
+| `--ow-tree-rail-rail` | `--ow-line` | Rails |
+| `--ow-tree-rail-node` | `--ow-fg` at 24% | Dots the trail has not lit |
+| `--ow-tree-rail-surface` | `--ow-bg` | Cuts the dots out of the rail; match the background behind the nav |
+| `--ow-tree-rail-r0` | `9px` | Rail x of level 1 |
+| `--ow-tree-rail-r1` | `34px` | Rail x of level 2 |
+| `--ow-tree-rail-r2` | `59px` | Rail x of level 3 |
+
+</ForMode>
+
+<ForMode mode="isolated">
+
+Each Tree Rail Nav carries its own values on its root and reads no shared token, so set them on
+the nav itself, as in `.sidebar .ow-tree-rail-nav`.
+
+| Component token | Default | Purpose |
+| --- | --- | --- |
+| `--ow-tree-rail-trail` | Its own: neutral in Base, accent in Owsem | Trail, lit dots, marker, and the current row's tint |
+| `--ow-tree-rail-rail` | Its own, per theme | Rails |
+| `--ow-tree-rail-node` | Its own, per theme | Dots the trail has not lit |
+| `--ow-tree-rail-surface` | Its own, per theme | Cuts the dots out of the rail; match the background behind the nav |
+| `--ow-tree-rail-r0` | `9px` | Rail x of level 1 |
+| `--ow-tree-rail-r1` | `34px` | Rail x of level 2 |
+| `--ow-tree-rail-r2` | `59px` | Rail x of level 3 |
+
+</ForMode>
+
+The rails sit 25px apart: every branch curves the same way, and a first-level row's children line
+up with its text, after the icon. Write their positions in plain px: the script reads them as
+numbers. Rows indent just past their rail, so moving a rail moves its rows. The hover highlight is
+Glide's, so `--ow-glide-bg` and `--ow-glide-radius` set its color and corners.
+
+<TokenChip item="tree-rail-nav" lang="en" />
+
+## Ship it [#ship]
+
+The code drawer writes the component exactly as the stage is set up. Switch the flavor and the line
+that moved lights up.
+
+| Part | Prop | Type | Default |
+| --- | --- | --- | --- |
+| Root | `flavor` | `"base" \| "owsem"` | `"base"` |
+| Node | `open` | `boolean` | |
+| Node | `defaultOpen` | `boolean` | `false` |
+| Node | `onOpenChange` | `(open, eventDetails) => void` | |
+| Link | `current` | `boolean \| "page" \| "step"` | |
+| Link | `disabled` | `boolean` | |
+| Link | `render` | `ReactElement \| (props, state) => ReactElement` | |
+
+Node's `open`, `defaultOpen`, and `onOpenChange` come from Base UI Collapsible. Other props pass
+through to the element or to Base UI as they are.
+
+In the registry, `tree-rail-nav` defaults to Base and `tree-rail-nav-owsem` defaults to Owsem; both
+write the same files.

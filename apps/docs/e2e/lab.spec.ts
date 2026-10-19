@@ -177,6 +177,26 @@ test("stage shortcuts work only with focus on the stage (WCAG 2.1.4)", async ({ 
   await stage(page).getByRole("button", { name: "Controls" }).focus();
   await page.keyboard.press("c");
   await expect(stageBody(page)).toHaveAttribute("data-code", "");
+
+  // A click on an empty part of the stage is enough to put focus there.
+  await page.locator("body").click({ position: { x: 1, y: 1 } });
+  await stageBody(page).click({ position: { x: 8, y: 8 } });
+  await page.keyboard.press("c");
+  await expect(stageBody(page)).not.toHaveAttribute("data-code");
+});
+
+test("the header names each stage shortcut this Lab has", async ({ page }, testInfo) => {
+  const hint = page.locator(".lab-hint");
+  await page.goto("/en/separator");
+  await expect(hint).toContainText("I Inspect");
+  await expect(hint).toContainText("C Code");
+  await expect(hint).not.toContainText("Replay");
+  await page.goto("/en/tree-rail-nav");
+  await expect(hint).toContainText("R Replay");
+  // H folds the pane, which only exists below 960 px.
+  const pane = hint.getByText("Preview");
+  if (testInfo.project.name === "mobile-390") await expect(pane).toBeVisible();
+  else await expect(pane).toBeHidden();
 });
 
 test("the stage theme changes the stage only (DS-12)", async ({ page }) => {
@@ -223,10 +243,17 @@ test("the code drawer ends at the side panel's line, closing included", async ({
 test("the preview pane folds and remembers it (DS-10)", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "mobile-390", "the pane only exists below 960 px");
   await page.goto("/id/separator");
-  const toggle = stage(page).getByRole("button", { name: "Sembunyikan pratinjau" });
+  // The toggle says what it does, not just an arrow.
+  const toggle = stage(page).getByRole("button", { name: "Tutup pratinjau" });
+  await expect(toggle).toHaveText("Tutup");
   await toggle.click();
   await expect(page.locator("html")).toHaveAttribute("data-lab-pane", "hidden");
   await expect(stage(page).getByRole("separator")).toBeHidden();
+  // Folded: the bar keeps its title and the way back, with one line under it.
+  const show = stage(page).getByRole("button", { name: "Tampilkan pratinjau" });
+  await expect(show).toHaveText("Tampilkan pratinjau");
+  await expect(stage(page).getByRole("button", { name: "Kontrol" })).toBeHidden();
+  await expect(page.locator(".lab-stage-bar")).toHaveCSS("border-bottom-width", "0px");
 
   await page.reload();
   await expect(page.locator("html")).toHaveAttribute("data-lab-pane", "hidden");
@@ -257,4 +284,155 @@ test("H folds the pane without moving the text or the scene", async ({ page }, t
 
   await page.keyboard.press("h");
   await expect(page.locator("html")).not.toHaveAttribute("data-lab-pane");
+});
+
+const current = (page: Page) => stage(page).locator("a[aria-current]");
+
+test("the anatomy scene outlines each part, and a part's name picks it (DS-3)", async ({
+  page,
+}, testInfo) => {
+  await page.goto("/en/tree-rail-nav");
+  const inspect = stage(page).getByRole("button", { name: "Inspect" });
+  await expect(inspect).toHaveAttribute("aria-pressed", "false");
+  await scene(page, "anatomy");
+  await expect(inspect).toHaveAttribute("aria-pressed", "true");
+  const chips = stage(page).getByRole("group", { name: "Parts" }).getByRole("button");
+  await expect(chips).toHaveCount(9);
+
+  // The first outline is Root's, on the nav itself, once the demo has made room for the names.
+  await expect
+    .poll(async () => {
+      const box = await page.locator(".lab-ibox").first().boundingBox();
+      const nav = await stage(page).locator(".ow-tree-rail-nav").boundingBox();
+      return box && nav ? Math.abs(box.x - nav.x) + Math.abs(box.height - nav.height) : -1;
+    })
+    .toBeLessThan(1);
+
+  // A name in the anatomy table picks the part on the stage.
+  await page
+    .locator(".lab-narrative")
+    .getByRole("button", { name: "Origin", exact: true })
+    .evaluate((el: HTMLElement) => el.click());
+  await expect(chips.filter({ hasText: "Origin" })).toHaveAttribute("aria-pressed", "true");
+
+  // On a wide stage the part's card shows its tokens with the values in use.
+  if (testInfo.project.name !== "mobile-390") {
+    await chips.filter({ hasText: "Root" }).click();
+    const card = page.locator("section.lab-part-card");
+    await expect(card.locator("li", { hasText: "--ow-tree-rail-r1" })).toContainText("34px");
+    await expect(card.locator("li", { hasText: "--ow-tree-rail-trail" })).toContainText(
+      /#[0-9A-F]{6}/,
+    );
+  }
+
+  await scene(page, "states");
+  await expect(inspect).toHaveAttribute("aria-pressed", "false");
+  await expect(page.locator(".lab-inspect")).toHaveCount(0);
+});
+
+test("a scene's animation plays on its own; the visitor's press stops it (DS-11)", async ({
+  page,
+}) => {
+  await page.goto("/en/tree-rail-nav");
+  await expect(current(page)).toHaveText("Dark mode");
+  await scene(page, "trail");
+  await expect(stage(page).getByRole("button", { name: "Stop" })).toBeVisible();
+  await expect(current(page)).toHaveText("Installation");
+
+  // A press of the visitor's own ends the run where it is.
+  await stage(page).locator('a[href="#changelog"]').click();
+  await expect(stage(page).getByRole("button", { name: "Replay" })).toBeVisible();
+  await expect(current(page)).toHaveText("Changelog");
+  await page.waitForTimeout(1600);
+  await expect(current(page)).toHaveText("Changelog");
+
+  await stage(page).getByRole("button", { name: "Replay" }).click();
+  await expect(current(page)).toHaveText("Installation");
+  // Leaving the scene mid-run puts the demo back as it was.
+  await scene(page, "anatomy");
+  await expect(current(page)).toHaveText("Dark mode");
+  await expect(stage(page).getByRole("button", { name: /^(Replay|Stop)$/ })).toHaveCount(0);
+});
+
+test("under reduced motion a scene plays only when asked", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/en/tree-rail-nav");
+  await scene(page, "trail");
+  await expect(stage(page).getByRole("button", { name: "Replay" })).toBeVisible();
+  await page.waitForTimeout(1200);
+  await expect(current(page)).toHaveText("Dark mode");
+
+  const section = page.locator("#scene-trail");
+  await section.getByRole("button", { name: "Play scene" }).click();
+  await expect(current(page)).toHaveText("Installation");
+  await section.getByRole("button", { name: "Stop" }).click();
+  await expect(section.getByRole("button", { name: "Play scene" })).toBeVisible();
+  await expect(current(page)).toHaveText("Dark mode");
+});
+
+test("a Lab without animations has no Play scene or Replay", async ({ page }) => {
+  await page.goto("/en/separator");
+  for (const id of ["anatomy", "states", "ship"]) {
+    await scene(page, id);
+    await expect(stage(page).getByRole("button", { name: "Replay" })).toHaveCount(0);
+  }
+  await expect(page.getByRole("button", { name: "Play scene" })).toHaveCount(0);
+  await expect(stage(page).getByRole("button", { name: "Inspect" })).toHaveAttribute(
+    "aria-pressed",
+    "false",
+  );
+});
+
+test("the states scene sets the flavors side by side, then gives the demo back (DS-2)", async ({
+  page,
+}) => {
+  await page.goto("/en/tree-rail-nav");
+  const navs = stage(page).getByRole("navigation");
+  await expect(navs).toHaveCount(1);
+  await scene(page, "states");
+  await expect(stage(page).getByRole("columnheader")).toHaveText(["Base", "Owsem"]);
+  await expect(navs).toHaveCount(4);
+  const cell = (name: string) => stage(page).getByRole("navigation", { name });
+  await expect(cell("Owsem, Group closed").getByRole("button", { name: "Guides" })).toHaveAttribute(
+    "aria-expanded",
+    "false",
+  );
+  // The pointer picks Installation in Base, then in Owsem.
+  await expect(cell("Base, Group open").locator("a[aria-current]")).toHaveText("Installation");
+  await expect(cell("Owsem, Group open").locator("a[aria-current]")).toHaveText("Installation");
+
+  await scene(page, "keyboard");
+  await expect(navs).toHaveCount(1);
+});
+
+test("the docs' element defaults never override a component's own styles (FR-8, FR-13)", async ({
+  page,
+}) => {
+  await page.goto("/en/tree-rail-nav");
+  const color = (href: string) =>
+    stage(page)
+      .locator(`a[href="${href}"]`)
+      .evaluate((el) => getComputedStyle(el).color);
+  // A disabled row is dimmer than a plain one: the docs' `a { color: inherit }` sits under it.
+  expect(await color("#density")).not.toBe(await color("#install"));
+  // The component's focus ring stays inside the row, not the docs' outward one.
+  const install = stage(page).locator('a[href="#install"]');
+  await install.focus();
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("ArrowUp");
+  await expect(install).toBeFocused();
+  await expect(install).toHaveCSS("outline-offset", "-2px");
+});
+
+test("the scene being read stands out; the others recede (DS-2)", async ({ page }) => {
+  await page.goto("/en/tree-rail-nav");
+  const title = (id: string) => page.locator(`#scene-${id} h2`);
+  await scene(page, "groups");
+  await expect(page.locator("#scene-groups")).toHaveAttribute("data-active", "");
+  const read = await title("groups").evaluate((el) => getComputedStyle(el).color);
+  await expect(title("trail")).not.toHaveCSS("color", read);
+  await expect(title("anatomy")).not.toHaveCSS("color", read);
+  // Play scene sits beside the scene's number.
+  const head = page.locator("#scene-groups .lab-scene-head");
+  await expect(head.getByRole("button", { name: /^(Play scene|Stop)$/ })).toBeVisible();
 });

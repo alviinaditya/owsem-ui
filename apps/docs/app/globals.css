@@ -1,8 +1,8 @@
 /*
  * Docs chrome, after the owner's Lab prototype. Unlayered on purpose, so it always beats
- * @layer owsem.* (FR-8). Colors use light-dark(): owsem-ui's tokens set color-scheme per theme,
- * so the site theme and the stage's own data-theme pick the right value. Docs only; the library
- * stays on Baseline 2023 (NF-1).
+ * @layer owsem.* (FR-8); only element defaults sit under it, in @layer docs-base. Colors use
+ * light-dark(): owsem-ui's tokens set color-scheme per theme, so the site theme and the stage's
+ * own data-theme pick the right value. Docs only; the library stays on Baseline 2023 (NF-1).
  */
 /* Re-declared on every theme root: the light-dark() fallback Next emits resolves where the
  * property is declared, so the stage's own data-theme needs its own copy. */
@@ -110,48 +110,54 @@ body {
   background-color: color-mix(in oklab, var(--docs-accent) 28%, transparent);
 }
 
-a {
-  color: inherit;
-  text-underline-offset: 0.2em;
-}
+/*
+ * Element defaults sit in a layer under owsem-ui's (order in app/layers.css), so components keep
+ * their own colors, fonts and focus rings, in the stage as they ship. Docs chrome stays unlayered.
+ */
+@layer docs-base {
+  a {
+    color: inherit;
+    text-underline-offset: 0.2em;
+  }
 
-button,
-input,
-select {
-  font: inherit;
-  color: inherit;
-}
+  button,
+  input,
+  select {
+    font: inherit;
+    color: inherit;
+  }
 
-button {
-  cursor: pointer;
-}
+  button {
+    cursor: pointer;
+  }
 
-:focus-visible {
-  outline: 2px solid var(--docs-accent);
-  outline-offset: 2px;
-}
+  :focus-visible {
+    outline: 2px solid var(--docs-accent);
+    outline-offset: 2px;
+  }
 
-code,
-kbd,
-pre {
-  font-family: var(--font-mono), ui-monospace, monospace;
-}
+  code,
+  kbd,
+  pre {
+    font-family: var(--font-mono), ui-monospace, monospace;
+  }
 
-code {
-  font-size: 0.88em;
-}
+  code {
+    font-size: 0.88em;
+  }
 
-kbd {
-  display: inline-grid;
-  place-items: center;
-  min-inline-size: 20px;
-  block-size: 20px;
-  padding-inline: 5px;
-  border: 1px solid var(--docs-line-strong);
-  border-radius: 5px;
-  background-color: var(--docs-hover);
-  font-size: 11px;
-  line-height: 1;
+  kbd {
+    display: inline-grid;
+    place-items: center;
+    min-inline-size: 20px;
+    block-size: 20px;
+    padding-inline: 5px;
+    border: 1px solid var(--docs-line-strong);
+    border-radius: 5px;
+    background-color: var(--docs-hover);
+    font-size: 11px;
+    line-height: 1;
+  }
 }
 
 .visually-hidden {
@@ -455,30 +461,32 @@ kbd {
   padding: 40px 16px 80px;
 }
 
-h1 {
-  margin-block: 8px 0;
-  font-size: clamp(34px, 5vw, 50px);
-  font-weight: 600;
-  line-height: 1.04;
-  letter-spacing: -0.04em;
-  text-wrap: balance;
-}
+@layer docs-base {
+  h1 {
+    margin-block: 8px 0;
+    font-size: clamp(34px, 5vw, 50px);
+    font-weight: 600;
+    line-height: 1.04;
+    letter-spacing: -0.04em;
+    text-wrap: balance;
+  }
 
-h2 {
-  margin-block: 0 12px;
-  font-size: clamp(22px, 3vw, 28px);
-  font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: -0.03em;
-  text-wrap: balance;
-}
+  h2 {
+    margin-block: 0 12px;
+    font-size: clamp(22px, 3vw, 28px);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
 
-p {
-  margin-block: 0 16px;
+  p {
+    margin-block: 0 16px;
+  }
 }
 
 .eyebrow,
-.sidebar-heading {
+.toc .sidebar-heading {
   margin: 0;
   color: var(--docs-accent);
   font-family: var(--font-mono), ui-monospace, monospace;
@@ -733,13 +741,23 @@ p {
   .theme-switcher::before,
   .pm-picker label:has(:checked),
   .lab-tool[aria-pressed="true"],
-  .lab-tabs [aria-selected="true"] {
+  .lab-tabs [aria-selected="true"],
+  .lab-ichip[aria-pressed="true"],
+  .lab-part[aria-pressed="true"] {
     outline: 2px solid Highlight;
     outline-offset: -2px;
   }
 
-  .sidebar-scenes a[aria-current="step"] {
-    border-inline-start-color: Highlight;
+  .lab-ibox[data-on] {
+    border-color: Highlight;
+  }
+
+  .lab-inspect-lines [data-on] path {
+    stroke: Highlight;
+  }
+
+  .lab-inspect-lines [data-on] circle {
+    fill: Highlight;
   }
 
   /* The well's shadow is gone: a transparent outline turns into the field's edge, and the
@@ -1030,45 +1048,21 @@ p {
   }
 }
 
-/* Hover is one highlight that glides between links (Glide, from owsem-ui/core). */
+/*
+ * The sidebar is a Tree Rail Nav (owsem-ui, DS-14) in the docs' colors: an accent trail to the
+ * current page or scene, and the docs' hover for Glide. Groups have icons, so the default rails fit.
+ */
 .sidebar-nav {
+  --ow-fg: var(--docs-fg);
+  --ow-muted: var(--docs-muted);
+  --ow-focus: var(--docs-accent);
+  --ow-radius: var(--docs-radius);
+  --ow-tree-rail-trail: var(--docs-accent);
+  --ow-tree-rail-rail: var(--docs-line-strong);
+  --ow-tree-rail-surface: var(--docs-bg);
   --ow-glide-bg: var(--docs-hover);
   --ow-glide-pressed-bg: color-mix(in oklab, var(--docs-fg) 9%, transparent);
-  --ow-glide-radius: var(--docs-radius);
-}
-
-.sidebar-nav ul,
-.toc ul,
-.sidebar-scenes {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.sidebar-heading {
-  margin: 20px 8px 6px;
-}
-
-.sidebar-nav a {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  padding: 3px 8px;
-  border-radius: var(--docs-radius);
   font-size: 14px;
-  line-height: 1.6;
-  text-decoration: none;
-}
-
-.sidebar-nav a[aria-current="page"] {
-  background-color: var(--docs-hover);
-  font-weight: 600;
-}
-
-/* Links inherit this color; the "Soon" tag carries the status without color. */
-.sidebar-nav [data-planned] {
-  color: var(--docs-muted);
 }
 
 .soon {
@@ -1080,40 +1074,43 @@ p {
   line-height: 18px;
 }
 
-/* The current Lab's scenes, under its entry; the one being read is marked. */
-.sidebar-scenes {
-  margin: 2px 0 8px 14px;
-  border-inline-start: 1px solid var(--ow-line-dark);
-  box-shadow: inset 1px 0 0 var(--ow-line-light);
-}
-
-.sidebar-scenes a {
-  justify-content: flex-start;
-  margin-inline-start: -1px;
-  padding-block: 2px;
-  border-inline-start: 2px solid transparent;
-  border-radius: 0;
-  color: var(--docs-muted);
-  font-size: 13px;
-  line-height: 1.4;
-}
-
-.sidebar-scenes a[data-glide-active] {
+/* Available pages read as such; planned ones stay muted, with the "Soon" tag beside them. */
+.sidebar-nav .ow-tree-rail-node:not([data-planned]) > .ow-tree-rail-item[data-depth="2"] {
   color: var(--docs-fg);
 }
 
-.sidebar-scenes a[aria-current="step"] {
-  border-inline-start-color: var(--docs-accent);
+.sidebar-brand {
   color: var(--docs-fg);
+  font-weight: 600;
+}
+
+.sidebar-version {
+  padding-inline: 6px;
+  border: 1px solid var(--docs-line-strong);
+  border-radius: 999px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.sidebar-nav .soon {
+  flex: none;
+}
+
+.toc ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .sidebar-scene-n {
+  flex: none;
   color: var(--docs-muted);
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 10.5px;
 }
 
-.sidebar-scenes a[aria-current="step"] .sidebar-scene-n {
+.sidebar-nav [aria-current="step"] .sidebar-scene-n {
   color: var(--docs-accent);
 }
 
@@ -1157,7 +1154,7 @@ p {
 }
 
 .toc .sidebar-heading {
-  margin-inline: 0;
+  margin-block: 20px 6px;
 }
 
 .toc a {
@@ -1189,28 +1186,30 @@ figure[data-code-block] pre {
   line-height: 1.7;
 }
 
-/* Scrolls inside itself so wide tables never scroll the page (DS-9). */
-table {
-  display: block;
-  max-inline-size: 100%;
-  margin-block: 16px;
-  overflow-x: auto;
-  border-collapse: separate;
-  border-spacing: 0;
-  font-size: 13.5px;
-}
+@layer docs-base {
+  /* Scrolls inside itself so wide tables never scroll the page (DS-9). */
+  table {
+    display: block;
+    max-inline-size: 100%;
+    margin-block: 16px;
+    overflow-x: auto;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13.5px;
+  }
 
-th,
-td {
-  padding: 8px 12px;
-  border-block-end: 2px solid var(--ow-line-dark);
-  border-image: var(--docs-etch-bottom);
-  text-align: start;
-}
+  th,
+  td {
+    padding: 8px 12px;
+    border-block-end: 2px solid var(--ow-line-dark);
+    border-image: var(--docs-etch-bottom);
+    text-align: start;
+  }
 
-th {
-  color: var(--docs-muted);
-  font-weight: 500;
+  th {
+    color: var(--docs-muted);
+    font-weight: 500;
+  }
 }
 
 /*
@@ -1282,15 +1281,29 @@ th {
     --pane-h: 48px;
   }
 
-  :root[data-lab-pane="hidden"] .lab-stage-body,
-  :root[data-lab-pane="hidden"] .lab-tool {
+  :root[data-lab-pane="hidden"] .lab-stage-body {
     visibility: hidden;
+  }
+
+  /* Folded, the bar is the stage's title and the way back: no tools, and one line under it
+   * (the frame's), not two. */
+  :root[data-lab-pane="hidden"] .lab-tool {
+    display: none;
+  }
+
+  :root[data-lab-pane="hidden"] .lab-stage-bar {
+    border-block-end: 0;
+  }
+
+  :root[data-lab-pane="hidden"] .lab-pane-toggle {
+    color: var(--docs-fg);
   }
 }
 
 @media (width >= 960px) {
   .lab {
-    grid-template-columns: minmax(0, 440px) minmax(0, 1fr);
+    /* The text grows with wide screens, so its lines reach the paragraphs' 60ch. */
+    grid-template-columns: clamp(440px, 38%, 640px) minmax(0, 1fr);
   }
 
   .lab-narrative {
@@ -1324,20 +1337,34 @@ th {
 }
 
 /* Scenes follow their content; an etched Separator marks where the next one starts. */
+/*
+ * Scenes are set apart by space alone. The scene being read, the one shaping the stage, reads in
+ * full; the others recede to the muted color (still AA), and fade back as they become active.
+ */
 .lab-scene {
-  padding-block: 40px;
+  padding-block: 48px;
+  transition: color 0.3s ease;
 }
 
 .lab-scene:first-child {
   padding-block-start: 24px;
 }
 
-.lab-scene > .ow-separator {
-  margin-block-end: 32px;
+.lab-scene:not([data-active]) {
+  --scene-text: var(--docs-muted);
+  color: var(--docs-muted);
+}
+
+/* The scene's number, then its Play scene button: one label above the title. */
+.lab-scene-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-block-end: 6px;
 }
 
 .lab-scene-n {
-  margin-block-end: 6px;
+  margin: 0;
   color: var(--docs-muted);
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 11px;
@@ -1349,7 +1376,8 @@ th {
 
 .lab-narrative p {
   max-inline-size: 60ch;
-  color: var(--docs-body);
+  color: var(--scene-text, var(--docs-body));
+  transition: color 0.3s ease;
 }
 
 .lab-narrative .page-header {
@@ -1360,10 +1388,33 @@ th {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  gap: 6px 14px;
   margin-block: 16px 0;
   color: var(--docs-muted);
   font-size: 13px;
+}
+
+.lab-hint-lead {
+  flex-basis: 100%;
+}
+
+.lab-hint-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+/* The pane, and so H, only exists while the stage sits above the narrative. */
+@media (width >= 960px) {
+  .lab-hint-key[data-narrow] {
+    display: none;
+  }
+}
+
+/* Focused by a click (tabIndex -1), the stage itself shows no ring. */
+.lab-stage:focus {
+  outline: none;
 }
 
 .lab-stage-bar {
@@ -1476,6 +1527,9 @@ th {
   isolation: isolate;
   display: grid;
   flex: 1;
+  /* One cell the size of the stage, so a demo taller than it still centers before .lab-fit
+   * scales it down. */
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
   place-items: center;
   min-block-size: 0;
   padding: 16px;
@@ -1497,9 +1551,304 @@ th {
   pointer-events: none;
 }
 
+/* States and variants side by side (components/lab/matrix.tsx), without the docs' table lines. */
+.lab-matrix {
+  display: table;
+  margin: -14px -18px;
+  overflow: visible;
+  border-spacing: 18px 14px;
+  font-size: inherit;
+}
+
+.lab-matrix :is(th, td) {
+  padding: 0;
+  border: 0;
+  border-image: none;
+  vertical-align: top;
+}
+
+.lab-matrix th {
+  color: var(--docs-muted);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.lab-matrix th[scope="row"] {
+  max-inline-size: 84px;
+  padding-block-start: 14px;
+}
+
 .lab-fit {
   transform-origin: center;
   transition: transform 0.35s var(--ease);
+}
+
+/* Play scene (DS-11): only on scenes with an animation, beside the number; it also stops. */
+.lab-play {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  block-size: 24px;
+  padding-inline: 7px 9px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--docs-muted);
+  font-size: 12px;
+}
+
+.lab-play:hover {
+  background-color: var(--docs-hover);
+  color: var(--docs-fg);
+}
+
+.lab-play[data-playing] {
+  color: var(--docs-accent);
+}
+
+/* A part's name in the anatomy table: it outlines the part on the stage. */
+.lab-part {
+  display: inline-flex;
+  align-items: center;
+  block-size: 26px;
+  padding-inline: 10px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  box-shadow: inset 0 0 0 1px var(--docs-line-strong);
+  color: var(--docs-fg);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.lab-part:hover {
+  background-color: var(--docs-hover);
+}
+
+.lab-part[aria-pressed="true"] {
+  background-color: var(--docs-accent);
+  box-shadow: none;
+  color: var(--docs-on-accent);
+}
+
+/*
+ * Inspect (DS-3): dashed outlines on the parts, the selected one solid; leader lines run from a
+ * dot on each part to its name. Positions come from components/lab/inspect.tsx.
+ */
+.lab-inspect {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.lab-inspect-lines {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: visible;
+}
+
+.lab-inspect-lines path {
+  fill: none;
+  stroke: color-mix(in srgb, var(--docs-accent) 38%, transparent);
+  stroke-width: 1;
+}
+
+.lab-inspect-lines circle {
+  fill: color-mix(in srgb, var(--docs-accent) 60%, transparent);
+}
+
+.lab-inspect-lines [data-on] path {
+  stroke: var(--docs-accent);
+}
+
+.lab-inspect-lines [data-on] circle {
+  fill: var(--docs-accent);
+}
+
+.lab-ibox {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  box-sizing: border-box;
+  border: 1px dashed color-mix(in srgb, var(--docs-accent) 34%, transparent);
+  border-radius: 8px;
+}
+
+.lab-ibox[data-on] {
+  border-style: solid;
+  border-color: var(--docs-accent);
+  background-color: color-mix(in srgb, var(--docs-accent) 7%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--docs-accent) 9%, transparent);
+}
+
+.lab-ichips {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.lab-ichip {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  box-sizing: border-box;
+  block-size: 24px;
+  padding-inline: 9px;
+  border: 1px solid var(--docs-line-strong);
+  border-radius: 999px;
+  background-color: var(--docs-surface);
+  color: var(--docs-body);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11.5px;
+  white-space: nowrap;
+  pointer-events: auto;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.lab-ichip:hover {
+  color: var(--docs-fg);
+}
+
+.lab-ichip[aria-pressed="true"] {
+  border-color: transparent;
+  background-color: var(--docs-accent);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--docs-accent) 45%, transparent);
+  color: var(--docs-on-accent);
+}
+
+.lab-part-card {
+  position: absolute;
+  inset-block-end: 14px;
+  inset-inline-start: 14px;
+  box-sizing: border-box;
+  inline-size: 240px;
+  padding: 12px;
+  border-radius: var(--docs-radius-box);
+  background-color: var(--docs-surface);
+  box-shadow:
+    inset 0 0 0 1px var(--docs-line-strong),
+    0 16px 32px -16px rgb(0 0 0 / 0.5);
+  pointer-events: auto;
+}
+
+.lab-part-card-name {
+  margin: 0;
+  color: var(--docs-fg);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.lab-part-card-note {
+  margin: 4px 0 0;
+  color: var(--docs-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.lab-part-card ul {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lab-part-card li {
+  display: grid;
+  grid-template-columns: 14px auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.lab-part-card code {
+  color: var(--tk-attr);
+}
+
+.lab-part-card-swatch {
+  inline-size: 14px;
+  block-size: 14px;
+  box-sizing: border-box;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px var(--docs-line-strong);
+}
+
+.lab-part-card-swatch[data-empty] {
+  visibility: hidden;
+}
+
+.lab-part-card-value {
+  overflow: hidden;
+  color: var(--docs-muted);
+  text-align: end;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Under the demo the card spans the stage, its tokens in columns. */
+.lab-part-card[data-place="below"] {
+  inset-inline-end: 14px;
+  inline-size: auto;
+}
+
+.lab-part-card[data-place="below"] ul {
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  column-gap: 24px;
+}
+
+.lab-part-card-sizer {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 14px;
+  display: grid;
+  visibility: hidden;
+}
+
+.lab-part-card-sizer > .lab-part-card {
+  position: static;
+  grid-area: 1 / 1;
+}
+
+/* A scene script's pointer; the arrow's tip is the point it stands on. */
+.lab-ghost {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  z-index: 3;
+  opacity: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 4px rgb(0 0 0 / 0.45));
+  transition: opacity 0.2s ease;
+}
+
+.lab-ghost[data-on] {
+  opacity: 1;
+}
+
+.lab-ghost-arrow {
+  display: block;
+  margin: -3px 0 0 -4px;
+  fill: #fff;
+  stroke: #17141f;
+  stroke-width: 1.3;
+  stroke-linejoin: round;
+  transform-origin: 4px 3px;
+  transition: scale 0.12s ease;
+}
+
+.lab-ghost[data-down] .lab-ghost-arrow {
+  scale: 0.82;
 }
 
 /* Controls and code are sheets attached to the stage edges, divided by etched lines. */
@@ -1786,6 +2135,21 @@ th {
   color: var(--ow-fg);
   font-size: 14px;
   line-height: 1.5;
+}
+
+/* The Tree Rail Nav Lab's demo: a sidebar panel on the stage. */
+.demo-tree-rail {
+  box-sizing: border-box;
+  inline-size: 280px;
+  padding: 4px 12px 8px;
+  border: 1px solid var(--ow-line);
+  border-radius: 14px;
+  background-color: var(--ow-bg);
+  color: var(--ow-fg);
+}
+
+.demo-tree-rail[data-compact] {
+  inline-size: 220px;
 }
 
 .demo-card p {

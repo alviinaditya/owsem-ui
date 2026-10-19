@@ -1,0 +1,2 @@
+/* Layer order, before any other CSS: the docs' element defaults under owsem-ui's layers. */
+@layer docs-base, owsem;

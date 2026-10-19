@@ -1,0 +1,476 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * Tree Rail Nav (tree-rail.ts draws the rail). Base: a neutral trail that is simply there.
+ * Owsem (Kinetic): an accent trail that travels and pulses on arrival. No glow (Lumen stays 3).
+ */
+@layer owsem.components {
+  .ow-tree-rail-nav {
+    --_fg: var(--ow-fg, #18181b);
+    --_muted: var(--ow-muted, #5f5f6b);
+    --_rail: var(--ow-tree-rail-rail, var(--ow-line, #d9d9e0));
+    --_node: var(--ow-tree-rail-node, color-mix(in oklab, var(--_fg) 24%, transparent));
+    --_trail: var(--ow-tree-rail-trail, var(--_fg));
+    /* Dots are cut out of the rail with the surface color behind them. */
+    --_surface: var(--ow-tree-rail-surface, var(--ow-bg, #fbfbfc));
+    --_tint: color-mix(in oklab, var(--_trail) 10%, transparent);
+    --_focus: var(--ow-focus, #7c6ab8);
+    --_radius: var(--ow-radius, 8px);
+    --_ease: cubic-bezier(0.22, 1, 0.36, 1);
+    /*
+     * One rail per level, 25px apart (px, read by the script); rows indent just past their rail.
+     * 25px puts a first-level row's children in line with its text, after the icon.
+     */
+    --_r0: var(--ow-tree-rail-r0, 9px);
+    --_r1: var(--ow-tree-rail-r1, 34px);
+    --_r2: var(--ow-tree-rail-r2, 59px);
+    font-size: 13.5px;
+    line-height: 1.4;
+  }
+
+  .ow-tree-rail-nav[data-flavor="owsem"] {
+    --_trail: var(--ow-tree-rail-trail, var(--ow-accent, #d4cbe5));
+  }
+
+  .ow-tree-rail {
+    --_origin-y: 5px;
+    position: relative;
+    isolation: isolate;
+    padding-block: 16px 10px;
+  }
+
+  /* A label at the top, the trail's starting point, indented like a first-level row. */
+  .ow-tree-rail-origin {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-block-size: 24px;
+    margin-block-end: 6px;
+    margin-inline-start: calc(var(--_r0) + 11px);
+    padding-inline: 10px;
+    color: var(--_muted);
+    font-size: 12.5px;
+  }
+
+  .ow-tree-rail:has(> .ow-tree-rail-origin) {
+    padding-block-start: 4px;
+  }
+
+  .ow-tree-rail-svg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  /* The script measures x from the left; right to left, the whole rail is mirrored. */
+  [dir="rtl"] .ow-tree-rail-svg,
+  .ow-tree-rail-svg:dir(rtl) {
+    scale: -1 1;
+  }
+
+  .ow-tree-rail-svg path {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .ow-tree-rail-svg [data-part="base"] path {
+    stroke: var(--_rail);
+    stroke-width: 1.25;
+  }
+
+  .ow-tree-rail-svg [data-part="trail"] {
+    stroke: var(--_trail);
+    stroke-width: 1.75;
+  }
+
+  .ow-tree-rail-svg [data-part="origin"] circle {
+    fill: var(--_trail);
+  }
+
+  .ow-tree-rail-svg [data-part="origin"] [data-part="ring"] {
+    fill: none;
+    stroke: var(--_trail);
+    stroke-width: 1.25;
+    opacity: 0.35;
+  }
+
+  .ow-tree-rail-svg [data-part="active"] {
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  .ow-tree-rail-svg [data-part="active"][data-on] {
+    opacity: 1;
+  }
+
+  /* Each dot is drawn 1px wider than it looks: its surface-coloured stroke cuts it out of the rail. */
+  .ow-tree-rail-svg [data-part="dot"] {
+    fill: var(--_trail);
+    stroke: var(--_surface);
+    stroke-width: 2;
+  }
+
+  .ow-tree-rail-svg [data-part="marker"][data-hollow] [data-part="dot"] {
+    fill: var(--_surface);
+    stroke: var(--_trail);
+    stroke-width: 1.5;
+  }
+
+  .ow-tree-rail-svg [data-part="halo"] {
+    fill: var(--_trail);
+    opacity: 0;
+  }
+
+  .ow-tree-rail-svg [data-part="node"] circle {
+    fill: var(--_node);
+    stroke: var(--_surface);
+    stroke-width: 1.5;
+    transition:
+      fill 0.22s ease,
+      opacity 0.2s ease,
+      transform 0.34s var(--_ease);
+  }
+
+  .ow-tree-rail-svg [data-part="node"][data-hot] circle {
+    fill: var(--_muted);
+  }
+
+  .ow-tree-rail-svg [data-part="node"][data-lit] circle {
+    fill: var(--_trail);
+    transform: scale(1.2);
+  }
+
+  .ow-tree-rail-svg [data-part="node"][data-disabled] circle {
+    opacity: 0.45;
+  }
+
+  .ow-tree-rail-svg [data-part="node"][data-hidden] circle {
+    opacity: 0;
+  }
+
+  .ow-tree-rail-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ow-tree-rail > .ow-tree-rail-list > .ow-tree-rail-node + .ow-tree-rail-node {
+    margin-block-start: 6px;
+  }
+
+  .ow-tree-rail-panel > .ow-tree-rail-list {
+    padding-block: 2px 6px;
+  }
+
+  .ow-tree-rail-panel > .ow-tree-rail-list > .ow-tree-rail-node + .ow-tree-rail-node {
+    margin-block-start: 2px;
+  }
+
+  .ow-tree-rail-panel {
+    block-size: var(--collapsible-panel-height);
+    transition: block-size 0.34s var(--_ease);
+  }
+
+  .ow-tree-rail-panel[data-starting-style],
+  .ow-tree-rail-panel[data-ending-style] {
+    block-size: 0;
+  }
+
+  /* Clipped only while it animates (data-clip comes from the script while its rows do not fit). */
+  .ow-tree-rail-panel:is([data-starting-style], [data-ending-style], [data-clip]) {
+    overflow: hidden;
+  }
+
+  .ow-tree-rail-item {
+    --_x: calc(var(--_r0) + 11px);
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-sizing: border-box;
+    inline-size: calc(100% - var(--_x));
+    min-block-size: 32px;
+    margin-inline-start: var(--_x);
+    padding: 6px 10px;
+    border: 0;
+    border-radius: var(--_radius);
+    background: none;
+    color: var(--_muted);
+    font: inherit;
+    text-align: start;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.18s ease;
+  }
+
+  /* First-level rows stand out by color and icon; every level shares one size and weight. */
+  .ow-tree-rail-item[data-depth="1"] {
+    color: var(--_fg);
+  }
+
+  .ow-tree-rail-item[data-depth="2"] {
+    --_x: calc(var(--_r1) + 10px);
+  }
+
+  .ow-tree-rail-item[data-depth="3"] {
+    --_x: calc(var(--_r2) + 10px);
+  }
+
+  .ow-tree-rail-item:is([data-glide-active], [data-trail]) {
+    color: var(--_fg);
+  }
+
+  .ow-tree-rail-item[data-current] {
+    color: var(--_fg);
+  }
+
+  /*
+   * The current row's tint: Base shows it at once, Owsem sweeps it in when the trail arrives and
+   * folds it back toward the rail when the trail leaves (data-leaving, set by the script while
+   * it closes). Only these rows have it, so axe can read every other row's contrast directly.
+   */
+  .ow-tree-rail-item:is([data-current], [data-arrived], [data-leaving])::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background-color: var(--_tint);
+    opacity: 0;
+    transform: scaleX(0.04);
+    transform-origin: left center;
+    transition:
+      transform 0.5s var(--_ease),
+      opacity 0.22s ease;
+  }
+
+  .ow-tree-rail-item:is([data-current], [data-arrived], [data-leaving]):dir(rtl)::before {
+    transform-origin: right center;
+  }
+
+  .ow-tree-rail-item[data-arrived]::before {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Closing is quicker than the sweep, and fades once it has mostly folded. */
+  .ow-tree-rail-item[data-leaving]::before {
+    transition:
+      transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 0.16s ease 0.14s;
+  }
+
+  .ow-tree-rail-nav[data-flavor="base"]
+    .ow-tree-rail-item:is([data-current], [data-arrived], [data-leaving])::before {
+    transform: none;
+    transition: opacity 0.22s ease;
+  }
+
+  .ow-tree-rail-item:focus-visible {
+    outline: 2px solid var(--_focus);
+    /* Inside, so a panel's overflow never cuts it (FR-13). */
+    outline-offset: -2px;
+  }
+
+  .ow-tree-rail-item:is(:disabled, [aria-disabled="true"]) {
+    color: color-mix(in oklab, var(--_muted) 60%, transparent);
+    cursor: not-allowed;
+  }
+
+  /* An icon is the row's font size plus 2px, whatever icon is given. */
+  .ow-tree-rail-icon {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    inline-size: calc(1em + 2px);
+    block-size: calc(1em + 2px);
+  }
+
+  .ow-tree-rail-icon > svg {
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  /*
+   * A label on one line. When it overflows, its end fades; on hover or keyboard focus the text
+   * runs left in a seamless loop (two copies, --_loop apart), after a short pause.
+   */
+  .ow-tree-rail-label {
+    display: flex;
+    flex: 1 1 auto;
+    gap: 32px;
+    min-inline-size: 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .ow-tree-rail-label-text {
+    flex: none;
+  }
+
+  /*
+   * Two mask layers: the end fade stays put; the start fade waits just outside the label and
+   * slides in (mask-position transitions, mask images do not) as the text starts to run. Only
+   * the way in transitions: on leave the fade snaps back with the text.
+   */
+  .ow-tree-rail-label[data-overflow] {
+    mask-image:
+      linear-gradient(to right, transparent, #000 16px),
+      linear-gradient(to left, transparent, #000 20px);
+    mask-size:
+      calc(100% + 16px) 100%,
+      100% 100%;
+    mask-position:
+      -16px 0,
+      0 0;
+    mask-repeat: no-repeat;
+    mask-composite: intersect;
+  }
+
+  .ow-tree-rail-label[data-overflow]:dir(rtl) {
+    mask-image:
+      linear-gradient(to left, transparent, #000 16px),
+      linear-gradient(to right, transparent, #000 20px);
+    mask-position:
+      0 0,
+      0 0;
+  }
+
+  .ow-tree-rail-item:is([data-glide-active], :focus-visible) .ow-tree-rail-label[data-overflow] {
+    mask-position:
+      0 0,
+      0 0;
+    transition: mask-position 0.25s ease 0.4s;
+  }
+
+  .ow-tree-rail-item:is([data-glide-active], :focus-visible)
+    .ow-tree-rail-label[data-overflow]:dir(rtl) {
+    mask-position:
+      -16px 0,
+      0 0;
+  }
+
+  .ow-tree-rail-item:is([data-glide-active], :focus-visible)
+    .ow-tree-rail-label[data-overflow]
+    > .ow-tree-rail-label-text {
+    animation: ow-tree-rail-marquee var(--_marquee-duration) linear 0.4s infinite;
+  }
+
+  .ow-tree-rail-item:is([data-glide-active], :focus-visible)
+    .ow-tree-rail-label[data-overflow]:dir(rtl)
+    > .ow-tree-rail-label-text {
+    animation-name: ow-tree-rail-marquee-rtl;
+  }
+
+  @keyframes ow-tree-rail-marquee {
+    to {
+      transform: translateX(calc(-1 * var(--_loop)));
+    }
+  }
+
+  @keyframes ow-tree-rail-marquee-rtl {
+    to {
+      transform: translateX(var(--_loop));
+    }
+  }
+
+  .ow-tree-rail-chevron {
+    flex: none;
+    inline-size: 14px;
+    block-size: 14px;
+    margin-inline-start: auto;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: rotate 0.34s var(--_ease);
+  }
+
+  .ow-tree-rail-item[aria-expanded="false"] .ow-tree-rail-chevron {
+    rotate: -90deg;
+  }
+
+  .ow-tree-rail-item[aria-expanded="false"]:dir(rtl) .ow-tree-rail-chevron {
+    rotate: 90deg;
+  }
+
+  /* FR-20: no sliding, no sweeping; opacity and color only. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-tree-rail-panel,
+    .ow-tree-rail-chevron {
+      transition: none;
+    }
+
+    .ow-tree-rail-item:is([data-current], [data-arrived], [data-leaving])::before {
+      transform: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .ow-tree-rail-svg [data-part="node"] circle {
+      transition:
+        fill 0.2s ease,
+        opacity 0.2s ease;
+    }
+
+    /* The label keeps still, start fade included; its full text is in a tooltip instead. The
+     * selectors match the ones above, so these win. */
+    .ow-tree-rail-item:is([data-glide-active], :focus-visible) .ow-tree-rail-label[data-overflow] {
+      mask-position:
+        -16px 0,
+        0 0;
+    }
+
+    .ow-tree-rail-item:is([data-glide-active], :focus-visible)
+      .ow-tree-rail-label[data-overflow]:dir(rtl) {
+      mask-position:
+        0 0,
+        0 0;
+    }
+
+    .ow-tree-rail-item:is([data-glide-active], :focus-visible)
+      .ow-tree-rail-label[data-overflow]
+      > .ow-tree-rail-label-text,
+    .ow-tree-rail-item:is([data-glide-active], :focus-visible)
+      .ow-tree-rail-label[data-overflow]:dir(rtl)
+      > .ow-tree-rail-label-text {
+      animation: none;
+    }
+  }
+
+  /* DP-8: system colors for the rail and the trail; the current row is underlined. */
+  @media (forced-colors: active) {
+    .ow-tree-rail-item {
+      outline: 1px solid transparent;
+      outline-offset: -1px;
+    }
+
+    .ow-tree-rail-item[data-current] {
+      text-decoration: underline;
+    }
+
+    .ow-tree-rail-item:focus-visible {
+      outline: 2px solid Highlight;
+      outline-offset: -2px;
+    }
+
+    .ow-tree-rail-svg [data-part="base"] path {
+      stroke: GrayText;
+    }
+
+    .ow-tree-rail-svg [data-part="trail"],
+    .ow-tree-rail-svg [data-part="ring"] {
+      stroke: Highlight;
+    }
+
+    .ow-tree-rail-svg :is([data-part="dot"], [data-lit] circle, [data-part="origin"] circle) {
+      fill: Highlight;
+    }
+  }
+}

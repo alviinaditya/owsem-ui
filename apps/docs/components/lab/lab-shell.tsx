@@ -1,6 +1,5 @@
 "use client";
 
-import { Separator } from "owsem-ui/base";
 import {
   createContext,
   type ReactNode,
@@ -10,9 +9,11 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 import { type Dictionary, format } from "@/lib/dictionaries";
 import type { Lang } from "@/lib/i18n";
+import { Icon } from "../icons/icon";
 import { useTokenNames } from "../token-setup";
 import { PANE_CHROME, paneOpenHeight, SIDE_BY_SIDE } from "./layout";
 import { setActiveScene } from "./scene-store";
@@ -29,7 +30,17 @@ interface LabContextValue {
   scenes: SceneInfo[];
   active: string;
   intro: ReactNode;
+  labels: Dictionary["lab"];
   register: (id: string) => (el: HTMLElement | null) => void;
+  /** Scenes with a script, and the one playing now. */
+  playable: ReadonlySet<string>;
+  playing: string | undefined;
+  playScene: (id: string) => void;
+  parts: readonly string[];
+  /** The part Inspect outlines, when it is on. */
+  inspected: string | undefined;
+  inspectPart: (name: string) => void;
+  hoverPart: (name: string) => void;
 }
 
 const LabContext = createContext<LabContextValue | null>(null);
@@ -42,6 +53,21 @@ function useLab(): LabContextValue {
 
 const SETTLE_MS = 250; // a scene applies to the stage once scrolling stops on it
 const SCROLL_KEYS = new Set(["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "]);
+const REDUCED = "(prefers-reduced-motion: reduce)";
+
+function subscribeReduced(listener: () => void): () => void {
+  const query = matchMedia(REDUCED);
+  query.addEventListener("change", listener);
+  return () => query.removeEventListener("change", listener);
+}
+
+/** Whether the visitor prefers reduced motion; true on the server, so nothing plays before it knows. */
+const useReducedMotion = (): boolean =>
+  useSyncExternalStore(
+    subscribeReduced,
+    () => matchMedia(REDUCED).matches,
+    () => true,
+  );
 
 /** The site's color scheme at this moment: <html data-theme>, else the system preference. */
 function siteScheme(): "light" | "dark" {
@@ -208,6 +234,8 @@ export function LabShell({
     setTouched(new Set());
   }
   const touch = (key: string) => setTouched((keys) => new Set(keys).add(key));
+  const [inspect, setInspect] = useState(false);
+  const [part, setPart] = useState(lab.parts?.[0]?.name ?? "");
 
   const spec = lab.scenes?.[settled] ?? {};
   const stageCfg: Config = { ...cfg };
@@ -219,6 +247,21 @@ export function LabShell({
   const userPicked = touched.has("code") || touched.has("controls");
   const scenePick = spec.code ? "code" : spec.controls ? "controls" : undefined;
   const stageTheme = pick("theme", theme, spec.theme);
+  const stageInspect = pick("inspect", inspect, spec.inspect);
+
+  // Scene scripts (DS-11): a scene's script plays once the scene settles, unless the visitor
+  // prefers reduced motion; Play scene and Replay play it on request, Stop ends it.
+  const reduced = useReducedMotion();
+  const [request, setRequest] = useState({ scene: "", n: 0, stop: false });
+  const [playing, setPlaying] = useState(false);
+  const script = spec.play;
+  const asked = request.scene === settled;
+  const playToken =
+    !script || (asked ? request.stop : reduced)
+      ? undefined
+      : `${settled}:${asked ? request.n : "auto"}`;
+  const replay = (scene: string) => setRequest((r) => ({ scene, n: r.n + 1, stop: false }));
+  const stop = () => setRequest((r) => ({ ...r, scene: settled, stop: true }));
 
   const state: StageState = {
     cfg: stageCfg,
@@ -251,6 +294,20 @@ export function LabShell({
       setTheme((stageTheme ?? siteScheme()) === "dark" ? "light" : "dark");
       touch("theme");
     },
+    inspect: stageInspect,
+    setInspect: (on) => {
+      setInspect(on);
+      touch("inspect");
+    },
+    part,
+    setPart,
+    view: spec.demo ? settled : undefined,
+    script,
+    playToken,
+    playing,
+    setPlaying,
+    replay: () => replay(settled),
+    stop,
   };
 
   const index = Math.max(
@@ -269,10 +326,50 @@ export function LabShell({
       </>
     );
 
-  const context = useMemo(
-    () => ({ scenes, active, intro, register }),
-    [scenes, active, intro, register],
+  const playable = useMemo(
+    () => new Set(Object.keys(lab.scenes ?? {}).filter((id) => lab.scenes?.[id]?.play)),
+    [lab],
   );
+  const parts = useMemo(() => (lab.parts ?? []).map((p) => p.name), [lab]);
+
+  // Play scene (DS-11): picks the scene, plays it once it settles, and on a narrow screen opens
+  // the pane and brings the scene up under it. Pressed while that scene plays, it stops it.
+  const playScene = (id: string) => {
+    if (playing && id === settled) {
+      stop();
+      return;
+    }
+    setPicked(id);
+    replay(id);
+    if (matchMedia(SIDE_BY_SIDE).matches) return;
+    if (paneHidden) togglePane();
+    sections.current.get(id)?.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
+  };
+  // A part's name picks the part, and turns Inspect on (the visitor's choice) only if it is off.
+  const inspectPart = (name: string) => {
+    setPart(name);
+    if (stageInspect) return;
+    setInspect(true);
+    touch("inspect");
+  };
+  const hoverPart = (name: string) => {
+    if (stageInspect) setPart(name);
+  };
+
+  const context: LabContextValue = {
+    scenes,
+    active,
+    intro,
+    labels,
+    register,
+    playable,
+    playing: playing ? settled : undefined,
+    playScene,
+    parts,
+    inspected: stageInspect ? part : undefined,
+    inspectPart,
+    hoverPart,
+  };
 
   return (
     <LabContext value={context}>
@@ -311,6 +408,7 @@ export function Scene({
 }) {
   const lab = useLab();
   const index = lab.scenes.findIndex((scene) => scene.id === id);
+  const playing = lab.playing === id;
   return (
     <section
       ref={lab.register(id)}
@@ -322,12 +420,71 @@ export function Scene({
       {index === 0 ? (
         lab.intro
       ) : (
-        <>
-          <Separator />
+        <div className="lab-scene-head">
           <p className="lab-scene-n">{String(index).padStart(2, "0")}</p>
-        </>
+          {lab.playable.has(id) ? (
+            <button
+              type="button"
+              className="lab-play"
+              data-playing={playing ? "" : undefined}
+              onClick={() => lab.playScene(id)}
+            >
+              <Icon name={playing ? "square" : "play"} size={13} />
+              {playing ? lab.labels.stop : lab.labels.playScene}
+            </button>
+          ) : null}
+        </div>
       )}
       {children}
     </section>
+  );
+}
+
+/**
+ * The stage's shortcuts, each with its name, in the page header: only the ones this Lab has (R
+ * needs a scene with an animation; H, the narrow screen's pane). They work while focus is in the
+ * stage (WCAG 2.1.4), and a click anywhere on the stage puts it there.
+ */
+export function StageShortcuts() {
+  const { labels, parts, playable } = useLab();
+  const keys = [
+    ...(parts.length ? [["I", labels.inspect]] : []),
+    ["T", labels.theme],
+    ["P", labels.controls],
+    ["C", labels.code],
+    ...(playable.size ? [["R", labels.replay]] : []),
+  ];
+  return (
+    <p className="lab-hint">
+      <span className="lab-hint-lead">{labels.shortcuts}</span>
+      {keys.map(([key, name]) => (
+        <span key={key} className="lab-hint-key">
+          <kbd>{key}</kbd> {name}
+        </span>
+      ))}
+      <span className="lab-hint-key" data-narrow="">
+        <kbd>H</kbd> {labels.preview}
+      </span>
+    </p>
+  );
+}
+
+/** MDX: a part's name in the anatomy table, which outlines that part on the stage (Inspect). */
+export function Part({ name }: { name: string }) {
+  const lab = useLab();
+  if (!lab.parts.includes(name)) {
+    throw new Error(`Part "${name}" is not in this Lab's parts (apps/docs/labs).`);
+  }
+  return (
+    <button
+      type="button"
+      className="lab-part"
+      aria-pressed={lab.inspected === name}
+      title={lab.labels.inspectPart}
+      onClick={() => lab.inspectPart(name)}
+      onPointerEnter={() => lab.hoverPart(name)}
+    >
+      {name}
+    </button>
   );
 }

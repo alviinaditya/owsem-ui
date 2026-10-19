@@ -2,6 +2,7 @@
 title: Separator
 ---
 
+import { Part } from "@/components/lab/lab-shell";
 import { ForMode, TokenChip } from "@/components/token-setup";
 
 Separator divides content with an etched line: a 1 px dark line with a 1 px light line beside it,
@@ -11,11 +12,12 @@ part.
 ## Anatomy [#anatomy]
 
 A single part. Base UI renders `<div role="separator">` with `aria-orientation` and
-`data-orientation`; OwsemUI adds the `ow-separator` class and draws both lines as borders.
+`data-orientation`; OwsemUI adds the `ow-separator` class and draws both lines as borders. Inspect
+(I) outlines it on the stage, with its tokens.
 
 | Part | Element | Tokens |
 | --- | --- | --- |
-| Root | `div.ow-separator` | `--ow-separator-line-dark`, `--ow-separator-line-light` |
+| <Part name="Root" /> | `div.ow-separator` | `--ow-separator-line-dark`, `--ow-separator-line-light` |
 
 ## States and variants [#states]
 

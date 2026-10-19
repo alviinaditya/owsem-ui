@@ -9,7 +9,7 @@ const repo = (path: string) => new URL(`../../../${path}`, import.meta.url);
 test("the sidebar lists the docs pages in order", async ({ page }, testInfo) => {
   await page.goto("/id/docs/theming");
   if (testInfo.project.name === "mobile-390") {
-    await page.getByRole("button", { name: "Menu" }).click();
+    await page.getByRole("button", { name: "Menu", exact: true }).click();
   }
   await expect(page.getByRole("list", { name: "Dokumentasi" }).getByRole("link")).toHaveText([
     "Getting Started",

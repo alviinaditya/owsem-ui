@@ -132,8 +132,11 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 
 ## Components available now
 
-Read the registry index or the docs, not a hard-coded list. As of this version of the skill, only
-**Separator** (Base family) is built; no Owsem family component and no `flavor` prop exist yet.
+Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
+**Separator** (Base) and **Tree Rail Nav** (Base + Owsem, the only component with `flavor` so far)
+are built.
+
+### Separator
 
 ```tsx
 import { Separator } from "owsem-ui/base"; // or "@/components/owsem/separator"
@@ -149,6 +152,43 @@ import { Separator } from "owsem-ui/base"; // or "@/components/owsem/separator"
   to the `div`.
 - Tokens: `--ow-separator-line-dark` (falls back to `--ow-line-dark`) and
   `--ow-separator-line-light` (falls back to `--ow-line-light`).
+
+### Tree Rail Nav
+
+A sidebar navigation in up to three levels: a rail per level and a trail from the top to the
+current row. Registry items: `tree-rail-nav` (Base by default) and `tree-rail-nav-owsem` (Owsem by
+default); both write the same files, so install one.
+
+```tsx
+import { TreeRailNav } from "owsem-ui/base"; // or "@/components/owsem/tree-rail-nav"
+<TreeRailNav.Root aria-label="Docs" flavor="owsem">
+  <TreeRailNav.List>
+    <TreeRailNav.Node>
+      <TreeRailNav.Link href="/" current={path === "/"}>Home</TreeRailNav.Link>
+    </TreeRailNav.Node>
+    <TreeRailNav.Node defaultOpen>
+      <TreeRailNav.Toggle>Guides</TreeRailNav.Toggle>
+      <TreeRailNav.Panel>
+        <TreeRailNav.List>{/* more Nodes */}</TreeRailNav.List>
+      </TreeRailNav.Panel>
+    </TreeRailNav.Node>
+  </TreeRailNav.List>
+</TreeRailNav.Root>
+```
+
+- Every row is a `Node` (`li`, a Base UI Collapsible root: `open`, `defaultOpen`,
+  `onOpenChange`) holding a `Link` or a `Toggle`, plus a `Panel` with a nested `List` for a group.
+  `TreeRailNav.Icon` wraps a row's icon and sizes it to the font plus 2px (no size props needed);
+  `TreeRailNav.Label` keeps a row's text on one line (it
+  fades when too long, and runs while hovered); `TreeRailNav.Origin`, before the first `List`, is
+  an optional label the trail starts beside.
+- `Link`: `current` (`true`, `"page"`, or `"step"`; the trail ends at the deepest current row),
+  `disabled`, and `render` for a router link (`render={<Link href="/x" />}`).
+- `Root`: `flavor` (`"base"`: neutral trail, drawn at once; `"owsem"`: accent trail that travels
+  and pulses). Arrow keys, Home, and End move between rows; do not add your own.
+- Tokens: `--ow-tree-rail-trail`, `--ow-tree-rail-rail`, `--ow-tree-rail-node`,
+  `--ow-tree-rail-surface` (the background behind the nav), and rail positions
+  `--ow-tree-rail-r0` to `--ow-tree-rail-r2` in px.
 
 ## Rules
 

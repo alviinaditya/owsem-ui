@@ -97,6 +97,22 @@ describe("Glide", () => {
     expect(Number(style.getPropertyValue("--_sy"))).toBeCloseTo(1);
   });
 
+  test("lands on the item inside a scaled ancestor", async () => {
+    const { list, highlight, items } = await mount(
+      <div style={{ transform: "scale(0.5)", transformOrigin: "0 0" }}>
+        <List />
+      </div>,
+    );
+    const two = items[1] && box(items[1]);
+    if (!two) throw new Error("no items");
+    move(list, two.left + 5, two.top + 5);
+    // As drawn on screen, the highlight covers Two exactly.
+    const h = box(highlight);
+    expect([h.left, h.top, h.width, h.height]).toEqual(
+      [two.left, two.top, two.width, two.height].map((v) => expect.closeTo(v, 0)),
+    );
+  });
+
   test("keeps the lit item through the middle of a gap (hysteresis)", async () => {
     const { list, items } = await mount(<List />);
     const [one, two] = items.map(box);

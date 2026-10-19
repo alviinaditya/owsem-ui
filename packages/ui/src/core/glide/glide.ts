@@ -101,24 +101,32 @@ export function createGlide(
     return best;
   }
 
-  /** Writes the highlight's geometry as custom properties; the CSS turns them into a transform. */
+  /**
+   * Writes the highlight's geometry as custom properties; the CSS turns them into a transform.
+   * Client rects are divided by the container's scale, so a scaled ancestor (a zoomed preview, a
+   * dialog growing in) still puts the highlight on the item.
+   */
   function place(rect: DOMRect, snap: boolean): void {
     const box = container.getBoundingClientRect();
-    if (snap) base = { width: Math.max(rect.width, 1), height: Math.max(rect.height, 1) };
+    const sx = (container.offsetWidth && box.width / container.offsetWidth) || 1;
+    const sy = (container.offsetHeight && box.height / container.offsetHeight) || 1;
+    const width = rect.width / sx;
+    const height = rect.height / sy;
+    if (snap) base = { width: Math.max(width, 1), height: Math.max(height, 1) };
     const style = highlight.style;
     if (snap) highlight.setAttribute("data-instant", "");
     style.setProperty("--_w", `${base.width}px`);
     style.setProperty("--_h", `${base.height}px`);
     style.setProperty(
       "--_x",
-      `${rect.left - box.left - container.clientLeft + container.scrollLeft}px`,
+      `${(rect.left - box.left) / sx - container.clientLeft + container.scrollLeft}px`,
     );
     style.setProperty(
       "--_y",
-      `${rect.top - box.top - container.clientTop + container.scrollTop}px`,
+      `${(rect.top - box.top) / sy - container.clientTop + container.scrollTop}px`,
     );
-    style.setProperty("--_sx", String(rect.width / base.width));
-    style.setProperty("--_sy", String(rect.height / base.height));
+    style.setProperty("--_sx", String(width / base.width));
+    style.setProperty("--_sy", String(height / base.height));
     if (snap) {
       // Commit the jump before transitions come back.
       void highlight.offsetWidth;

@@ -90,27 +90,28 @@ subtree itu saja:
 }
 ```
 
-Untuk saat ini baru Separator yang membaca token, dan hanya `--ow-line-dark` serta
-`--ow-line-light`. Token semantic seperti `--ow-accent` mulai berpengaruh begitu komponen yang
-memakainya tersedia.
+Separator membaca `--ow-line-dark` dan `--ow-line-light`. Tree Rail Nav membaca `--ow-fg`,
+`--ow-muted`, `--ow-line`, dan `--ow-bg`, dan flavor Owsem-nya juga `--ow-accent`. Token semantic
+lainnya mulai berpengaruh begitu komponen yang memakainya tersedia.
 
-Token yang dipasang di `:root` berlaku untuk kedua tema. Itu pas untuk `--ow-accent`, yang nilainya
-sama di terang dan gelap. Token yang nilainya berbeda per tema, seperti `--ow-line-dark`, perlu
+Token yang dipasang di `:root` berlaku untuk kedua tema. Itu pas untuk accent yang terbaca di kedua
+latar. `--ow-accent` bawaan justru punya nilai per tema: lilac yang lebih tua di tema terang dan
+lilac muda di tema gelap, supaya menonjol di kedua latar. Untuk memberi token nilai per tema, pakai
 selector yang sama dengan `tokens.css`:
 
 ```css
 :root,
 [data-theme="light"] {
-  --ow-line-dark: #cfcfd8;
+  --ow-accent: #6b55b0;
 }
 
 [data-theme="dark"] {
-  --ow-line-dark: #000000;
+  --ow-accent: #c9b8f0;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --ow-line-dark: #000000;
+    --ow-accent: #c9b8f0;
   }
 }
 ```

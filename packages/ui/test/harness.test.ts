@@ -73,6 +73,27 @@ describe("light, dark, and system themes (TK-5)", () => {
     expect(themeOf(root)).toEqual(light);
   });
 
+  test("the accent stands out from the background in both themes (WCAG 1.4.11)", async () => {
+    onTestFinished(() => {
+      delete root.dataset.theme;
+    });
+    const luminance = (hex: string) => {
+      const [r = 0, g = 0, b = 0] = [1, 3, 5].map((i) => {
+        const c = Number.parseInt(hex.slice(i, i + 2), 16) / 255;
+        return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    for (const theme of ["light", "dark"]) {
+      root.dataset.theme = theme;
+      const tokens = themeOf(root);
+      const [hi, lo] = [tokens["--ow-accent"], tokens["--ow-bg"]]
+        .map((hex) => luminance(hex ?? ""))
+        .sort((a, b) => b - a);
+      expect((hi ?? 0) + 0.05, theme).toBeGreaterThanOrEqual(((lo ?? 0) + 0.05) * 3);
+    }
+  });
+
   test("nested themes work in both directions", () => {
     onTestFinished(() => {
       delete root.dataset.theme;

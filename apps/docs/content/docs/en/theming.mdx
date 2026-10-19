@@ -88,26 +88,28 @@ subtree:
 }
 ```
 
-For now only the Separator reads tokens, and only `--ow-line-dark` and `--ow-line-light`. Semantic
-tokens such as `--ow-accent` take effect as the components that use them arrive.
+Separator reads `--ow-line-dark` and `--ow-line-light`. Tree Rail Nav reads `--ow-fg`,
+`--ow-muted`, `--ow-line`, and `--ow-bg`, and its Owsem flavor `--ow-accent`. Other semantic tokens
+take effect as the components that use them arrive.
 
-A token set on `:root` applies to both themes, which suits `--ow-accent`: it has one value for
-light and dark. A token with a value per theme, such as `--ow-line-dark`, needs the same selectors
-as `tokens.css`:
+A token set on `:root` applies to both themes, which suits an accent that reads on either
+background. The default `--ow-accent` has a value per theme instead: a deeper lilac on light, a
+pale one on dark, so it stands out from both backgrounds. To give a token a value per theme, use
+the same selectors as `tokens.css`:
 
 ```css
 :root,
 [data-theme="light"] {
-  --ow-line-dark: #cfcfd8;
+  --ow-accent: #6b55b0;
 }
 
 [data-theme="dark"] {
-  --ow-line-dark: #000000;
+  --ow-accent: #c9b8f0;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --ow-line-dark: #000000;
+    --ow-accent: #c9b8f0;
   }
 }
 ```

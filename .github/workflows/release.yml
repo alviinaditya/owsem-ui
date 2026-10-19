@@ -37,7 +37,9 @@ jobs:
 
   version:
     needs: select-mode
-    if: needs.select-mode.outputs.mode == 'version'
+    # Off until the release setup in CONTRIBUTING.md (Releases) sets RELEASE_PR, so no version PR
+    # opens, or fails to open, before the first release.
+    if: needs.select-mode.outputs.mode == 'version' && vars.RELEASE_PR == 'true'
     runs-on: ubuntu-24.04
     permissions:
       contents: write

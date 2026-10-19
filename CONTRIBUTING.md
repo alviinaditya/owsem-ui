@@ -215,8 +215,8 @@ so a changeset's summary is what users read there: write it for them.
 ## Releases
 
 `release.yml` opens a `chore(release): version packages` PR from the changesets, then publishes to
-npm with trusted publishing (OIDC) once that PR is merged. One-time setup before the first CI
-release:
+npm with trusted publishing (OIDC) once that PR is merged. Both jobs are off until the setup below
+turns them on, so pushes to `main` stay green before the first release. One-time setup:
 
 1. Keep `repository` in `packages/ui/package.json` and `packages/cli/package.json` matching the
    GitHub repo (`alviinaditya/owsem-ui`) exactly; trusted publishing checks it.
@@ -236,8 +236,11 @@ release:
 5. Set the repository variable `NPM_TRUSTED_PUBLISHING` to `true`. Until then the pack and publish
    jobs are skipped.
 6. In each npm package's settings, choose "Require two-factor authentication and disallow tokens".
-
-PRs opened with `GITHUB_TOKEN` do not trigger CI. If CI checks are required on `main`, create a
-GitHub App with contents and pull requests (write) permissions, then set the repository variable
-`RELEASE_APP_ID` and secret `RELEASE_APP_PRIVATE_KEY`. Also enable "Allow GitHub Actions to create
-and approve pull requests".
+7. Let the workflow open the version PR. Create a GitHub App with contents and pull requests (write)
+   permissions, then set the repository variable `RELEASE_APP_ID` and secret
+   `RELEASE_APP_PRIVATE_KEY`: PRs opened with `GITHUB_TOKEN` do not trigger CI, so required checks
+   would never run on them. Without an App, enable "Allow GitHub Actions to create and approve pull
+   requests" under Settings > Actions > General instead.
+8. Set the repository variable `RELEASE_PR` to `true`. Until then the version job is skipped and no
+   version PR opens. Merge that PR only when the release should go out: merging it bumps the
+   versions.

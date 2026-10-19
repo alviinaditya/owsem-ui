@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ComponentBadges } from "@/components/component-header";
 import { ComponentIndex } from "@/components/component-index";
+import { SiteShell } from "@/components/site-shell";
 import { CATEGORIES, catalog, isAvailable } from "@/lib/catalog";
 import { format, getDictionary } from "@/lib/dictionaries";
 import { isLang, localeAlternates } from "@/lib/i18n";
@@ -31,26 +32,29 @@ export default async function IndexPage(props: PageProps<"/[lang]">) {
       })),
   }));
   return (
-    <main>
-      <header className="page-header">
-        <h1>OwsemUI</h1>
-        <p className="lead">{dict.site.description}</p>
-        <p>
-          {format(dict.catalog.progress, {
-            available: catalog.filter(isAvailable).length,
-            total: catalog.length,
-          })}
-        </p>
-      </header>
-      <ComponentIndex
-        groups={groups}
-        labels={{
-          legend: dict.catalog.filter,
-          all: dict.catalog.all,
-          base: dict.catalog.families.base,
-          owsem: dict.catalog.families.owsem,
-        }}
-      />
-    </main>
+    <SiteShell lang={lang}>
+      <main className="page">
+        <header className="page-header">
+          <p className="eyebrow">{dict.nav.components}</p>
+          <h1>OwsemUI</h1>
+          <p className="lead">{dict.site.description}</p>
+          <p>
+            {format(dict.catalog.progress, {
+              available: catalog.filter(isAvailable).length,
+              total: catalog.length,
+            })}
+          </p>
+        </header>
+        <ComponentIndex
+          groups={groups}
+          labels={{
+            legend: dict.catalog.filter,
+            all: dict.catalog.all,
+            base: dict.catalog.families.base,
+            owsem: dict.catalog.families.owsem,
+          }}
+        />
+      </main>
+    </SiteShell>
   );
 }

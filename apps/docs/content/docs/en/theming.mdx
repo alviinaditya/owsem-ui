@@ -1,0 +1,187 @@
+---
+title: Theming
+description: Light, dark, and system themes, switching without a flash, and recoloring with tokens.
+---
+
+import { TokenChip } from "@/components/token-setup";
+import { TokenTable } from "@/components/token-table";
+
+Every OwsemUI color is an `--ow-*` token, a CSS custom property. Themes set the token values and
+components only read them, so switching themes or recoloring never touches component CSS.
+
+## Light, dark, and system
+
+Without a `data-theme` attribute, tokens follow the system setting (`prefers-color-scheme`) and
+update when it changes, with no JavaScript. Set `data-theme="light"` or `data-theme="dark"` on
+`<html>` or any element to force a theme for that subtree:
+
+```html
+<html data-theme="dark">
+  <body>
+    <aside data-theme="light">Always light, inside a dark page.</aside>
+  </body>
+</html>
+```
+
+Nesting works both ways: a light panel inside a dark page, or a dark panel inside a light one.
+Each theme also sets `color-scheme`, so native controls, scrollbars, and autofill follow it.
+
+## Switching without a flash
+
+To let people pick a theme, store their choice and set `data-theme` from an inline script in
+`<head>`. It runs before the first paint, so the page never shows the wrong theme first. Keep
+"system" as no attribute at all, so the OS setting keeps working.
+
+```html
+<script>
+  try {
+    const theme = localStorage.getItem("theme");
+    if (theme === "light" || theme === "dark") {
+      document.documentElement.dataset.theme = theme;
+    }
+  } catch {}
+</script>
+```
+
+The `try` keeps the system theme when storage is blocked. Your theme switcher then sets or removes
+both the attribute and the stored value:
+
+```ts
+function setTheme(theme: "light" | "dark" | "system") {
+  const root = document.documentElement;
+  if (theme === "system") delete root.dataset.theme;
+  else root.dataset.theme = theme;
+  try {
+    if (theme === "system") localStorage.removeItem("theme");
+    else localStorage.setItem("theme", theme);
+  } catch {
+    // Storage blocked: the theme still applies until the next page load.
+  }
+}
+```
+
+If React renders your `<html>`, as in Next.js, put the script in `<head>` with
+`dangerouslySetInnerHTML` and add `suppressHydrationWarning` to `<html>`, since the script sets the
+attribute before React hydrates.
+
+## Recoloring
+
+Tokens come in tiers. Each component reads its own component token first, then the theme token,
+then a built-in value.
+
+| Tier | Examples | Set by |
+| --- | --- | --- |
+| Semantic | `--ow-bg`, `--ow-fg`, `--ow-muted`, `--ow-line`, `--ow-accent` | Your app, once for all components |
+| Material depth | `--ow-line-dark`, `--ow-line-light` | OwsemUI per theme; you may override them |
+| Component | `--ow-separator-line-dark`, `--ow-separator-line-light` | Per component, for local changes |
+
+Set a theme token on `:root` to recolor every component, or on any element to recolor only that
+subtree:
+
+```css
+:root {
+  --ow-accent: #c9b8f0;
+}
+
+.billing {
+  --ow-accent: #9fd8c8;
+}
+```
+
+For now only the Separator reads tokens, and only `--ow-line-dark` and `--ow-line-light`. Semantic
+tokens such as `--ow-accent` take effect as the components that use them arrive.
+
+A token set on `:root` applies to both themes, which suits `--ow-accent`: it has one value for
+light and dark. A token with a value per theme, such as `--ow-line-dark`, needs the same selectors
+as `tokens.css`:
+
+```css
+:root,
+[data-theme="light"] {
+  --ow-line-dark: #cfcfd8;
+}
+
+[data-theme="dark"] {
+  --ow-line-dark: #000000;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ow-line-dark: #000000;
+  }
+}
+```
+
+Material depth tokens are written out for each theme, not derived from other tokens. If you change
+neutrals such as `--ow-bg`, set `--ow-line-dark` and `--ow-line-light` for each theme too, so
+etched lines stay visible.
+
+To change one component only, set its component token. The Separator, for example, reads
+`--ow-separator-line-dark`, then `--ow-line-dark`, then a built-in value:
+
+```css
+.ow-separator {
+  --_dark: var(--ow-separator-line-dark, var(--ow-line-dark, #d9d9e0));
+}
+```
+
+Names that start with `--_` are private and may change. Override the public token instead:
+
+```css
+.settings {
+  --ow-separator-line-dark: #b9b0d0;
+}
+```
+
+A component's tokens are listed in the Customization section of its Lab, as for the
+[Separator](/en/separator#scene-customization).
+
+## Cascade layers
+
+Tokens live in `@layer owsem.tokens` and component styles in `@layer owsem.components`. Unlayered
+CSS always beats layered CSS, so your plain CSS wins with no extra specificity or `!important`. If
+your CSS is in layers too, as with Tailwind, the layer order decides: see
+[Tailwind CSS v4](/en/docs#tailwind-css-v4).
+
+## Token reference
+
+Every theme token in the library's `tokens.css` with its light and dark value, read when these docs
+are built. Component tokens are listed in each component's Lab. Neutral values are still
+placeholders and will change with the full token set. More tokens, such as radius and fonts, come
+later.
+
+<TokenTable lang="en" />
+
+## Token modes and prefix
+
+Everything above is theme mode, where components share one set of tokens. Isolated mode gives
+each component its own:
+
+| | Theme | Isolated |
+| --- | --- | --- |
+| Token names | `--{prefix}-accent` | `--{prefix}-{component}-accent` |
+| Values live | On `:root` and each theme, written once | On each component's root, with the component |
+| Changing the accent | One line for every component | Per component |
+| Name clashes | Possible, if your app has tokens with the same names | Hardly any |
+| Best for | An app with one design system | One component with its own theme, or components in an app with another design system |
+
+An isolated component reads no shared tokens, so changing one never touches another. Its values
+sit on its own root, so set them on the component itself rather than on a parent:
+
+```css
+.settings .ow-separator {
+  --acme-separator-line-dark: #b9b0d0;
+}
+```
+
+The prefix replaces `ow` in every public token name. It starts with a letter, uses lowercase
+letters, numbers, and single hyphens between words, and has at most 16 characters. Private names
+(`--_*`) and class names (`.ow-*`) keep theirs.
+
+Both choices go in `owsem.json` and are applied by the `owsem` CLI when it copies components into
+your project. The CLI is not released yet; until then the npm package and `shadcn add` use theme
+mode with <code data-token-literal="">--ow-</code>.
+
+The Token setup applies your choice to the code in every Lab:
+
+<TokenChip lang="en" />

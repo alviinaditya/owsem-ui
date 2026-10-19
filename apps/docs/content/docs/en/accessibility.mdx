@@ -1,0 +1,134 @@
+---
+title: Accessibility
+description: What OwsemUI handles, how it is tested today, and what stays your app's job.
+---
+
+OwsemUI aims for WCAG 2.2 AA in every component, in light and dark. This page lists the rules every
+component follows and says which ones the tests check today. Only Separator is available so far, so
+most rules are written down before the components that need them.
+
+## Behavior from Base UI
+
+Focus, keyboard, ARIA, and positioning come from [Base UI](https://base-ui.com). OwsemUI does not
+rewrite them: it adds CSS and passes props to Base UI as they are. Styles read the state attributes
+Base UI sets, such as `data-orientation` on Separator, so what you see and what a screen reader
+announces come from the same state.
+
+Separator, for example, renders `role="separator"` with `aria-orientation`, and its tests check that
+OwsemUI's wrapper keeps both. Base UI's
+[accessibility guide](https://base-ui.com/react/overview/accessibility) covers the behavior itself,
+and each component's Lab has a Keyboard and accessibility section, like the one for
+[Separator](/en/separator#scene-keyboard).
+
+## Visible focus
+
+Base UI manages focus but leaves how it looks to the styles. The OwsemUI rule for every part that
+takes focus: a 2 px outline, 2 px away from the part, with at least 3:1 contrast against the
+background around it.
+
+- A part whose focus lands on a hidden input inside it, like a slider thumb, shows the ring through
+  `:has(:focus-visible)`.
+- Containers that clip their content leave room for the ring or draw it inside, so it is never cut
+  off.
+- In forced colors, the ring uses the system color `Highlight`.
+
+Separator cannot take focus, so no available component draws a ring yet. The focus color token
+comes with the first focusable component.
+
+## Contrast
+
+The targets, in light and dark:
+
+- Text: at least 4.5:1 against its background.
+- Control boundaries and state indicators, such as a check mark, a filled switch, or the focus
+  ring: at least 3:1 against the colors beside them. Disabled controls are exempt, as WCAG 1.4.11
+  allows.
+
+Today axe checks text contrast on Separator's test page in both themes. The boundary check comes
+with the first control: it computes contrast from the token values, blending semi-transparent
+shadows onto the surface behind them first.
+
+## Pointer targets
+
+The rule: every pointer target is at least 24 × 24 px, or meets the spacing exception of WCAG
+2.5.8. Parts that look smaller, like a checkbox box or a dialog close button, get a larger hit area
+through padding or a pseudo-element. axe already runs with its `target-size` rule on; measuring hit
+areas comes with the first control.
+
+## Reduced motion
+
+The rules: animations move only `transform` and `opacity`, plus `clip-path` when needed, and every
+animation has a `prefers-reduced-motion` version without movement, only a change of opacity or
+color. This covers Owsem's richer effects too. Separator does not animate, so there is nothing to
+reduce yet.
+
+## Forced colors
+
+In forced colors mode (Windows High Contrast), the browser drops `box-shadow` and background
+gradients and paints backgrounds in the system color `Canvas`. The depth material would vanish.
+Separator draws its etched line with borders instead of a background, and its test checks that the
+line stays 1 px wide in the system text color. Controls follow two rules:
+
+- Every control gets `outline: 1px solid transparent; outline-offset: -1px`. The outline is
+  invisible in normal mode, changes no geometry, and shows up when forced colors apply.
+- Indicators map to system colors (`CanvasText`, `Highlight`, `GrayText`) inside
+  `@media (forced-colors: active)`.
+
+Both come with the first control.
+
+## No frames while idle
+
+The rule: when nobody interacts, nothing runs. No `requestAnimationFrame` callbacks and no running
+CSS or Web Animations once entry animations finish. A frame loop runs only while its animation
+does, and only states that animate on purpose, such as loading, are exempt. A still page is easier
+on people who find motion distracting, and on batteries.
+
+The test wraps `requestAnimationFrame` before any component loads, waits up to 2 seconds for
+everything to stop, then counts for 3 seconds without interaction. Separator passes with zero frames
+and zero animations.
+
+## How it is tested
+
+Component tests run in a real Chromium with Vitest browser mode (`pnpm test`), on every pull
+request. What they check today:
+
+| Check | Today |
+| --- | --- |
+| axe-core with the WCAG 2.0 to 2.2 A and AA tags, `target-size` included | Separator in light and dark: no serious or critical violations, and no text contrast that axe cannot compute |
+| Forced colors, emulated through Playwright | Separator's line stays visible in the system text color |
+| Frames and animations while idle | Separator: zero of each for 3 seconds |
+| ARIA from Base UI | Separator keeps `role` and `aria-orientation` |
+
+Canary tests keep the harness honest: axe must flag a target that is too small and report text
+over a gradient as unchecked, and the idle counter must catch a loop that never stops.
+
+Planned with later components: 3:1 boundary checks and hit-area measurements in Chromium, Firefox,
+and WebKit; a contrast test for text over depth gradients, against both ends of the gradient; and
+checks that visually hidden text stays readable for screen readers.
+
+## What stays your app's job
+
+The components take care of their own parts. The page around them is yours:
+
+- Give icon-only buttons and other controls without visible text an accessible name, for example
+  with `aria-label`.
+- Structure the page: one `h1`, headings in order, landmarks such as `<main>` and `<nav>`, a page
+  title, and `lang` on `<html>`.
+- Keep contrast when you recolor tokens. Check 4.5:1 for text and 3:1 for control boundaries, in
+  both themes, for every token you change.
+- Put the theme on the page itself, so text sits on the background the contrast was checked
+  against. OwsemUI's tests use this:
+  ```css
+  body {
+    background-color: var(--ow-bg);
+    color: var(--ow-fg);
+  }
+  ```
+- Keep focus outlines in your resets. OwsemUI's CSS sits in `@layer`, so an unlayered rule such as
+  `:focus { outline: none }` wins over the focus ring.
+- Translate built-in labels. Base UI ships some text in English, such as
+  `aria-label="Notifications"` on `Toast.Viewport`. Props to replace them come with those
+  components.
+- Give your own animations a reduced-motion version too.
+- Test your pages with a keyboard and a screen reader. Automated checks like axe find only part of
+  the problems.

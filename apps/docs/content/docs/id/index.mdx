@@ -44,14 +44,8 @@ body {
 
 Tanpa atribut `data-theme`, tema mengikuti pengaturan sistem (`prefers-color-scheme`). Pasang
 `data-theme="light"` atau `data-theme="dark"` di `<html>` atau elemen mana pun untuk memaksa tema
-di subtree itu. Semua warna adalah token `--ow-*`, jadi warna bisa diganti tanpa menyentuh CSS
-komponen:
-
-```css
-:root {
-  --ow-accent: #c9b8f0;
-}
-```
+di subtree itu. Semua warna adalah token `--ow-*` yang bisa ditimpa; cara berpindah tema tanpa
+kedip, mengganti warna, dan daftar token tema ada di halaman [Tema](/id/docs/theming).
 
 ## Tailwind CSS v4
 
@@ -82,11 +76,11 @@ isolated, menyusul.
 ## Base dan Owsem
 
 Base adalah komponen tenang untuk dashboard; Owsem menambah motion dan efek yang lebih kaya dengan
-API yang sama. Komponen yang ada di kedua keluarga dipilih lewat prop `flavor`, jadi berpindah cukup
-dengan satu prop:
+API yang sama. Komponen yang ada di kedua keluarga, dimulai dari Button, akan dipilih lewat prop
+`flavor`, jadi berpindah cukup dengan satu prop:
 
 ```tsx
 <Button flavor="owsem">Simpan</Button>
 ```
 
-Komponen yang tersedia ada di [halaman komponen](/id).
+Button dan `flavor` belum dibuat; komponen yang sudah tersedia ada di [halaman komponen](/id).

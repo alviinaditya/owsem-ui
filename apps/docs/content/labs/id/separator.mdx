@@ -2,75 +2,73 @@
 title: Separator
 ---
 
-import { Separator } from "owsem-ui/base";
-
-## Ikhtisar
+import { ForMode, TokenChip } from "@/components/token-setup";
 
 Separator memisahkan bagian konten dengan garis terukir: garis gelap 1 px dengan garis terang 1 px
-di sebelahnya, seolah ditoreh ke permukaan dengan cahaya dari atas.
+di sebelahnya, seolah ditoreh ke permukaan dengan cahaya dari atas. Gulir untuk mulai tur; stage
+mengikuti setiap bagian.
 
-<div className="lab-demo">
-  <p>Profil</p>
-  <Separator />
-  <p>Keamanan</p>
-</div>
-
-## Anatomi
+## Anatomi [#anatomy]
 
 Satu bagian saja. Base UI merender `<div role="separator">` dengan `aria-orientation` dan
-`data-orientation`; OwsemUI menambahkan class `ow-separator` dan kedua garisnya sebagai border.
+`data-orientation`; OwsemUI menambahkan class `ow-separator` dan menggambar kedua garis sebagai
+border.
 
-## State dan varian
+| Bagian | Elemen | Token |
+| --- | --- | --- |
+| Root | `div.ow-separator` | `--ow-separator-line-dark`, `--ow-separator-line-light` |
 
-`orientation` bernilai `horizontal` (bawaan) atau `vertical`. Separator vertikal mengisi tinggi baris
-di dalam container flex atau grid, dan ketebalannya tetap 2 px walaupun container meregangkannya.
+## State dan varian [#states]
 
-<div className="lab-demo">
-  <div className="lab-demo-row">
-    <span>Draf</span>
-    <Separator orientation="vertical" />
-    <span>Terbit</span>
-    <Separator orientation="vertical" />
-    <span>Arsip</span>
-  </div>
-</div>
+`orientation` bernilai `horizontal` (bawaan) atau `vertical`; stage sekarang menampilkan yang
+vertikal. Separator vertikal mengisi tinggi baris di dalam container flex atau grid, dan tebalnya
+tetap 2 px walaupun container meregangkannya.
 
-## Keyboard dan aksesibilitas
+## Keyboard dan aksesibilitas [#keyboard]
 
 Separator tidak bisa difokus dan tidak punya interaksi keyboard. Screen reader mengenalinya sebagai
-pemisah lewat `role="separator"`. Di mode forced colors (Windows High Contrast), kedua garis memakai
-warna sistem sehingga tetap terlihat.
+pemisah lewat `role="separator"` dan `aria-orientation`. Di mode forced colors (Windows High
+Contrast), kedua garis memakai warna sistem sehingga tetap terlihat.
 
-## Ship it
+## Kustomisasi [#customization]
 
-```sh
-pnpm add owsem-ui
-```
+Kontrol di stage terbuka; CSS-nya ada di tab `settings.css` setelah warna diganti.
 
-```tsx
-import "owsem-ui/styles.css";
-import { Separator } from "owsem-ui/base";
+<ForMode mode="theme">
 
-export function Sections() {
-  return (
-    <>
-      <p>Profil</p>
-      <Separator />
-      <p>Keamanan</p>
-    </>
-  );
-}
-```
+Token komponen menimpa token tema hanya untuk Separator di dalam elemen tempat token itu dipasang.
 
 | Token komponen | Bawaan | Fungsi |
 | --- | --- | --- |
 | `--ow-separator-line-dark` | `--ow-line-dark` | Garis gelap |
 | `--ow-separator-line-light` | `--ow-line-light` | Garis terang di sebelahnya |
 
-Token komponen menimpa token tema hanya untuk Separator di dalam elemen itu:
+</ForMode>
 
-```css
-.sidebar {
-  --ow-separator-line-dark: #c8c8d0;
-}
-```
+<ForMode mode="isolated">
+
+Setiap Separator membawa nilainya sendiri di elemen root-nya dan tidak membaca token bersama, jadi
+atur token di Separator itu sendiri, seperti `settings.css` dengan `.settings .ow-separator`.
+
+| Token komponen | Bawaan | Fungsi |
+| --- | --- | --- |
+| `--ow-separator-line-dark` | Nilainya sendiri, per tema | Garis gelap |
+| `--ow-separator-line-light` | Nilainya sendiri, per tema | Garis terang di sebelahnya |
+
+</ForMode>
+
+<TokenChip item="separator" lang="id" />
+
+## Ship it [#ship]
+
+Drawer kode menulis komponen persis seperti yang diatur di stage. Ubah apa pun, dan baris yang
+berubah akan menyala.
+
+| Prop | Tipe | Bawaan |
+| --- | --- | --- |
+| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` |
+| `className` | `string \| (state) => string` | |
+| `style` | `CSSProperties` | |
+| `render` | `ReactElement \| (props, state) => ReactElement` | |
+
+Ref diteruskan ke elemen `div`, dan props lain diteruskan ke Base UI apa adanya.

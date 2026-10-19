@@ -3,6 +3,9 @@
 import { useSyncExternalStore } from "react";
 import type { Dictionary } from "@/lib/dictionaries";
 import { THEME_STORAGE_KEY, THEMES, type Theme } from "@/lib/theme";
+import { Icon, type IconName } from "./icons/icon";
+
+const ICONS: Record<Theme, IconName> = { light: "sun", dark: "moon", system: "monitor" };
 
 // <html data-theme> is the source of truth: set by themeScript before hydration, then here.
 // No attribute means "system".
@@ -45,19 +48,29 @@ function setTheme(theme: Theme): void {
   for (const listener of listeners) listener();
 }
 
+/**
+ * Three radios. The raised thumb and the chosen icon's color follow <html data-theme> in CSS, not
+ * the radios, so they are right from the first paint, before the stored choice reaches React.
+ */
 export function ThemeSwitcher({ labels }: { labels: Dictionary["theme"] }) {
   // The server renders "system"; the stored value is read after hydration without a mismatch.
   const theme = useSyncExternalStore(subscribe, getTheme, () => "system" as const);
   return (
-    <label>
-      {labels.label}{" "}
-      <select value={theme} onChange={(event) => setTheme(event.currentTarget.value as Theme)}>
-        {THEMES.map((value) => (
-          <option key={value} value={value}>
-            {labels[value]}
-          </option>
-        ))}
-      </select>
-    </label>
+    <fieldset className="seg theme-switcher">
+      <legend className="visually-hidden">{labels.label}</legend>
+      {THEMES.map((value) => (
+        <label key={value} className="seg-item" data-option={value} title={labels[value]}>
+          <input
+            type="radio"
+            name="site-theme"
+            value={value}
+            checked={theme === value}
+            onChange={() => setTheme(value)}
+          />
+          <Icon name={ICONS[value]} size={15} />
+          <span className="visually-hidden">{labels[value]}</span>
+        </label>
+      ))}
+    </fieldset>
   );
 }

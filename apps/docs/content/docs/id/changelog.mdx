@@ -1,0 +1,28 @@
+---
+title: Changelog
+description: Perubahan yang menunggu rilis berikutnya dan semua versi yang sudah terbit, dibaca dari repo.
+---
+
+import { Releases, Unreleased } from "@/components/changelog";
+
+OwsemUI memakai [Changesets](https://github.com/changesets/changesets) untuk versi dan catatan rilis.
+Setiap perubahan yang terasa oleh pengguna disertai changeset di `.changeset/`, yang dibuat dengan
+`pnpm changeset`. Saat rilis, changeset yang menunggu menjadi versi baru dan entri di
+`CHANGELOG.md` package-nya. Halaman ini membaca file-file itu saat docs di-build, jadi isinya selalu
+sama dengan repo.
+
+`owsem-ui` dan CLI `owsem`, yang menyusul, punya versinya masing-masing. Isi setiap perubahan tetap
+dalam bahasa Inggris karena ditulis langsung di repo.
+
+## Belum dirilis [#unreleased]
+
+Perubahan yang sudah ada di repo dan akan terbit di rilis berikutnya, per package. Label di setiap
+perubahan adalah kenaikan versi yang dimintanya: major, minor, atau patch.
+
+<Unreleased lang="id" />
+
+## Rilis [#releases]
+
+Versi yang sudah terbit untuk setiap package, dari yang terbaru.
+
+<Releases lang="id" />

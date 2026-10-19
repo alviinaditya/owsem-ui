@@ -1,0 +1,56 @@
+---
+title: Skills
+description: Teach your coding agent to use OwsemUI with the owsem-ui skill.
+---
+
+An agent skill is a folder with a `SKILL.md` file of instructions that a coding agent, such as
+Claude Code, Cursor, or Codex, loads when a task needs it. OwsemUI ships one, `owsem-ui`, so your
+agent installs, themes, and styles components the way the library expects instead of guessing.
+
+## Installation
+
+The [skills CLI](https://github.com/vercel-labs/skills) installs the skill into your project for
+the agents it detects:
+
+```sh
+npx skills add alviinaditya/owsem-ui
+```
+
+To pick the skill and the agent yourself:
+
+```sh
+npx skills add alviinaditya/owsem-ui --skill owsem-ui -a claude-code
+```
+
+`-a` takes other agents too, such as `cursor` or `codex`, and can be repeated. Add `-g` to install
+it globally, in your home directory, for every project.
+
+## What it covers
+
+- Installing from npm (`owsem-ui`) or from the shadcn registry (`@owsem`), and where the files go.
+- The two global styles Base UI needs.
+- Theming: `data-theme`, `--ow-*` tokens, component tokens and their fallbacks, and the `@layer`
+  order, including the line for Tailwind CSS v4.
+- Which components exist today, with Separator's props and tokens, and where to check for the rest
+  instead of a hard-coded list.
+- Rules for agents: restyle with tokens instead of overriding component CSS, keep focus rings and
+  reduced motion, leave behavior to Base UI, and read a component's docs before using it.
+
+## Versions
+
+The skill lives in the repository at
+[`skills/owsem-ui/SKILL.md`](https://github.com/alviinaditya/owsem-ui/blob/main/skills/owsem-ui/SKILL.md)
+and follows the library on the `main` branch, so it can be ahead of the version on npm. To get the
+latest copy:
+
+```sh
+npx skills update owsem-ui
+```
+
+## Other sources for agents
+
+- These docs: [Getting Started](/en/docs) and [Theming](/en/docs/theming) for setup, and each
+  [component page](/en) for its anatomy, keyboard behavior, tokens, and props. A component that is
+  not built yet has a Coming soon page.
+- The shadcn registry: `https://owsem.dev/r/registry.json` lists every built component, and
+  `https://owsem.dev/r/{name}.json` holds one component's files.

@@ -15,6 +15,19 @@ test("the sidebar lists every catalog component", async ({ page }, testInfo) => 
   }
 });
 
+test("the sidebar fades the edges that have more to scroll", async ({ page }, testInfo) => {
+  await page.goto("/en/docs");
+  if (testInfo.project.name === "mobile-390") {
+    await page.getByRole("button", { name: "Menu" }).click();
+  }
+  const scroller = page.locator("#site-sidebar");
+  await expect(scroller).not.toHaveAttribute("data-fade-top");
+  await expect(scroller).toHaveAttribute("data-fade-bottom", "");
+  await scroller.evaluate((el) => el.scrollTo(0, el.scrollHeight));
+  await expect(scroller).toHaveAttribute("data-fade-top", "");
+  await expect(scroller).not.toHaveAttribute("data-fade-bottom");
+});
+
 test("planned components show Coming soon and stay out of search", async ({ page }) => {
   await page.goto("/en/button");
   const main = page.getByRole("main");
@@ -28,6 +41,16 @@ test("planned components show Coming soon and stay out of search", async ({ page
 
   await page.goto("/en/separator");
   await expect(robots(page)).toHaveCount(0);
+});
+
+test("a Lab links the components before and after it", async ({ page }) => {
+  await page.goto("/en/separator");
+  const nav = page.getByRole("navigation", { name: "Component" });
+  await expect(nav.getByRole("link", { name: "Previous: Collapsible" })).toHaveAttribute(
+    "rel",
+    "prev",
+  );
+  await expect(nav.getByRole("link", { name: "Next: Scroll Area" })).toHaveAttribute("rel", "next");
 });
 
 test("the index filters components by family", async ({ page }) => {
@@ -55,6 +78,12 @@ test("the mobile menu opens and closes after navigating", async ({ page }, testI
 
   await menu.click();
   await expect(menu).toHaveAttribute("aria-expanded", "true");
+  // Escape inside the panel closes it and returns focus to the button.
+  await expect(sidebar.getByRole("link").first()).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(menu).toBeFocused();
+  await expect(sidebar).toBeHidden();
+  await menu.click();
   await sidebar.getByRole("link", { name: "Separator" }).click();
   await expect(page).toHaveURL(/\/id\/separator$/);
   await expect(sidebar).toBeHidden();

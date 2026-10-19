@@ -1,0 +1,189 @@
+---
+title: Tema
+description: Tema terang, gelap, dan sistem, berpindah tema tanpa kedip, dan mengganti warna lewat token.
+---
+
+import { TokenChip } from "@/components/token-setup";
+import { TokenTable } from "@/components/token-table";
+
+Semua warna OwsemUI adalah token `--ow-*`, yaitu custom property CSS. Tema mengisi nilai token,
+sedangkan komponen hanya membacanya, jadi berpindah tema atau mengganti warna tidak pernah
+menyentuh CSS komponen.
+
+## Terang, gelap, dan sistem
+
+Tanpa atribut `data-theme`, token mengikuti pengaturan sistem (`prefers-color-scheme`) dan ikut
+berubah saat pengaturan itu berubah, tanpa JavaScript. Pasang `data-theme="light"` atau
+`data-theme="dark"` di `<html>` atau elemen mana pun untuk memaksa tema di subtree itu:
+
+```html
+<html data-theme="dark">
+  <body>
+    <aside data-theme="light">Selalu terang, di dalam halaman gelap.</aside>
+  </body>
+</html>
+```
+
+Tema bersarang bekerja ke dua arah: panel terang di halaman gelap, atau panel gelap di halaman
+terang. Setiap tema juga memasang `color-scheme`, sehingga kontrol native, scrollbar, dan autofill
+ikut tema.
+
+## Berpindah tema tanpa kedip
+
+Kalau pengguna bisa memilih tema, simpan pilihannya dan pasang `data-theme` dari skrip inline di
+`<head>`. Skrip ini berjalan sebelum halaman pertama kali tampil, jadi tema yang salah tidak sempat
+terlihat. Biarkan pilihan "sistem" tanpa atribut sama sekali, supaya pengaturan OS tetap berlaku.
+
+```html
+<script>
+  try {
+    const theme = localStorage.getItem("theme");
+    if (theme === "light" || theme === "dark") {
+      document.documentElement.dataset.theme = theme;
+    }
+  } catch {}
+</script>
+```
+
+Berkat `try`, tema sistem tetap dipakai bila storage diblokir. Pemilih tema di app cukup memasang
+atau menghapus atribut sekaligus nilai yang disimpan:
+
+```ts
+function setTheme(theme: "light" | "dark" | "system") {
+  const root = document.documentElement;
+  if (theme === "system") delete root.dataset.theme;
+  else root.dataset.theme = theme;
+  try {
+    if (theme === "system") localStorage.removeItem("theme");
+    else localStorage.setItem("theme", theme);
+  } catch {
+    // Storage blocked: the theme still applies until the next page load.
+  }
+}
+```
+
+Kalau `<html>` dirender oleh React, seperti di Next.js, taruh skrip itu di `<head>` dengan
+`dangerouslySetInnerHTML`, lalu tambahkan `suppressHydrationWarning` di `<html>`, karena skrip
+sudah memasang atribut sebelum React melakukan hydration.
+
+## Mengganti warna
+
+Token terbagi dalam beberapa tingkat. Setiap komponen membaca token komponennya dulu, lalu token
+tema, lalu nilai bawaan.
+
+| Tingkat | Contoh | Diatur oleh |
+| --- | --- | --- |
+| Semantic | `--ow-bg`, `--ow-fg`, `--ow-muted`, `--ow-line`, `--ow-accent` | App, sekali untuk semua komponen |
+| Material depth | `--ow-line-dark`, `--ow-line-light` | OwsemUI per tema; app boleh menimpanya |
+| Komponen | `--ow-separator-line-dark`, `--ow-separator-line-light` | Per komponen, untuk perubahan lokal |
+
+Pasang token tema di `:root` untuk mengganti warna semua komponen, atau di elemen mana pun untuk
+subtree itu saja:
+
+```css
+:root {
+  --ow-accent: #c9b8f0;
+}
+
+.billing {
+  --ow-accent: #9fd8c8;
+}
+```
+
+Untuk saat ini baru Separator yang membaca token, dan hanya `--ow-line-dark` serta
+`--ow-line-light`. Token semantic seperti `--ow-accent` mulai berpengaruh begitu komponen yang
+memakainya tersedia.
+
+Token yang dipasang di `:root` berlaku untuk kedua tema. Itu pas untuk `--ow-accent`, yang nilainya
+sama di terang dan gelap. Token yang nilainya berbeda per tema, seperti `--ow-line-dark`, perlu
+selector yang sama dengan `tokens.css`:
+
+```css
+:root,
+[data-theme="light"] {
+  --ow-line-dark: #cfcfd8;
+}
+
+[data-theme="dark"] {
+  --ow-line-dark: #000000;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ow-line-dark: #000000;
+  }
+}
+```
+
+Token material depth ditulis lengkap untuk setiap tema, bukan diturunkan dari token lain. Kalau
+Anda mengganti warna netral seperti `--ow-bg`, ganti juga `--ow-line-dark` dan `--ow-line-light`
+di setiap tema supaya garis terukir tetap terlihat.
+
+Untuk mengubah satu komponen saja, pasang token komponennya. Separator, misalnya, membaca
+`--ow-separator-line-dark`, lalu `--ow-line-dark`, lalu nilai bawaan:
+
+```css
+.ow-separator {
+  --_dark: var(--ow-separator-line-dark, var(--ow-line-dark, #d9d9e0));
+}
+```
+
+Nama yang diawali `--_` bersifat privat dan bisa berubah. Timpa token publiknya saja:
+
+```css
+.settings {
+  --ow-separator-line-dark: #b9b0d0;
+}
+```
+
+Token sebuah komponen terdaftar di bagian Kustomisasi pada Lab-nya, contohnya
+[Separator](/id/separator#scene-customization).
+
+## Layer CSS
+
+Token berada di `@layer owsem.tokens` dan style komponen di `@layer owsem.components`. CSS tanpa
+layer selalu mengalahkan CSS di dalam layer, jadi CSS biasa milik app menang tanpa tambahan
+specificity atau `!important`. Kalau CSS app juga memakai layer, seperti Tailwind, urutan layer
+yang menentukan; lihat [Tailwind CSS v4](/id/docs#tailwind-css-v4).
+
+## Daftar token
+
+Semua token tema di `tokens.css` milik library beserta nilai terang dan gelapnya, dibaca saat docs
+ini di-build. Token komponen terdaftar di Lab masing-masing komponen. Nilai netral masih sementara
+dan akan berubah bersama set token lengkap. Token lain, seperti radius dan font, menyusul.
+
+<TokenTable lang="id" />
+
+## Mode token dan prefix
+
+Semua bagian di atas memakai mode theme: semua komponen berbagi satu set token. Mode isolated
+memberi setiap komponen token sendiri:
+
+| | Theme | Isolated |
+| --- | --- | --- |
+| Nama token | `--{prefix}-accent` | `--{prefix}-{komponen}-accent` |
+| Tempat nilai | Di `:root` dan setiap tema, ditulis sekali | Di root setiap komponen, bersama komponennya |
+| Mengganti accent | Satu baris untuk semua komponen | Per komponen |
+| Bentrok nama | Bisa terjadi, kalau app sudah punya token bernama sama | Hampir tidak ada |
+| Cocok untuk | App dengan satu design system | Satu komponen dengan tema tersendiri, atau komponen di app dengan design system lain |
+
+Komponen isolated tidak membaca token bersama, jadi mengubah satu komponen tidak menyentuh komponen
+lain. Nilainya ada di root komponen itu sendiri, jadi atur di komponennya, bukan di elemen induk:
+
+```css
+.settings .ow-separator {
+  --acme-separator-line-dark: #b9b0d0;
+}
+```
+
+Prefix menggantikan `ow` di setiap nama token publik. Prefix diawali huruf, memakai huruf kecil,
+angka, dan tanda hubung tunggal di antara kata, dan paling panjang 16 karakter. Nama privat (`--_*`)
+dan nama class (`.ow-*`) tidak berubah.
+
+Kedua pilihan ini disimpan di `owsem.json` dan diterapkan oleh CLI `owsem` saat menyalin komponen ke
+project Anda. CLI ini belum dirilis; sampai saat itu package npm dan `shadcn add` memakai mode
+theme dengan <code data-token-literal="">--ow-</code>.
+
+Pengaturan token menerapkan pilihan Anda ke kode di setiap Lab:
+
+<TokenChip lang="id" />

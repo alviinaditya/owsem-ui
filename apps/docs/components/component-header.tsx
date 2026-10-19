@@ -30,21 +30,3 @@ export function ComponentBadges({ entry, dict }: { entry: CatalogEntry; dict: Di
     </ul>
   );
 }
-
-export function ComponentHeader({
-  entry,
-  description,
-  dict,
-}: {
-  entry: CatalogEntry;
-  description: string;
-  dict: Dictionary;
-}) {
-  return (
-    <header className="page-header">
-      <h1>{entry.title}</h1>
-      <p className="lead">{description}</p>
-      <ComponentBadges entry={entry} dict={dict} />
-    </header>
-  );
-}

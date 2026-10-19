@@ -2,19 +2,22 @@ import "owsem-ui/styles.css";
 import "../globals.css";
 import { NextProvider } from "fumadocs-core/framework/next";
 import type { Metadata, Viewport } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Separator } from "owsem-ui/base";
 import { LanguageSwitcher } from "@/components/language-switcher";
-import { Sidebar } from "@/components/sidebar";
-import { SidebarShell } from "@/components/sidebar-shell";
+import { SidebarToggle } from "@/components/sidebar-toggle";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { TokenSetupMenu } from "@/components/token-setup";
 import { getDictionary } from "@/lib/dictionaries";
 import { i18n, isLang } from "@/lib/i18n";
 import { siteUrl } from "@/lib/site";
 import { themeScript } from "@/lib/theme";
 
 export const dynamicParams = false;
+
+const sans = Geist({ subsets: ["latin"], variable: "--font-sans" });
+const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export function generateStaticParams() {
   return i18n.languages.map((lang) => ({ lang }));
@@ -40,7 +43,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
   if (!isLang(lang)) notFound();
   const dict = getDictionary(lang);
   return (
-    <html lang={lang} suppressHydrationWarning>
+    <html lang={lang} className={`${sans.variable} ${mono.variable}`} suppressHydrationWarning>
       <head>
         {/* biome-ignore lint/security/noDangerouslySetInnerHtml: static theme script, no user input */}
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
@@ -52,24 +55,21 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
               {dict.nav.skip}
             </a>
             <header className="site-header">
+              <SidebarToggle label={dict.nav.menu} />
+              <Link href={`/${lang}`} className="site-brand">
+                OwsemUI
+              </Link>
               <nav aria-label={dict.nav.main} className="site-nav">
-                <Link href={`/${lang}`}>OwsemUI</Link>
+                <Link href={`/${lang}`}>{dict.nav.components}</Link>
                 <Link href={`/${lang}/docs`}>{dict.nav.docs}</Link>
               </nav>
               <div className="site-tools">
+                <TokenSetupMenu labels={dict.tokens} />
                 <LanguageSwitcher lang={lang} label={dict.language.label} />
                 <ThemeSwitcher labels={dict.theme} />
               </div>
             </header>
-            <Separator />
-            <div className="site-body">
-              <SidebarShell label={dict.nav.menu}>
-                <Sidebar lang={lang} />
-              </SidebarShell>
-              <div id="content" className="site-content">
-                {children}
-              </div>
-            </div>
+            {children}
           </div>
         </NextProvider>
       </body>

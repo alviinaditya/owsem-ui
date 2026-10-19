@@ -16,11 +16,22 @@ test("renders a component Lab in each language", async ({ page }) => {
   for (const lang of ["id", "en"]) {
     await page.goto(`/${lang}/separator`);
     await expect(page.getByRole("heading", { level: 1, name: "Separator" })).toBeVisible();
-    await expect(page.getByRole("main").getByRole("separator").first()).toBeVisible();
+    await expect(
+      page.getByRole("region", { name: "Stage" }).getByRole("separator").first(),
+    ).toBeVisible();
   }
 });
 
-for (const path of ["/id", "/en/docs", "/id/separator", "/en/button"]) {
+for (const path of [
+  "/id",
+  "/en/docs",
+  "/id/docs/theming",
+  "/en/docs/accessibility",
+  "/id/docs/skills",
+  "/en/docs/changelog",
+  "/id/separator",
+  "/en/button",
+]) {
   test(`${path} has no horizontal scroll (DS-9)`, async ({ page }) => {
     await page.goto(path);
     const overflow = await page.evaluate(

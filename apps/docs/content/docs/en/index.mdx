@@ -44,14 +44,8 @@ body {
 
 Without a `data-theme` attribute, the theme follows the system setting (`prefers-color-scheme`).
 Set `data-theme="light"` or `data-theme="dark"` on `<html>` or any element to force a theme for
-that subtree. Every color is an `--ow-*` token, so you can recolor components without touching their
-CSS:
-
-```css
-:root {
-  --ow-accent: #c9b8f0;
-}
-```
+that subtree. Every color is an `--ow-*` token you can override; [Theming](/en/docs/theming) covers
+switching themes without a flash, recoloring, and the theme tokens.
 
 ## Tailwind CSS v4
 
@@ -81,10 +75,11 @@ and isolated mode, comes later.
 ## Base and Owsem
 
 Base is the calm family for dashboards; Owsem adds richer motion and effects with the same API.
-Components in both families take a `flavor` prop, so switching is a single prop:
+Components in both families, starting with Button, will take a `flavor` prop, so switching is a
+single prop:
 
 ```tsx
 <Button flavor="owsem">Save</Button>
 ```
 
-See the [component page](/en) for what is available.
+Button and `flavor` are not built yet; the [component page](/en) shows what is available.

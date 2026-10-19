@@ -1,0 +1,26 @@
+---
+title: Changelog
+description: Changes waiting for the next release and every published version, read from the repo.
+---
+
+import { Releases, Unreleased } from "@/components/changelog";
+
+OwsemUI uses [Changesets](https://github.com/changesets/changesets) for versions and release notes.
+Every user-visible change comes with a changeset in `.changeset/`, added with `pnpm changeset`. A
+release turns the waiting changesets into a new version and an entry in the package's
+`CHANGELOG.md`. This page reads those files when the docs are built, so it always matches the repo.
+
+`owsem-ui` and the `owsem` CLI, which comes later, each have their own version.
+
+## Unreleased [#unreleased]
+
+Changes already in the repo that the next release will publish, by package. The label on each
+change is the version bump it asks for: major, minor, or patch.
+
+<Unreleased lang="en" />
+
+## Releases [#releases]
+
+Published versions of each package, newest first.
+
+<Releases lang="en" />

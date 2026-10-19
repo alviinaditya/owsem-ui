@@ -68,6 +68,14 @@ subtree. The dark set is written twice (media query and `[data-theme="dark"]`); 
 they drift. The docs site stores the visitor's choice (light, dark, or system) in `localStorage`
 and applies it from an inline `<head>` script before first paint.
 
+## Icons
+
+Icons come from [Lucide](https://lucide.dev) (ISC). Copy an icon's inner SVG elements into the
+code under its Lucide name rather than adding a dependency; the docs keep theirs in
+`apps/docs/components/icons/icon.tsx`, beside Lucide's `LICENSE`. Anything that ships Lucide
+paths (the package, registry items) ships that notice too. Icons are `aria-hidden`; whatever
+shows one also has a text name.
+
 ## Docs languages
 
 The docs site is available in Indonesian (`id`, default) and English (`en`). Every page URL
@@ -108,14 +116,74 @@ To build one, use Separator as the reference:
 
 2. Export it from `src/base.ts` or `src/owsem.ts`, import its CSS in `src/styles.css`, and add a
    size budget to `.size-limit.mjs` (Base 3 kB, Owsem 8 kB).
-3. Write its Lab in `apps/docs/content/labs/<lang>/<name>.mdx` for every language, with these
-   sections (DS-2): Overview, Anatomy, States and variants, Keyboard and accessibility, Ship it.
-4. Set its `status` in the catalog to `prototype`, and add a changeset.
+3. Build its Lab (see below), then set its `status` in the catalog to `prototype` and add a
+   changeset.
+4. Add it to "Components available now" in `skills/owsem-ui/SKILL.md`, the agent skill users
+   install with `npx skills add` (documented on the docs Skills page).
+5. If the docs have a hand-built stand-in for it (below), replace the stand-in with the component
+   and delete its CSS from `apps/docs/app/globals.css`. The docs are the components' first real
+   app.
+
+### Docs stand-ins
+
+Until a component exists, the docs build its job by hand, in the same depth material (sunken
+`--docs-well`, raised `--docs-raised`, the `--docs-radius*` scale), so the swap is markup and
+deleted CSS:
+
+| Phase | Component | Replaces in the docs |
+| --- | --- | --- |
+| 1 | Button | Copy and Reset (`.ghost-button`), Previous and Next links |
+| 1 | Tabs | The code drawer's file tabs (`.lab-tabs`) |
+| 1 | Popover | The Token setup panel (`.token-setup`, a native `[popover]`) |
+| 1 | Tooltip | `title` hints on icon buttons |
+| 1 | Field, Input | The prefix field (`.prefix-field`) and the hex field (`.color-field`) |
+| 1 | Scroll Area | `ScrollFade` (sidebar, controls, code drawer, commands) |
+| 2 | Toggle Group | Segmented choices (`.seg`): theme, Orientation, Family filter, and the package manager picker (`.pm-picker`) |
+| 2 | Toggle, Toolbar | The stage tools (`.lab-tool`) |
+| 2 | Toast | The Copied status |
+| 2 | Collapsible | The folding preview pane (DS-10) |
+| 2 | Combobox, Dialog | ⌘K search (DS-5), through Command Menu |
+| 3 | Drawer | The sidebar as a menu panel below 1100 px |
+
+When the depth material tokens land in `tokens.css` (TK-7), point `--docs-well`, `--docs-raised`,
+and their shadows at them, so the docs and the library share one source.
 
 The package and registry builds pick up the folder automatically. Registry copies rewrite imports
 that leave the folder: Core to `@/lib/owsem/...` and other components to
 `@/components/owsem/<name>/...` (CLI-6 in the PRD). The registry build does not support
 `base+owsem` components (two items from one source) yet; that arrives with Button.
+
+## Labs
+
+A component page is a Lab: the narrative scrolls beside (or, below 960 px, under) a live stage,
+and the scene being read shapes the stage. The sidebar lists the page's scenes under the
+component and marks the one being read. Separator is the reference. A Lab has two parts:
+
+- **Narrative:** `apps/docs/content/labs/<lang>/<name>.mdx` for every language. The text before
+  the first heading is the overview; each `## Title [#id]` starts a scene. The ids are the same in
+  every language and follow one order, which the build checks: up to three signature scenes, then
+  `anatomy`, `states`, `keyboard`, `customization` (only for components with tokens), and `ship`.
+- **Stage:** `apps/docs/labs/<name>.tsx`, a client module whose default export renders
+  `LabShell` with a `defineLab` definition (the demo, the controls, the code files generated from
+  the controls and the visitor's token setup, and per scene what the stage shows: `cfg`, `code`,
+  `controls`, `theme`), and is
+  registered in `labs/index.ts`. A scene borrows the stage: the visitor's own changes win and stay
+  after the scene. Controls are `choice` (a segmented radio group) or `color` (a hex field and the
+  browser's picker; `token` names the theme token the component uses until a color is chosen).
+
+The token setup in the top bar (mode and prefix, DS-4) reaches every Lab: `code(cfg, setup)` writes
+token names with `setup.prefix` and any setup but theme with `ow` imports from the owsem CLI's copy,
+the install tab switches to the owsem CLI, and `--ow-` in the narrative's code is renamed in the
+browser (`data-token-literal` keeps a name as written).
+
+Code is highlighted by Shiki with one theme, `apps/docs/lib/code-theme.ts`, in MDX code blocks
+and in the stage's live code alike; its colors are the `--tk-*` tokens in `globals.css`. The code
+drawer ends with an Install tab built from the component's registry name.
+
+Stage shortcuts (T, P, C, and H for the pane) work only while focus is on the stage. Play scene
+and Replay appear only for scenes with an animation; scripted motion uses Motion
+(`motion/react`), everything else CSS transitions, and never GSAP. Every animation follows
+`prefers-reduced-motion`.
 
 ## Commits
 
@@ -140,7 +208,9 @@ Every change visible to users of `owsem-ui` or `owsem` needs a changeset:
 pnpm changeset
 ```
 
-Both packages are versioned independently. Releases go through the `release.yml` workflow.
+Both packages are versioned independently. Releases go through the `release.yml` workflow. The
+docs Changelog page reads the pending changesets and each package's `CHANGELOG.md` at build time,
+so a changeset's summary is what users read there: write it for them.
 
 ## Releases
 

@@ -2,75 +2,72 @@
 title: Separator
 ---
 
-import { Separator } from "owsem-ui/base";
-
-## Overview
+import { ForMode, TokenChip } from "@/components/token-setup";
 
 Separator divides content with an etched line: a 1 px dark line with a 1 px light line beside it,
-as if cut into the surface with light from above.
+as if cut into the surface with light from above. Scroll to start the tour; the stage follows each
+part.
 
-<div className="lab-demo">
-  <p>Profile</p>
-  <Separator />
-  <p>Security</p>
-</div>
-
-## Anatomy
+## Anatomy [#anatomy]
 
 A single part. Base UI renders `<div role="separator">` with `aria-orientation` and
 `data-orientation`; OwsemUI adds the `ow-separator` class and draws both lines as borders.
 
-## States and variants
+| Part | Element | Tokens |
+| --- | --- | --- |
+| Root | `div.ow-separator` | `--ow-separator-line-dark`, `--ow-separator-line-light` |
 
-`orientation` is `horizontal` (default) or `vertical`. A vertical separator fills the row height
-inside a flex or grid container, and stays 2 px thick even when the container stretches it.
+## States and variants [#states]
 
-<div className="lab-demo">
-  <div className="lab-demo-row">
-    <span>Draft</span>
-    <Separator orientation="vertical" />
-    <span>Published</span>
-    <Separator orientation="vertical" />
-    <span>Archived</span>
-  </div>
-</div>
+`orientation` is `horizontal` (default) or `vertical`; the stage now shows the vertical one. A
+vertical separator fills the row height inside a flex or grid container, and stays 2 px thick even
+when the container stretches it.
 
-## Keyboard and accessibility
+## Keyboard and accessibility [#keyboard]
 
 Separator is not focusable and has no keyboard interaction. Screen readers announce it as a
-separator through `role="separator"`. In forced colors (Windows High Contrast), both lines use the
-system color so the line stays visible.
+separator through `role="separator"` and `aria-orientation`. In forced colors (Windows High
+Contrast), both lines use the system color so the line stays visible.
 
-## Ship it
+## Customization [#customization]
 
-```sh
-pnpm add owsem-ui
-```
+The stage controls are open; once you change a color, its CSS is in the `settings.css` tab.
 
-```tsx
-import "owsem-ui/styles.css";
-import { Separator } from "owsem-ui/base";
+<ForMode mode="theme">
 
-export function Sections() {
-  return (
-    <>
-      <p>Profile</p>
-      <Separator />
-      <p>Security</p>
-    </>
-  );
-}
-```
+Component tokens override the theme tokens for separators inside the element that sets them.
 
 | Component token | Default | Purpose |
 | --- | --- | --- |
 | `--ow-separator-line-dark` | `--ow-line-dark` | Dark line |
 | `--ow-separator-line-light` | `--ow-line-light` | Light line beside it |
 
-Component tokens override the theme tokens for separators inside that element only:
+</ForMode>
 
-```css
-.sidebar {
-  --ow-separator-line-dark: #c8c8d0;
-}
-```
+<ForMode mode="isolated">
+
+Each Separator carries its own values on its root and reads no shared token, so set them on the
+Separator itself, as `settings.css` does with `.settings .ow-separator`.
+
+| Component token | Default | Purpose |
+| --- | --- | --- |
+| `--ow-separator-line-dark` | Its own, per theme | Dark line |
+| `--ow-separator-line-light` | Its own, per theme | Light line beside it |
+
+</ForMode>
+
+<TokenChip item="separator" lang="en" />
+
+## Ship it [#ship]
+
+The code drawer writes the component exactly as the stage is set up. Change anything and the lines
+that moved light up.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` |
+| `className` | `string \| (state) => string` | |
+| `style` | `CSSProperties` | |
+| `render` | `ReactElement \| (props, state) => ReactElement` | |
+
+The ref goes to the `div`, and other props pass through to Base UI as they are.

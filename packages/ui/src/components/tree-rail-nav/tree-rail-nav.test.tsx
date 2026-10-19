@@ -122,6 +122,20 @@ describe("Tree Rail Nav", () => {
     expect(tree.querySelectorAll('[data-part="node"][data-lit]').length).toBe(5);
   });
 
+  test("draws the trail to the current row inside a scaled ancestor", async () => {
+    const scaled = (current = "dark") => (
+      <div style={{ transform: "scale(0.5)", transformOrigin: "0 0" }}>
+        <Nav current={current} />
+      </div>
+    );
+    const { screen, tree, row } = await mount(scaled());
+    // The SVG draws in the tree's own px: twice what the screen shows at half scale.
+    const local = (name: string) => middle(tree, row(name)) / 0.5;
+    await expect.poll(() => markerY(tree)).toBeCloseTo(local("Dark mode"), 0);
+    screen.rerender(scaled("about"));
+    await expect.poll(() => markerY(tree)).toBeCloseTo(local("About"), 0);
+  });
+
   test("Base moves the trail to a new current row at once", async () => {
     const { screen, tree, row } = await mount(<Nav />);
     await expect.poll(() => markerY(tree)).toBeCloseTo(middle(tree, row("Dark mode")), 0);

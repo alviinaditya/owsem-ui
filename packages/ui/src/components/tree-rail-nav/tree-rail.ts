@@ -175,7 +175,7 @@ export function createTreeRail(
 
   const panelPaths = new Map<Element, SVGPathElement>();
   const nodeDots = new Map<HTMLElement, SVGGElement>();
-  let rails = [9, 38, 58];
+  let rails = [9, 34, 59];
   let originY = 5;
   let lit: { dot: SVGGElement; x: number; y: number }[] = [];
   let target: HTMLElement | null = null;
@@ -193,6 +193,25 @@ export function createTreeRail(
 
   const railX = (depth: number) => rails[clamp(depth, 0, rails.length - 1)] ?? 0;
 
+  // Geometry is in the tree's own px: client rects are divided by the tree's scale, so a scaled
+  // ancestor (a zoomed preview, a dialog growing in) still gets the rail drawn where rows are.
+  let top0 = 0;
+  let scale = 1;
+  function locate(): void {
+    const box = tree.getBoundingClientRect();
+    top0 = box.top;
+    scale = (tree.offsetHeight && box.height / tree.offsetHeight) || 1;
+  }
+  /** An element's vertical span, in the tree's px from its top. */
+  function span(el: Element): { top: number; bottom: number; height: number } {
+    const r = el.getBoundingClientRect();
+    return {
+      top: (r.top - top0) / scale,
+      bottom: (r.bottom - top0) / scale,
+      height: r.height / scale,
+    };
+  }
+
   function measure(): void {
     const style = getComputedStyle(tree);
     rails = [0, 1, 2].map(
@@ -208,17 +227,18 @@ export function createTreeRail(
 
   /** A panel's box; a closed (hidden) one collapses to the bottom of its row. */
   function panelRect(panel: Element): { top: number; bottom: number } {
-    const r = panel.getBoundingClientRect();
+    const r = span(panel);
     if (r.height > 0 || panel.getClientRects().length > 0) return r;
-    const row = rowOfPanel(panel)?.getBoundingClientRect();
-    return { top: row?.bottom ?? 0, bottom: row?.bottom ?? 0 };
+    const row = rowOfPanel(panel);
+    const bottom = row ? span(row).bottom : 0;
+    return { top: bottom, bottom };
   }
 
   // Branches start at the bottom edge of the parent row and land on the first child's dot.
   function branchSpan(panel: Element): number {
     const first = panel.querySelector(ROW);
     if (!first) return 16;
-    const r = first.getBoundingClientRect();
+    const r = span(first);
     return Math.max(10, r.top + r.height / 2 - panelRect(panel).top);
   }
 
@@ -226,7 +246,7 @@ export function createTreeRail(
    * Origin → down the parent's rail → an S-curve onto the child's rail → … → the row's middle.
    * A panel that is closing only sets `limit`, where the visible trail is cut.
    */
-  function route(row: HTMLElement, box: DOMRect): Route {
+  function route(row: HTMLElement): Route {
     const chain = chainOf(row);
     const segs: Route = [];
     let x = railX(0);
@@ -237,9 +257,8 @@ export function createTreeRail(
       const panel = parent && panelOf(parent);
       if (!parent || !panel) break;
       const r = panelRect(panel);
-      const pr = parent.getBoundingClientRect();
-      limit = Math.min(limit, r.bottom - box.top - pr.height / 2);
-      const top = r.top - box.top;
+      limit = Math.min(limit, r.bottom - span(parent).height / 2);
+      const top = r.top;
       const xn = railX(i + 1);
       const ys = Math.max(y, top);
       const ye = ys + branchSpan(panel);
@@ -247,18 +266,18 @@ export function createTreeRail(
       x = xn;
       y = ye;
     }
-    const r = row.getBoundingClientRect();
-    const cy = r.top + r.height / 2 - box.top;
+    const r = span(row);
+    const cy = r.top + r.height / 2;
     segs.push({ t: "V", x, y0: y, y1: Math.max(y, cy) });
     segs.limit = limit;
     return segs;
   }
 
   /** The lowest visible y of `el`, given the panels around it (relative to the tree). */
-  function clipOf(el: Element, box: DOMRect): number {
+  function clipOf(el: Element): number {
     let clip = Number.POSITIVE_INFINITY;
     for (let p = el.parentElement?.closest(PANEL); p; p = p.parentElement?.closest(PANEL)) {
-      clip = Math.min(clip, panelRect(p).bottom - box.top);
+      clip = Math.min(clip, panelRect(p).bottom);
     }
     return clip;
   }
@@ -302,19 +321,19 @@ export function createTreeRail(
     return hidden;
   }
 
-  function drawBase(box: DOMRect): void {
+  function drawBase(): void {
     // The rail of a list ends at its last row's dot, or runs on into an open child panel.
     const railEnd = (list: Element | null, clip: number) => {
       const rows = list ? [...list.querySelectorAll(`:scope > li > ${ROW}`)] : [];
       const last = rows.at(-1);
       if (!last) return Number.NEGATIVE_INFINITY;
-      const r = last.getBoundingClientRect();
-      let end = r.top + r.height / 2 - box.top;
+      const r = span(last);
+      let end = r.top + r.height / 2;
       const child = panelOf(last);
       if (child) {
         const cr = panelRect(child);
-        const top = cr.top - box.top;
-        const visible = Math.min(cr.bottom - box.top, clip) - top;
+        const top = cr.top;
+        const visible = Math.min(cr.bottom, clip) - top;
         if (visible > 0) end += Math.max(0, top - end) * clamp(visible / 28, 0, 1);
       }
       return end;
@@ -337,8 +356,8 @@ export function createTreeRail(
         panelPaths.set(panel, path);
       }
       const r = panelRect(panel);
-      const top = r.top - box.top;
-      const clip = Math.min(r.bottom - box.top, clipOf(panel, box));
+      const top = r.top;
+      const clip = Math.min(r.bottom, clipOf(panel));
       if (clip - top < 1) {
         path.removeAttribute("d");
         continue;
@@ -374,10 +393,10 @@ export function createTreeRail(
         nodeDots.set(row, c);
       }
       c.toggleAttribute("data-disabled", disabled(row));
-      const r = row.getBoundingClientRect();
+      const r = span(row);
       const x = railX(depthOf(row) - 1);
-      const y = r.top + r.height / 2 - box.top;
-      const shown = r.height > 0 && y <= clipOf(row, box) - r.height / 2 + 0.5;
+      const y = r.top + r.height / 2;
+      const shown = r.height > 0 && y <= clipOf(row) - r.height / 2 + 0.5;
       c.toggleAttribute("data-hidden", !shown);
       c.toggleAttribute("data-hot", shown && row.hasAttribute("data-glide-active"));
       if (shown) {
@@ -442,11 +461,11 @@ export function createTreeRail(
 
   function draw(now: number): void {
     frame = 0;
-    const box = tree.getBoundingClientRect();
-    drawBase(box);
+    locate();
+    drawBase();
     if (anim) {
-      const a = route(anim.from, box);
-      const b = route(anim.to, box);
+      const a = route(anim.from);
+      const b = route(anim.to);
       const fromLength = Math.min(anim.fromLength, pathLength(a));
       const shared = Math.min(fromLength, sharedLength(a, b));
       const back = fromLength - shared;
@@ -472,7 +491,7 @@ export function createTreeRail(
       }
       frame = requestAnimationFrame(draw);
     } else if (current.row) {
-      const hidden = drawRoute(route(current.row, box), current.length);
+      const hidden = drawRoute(route(current.row), current.length);
       if (wasHidden !== null && hidden !== wasHidden) {
         arrived(current.row, hidden);
         // A panel opened again: the trail reaches the row once more.
@@ -499,8 +518,8 @@ export function createTreeRail(
       redraw();
       return;
     }
-    const box = tree.getBoundingClientRect();
-    const to = route(row, box);
+    locate();
+    const to = route(row);
     const first = !current.row;
     if (first || !options.travel() || reduced()) {
       anim = null;
@@ -513,7 +532,7 @@ export function createTreeRail(
       return;
     }
     const from = current.row ?? row;
-    const a = route(from, box);
+    const a = route(from);
     const fromLength = Math.min(drawn, pathLength(a));
     const shared = Math.min(fromLength, sharedLength(a, to));
     const distance = fromLength - shared + (pathLength(to) - shared);

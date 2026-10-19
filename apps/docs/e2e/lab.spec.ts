@@ -243,10 +243,17 @@ test("the code drawer ends at the side panel's line, closing included", async ({
 test("the preview pane folds and remembers it (DS-10)", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "mobile-390", "the pane only exists below 960 px");
   await page.goto("/id/separator");
-  const toggle = stage(page).getByRole("button", { name: "Sembunyikan pratinjau" });
+  // The toggle says what it does, not just an arrow.
+  const toggle = stage(page).getByRole("button", { name: "Tutup pratinjau" });
+  await expect(toggle).toHaveText("Tutup");
   await toggle.click();
   await expect(page.locator("html")).toHaveAttribute("data-lab-pane", "hidden");
   await expect(stage(page).getByRole("separator")).toBeHidden();
+  // Folded: the bar keeps its title and the way back, with one line under it.
+  const show = stage(page).getByRole("button", { name: "Tampilkan pratinjau" });
+  await expect(show).toHaveText("Tampilkan pratinjau");
+  await expect(stage(page).getByRole("button", { name: "Kontrol" })).toBeHidden();
+  await expect(page.locator(".lab-stage-bar")).toHaveCSS("border-bottom-width", "0px");
 
   await page.reload();
   await expect(page.locator("html")).toHaveAttribute("data-lab-pane", "hidden");

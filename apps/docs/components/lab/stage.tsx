@@ -338,9 +338,11 @@ export function Stage({ lab, lang, labels, title, state, item, pane }: StageProp
             className="lab-pane-toggle"
             aria-expanded={!paneHidden}
             aria-keyshortcuts="H"
+            // The full name; the visible text is its start, so voice control finds it (2.5.3).
+            aria-label={paneHidden ? labels.show : labels.hide}
             onClick={togglePane}
           >
-            <span className="visually-hidden">{paneHidden ? labels.show : labels.hide}</span>
+            {paneHidden ? labels.show : labels.hideShort}
             <Icon name="chevron-down" size={15} />
           </button>
         </fieldset>

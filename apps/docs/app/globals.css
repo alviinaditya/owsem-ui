@@ -1281,9 +1281,22 @@ figure[data-code-block] pre {
     --pane-h: 48px;
   }
 
-  :root[data-lab-pane="hidden"] .lab-stage-body,
-  :root[data-lab-pane="hidden"] .lab-tool {
+  :root[data-lab-pane="hidden"] .lab-stage-body {
     visibility: hidden;
+  }
+
+  /* Folded, the bar is the stage's title and the way back: no tools, and one line under it
+   * (the frame's), not two. */
+  :root[data-lab-pane="hidden"] .lab-tool {
+    display: none;
+  }
+
+  :root[data-lab-pane="hidden"] .lab-stage-bar {
+    border-block-end: 0;
+  }
+
+  :root[data-lab-pane="hidden"] .lab-pane-toggle {
+    color: var(--docs-fg);
   }
 }
 

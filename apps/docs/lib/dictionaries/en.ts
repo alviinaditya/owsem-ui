@@ -70,6 +70,7 @@ export const en = {
     copy: "Copy",
     copied: "Copied",
     hide: "Hide preview",
+    hideShort: "Hide",
     show: "Show preview",
     reset: "Reset",
     themeDefault: "Theme default",

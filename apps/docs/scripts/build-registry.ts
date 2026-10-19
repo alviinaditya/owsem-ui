@@ -70,9 +70,10 @@ function assertValidItem(item: RegistryItem): void {
 rmSync(stageDir, { recursive: true, force: true });
 rmSync(outDir, { recursive: true, force: true });
 
-// Core TS modules keep their path under @lib/owsem/; index.ts only re-exports Base UI providers.
+// Core modules and their CSS keep their path under @lib/owsem/. index.ts only re-exports (Base UI
+// providers for npm users); tokens.css is listed on its own.
 const coreModules = readdirSync(join(uiSrc, "core"), { recursive: true, encoding: "utf8" }).filter(
-  (file) => isSource(file) && file.endsWith(".ts") && file !== "index.ts",
+  (file) => isSource(file) && file !== "index.ts" && file !== "tokens/tokens.css",
 );
 
 const items: RegistryItem[] = [
@@ -80,7 +81,8 @@ const items: RegistryItem[] = [
     name: "core",
     type: "registry:lib",
     title: "Owsem Core",
-    description: "Theme tokens with the --ow- prefix, the OwsemUI @layer order, and helpers.",
+    description:
+      "Theme tokens with the --ow- prefix, the OwsemUI @layer order, Glide, and helpers.",
     files: [
       {
         path: stage("core", "core/tokens/tokens.css", "tokens.css"),
@@ -89,7 +91,7 @@ const items: RegistryItem[] = [
       },
       ...coreModules.map((file) => ({
         path: stage("core", `core/${file}`, file),
-        type: "registry:lib" as const,
+        type: file.endsWith(".css") ? ("registry:file" as const) : ("registry:lib" as const),
         target: `@lib/owsem/${file}`,
       })),
     ],

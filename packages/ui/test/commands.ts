@@ -14,9 +14,19 @@ export const setForcedColors: BrowserCommand<[mode: "active" | "none"]> = async 
   await ctx.page.emulateMedia({ forcedColors: mode });
 };
 
+// FR-20: motion has a prefers-reduced-motion version.
+export const setReducedMotion: BrowserCommand<[mode: "reduce" | "no-preference"]> = async (
+  ctx,
+  mode,
+) => {
+  if (ctx.provider.name !== "playwright") throw new Error("requires the playwright provider");
+  await ctx.page.emulateMedia({ reducedMotion: mode });
+};
+
 declare module "vitest/browser" {
   interface BrowserCommands {
     setColorScheme: (scheme: "light" | "dark") => Promise<void>;
     setForcedColors: (mode: "active" | "none") => Promise<void>;
+    setReducedMotion: (mode: "reduce" | "no-preference") => Promise<void>;
   }
 }

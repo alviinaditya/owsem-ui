@@ -148,6 +148,10 @@ deleted CSS:
 When the depth material tokens land in `tokens.css` (TK-7), point `--docs-well`, `--docs-raised`,
 and their shadows at them, so the docs and the library share one source.
 
+Items in a list (menus, selects, tabs, toggle groups) are lit with Glide from
+`src/core/glide/`, not a hover style of their own; a component that moves its highlight with the
+keyboard calls `setActive()`.
+
 The package and registry builds pick up the folder automatically. Registry copies rewrite imports
 that leave the folder: Core to `@/lib/owsem/...` and other components to
 `@/components/owsem/<name>/...` (CLI-6 in the PRD). The registry build does not support

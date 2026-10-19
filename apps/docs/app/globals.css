@@ -1030,6 +1030,13 @@ p {
   }
 }
 
+/* Hover is one highlight that glides between links (Glide, from owsem-ui/core). */
+.sidebar-nav {
+  --ow-glide-bg: var(--docs-hover);
+  --ow-glide-pressed-bg: color-mix(in oklab, var(--docs-fg) 9%, transparent);
+  --ow-glide-radius: var(--docs-radius);
+}
+
 .sidebar-nav ul,
 .toc ul,
 .sidebar-scenes {
@@ -1052,10 +1059,6 @@ p {
   font-size: 14px;
   line-height: 1.6;
   text-decoration: none;
-}
-
-.sidebar-nav a:hover {
-  background-color: var(--docs-hover);
 }
 
 .sidebar-nav a[aria-current="page"] {
@@ -1095,8 +1098,7 @@ p {
   line-height: 1.4;
 }
 
-.sidebar-scenes a:hover {
-  background: none;
+.sidebar-scenes a[data-glide-active] {
   color: var(--docs-fg);
 }
 
@@ -2007,6 +2009,69 @@ th {
   margin: 12px 0 0;
   color: var(--docs-muted);
   font-size: 13px;
+}
+
+/* Glide demo (components/glide-demo.tsx): items inside a box use its radius minus the padding. */
+
+.glide-demo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 16px;
+  margin-block: 24px;
+}
+
+.glide-demo figure {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  margin: 0;
+}
+
+.glide-demo figcaption,
+.glide-demo-status {
+  color: var(--docs-muted);
+  font-size: 12.5px;
+}
+
+.glide-demo-list,
+.glide-demo-row {
+  padding: 6px;
+  border: 1px solid var(--ow-line-dark);
+  border-radius: var(--docs-radius-box);
+  background-color: var(--docs-surface);
+  box-shadow: inset 0 1px 0 var(--ow-line-light);
+}
+
+.glide-demo-list {
+  display: grid;
+  gap: 6px;
+}
+
+.glide-demo-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-self: start;
+  gap: 4px;
+}
+
+.glide-demo button {
+  block-size: 32px;
+  padding-inline: 10px;
+  border: 0;
+  border-radius: calc(var(--docs-radius-box) - 6px);
+  background: none;
+  font-size: 13.5px;
+  text-align: start;
+}
+
+.glide-demo button:disabled {
+  color: var(--docs-muted);
+  cursor: not-allowed;
+}
+
+.glide-demo-status {
+  grid-column: 1 / -1;
+  margin: 0;
 }
 
 /* Token reference (components/token-table.tsx) */

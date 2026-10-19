@@ -1,0 +1,81 @@
+---
+title: Glide
+description: One hover highlight that glides to the item nearest the pointer. Part of Core.
+---
+
+import { GlideDemo } from "@/components/glide-demo";
+
+Glide draws one highlight under a group of items, such as a menu, a list, or a row of tabs, and
+moves it to the item nearest the pointer. It never blinks out between items, and it lands with a
+CSS transition, so nothing runs while the pointer rests. The sidebar of these docs uses it, and
+OwsemUI's menus, selects, and tabs will.
+
+<GlideDemo lang="en" />
+
+## Usage
+
+```tsx
+import { GlideHighlight, useGlide } from "owsem-ui/core";
+
+export function Menu() {
+  const glide = useGlide<HTMLDivElement>();
+  return (
+    <div ref={glide.ref}>
+      <GlideHighlight glide={glide} />
+      <button type="button" data-glide-item>Profile</button>
+      <button type="button" data-glide-item>Settings</button>
+      <button type="button" data-glide-item disabled>Billing</button>
+    </div>
+  );
+}
+```
+
+`useGlide` returns a ref for the container. Put `GlideHighlight` inside it and mark each item with
+`data-glide-item`, or pass your own selector as `items`. The container becomes a positioned,
+isolated box, and the highlight sits under the items. Its CSS is in `owsem-ui/styles.css`, or on
+its own in `owsem-ui/css/glide.css`.
+
+## How it behaves
+
+- **The nearest item wins.** In a gap, the closest item stays lit, with a 2 px margin
+  (`hysteresis`) so the highlight does not flicker at the midpoint.
+- **Clicks in a gap** go to the lit item within 16 px (`gapClick`). A click on an item, disabled or
+  not, belongs to that item.
+- **Disabled items** (`:disabled`, `aria-disabled="true"`, `data-disabled`) are skipped.
+- **Focus stays where it is.** Glide never focuses an item. Components that move a highlight with
+  the keyboard call `setActive(item)`.
+- **Touch is ignored**: a tap is just a click.
+- **The lit item** gets `data-glide-active`, for its own hover styles.
+
+## Options
+
+| Option | Default | |
+| --- | --- | --- |
+| `items` | `"[data-glide-item]"` | Selector for the items in the container |
+| `axis` | `"y"` | `"y"` for lists and menus, `"x"` for tabs and toggle groups, `"xy"` for grids |
+| `maxDistance` | anywhere in the container | Px from every item beyond which nothing is lit |
+| `hysteresis` | `2` | Px the lit item keeps winning by in a gap |
+| `hideDelay` | `70` | Ms before the highlight fades once the pointer leaves |
+| `gapClick` | `{ maxDistance: 16 }` | `false` turns it off |
+| `isDisabled` | disabled attributes | `(item) => boolean` |
+| `onChange` | | `(item \| null) => void`, when the lit item changes |
+
+`useGlide` also returns `setActive(item)`, and `refresh()` for items that move under a still
+pointer. Without React, `createGlide(container, highlight, options)` does the same and returns
+`destroy()`.
+
+## Tokens
+
+| Token | Default |
+| --- | --- |
+| `--ow-glide-bg` | `--ow-fg` at 7% |
+| `--ow-glide-pressed-bg` | `--ow-fg` at 11%, while an item is pressed |
+| `--ow-glide-radius` | `8px` |
+| `--ow-glide-duration` | `260ms` |
+
+## Motion and accessibility
+
+The highlight moves by `transform` only. It scales to items of other sizes, keeping its corners
+round, and stops once it lands: no frames while idle. Under `prefers-reduced-motion` it only fades.
+It is decorative and hidden from assistive technology. In forced colors it draws a 2 px outline in
+the system `Highlight` color.

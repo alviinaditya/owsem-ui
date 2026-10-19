@@ -1,0 +1,82 @@
+---
+title: Glide
+description: Satu highlight hover yang meluncur ke item terdekat dari pointer. Bagian dari Core.
+---
+
+import { GlideDemo } from "@/components/glide-demo";
+
+Glide menggambar satu highlight di bawah sekelompok item, seperti menu, daftar, atau deretan tab,
+lalu memindahkannya ke item yang paling dekat dengan pointer. Highlight tidak pernah hilang di
+antara item, dan berhenti lewat transisi CSS, jadi tidak ada yang berjalan saat pointer diam.
+Sidebar docs ini memakainya, begitu juga menu, select, dan tab OwsemUI nanti.
+
+<GlideDemo lang="id" />
+
+## Pemakaian
+
+```tsx
+import { GlideHighlight, useGlide } from "owsem-ui/core";
+
+export function Menu() {
+  const glide = useGlide<HTMLDivElement>();
+  return (
+    <div ref={glide.ref}>
+      <GlideHighlight glide={glide} />
+      <button type="button" data-glide-item>Profil</button>
+      <button type="button" data-glide-item>Pengaturan</button>
+      <button type="button" data-glide-item disabled>Tagihan</button>
+    </div>
+  );
+}
+```
+
+`useGlide` mengembalikan ref untuk wadahnya. Letakkan `GlideHighlight` di dalamnya dan tandai
+setiap item dengan `data-glide-item`, atau berikan selector sendiri lewat `items`. Wadahnya menjadi
+kotak yang ber-posisi dan terisolasi, dan highlight berada di bawah item. CSS-nya ada di
+`owsem-ui/styles.css`, atau tersendiri di `owsem-ui/css/glide.css`.
+
+## Perilakunya
+
+- **Item terdekat yang menang.** Di celah, item terdekat tetap menyala, dengan selisih 2 px
+  (`hysteresis`) supaya highlight tidak berkedip di titik tengah.
+- **Klik di celah** diteruskan ke item yang menyala, sampai 16 px (`gapClick`). Klik di item,
+  disabled atau tidak, menjadi urusan item itu sendiri.
+- **Item disabled** (`:disabled`, `aria-disabled="true"`, `data-disabled`) dilewati.
+- **Fokus tidak dipindah.** Glide tidak pernah memfokuskan item. Komponen yang menggerakkan
+  highlight dengan keyboard memanggil `setActive(item)`.
+- **Sentuhan diabaikan**: tap tetap klik biasa.
+- **Item yang menyala** mendapat `data-glide-active`, untuk gaya hover-nya sendiri.
+
+## Opsi
+
+| Opsi | Bawaan | |
+| --- | --- | --- |
+| `items` | `"[data-glide-item]"` | Selector untuk item di dalam wadah |
+| `axis` | `"y"` | `"y"` untuk daftar dan menu, `"x"` untuk tab dan toggle group, `"xy"` untuk grid |
+| `maxDistance` | di mana saja dalam wadah | Jarak px dari semua item, lewat dari itu tidak ada yang menyala |
+| `hysteresis` | `2` | Selisih px yang membuat item yang menyala tetap menang di celah |
+| `hideDelay` | `70` | Jeda ms sebelum highlight memudar setelah pointer keluar |
+| `gapClick` | `{ maxDistance: 16 }` | `false` mematikannya |
+| `isDisabled` | atribut disabled | `(item) => boolean` |
+| `onChange` | | `(item \| null) => void`, saat item yang menyala berganti |
+
+`useGlide` juga mengembalikan `setActive(item)`, dan `refresh()` untuk item yang bergeser di bawah
+pointer yang diam. Tanpa React, `createGlide(container, highlight, options)` melakukan hal yang
+sama dan mengembalikan `destroy()`.
+
+## Token
+
+| Token | Bawaan |
+| --- | --- |
+| `--ow-glide-bg` | `--ow-fg` 7% |
+| `--ow-glide-pressed-bg` | `--ow-fg` 11%, saat item ditekan |
+| `--ow-glide-radius` | `8px` |
+| `--ow-glide-duration` | `260ms` |
+
+## Gerak dan aksesibilitas
+
+Highlight hanya bergerak lewat `transform`. Ia menyesuaikan skala dengan item yang ukurannya berbeda
+sambil menjaga sudutnya tetap bulat, dan berhenti begitu sampai: tidak ada frame saat diam. Dengan
+`prefers-reduced-motion`, highlight hanya memudar. Highlight bersifat dekoratif dan disembunyikan
+dari teknologi asistif. Di mode forced colors, highlight digambar sebagai outline 2 px dengan warna
+sistem `Highlight`.

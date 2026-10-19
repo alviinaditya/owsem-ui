@@ -74,6 +74,7 @@ export default defineConfig([
     entry: {
       styles: "src/styles.css",
       tokens: "src/core/tokens/tokens.css",
+      "css/glide": "src/core/glide/glide.css",
       ...Object.fromEntries(
         components
           .filter((c) => existsSync(`${componentsDir}/${c}/${c}.css`))

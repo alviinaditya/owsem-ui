@@ -3,11 +3,13 @@ import { CATEGORIES, catalog, isAvailable } from "@/lib/catalog";
 import { getDictionary } from "@/lib/dictionaries";
 import type { Lang } from "@/lib/i18n";
 import { source } from "@/lib/source";
+import type { SceneInfo } from "./lab/lab-shell";
+import { SceneLinks } from "./lab/scene-links";
 import { NavLink } from "./nav-link";
 
-function TreeItems({ items }: { items: Node[] }) {
+function TreeItems({ items, labelledBy }: { items: Node[]; labelledBy?: string }) {
   return (
-    <ul>
+    <ul aria-labelledby={labelledBy}>
       {items.map((node) => (
         <li key={node.$id ?? (node.type === "page" ? node.url : String(node.name))}>
           {node.type === "page" ? (
@@ -26,12 +28,27 @@ function TreeItems({ items }: { items: Node[] }) {
   );
 }
 
-/** Docs pages from the Fumadocs page tree, then every catalog component by category. */
-export function Sidebar({ lang }: { lang: Lang }) {
+/**
+ * Docs pages from the Fumadocs page tree (ordered by content/docs/<lang>/meta.json), then every
+ * catalog component by category. On a Lab
+ * page, the current component's scenes are listed under it.
+ */
+export function Sidebar({
+  lang,
+  current,
+  scenes,
+}: {
+  lang: Lang;
+  current?: string | undefined;
+  scenes?: SceneInfo[] | undefined;
+}) {
   const dict = getDictionary(lang);
   return (
     <nav aria-label={dict.nav.sidebar} className="sidebar-nav">
-      <TreeItems items={source.getPageTree(lang).children} />
+      <p className="sidebar-heading" id="sidebar-docs">
+        {dict.nav.docs}
+      </p>
+      <TreeItems items={source.getPageTree(lang).children} labelledBy="sidebar-docs" />
       {CATEGORIES.map((category) => (
         <div key={category}>
           <p className="sidebar-heading" id={`sidebar-${category}`}>
@@ -51,6 +68,9 @@ export function Sidebar({ lang }: { lang: Lang }) {
                       </>
                     )}
                   </NavLink>
+                  {entry.name === current && scenes ? (
+                    <SceneLinks scenes={scenes} label={dict.lab.scenes} />
+                  ) : null}
                 </li>
               ))}
           </ul>

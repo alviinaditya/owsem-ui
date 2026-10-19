@@ -78,6 +78,11 @@ export const catalog = [
 
 export type ComponentName = (typeof catalog)[number]["name"];
 
+/** The order the sidebar lists components in: by category, then PRD order. Previous and next follow it. */
+export const readingOrder = CATEGORIES.flatMap((category) =>
+  catalog.filter((entry) => entry.category === category),
+);
+
 export const isAvailable = (entry: CatalogEntry): boolean => entry.status !== "planned";
 
 /** Base UI docs for components built on a Base UI counterpart. */

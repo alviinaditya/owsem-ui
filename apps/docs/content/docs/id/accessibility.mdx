@@ -1,0 +1,136 @@
+---
+title: Aksesibilitas
+description: Apa yang ditangani OwsemUI, cara mengujinya saat ini, dan yang tetap menjadi tugas app.
+---
+
+OwsemUI menargetkan WCAG 2.2 AA untuk setiap komponen, di light maupun dark. Halaman ini memuat
+aturan yang diikuti setiap komponen dan menandai mana yang sudah dicek test saat ini. Baru Separator
+yang tersedia, jadi sebagian besar aturan di sini sudah ditetapkan walaupun komponen yang
+membutuhkannya belum dibuat.
+
+## Perilaku dari Base UI
+
+Fokus, keyboard, ARIA, dan positioning berasal dari [Base UI](https://base-ui.com). OwsemUI tidak
+menulis ulang semua itu; yang ditambahkan hanya CSS, dan props diteruskan ke Base UI apa adanya.
+Style membaca atribut state yang dipasang Base UI, seperti `data-orientation` di Separator, sehingga
+yang terlihat di layar dan yang dibacakan screen reader berasal dari state yang sama.
+
+Contohnya, Separator merender `role="separator"` dengan `aria-orientation`, dan test-nya memastikan
+keduanya tetap ada setelah dibungkus OwsemUI. Perilakunya sendiri dijelaskan di
+[panduan aksesibilitas Base UI](https://base-ui.com/react/overview/accessibility), dan setiap Lab
+komponen punya bagian Keyboard dan aksesibilitas, seperti milik [Separator](/id/separator#scene-keyboard).
+
+## Fokus yang terlihat
+
+Base UI mengatur fokus, tapi tampilannya diserahkan ke style. Aturan OwsemUI untuk setiap bagian
+yang bisa difokus: outline 2 px dengan jarak 2 px dari bagian itu, dengan kontras minimal 3:1
+terhadap latar di sekitarnya.
+
+- Bagian yang fokusnya jatuh ke input tersembunyi di dalamnya, seperti thumb slider, menampilkan
+  ring lewat `:has(:focus-visible)`.
+- Wadah yang memotong isinya memberi ruang untuk ring atau menggambarnya di sisi dalam, supaya ring
+  tidak pernah terpotong.
+- Di mode forced colors, ring memakai warna sistem `Highlight`.
+
+Separator tidak bisa difokus, jadi belum ada komponen tersedia yang menggambar ring. Token warna
+fokus menyusul bersama komponen pertama yang bisa difokus.
+
+## Kontras
+
+Targetnya, di light dan dark:
+
+- Teks: minimal 4,5:1 terhadap latarnya.
+- Batas kontrol dan indikator state, seperti tanda centang, Switch yang menyala, atau ring fokus:
+  minimal 3:1 terhadap warna di sebelahnya. Kontrol disabled dikecualikan, sesuai WCAG 1.4.11.
+
+Saat ini axe mengecek kontras teks di halaman test Separator untuk kedua tema. Pengecekan batas
+kontrol menyusul bersama kontrol pertama: kontrasnya dihitung dari nilai token, dan bayangan
+semi-transparan dikomposit dulu ke permukaan di belakangnya.
+
+## Target pointer
+
+Aturannya: setiap target pointer minimal 24 × 24 px, atau memenuhi pengecualian spacing di WCAG
+2.5.8. Bagian yang terlihat lebih kecil, seperti kotak Checkbox atau tombol tutup Dialog, mendapat
+area tekan yang lebih besar lewat padding atau pseudo-element. axe sudah berjalan dengan rule
+`target-size` aktif; pengukuran area tekan menyusul bersama kontrol pertama.
+
+## Reduced motion
+
+Aturannya: animasi hanya menggerakkan `transform` dan `opacity`, ditambah `clip-path` bila perlu,
+dan setiap animasi punya versi `prefers-reduced-motion` tanpa perpindahan, cukup perubahan opacity
+atau warna. Aturan ini juga berlaku untuk efek Owsem yang lebih kaya. Separator tidak beranimasi,
+jadi belum ada yang perlu dikurangi.
+
+## Forced colors
+
+Di mode forced colors (Windows High Contrast), browser membuang `box-shadow` dan gradien latar, lalu
+mewarnai latar dengan warna sistem `Canvas`. Material depth akan hilang. Separator menggambar garis
+terukirnya dengan border, bukan background, dan test-nya memastikan garis tetap 1 px dengan warna
+teks sistem. Kontrol mengikuti dua aturan:
+
+- Setiap kontrol memakai `outline: 1px solid transparent; outline-offset: -1px`. Outline ini tidak
+  terlihat di mode biasa, tidak mengubah geometri, dan muncul saat forced colors aktif.
+- Indikator dipetakan ke warna sistem (`CanvasText`, `Highlight`, `GrayText`) di dalam
+  `@media (forced-colors: active)`.
+
+Keduanya menyusul bersama kontrol pertama.
+
+## Tanpa frame saat diam
+
+Aturannya: saat tidak ada interaksi, tidak ada yang berjalan. Tidak ada callback
+`requestAnimationFrame` dan tidak ada animasi CSS atau Web Animations yang masih berjalan setelah
+animasi masuk selesai. Loop frame hanya berjalan selama animasinya berlangsung, dan pengecualiannya
+hanya state yang memang beranimasi, seperti loading. Halaman yang diam lebih nyaman bagi orang yang
+mudah terganggu oleh gerakan, dan lebih hemat baterai.
+
+Test-nya membungkus `requestAnimationFrame` sebelum komponen apa pun dimuat, menunggu sampai
+semuanya berhenti (paling lama 2 detik), lalu menghitung selama 3 detik tanpa interaksi. Separator
+lolos dengan nol frame dan nol animasi.
+
+## Cara mengujinya
+
+Test komponen berjalan di Chromium sungguhan dengan Vitest browser mode (`pnpm test`), di setiap
+pull request. Yang dicek saat ini:
+
+| Pengecekan | Saat ini |
+| --- | --- |
+| axe-core dengan tag WCAG 2.0 sampai 2.2 A dan AA, termasuk `target-size` | Separator di light dan dark: tanpa pelanggaran serious atau critical, dan tanpa kontras teks yang tidak bisa dihitung axe |
+| Forced colors, diemulasikan lewat Playwright | Garis Separator tetap terlihat dengan warna teks sistem |
+| Frame dan animasi saat diam | Separator: nol untuk keduanya selama 3 detik |
+| ARIA dari Base UI | Separator tetap punya `role` dan `aria-orientation` |
+
+Test canary memastikan alat test-nya sendiri bekerja: axe harus menandai target yang terlalu kecil
+dan melaporkan teks di atas gradien sebagai belum dicek, dan penghitung frame harus menangkap loop
+yang tidak pernah berhenti.
+
+Yang direncanakan bersama komponen berikutnya: pengecekan batas 3:1 dan pengukuran area tekan di
+Chromium, Firefox, dan WebKit; test kontras untuk teks di atas gradien material depth, terhadap
+kedua ujung gradiennya; serta pengecekan bahwa teks yang disembunyikan secara visual tetap terbaca
+screen reader.
+
+## Yang tetap menjadi tugas app
+
+Komponen mengurus bagiannya sendiri. Halaman di sekitarnya adalah tugas Anda:
+
+- Beri nama yang aksesibel untuk tombol yang hanya berisi ikon dan kontrol lain tanpa teks yang
+  terlihat, misalnya lewat `aria-label`.
+- Susun struktur halaman: satu `h1`, heading yang berurutan, landmark seperti `<main>` dan `<nav>`,
+  judul halaman, dan atribut `lang` di `<html>`.
+- Jaga kontras saat mengganti warna token. Cek 4,5:1 untuk teks dan 3:1 untuk batas kontrol, di
+  kedua tema, untuk setiap token yang diganti.
+- Pasang tema di halaman itu sendiri, supaya teks berada di atas latar yang kontrasnya sudah dicek.
+  Test OwsemUI memakai ini:
+  ```css
+  body {
+    background-color: var(--ow-bg);
+    color: var(--ow-fg);
+  }
+  ```
+- Jangan hapus outline fokus lewat CSS reset. CSS OwsemUI berada di dalam `@layer`, jadi aturan di
+  luar layer seperti `:focus { outline: none }` akan mengalahkan ring fokus.
+- Terjemahkan label bawaan. Base UI memasang beberapa teks dalam bahasa Inggris, seperti
+  `aria-label="Notifications"` di `Toast.Viewport`. Props untuk menggantinya menyusul bersama
+  komponen tersebut.
+- Beri juga versi reduced motion untuk animasi buatan Anda sendiri.
+- Uji halaman app Anda dengan keyboard dan screen reader. Pengecekan otomatis seperti axe hanya
+  menemukan sebagian masalah.

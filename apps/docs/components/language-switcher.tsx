@@ -12,16 +12,19 @@ export function LanguageSwitcher({ lang, label }: { lang: Lang; label: string })
   const rest = usePathname().split("/").slice(2).join("/");
   return (
     <nav aria-label={label} className="language-switcher">
-      <ul>
+      <ul className="seg">
         {i18n.languages.map((target) => (
           <li key={target}>
             <a
+              className="seg-item"
               href={`/${target}${rest ? `/${rest}` : ""}`}
               hrefLang={target}
               lang={target}
+              title={languageNames[target]}
               aria-current={target === lang ? "page" : undefined}
             >
-              {languageNames[target]}
+              {target.toUpperCase()}
+              <span className="visually-hidden"> {languageNames[target]}</span>
             </a>
           </li>
         ))}

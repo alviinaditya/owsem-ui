@@ -1,0 +1,57 @@
+---
+title: Skills
+description: Ajari coding agent memakai OwsemUI lewat skill owsem-ui.
+---
+
+Agent skill adalah folder berisi file `SKILL.md` dengan instruksi yang dimuat coding agent, seperti
+Claude Code, Cursor, atau Codex, saat sebuah tugas membutuhkannya. OwsemUI menyediakan satu skill,
+`owsem-ui`, supaya agent Anda memasang, memberi tema, dan menata komponen sesuai cara kerja library
+ini, bukan menebak.
+
+## Instalasi
+
+[CLI skills](https://github.com/vercel-labs/skills) memasang skill ke project untuk agent yang
+terdeteksi:
+
+```sh
+npx skills add alviinaditya/owsem-ui
+```
+
+Untuk memilih sendiri skill dan agent-nya:
+
+```sh
+npx skills add alviinaditya/owsem-ui --skill owsem-ui -a claude-code
+```
+
+`-a` juga menerima agent lain, seperti `cursor` atau `codex`, dan bisa diulang. Tambahkan `-g` untuk
+memasang skill secara global, di folder home Anda, sehingga berlaku di semua project.
+
+## Isi skill
+
+- Instalasi lewat npm (`owsem-ui`) atau registry shadcn (`@owsem`), dan ke mana file-nya masuk.
+- Dua style global yang diminta Base UI.
+- Tema: `data-theme`, token `--ow-*`, token komponen beserta fallback-nya, dan urutan `@layer`,
+  termasuk baris untuk Tailwind CSS v4.
+- Komponen yang sudah tersedia, dengan props dan token Separator, serta tempat mengecek komponen
+  lain, bukan daftar tetap di dalam skill.
+- Aturan untuk agent: ubah tampilan lewat token alih-alih menimpa CSS komponen, pertahankan ring
+  fokus dan reduced motion, serahkan perilaku ke Base UI, dan baca docs komponen sebelum memakainya.
+
+## Versi
+
+Skill ini ada di repository, di
+[`skills/owsem-ui/SKILL.md`](https://github.com/alviinaditya/owsem-ui/blob/main/skills/owsem-ui/SKILL.md),
+dan mengikuti library di branch `main`, jadi bisa lebih baru daripada versi di npm. Untuk mengambil
+versi terbaru:
+
+```sh
+npx skills update owsem-ui
+```
+
+## Sumber lain untuk agent
+
+- Dokumentasi ini: [Getting Started](/id/docs) dan [Tema](/id/docs/theming) untuk setup, serta
+  [halaman komponen](/id) untuk anatomi, keyboard, token, dan props tiap komponen. Komponen yang
+  belum dibuat menampilkan halaman Segera hadir.
+- Registry shadcn: `https://owsem.dev/r/registry.json` berisi daftar semua komponen yang sudah
+  dibuat, dan `https://owsem.dev/r/{name}.json` berisi file satu komponen.

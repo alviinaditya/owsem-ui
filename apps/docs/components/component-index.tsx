@@ -34,10 +34,10 @@ export function ComponentIndex({
     filter === "all" || family === filter || family === "base+owsem";
   return (
     <>
-      <fieldset className="filter">
+      <fieldset className="seg filter">
         <legend>{labels.legend}</legend>
         {FILTERS.map((value) => (
-          <label key={value}>
+          <label key={value} className="seg-item" data-selected={filter === value ? "" : undefined}>
             <input
               type="radio"
               name="family"

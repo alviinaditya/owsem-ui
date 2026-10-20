@@ -144,8 +144,8 @@ deleted CSS:
 | 2 | Combobox, Dialog | ⌘K search (DS-5), through Command Menu |
 | 3 | Drawer | The sidebar as a menu panel below 1100 px, and the Lab's docs, controls, and code sheets below 960 px (DS-10) |
 
-When the depth material tokens land in `tokens.css` (TK-7), point `--docs-well`, `--docs-raised`,
-and their shadows at them, so the docs and the library share one source.
+The docs' `--docs-well`, `--docs-raised`, and their shadows point at the library's depth
+materials (TK-7), so the docs and the library share one source.
 
 Items in a list (menus, selects, tabs, toggle groups) are lit with Glide from
 `src/core/glide/`, not a hover style of their own; a component that moves its highlight with the
@@ -154,6 +154,29 @@ keyboard calls `setActive()`.
 The package and registry builds pick up the folder automatically. Registry copies rewrite imports
 that leave the folder: Core to `@/lib/owsem/...` and other components to
 `@/components/owsem/<name>/...` (CLI-6 in the PRD). Every component is one item, `<name>`.
+
+### Materials and motion
+
+Surfaces come from the depth materials in `tokens.css` (TK-7): `--ow-panel` and `--ow-popup-shadow`
+for popups, `--ow-raised-*` for buttons and thumbs, `--ow-well-*` for tracks and fields,
+`--ow-pressed-*` for pressed and on states, `--ow-socket-*` around important buttons, and
+`--ow-primary-*` for the primary button. Base never glows (DP-1).
+
+Motion explains a state change (principle 4), with these rules:
+
+- Ask first whether it should move at all. Anything opened or toggled from the keyboard many times
+  a day (a command palette, shortcuts) changes instantly.
+- Animate `transform` and `opacity` only (FR-18). Enter and exit with `data-starting-style` and
+  `data-ending-style` and CSS transitions (FR-7); never from `scale(0)`, start at 0.95 or more.
+- Popups scale from their trigger (`transform-origin: var(--transform-origin)`); dialogs stay
+  centered.
+- Ease with `--ow-ease-out` for entering and leaving, `--ow-ease-in-out` for moving on screen, and
+  never `ease-in`. Springs are `--ow-spring-travel`, `--ow-spring-settle` (a press releasing), and
+  `--ow-spring-glide`, each with its `-duration` token.
+- Keep UI motion short: 100 to 160 ms for a press, 125 to 200 ms for tooltips, 150 to 250 ms for
+  menus and popovers, up to 300 ms for dialogs.
+- Gate hover motion with `@media (hover: hover) and (pointer: fine)`, and give every animation a
+  reduced-motion version without movement (FR-20).
 
 A component has one type. **Base** is a Base UI component with OwsemUI's styling and small
 improvements, exported from `src/base.ts` (`owsem-ui/base`). **Owsem** is OwsemUI's own component,
@@ -179,7 +202,7 @@ component and marks the one being read. Separator is the reference. A Lab has tw
   after the scene. Controls are `choice` (a segmented radio group) or `color` (a hex field and the
   browser's picker; `token` names the theme token the component uses until a color is chosen).
 
-The token setup in the sidebar's foot (mode and prefix, DS-4) reaches every Lab: `code(cfg, setup)` writes
+The token setup (the stage toolbar's Token button; mode and prefix, DS-4) reaches every Lab: `code(cfg, setup)` writes
 token names with `setup.prefix` and any setup but theme with `ow` imports from the owsem CLI's copy,
 the install tab switches to the owsem CLI, and `--ow-` in the narrative's code is renamed in the
 browser (`data-token-literal` keeps a name as written).

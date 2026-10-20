@@ -1,0 +1,133 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * A floating panel on the panel material with the popup shadow, and an optional arrow with the
+ * same surface and edge. It grows out of its trigger in 180 ms.
+ */
+@layer owsem.components {
+  .ow-popover-popup {
+    --_bg: var(--ow-popover-bg, var(--ow-panel, #ffffff));
+    --_shadow: var(
+      --ow-popover-shadow,
+      var(--ow-popup-shadow, 0 0 0 1px rgb(30 25 40 / 0.1), 0 16px 40px -12px rgb(40 30 20 / 0.24))
+    );
+    /* The arrow's edge: the popup shadow's 1px ring, in both themes. */
+    --_edge: var(--ow-popover-edge, color-mix(in oklab, var(--ow-fg, #1b1726) 10%, transparent));
+    --_fg: var(--ow-popover-fg, var(--ow-fg, #1b1726));
+    --_muted: var(--ow-popover-muted, var(--ow-muted, #5c5669));
+    box-sizing: border-box;
+    max-inline-size: var(--available-width);
+    padding: 16px;
+    border-radius: calc(var(--ow-radius, 8px) + 4px);
+    /* Invisible until forced colors draw it as the edge (DP-8). */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--_bg);
+    box-shadow: var(--_shadow);
+    color: var(--_fg);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    transform-origin: var(--transform-origin);
+    transition:
+      opacity 180ms var(--ow-ease-out, cubic-bezier(0.23, 1, 0.32, 1)),
+      transform 180ms var(--ow-ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+  }
+
+  .ow-popover-popup:is([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  /* Leaving is quicker than arriving. */
+  .ow-popover-popup[data-ending-style] {
+    transition-duration: 120ms;
+  }
+
+  /* Opened from the keyboard, or shut with Escape: no animation. */
+  .ow-popover-popup[data-instant] {
+    transition: none;
+  }
+
+  .ow-popover-title {
+    margin: 0;
+    font-size: 1em;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .ow-popover-description {
+    margin: 0;
+    color: var(--_muted);
+  }
+
+  .ow-popover-title + .ow-popover-description {
+    margin-block-start: 4px;
+  }
+
+  /*
+   * A 14px box centered on the popup's edge; its outer half shows a square turned 45 degrees, with
+   * the popup's surface and a 1px edge. Base UI centers it on the trigger with top or left.
+   */
+  .ow-popover-arrow {
+    inline-size: 14px;
+    block-size: 14px;
+  }
+
+  .ow-popover-arrow::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    inline-size: 9.9px;
+    block-size: 9.9px;
+    margin: auto;
+    border: 1px solid var(--_edge);
+    background-color: var(--_bg);
+    transform: rotate(45deg);
+  }
+
+  /* biome-ignore-start lint/nursery/useLogicalProperties: Base UI's physical sides */
+  .ow-popover-arrow[data-side="top"] {
+    top: calc(100% - 7px);
+    clip-path: inset(50% 0 0);
+  }
+
+  .ow-popover-arrow[data-side="bottom"] {
+    bottom: calc(100% - 7px);
+    clip-path: inset(0 0 50%);
+  }
+
+  .ow-popover-arrow[data-side="left"] {
+    left: calc(100% - 7px);
+    clip-path: inset(0 0 0 50%);
+  }
+
+  .ow-popover-arrow[data-side="right"] {
+    right: calc(100% - 7px);
+    clip-path: inset(0 50% 0 0);
+  }
+  /* biome-ignore-end lint/nursery/useLogicalProperties: Base UI's physical sides */
+
+  /* Logical sides: mirrored right to left. */
+  .ow-popover-arrow[data-side="inline-start"] {
+    inset-inline-start: calc(100% - 7px);
+    clip-path: inset(0 0 0 50%);
+  }
+
+  .ow-popover-arrow[data-side="inline-end"] {
+    inset-inline-end: calc(100% - 7px);
+    clip-path: inset(0 50% 0 0);
+  }
+
+  .ow-popover-positioner[dir="rtl"]
+    .ow-popover-arrow:is([data-side="inline-start"], [data-side="inline-end"]) {
+    transform: scaleX(-1);
+  }
+
+  /* FR-20: it fades, without growing. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-popover-popup:is([data-starting-style], [data-ending-style]) {
+      transform: none;
+    }
+  }
+}

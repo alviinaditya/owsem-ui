@@ -1,6 +1,6 @@
 "use client";
 
-import { Kbd, Menu, Toggle, Toolbar, Tooltip } from "owsem-ui/base";
+import { Kbd, Menu, Popover, Toggle, Toolbar, Tooltip } from "owsem-ui/base";
 import {
   Fragment,
   type KeyboardEvent,
@@ -18,7 +18,7 @@ import { Icon, type IconName } from "../icons/icon";
 import { InstallPane } from "../install";
 import { ScrollFade } from "../scroll-fade";
 import { Tip } from "../tip";
-import { placeTokenSetup, TOKEN_SETUP_ID, useTokenSetup } from "../token-setup";
+import { type TokenSetupPlace, tokenSetupHandle, useTokenSetup } from "../token-setup";
 import { ColorField } from "./color-field";
 import { CopyButton } from "./copy-button";
 import { Inspect } from "./inspect";
@@ -278,25 +278,18 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
 
   const setup = useTokenSetup();
   const files = lab.code(state.cfg, setup);
-  // The More menu gives way to the token setup, which opens under the toolbar once the menu has
-  // shut and handed focus back; focus comes back to the menu's button when the setup shuts too.
+  // The token setup opens under the toolbar, from its Token button or, on a narrow stage where
+  // that button is hidden, from the More menu once the menu has shut and handed focus back. Focus
+  // then goes back to whichever button shows.
   const barRef = useRef<HTMLDivElement>(null);
+  const tokensButtonRef = useRef<HTMLButtonElement>(null);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
   const docsLabelRef = useRef<HTMLSpanElement>(null);
   const tokensFromMore = useRef(false);
-  const openTokenSetup = () => {
-    const panel = document.getElementById(TOKEN_SETUP_ID);
-    if (!panel) return;
-    placeTokenSetup("stage");
-    panel.showPopover();
-    const back = (event: Event) => {
-      if ((event as ToggleEvent).newState !== "closed") return;
-      panel.removeEventListener("toggle", back);
-      // Focus is still inside the hidden panel, or already fell back to the body.
-      const lost = document.activeElement;
-      if (!lost || lost === document.body || panel.contains(lost)) moreButtonRef.current?.focus();
-    };
-    panel.addEventListener("toggle", back);
+  const tokensId = `${id}-tokens`;
+  const tokensPlace: TokenSetupPlace = {
+    anchor: barRef,
+    finalFocus: () => (tokensButtonRef.current?.offsetParent ? true : moreButtonRef.current),
   };
   // Stage theme and the token setup step into the More menu when the stage is narrow (globals.css).
   const tools: {
@@ -403,11 +396,11 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
             <Tip
               trigger={
                 <Toolbar.Button
+                  ref={tokensButtonRef}
+                  id={tokensId}
+                  render={<Popover.Trigger handle={tokenSetupHandle} payload={tokensPlace} />}
                   className="lab-tool"
-                  popoverTarget={TOKEN_SETUP_ID}
-                  aria-haspopup="dialog"
                   data-more=""
-                  onClick={() => placeTokenSetup("stage")}
                 >
                   <Icon name="palette" size={15} />
                   <span className="lab-tool-label lab-tool-token-label">{labels.tokens}</span>
@@ -445,7 +438,7 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
               onOpenChangeComplete={(open) => {
                 if (open || !tokensFromMore.current) return;
                 tokensFromMore.current = false;
-                openTokenSetup();
+                tokenSetupHandle.open(tokensId);
               }}
             >
               <Tip

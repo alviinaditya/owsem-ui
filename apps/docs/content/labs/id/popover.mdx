@@ -1,0 +1,150 @@
+---
+title: Popover
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Popover membuka panel kecil dari sebuah tombol: judul, satu atau dua baris teks, dan kontrol, di
+atas material panel dengan bayangan popup, dengan panah opsional ke arah tombol. Base UI yang
+menaruhnya dan mengatur fokus. Gulir untuk mulai tur; stage mengikuti setiap bagian.
+
+## Panel dari trigger-nya [#panel]
+
+Panel tumbuh dari tombolnya dalam 180 ms, dari 0,96 dan transparan, dengan ease-out, dari ujung
+panah; panel pergi dalam 120 ms. Bila dibuka dari keyboard, panel langsung muncul. Fokus masuk ke
+panel dan kembali ke tombol saat panel tertutup: dengan Escape, klik di luar, atau
+`Popover.Close`.
+
+Berbeda dengan tooltip, popover untuk konten yang dibaca dan dipakai, dan bekerja sama baiknya di
+layar sentuh dan screen reader. Panelnya adalah `dialog` yang dinamai oleh `Popover.Title` dan
+dideskripsikan oleh `Popover.Description`.
+
+Stage memutarnya: pointer membuka Bagikan, menyalakan dan mematikan komentar di dalam panel, lalu
+menutupnya dari tombol. Putar scene memutarnya lagi.
+
+## Ditaruh dan menunjuk [#placement]
+
+Base UI menaruh panel di `side` yang diminta, bawaannya `bottom`, 10px dari tombolnya, dan
+membaliknya ke sisi seberang bila panel akan keluar layar. Panah berada di tepi panel, dengan
+permukaan dan tepi 1px yang sama, dan menunjuk tengah tombol meski panel bergeser agar tetap di
+layar; panah juga menjauh dari sudut yang membulat.
+
+Panel disematkan terbuka di stage: pilih sisi atau matikan panah di kontrol.
+
+## Satu panel, banyak trigger [#detached]
+
+`Popover.Trigger` bisa berada di mana saja, di luar `Popover.Root`-nya, dihubungkan oleh handle
+dari `Popover.createHandle()`. Setiap trigger dengan handle itu membuka panel yang sama, di
+bawah dirinya; handle juga bisa membuka dan menutupnya dari kode. Docs ini bekerja dengan cara
+itu: tombol Token di stage, menu Lainnya, dan setiap link Ubah membuka satu panel Pengaturan token.
+
+Stage memutarnya: Bagikan membuka panel, link di bawah toolbar mengambil alih, lalu menutupnya.
+
+## Anatomi [#anatomy]
+
+Base UI merender bagian-bagiannya, penamaan dialog, dan fokus; OwsemUI memberi gaya pada panel,
+panah, judul, dan deskripsi, memasang jarak 10px, dan membawa arah teks ke dalam portal. Root,
+Portal, Close, dan Backdrop tidak menambah tampilan. Inspeksi (I) menandai bagian lainnya di stage;
+pilih sebuah nama, di sini atau di stage, untuk melihat tokennya.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Trigger" /> | Tombol Anda | Diberikan lewat `render`; `aria-expanded`, dan `data-popup-open` selama terbuka |
+| Positioner | `div.ow-popover-positioner` | `side`, `align`, `sideOffset` (10), `arrowPadding` (12), dan `dir` |
+| <Part name="Popup" /> | `div.ow-popover-popup` | `role="dialog"`, `data-side`, dan `data-instant` saat melewati animasi |
+| <Part name="Arrow" /> | `div.ow-popover-arrow` | Opsional dan `aria-hidden`; persegi yang diputar, separuhnya tampil |
+| <Part name="Title" /> | `h2.ow-popover-title` | Menamai dialog |
+| <Part name="Description" /> | `p.ow-popover-description` | Mendeskripsikan dialog, muted |
+| Close | Tombol Anda | Menutup popover |
+
+## State dan varian [#states]
+
+Stage menampilkan panel di kedua tema, dengan dan tanpa panah. Permukaannya material panel di
+keduanya, dengan bayangan popup, dan panah memakai permukaan serta tepi yang sama.
+
+| State | Tandanya |
+| --- | --- |
+| Masuk | Dari 0,96 dan transparan ke ukuran penuh, dalam 180 ms, dengan ease-out |
+| Terbuka | `data-open`, `data-side` di popup dan panah; `data-popup-open` di trigger |
+| Langsung | `data-instant`: `click` dari keyboard, `dismiss` setelah Escape, `trigger-change` antar trigger |
+| Keluar | Kembali ke 0,96 dan transparan, dalam 120 ms |
+
+## Keyboard dan aksesibilitas [#keyboard]
+
+| Tombol | Aksi |
+| --- | --- |
+| Enter, Space | Di trigger: membuka panel; fokus masuk ke dalamnya |
+| Tab | Berpindah antar kontrol di panel |
+| Escape | Menutup panel; fokus kembali ke trigger |
+
+Screen reader mengumumkan dialog yang dinamai oleh judul dan dideskripsikan oleh deskripsinya.
+`modal` bawaannya false, jadi halaman tetap bisa dipakai selama panel terbuka; pasang `true` atau
+`"trap-focus"` untuk menahan fokus di dalam. `initialFocus` dan `finalFocus` menentukan ke mana
+fokus pergi.
+
+Dengan `prefers-reduced-motion`, panel memudar tanpa tumbuh. Di forced colors (Windows High
+Contrast), panel tetap punya tepi 1px dengan warna sistem, begitu pula panahnya.
+
+## Kustomisasi [#customization]
+
+Kontrol stage terbuka: pilih sisi, panah, permukaan, atau warna teks, dan kodenya ikut berubah.
+
+<ForMode mode="theme">
+
+Pasang token di popup lewat class, seperti `share.css`, atau untuk semua popover di `:root`. Class
+di sekitar trigger tidak sampai: panel dirender di portal, di luar subtree trigger-nya.
+
+| Token komponen | Bawaan | Fungsi |
+| --- | --- | --- |
+| `--ow-popover-bg` | `--ow-panel` | Permukaan, juga untuk panah |
+| `--ow-popover-shadow` | `--ow-popup-shadow` | Tepi dan bayangan |
+| `--ow-popover-edge` | `--ow-fg` 10% | Tepi panah: pasang bersama bayangannya |
+| `--ow-popover-fg` | `--ow-fg` | Teks |
+| `--ow-popover-muted` | `--ow-muted` | Deskripsi |
+
+</ForMode>
+
+<ForMode mode="isolated">
+
+Popup membawa nilainya sendiri: pasang token di Popup lewat class, seperti `share.css`. Class di
+sekitar trigger tidak sampai: panel dirender di portal.
+
+| Token komponen | Bawaan | Fungsi |
+| --- | --- | --- |
+| `--ow-popover-bg` | Miliknya sendiri, per tema | Permukaan, juga untuk panah |
+| `--ow-popover-shadow` | Miliknya sendiri, per tema | Tepi dan bayangan |
+| `--ow-popover-edge` | Miliknya sendiri, per tema | Tepi panah: pasang bersama bayangannya |
+| `--ow-popover-fg` | Miliknya sendiri, per tema | Teks |
+| `--ow-popover-muted` | Miliknya sendiri, per tema | Deskripsi |
+
+</ForMode>
+
+Sudutnya `--ow-radius` ditambah 4px, sama seperti menu, dan panel punya padding 16px.
+
+<TokenChip item="popover" lang="id" />
+
+## Ship it [#ship]
+
+Drawer kode menulis popover persis seperti pengaturan stage. Ganti sisi, panah, atau warna, dan
+baris yang berubah akan menyala.
+
+| Bagian | Prop | Tipe | Bawaan |
+| --- | --- | --- | --- |
+| Root | `open`, `defaultOpen`, `onOpenChange` | | |
+| Root | `modal` | `boolean \| "trap-focus"` | `false` |
+| Root | `handle` | `Popover.Handle` | |
+| Trigger | `handle`, `payload` | | |
+| Trigger | `openOnHover`, `delay` | `boolean`, `number` | `false`, `300` |
+| Positioner | `side` | `"top" \| "right" \| "bottom" \| "left" \| "inline-start" \| "inline-end"` | `"bottom"` |
+| Positioner | `align` | `"start" \| "center" \| "end"` | `"center"` |
+| Positioner | `sideOffset` | `number` | `10` |
+| Positioner | `arrowPadding` | `number` | `12` |
+| Popup | `initialFocus`, `finalFocus` | | |
+| Semua bagian | `className`, `style`, `render` | | |
+
+Nilai bawaan `sideOffset` dan `arrowPadding` berasal dari OwsemUI; sisanya dari Base UI, yang
+mendokumentasikannya. Ref diteruskan ke elemen setiap bagian.
+
+Impor dari `owsem-ui/base`. Di registry, item-nya `popover`; toolbar di sini juga butuh `toolbar`
+dan `toggle`.

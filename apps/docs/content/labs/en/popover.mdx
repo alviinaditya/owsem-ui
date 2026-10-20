@@ -1,0 +1,150 @@
+---
+title: Popover
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Popover opens a small panel from a button: a title, a line or two, and controls, on the panel
+material with the popup shadow, with an optional arrow toward the button. Base UI places it and
+handles focus. Scroll to start the tour; the stage follows each part.
+
+## A panel from its trigger [#panel]
+
+The panel grows out of its button in 180 ms, from 0.96 and transparent, eased out, from the arrow's
+tip; it leaves in 120 ms. Opened from the keyboard, it appears at once. Focus moves into the panel
+and comes back to the button when it shuts: with Escape, a click outside, or a `Popover.Close`.
+
+Unlike a tooltip, a popover is for content people read and act on, and it works the same with
+touch and screen readers. The panel is a `dialog` named by its `Popover.Title` and described by
+`Popover.Description`.
+
+The stage plays it: the pointer opens Share, turns comments on and off inside the panel, and
+shuts it from the button. Play scene runs it again.
+
+## Placed and pointed [#placement]
+
+Base UI places the panel on the `side` you ask for, `bottom` by default, 10px from its button, and
+flips it to the other side when it would leave the screen. The arrow sits on the panel's edge,
+with its surface and its 1px edge, and points at the button's middle even when the panel slides
+along to stay on screen; it keeps clear of the rounded corners.
+
+The panel is pinned open on the stage: pick a side or turn the arrow off in the controls.
+
+## One panel, many triggers [#detached]
+
+A `Popover.Trigger` can sit anywhere, outside its `Popover.Root`, linked by a handle from
+`Popover.createHandle()`. Every trigger with that handle opens the same panel, under itself; the
+handle also opens and shuts it from code. These docs work this way: the stage's Token button,
+the More menu, and every Change link open one Token setup panel.
+
+The stage plays it: Share opens the panel, the link under the toolbar takes it over, then shuts it.
+
+## Anatomy [#anatomy]
+
+Base UI renders the parts, the dialog's naming, and focus; OwsemUI styles the panel, the arrow, the
+title, and the description, sets the 10px offset, and carries the text direction into the portal.
+Root, Portal, Close, and Backdrop add no look of their own. Inspect (I) outlines the other parts on
+the stage; pick a name, here or on the stage, to see its tokens.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Trigger" /> | Your button | Passed to `render`; `aria-expanded`, and `data-popup-open` while open |
+| Positioner | `div.ow-popover-positioner` | `side`, `align`, `sideOffset` (10), `arrowPadding` (12), and `dir` |
+| <Part name="Popup" /> | `div.ow-popover-popup` | `role="dialog"`, `data-side`, and `data-instant` when it skips the animation |
+| <Part name="Arrow" /> | `div.ow-popover-arrow` | Optional and `aria-hidden`; a turned square, half of it showing |
+| <Part name="Title" /> | `h2.ow-popover-title` | Names the dialog |
+| <Part name="Description" /> | `p.ow-popover-description` | Describes the dialog, muted |
+| Close | Your button | Shuts the popover |
+
+## States and variants [#states]
+
+The stage sets the panel in both themes, with and without the arrow. The surface is the panel
+material in both, with the popup shadow, and the arrow shares its surface and edge.
+
+| State | What shows it |
+| --- | --- |
+| Entering | From 0.96 and transparent to full size, in 180 ms, eased out |
+| Open | `data-open`, `data-side` on the popup and arrow; `data-popup-open` on the trigger |
+| At once | `data-instant`: `click` from the keyboard, `dismiss` after Escape, `trigger-change` between triggers |
+| Leaving | Back to 0.96 and transparent, in 120 ms |
+
+## Keyboard and accessibility [#keyboard]
+
+| Key | Action |
+| --- | --- |
+| Enter, Space | On the trigger: open the panel; focus moves into it |
+| Tab | Moves through the panel's controls |
+| Escape | Shuts the panel; focus goes back to the trigger |
+
+Screen readers announce a dialog named by the title and described by the description. `modal`
+is false by default, so the page stays usable while the panel is open; set it to `true` or
+`"trap-focus"` to keep focus inside. `initialFocus` and `finalFocus` pick where focus goes.
+
+With `prefers-reduced-motion`, the panel fades without growing. In forced colors (Windows High
+Contrast), the panel keeps a 1px edge in the system color, and so does the arrow.
+
+## Customization [#customization]
+
+The stage controls are open: pick the side, the arrow, the surface, or the text color, and the code
+follows.
+
+<ForMode mode="theme">
+
+Set the tokens on the popup with a class, as `share.css` does, or for every popover on `:root`. A
+class around the trigger does not reach: the panel renders in a portal, outside the trigger's
+subtree.
+
+| Component token | Default | Purpose |
+| --- | --- | --- |
+| `--ow-popover-bg` | `--ow-panel` | Surface, the arrow's too |
+| `--ow-popover-shadow` | `--ow-popup-shadow` | Edge and shadow |
+| `--ow-popover-edge` | `--ow-fg` at 10% | The arrow's edge: set it with the shadow |
+| `--ow-popover-fg` | `--ow-fg` | Text |
+| `--ow-popover-muted` | `--ow-muted` | The description |
+
+</ForMode>
+
+<ForMode mode="isolated">
+
+The popup carries its own values: set a token on the Popup with a class, as `share.css` does. A
+class around the trigger does not reach: the panel renders in a portal.
+
+| Component token | Default | Purpose |
+| --- | --- | --- |
+| `--ow-popover-bg` | Its own, per theme | Surface, the arrow's too |
+| `--ow-popover-shadow` | Its own, per theme | Edge and shadow |
+| `--ow-popover-edge` | Its own, per theme | The arrow's edge: set it with the shadow |
+| `--ow-popover-fg` | Its own, per theme | Text |
+| `--ow-popover-muted` | Its own, per theme | The description |
+
+</ForMode>
+
+The corners are `--ow-radius` plus 4px, as a menu's, and the panel has 16px of padding.
+
+<TokenChip item="popover" lang="en" />
+
+## Ship it [#ship]
+
+The code drawer writes the popover exactly as the stage is set up. Change the side, the arrow, or a
+color, and the lines that change light up.
+
+| Part | Prop | Type | Default |
+| --- | --- | --- | --- |
+| Root | `open`, `defaultOpen`, `onOpenChange` | | |
+| Root | `modal` | `boolean \| "trap-focus"` | `false` |
+| Root | `handle` | `Popover.Handle` | |
+| Trigger | `handle`, `payload` | | |
+| Trigger | `openOnHover`, `delay` | `boolean`, `number` | `false`, `300` |
+| Positioner | `side` | `"top" \| "right" \| "bottom" \| "left" \| "inline-start" \| "inline-end"` | `"bottom"` |
+| Positioner | `align` | `"start" \| "center" \| "end"` | `"center"` |
+| Positioner | `sideOffset` | `number` | `10` |
+| Positioner | `arrowPadding` | `number` | `12` |
+| Popup | `initialFocus`, `finalFocus` | | |
+| Every part | `className`, `style`, `render` | | |
+
+The defaults of `sideOffset` and `arrowPadding` are OwsemUI's; the rest comes from Base UI, which
+documents it. Refs go to each part's element.
+
+Import it from `owsem-ui/base`. In the registry, it is the `popover` item; the toolbar here also
+needs `toolbar` and `toggle`.

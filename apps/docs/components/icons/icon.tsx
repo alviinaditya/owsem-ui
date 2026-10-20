@@ -119,6 +119,7 @@ const ICONS = {
       <path d="M4 19h16" />
     </>
   ),
+  "message-square": <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />,
   monitor: (
     <>
       <rect width="20" height="14" x="2" y="3" rx="2" />

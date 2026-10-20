@@ -139,9 +139,44 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Separator** (Base, from `owsem-ui/base`) and **Tree Rail Nav** (Owsem, from `owsem-ui/owsem`)
-are built. Base components are Base UI components with OwsemUI's styling; Owsem components are
+**Button** and **Separator** (Base, from `owsem-ui/base`) and **Tree Rail Nav** (Owsem, from
+`owsem-ui/owsem`) are built. Base components are Base UI components with OwsemUI's styling; Owsem components are
 OwsemUI's own. No component has a `flavor` prop.
+
+### Button
+
+```tsx
+import { Button, ButtonIcon, buttonStyles, IconButton } from "owsem-ui/base"; // or "@/components/owsem/button"
+<Button onClick={save}>Save</Button>
+<Button variant="secondary" size="sm" startIcon={<Plus />}>Add</Button>
+<Button loading={saving}>Save</Button>
+<IconButton icon={<Trash />} aria-label="Delete" variant="destructive" />
+<a href="/docs" {...buttonStyles({ variant: "outline" })}>
+  Docs
+  <ButtonIcon side="end"><ArrowRight /></ButtonIcon>
+</a>
+```
+
+- Base UI's Button: a native `<button type="button">` with the `ow-button` class. Props:
+  `variant` (`"primary"`, the default, `"secondary"`, `"outline"`, `"ghost"`, `"link"`,
+  `"destructive"`), `size` (`"sm"`, `"md"`, the default, `"lg"`), `soft` (a flat tint, for
+  primary, secondary, and destructive), `loading`, `startIcon`, `endIcon`, and Base UI's
+  `disabled`, `focusableWhenDisabled`, `nativeButton`, `className`, `style`, `render`. The ref
+  goes to the button.
+- `loading` keeps the width and focus, ignores presses, and sets `aria-busy` and `aria-disabled`.
+  Keep the label the same while loading. Use a boolean (`loading={saving}`) on buttons that can
+  load, so the spinner fades in.
+- `IconButton`: `icon` and a required `aria-label`; square; `ghost` by default.
+- Links: never render a link through Button. Spread `buttonStyles({ variant, size, soft,
+  className })` on the `<a>` or router `Link`, and wrap icons in `ButtonIcon` (`side`). Pass icons
+  as elements; their size is the font size plus 2px, so do not size them.
+- Size: `--py` (padding above and below the text) sets any custom size, through `style` on the
+  button itself: `style={{ "--py": "0.6em" }}`. Do not set `height` or `padding`.
+- Tokens: `--ow-button-radius`, `--ow-button-primary-bg`, `--ow-button-on-primary`,
+  `--ow-button-critical`, `--ow-button-on-critical`, `--ow-button-edge`, `--ow-button-hover`,
+  `--ow-button-fg`, `--ow-button-link`, `--ow-button-focus`, `--ow-button-ripple`, and the
+  material pairs `--ow-button-{raised,pressed,socket}-{bg,shadow}` and
+  `--ow-button-primary-shadow`.
 
 ### Separator
 

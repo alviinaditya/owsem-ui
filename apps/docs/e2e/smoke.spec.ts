@@ -5,7 +5,7 @@ test("serves the registry at /r without a language prefix (DS-7)", async ({ requ
   expect(catalog.ok()).toBe(true);
   expect(catalog.headers()["access-control-allow-origin"]).toBe("*");
 
-  for (const name of ["core", "separator"]) {
+  for (const name of ["core", "button", "separator"]) {
     const item = await request.get(`/r/${name}.json`, { maxRedirects: 0 });
     expect(item.ok()).toBe(true);
     expect((await item.json()).name).toBe(name);

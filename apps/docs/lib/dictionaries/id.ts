@@ -119,7 +119,8 @@ export const id = {
     change: "Ubah",
   },
   components: {
-    button: "Tombol aksi dengan ikon dan state loading yang tidak mengubah lebar.",
+    button:
+      "Tombol aksi yang masuk ke dalam saat ditekan, dengan ikon dan state loading yang tidak mengubah lebar.",
     separator: "Garis terukir pemisah antarbagian, horizontal atau vertikal.",
     field: "Label, deskripsi, dan pesan error yang terhubung ke kontrolnya.",
     fieldset: "Grup field dengan legend dan jarak yang konsisten.",

@@ -1,6 +1,7 @@
 import type { Metadata, Route } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ButtonIcon, buttonStyles } from "owsem-ui/base";
 import { ComponentBadges } from "@/components/component-header";
 import { Icon } from "@/components/icons/icon";
 import { InstallCommand } from "@/components/install";
@@ -107,18 +108,32 @@ function Neighbors({ lang, entry, dict }: PageArgs) {
     { target: readingOrder[i - 1], label: dict.lab.previous, rel: "prev", icon: "arrow-left" },
     { target: readingOrder[i + 1], label: dict.lab.next, rel: "next", icon: "arrow-right" },
   ] as const;
-  // One line each; the direction is in the name for screen readers, the arrow shows it.
+  // One line each, links styled as buttons; the direction is in the name for screen readers, the
+  // arrow shows it.
   return (
     <nav className="neighbors" aria-label={dict.lab.component}>
-      {links.map(({ target, label, rel, icon }) =>
-        target ? (
-          <Link key={rel} href={`/${lang}/${target.name}` as Route} rel={rel} data-rel={rel}>
+      {links.map(({ target, label, rel, icon }) => {
+        if (!target) return null;
+        const arrow = (
+          <ButtonIcon side={rel === "prev" ? "start" : "end"}>
             <Icon name={icon} />
+          </ButtonIcon>
+        );
+        return (
+          <Link
+            key={rel}
+            href={`/${lang}/${target.name}` as Route}
+            rel={rel}
+            data-rel={rel}
+            {...buttonStyles({ variant: "outline" })}
+          >
+            {rel === "prev" ? arrow : null}
             <span className="visually-hidden">{label}: </span>
             <span className="neighbors-title">{target.title}</span>
+            {rel === "next" ? arrow : null}
           </Link>
-        ) : null,
-      )}
+        );
+      })}
     </nav>
   );
 }

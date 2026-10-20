@@ -166,7 +166,6 @@ deleted CSS:
 
 | Phase | Component | Replaces in the docs |
 | --- | --- | --- |
-| 1 | Button | Copy and Reset (`.ghost-button`), Previous and Next links |
 | 1 | Tabs | The code drawer's file tabs (`.lab-tabs`) |
 | 1 | Popover | The Token setup panel (`.token-setup`, a native `[popover]`) |
 | 1 | Tooltip | `title` hints on icon buttons |

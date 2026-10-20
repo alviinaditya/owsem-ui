@@ -34,7 +34,7 @@ export const CATEGORIES: readonly Category[] = [
 
 // biome-ignore format: one row per component reads like the PRD tables
 export const catalog = [
-  { name: "button", title: "Button", family: "base", category: "action", phase: 1, expressions: ["tactile"], status: "planned" },
+  { name: "button", title: "Button", family: "base", category: "action", phase: 1, expressions: ["tactile"], status: "prototype" },
   { name: "separator", title: "Separator", family: "base", category: "display", phase: 1, status: "prototype" },
   { name: "field", title: "Field", family: "base", category: "form", phase: 1, status: "planned" },
   { name: "fieldset", title: "Fieldset", family: "base", category: "form", phase: 1, status: "planned" },

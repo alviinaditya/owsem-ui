@@ -1,0 +1,457 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * Button. Geometry comes from one number, --py (FR-9 to FR-11). Materials (DP-7): secondary is
+ * raised and primary is the primary material, both in a socket; ghost is flat until hovered;
+ * outline has an edge line; link is text. Only transform and opacity move: the press (DP-4), the
+ * ripple (Tactile), and the loading swap.
+ */
+@layer owsem.components {
+  .ow-button {
+    /* The one input; override it with style. The block padding never drops a target below 24px. */
+    --py: 0.75em;
+    --_py: max(var(--py), (24px - 1lh) / 2);
+    --px: calc(var(--_py) + (1lh - 1cap) / 2);
+    --icon: calc(1em + 2px);
+    --_radius: var(--ow-button-radius, var(--ow-radius, 8px));
+    /* The socket's groove; raised variants set it to 3px. */
+    --_socket: 0px;
+    --_press: calc(1 - 0.03 * var(--ow-motion-scale, 1));
+
+    --_ink: var(--ow-button-fg, var(--ow-fg, #1b1726));
+    --_hover: var(--ow-button-hover, var(--ow-hover, rgb(27 23 38 / 0.05)));
+    --_focus: var(--ow-button-focus, var(--ow-focus, #5b4a9a));
+    --_edge: var(--ow-button-edge, var(--ow-edge, #8a8497));
+    --_raised-bg: var(--ow-button-raised-bg, var(--ow-raised-bg, #ffffff));
+    --_raised-shadow: var(
+      --ow-button-raised-shadow,
+      var(
+        --ow-raised-shadow,
+        inset 0 1px 0 rgb(255 255 255 / 0.95),
+        0 0 0 1px rgb(30 25 40 / 0.12),
+        0 1.5px 2px rgb(40 30 20 / 0.13)
+      )
+    );
+    --_pressed-bg: var(--ow-button-pressed-bg, var(--ow-pressed-bg, #e6e3ee));
+    --_pressed-shadow: var(
+      --ow-button-pressed-shadow,
+      var(
+        --ow-pressed-shadow,
+        inset 0 1.5px 3px rgb(40 30 20 / 0.2),
+        inset 0 0 0 1px rgb(30 25 40 / 0.1)
+      )
+    );
+    --_socket-bg: var(--ow-button-socket-bg, var(--ow-socket-bg, #e9e6f0));
+    --_socket-shadow: var(
+      --ow-button-socket-shadow,
+      var(
+        --ow-socket-shadow,
+        inset 0 1px 2px rgb(40 30 20 / 0.16),
+        inset 0 -1px 0 rgb(255 255 255 / 0.8)
+      )
+    );
+    --_primary-bg: var(--ow-button-primary-bg, var(--ow-primary-bg, #7c6ab8));
+    --_primary-shadow: var(
+      --ow-button-primary-shadow,
+      var(
+        --ow-primary-shadow,
+        inset 0 1px 0 rgb(255 255 255 / 0.28),
+        0 0 0 1px rgb(55 40 110 / 0.55),
+        0 1.5px 2px rgb(40 30 20 / 0.2)
+      )
+    );
+    --_on-primary: var(--ow-button-on-primary, var(--ow-on-primary, #ffffff));
+    --_critical: var(--ow-button-critical, var(--ow-critical, #b03f2a));
+    /* The page's own surface reads on the critical tone in both themes. */
+    --_on-critical: var(--ow-button-on-critical, var(--ow-surface, #ffffff));
+    /* Text needs 4.5:1, more than the accent's 3:1, so the link leans toward the text color. */
+    --_link: var(--ow-button-link, color-mix(in oklab, var(--ow-accent, #7c6ab8) 70%, var(--_ink)));
+    --_ripple: var(--ow-button-ripple, currentColor);
+
+    /* The face, set per variant; pressing swaps in the pressed pair. */
+    --_fg: var(--_ink);
+    --_bg: transparent;
+    --_shadow: 0 0 #0000;
+    --_bg-pressed: var(--_pressed-bg);
+    --_shadow-pressed: var(--_pressed-shadow);
+    --_tint: transparent;
+
+    position: relative;
+    /* Keeps the socket and the face under the content, pressed or not. */
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    box-sizing: border-box;
+    margin: 0;
+    padding: var(--_py) var(--px);
+    border: 0;
+    border-radius: var(--_radius);
+    background: none;
+    color: var(--_fg);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25;
+    text-decoration: none;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    /* Releasing settles with the Core spring. */
+    transition: transform var(--ow-spring-settle-duration, 1030ms)
+      var(--ow-spring-settle, cubic-bezier(0.23, 1, 0.32, 1));
+  }
+
+  .ow-button[data-size="sm"] {
+    --py: 0.5em;
+    font-size: 0.8125rem;
+  }
+
+  .ow-button[data-size="lg"] {
+    --py: 0.875em;
+    font-size: 1rem;
+  }
+
+  /* The face: the variant's material, under the hover tint. */
+  .ow-button::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: linear-gradient(var(--_tint) 0 0), var(--_bg);
+    box-shadow: var(--_shadow);
+    pointer-events: none;
+  }
+
+  /* Raised variants sit in a socket: a groove around the face, concentric with it (FR-10b). */
+  .ow-button:is(
+    [data-variant="primary"],
+    [data-variant="secondary"],
+    [data-variant="destructive"]
+  ):not([data-soft]) {
+    --_socket: 3px;
+  }
+
+  .ow-button:is(
+    [data-variant="primary"],
+    [data-variant="secondary"],
+    [data-variant="destructive"]
+  ):not([data-soft])::after {
+    content: "";
+    position: absolute;
+    inset: calc(var(--_socket) * -1);
+    z-index: -2;
+    border-radius: calc(var(--_radius) + var(--_socket));
+    background: var(--_socket-bg);
+    box-shadow: var(--_socket-shadow);
+    pointer-events: none;
+    transition: inherit;
+  }
+
+  .ow-button[data-variant="secondary"] {
+    --_bg: var(--_raised-bg);
+    --_shadow: var(--_raised-shadow);
+  }
+
+  .ow-button[data-variant="primary"] {
+    --_fg: var(--_on-primary);
+    --_bg: var(--_primary-bg);
+    --_shadow: var(--_primary-shadow);
+    --_bg-pressed: var(--_primary-bg);
+  }
+
+  .ow-button[data-variant="destructive"] {
+    --_fg: var(--_on-critical);
+    --_bg: var(--_critical);
+    --_shadow: var(--_primary-shadow);
+    --_bg-pressed: var(--_critical);
+  }
+
+  .ow-button[data-variant="outline"] {
+    --_shadow: inset 0 0 0 1px var(--_edge);
+    --_shadow-pressed: inset 0 0 0 1px var(--_edge), var(--_pressed-shadow);
+  }
+
+  /* Soft: a flat tint of the variant's tone, with text in that tone. */
+  .ow-button[data-soft]:is(
+    [data-variant="primary"],
+    [data-variant="secondary"],
+    [data-variant="destructive"]
+  ) {
+    --_fg: color-mix(in oklab, var(--_tone) 75%, var(--_ink));
+    --_bg: color-mix(in oklab, var(--_tone) 12%, transparent);
+    --_shadow: inset 0 0 0 1px color-mix(in oklab, var(--_tone) 18%, transparent);
+    --_bg-pressed: color-mix(in oklab, var(--_tone) 18%, transparent);
+    --_shadow-pressed: var(--_pressed-shadow);
+  }
+
+  .ow-button[data-soft][data-variant="primary"] {
+    --_tone: var(--_primary-bg);
+  }
+
+  .ow-button[data-soft][data-variant="secondary"] {
+    --_tone: var(--_ink);
+  }
+
+  .ow-button[data-soft][data-variant="destructive"] {
+    --_tone: var(--_critical);
+  }
+
+  /* Link: text only, underlined on hover; a press dims it instead of sinking it. */
+  .ow-button[data-variant="link"] {
+    --_fg: var(--_link);
+    --_press: 1;
+    text-decoration-line: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+    transition: opacity 150ms var(--ow-ease-out, ease-out);
+  }
+
+  .ow-button[data-variant="link"]::before {
+    content: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .ow-button:hover:not([data-disabled]) {
+      --_tint: var(--_hover);
+    }
+
+    .ow-button[data-variant="link"]:hover:not([data-disabled]) {
+      text-decoration-color: currentColor;
+    }
+  }
+
+  /* DP-4: in within 90 ms, into the pressed material; the socket scales back to keep its size. */
+  .ow-button:is(:active, [data-pressed]):not([data-disabled]) {
+    --_bg: var(--_bg-pressed);
+    --_shadow: var(--_shadow-pressed);
+    --_tint: transparent;
+    transform: scale(var(--_press));
+    transition-duration: 90ms;
+    transition-timing-function: var(--ow-ease-out, ease-out);
+  }
+
+  .ow-button:is(:active, [data-pressed]):not([data-disabled])::after {
+    transform: scale(calc(1 / var(--_press)));
+  }
+
+  .ow-button[data-variant="link"]:is(:active, [data-pressed]):not([data-disabled]) {
+    opacity: 0.7;
+  }
+
+  .ow-button:focus-visible {
+    outline: 2px solid var(--_focus);
+    outline-offset: calc(2px + var(--_socket));
+  }
+
+  .ow-button[data-disabled]:not([data-loading]) {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .ow-button[data-loading] {
+    cursor: progress;
+  }
+
+  /* The parts that fade while loading. */
+  .ow-button-glyph,
+  .ow-button-label,
+  .ow-button-icon,
+  .ow-button-spinner {
+    transition:
+      opacity 150ms var(--ow-ease-out, ease-out),
+      transform 200ms var(--ow-ease-out, ease-out);
+  }
+
+  /* Icons: font size + 2px, pulled toward the edge so they sit as far from it as from the top. */
+  .ow-button-icon {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    inline-size: var(--icon);
+    block-size: var(--icon);
+  }
+
+  .ow-button-icon[data-side="start"] {
+    margin-inline-start: calc((1cap - var(--icon)) / 2);
+  }
+
+  .ow-button-icon[data-side="end"] {
+    margin-inline-end: calc((1cap - var(--icon)) / 2);
+  }
+
+  /* The glyph and the spinner share one cell, so swapping them moves nothing. */
+  .ow-button-icon > * {
+    grid-area: 1 / 1;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  .ow-button-glyph {
+    display: grid;
+    place-items: center;
+  }
+
+  .ow-button-icon :where(svg, img),
+  .ow-button-spinner > svg {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  /* Icon only (FR-10a): square, the same height as the others. */
+  .ow-button[data-icon-only] {
+    padding: calc(var(--_py) + (1lh - var(--icon)) / 2);
+  }
+
+  .ow-button[data-icon-only] > .ow-button-icon {
+    margin: 0;
+  }
+
+  /* Ripple (Tactile): grows from the press point, fades on release. Clipped to the face. */
+  .ow-button-layer {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  .ow-button-ripple {
+    position: absolute;
+    /* biome-ignore lint/nursery/useLogicalProperties: the press point is measured from the left */
+    left: var(--_x, 50%);
+    inset-block-start: var(--_y, 50%);
+    inline-size: var(--_d, 0px);
+    block-size: var(--_d, 0px);
+    margin: calc(var(--_d, 0px) / -2);
+    border-radius: 50%;
+    background-color: var(--_ripple);
+    opacity: 0;
+    transform: scale(0.2);
+  }
+
+  .ow-button-ripple[data-state] {
+    transform: none;
+    transition:
+      opacity 300ms var(--ow-ease-out, ease-out),
+      transform 450ms var(--ow-ease-out, ease-out);
+  }
+
+  .ow-button-ripple[data-state="on"] {
+    opacity: calc(0.1 * var(--ow-motion-scale, 1));
+    transition-duration: 90ms, 450ms;
+  }
+
+  /* Loading: the spinner takes the start icon's place, or the centre, and nothing resizes. */
+  .ow-button-spinner {
+    display: grid;
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  .ow-button > .ow-button-spinner {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    inline-size: var(--icon);
+    block-size: var(--icon);
+  }
+
+  .ow-button[data-loading] .ow-button-spinner {
+    opacity: 1;
+    transform: none;
+  }
+
+  .ow-button[data-loading] .ow-button-spinner > svg {
+    animation: ow-button-spin 0.8s linear infinite;
+  }
+
+  .ow-button[data-loading] > [data-side="start"] > .ow-button-glyph {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  /* Centred: the content fades but keeps its box. */
+  .ow-button[data-loading] > .ow-button-spinner ~ * {
+    opacity: 0;
+  }
+
+  @keyframes ow-button-spin {
+    to {
+      transform: rotate(1turn);
+    }
+  }
+
+  @keyframes ow-button-pulse {
+    to {
+      opacity: 0.4;
+    }
+  }
+
+  /* FR-20: no movement. The press is the material alone, and the spinner pulses in place. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-button {
+      --_press: 1;
+    }
+
+    .ow-button-ripple {
+      display: none;
+    }
+
+    .ow-button :is(.ow-button-glyph, .ow-button-spinner) {
+      transform: none;
+    }
+
+    .ow-button[data-loading] .ow-button-spinner > svg {
+      animation: ow-button-pulse 0.8s ease-in-out infinite alternate;
+    }
+  }
+
+  /* DP-8: materials drop out, so an outline draws the edge in the system color. */
+  @media (forced-colors: active) {
+    .ow-button:not([data-variant="link"]) {
+      outline: 1px solid transparent;
+      outline-offset: -1px;
+    }
+
+    .ow-button:focus-visible {
+      outline: 2px solid Highlight;
+      outline-offset: 2px;
+    }
+
+    .ow-button[data-disabled]:not([data-loading]) {
+      color: GrayText;
+    }
+
+    .ow-button-layer {
+      display: none;
+    }
+  }
+
+  /* NF-2: without lh or cap, 1lh is 1.25em (the line height is fixed) and 1cap about 0.65em. */
+  @supports not ((inline-size: 1lh) and (inline-size: 1cap)) {
+    .ow-button {
+      --_py: max(var(--py), (24px - 1.25em) / 2);
+      --px: calc(var(--_py) + 0.3em);
+    }
+
+    .ow-button-icon[data-side="start"] {
+      margin-inline-start: calc((0.65em - var(--icon)) / 2);
+    }
+
+    .ow-button-icon[data-side="end"] {
+      margin-inline-end: calc((0.65em - var(--icon)) / 2);
+    }
+
+    .ow-button[data-icon-only] {
+      padding: calc(var(--_py) + (1.25em - var(--icon)) / 2);
+    }
+  }
+}

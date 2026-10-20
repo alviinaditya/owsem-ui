@@ -1,0 +1,201 @@
+---
+title: Button
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Button menjalankan sebuah aksi. Base UI memberinya semantik tombol, keyboard, dan state loading
+yang tetap memegang fokus; OwsemUI menambahkan material depth, satu angka untuk semua ukuran,
+tekanan yang membuatnya masuk ke dalam dengan riak dari titik tekan, dan spinner yang tidak pernah
+mengubah lebar. Gulir untuk mulai tur; stage mengikuti setiap bagian.
+
+## Tekan dan riak [#press]
+
+Saat ditekan, tombol masuk ke dalam: dalam 90 ms ia mengecil ke 0,97 dan berpindah ke material
+ditekan, sementara socket-nya diskalakan balik sehingga alur di sekelilingnya tetap berukuran sama.
+Saat dilepas, ia kembali dengan spring settle dari Core. Riak tumbuh dari titik yang ditekan,
+terpotong mengikuti permukaan tombol, lalu memudar saat dilepas.
+
+Stage memutarnya: sebuah pointer menekan empat varian bergantian. Tekan tombol mana saja untuk
+mencobanya sendiri. Kedua efek hanya menggerakkan `transform` dan `opacity` lewat transisi CSS,
+jadi tidak ada yang berjalan di antara dua tekanan. Dengan `prefers-reduced-motion`, tekanan hanya
+mengganti material, tanpa riak.
+
+## Loading [#loading]
+
+`loading` menampilkan spinner tanpa mengubah ukuran tombol. Kalau ada ikon awal, spinner mengambil
+tempat ikon itu; kalau tidak, isinya memudar tapi tetap mengisi ruangnya, dan spinner muncul di
+tengah. Angka di bawah setiap tombol adalah lebarnya: tekan salah satunya dan lihat angkanya tetap.
+
+Selama loading, tombol tetap memegang fokus tapi mengabaikan klik, Enter, dan Space. Ini
+`focusableWhenDisabled` dari Base UI: tombol mendapat `aria-disabled`, dan dari OwsemUI
+`aria-busy`. Biarkan labelnya tetap sama selama loading, karena screen reader tidak selalu
+mengumumkan teks baru di dalam tombol yang sedang difokus.
+
+## Geometri [#geometry]
+
+Satu angka, `--py`, mengatur semua ukuran. Ia adalah padding di atas dan di bawah teks, dan padding
+di samping ditambah setengah selisih tinggi baris dan tinggi huruf kapital, sehingga jarak teks
+terlihat sama di keempat sisi. Ikon berukuran font ditambah 2px dan ditarik ke tepi: garis
+putus-putus di stage menunjukkan jarak yang sama ke atas, ke bawah, dan ke samping. Tombol ikon
+saja berbentuk persegi dan setinggi tombol lain. Pasangan yang besar adalah `lg` berukuran 32px lewat
+`style`: aturannya berlaku di ukuran berapa pun.
+
+| Ukuran | Font | `--py` | Ikon | Tinggi | Ikon ke tepi |
+| --- | --- | --- | --- | --- | --- |
+| `sm` | 13px | `0.5em` | 15px | 29,25px | 7,1px |
+| `md` | 14px | `0.75em` | 16px | 38,5px | 11,25px |
+| `lg` | 16px | `0.875em` | 18px | 48px | 15px |
+
+Semua varian dalam satu ukuran sama tingginya, jadi tombol, input, dan select sejajar dalam satu
+baris. Pasang `--py` di tombolnya sendiri untuk membuat ukuran lain, misalnya
+`style={{ "--py": "0.6em" }}`; padding-nya tidak pernah membuat target lebih kecil dari 24px.
+
+## Anatomi [#anatomy]
+
+Base UI merender `<button>`; OwsemUI menambahkan class `ow-button` dan menggambar permukaan serta
+socket-nya sebagai pseudo-element, sehingga tombol tetap satu elemen. Inspeksi (I) menandai setiap
+bagian di stage, beserta tokennya.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `button.ow-button` | Button dari Base UI; `data-variant`, `data-size`, dan `data-soft` menentukan tampilannya |
+| <Part name="Icon" /> | `span.ow-button-icon` | `startIcon` atau `endIcon`, dengan `data-side`; dekoratif (`aria-hidden`) |
+| <Part name="Label" /> | `span.ow-button-label` | Children-nya |
+| <Part name="Spinner" /> | `span.ow-button-spinner` | Hanya pada tombol yang punya prop `loading` |
+| <Part name="Ripple" /> | `span.ow-button-layer` | Memotong riak mengikuti permukaan; tidak ada pada `link` |
+
+## State dan varian [#states]
+
+Stage menampilkan setiap varian di kedua tema: tiga ukuran, lalu disabled dan loading. Buka panel
+kontrol (P) dan nyalakan Soft untuk melihat varian soft di sini juga.
+
+| Varian | Material |
+| --- | --- |
+| `primary` (bawaan) | Material primary, di dalam socket |
+| `secondary` | Timbul, di dalam socket |
+| `outline` | Datar, dengan garis tepi |
+| `ghost` | Datar; berwarna hanya saat hover |
+| `link` | Teks; bergaris bawah saat hover |
+| `destructive` | Nada critical, di dalam socket |
+
+`soft` mengubah `primary`, `secondary`, dan `destructive` menjadi warna tipis dari nadanya yang
+datar, dengan teks bernada sama. Base tidak pernah bercahaya: hierarki dibangun dari kedalaman,
+bukan cahaya.
+
+| State | Yang menandainya |
+| --- | --- |
+| Hover | `--ow-hover` di atas permukaan, hanya untuk mouse atau pena |
+| Ditekan | Mengecil ke 0,97, material ditekan, dan riak |
+| Fokus keyboard | Ring 2px, 2px di luar tombol atau socket-nya |
+| Disabled | `data-disabled`; meredup dan keluar dari urutan Tab |
+| Loading | `data-loading` dan `aria-busy`; spinner, fokus tetap |
+
+## Keyboard dan aksesibilitas [#keyboard]
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab | Memindahkan fokus ke tombol, kecuali yang disabled |
+| Enter, Space | Menjalankannya |
+
+Button adalah `<button type="button">` native, jadi form, keyboard, dan screen reader bekerja seperti
+pada tombol biasa. `disabled` mengeluarkannya dari urutan Tab; tambahkan `focusableWhenDisabled`
+supaya tetap bisa difokus, dengan `aria-disabled`. `IconButton` tidak punya teks yang terlihat,
+jadi `aria-label`-nya wajib.
+
+Button dari Base UI bukan untuk link. Supaya link terlihat seperti tombol, sebarkan
+`buttonStyles()` ke `<a>` atau `Link` milik router, dan bungkus ikonnya dengan `ButtonIcon`: ia
+tetap link, dengan tampilan, hover, dan tekanan yang sama, tapi tanpa riak.
+
+Dengan `prefers-reduced-motion`, tidak ada yang bergerak: tekanan hanya mengganti material, dan
+spinner berdenyut di tempat. Di forced colors (Windows High Contrast), setiap tombol tetap punya
+outline berwarna sistem dan ring fokusnya memakai `Highlight`. Dari kanan ke kiri, ikon awal ada di
+kanan.
+
+## Kustomisasi [#customization]
+
+Panel kontrol di stage terbuka: ubah ukuran, ikon, soft, loading, radius, atau warna primary, dan
+kodenya ikut berubah. Warna adalah token komponen yang kamu pasang di CSS sendiri.
+
+<ForMode mode="theme">
+
+Token komponen menimpa token tema untuk setiap Button di dalam elemen yang memasangnya, misalnya
+`.actions`.
+
+| Token komponen | Bawaan | Fungsi |
+| --- | --- | --- |
+| `--ow-button-radius` | `--ow-radius` | Radius sudut; socket menambahkan 3px-nya |
+| `--ow-button-primary-bg` | `--ow-primary-bg` | Isi primary |
+| `--ow-button-on-primary` | `--ow-on-primary` | Teks di atas isi primary |
+| `--ow-button-critical` | `--ow-critical` | Isi destructive |
+| `--ow-button-on-critical` | `--ow-surface` | Teks di atas isi destructive |
+| `--ow-button-raised-bg`, `-raised-shadow` | `--ow-raised-*` | Permukaan secondary |
+| `--ow-button-pressed-bg`, `-pressed-shadow` | `--ow-pressed-*` | Permukaan saat ditekan |
+| `--ow-button-socket-bg`, `-socket-shadow` | `--ow-socket-*` | Alur di sekeliling varian timbul |
+| `--ow-button-primary-shadow` | `--ow-primary-shadow` | Tepi primary dan destructive |
+| `--ow-button-edge` | `--ow-edge` | Garis outline |
+| `--ow-button-hover` | `--ow-hover` | Warna hover |
+| `--ow-button-fg` | `--ow-fg` | Teks secondary, outline, dan ghost |
+| `--ow-button-link` | `--ow-accent` dicampur ke arah `--ow-fg` | Teks link, minimal 4,5:1 |
+| `--ow-button-focus` | `--ow-focus` | Ring fokus |
+| `--ow-button-ripple` | `currentColor` | Riak |
+
+</ForMode>
+
+<ForMode mode="isolated">
+
+Setiap Button membawa nilainya sendiri di root-nya dan tidak membaca token bersama, jadi pasang
+tokennya di tombol itu sendiri, seperti `actions.css` memasangnya di `.actions .ow-button`.
+
+| Token komponen | Bawaan | Fungsi |
+| --- | --- | --- |
+| `--ow-button-radius` | `8px` | Radius sudut; socket menambahkan 3px-nya |
+| `--ow-button-primary-bg` | Miliknya sendiri, per tema | Isi primary |
+| `--ow-button-on-primary` | Miliknya sendiri, per tema | Teks di atas isi primary |
+| `--ow-button-critical` | Miliknya sendiri, per tema | Isi destructive |
+| `--ow-button-on-critical` | Miliknya sendiri, per tema | Teks di atas isi destructive |
+| `--ow-button-raised-bg`, `-raised-shadow` | Miliknya sendiri, per tema | Permukaan secondary |
+| `--ow-button-pressed-bg`, `-pressed-shadow` | Miliknya sendiri, per tema | Permukaan saat ditekan |
+| `--ow-button-socket-bg`, `-socket-shadow` | Miliknya sendiri, per tema | Alur di sekeliling varian timbul |
+| `--ow-button-primary-shadow` | Miliknya sendiri, per tema | Tepi primary dan destructive |
+| `--ow-button-edge` | Miliknya sendiri, per tema | Garis outline |
+| `--ow-button-hover` | Miliknya sendiri, per tema | Warna hover |
+| `--ow-button-fg` | Miliknya sendiri, per tema | Teks secondary, outline, dan ghost |
+| `--ow-button-link` | Miliknya sendiri, per tema | Teks link, minimal 4,5:1 |
+| `--ow-button-focus` | Miliknya sendiri, per tema | Ring fokus |
+| `--ow-button-ripple` | `currentColor` | Riak |
+
+</ForMode>
+
+`--py` bukan warna: pasang lewat `style` di tombolnya sendiri (lihat Geometri). Tekanan dan riak
+mengikuti `--ow-motion-scale`: nilai `0` membuat tombol diam.
+
+<TokenChip item="button" lang="id" />
+
+## Ship it [#ship]
+
+Drawer kode menulis tombol persis seperti pengaturan stage. Ubah apa saja, dan baris yang berubah
+akan menyala.
+
+| Prop | Tipe | Bawaan |
+| --- | --- | --- |
+| `variant` | `"primary" \| "secondary" \| "outline" \| "ghost" \| "link" \| "destructive"` | `"primary"` |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| `soft` | `boolean` | `false` |
+| `loading` | `boolean` | |
+| `startIcon`, `endIcon` | `ReactNode` | |
+| `disabled` | `boolean` | `false` |
+| `focusableWhenDisabled` | `boolean` | `false` |
+| `nativeButton` | `boolean` | `true` |
+| `className` | `string \| (state) => string` | |
+| `style` | `CSSProperties` | |
+| `render` | `ReactElement \| (props, state) => ReactElement` | |
+
+`IconButton` menerima prop yang sama, kecuali ikon dan children, ditambah `icon` dan `aria-label`
+yang wajib; variannya bawaan `ghost`. `buttonStyles({ variant, size, soft, className })`
+mengembalikan class dan atribut data untuk link, dan `ButtonIcon` (`side`: `"start"` atau `"end"`)
+mengatur ukuran ikon di dalamnya. Ref diteruskan ke `button`, dan prop lain diteruskan ke Base UI
+apa adanya.
+
+Import dari `owsem-ui/base`. Di registry, namanya item `button`.

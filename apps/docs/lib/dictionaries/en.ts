@@ -117,7 +117,8 @@ export const en = {
     change: "Change",
   },
   components: {
-    button: "An action button with icons and a loading state that keeps its width.",
+    button:
+      "An action button that sinks when pressed, with icons and a loading state that keeps its width.",
     separator: "An etched line between sections, horizontal or vertical.",
     field: "A label, description, and error message wired to their control.",
     fieldset: "A group of fields with a legend and consistent spacing.",

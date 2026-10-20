@@ -141,9 +141,8 @@ deleted CSS:
 | 2 | Toggle Group | Segmented choices (`.seg`): theme, Orientation, Family filter, and the package manager picker (`.pm-picker`) |
 | 2 | Toggle, Toolbar | The stage tools (`.lab-tool`) |
 | 2 | Toast | The Copied status |
-| 2 | Collapsible | The folding preview pane (DS-10) |
 | 2 | Combobox, Dialog | ⌘K search (DS-5), through Command Menu |
-| 3 | Drawer | The sidebar as a menu panel below 1100 px |
+| 3 | Drawer | The sidebar as a menu panel below 1100 px, and the Lab's docs, controls, and code sheets below 960 px (DS-10) |
 
 When the depth material tokens land in `tokens.css` (TK-7), point `--docs-well`, `--docs-raised`,
 and their shadows at them, so the docs and the library share one source.
@@ -207,7 +206,7 @@ once its scene settles, except under reduced motion, where it waits for Play sce
 visitor's own press or key stops it where it is; Stop and a scene change remount the demo, so end
 a script where it started.
 
-Stage shortcuts (I, T, P, C, R for Replay, and H for the pane) work only while focus is on the
+Stage shortcuts (I, T, P, C, and R for Replay) work only while focus is on the
 stage; a click anywhere on it puts focus there, and the page header names the ones a Lab has. Play scene and Replay appear only for scenes with an animation; scripted motion uses Motion
 (`motion/react`), everything else CSS transitions, and never GSAP. Every animation follows
 `prefers-reduced-motion`.

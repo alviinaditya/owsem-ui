@@ -136,6 +136,7 @@ function LabPage({ lang, entry, dict }: PageArgs) {
         lang={lang}
         scenes={scenes}
         intro={<Intro lang={lang} entry={entry} dict={dict} install shortcuts />}
+        caption={<Intro lang={lang} entry={entry} dict={dict} />}
         footer={<Neighbors lang={lang} entry={entry} dict={dict} />}
         labels={dict.lab}
         item={entry.name}

@@ -24,6 +24,8 @@ function subscribe(listener: () => void): () => void {
   };
 }
 
+const TOGGLE_ID = "site-menu-button";
+
 /** Scrolls the sidebar, not the page, so the current page's link (and its scenes) is in view. */
 export function revealCurrentLink(): HTMLElement | undefined {
   const sidebar = document.getElementById("site-sidebar-scroll");
@@ -38,7 +40,10 @@ export function revealCurrentLink(): HTMLElement | undefined {
   return link;
 }
 
-/** Below 1100 px the sidebar is a panel over the page, opened from the dock at the bottom. */
+/**
+ * Below 1100 px the sidebar is a panel opened from the dock (bottom center; top left on a narrow
+ * Lab). The open panel has its own close button, so the dock steps aside meanwhile.
+ */
 export function SidebarToggle({ label }: { label: string }) {
   const open = useSyncExternalStore(subscribe, isOpen, () => false);
   const button = useRef<HTMLButtonElement>(null);
@@ -90,14 +95,33 @@ export function SidebarToggle({ label }: { label: string }) {
   return (
     <button
       ref={button}
+      id={TOGGLE_ID}
       type="button"
       className="dock-button"
       aria-expanded={open}
       aria-controls="site-sidebar"
       onClick={() => setSidebarOpen(!open)}
     >
-      <Icon name={open ? "x" : "menu"} size={18} />
-      {label}
+      <Icon name="menu" size={18} />
+      <span className="dock-label">{label}</span>
+    </button>
+  );
+}
+
+/** The open panel's own close button, in the sidebar's head; focus goes back to the dock. */
+export function SidebarClose({ label }: { label: string }) {
+  return (
+    <button
+      type="button"
+      className="sidebar-close"
+      aria-label={label}
+      title={label}
+      onClick={() => {
+        setSidebarOpen(false);
+        requestAnimationFrame(() => document.getElementById(TOGGLE_ID)?.focus());
+      }}
+    >
+      <Icon name="x" size={18} />
     </button>
   );
 }

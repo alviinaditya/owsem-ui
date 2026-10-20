@@ -23,12 +23,19 @@ import {
   type TokenSetup,
   withPrefix,
 } from "@/lib/token-setup";
-import { Icon } from "./icons/icon";
 
 type Labels = Dictionary["tokens"];
 
 /** The panel's id: any button with popoverTarget set to it opens the panel. */
 export const TOKEN_SETUP_ID = "token-setup";
+
+/** Where the panel opens: under a Lab stage's toolbar, or (by default) at the bottom left. */
+export function placeTokenSetup(place?: "stage"): void {
+  const panel = document.getElementById(TOKEN_SETUP_ID);
+  if (!panel) return;
+  if (place) panel.dataset.place = place;
+  else delete panel.dataset.place;
+}
 
 // Stored as JSON, kept across visits and shared by every tab. The raw string is the snapshot, so
 // it stays the same value until the setup changes.
@@ -171,33 +178,9 @@ function PrefixField({ setup, labels }: { setup: TokenSetup; labels: Labels }) {
   );
 }
 
-/** The sidebar foot's button for the panel: like the switchers under it, a sunken track. */
-export function TokenSetupButton({ labels }: { labels: Labels }) {
-  const setup = useTokenSetup();
-  return (
-    <button
-      type="button"
-      className="token-button"
-      popoverTarget={TOKEN_SETUP_ID}
-      aria-haspopup="dialog"
-      title={labels.title}
-    >
-      <Icon name="palette" size={15} />
-      <span className="token-button-text">
-        {labels.button}{" "}
-        <code>
-          --{setup.prefix}
-          {setup.mode === "isolated" ? " · isolated" : ""}
-        </code>
-      </span>
-      <Icon name="chevron-down" size={14} />
-    </button>
-  );
-}
-
 /**
- * The panel the button and every Token chip open (a popover: Escape and a click outside close it).
- * Rendered once, outside the sidebar, so it opens even while the narrow screen's sidebar is shut.
+ * The panel a Lab stage's Token button and every Token chip open (a popover: Escape and a click
+ * outside close it). Rendered once in the site shell, so every page shares it.
  */
 export function TokenSetupPanel({ labels }: { labels: Labels }) {
   const setup = useTokenSetup();
@@ -283,7 +266,12 @@ export function TokenChip({ item, lang }: { item?: string; lang: Lang }) {
   return (
     <p className="token-chip">
       {labels[setup.mode]} · <code data-token-literal="">{names}</code>
-      <button type="button" className="text-button" popoverTarget={TOKEN_SETUP_ID}>
+      <button
+        type="button"
+        className="text-button"
+        popoverTarget={TOKEN_SETUP_ID}
+        onClick={() => placeTokenSetup()}
+      >
         {labels.change}
         <span className="visually-hidden"> {labels.title}</span>
       </button>

@@ -1,7 +1,5 @@
 import type { Node } from "fumadocs-core/page-tree";
-import Link from "next/link";
 import { TreeRailNav } from "owsem-ui/owsem";
-import ui from "owsem-ui/package.json";
 import type { ReactNode } from "react";
 import { CATEGORIES, type Category, catalog, isAvailable } from "@/lib/catalog";
 import { getDictionary } from "@/lib/dictionaries";
@@ -50,16 +48,8 @@ const pages = (nodes: Node[]): Extract<Node, { type: "page" }>[] =>
  */
 export function Sidebar({ lang }: { lang: Lang }) {
   const dict = getDictionary(lang);
-  // Nothing is published before the first release; package.json says 0.0.0 until then.
-  const version = ui.version === "0.0.0" ? dict.nav.prerelease : `v${ui.version}`;
   return (
     <TreeRailNav.Root aria-label={dict.nav.sidebar} className="sidebar-nav">
-      <TreeRailNav.Origin>
-        <Link href={`/${lang}`} className="sidebar-brand">
-          OwsemUI
-        </Link>
-        <span className="sidebar-version">{version}</span>
-      </TreeRailNav.Origin>
       <TreeRailNav.List>
         <Group label={dict.nav.docs} icon="book-open">
           {pages(source.getPageTree(lang).children).map((page) => (

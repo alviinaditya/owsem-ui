@@ -1,6 +1,6 @@
 "use client";
 
-import { type HTMLAttributes, useLayoutEffect, useRef } from "react";
+import { type HTMLAttributes, useEffect, useLayoutEffect, useRef } from "react";
 
 /**
  * A scroller without a visible scrollbar: each edge fades (globals.css, .scroll-fade) while there
@@ -8,8 +8,32 @@ import { type HTMLAttributes, useLayoutEffect, useRef } from "react";
  * `className`, so the outer element's background and its focus ring (drawn for the scroller) stay
  * solid.
  */
-export function ScrollFade({ className, children, ...scroller }: HTMLAttributes<HTMLDivElement>) {
+export function ScrollFade({
+  className,
+  wheelX = false,
+  children,
+  ...scroller
+}: HTMLAttributes<HTMLDivElement> & {
+  /** A row: a mouse wheel scrolls it sideways, then the page once the row reaches its end. */
+  wheelX?: boolean;
+}) {
   const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!wheelX || !el) return;
+    const onWheel = (event: WheelEvent) => {
+      // A trackpad already scrolls sideways.
+      if (Math.abs(event.deltaX) >= Math.abs(event.deltaY)) return;
+      const end = el.scrollWidth - el.clientWidth;
+      const left = Math.max(0, Math.min(end, el.scrollLeft + event.deltaY));
+      if (left === el.scrollLeft) return;
+      event.preventDefault();
+      el.scrollLeft = left;
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [wheelX]);
 
   // Before the first paint, so a scroller mounted on the client never shows a frame unfaded.
   useLayoutEffect(() => {

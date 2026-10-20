@@ -1,10 +1,11 @@
 import { expect, type Page, test } from "@playwright/test";
+import { openSheet, stage, stageTool } from "./lab.ts";
 
-const stage = (page: Page) => page.getByRole("region", { name: "Stage" });
 const narrative = (page: Page) => page.locator(".lab-narrative");
 
 test("the token setup rewrites a Lab's code and install steps (DS-4)", async ({ page }) => {
   await page.goto("/en/separator");
+  await openSheet(page);
   // The intro's line; Customization has the same one.
   const chip = page.getByRole("button", { name: "Change Token setup" }).first();
   const panel = page.getByRole("dialog", { name: "Token setup" });
@@ -54,6 +55,7 @@ test("the token setup rewrites a Lab's code and install steps (DS-4)", async ({ 
   // Kept for the next visit, until reset.
   await page.reload();
   await expect(narrative(page)).toContainText("--acme-separator-line-dark");
+  await openSheet(page);
   await chip.click();
   await panel.getByRole("button", { name: "Reset to theme tokens, --ow" }).click();
   await expect(narrative(page)).toContainText("--ow-separator-line-dark");
@@ -61,17 +63,16 @@ test("the token setup rewrites a Lab's code and install steps (DS-4)", async ({ 
   expect(await page.evaluate(() => localStorage.getItem("owsem-token-setup"))).toBeNull();
 });
 
-test("the top bar shows the token setup and opens it", async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name === "mobile-390", "below 400 px the Lab's line opens it");
-  await page.goto("/id/docs/theming");
-  const button = page.getByRole("button", { name: /^Token --/ });
-  await expect(button).toHaveAccessibleName("Token --ow");
-  await button.click();
-  const panel = page.getByRole("dialog", { name: "Pengaturan token" });
+test("the Theming page's code stays literal whatever the token setup", async ({ page }) => {
+  await page.goto("/en/separator");
+  await stageTool(page, "Tokens", "Token setup");
+  const panel = page.getByRole("dialog", { name: "Token setup" });
+  await expect(panel).toBeVisible();
+  await panel.getByRole("radio", { name: "Isolated tokens" }).check();
   await panel.getByLabel("Prefix").fill("acme");
   await page.keyboard.press("Escape");
-  await expect(button).toHaveAccessibleName("Token --acme");
-  // The Theming page explains the default, so its code stays literal.
+  // The Theming page explains the default, so its code keeps --ow.
+  await page.goto("/id/docs/theming");
   await expect(page.getByRole("main")).toContainText("--ow-accent");
 });
 

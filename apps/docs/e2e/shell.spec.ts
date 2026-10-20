@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { catalog, isAvailable } from "../lib/catalog.ts";
+import { openSheet } from "./lab.ts";
 
 const robots = (page: import("@playwright/test").Page) => page.locator('meta[name="robots"]');
 
@@ -45,6 +46,8 @@ test("planned components show Coming soon and stay out of search", async ({ page
 
 test("a Lab links the components before and after it", async ({ page }) => {
   await page.goto("/en/separator");
+  // Below 960 px the links end the docs sheet.
+  await openSheet(page);
   const nav = page.getByRole("navigation", { name: "Component" });
   await expect(nav.getByRole("link", { name: "Previous: Collapsible" })).toHaveAttribute(
     "rel",
@@ -159,7 +162,6 @@ test("no top bar: the sidebar's foot holds the settings, and a dock opens it bel
   }
   await expect(foot.getByRole("group", { name: "Theme" })).toBeVisible();
   await expect(foot.getByRole("navigation", { name: "Language" })).toBeVisible();
-  // The foot's button opens the token panel; so does the chip in a Lab.
-  await foot.getByRole("button", { name: /Token/ }).click();
-  await expect(page.getByRole("dialog", { name: "Token setup" })).toBeVisible();
+  // The token setup opens from the Labs (stage toolbar, Token chips), not from the foot.
+  await expect(foot.getByRole("button", { name: /Token/ })).toHaveCount(0);
 });

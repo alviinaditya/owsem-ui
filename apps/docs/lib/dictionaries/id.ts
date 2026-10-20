@@ -19,7 +19,7 @@ export const id = {
     label: "Bahasa",
   },
   search: {
-    trigger: "Cari dokumentasi…",
+    trigger: "Cari…",
     button: "Cari",
     dialog: "Cari dokumentasi",
     input: "Cari komponen, halaman, dan scene",

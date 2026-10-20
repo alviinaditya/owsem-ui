@@ -1,6 +1,6 @@
 "use client";
 
-import { Kbd, Toggle, Toolbar } from "owsem-ui/base";
+import { Kbd, Toggle, Toolbar, Tooltip } from "owsem-ui/base";
 import {
   Fragment,
   type KeyboardEvent,
@@ -16,6 +16,7 @@ import type { Lang } from "@/lib/i18n";
 import { Icon, type IconName } from "../icons/icon";
 import { InstallPane } from "../install";
 import { ScrollFade } from "../scroll-fade";
+import { Tip } from "../tip";
 import { placeTokenSetup, TOKEN_SETUP_ID, useTokenSetup } from "../token-setup";
 import { ColorField } from "./color-field";
 import { CopyButton } from "./copy-button";
@@ -281,6 +282,7 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
   const moreId = `${id}-more`;
   const moreRef = useRef<HTMLFieldSetElement>(null);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
+  const docsLabelRef = useRef<HTMLSpanElement>(null);
   const openTokenSetup = () => {
     moreRef.current?.hidePopover();
     const panel = document.getElementById(TOKEN_SETUP_ID);
@@ -357,69 +359,101 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
           <span className="lab-live" aria-hidden="true" />
           <span className="lab-stage-title-text">{title}</span>
         </p>
-        {/* One Tab stop; arrow keys move between the tools. */}
-        <Toolbar.Root className="lab-tools" aria-label={labels.tools}>
-          {tools.map((tool) => {
-            const props = {
-              ref: (el: HTMLButtonElement | null) => {
-                toolRefs.current.set(tool.key, el);
-              },
-              className: "lab-tool",
-              "aria-controls": tool.controls,
-              "aria-keyshortcuts": tool.key,
-              title: `${tool.label} (${tool.key})`,
-              "data-more": tool.more ? "" : undefined,
-              children: (
-                <>
-                  <Icon name={tool.icon} size={15} />
-                  <span className="lab-tool-label">{tool.label}</span>
-                </>
-              ),
-            };
-            // Tools with an on state are toggles; the others act once.
-            return tool.pressed === undefined ? (
-              <Toolbar.Button key={tool.key} onClick={tool.act} {...props} />
-            ) : (
-              <Toolbar.Button
-                key={tool.key}
-                render={<Toggle pressed={tool.pressed} onPressedChange={tool.act} />}
-                {...props}
-              />
-            );
-          })}
-          <Toolbar.Button
-            className="lab-tool"
-            popoverTarget={TOKEN_SETUP_ID}
-            aria-haspopup="dialog"
-            title={labels.tokenSetup}
-            data-more=""
-            onClick={() => placeTokenSetup("stage")}
-          >
-            <Icon name="palette" size={15} />
-            <span className="lab-tool-label lab-tool-token-label">{labels.tokens}</span>
-          </Toolbar.Button>
-          {/* Narrow screens: the documentation sheet opens from here, set apart by a groove. */}
-          <Toolbar.Separator className="lab-tool-sep" />
-          <Toolbar.Button
-            id={docs.buttonId}
-            className="lab-tool lab-tool-docs"
-            aria-expanded={docs.open}
-            aria-controls={docs.sheetId}
-            onClick={docs.toggle}
-          >
-            <Icon name="book-open" size={15} />
-            <span className="lab-tool-docs-label">{labels.docs}</span>
-          </Toolbar.Button>
-          <Toolbar.Button
-            ref={moreButtonRef}
-            className="lab-tool lab-tool-more"
-            popoverTarget={moreId}
-            aria-label={labels.more}
-            title={labels.more}
-          >
-            <Icon name="ellipsis" size={15} />
-          </Toolbar.Button>
-        </Toolbar.Root>
+        {/* One Tab stop; arrow keys move between the tools. Their tooltips share one delay. */}
+        <Tooltip.Provider>
+          <Toolbar.Root className="lab-tools" aria-label={labels.tools}>
+            {tools.map((tool) => {
+              const props = {
+                ref: (el: HTMLButtonElement | null) => {
+                  toolRefs.current.set(tool.key, el);
+                },
+                className: "lab-tool",
+                "aria-controls": tool.controls,
+                "aria-keyshortcuts": tool.key,
+                "data-more": tool.more ? "" : undefined,
+                children: (
+                  <>
+                    <Icon name={tool.icon} size={15} />
+                    <span className="lab-tool-label">{tool.label}</span>
+                  </>
+                ),
+              };
+              // Tools with an on state are toggles; the others act once.
+              const button =
+                tool.pressed === undefined ? (
+                  <Toolbar.Button onClick={tool.act} {...props} />
+                ) : (
+                  <Toolbar.Button
+                    render={<Toggle pressed={tool.pressed} onPressedChange={tool.act} />}
+                    {...props}
+                  />
+                );
+              return (
+                <Tip
+                  key={tool.key}
+                  trigger={button}
+                  label={tool.label}
+                  shortcut={tool.key}
+                  theme={state.theme}
+                />
+              );
+            })}
+            <Tip
+              trigger={
+                <Toolbar.Button
+                  className="lab-tool"
+                  popoverTarget={TOKEN_SETUP_ID}
+                  aria-haspopup="dialog"
+                  data-more=""
+                  onClick={() => placeTokenSetup("stage")}
+                >
+                  <Icon name="palette" size={15} />
+                  <span className="lab-tool-label lab-tool-token-label">{labels.tokens}</span>
+                </Toolbar.Button>
+              }
+              label={labels.tokenSetup}
+              theme={state.theme}
+            />
+            {/* Narrow screens: the documentation sheet opens from here, set apart by a groove. */}
+            <Toolbar.Separator className="lab-tool-sep" />
+            <Tip
+              trigger={
+                <Toolbar.Button
+                  id={docs.buttonId}
+                  className="lab-tool lab-tool-docs"
+                  aria-expanded={docs.open}
+                  aria-controls={docs.sheetId}
+                  onClick={docs.toggle}
+                >
+                  <Icon name="book-open" size={15} />
+                  <span ref={docsLabelRef} className="lab-tool-docs-label">
+                    {labels.docs}
+                  </span>
+                </Toolbar.Button>
+              }
+              label={labels.docs}
+              theme={state.theme}
+              // Only while the stage is too narrow for the label, visually hidden to 1px then.
+              onOpenChange={(open, details) => {
+                if (open && (docsLabelRef.current?.offsetWidth ?? 0) > 1) details.cancel();
+              }}
+            />
+            <Tip
+              trigger={
+                <Toolbar.Button
+                  ref={moreButtonRef}
+                  className="lab-tool lab-tool-more"
+                  popoverTarget={moreId}
+                  aria-label={labels.more}
+                >
+                  <Icon name="ellipsis" size={15} />
+                </Toolbar.Button>
+              }
+              label={labels.more}
+              theme={state.theme}
+            />
+          </Toolbar.Root>
+        </Tooltip.Provider>
         <fieldset ref={moreRef} id={moreId} popover="auto" className="lab-more">
           <legend className="visually-hidden">{labels.more}</legend>
           <button

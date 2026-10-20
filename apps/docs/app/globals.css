@@ -2749,6 +2749,66 @@ figure[data-code-block] pre {
   font-size: 15px;
 }
 
+/* The Tooltip Lab: a toolbar with a tooltip per button, and room above it for the open one. */
+.demo-tooltip {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding-block: 44px 8px;
+}
+
+/*
+ * Lab popups render here, inside the demo, so they take the stage's theme and scale. The box
+ * covers the demo, so Base UI can measure the stage's scale from it; clicks pass through.
+ */
+.demo-portal {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.demo-portal > * {
+  pointer-events: auto;
+}
+
+/* One trigger per side on a card, each tooltip open away from the middle. */
+.demo-tooltip-sides {
+  grid-template: repeat(3, auto) / repeat(3, auto);
+  grid-template-areas:
+    ". top ."
+    "left . right"
+    ". bottom .";
+  gap: 16px 48px;
+  padding: 48px 76px;
+  border: 1px solid var(--ow-line);
+  border-radius: 14px;
+  background-color: var(--ow-bg);
+}
+
+.demo-tooltip-sides [data-side-demo="top"] {
+  grid-area: top;
+}
+
+.demo-tooltip-sides [data-side-demo="right"] {
+  grid-area: right;
+}
+
+.demo-tooltip-sides [data-side-demo="bottom"] {
+  grid-area: bottom;
+}
+
+.demo-tooltip-sides [data-side-demo="left"] {
+  grid-area: left;
+}
+
+/* A matrix cell with its tooltip open above the trigger. */
+.demo-cell.demo-tooltip-cell {
+  position: relative;
+  min-inline-size: 104px;
+  padding-block-start: 46px;
+}
+
 /* A matrix of controls on the components' own background. */
 .demo-surface {
   padding: 20px 24px;

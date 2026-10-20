@@ -20,6 +20,7 @@ import { type Dictionary, format } from "@/lib/dictionaries";
 import type { Lang } from "@/lib/i18n";
 import { Icon } from "../icons/icon";
 import { ScrollFade } from "../scroll-fade";
+import { Tip } from "../tip";
 import { useTokenNames } from "../token-setup";
 import { SHEET_FULL_GAP, SHEET_HALF, SIDE_BY_SIDE } from "./layout";
 import { setActiveScene } from "./scene-store";
@@ -588,14 +589,19 @@ export function LabShell({
             <p ref={sheetTitle} className="lab-sheet-title" tabIndex={-1}>
               {format(labels.sheetTitle, { name: componentTitle })}
             </p>
-            <button
-              type="button"
-              className="lab-sheet-close"
-              aria-label={labels.close}
-              onClick={closeSheet}
-            >
-              <Icon name="x" size={16} />
-            </button>
+            <Tip
+              trigger={
+                <button
+                  type="button"
+                  className="lab-sheet-close"
+                  aria-label={labels.close}
+                  onClick={closeSheet}
+                >
+                  <Icon name="x" size={16} />
+                </button>
+              }
+              label={labels.close}
+            />
           </div>
           {/* Outside the text's scroller, so its scrollbar runs beside the text alone. */}
           <nav ref={sceneNav} className="lab-scene-nav" aria-label={labels.scenes}>

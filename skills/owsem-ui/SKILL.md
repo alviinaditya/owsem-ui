@@ -139,9 +139,10 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Kbd**, **Separator**, **Toggle**, and **Toolbar** (Base, from `owsem-ui/base`) and **Tree Rail
-Nav** (Owsem, from `owsem-ui/owsem`) are built. Base components are Base UI components with
-OwsemUI's styling, and small primitives without a Base UI part, such as Kbd; Owsem components are
+**Kbd**, **Separator**, **Toggle**, **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`) and
+**Tree Rail Nav** (Owsem, from `owsem-ui/owsem`) are built. Base components are Base UI components
+with OwsemUI's styling, and small primitives without a Base UI part, such as Kbd; Owsem components
+are OwsemUI's own. No component has a `flavor` prop.
 OwsemUI's own. No component has a `flavor` prop.
 
 ### Separator
@@ -236,6 +237,42 @@ import { Toggle, Toolbar } from "owsem-ui/base"; // or "@/components/owsem/toolb
   `--ow-pressed-bg`, and `--ow-pressed-shadow` (buttons and links), `--ow-well-bg`,
   `--ow-well-shadow`, and `--ow-edge` (the field), `--ow-line-dark` and `--ow-line-light` (grooves),
   `--ow-radius`, and `--ow-focus`.
+
+### Tooltip
+
+A short visual label for a button, on hover or keyboard focus (touch shows none). Registry item:
+`tooltip`.
+
+```tsx
+import { Toggle, Toolbar, Tooltip } from "owsem-ui/base"; // or "@/components/owsem/tooltip"
+<Tooltip.Provider>
+  <Tooltip.Root>
+    <Tooltip.Trigger render={<Toolbar.Button render={<Toggle />} aria-label="Bold" startIcon={<BoldIcon />} />} />
+    <Tooltip.Portal>
+      <Tooltip.Positioner side="bottom">
+        <Tooltip.Popup>
+          <Tooltip.Arrow />
+          Bold<kbd>⌘B</kbd>
+        </Tooltip.Popup>
+      </Tooltip.Positioner>
+    </Tooltip.Portal>
+  </Tooltip.Root>
+</Tooltip.Provider>
+```
+
+- The trigger keeps its own accessible name (`aria-label` on an icon button); the tooltip only
+  repeats it. Never put information a touch or screen reader user needs only in a tooltip.
+- Pass the button to `Tooltip.Trigger`'s `render`; it can itself render a Toggle or a toolbar item.
+- `Tooltip.Provider` around a group shares one `delay` (600 ms default): after the first, the next
+  tooltips open at once. `Trigger` takes `delay`, `closeDelay`, and `closeOnClick`; `Root` takes
+  `open`, `defaultOpen`, `onOpenChange`, and `disabled`.
+- `Positioner`: `side` (`"top"` default, also `"inline-start"` and `"inline-end"`), `align`, and
+  `sideOffset` (8 by default). `Arrow` is optional. A `kbd` inside the popup is styled as the
+  shortcut.
+- The popup renders in a portal on `body`: a `data-theme` or token set around the trigger does not
+  reach it. Set tokens on `:root` or on the Popup's class, and pass `data-theme` to the Positioner
+  when the trigger sits in a themed subtree. Wrap the app in `DirectionProvider` for right to left.
+- Tokens: `--ow-tooltip-bg` and `--ow-tooltip-fg` (theme tokens, shared by every tooltip).
 
 ### Tree Rail Nav
 

@@ -704,3 +704,62 @@ test("the scene being read stands out; the others recede (DS-2)", async ({ page 
   const head = page.locator("#scene-groups .lab-scene-head");
   await expect(head.getByRole("button", { name: /^(Play scene|Stop)$/ })).toBeVisible();
 });
+
+test("the stage tools name themselves and their key in a tooltip, not a title", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "desktop", "a wide stage shows every tool");
+  await page.goto("/en/separator");
+  const tools = stage(page).getByRole("toolbar", { name: "Stage tools" });
+  await expect(tools.locator("[title]")).toHaveCount(0);
+  const tip = page.locator(".ow-tooltip-popup");
+  await tools.getByRole("button", { name: "Code", exact: true }).hover();
+  await expect(tip).toHaveText("CodeC");
+  await expect(tip.locator("kbd")).toHaveText("C");
+  // The next tool's tooltip opens at once, unanimated.
+  await tools.getByRole("button", { name: "Controls", exact: true }).hover();
+  await expect(tip).toHaveText("ControlsP");
+  await expect(tip).toHaveAttribute("data-instant", "delay");
+  // The tooltip takes the stage's theme, and leaves the button's name alone.
+  await page.keyboard.press("Escape");
+  await page.mouse.move(0, 0);
+  await stage(page).click({ position: { x: 20, y: 200 } });
+  await page.keyboard.press("t");
+  await tools.getByRole("button", { name: "Inspect", exact: true }).hover();
+  await expect(page.locator(".ow-tooltip-positioner")).toHaveAttribute(
+    "data-theme",
+    (await stage(page).getAttribute("data-theme")) ?? "",
+  );
+  await expect(tools.getByRole("button", { name: "Inspect", exact: true })).toBeVisible();
+});
+
+test("a phone's Docs button shows its name in a tooltip only when it is an icon", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile-390", "a phone's widths");
+  await page.goto("/en/separator");
+  const docs = page.locator(".lab-tool-docs");
+  const tip = page.locator(".ow-tooltip-popup");
+  // 390 px: the label shows, so no tooltip repeats it.
+  await docs.hover();
+  await page.waitForTimeout(900);
+  await expect(tip).toHaveCount(0);
+  await page.mouse.move(0, 400);
+  await page.setViewportSize({ width: 320, height: 640 });
+  await docs.hover();
+  await expect(tip).toHaveText("Docs");
+  await expect(docs).toHaveAccessibleName("Docs");
+  // The sheet's close button has one too.
+  await docs.click();
+  await page.locator(".lab-sheet-close").hover();
+  await expect(tip).toHaveText("Close");
+});
+
+test("the Tooltip Lab's first scene walks the toolbar's tooltips", async ({ page }) => {
+  await page.goto("/en/tooltip");
+  await scene(page, "group");
+  // The one closing stays a moment, without data-open.
+  const open = demo(page).locator(".ow-tooltip-popup[data-open]");
+  await expect(open).toHaveText("Bold⌘B");
+  await expect(open).toHaveText("Italic⌘I");
+});

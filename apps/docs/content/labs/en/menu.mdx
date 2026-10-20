@@ -1,0 +1,179 @@
+---
+title: Menu
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Menu opens a list of actions from a button: items with icons and shortcuts, checks and choices,
+and submenus, on the panel material with the popup shadow. Glide lights the item under the
+pointer. Scroll to start the tour; the stage follows each part.
+
+## Lit by Glide [#glide]
+
+Items have no hover color of their own. One highlight, Glide, slides to the item nearest the
+pointer, so moving down a menu reads as one motion rather than rows blinking on and off. In the
+gaps between items the lit one holds, and disabled items are passed over.
+
+The keyboard moves the same highlight. Base UI moves focus from item to item with the arrow keys,
+and the menu hands each one to Glide with `setActive()`, so the pointer and the keys never show two
+highlights.
+
+The menu itself grows out of its trigger in 180 ms, from 0.96 and transparent, eased out, and
+leaves in 120 ms. Opened from the keyboard, it appears at once.
+
+The stage plays it: the pointer opens Edit, runs down its items and back, and shuts it. Play scene
+runs it again.
+
+## Submenus [#submenu]
+
+An item with a chevron opens a submenu when the pointer rests on it, or with Arrow Right. The
+submenu sits beside its item with their first rows in line, and while the pointer is inside it, its
+item stays lit in the menu it came from. Arrow Left or Escape goes back one level.
+
+A submenu is a `Menu.SubmenuRoot` holding a `Menu.SubmenuTrigger` and its own Portal, Positioner,
+and Popup, which take the same props as the menu's.
+
+## Checks and choices [#choices]
+
+`Menu.CheckboxItem` turns a setting on and off; `Menu.RadioItem`, inside a `Menu.RadioGroup`, picks
+one of several. Both keep the menu open by default, so several can change in a row; set
+`closeOnClick` to shut it on a pick. Their indicators, a check and a dot, sit in the icon column and
+keep their room while off, so every label stays in line. `Menu.GroupLabel` names a group.
+
+A shortcut is a `kbd` last in an item: it moves to the item's end, muted. The menu shows it; your
+app handles the keys.
+
+The stage plays it: View opens, Line numbers turns on, Dark is picked, then both go back.
+
+## Anatomy [#anatomy]
+
+Base UI renders the parts, their roles, and the keyboard; OwsemUI styles them, adds Glide, the
+indicators' default check and dot, the chevron, the sizes, and carries the text direction into the
+portal. Root, Portal, Group, RadioGroup, and SubmenuRoot add no look of their own. Inspect (I)
+outlines the other parts on the stage; pick a name, here or on the stage, to see its tokens.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Trigger" /> | Your button | Passed to `render`; `aria-haspopup="menu"` and `aria-expanded` |
+| Positioner | `div.ow-menu-positioner` | 6px from the trigger; a submenu beside its item, first rows in line |
+| <Part name="Popup" /> | `div.ow-menu-popup` | `role="menu"`, `data-size`, and the Glide highlight inside |
+| <Part name="Item" /> | `div.ow-menu-item` | `role="menuitem"`; an `svg` first is sized as its icon |
+| <Part name="Shortcut" /> | `kbd` | Last in an item, at its end |
+| <Part name="GroupLabel" /> | `div.ow-menu-group-label` | Names its `Menu.Group` or `Menu.RadioGroup` |
+| <Part name="CheckboxItem" /> | `div.ow-menu-item` | `role="menuitemcheckbox"`, `aria-checked` |
+| <Part name="Indicator" /> | `span.ow-menu-indicator` | A check, or a dot in a RadioItem; `data-checked` or `data-unchecked` |
+| <Part name="Separator" /> | `div.ow-menu-separator` | `role="separator"`, an etched groove |
+| <Part name="SubmenuTrigger" /> | `div.ow-menu-item` | `aria-haspopup`, `data-popup-open`, and a chevron |
+
+`Menu.LinkItem` is an item that is a link; `render` swaps in a router link.
+
+## States and variants [#states]
+
+The stage sets each size in both themes, each menu with an item and its shortcut, a disabled item,
+and a checked one. Items follow Button's `--py` rule with `--py: 0.5em`; the popup's 4px padding
+keeps its corners concentric with theirs.
+
+| Size | Font | Item height | Icon |
+| --- | --- | --- | --- |
+| `sm` | 13px | 29.25px | 15px |
+| `md` | 14px | 31.5px | 16px |
+| `lg` | 16px | 36px | 18px |
+
+| State | What shows it |
+| --- | --- |
+| Lit | The Glide highlight, under the pointer or at the keyboard's item |
+| Keyboard focus | A 2px ring inside the item, in `--ow-focus` |
+| Disabled | 45% opacity; the keyboard still reaches it, Glide passes it |
+| Checked | `data-checked`, and the indicator shows |
+| Submenu open | `data-popup-open`; the item stays lit while the pointer is in the submenu |
+
+## Keyboard and accessibility [#keyboard]
+
+| Key | Action |
+| --- | --- |
+| Enter, Space, Arrow Down | On the trigger: open the menu at its first item |
+| Arrow Down, Arrow Up | The next or previous item, wrapping around |
+| Home, End | The first or last item |
+| Enter, Space | Pick the item |
+| Arrow Right, Arrow Left | Open a submenu, or go back from one (mirrored right to left) |
+| Escape | Shut the menu; focus goes back to the trigger |
+| A letter | The next item that starts with it |
+
+Screen readers announce the menu, each item's role and state, and the groups by their labels.
+`modal` (true by default) keeps the rest of the page out of reach while the menu is open.
+
+With `prefers-reduced-motion`, the menu fades without growing, and Glide fades instead of sliding.
+In forced colors (Windows High Contrast), the popup keeps a 1px edge in the system color, the
+grooves stay, the highlight is an outline in `Highlight`, and the checks follow the text color.
+
+## Customization [#customization]
+
+The stage controls are open: pick a size, the surface, or the text color, and the code follows.
+
+<ForMode mode="theme">
+
+Set the tokens on the popup with a class, as `menu.css` does, or for every menu on `:root`. A class
+around the trigger does not reach: the menu renders in a portal, outside the trigger's subtree.
+
+| Component token | Default | Purpose |
+| --- | --- | --- |
+| `--ow-menu-bg` | `--ow-panel` | Surface |
+| `--ow-menu-shadow` | `--ow-popup-shadow` | Edge and shadow |
+| `--ow-menu-fg` | `--ow-fg` | Item text |
+| `--ow-menu-muted` | `--ow-muted` | Group labels, shortcuts, and chevrons |
+| `--ow-menu-line-dark` | `--ow-line-dark` | Groove's dark line |
+| `--ow-menu-line-light` | `--ow-line-light` | Groove's light line |
+| `--ow-glide-bg` | `--ow-fg` at 7% | The highlight (Glide's own token) |
+
+</ForMode>
+
+<ForMode mode="isolated">
+
+The popup carries its own values: set a token on the Popup with a class, as `menu.css` does, and
+on the separators for their lines. A class around the trigger does not reach: the menu renders in a
+portal.
+
+| Component token | Default | Purpose |
+| --- | --- | --- |
+| `--ow-menu-bg` | Its own, per theme | Surface |
+| `--ow-menu-shadow` | Its own, per theme | Edge and shadow |
+| `--ow-menu-fg` | Its own, per theme | Item text |
+| `--ow-menu-muted` | Its own, per theme | Group labels, shortcuts, and chevrons |
+| `--ow-menu-line-dark` | Its own, per theme | Groove's dark line |
+| `--ow-menu-line-light` | Its own, per theme | Groove's light line |
+| `--ow-glide-bg` | Its own, per theme | The highlight (Glide's own token) |
+
+</ForMode>
+
+Item corners follow `--ow-radius`, and the popup's add its 4px padding.
+
+<TokenChip item="menu" lang="en" />
+
+## Ship it [#ship]
+
+The code drawer writes both menus exactly as the stage is set up. Change the size or a color, and
+the lines that change light up.
+
+| Part | Prop | Type | Default |
+| --- | --- | --- | --- |
+| Root | `open`, `defaultOpen`, `onOpenChange` | | |
+| Root | `modal` | `boolean` | `true` |
+| Root | `loopFocus` | `boolean` | `true` |
+| Positioner | `side` | `"top" \| "right" \| "bottom" \| "left" \| "inline-start" \| "inline-end"` | `"bottom"` |
+| Positioner | `align` | `"start" \| "center" \| "end"` | `"center"` |
+| Positioner | `sideOffset`, `alignOffset` | `number \| function` | `6`; a submenu's first rows in line |
+| Popup | `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| Item | `onClick`, `disabled`, `label` | | |
+| Item, CheckboxItem, RadioItem | `closeOnClick` | `boolean` | `true` for Item, `false` for the others |
+| CheckboxItem | `checked`, `defaultChecked`, `onCheckedChange` | | |
+| RadioGroup | `value`, `defaultValue`, `onValueChange` | | |
+| Indicators | `keepMounted` | `boolean` | `true` |
+| Every part | `className`, `style`, `render` | | |
+
+`size`, the offsets' defaults, and the indicators' `keepMounted` and default glyphs are OwsemUI's;
+the rest comes from Base UI, which documents it, such as detached triggers with
+`Menu.createHandle()`. Refs go to each part's element.
+
+Import it from `owsem-ui/base`. In the registry, it is the `menu` item; the toolbar here also needs
+`toolbar`.

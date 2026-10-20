@@ -1,0 +1,196 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * A popup list of actions on the panel material with the popup shadow. Items are flat; Glide
+ * lights the one nearest the pointer, or the one the keyboard reached. Items follow Button's
+ * geometry rule (FR-9) with a tighter --py, and the popup's corners stay concentric with theirs.
+ */
+@layer owsem.components {
+  .ow-menu-popup {
+    --_bg: var(--ow-menu-bg, var(--ow-panel, #ffffff));
+    --_shadow: var(
+      --ow-menu-shadow,
+      var(--ow-popup-shadow, 0 0 0 1px rgb(30 25 40 / 0.1), 0 16px 40px -12px rgb(40 30 20 / 0.24))
+    );
+    --_fg: var(--ow-menu-fg, var(--ow-fg, #1b1726));
+    --_muted: var(--ow-menu-muted, var(--ow-muted, #5c5669));
+    --_highlight: var(--ow-glide-bg, color-mix(in oklab, var(--ow-fg, #18181b) 7%, transparent));
+    --_pad: 4px;
+    box-sizing: border-box;
+    min-inline-size: 10rem;
+    max-block-size: var(--available-height);
+    padding: var(--_pad);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    /* Concentric with the items (FR-10b). */
+    border-radius: calc(var(--ow-radius, 8px) + var(--_pad));
+    /* Invisible until forced colors draw it as the edge (DP-8). */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--_bg);
+    box-shadow: var(--_shadow);
+    color: var(--_fg);
+    font-size: 0.875rem;
+    line-height: 1.25;
+    transform-origin: var(--transform-origin);
+    transition:
+      opacity 180ms var(--ow-ease-out, cubic-bezier(0.23, 1, 0.32, 1)),
+      transform 180ms var(--ow-ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+  }
+
+  .ow-menu-popup[data-size="sm"] {
+    font-size: 0.8125rem;
+  }
+
+  .ow-menu-popup[data-size="lg"] {
+    font-size: 1rem;
+  }
+
+  .ow-menu-popup:is([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  /* Leaving is quicker than arriving. */
+  .ow-menu-popup[data-ending-style] {
+    transition-duration: 120ms;
+  }
+
+  /* Opened from the keyboard, or shut with Escape: no animation. */
+  .ow-menu-popup[data-instant] {
+    transition: none;
+  }
+
+  /* Glide's highlight takes the items' corners. */
+  .ow-menu-popup > .ow-glide {
+    --_radius: var(--ow-radius, 8px);
+  }
+
+  /* Items: Button's geometry rule (FR-9), --py the only input; an icon or indicator first. */
+  .ow-menu-item {
+    --py: 0.5em;
+    --_py: max(var(--py), (24px - 1lh) / 2);
+    --px: calc(var(--_py) + (1lh - 1cap) / 2);
+    --icon: calc(1em + 2px);
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    box-sizing: border-box;
+    padding: var(--_py) var(--px);
+    border-radius: var(--ow-radius, 8px);
+    outline: 0;
+    color: var(--_fg);
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: default;
+  }
+
+  /* Icons and indicators sit as far from the edge as from the top and bottom (FR-10). */
+  .ow-menu-item > svg,
+  .ow-menu-indicator {
+    display: inline-flex;
+    flex: none;
+    inline-size: var(--icon);
+    block-size: var(--icon);
+  }
+
+  .ow-menu-item > :is(svg, .ow-menu-indicator):first-child {
+    margin-inline-start: calc((1cap - var(--icon)) / 2);
+  }
+
+  .ow-menu-indicator > svg {
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  /* Unchecked, the indicator keeps its room, so the labels stay in line. */
+  .ow-menu-indicator[data-unchecked] {
+    visibility: hidden;
+  }
+
+  /* A shortcut (<kbd>) or the submenu chevron at the end, muted. */
+  .ow-menu-item > kbd,
+  .ow-menu-chevron {
+    margin-inline-start: auto;
+    color: var(--_muted);
+  }
+
+  .ow-menu-item > kbd {
+    display: inline;
+    padding: 0;
+    padding-inline-start: 1.5em;
+    border: 0;
+    background: none;
+    font: inherit;
+    letter-spacing: 0.04em;
+  }
+
+  .ow-menu-chevron {
+    display: inline-flex;
+    flex: none;
+    inline-size: var(--icon);
+    block-size: var(--icon);
+    margin-inline-end: calc((1cap - var(--icon)) / 2);
+  }
+
+  .ow-menu-chevron > svg {
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  .ow-menu-positioner[dir="rtl"] .ow-menu-chevron {
+    transform: scaleX(-1);
+  }
+
+  /* The item whose submenu is open stays lit while the pointer is in the submenu. */
+  .ow-menu-popup:not(:hover) .ow-menu-item[data-popup-open] {
+    background-color: var(--_highlight);
+  }
+
+  /* FR-13: a 2px ring, inside the item so the popup does not clip it. */
+  .ow-menu-item:focus-visible {
+    outline: 2px solid var(--ow-focus, #5b4a9a);
+    outline-offset: -2px;
+  }
+
+  .ow-menu-item[data-disabled] {
+    opacity: 0.45;
+  }
+
+  /* Smaller than the items (12px of 14), with their inline padding: the item's --px in its em. */
+  .ow-menu-group-label {
+    padding-block: 0.6em 0.3em;
+    padding-inline: calc((0.5em + (1.25em - 1cap) / 2) / 0.8571);
+    color: var(--_muted);
+    font-size: 0.8571em;
+    font-weight: 500;
+    line-height: 1.25;
+  }
+
+  /* An etched groove: a dark line with a light one under it, as borders for forced colors. */
+  .ow-menu-separator {
+    --_dark: var(--ow-menu-line-dark, var(--ow-line-dark, #d9d9e0));
+    --_light: var(--ow-menu-line-light, var(--ow-line-light, #ffffff));
+    margin-block: var(--_pad);
+    border-block: 1px solid;
+    border-block-color: var(--_dark) var(--_light);
+  }
+
+  /* FR-20: it fades, without growing. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-menu-popup:is([data-starting-style], [data-ending-style]) {
+      transform: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .ow-menu-item:focus-visible {
+      outline-color: Highlight;
+    }
+
+    .ow-menu-item[data-disabled] {
+      color: GrayText;
+      opacity: 1;
+    }
+  }
+}

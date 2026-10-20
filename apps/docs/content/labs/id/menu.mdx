@@ -1,0 +1,179 @@
+---
+title: Menu
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Menu membuka daftar aksi dari sebuah tombol: item dengan ikon dan shortcut, centang dan pilihan,
+serta submenu, di atas material panel dengan bayangan popup. Glide menyalakan item di bawah
+pointer. Gulir untuk mulai tur; stage mengikuti setiap bagian.
+
+## Dinyalakan oleh Glide [#glide]
+
+Item tidak punya warna hover sendiri. Satu sorotan, Glide, bergeser ke item yang paling dekat
+dengan pointer, jadi menyusuri menu terasa sebagai satu gerakan, bukan baris yang berkedip
+bergantian. Di celah antar item, item yang menyala tetap bertahan, dan item disabled dilewati.
+
+Keyboard menggerakkan sorotan yang sama. Base UI memindahkan fokus antar item dengan tombol panah,
+dan menu menyerahkan setiap item ke Glide lewat `setActive()`, jadi pointer dan keyboard tidak
+pernah menampilkan dua sorotan.
+
+Menu sendiri tumbuh dari trigger-nya dalam 180 ms, dari 0,96 dan transparan, dengan ease-out, lalu
+pergi dalam 120 ms. Bila dibuka dari keyboard, menu langsung muncul.
+
+Stage memutarnya: pointer membuka Edit, menyusuri item-nya bolak-balik, lalu menutupnya. Putar
+scene memutarnya lagi.
+
+## Submenu [#submenu]
+
+Item dengan chevron membuka submenu saat pointer berhenti di atasnya, atau dengan panah kanan.
+Submenu berada di samping item-nya dengan baris pertama yang sejajar, dan selama pointer ada di
+dalamnya, item asalnya tetap menyala di menu induk. Panah kiri atau Escape kembali satu tingkat.
+
+Submenu adalah `Menu.SubmenuRoot` berisi `Menu.SubmenuTrigger` serta Portal, Positioner, dan Popup
+miliknya sendiri, dengan props yang sama seperti milik menu.
+
+## Centang dan pilihan [#choices]
+
+`Menu.CheckboxItem` menyalakan dan mematikan sebuah pengaturan; `Menu.RadioItem`, di dalam
+`Menu.RadioGroup`, memilih satu dari beberapa. Keduanya membiarkan menu tetap terbuka secara
+bawaan, jadi beberapa pengaturan bisa diubah berturut-turut; pasang `closeOnClick` agar menu
+tertutup setelah memilih. Indikatornya, centang dan titik, berada di kolom ikon dan tetap
+menyimpan tempatnya saat mati, jadi semua label tetap sejajar. `Menu.GroupLabel` menamai sebuah
+grup.
+
+Shortcut adalah `kbd` terakhir di item: posisinya pindah ke ujung item, dengan warna muted. Menu
+hanya menampilkannya; app Anda yang menangani tombolnya.
+
+Stage memutarnya: Tampilan terbuka, Nomor baris menyala, Gelap dipilih, lalu keduanya dikembalikan.
+
+## Anatomi [#anatomy]
+
+Base UI merender bagian-bagiannya, role-nya, dan keyboard-nya; OwsemUI memberi gaya, menambahkan
+Glide, centang dan titik bawaan untuk indikator, chevron, ukuran, dan membawa arah teks ke dalam
+portal. Root, Portal, Group, RadioGroup, dan SubmenuRoot tidak menambah tampilan. Inspeksi (I)
+menandai bagian lainnya di stage; pilih sebuah nama, di sini atau di stage, untuk melihat tokennya.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Trigger" /> | Tombol Anda | Diberikan lewat `render`; `aria-haspopup="menu"` dan `aria-expanded` |
+| Positioner | `div.ow-menu-positioner` | 6px dari trigger; submenu di samping item-nya, baris pertama sejajar |
+| <Part name="Popup" /> | `div.ow-menu-popup` | `role="menu"`, `data-size`, dan sorotan Glide di dalamnya |
+| <Part name="Item" /> | `div.ow-menu-item` | `role="menuitem"`; `svg` di awal menjadi ikonnya |
+| <Part name="Shortcut" /> | `kbd` | Terakhir di item, di ujungnya |
+| <Part name="GroupLabel" /> | `div.ow-menu-group-label` | Menamai `Menu.Group` atau `Menu.RadioGroup`-nya |
+| <Part name="CheckboxItem" /> | `div.ow-menu-item` | `role="menuitemcheckbox"`, `aria-checked` |
+| <Part name="Indicator" /> | `span.ow-menu-indicator` | Centang, atau titik di RadioItem; `data-checked` atau `data-unchecked` |
+| <Part name="Separator" /> | `div.ow-menu-separator` | `role="separator"`, alur terukir |
+| <Part name="SubmenuTrigger" /> | `div.ow-menu-item` | `aria-haspopup`, `data-popup-open`, dan chevron |
+
+`Menu.LinkItem` adalah item berupa link; `render` menggantinya dengan link router.
+
+## State dan varian [#states]
+
+Stage menampilkan setiap ukuran di kedua tema, masing-masing menu berisi item dengan shortcut-nya,
+item disabled, dan item yang dicentang. Item mengikuti aturan `--py` milik Button dengan
+`--py: 0.5em`; padding popup 4px menjaga sudutnya konsentris dengan sudut item.
+
+| Ukuran | Font | Tinggi item | Ikon |
+| --- | --- | --- | --- |
+| `sm` | 13px | 29,25px | 15px |
+| `md` | 14px | 31,5px | 16px |
+| `lg` | 16px | 36px | 18px |
+
+| State | Tandanya |
+| --- | --- |
+| Menyala | Sorotan Glide, di bawah pointer atau di item yang dicapai keyboard |
+| Fokus keyboard | Ring 2px di dalam item, warna `--ow-focus` |
+| Disabled | Opacity 45%; keyboard tetap mencapainya, Glide melewatinya |
+| Dicentang | `data-checked`, dan indikatornya tampil |
+| Submenu terbuka | `data-popup-open`; item tetap menyala selama pointer ada di submenu |
+
+## Keyboard dan aksesibilitas [#keyboard]
+
+| Tombol | Aksi |
+| --- | --- |
+| Enter, Space, panah bawah | Di trigger: membuka menu di item pertama |
+| Panah bawah, panah atas | Item berikutnya atau sebelumnya, berputar di ujung |
+| Home, End | Item pertama atau terakhir |
+| Enter, Space | Memilih item |
+| Panah kanan, panah kiri | Membuka submenu, atau kembali darinya (terbalik untuk kanan ke kiri) |
+| Escape | Menutup menu; fokus kembali ke trigger |
+| Sebuah huruf | Item berikutnya yang diawali huruf itu |
+
+Screen reader mengumumkan menu, role dan state setiap item, serta grup lewat labelnya. `modal`
+(bawaannya true) membuat bagian halaman lain tidak terjangkau selama menu terbuka.
+
+Dengan `prefers-reduced-motion`, menu memudar tanpa tumbuh, dan Glide memudar alih-alih bergeser.
+Di forced colors (Windows High Contrast), popup tetap punya tepi 1px dengan warna sistem, alurnya
+tetap ada, sorotannya menjadi outline `Highlight`, dan centangnya mengikuti warna teks.
+
+## Kustomisasi [#customization]
+
+Kontrol stage terbuka: pilih ukuran, permukaan, atau warna teks, dan kodenya ikut berubah.
+
+<ForMode mode="theme">
+
+Pasang token di popup lewat class, seperti `menu.css`, atau untuk semua menu di `:root`. Class di
+sekitar trigger tidak sampai: menu dirender di portal, di luar subtree trigger-nya.
+
+| Token komponen | Bawaan | Fungsi |
+| --- | --- | --- |
+| `--ow-menu-bg` | `--ow-panel` | Permukaan |
+| `--ow-menu-shadow` | `--ow-popup-shadow` | Tepi dan bayangan |
+| `--ow-menu-fg` | `--ow-fg` | Teks item |
+| `--ow-menu-muted` | `--ow-muted` | Label grup, shortcut, dan chevron |
+| `--ow-menu-line-dark` | `--ow-line-dark` | Garis gelap alur |
+| `--ow-menu-line-light` | `--ow-line-light` | Garis terang alur |
+| `--ow-glide-bg` | `--ow-fg` 7% | Sorotan (token milik Glide) |
+
+</ForMode>
+
+<ForMode mode="isolated">
+
+Popup membawa nilainya sendiri: pasang token di Popup lewat class, seperti `menu.css`, dan di
+separator untuk garisnya. Class di sekitar trigger tidak sampai: menu dirender di portal.
+
+| Token komponen | Bawaan | Fungsi |
+| --- | --- | --- |
+| `--ow-menu-bg` | Miliknya sendiri, per tema | Permukaan |
+| `--ow-menu-shadow` | Miliknya sendiri, per tema | Tepi dan bayangan |
+| `--ow-menu-fg` | Miliknya sendiri, per tema | Teks item |
+| `--ow-menu-muted` | Miliknya sendiri, per tema | Label grup, shortcut, dan chevron |
+| `--ow-menu-line-dark` | Miliknya sendiri, per tema | Garis gelap alur |
+| `--ow-menu-line-light` | Miliknya sendiri, per tema | Garis terang alur |
+| `--ow-glide-bg` | Miliknya sendiri, per tema | Sorotan (token milik Glide) |
+
+</ForMode>
+
+Sudut item mengikuti `--ow-radius`, dan sudut popup menambahkan padding 4px-nya.
+
+<TokenChip item="menu" lang="id" />
+
+## Ship it [#ship]
+
+Drawer kode menulis kedua menu persis seperti pengaturan stage. Ganti ukuran atau warna, dan baris
+yang berubah akan menyala.
+
+| Bagian | Prop | Tipe | Bawaan |
+| --- | --- | --- | --- |
+| Root | `open`, `defaultOpen`, `onOpenChange` | | |
+| Root | `modal` | `boolean` | `true` |
+| Root | `loopFocus` | `boolean` | `true` |
+| Positioner | `side` | `"top" \| "right" \| "bottom" \| "left" \| "inline-start" \| "inline-end"` | `"bottom"` |
+| Positioner | `align` | `"start" \| "center" \| "end"` | `"center"` |
+| Positioner | `sideOffset`, `alignOffset` | `number \| function` | `6`; baris pertama submenu sejajar |
+| Popup | `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| Item | `onClick`, `disabled`, `label` | | |
+| Item, CheckboxItem, RadioItem | `closeOnClick` | `boolean` | `true` untuk Item, `false` untuk lainnya |
+| CheckboxItem | `checked`, `defaultChecked`, `onCheckedChange` | | |
+| RadioGroup | `value`, `defaultValue`, `onValueChange` | | |
+| Indikator | `keepMounted` | `boolean` | `true` |
+| Semua bagian | `className`, `style`, `render` | | |
+
+`size`, nilai bawaan offset, serta `keepMounted` dan glyph bawaan indikator berasal dari OwsemUI;
+sisanya dari Base UI, yang mendokumentasikannya, seperti trigger terpisah dengan
+`Menu.createHandle()`. Ref diteruskan ke elemen setiap bagian.
+
+Impor dari `owsem-ui/base`. Di registry, item-nya `menu`; toolbar di sini juga butuh `toolbar`.

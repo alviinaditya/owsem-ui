@@ -31,6 +31,12 @@ const ICONS = {
       <path d="M12 17h.01" />
     </>
   ),
+  clipboard: (
+    <>
+      <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+    </>
+  ),
   "code-xml": (
     <>
       <path d="m18 16 4-4-4-4" />
@@ -48,6 +54,12 @@ const ICONS = {
     <>
       <circle cx="12" cy="12" r="10" />
       <path d="M12 18a6 6 0 0 0 0-12v12z" />
+    </>
+  ),
+  copy: (
+    <>
+      <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
     </>
   ),
   ellipsis: (
@@ -79,6 +91,12 @@ const ICONS = {
       <rect width="7" height="5" x="3" y="16" rx="1" />
     </>
   ),
+  link: (
+    <>
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+    </>
+  ),
   "list-collapse": (
     <>
       <path d="M10 5h11" />
@@ -86,6 +104,12 @@ const ICONS = {
       <path d="M10 19h11" />
       <path d="m3 10 3-3-3-3" />
       <path d="m3 20 3-3-3-3" />
+    </>
+  ),
+  mail: (
+    <>
+      <rect width="20" height="16" x="2" y="4" rx="2" />
+      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
     </>
   ),
   menu: (
@@ -151,6 +175,24 @@ const ICONS = {
       <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
       <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
       <rect width="8" height="8" x="8" y="8" rx="1.5" />
+    </>
+  ),
+  scissors: (
+    <>
+      <circle cx="6" cy="6" r="3" />
+      <path d="M8.12 8.12 12 12" />
+      <path d="M20 4 8.12 15.88" />
+      <circle cx="6" cy="18" r="3" />
+      <path d="M14.8 14.8 20 20" />
+    </>
+  ),
+  "share-2": (
+    <>
+      <circle cx="18" cy="5" r="3" />
+      <circle cx="6" cy="12" r="3" />
+      <circle cx="18" cy="19" r="3" />
+      <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" />
+      <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" />
     </>
   ),
   "sliders-horizontal": (

@@ -18,6 +18,7 @@ import {
 } from "react";
 import { type Dictionary, format } from "@/lib/dictionaries";
 import type { Lang } from "@/lib/i18n";
+import { siteScheme } from "@/lib/theme";
 import { Icon } from "../icons/icon";
 import { ScrollFade } from "../scroll-fade";
 import { Tip } from "../tip";
@@ -91,13 +92,6 @@ const useSideBySide = (): boolean =>
     () => matchMedia(SIDE_BY_SIDE).matches,
     () => true,
   );
-
-/** The site's color scheme at this moment: <html data-theme>, else the system preference. */
-function siteScheme(): "light" | "dark" {
-  const theme = document.documentElement.dataset.theme;
-  if (theme === "light" || theme === "dark") return theme;
-  return matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-}
 
 export interface LabShellProps {
   lab: LabDefinition<Config>;

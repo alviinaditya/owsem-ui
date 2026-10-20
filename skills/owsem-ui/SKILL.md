@@ -139,11 +139,70 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Kbd**, **Separator**, **Toggle**, **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`) and
-**Tree Rail Nav** (Owsem, from `owsem-ui/owsem`) are built. Base components are Base UI components
-with OwsemUI's styling, and small primitives without a Base UI part, such as Kbd; Owsem components
-are OwsemUI's own. No component has a `flavor` prop.
+**Kbd**, **Menu**, **Separator**, **Toggle**, **Toolbar**, and **Tooltip** (Base, from
+`owsem-ui/base`) and **Tree Rail Nav** (Owsem, from `owsem-ui/owsem`) are built. Base components are
+Base UI components with OwsemUI's styling, and small primitives without a Base UI part, such as Kbd;
+Owsem components are OwsemUI's own. No component has a `flavor` prop.
 OwsemUI's own. No component has a `flavor` prop.
+
+### Menu
+
+A dropdown list of actions from a button, with checks, choices, and submenus. Registry item: `menu`.
+
+```tsx
+import { Menu } from "owsem-ui/base"; // or "@/components/owsem/menu"
+<Menu.Root>
+  <Menu.Trigger render={<button type="button" />}>Edit</Menu.Trigger>
+  <Menu.Portal>
+    <Menu.Positioner>
+      <Menu.Popup>
+        <Menu.Item onClick={copy}>
+          <CopyIcon />
+          Copy
+          <kbd>⌘C</kbd>
+        </Menu.Item>
+        <Menu.Separator />
+        <Menu.CheckboxItem checked={wrap} onCheckedChange={setWrap}>
+          <Menu.CheckboxItemIndicator />
+          Word wrap
+        </Menu.CheckboxItem>
+        <Menu.Group>
+          <Menu.GroupLabel>Theme</Menu.GroupLabel>
+          <Menu.RadioGroup value={theme} onValueChange={setTheme}>
+            <Menu.RadioItem value="light">
+              <Menu.RadioItemIndicator />
+              Light
+            </Menu.RadioItem>
+          </Menu.RadioGroup>
+        </Menu.Group>
+        <Menu.SubmenuRoot>
+          <Menu.SubmenuTrigger>Share</Menu.SubmenuTrigger>
+          <Menu.Portal>
+            <Menu.Positioner>
+              <Menu.Popup>{/* items */}</Menu.Popup>
+            </Menu.Positioner>
+          </Menu.Portal>
+        </Menu.SubmenuRoot>
+      </Menu.Popup>
+    </Menu.Positioner>
+  </Menu.Portal>
+</Menu.Root>
+```
+
+- Keyboard, focus, typeahead, and ARIA come from Base UI; do not add handlers. Inside a Toolbar,
+  open it from an item: `<Toolbar.Button render={<Menu.Trigger />}>Edit</Toolbar.Button>`.
+- Do not style item hover or `data-highlighted`: Glide lights items (restyle it with
+  `--ow-glide-bg`). An `svg` first in an item is its icon; a `kbd` last is its shortcut (the menu
+  shows it, the app handles the keys).
+- `Menu.CheckboxItemIndicator` and `Menu.RadioItemIndicator` draw a check and a dot by default and
+  keep their room while off (`keepMounted`); put them first. Checkbox and radio items keep the menu
+  open unless `closeOnClick`.
+- `Popup` takes `size` (`"sm"`, `"md"` default, `"lg"`), also on a submenu's Popup. `Positioner`
+  sits 6px from the trigger (`side`, `align`, `sideOffset`); a submenu lines its first item up with
+  its trigger. The menu renders in a portal: set tokens on the Popup's class or on `:root`, and
+  `data-theme` on the Positioner when the trigger sits in a themed subtree.
+- Tokens: `--ow-menu-bg`, `--ow-menu-shadow`, `--ow-menu-fg`, `--ow-menu-muted`,
+  `--ow-menu-line-dark`, `--ow-menu-line-light`.
 
 ### Separator
 

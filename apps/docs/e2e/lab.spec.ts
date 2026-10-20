@@ -220,7 +220,7 @@ test("the stage theme changes the whole stage, and the stage only (DS-12)", asyn
   const dark = await background();
   const darkBar = await bar();
 
-  await stageTool(page, "Stage theme");
+  await stageTool(page, "Stage theme", "Light");
   await expect(stage(page)).toHaveAttribute("data-theme", "light");
   expect(await background()).not.toBe(dark);
   // The toolbar goes light with the stage.
@@ -374,23 +374,56 @@ test("the toolbar fits a 320 px screen, stage theme and tokens in its More menu"
   const more = stage(page).getByRole("button", { name: "More", exact: true });
   await expect(stage(page).getByRole("button", { name: "Stage theme" })).toBeHidden();
   await more.click();
-  await page
-    .locator(".lab-more")
-    .getByRole("button", { name: /Stage theme/ })
-    .click();
-  await expect(stage(page)).toHaveAttribute("data-theme");
+  // A Menu under the toolbar's end, on screen.
+  const menu = page.getByRole("menu");
+  await expect(menu).toBeVisible();
+  const box = await menu.boundingBox();
+  const bar = await page.locator(".lab-stage-bar").boundingBox();
+  if (!box || !bar) throw new Error("The menu and the toolbar need boxes.");
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeCloseTo(bar.x + bar.width, 0);
+  expect(box.y).toBeGreaterThan(bar.y + bar.height);
+  // The stage theme is a choice of two; picking one shuts the menu.
+  await expect(menu.getByRole("menuitemradio", { name: "Light" })).toHaveAttribute(
+    "aria-checked",
+    "true",
+  );
+  await menu.getByRole("menuitemradio", { name: "Dark" }).click();
+  await expect(stage(page)).toHaveAttribute("data-theme", "dark");
+  await expect(menu).toBeHidden();
+  await more.click();
+  await expect(menu.getByRole("menuitemradio", { name: "Dark" })).toHaveAttribute(
+    "aria-checked",
+    "true",
+  );
 
   // The token setup takes the menu's place, under the toolbar, and gives focus back to More.
-  await page
-    .locator(".lab-more")
-    .getByRole("button", { name: /Token setup/ })
-    .click();
+  await menu.getByRole("menuitem", { name: "Token setup" }).click();
   const panel = page.getByRole("dialog", { name: "Token setup" });
   await expect(panel).toBeVisible();
-  await expect(page.locator(".lab-more")).toBeHidden();
+  await expect(menu).toBeHidden();
+  await expect(panel.getByRole("radio", { name: "Theme tokens" })).toBeFocused();
   expect((await panel.boundingBox())?.y).toBeLessThan(100);
   await page.keyboard.press("Escape");
   await expect(panel).toBeHidden();
+  await expect(more).toBeFocused();
+});
+
+test("the More menu works from the keyboard, and Glide follows it", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile-390", "More shows on a narrow stage");
+  await page.goto("/en/separator");
+  const more = stage(page).getByRole("button", { name: "More", exact: true });
+  await more.focus();
+  await page.keyboard.press("Enter");
+  const menu = page.getByRole("menu");
+  // Opened from the keyboard: no animation, the first item lit.
+  await expect(menu).toHaveAttribute("data-instant", "click");
+  await expect(menu.getByRole("menuitemradio", { name: "Light" })).toBeFocused();
+  await expect(menu.locator("[data-glide-active]")).toHaveText("Light");
+  await page.keyboard.press("ArrowDown");
+  await expect(menu.locator("[data-glide-active]")).toHaveText("Dark");
+  await page.keyboard.press("Escape");
+  await expect(menu).toBeHidden();
   await expect(more).toBeFocused();
 });
 
@@ -713,8 +746,12 @@ test("the stage tools name themselves and their key in a tooltip, not a title", 
   const tools = stage(page).getByRole("toolbar", { name: "Stage tools" });
   await expect(tools.locator("[title]")).toHaveCount(0);
   const tip = page.locator(".ow-tooltip__popup");
-  await tools.getByRole("button", { name: "Code", exact: true }).hover();
-  await expect(tip).toHaveText("CodeC");
+  // Hovered again until the page has hydrated.
+  await expect(async () => {
+    await page.mouse.move(0, 0);
+    await tools.getByRole("button", { name: "Code", exact: true }).hover();
+    await expect(tip).toHaveText("CodeC", { timeout: 1500 });
+  }).toPass();
   await expect(tip.locator("kbd")).toHaveText("C");
   // The next tool's tooltip opens at once, unanimated.
   await tools.getByRole("button", { name: "Controls", exact: true }).hover();
@@ -762,4 +799,19 @@ test("the Tooltip Lab's first scene walks the toolbar's tooltips", async ({ page
   const open = demo(page).locator(".ow-tooltip__popup[data-open]");
   await expect(open).toHaveText("Bold⌘B");
   await expect(open).toHaveText("Italic⌘I");
+});
+
+test("the Menu Lab opens Edit with Glide on its items, and View's choices", async ({ page }) => {
+  await page.goto("/en/menu");
+  await scene(page, "glide");
+  await expect(demo(page).locator("[data-glide-active]")).toHaveText(/Copy/);
+  await scene(page, "choices");
+  await expect(demo(page).getByRole("menuitemcheckbox", { name: "Line numbers" })).toHaveAttribute(
+    "aria-checked",
+    "true",
+  );
+  // Anatomy pins a menu open without taking focus from the page.
+  await scene(page, "anatomy");
+  await expect(demo(page).getByRole("menu")).toBeVisible();
+  await expect(demo(page).getByRole("menu")).not.toBeFocused();
 });

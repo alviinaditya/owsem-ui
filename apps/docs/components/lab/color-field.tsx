@@ -1,6 +1,7 @@
 "use client";
 
-import { type CSSProperties, useId, useRef, useState } from "react";
+import { ColorPickerPopover } from "owsem-ui/owsem";
+import { useId, useRef, useState } from "react";
 import type { Dictionary } from "@/lib/dictionaries";
 import { Icon } from "../icons/icon";
 
@@ -13,18 +14,10 @@ export function normalizeHex(text: string): string | undefined {
   return `#${digits.length === 3 ? [...digits].map((d) => d + d).join("") : digits}`;
 }
 
-/** An element's background as #rrggbb, whatever color syntax the token uses. */
-function backgroundHex(el: Element | null): string {
-  const context = document.createElement("canvas").getContext("2d");
-  if (!el || !context) return "#000000";
-  context.fillStyle = getComputedStyle(el).backgroundColor;
-  return normalizeHex(context.fillStyle) ?? "#000000";
-}
-
 /**
- * A color control: a swatch that opens the browser's picker, a hex field to type or paste into,
- * and a button back to the theme's own color. Empty means the theme token, shown live in the
- * swatch, so it follows the stage theme.
+ * A color control: a swatch that opens Color Picker, a hex field to type or paste into, and a
+ * button back to the theme's own color. Empty means the theme token: the swatch paints it, so it
+ * follows the stage theme, and the picker opens on it.
  */
 export function ColorField({
   label,
@@ -41,40 +34,29 @@ export function ColorField({
   onChange: (value: string) => void;
 }) {
   const id = useId();
-  const swatch = useRef<HTMLSpanElement>(null);
   const field = useRef<HTMLInputElement>(null);
   const [draft, setDraft] = useState(value);
   const [shown, setShown] = useState(value);
-  // The picker opens on the color in use, the theme's included.
-  const [picked, setPicked] = useState("#000000");
   // A scene, Reset, or the picker changed the value: show it, unless the draft already means it.
   if (value !== shown) {
     setShown(value);
     if (value !== (normalizeHex(draft) ?? "")) setDraft(value);
   }
   const invalid = draft.trim() !== "" && !normalizeHex(draft);
-  const syncPicker = () => {
-    if (!value) setPicked(backgroundHex(swatch.current));
-  };
 
   return (
     <div className="lab-field">
       <label htmlFor={id}>{label}</label>
       <div className="color-field">
-        <span
-          ref={swatch}
+        <ColorPickerPopover
+          variant="swatch"
           className="color-swatch"
-          style={{ "--swatch": value || `var(${token})` } as CSSProperties}
-        >
-          <input
-            type="color"
-            aria-label={`${label} (${labels.colorPicker})`}
-            value={value || picked}
-            onPointerDown={syncPicker}
-            onFocus={syncPicker}
-            onChange={(event) => onChange(event.currentTarget.value)}
-          />
-        </span>
+          aria-label={`${label} (${labels.colorPicker})`}
+          value={value || `var(${token})`}
+          alpha={false}
+          labels={{ ...labels.picker, picker: label }}
+          onChange={onChange}
+        />
         <input
           ref={field}
           id={id}

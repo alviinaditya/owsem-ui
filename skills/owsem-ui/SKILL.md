@@ -45,7 +45,7 @@ import { Separator } from "owsem-ui/base";
 ```
 
 To load only what is used, import `owsem-ui/tokens.css` plus `owsem-ui/css/<name>.css` for each
-component. Other entry points: `owsem-ui/owsem` (Owsem family, empty today),
+component. Other entry points: `owsem-ui/owsem` (Owsem family),
 `owsem-ui/components/<name>`, and `owsem-ui/core` (`DirectionProvider`, `useDirection`,
 `CSPProvider`). With the npm package, take those from `owsem-ui/core`, not from `@base-ui/react`,
 so the app shares OwsemUI's copy of Base UI; React context does not cross copies.
@@ -139,8 +139,8 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Separator** (Base, from `owsem-ui/base`) and **Tree Rail Nav** (Owsem, from `owsem-ui/owsem`)
-are built. Base components are Base UI components with OwsemUI's styling; Owsem components are
+**Separator** (Base, from `owsem-ui/base`), **Tree Rail Nav**, and **Color Picker** (Owsem, from
+`owsem-ui/owsem`) are built. Base components are Base UI components with OwsemUI's styling; Owsem components are
 OwsemUI's own. No component has a `flavor` prop.
 
 ### Separator
@@ -193,6 +193,37 @@ import { TreeRailNav } from "owsem-ui/owsem"; // or "@/components/owsem/tree-rai
 - `Root`: arrow keys, Home, and End move between rows; do not add your own.
 - Reads `--ow-accent` (the trail), `--ow-line` (rails), `--ow-fg`, `--ow-muted`, `--ow-bg` (behind
   the dots; match the nav's background), `--ow-hover`, and `--ow-radius`.
+
+### Color Picker
+
+A color picker: a saturation and brightness area, hue and opacity sliders, an eye dropper where the
+browser has one, hex, RGB, and HSL fields, and swatches. Registry item: `color-picker`.
+
+```tsx
+import { ColorPicker, ColorPickerPopover } from "owsem-ui/owsem"; // or "@/components/owsem/color-picker"
+<ColorPicker value={color} onChange={setColor} onChangeComplete={save} />
+<span id="brand-label">Brand color</span>
+<ColorPickerPopover id="brand" aria-labelledby="brand-label brand" defaultValue="#7c6ab8" />
+```
+
+- `ColorPicker` is the panel (`div`); `ColorPickerPopover` is a trigger (`button`, Base UI
+  `Popover.Trigger`) that opens the panel in a popover. Both take `value` or `defaultValue` (hex,
+  `rgb()`, `hsl()`, or any CSS color the browser reads, such as `var(--ow-accent)`), `onChange`
+  (every move) and `onChangeComplete` (when a drag, key, edit, or swatch is done), both called with
+  `(value, { hex, rgb, hsl, hsv })`, `format` (`"hex"`, `"rgb"`, or `"hsl"`: the string returned),
+  `alpha`, `inputs`, `eyeDropper` (booleans, default true), `swatches` (colors or
+  `{ color, label }`, or `false`), and `labels` (every text, for translation).
+- `ColorPickerPopover` adds `size` (`sm`, `md`, `lg`), `variant` (`"field"`: the color and its
+  value; `"swatch"`: a square), `open`, `defaultOpen`, `onOpenChange`, `side`, `align`,
+  `sideOffset`, and `disabled`; `children` replaces the trigger's content. A swatch trigger needs
+  `aria-label`.
+- Do not wrap it in another popover or add keyboard handling: the area, sliders, fields, and
+  swatches have their own.
+- Tokens: `--ow-color-picker-bg`, `--ow-color-picker-checker`, `--ow-color-picker-thumb`,
+  `--ow-color-picker-width`, `--ow-color-picker-area-height`. The popover's panel is portaled to
+  the body: set its tokens on `:root` or `.ow-color-picker`, not on the trigger's parent.
+- `parseColor`, `formatColor`, and the conversions (`hsvaToRgba`, `rgbaToHsva`, `hsvaToHsla`,
+  `hslaToHsva`, `rgbaToHex`) are exported too.
 
 ## Rules
 

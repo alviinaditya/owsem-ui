@@ -81,6 +81,22 @@ export const id = {
     themeDefault: "Bawaan tema",
     colorPicker: "pemilih warna",
     useDefault: "Pakai bawaan tema",
+    picker: {
+      picker: "Pemilih warna",
+      area: "Saturasi dan kecerahan",
+      saturation: "Saturasi",
+      brightness: "Kecerahan",
+      hue: "Rona",
+      alpha: "Opasitas",
+      eyeDropper: "Ambil warna dari layar",
+      format: "Format",
+      hex: "Hex",
+      red: "Merah",
+      green: "Hijau",
+      blue: "Biru",
+      lightness: "Luminositas",
+      swatches: "Contoh warna",
+    },
     shortcuts: "Klik stage atau Tab ke dalamnya, lalu tekan:",
     previous: "Sebelumnya",
     next: "Berikutnya",
@@ -162,6 +178,8 @@ export const id = {
     "command-menu": "Palet perintah dengan pencarian, dibangun dari Dialog dan Combobox.",
     "number-ticker": "Angka yang digitnya bergulir saat nilainya berubah.",
     "spotlight-card": "Kartu dengan border dan cahaya yang mengikuti kursor.",
+    "color-picker":
+      "Pemilih warna dengan area, slider rona dan opasitas, kolom isian, dan contoh warna, langsung atau di popover.",
   } satisfies Record<ComponentName, string>,
 };
 

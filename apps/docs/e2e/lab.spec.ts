@@ -110,25 +110,43 @@ test("controls rewrite the code", async ({ page }) => {
   await expect(code).toContainText("--ow-line-dark: #ff0000;");
 });
 
-test("a color takes short hex and goes back to the theme's own", async ({ page }) => {
+test("a color takes short hex, picks from Color Picker, and goes back to the theme's own", async ({
+  page,
+}) => {
   await page.goto("/en/separator");
   await stage(page).getByRole("button", { name: "Controls" }).click();
   const hex = stage(page).getByLabel("Dark line", { exact: true });
-  const picker = stage(page).getByLabel("Dark line (color picker)");
+  const swatch = stage(page).getByRole("button", { name: "Dark line (color picker)" });
+  const picker = page.getByRole("dialog", { name: "Dark line" });
   await hex.fill("f00");
-  await expect(picker).toHaveValue("#ff0000");
+  await expect(swatch.locator(".ow-color-picker-chip")).toHaveCSS(
+    "background-color",
+    "rgb(255, 0, 0)",
+  );
   await hex.blur();
   await expect(hex).toHaveValue("#ff0000");
+
+  // The swatch opens the picker on the color, with focus on its area.
+  await swatch.click();
+  await expect(picker.getByRole("textbox", { name: "Hex" })).toHaveValue("FF0000");
+  await expect(picker.getByRole("slider", { name: "Saturation and brightness" })).toBeFocused();
+  await page.keyboard.press("ArrowDown");
+  await expect(hex).toHaveValue("#fc0000");
+  await page.keyboard.press("Escape");
+  await expect(picker).toBeHidden();
+  await expect(swatch).toBeFocused();
 
   await stage(page).getByRole("button", { name: "Dark line: Use the theme default" }).click();
   await expect(hex).toHaveValue("");
   await expect(hex).toBeFocused();
-  // The picker opens on the theme's color.
+  // Empty, the swatch paints the theme's token, and the picker opens on it.
   const token = await stageBody(page).evaluate((el) =>
     getComputedStyle(el).getPropertyValue("--ow-line-dark").trim(),
   );
-  await picker.focus();
-  await expect(picker).toHaveValue(token);
+  await swatch.click();
+  await expect(picker.getByRole("textbox", { name: "Hex" })).toHaveValue(
+    token.slice(1).toUpperCase(),
+  );
 });
 
 test("the code is highlighted, tags apart from text", async ({ page }) => {
@@ -608,6 +626,32 @@ test("the states scene sets the themes side by side, then gives the demo back (D
 
   await scene(page, "keyboard");
   await expect(navs).toHaveCount(1);
+});
+
+test("Color Picker's scenes drag the area and the opacity, then show triggers by theme", async ({
+  page,
+}) => {
+  await page.goto("/en/color-picker");
+  const log = stage(page).locator(".demo-color-log dd");
+  await expect(log).toHaveText(["#7c6ab8", "#7c6ab8"]);
+  // The scene's pointer drags the area, and onChange follows; focus stays where it was.
+  await scene(page, "area");
+  await expect(log.first()).not.toHaveText("#7c6ab8", { timeout: 8000 });
+  await expect(
+    stage(page).getByRole("slider", { name: "Saturation and brightness" }),
+  ).not.toBeFocused();
+
+  await scene(page, "alpha");
+  const opacity = stage(page).getByRole("slider", { name: "Opacity" });
+  await expect(opacity).toHaveAttribute("aria-valuenow", "100");
+  await expect(opacity).not.toHaveAttribute("aria-valuenow", "100", { timeout: 8000 });
+
+  await scene(page, "states");
+  await expect(stage(page).getByRole("columnheader")).toHaveText(["Light", "Dark"]);
+  // The pointer opens a popover from the light column, in the light theme.
+  const dialog = page.getByRole("dialog", { name: "Color picker" });
+  await expect(dialog).toBeVisible({ timeout: 8000 });
+  await expect(dialog.locator("..")).toHaveAttribute("data-theme", "light");
 });
 
 test("the docs' element defaults never override a component's own styles (FR-8, FR-13)", async ({

@@ -1,0 +1,196 @@
+---
+title: Color Picker
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Color Picker memilih warna seperti yang biasa dilakukan desainer: geser di bidang saturasi dan
+kecerahan, atur rona dan opasitas, ketik hex, RGB, atau HSL, atau ambil contoh warna. Pakai sebagai
+panel langsung di halaman, atau buka dari sebuah trigger di dalam popover. Gulir untuk mulai tur;
+stage mengikuti setiap bagian.
+
+## Saturasi dan kecerahan [#area]
+
+Bidang besar berisi semua gradasi satu rona: saturasi naik ke kanan, kecerahan naik ke atas. Tekan
+di mana saja lalu geser; thumb memadat di bawah pointer dan memantul kembali saat dilepas.
+
+Stage menggeser thumb berkeliling lalu kembali. Log di bawah panel memperlihatkan beda kedua
+callback: `onChange` mengikuti setiap gerakan, untuk pratinjau langsung; `onChangeComplete` datang
+sekali saat geseran selesai, untuk menyimpan atau untuk pekerjaan yang terlalu berat bila dijalankan
+setiap frame.
+
+## Opasitas di atas papan catur [#alpha]
+
+Di bawah slider rona, slider opasitas berjalan dari bening sampai pekat di atas papan catur,
+sehingga warna transparan memperlihatkan apa yang ada di belakangnya. Pratinjau di samping slider,
+contoh warna, dan trigger popover melukis warna transparan di atas pola yang sama. Polanya dibuat
+dari warna panel dan `--ow-line`, jadi ikut tema.
+
+Stage menurunkan opasitas sampai 15% lalu menaikkannya lagi. Hex yang transparan mendapat byte
+keempat (`#7c6ab826`), `rgb()` menjadi `rgba()`, dan `hsl()` menjadi `hsla()`. Pasang
+`alpha={false}` bila warnanya harus tetap pekat.
+
+## Format dan contoh warna [#formats]
+
+Tombol di depan kolom isian berganti antara HEX, RGB, dan HSL. Angka langsung berlaku saat diketik
+dan naik-turun dengan tombol panah (Shift: 10); hex berlaku saat Enter atau saat kolomnya ditinggal,
+dan isian yang tidak terbaca dikembalikan. `format` menentukan kolom yang tampil pertama dan bentuk
+nilai yang diterima callback.
+
+Contoh warna adalah Toggle Group dari Base UI: satu perhentian Tab, tombol panah untuk berpindah, dan
+tanda centang pada warna yang sama dengan warna saat ini. Isi `swatches` dengan palet Anda, lengkap
+dengan nama yang dibacakan, misalnya `{ color: "#7c6ab8", label: "Lila" }`. Stage berganti format
+lalu mencoba dua contoh warna.
+
+## Anatomi [#anatomy]
+
+Panelnya terdiri dari sepuluh bagian dalam satu `div`. Inspeksi (I) menandai setiap bagian di
+stage; pilih sebuah nama, di sini atau di stage, untuk melihat tokennya.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-color-picker` | Panelnya; token komponen dipasang di sini |
+| <Part name="Area" /> | `div` | `role="slider"` dua dimensi, dengan tombolnya sendiri |
+| <Part name="Thumb" /> | `span` | Cincin timbul berisi warnanya, juga di setiap slider |
+| <Part name="Hue" /> | `div` | `Slider` dari Base UI |
+| <Part name="Alpha" /> | `div` | `Slider` dari Base UI di atas papan catur |
+| <Part name="EyeDropper" /> | `button` | Hanya di browser yang punya EyeDropper API |
+| <Part name="Preview" /> | `span` | Warna saat ini, setinggi kedua track |
+| <Part name="Format" /> | `button` | Berganti antara HEX, RGB, dan HSL |
+| <Part name="Field" /> | `input` | Di dalam `label`; huruf di bawahnya adalah notasi |
+| <Part name="Swatches" /> | `div` | `ToggleGroup` dari Base UI; setiap contoh warna punya `aria-pressed` |
+
+`ColorPickerPopover` menambah trigger, `button.ow-color-picker-trigger` (`Popover.Trigger` dari Base
+UI), dan popup, `div.ow-color-picker-popup` (`Popover.Popup`, sebuah dialog), yang memuat panelnya.
+
+## State dan varian [#states]
+
+Stage menampilkan trigger popover dalam tema terang dan gelap: tiga ukuran, masing-masing sebagai
+kolom (`variant="field"`: warna dan nilainya) dan sebagai kotak warna (`variant="swatch"`), lalu
+versi transparan dan nonaktif. Pointer membuka satu popover di setiap tema. Popup membesar dari
+trigger-nya dalam 180 ms dan kembali dalam 140 ms; bila dibuka dari keyboard, popup langsung tampil.
+
+| State | Yang menandainya |
+| --- | --- |
+| Ditekan | Thumb memadat selama digeser lalu memantul kembali; tombol dan contoh warna ikut tertekan |
+| Fokus keyboard | Cincin 2 px dari `--ow-focus` di sekeliling area, thumb, kolom, atau contoh warna |
+| Contoh warna aktif | Tanda centang, gelap atau terang mengikuti warnanya |
+| Transparan | Papan catur di bawah pratinjau, contoh warna, dan warna di trigger |
+| Nonaktif | Diredupkan; tidak ada yang bergerak atau menerima fokus |
+
+Ukurannya mengikuti aturan `--py`: tinggi trigger 29,25, 38,5, atau 48 px, dan jarak warnanya ke
+tepi sama dengan jaraknya ke atas dan bawah. Color Picker adalah komponen Owsem (Tactile): thumb dan
+contoh warna tertekan dengan spring, dan tidak ada yang berpendar.
+
+## Keyboard dan aksesibilitas [#keyboard]
+
+Tab berpindah ke area, tombol eye dropper, slider, tombol format, kolom isian, lalu contoh warna.
+
+| Tempat | Tombol | Aksi |
+| --- | --- | --- |
+| Area | Panah | Saturasi (kiri, kanan) atau kecerahan (atas, bawah) sebesar 1; dengan Shift, 10 |
+| Area | Page Up, Page Down | Kecerahan sebesar 10 |
+| Area | Home, End | Saturasi ke 0 atau 100 |
+| Rona, opasitas | Panah, Page Up, Page Down, Home, End | Tombol dari Slider Base UI |
+| Kolom | Panah atas, panah bawah | Angka sebesar 1; dengan Shift, 10 |
+| Kolom | Enter | Menerapkan hex |
+| Kolom | Escape | Membatalkan isian; Escape kedua menutup popover |
+| Contoh warna | Panah, Enter, Spasi | Berpindah antar contoh warna, lalu menerapkannya |
+| Trigger | Enter, Spasi | Membuka popover dengan fokus di area; Escape menutupnya dan fokus kembali |
+
+Area adalah `role="slider"` yang `aria-valuetext`-nya menyebut kedua nilai, misalnya "Saturasi 42%,
+Kecerahan 72%". Rona dan opasitas adalah slider Base UI, dengan input range di setiap thumb. Setiap
+kata yang ditampilkan atau dibacakan ada di `labels` (FR-17); halaman ini memakai label bahasa
+Indonesia. Huruf format dan kanal (HEX, R, G, B, H, S, L, A) adalah notasi dan tidak diterjemahkan.
+
+Dengan `prefers-reduced-motion`, popover hanya memudar tanpa membesar, dan thumb serta contoh warna
+tidak tertekan. Di forced colors (Windows High Contrast), area, track, dan contoh warna tetap memakai
+warnanya sendiri di dalam outline warna sistem, fokus memakai `Highlight`, dan contoh warna aktif
+diberi outline `Highlight`. Dari kanan ke kiri, saturasi, rona, dan opasitas naik ke arah kiri.
+
+## Kustomisasi [#customization]
+
+Kontrol stage sudah terbuka: pilih warna panel atau papan catur, dan kodenya ikut berubah.
+
+<ForMode mode="theme">
+
+Token komponen menimpa token tema untuk setiap Color Picker di dalam elemen yang memasangnya,
+misalnya `.brand-picker`.
+
+| Token komponen | Bawaan | Fungsi |
+| --- | --- | --- |
+| `--ow-color-picker-bg` | `--ow-panel` | Panel, sekaligus kotak terang papan catur |
+| `--ow-color-picker-checker` | `--ow-line` | Kotak gelap papan catur |
+| `--ow-color-picker-thumb` | `#ffffff` | Cincin thumb, di kedua tema |
+| `--ow-color-picker-width` | `256px` | Lebar panel |
+| `--ow-color-picker-area-height` | `160px` | Tinggi area |
+
+</ForMode>
+
+<ForMode mode="isolated">
+
+Setiap Color Picker membawa nilainya sendiri di root-nya dan tidak membaca token bersama, jadi
+pasang token di picker itu sendiri, seperti `.brand-picker.ow-color-picker`.
+
+| Token komponen | Bawaan | Fungsi |
+| --- | --- | --- |
+| `--ow-color-picker-bg` | Miliknya sendiri, per tema | Panel, sekaligus kotak terang papan catur |
+| `--ow-color-picker-checker` | Miliknya sendiri, per tema | Kotak gelap papan catur |
+| `--ow-color-picker-thumb` | `#ffffff` | Cincin thumb, di kedua tema |
+| `--ow-color-picker-width` | `256px` | Lebar panel |
+| `--ow-color-picker-area-height` | `160px` | Tinggi area |
+
+</ForMode>
+
+Sisanya datang dari material depth: cekungan di bawah area, track, dan kolom (`--ow-well-*`), tombol
+timbul (`--ow-raised-*`), bayangan popup (`--ow-popup-shadow`), serta `--ow-focus` dan `--ow-edge`.
+Panel popover di-portal ke body, jadi pasang tokennya di tempat yang terbaca oleh popup, misalnya
+`:root`; tema dan arah trigger-nya ikut terbawa dengan sendirinya.
+
+<TokenChip item="color-picker" lang="id" />
+
+## Ship it [#ship]
+
+Drawer kode menulis panel persis seperti yang diatur di stage. Untuk kolom yang membuka picker,
+pakai `ColorPickerPopover`, dan beri nama dari label kolomnya ditambah nilainya sendiri:
+
+```tsx
+<span id="brand-label">Warna merek</span>
+<ColorPickerPopover
+  id="brand"
+  aria-labelledby="brand-label brand"
+  defaultValue="#7c6ab8"
+/>
+```
+
+| Prop | Tipe | Bawaan |
+| --- | --- | --- |
+| `value` | `string` | |
+| `defaultValue` | `string` | `#7c6ab8` |
+| `onChange` | `(value, color) => void` | |
+| `onChangeComplete` | `(value, color) => void` | |
+| `format` | `hex`, `rgb`, `hsl` | `hex` |
+| `alpha`, `inputs`, `eyeDropper` | `boolean` | `true` |
+| `swatches` | `ColorSwatch[]`, `false` | 16 warna |
+| `disabled` | `boolean` | `false` |
+| `labels` | `ColorPickerLabels`, sebagian | Bahasa Inggris |
+
+`value` dan `defaultValue` menerima hex, `rgb()`, `hsl()`, atau warna CSS apa pun yang bisa dibaca
+browser, seperti `oklch()` atau `var(--ow-accent)`. `color` berisi semua model sekaligus:
+`{ hex, rgb, hsl, hsv }`. `ColorPickerPopover` menerima prop yang sama, ditambah prop trigger-nya:
+
+| Prop | Tipe | Bawaan |
+| --- | --- | --- |
+| `size` | `sm`, `md`, `lg` | `md` |
+| `variant` | `field`, `swatch` | `field` |
+| `open`, `defaultOpen`, `onOpenChange` | Popover Base UI | |
+| `side`, `align`, `sideOffset` | Positioner Base UI | `bottom`, `start`, `8` |
+| `disabled` | `boolean` | `false` |
+| `children` | `ReactNode` | Warna dan nilainya |
+
+Ref panel mengarah ke `div`-nya, ref popover ke `button` trigger; prop lain diteruskan apa adanya.
+`parseColor`, `formatColor`, dan fungsi konversinya (`hsvaToRgba`, `rgbaToHsva`, `hsvaToHsla`,
+`hslaToHsva`, `rgbaToHex`) ikut diekspor, dan bisa dipakai di Server Component.
+
+Impor dari `owsem-ui/owsem`. Di registry, namanya item `color-picker`.

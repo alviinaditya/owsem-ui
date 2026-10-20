@@ -26,6 +26,7 @@ const entry = (name, path, limit) => ({
 export default [
   entry("core", "dist/core/index.js", "6 kB"),
   entry("separator", "dist/components/separator/index.js", "3 kB"),
+  entry("toggle-group", "dist/components/toggle-group/index.js", "3 kB"),
   // Base + Owsem: both flavors in one entry; 3 kB or 8 kB is open in the PRD.
   entry("tree-rail-nav", "dist/components/tree-rail-nav/index.js", "8 kB"),
 ];

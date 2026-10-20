@@ -1,0 +1,182 @@
+---
+title: Toggle Group
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Toggle Group is a row of toggle buttons that work as one. With one choice at a time it is the
+segmented control: a sunken track, and a raised thumb that slides to the pressed item. With
+`multiple`, each item toggles on its own. Scroll to start the tour; the stage follows each part.
+
+## The segmented control [#segmented]
+
+One item is pressed at a time, and a raised thumb sits under it. Pick another and the thumb slides
+there with the travel spring (`--ow-spring-travel`); the label it leaves dims, and the one it
+reaches lights up. The pointer lights the nearest item with Glide along the x axis, so the
+highlight never blinks out in the gaps, and a click in a gap goes to the lit item.
+
+The stage plays it: a pointer picks each view in turn. Base UI lets a pressed item be pressed
+again to leave nothing pressed; a segmented control keeps one choice, so the demo ignores an empty
+value:
+
+```tsx
+const [view, setView] = useState("list");
+
+<ToggleGroup.Root
+  aria-label="View"
+  value={[view]}
+  onValueChange={([next]) => next && setView(next)}
+>
+```
+
+The thumb never sweeps in. On the first render, and when a value only arrives after hydration, it
+appears in place; only a change from one item to another slides.
+
+## The thumb's spring [#spring]
+
+The thumb is Tactile. Hold the pressed item and the item presses in to 0.97 in 90 ms, the thumb
+with it, then springs back with the settle spring (`--ow-spring-settle`) when you let go. Change
+your mind mid-slide and the thumb turns from where it is: the slide is a CSS transition of
+`translate` and `transform`, so it also costs no frames once it lands.
+
+The stage presses the chosen view, then picks Calendar and, mid-slide, Board. When the items differ
+in width, the thumb takes the new width on the way, scaled from its centre.
+
+## Multiple selection [#multiple]
+
+With `multiple`, each item toggles on its own and there is no thumb: every pressed item is raised
+on its own, in the thumb's material. The pressed material, sunken, would hardly differ from the
+track it sits in, so here raised means on. The stage turns Italic and Underline on, then off
+again.
+
+## Anatomy [#anatomy]
+
+Three parts, two of them yours to write: Root and Item. Inspect (I) outlines each on the stage;
+pick a name, here or on the stage, to see its tokens. The hover highlight is Glide, from
+`owsem-ui/core`.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-toggle-group` | Base UI's `ToggleGroup`, with `role="group"`: the track, which holds the component tokens |
+| <Part name="Item" /> | `button.ow-toggle-group-item` | Base UI's `Toggle`, with `aria-pressed`. Its text is wrapped in a span, so an item with only an icon is square |
+| <Part name="Thumb" /> | `span.ow-toggle-group-thumb` | Decorative (`aria-hidden`): placed by a script, moved by CSS |
+
+Items follow the control geometry: their padding comes from `--py` (FR-9), and an icon is the font
+size plus 2 px, as far from the edge as from the top. The track adds 3 px on every side, and its
+radius is the items' radius plus those 3 px, so the corners stay concentric. `--ow-radius` sets
+the items' radius; there is no second radius to keep in sync.
+
+## States and variants [#states]
+
+The stage lines up the three sizes, a disabled group, and multiple selection, in light and dark.
+A pointer picks Calendar in each theme's `md` group, then Board again.
+
+| Size | Font | Item | Track |
+| --- | --- | --- | --- |
+| `sm` | 13 px | 29.25 px | 35.25 px |
+| `md` (default) | 14 px | 38.5 px | 44.5 px |
+| `lg` | 16 px | 48 px | 54 px |
+
+| State | What marks it |
+| --- | --- |
+| Pressed | The thumb under it, and its label at full strength |
+| Hover | Glide's highlight, and its label at full strength |
+| Held | It presses in, with the thumb if it is the pressed item |
+| Disabled | A dimmed label; the arrows and Glide skip it |
+| Keyboard focus | A 2 px ring, 2 px out, above its neighbours |
+
+`equal` gives every item the widest one's width. When something stretches the group (a flex or
+grid parent, or `inline-size: 100%`), equal items share its width; without `equal`, each item is
+as wide as its content.
+
+## Keyboard and accessibility [#keyboard]
+
+The group is one tab stop, and its keyboard comes from Base UI:
+
+| Key | Action |
+| --- | --- |
+| Tab, Shift Tab | Into the group, and out again |
+| Arrow Right, Arrow Left | The next or previous item, reversed right to left. It loops and skips disabled items |
+| Home, End | The first or last item |
+| Space, Enter | Press or release the focused item |
+
+With `orientation="vertical"`, Arrow Down and Arrow Up move instead. Screen readers announce each
+item as a toggle button with its pressed state: name the group with `aria-label` or
+`aria-labelledby`, and an item with only an icon with `aria-label`.
+
+With `prefers-reduced-motion`, the thumb moves at once and nothing presses in; a held thumb dims
+instead. In forced colors (Windows High Contrast), the pressed item is filled with `Highlight`
+behind `HighlightText`, and the track keeps a visible edge. Right to left, the first item sits on
+the right, and so does its thumb.
+
+## Customization [#customization]
+
+The stage controls are open: size, selection, item width, content, and the colors of the thumb
+and the track. Once you pick a color, its CSS is in its own tab of the code drawer.
+
+<ForMode mode="theme">
+
+Component tokens override the theme tokens for groups inside the element that sets them.
+
+| Component token | Default | Purpose |
+| --- | --- | --- |
+| `--ow-toggle-group-track` | `--ow-well-bg` | Track |
+| `--ow-toggle-group-track-shadow` | `--ow-well-shadow` | The track's sunken edge |
+| `--ow-toggle-group-thumb` | `--ow-raised-bg` | Thumb, and pressed items with multiple selection |
+| `--ow-toggle-group-thumb-shadow` | `--ow-raised-shadow` | Their raised edge |
+| `--ow-toggle-group-fg` | `--ow-fg` | Labels of pressed and hovered items |
+| `--ow-toggle-group-muted` | `--ow-muted` | Other labels |
+
+</ForMode>
+
+<ForMode mode="isolated">
+
+Each Toggle Group carries its own values on its root and reads no shared token, so set them on
+the group itself, as the stage's CSS does with `.view-switcher.ow-toggle-group`.
+
+| Component token | Default | Purpose |
+| --- | --- | --- |
+| `--ow-toggle-group-track` | Its own, per theme | Track |
+| `--ow-toggle-group-track-shadow` | Its own, per theme | The track's sunken edge |
+| `--ow-toggle-group-thumb` | Its own, per theme | Thumb, and pressed items with multiple selection |
+| `--ow-toggle-group-thumb-shadow` | Its own, per theme | Their raised edge |
+| `--ow-toggle-group-fg` | Its own, per theme | Labels of pressed and hovered items |
+| `--ow-toggle-group-muted` | Its own, per theme | Other labels |
+
+</ForMode>
+
+The motion comes from Core: `--ow-spring-travel` for the slide, `--ow-spring-settle` for the
+release, and `--ow-motion-scale` for how far a press goes (0 turns it off). The hover highlight is
+Glide's, set with `--ow-glide-bg` and `--ow-glide-radius`. An item's padding is its own `--py`
+(FR-11): set it on the items, not on the group.
+
+<TokenChip item="toggle-group" lang="en" />
+
+## Ship it [#ship]
+
+The code drawer writes the component exactly as the stage is set up. Change anything and the
+lines that moved light up.
+
+| Part | Prop | Type | Default |
+| --- | --- | --- | --- |
+| Root | `value` | `string[]` | |
+| Root | `defaultValue` | `string[]` | |
+| Root | `onValueChange` | `(value, eventDetails) => void` | |
+| Root | `multiple` | `boolean` | `false` |
+| Root | `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| Root | `equal` | `boolean` | `false` |
+| Root | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` |
+| Root | `disabled` | `boolean` | `false` |
+| Root | `loopFocus` | `boolean` | `true` |
+| Item | `value` | `string` | |
+| Item | `disabled` | `boolean` | `false` |
+
+`size` and `equal` are OwsemUI's; every other prop passes through to Base UI as it is. Each part
+also takes `className`, `style`, and `render`, and its ref goes to the `div` or the `button`.
+
+A value kept in storage is only known after hydration. Render none on the server
+(`value={[]}`) and the stored one after: the thumb then appears in place instead of sliding from
+a default.
+
+Import from `owsem-ui/base`. In the registry, the item is `toggle-group`.

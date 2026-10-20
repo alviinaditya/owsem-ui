@@ -61,14 +61,25 @@ test("the index filters components by family", async ({ page }) => {
   const main = page.getByRole("main");
   await expect(main.getByRole("link", { name: "Separator", exact: true })).toBeVisible();
 
-  await main.getByLabel("Owsem").check();
+  const filter = main.getByRole("group", { name: "Family" });
+  await filter.getByRole("button", { name: "Owsem" }).click();
+  await expect(filter.getByRole("button", { name: "Owsem" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
   await expect(main.getByRole("link", { name: "Separator", exact: true })).toHaveCount(0);
   await expect(main.getByRole("link", { name: "Lumen Rail Nav", exact: true })).toBeVisible();
   await expect(main.getByRole("link", { name: "Tree Rail Nav", exact: true })).toBeVisible();
   // A component has one type: Button, from Base UI, is Base only.
   await expect(main.getByRole("link", { name: "Button", exact: true })).toHaveCount(0);
 
-  await main.getByLabel("Base").check();
+  await filter.getByRole("button", { name: "Base" }).click();
+  // Pressing the chosen family again keeps it: one is always chosen.
+  await filter.getByRole("button", { name: "Base" }).click();
+  await expect(filter.getByRole("button", { name: "Base" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
   await expect(main.getByRole("link", { name: "Lumen Rail Nav", exact: true })).toHaveCount(0);
   await expect(main.getByRole("link", { name: "Button", exact: true })).toBeVisible();
 });

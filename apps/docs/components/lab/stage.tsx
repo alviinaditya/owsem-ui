@@ -1,5 +1,6 @@
 "use client";
 
+import { ToggleGroup } from "owsem-ui/base";
 import {
   Fragment,
   type KeyboardEvent,
@@ -518,31 +519,28 @@ function ControlsPanel({
   labels,
   state,
 }: Pick<StageProps, "lab" | "lang" | "labels" | "state">) {
+  const id = useId();
   return (
     <div className="lab-controls-inner">
       {lab.controls.map((control) =>
         control.type === "choice" ? (
-          <fieldset key={control.key} className="lab-field">
-            <legend>{control.label[lang]}</legend>
-            <div className="seg">
+          <div key={control.key} className="lab-field">
+            <span id={`${id}-${control.key}`} className="lab-field-label">
+              {control.label[lang]}
+            </span>
+            <ToggleGroup.Root
+              aria-labelledby={`${id}-${control.key}`}
+              className="docs-choice"
+              value={[state.cfg[control.key] ?? ""]}
+              onValueChange={([next]) => next && state.setValue(control.key, next)}
+            >
               {control.options.map((option) => (
-                <label
-                  key={option.value}
-                  className="seg-item"
-                  data-selected={state.cfg[control.key] === option.value ? "" : undefined}
-                >
-                  <input
-                    type="radio"
-                    name={control.key}
-                    value={option.value}
-                    checked={state.cfg[control.key] === option.value}
-                    onChange={() => state.setValue(control.key, option.value)}
-                  />
+                <ToggleGroup.Item key={option.value} value={option.value}>
                   {option.label[lang]}
-                </label>
+                </ToggleGroup.Item>
               ))}
-            </div>
-          </fieldset>
+            </ToggleGroup.Root>
+          </div>
         ) : (
           <ColorField
             key={control.key}

@@ -193,12 +193,10 @@ body {
 }
 
 /*
- * Segmented choices: the header's language and theme, and Lab controls. A sunken track; the
- * chosen segment is raised (depth material, DP-1: no accent fill). Items are labels around a
- * radio, or links with aria-current.
+ * The Token setup's mode: radios in a sunken track, the chosen one raised. The last hand-built
+ * segmented choice in the docs; it becomes a Toggle Group with the Popover that replaces the panel.
  */
 .seg {
-  position: relative;
   display: inline-flex;
   gap: 2px;
   margin: 0;
@@ -207,12 +205,6 @@ body {
   border-radius: var(--docs-radius);
   background-color: var(--docs-well);
   box-shadow: var(--docs-well-shadow);
-  list-style: none;
-}
-
-/* No line box around a list item's segment, so it sits 3px inside the track like the others. */
-.seg > li {
-  display: flex;
 }
 
 .seg-item {
@@ -228,7 +220,6 @@ body {
   color: var(--docs-muted);
   font-size: 12.5px;
   line-height: 1;
-  text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
   transition: color 0.15s ease;
@@ -238,54 +229,106 @@ body {
   color: var(--docs-fg);
 }
 
-.seg-item:is([data-selected], [aria-current="page"]) {
+.seg-item[data-selected] {
   background-color: var(--docs-raised);
   box-shadow: var(--docs-raised-shadow);
   color: var(--docs-fg);
 }
 
-.language-switcher .seg-item {
+.seg-item input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.seg-item:has(:focus-visible) {
+  outline: 2px solid var(--docs-accent);
+  outline-offset: 2px;
+}
+
+/*
+ * Segmented choices (the theme, Lab controls, the family filter, the package manager): OwsemUI's
+ * Toggle Group, a sunken track with a raised thumb (DP-1: no accent fill), at the docs' compact
+ * size. --py on the items sets their height: 26px here, 24px in the sidebar's foot.
+ */
+.docs-choice {
+  --ow-radius: var(--docs-radius-inner);
+  --ow-glide-bg: var(--docs-hover);
+  --ow-glide-pressed-bg: color-mix(in oklab, var(--docs-fg) 9%, transparent);
+  font-size: 12.5px;
+}
+
+.docs-choice .ow-toggle-group-item {
+  --py: calc((26px - 1lh) / 2);
+}
+
+/*
+ * Light, dark, system. Nothing is pressed until hydration (theme-switcher.tsx), so the theme in
+ * use is raised here from <html data-theme>, like the thumb that then takes its place.
+ */
+:root[data-theme="light"] .theme-switcher:not(:has([aria-pressed="true"])) [data-option="light"],
+:root[data-theme="dark"] .theme-switcher:not(:has([aria-pressed="true"])) [data-option="dark"],
+:root:not([data-theme]) .theme-switcher:not(:has([aria-pressed="true"])) [data-option="system"] {
+  background-color: var(--docs-raised);
+  box-shadow: var(--docs-raised-shadow);
+  color: var(--docs-fg);
+}
+
+/*
+ * The language switcher is navigation, so links, not a Toggle Group; it is drawn like the theme's
+ * group beside it: the same track, Glide on hover, and the current language raised.
+ */
+.language-switcher {
+  --ow-radius: var(--docs-radius-inner);
+  --ow-glide-bg: var(--docs-hover);
+  --ow-glide-pressed-bg: color-mix(in oklab, var(--docs-fg) 9%, transparent);
+  display: flex;
+  box-sizing: border-box;
+  padding: 3px;
+  border-radius: var(--docs-radius);
+  background-color: var(--docs-well);
+  box-shadow: var(--docs-well-shadow);
+}
+
+.language-switcher ul {
+  display: flex;
+  flex: 1;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.language-switcher li {
+  display: flex;
+  flex: 1;
+}
+
+.language-switcher a {
+  display: inline-flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  block-size: 24px;
   padding-inline: 8px;
+  border-radius: var(--docs-radius-inner);
+  color: var(--docs-muted);
   font-size: 12.5px;
   font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  transition: color 0.15s ease;
 }
 
-/* Light, dark, system: THEMES order in lib/theme.ts. The thumb slides under the theme in use. */
-.theme-switcher {
-  --theme-index: 2;
+.language-switcher a:is([data-glide-active], [aria-current="page"]) {
+  color: var(--docs-fg);
 }
 
-:root[data-theme="light"] .theme-switcher {
-  --theme-index: 0;
-}
-
-:root[data-theme="dark"] .theme-switcher {
-  --theme-index: 1;
-}
-
-.theme-switcher::before {
-  content: "";
-  position: absolute;
-  inset-block: 3px;
-  inset-inline-start: 3px;
-  /* One of three segments, however wide they stretch (2px gaps, 3px padding). */
-  inline-size: calc((100% - 10px) / 3);
-  border-radius: var(--docs-radius-inner);
+.language-switcher a[aria-current="page"] {
   background-color: var(--docs-raised);
   box-shadow: var(--docs-raised-shadow);
-  translate: calc(var(--theme-index) * (100% + 2px)) 0;
-  transition: translate 0.3s var(--ease);
-}
-
-.theme-switcher .seg-item {
-  inline-size: 28px;
-  padding: 0;
-}
-
-:root[data-theme="light"] .theme-switcher [data-option="light"],
-:root[data-theme="dark"] .theme-switcher [data-option="dark"],
-:root:not([data-theme]) .theme-switcher [data-option="system"] {
-  color: var(--docs-fg);
 }
 
 /* Plain pages */
@@ -354,31 +397,22 @@ body {
   box-shadow: inset 0 1px 0 var(--ow-line-light);
 }
 
+/* 4px around the picker's track keeps its corners concentric with the box's (FR-10b). */
 .install-head {
-  padding: 6px;
+  padding: 4px;
   border-block-end: 2px solid var(--docs-groove-dark);
   border-image: var(--docs-etch-bottom);
 }
 
 .pm-picker {
-  display: flex;
-  gap: 2px;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.pm-picker label {
-  position: relative;
-  padding: 4px 10px;
-  border-radius: var(--docs-radius-inner);
-  color: var(--docs-muted);
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 12px;
-  cursor: pointer;
 }
 
-.pm-picker label:hover {
+/* pnpm until hydration, when the stored choice is pressed (install.tsx). */
+.pm-picker:not(:has([aria-pressed="true"])) [data-option="pnpm"] {
+  background-color: var(--docs-raised);
+  box-shadow: var(--docs-raised-shadow);
   color: var(--docs-fg);
 }
 
@@ -525,40 +559,16 @@ body {
 
 /* Index */
 
-/* A segmented control (.seg) with its legend inside the track. */
+/* The family filter: a Toggle Group with its name inside the track, before the choices. */
 .filter {
   flex-wrap: wrap;
   align-items: center;
   margin: 0 0 24px;
 }
 
-/* As tall as a segment, so its text lines up with theirs. */
-.filter legend {
-  float: inline-start;
+.filter-legend {
   padding-inline: 8px 4px;
   color: var(--docs-muted);
-  font-size: 12.5px;
-  line-height: 26px;
-}
-
-.seg-item input,
-.pm-picker input {
-  position: absolute;
-  inset: 0;
-  margin: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.pm-picker label:has(:checked) {
-  background-color: var(--docs-hover);
-  color: var(--docs-fg);
-}
-
-.seg-item:has(:focus-visible),
-.pm-picker label:has(:focus-visible) {
-  outline: 2px solid var(--docs-accent);
-  outline-offset: 2px;
 }
 
 @media (forced-colors: active) {
@@ -570,9 +580,8 @@ body {
     --docs-etch-end: none;
   }
 
-  .seg-item:is([data-selected], [aria-current="page"]),
-  .theme-switcher::before,
-  .pm-picker label:has(:checked),
+  .seg-item[data-selected],
+  .language-switcher a[aria-current="page"],
   .lab-tool[aria-pressed="true"],
   .lab-tool[aria-expanded="true"],
   .lab-scene-nav a[aria-current="true"],
@@ -865,29 +874,20 @@ body {
   border-image: var(--docs-etch-top);
 }
 
-/* Theme and language side by side, each half the width, their segments sharing it. */
+/* Theme and language side by side, each half the width, their items sharing it: 24px items in a
+ * 30px track. */
 .site-sidebar-switchers {
   display: flex;
   gap: 8px;
 }
 
-.site-sidebar-switchers > *,
-.site-sidebar-switchers .seg,
-.site-sidebar-switchers li,
-.site-sidebar-switchers .seg-item {
+.site-sidebar-switchers > * {
   flex: 1;
+  min-inline-size: 0;
 }
 
-.site-sidebar-switchers .seg {
-  display: flex;
-}
-
-.site-sidebar-foot .seg-item {
-  block-size: 24px;
-}
-
-.site-sidebar-switchers .language-switcher .seg-item {
-  inline-size: 100%;
+.site-sidebar-switchers .ow-toggle-group-item {
+  --py: 0px;
 }
 
 /* Below 1100 px the sidebar slides in from the left over a scrim; a tap on the scrim shuts it. */
@@ -2489,6 +2489,7 @@ figure[data-code-block] pre {
   font-size: 13px;
 }
 
+.lab-field-label,
 .lab-field legend,
 .lab-field > label {
   margin-block-end: 6px;
@@ -2742,6 +2743,37 @@ figure[data-code-block] pre {
   gap: 14px;
   block-size: 24px;
   padding-inline-end: 14px;
+}
+
+/* The Toggle Group Lab's demos: a card as wide as its group, and the matrix's surfaces. */
+.demo-toggle {
+  inline-size: max-content;
+  min-inline-size: 300px;
+}
+
+/* In the card's grid, a group keeps its own width: only equal items share a stretched one. */
+.demo-toggle > .ow-toggle-group {
+  justify-self: start;
+}
+
+.demo-toggle-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.demo-card .demo-toggle-note {
+  font-size: 15px;
+  text-decoration-thickness: 1px;
+}
+
+.demo-surface {
+  padding: 12px;
+  border: 1px solid var(--ow-line);
+  border-radius: 14px;
+  background-color: var(--ow-bg);
+  color: var(--ow-fg);
 }
 
 /* Token setup panel (components/token-setup.tsx): bottom left, or under a Lab's toolbar (below). */

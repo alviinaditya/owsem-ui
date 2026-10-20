@@ -172,7 +172,7 @@ deleted CSS:
 | 1 | Tooltip | `title` hints on icon buttons |
 | 1 | Field, Input | The prefix field (`.prefix-field`) and the hex field (`.color-field`) |
 | 1 | Scroll Area | `ScrollFade` (sidebar, controls, code drawer, commands) |
-| 2 | Toggle Group | Segmented choices (`.seg`): theme, Orientation, Family filter, and the package manager picker (`.pm-picker`) |
+| 2 | Toggle Group | The Token setup's mode (`.seg`), with Popover. Already replaced: the theme, the Lab's choices, the Family filter, and the package manager picker |
 | 2 | Toggle, Toolbar | The stage tools (`.lab-tool`) |
 | 2 | Toast | The Copied status |
 | 2 | Combobox, Dialog | ⌘K search (DS-5), through Command Menu |

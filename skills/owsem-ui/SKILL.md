@@ -139,8 +139,8 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Separator** (Base, from `owsem-ui/base`) and **Tree Rail Nav** (Owsem, from `owsem-ui/owsem`)
-are built. Base components are Base UI components with OwsemUI's styling; Owsem components are
+**Separator** and **Toggle Group** (Base, from `owsem-ui/base`) and **Tree Rail Nav** (Owsem,
+from `owsem-ui/owsem`) are built. Base components are Base UI components with OwsemUI's styling; Owsem components are
 OwsemUI's own. No component has a `flavor` prop.
 
 ### Separator
@@ -158,6 +158,38 @@ import { Separator } from "owsem-ui/base"; // or "@/components/owsem/separator"
   `(state) => string`), `style`, and `render`. Other props pass through to Base UI. The ref goes
   to the `div`.
 - Reads `--ow-line-dark` and `--ow-line-light`.
+
+### Toggle Group
+
+Toggle buttons that work as one, and the segmented control: a sunken track, with a raised thumb
+that slides to the pressed item. Registry item: `toggle-group`.
+
+```tsx
+import { ToggleGroup } from "owsem-ui/base"; // or "@/components/owsem/toggle-group"
+const [view, setView] = useState("list");
+<ToggleGroup.Root
+  aria-label="View"
+  value={[view]}
+  onValueChange={([next]) => next && setView(next)} // a segmented control keeps one choice
+>
+  <ToggleGroup.Item value="list">List</ToggleGroup.Item>
+  <ToggleGroup.Item value="board" aria-label="Board"><BoardIcon /></ToggleGroup.Item>
+</ToggleGroup.Root>
+```
+
+- `Root` is Base UI's ToggleGroup: `value` and `defaultValue` are arrays, `multiple` lets several
+  items be pressed (each is raised on its own, with no thumb), plus `orientation`, `disabled`,
+  and `loopFocus`. OwsemUI adds `size` (`"sm"`, `"md"`, the default, or `"lg"`) and `equal`
+  (every item as wide as the widest; equal shares when the group is stretched).
+- `Item` is Base UI's Toggle with a `value`. Give an item with only an icon an `aria-label`; it is
+  square. Icons are any `svg`, sized to the font plus 2px.
+- A value read from storage: render `value={[]}` on the server and the stored one after
+  hydration, so the thumb appears in place instead of sliding from a default.
+- Name the group with `aria-label` or `aria-labelledby`. Arrows, Home, and End move focus, Space
+  and Enter press; do not add your own.
+- Tokens: `--ow-toggle-group-track`, `--ow-toggle-group-track-shadow`, `--ow-toggle-group-thumb`,
+  `--ow-toggle-group-thumb-shadow`, `--ow-toggle-group-fg`, and `--ow-toggle-group-muted`; the
+  radius is `--ow-radius`, and an item's height its own `--py`.
 
 ### Tree Rail Nav
 

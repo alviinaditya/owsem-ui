@@ -51,7 +51,7 @@ export const catalog = [
   { name: "tabs", title: "Tabs", family: "base", category: "navigation", phase: 1, expressions: ["kinetic"], status: "planned" },
   { name: "scroll-area", title: "Scroll Area", family: "base", category: "display", phase: 1, status: "planned" },
   { name: "toggle", title: "Toggle", family: "base", category: "action", phase: 2, status: "planned" },
-  { name: "toggle-group", title: "Toggle Group", family: "base", category: "action", phase: 2, expressions: ["tactile", "kinetic"], status: "planned" },
+  { name: "toggle-group", title: "Toggle Group", family: "base", category: "action", phase: 2, expressions: ["tactile", "kinetic"], status: "prototype" },
   { name: "toolbar", title: "Toolbar", family: "base", category: "action", phase: 2, status: "planned" },
   { name: "checkbox-group", title: "Checkbox Group", family: "base", category: "form", phase: 2, status: "planned" },
   { name: "number-field", title: "Number Field", family: "base", category: "form", phase: 2, status: "planned" },

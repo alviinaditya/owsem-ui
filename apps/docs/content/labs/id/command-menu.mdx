@@ -1,0 +1,191 @@
+---
+title: Command Menu
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Command Menu adalah palet perintah: kolom cari di atas daftar perintah yang berkelompok dan
+tersaring saat Anda mengetik. ⌘K atau Ctrl K membukanya dari mana saja, seketika, dan panelnya
+berupa kaca, dengan halaman yang buram di belakangnya. Gulir untuk mulai tur; stage mengikuti
+setiap bagian.
+
+## Dibuka dengan ⌘K [#shortcut]
+
+Root mendengarkan ⌘K atau Ctrl K di seluruh dokumen, dan tombol yang sama menutupnya lagi. Escape
+juga menutupnya, lalu fokus kembali ke tempat semula: ke Trigger, atau ke elemen yang terfokus
+sebelum shortcut ditekan.
+
+Palet dibuka berkali-kali dalam sehari, dari keyboard, jadi tidak beranimasi: panel langsung ada
+begitu tombol ditekan, dan langsung hilang begitu ditutup. Tidak ada yang membesar atau memudar.
+
+Stage memperagakannya: Escape, ⌘K, Escape, lalu Trigger. Di sini ⌘K bekerja selama fokus ada di
+stage; di bagian lain halaman, ⌘K membuka pencarian docs, yang juga sebuah Command Menu. Isi
+`shortcut` dengan tombol lain, atau `false` untuk menu kedua di halaman yang sama. Tombol yang sudah
+ditangani pihak lain (`preventDefault`) dibiarkan.
+
+## Menyaring dengan Glide [#filter]
+
+Mengetik menyaring daftar: Autocomplete dari Base UI mencocokkan label setiap item, dan grup yang
+tidak punya hasil ikut hilang. Hasil pertama selalu tersorot, jadi Enter langsung menjalankannya.
+
+Satu highlight menandai item yang akan dijalankan Enter. Highlight itu adalah Glide dari
+`owsem-ui/core`: setiap kali panah, pointer, atau kata kunci memindahkan sorotan Base UI, highlight
+meluncur ke sana hanya lewat transform, lalu berhenti. Fokus tetap di kolom cari; daftar mengikuti
+lewat `aria-activedescendant`.
+
+Stage mengetik kata kunci, menelusuri hasilnya dengan panah, lalu menghapusnya. Berikan
+`filteredItems` untuk mengurutkan hasil sendiri, seperti pencarian docs dengan pencocokan fuzzy.
+
+## Grup dan item [#groups]
+
+Item berada dalam grup, masing-masing dinamai oleh GroupLabel, yang sekaligus menjadi label grup
+untuk screen reader. Setiap item menyusun bagiannya dalam satu baris: ItemIcon, ItemLabel,
+ItemDescription yang mengalah lebih dulu saat baris sempit, dan Shortcut berupa keycap timbul di
+ujungnya.
+
+Stage menggerakkan pointer di atas kedua grup, lalu mundur dengan tombol panah. Highlight mengikuti
+keduanya, dan tetap di tempat saat pointer pergi, di item yang akan dijalankan Enter. Pulihkan versi
+dinonaktifkan: teksnya redup dan Enter tidak berbuat apa-apa di sana, tetapi panah tetap bisa
+mencapainya, supaya screen reader bisa membacanya.
+
+## Anatomi [#anatomy]
+
+Command Menu adalah Dialog Base UI yang berisi Autocomplete. Inspeksi (I) menandai setiap bagian di
+stage; pilih sebuah nama, di sini atau di stage, untuk melihat tokennya.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| Root | tidak ada | Dialog.Root, item dan kata kunci daftar, serta `shortcut` |
+| <Part name="Trigger" /> | `button` | Dialog.Trigger, kolom cekung dengan ikon cari dan `aria-keyshortcuts` |
+| <Part name="Popup" /> | `div` | `dialog`: portal, backdrop, viewport, dan popup Dialog, dengan Autocomplete.Root di dalamnya |
+| <Part name="Input" /> | `input` | `combobox`: Autocomplete.Input, setelah ikon cari |
+| <Part name="List" /> | `div` | `listbox`: Autocomplete.List; bisa digulir, dan memuat highlight Glide |
+| <Part name="Group" /> | `div` | `group`: Autocomplete.Group; `items` mengisi Collection di dalamnya |
+| <Part name="GroupLabel" /> | `div` | Label grupnya |
+| Collection | tidak ada | Merender item yang tersaring, satu panggilan fungsi per item |
+| <Part name="Item" /> | `div` | `option`: Autocomplete.Item, dengan `closeOnClick` |
+| <Part name="ItemIcon" /> | `span` | Dekoratif (`aria-hidden`), seukuran font ditambah 2px |
+| ItemLabel | `span` | Satu baris |
+| <Part name="ItemDescription" /> | `span` | Redup, di baris yang sama; mengalah lebih dulu |
+| <Part name="Shortcut" /> | `kbd` | Keycap timbul, di ujung item, di Trigger, atau di Footer |
+| Empty | `div` | Tampil saat tidak ada yang cocok, dan diumumkan dengan sopan |
+| <Part name="Footer" /> | `div` | Petunjuk tombol, setelah garis terukir |
+
+Popup juga merender tombol tutup yang tersembunyi sampai menerima fokus: screen reader di layar
+sentuh tidak punya tombol Escape. `closeLabel` memberinya nama.
+
+## State dan varian [#states]
+
+Stage memasang tema terang dan gelap berdampingan, masing-masing dengan hasil, daftar yang
+tersaring, dan hasil kosong.
+
+| State | Yang menunjukkannya |
+| --- | --- |
+| Tersorot | Highlight Glide di belakang item, dan ikonnya berwarna teks |
+| Nonaktif | Teks redup; Enter tidak berbuat apa-apa |
+| Tidak ada yang cocok | Teks Empty, diumumkan dengan sopan, dan daftar disembunyikan |
+| Input terfokus | Garis terukir di bawah baris cari berwarna fokus |
+| Trigger terfokus | Ring 2px berwarna fokus, berjarak 2px |
+
+Ada tiga ukuran, `sm`, `md` (bawaan), dan `lg`, dipasang di Popup dan Trigger: teks 13, 14, dan
+16px. Item dan Trigger mengikuti aturan `--py`, jadi tingginya 29,25, 38,5, dan 48px, dengan ikon
+yang sama jauhnya dari sisi dan dari atas; baris cari sedikit lebih tinggi. Coba di kontrol (P).
+
+Command Menu adalah komponen Owsem, Kinetic dan Surface: highlight-nya meluncur, dan panelnya kaca,
+yaitu material panel di atas halaman yang diburamkan, dengan tepi cahaya yang memudar dari atas,
+grain tipis, dan bayangan berlapis. Tidak ada glow.
+
+## Keyboard dan aksesibilitas [#keyboard]
+
+| Tombol | Aksi |
+| --- | --- |
+| ⌘K, Ctrl K | Membuka menu dari mana saja, atau menutupnya |
+| Panah Bawah, Panah Atas | Item berikutnya atau sebelumnya, melintasi grup |
+| Enter | Menjalankan item yang tersorot |
+| Escape | Menutup menu; fokus kembali ke tempat semula |
+| Tab | Ke tombol tutup, yang tampil selama terfokus |
+
+Menu adalah dialog modal: fokus tetap di dalamnya selama terbuka, dan kembali saat ditutup. Kolom
+cari adalah combobox yang `aria-activedescendant`-nya item yang tersorot; setiap grup diberi label
+oleh GroupLabel-nya, dan item nonaktif mendapat `aria-disabled`. Empty adalah live region yang
+sopan.
+
+Dengan `prefers-reduced-motion`, highlight memudar dari item ke item, bukan meluncur; tidak ada yang
+lain bergerak. Dengan `prefers-reduced-transparency`, panel tidak tembus pandang. Di mode forced
+colors (Windows High Contrast), panel, Trigger, dan keycap tetap punya outline, dan highlight
+menjadi outline `Highlight`. Dari kanan ke kiri, tata letaknya tercermin: Popup dirender di body,
+jadi arahnya diambil dari `DirectionProvider` Base UI.
+
+Semua teks bisa Anda terjemahkan: label dan placeholder Input, Empty, nama grup, Footer, dan
+`closeLabel`.
+
+## Kustomisasi [#customization]
+
+Kontrol di stage terbuka: pilih ukuran atau permukaan padat, dan kodenya ikut berubah.
+
+<ForMode mode="theme">
+
+Popup dirender di body, di luar layout Anda, jadi pasang tokennya di `:root`, atau di Popup itu
+sendiri lewat `className`. Token tema mengatur sisanya: `--ow-panel` mewarnai kaca, `--ow-well-bg`
+dan `--ow-edge` untuk Trigger, `--ow-raised-*` untuk keycap, serta `--ow-line-dark` dan
+`--ow-line-light` untuk garis terukir. Item memakai `--ow-radius`, dan panel menambahkan padding-nya.
+
+| Token komponen | Bawaan | Fungsi |
+| --- | --- | --- |
+| `--ow-command-menu-bg` | `--ow-panel` 76% | Kaca |
+| `--ow-command-menu-blur` | `24px` | Seberapa buram halaman di belakangnya |
+| `--ow-command-menu-edge` | `--ow-line-light` | Cahaya di sepanjang tepi atas |
+| `--ow-command-menu-grain` | `0.05` | Opasitas grain; `0` mematikannya |
+| `--ow-command-menu-shadow` | `--ow-popup-shadow` dan satu lapis lebih dalam | Bayangan berlapis |
+| `--ow-command-menu-width` | `560px` | Lebar maksimum panel |
+| `--ow-command-menu-backdrop` | Gelap 30% | Scrim di atas halaman |
+
+</ForMode>
+
+<ForMode mode="isolated">
+
+Setiap Command Menu membawa nilainya sendiri dan tidak membaca token bersama, jadi pasang token di
+Popup itu sendiri, seperti `.commands.ow-command-menu-popup`.
+
+| Token komponen | Bawaan | Fungsi |
+| --- | --- | --- |
+| `--ow-command-menu-bg` | Warna panelnya sendiri 76%, per tema | Kaca |
+| `--ow-command-menu-blur` | `24px` | Seberapa buram halaman di belakangnya |
+| `--ow-command-menu-edge` | Nilainya sendiri, per tema | Cahaya di sepanjang tepi atas |
+| `--ow-command-menu-grain` | `0.05` | Opasitas grain; `0` mematikannya |
+| `--ow-command-menu-shadow` | Nilainya sendiri, per tema | Bayangan berlapis |
+| `--ow-command-menu-width` | `560px` | Lebar maksimum panel |
+| `--ow-command-menu-backdrop` | Gelap 30% | Scrim di atas halaman |
+
+</ForMode>
+
+Highlight-nya milik Glide, jadi `--ow-glide-bg` dan `--ow-glide-radius` mengatur warna dan sudutnya.
+
+<TokenChip item="command-menu" lang="id" />
+
+## Ship it [#ship]
+
+Drawer kode menulis menu persis seperti yang diatur di stage. Ubah kontrol, dan baris yang berubah
+akan menyala.
+
+| Bagian | Prop | Tipe | Bawaan |
+| --- | --- | --- | --- |
+| Root | `shortcut` | `string \| false` | `"k"` |
+| Root | `items` | `Item[] \| Group[]` | |
+| Root | `value` | `string` | `""` |
+| Root | `open` | `boolean` | |
+| Root | `handle` | `createHandle()` | |
+| Trigger | `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| Popup | `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| Popup | `container` | `HTMLElement` | `body` |
+| Popup | `closeLabel` | `string` | `"Close"` |
+| Item | `closeOnClick` | `boolean` | `true` |
+
+Root juga menerima `filteredItems`, `filter`, `defaultValue`, dan `onValueChange` (kata kunci) dari
+Autocomplete Base UI, serta `defaultOpen`, `onOpenChange`, dan `modal` dari Dialog Base UI. Props
+lain diteruskan ke Base UI apa adanya, seperti `initialFocus` dan `finalFocus` di Popup, atau
+`disabled` di Item. Handle dari `CommandMenu.createHandle()` membuka menu dari mana saja, seperti
+tombol cari di dock docs ini.
+
+Impor dari `owsem-ui/owsem`. Di registry, komponen ini adalah item `command-menu`.

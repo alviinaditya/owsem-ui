@@ -1035,6 +1035,35 @@ body {
   font-size: 14px;
 }
 
+/*
+ * The search at the rail's origin (DS-5): the library's sunken trigger, as wide as a first-level
+ * row, its icon and text in line with the rows' (16px icon 10px in, an 8px gap).
+ */
+.sidebar-nav .sidebar-origin {
+  margin-block-end: 10px;
+  padding-inline: 0;
+}
+
+.sidebar-search {
+  --py: 9.25px;
+  flex: 1;
+  gap: 8px;
+}
+
+.sidebar-search-label {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* No keyboard, no shortcut to show. */
+@media (hover: none) {
+  .sidebar-search .ow-command-menu-shortcut,
+  .docs-search-foot {
+    display: none;
+  }
+}
+
 .soon {
   padding-inline: 6px;
   border: 1px solid var(--docs-line-strong);
@@ -1042,6 +1071,34 @@ body {
   font-size: 11px;
   font-weight: 400;
   line-height: 18px;
+}
+
+/* The search's results: a component's family (the dot's shape, as on the index) and status. */
+.docs-search-tag {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  margin-inline-start: 4px;
+  color: var(--docs-muted);
+  font-size: 12px;
+}
+
+.docs-search-tag::before {
+  content: "";
+  inline-size: 7px;
+  block-size: 7px;
+  border-radius: 1px;
+  background-color: currentColor;
+}
+
+.docs-search-tag[data-family="owsem"]::before {
+  border-radius: 50%;
+}
+
+.docs-search .soon {
+  flex: none;
+  color: var(--docs-muted);
 }
 
 /* Available pages read as such; planned ones stay muted, with the "Soon" tag beside them. */
@@ -2726,6 +2783,150 @@ figure[data-code-block] pre {
   gap: 14px;
   block-size: 24px;
   padding-inline-end: 14px;
+}
+
+/*
+ * The Command Menu Lab's demo: an app window, and the menu opens inside it rather than over the
+ * docs. In the states matrix the panel sits in its cell, which grows to fit it.
+ */
+.demo-command {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  inline-size: 600px;
+  block-size: 520px;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 1px solid var(--ow-line);
+  border-radius: 16px;
+  background-color: var(--ow-bg);
+  color: var(--ow-fg);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.demo-command :is(.ow-command-menu-backdrop, .ow-command-menu-viewport) {
+  position: absolute;
+}
+
+.demo-command .ow-command-menu-viewport {
+  padding: 58px 28px 20px;
+}
+
+.demo-command[data-cell] {
+  inline-size: 300px;
+  block-size: auto;
+}
+
+.demo-command[data-cell] .ow-command-menu-viewport {
+  position: static;
+  padding: 12px;
+}
+
+.demo-command[data-cell] .ow-command-menu-backdrop {
+  display: none;
+}
+
+.demo-command-bar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px 8px 16px;
+  border-block-end: 1px solid var(--ow-line);
+}
+
+.demo-command-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.demo-command-logo {
+  inline-size: 14px;
+  block-size: 14px;
+  border-radius: 4px;
+  background-color: var(--ow-accent);
+}
+
+.demo-command-trigger {
+  inline-size: 220px;
+}
+
+.demo-command-body {
+  display: grid;
+  flex: 1;
+  grid-template: auto minmax(0, 1fr) / repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding: 16px;
+}
+
+.demo-command-card {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background-color: var(--ow-surface);
+  box-shadow: var(--ow-panel-shadow);
+}
+
+.demo-command-card p {
+  margin: 0;
+}
+
+.demo-command-value {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* The chart's bars, so the glass has something to blur. */
+.demo-command-chart {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: flex-end;
+  gap: 8px;
+  padding-block-start: 24px;
+}
+
+.demo-command-column {
+  flex: 1;
+  border-radius: 4px 4px 1px 1px;
+  background-color: color-mix(in oklab, var(--ow-accent) 75%, transparent);
+}
+
+/* Keys a scene script presses, as keycaps over the window. */
+.demo-keys {
+  position: absolute;
+  inset-block-end: 18px;
+  inset-inline-start: 50%;
+  z-index: 3;
+  display: flex;
+  gap: 6px;
+  opacity: 0;
+  pointer-events: none;
+  translate: -50% 0;
+  transition: opacity 0.15s ease;
+}
+
+.demo-keys[data-on] {
+  opacity: 1;
+}
+
+.demo-keys kbd {
+  min-inline-size: 34px;
+  block-size: 34px;
+  padding-inline: 9px;
+  border: 0;
+  border-radius: 8px;
+  background-color: var(--ow-raised-bg);
+  box-shadow:
+    var(--ow-raised-shadow),
+    0 6px 16px -6px rgb(0 0 0 / 0.35);
+  color: var(--ow-fg);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 15px;
 }
 
 /* Token setup panel (components/token-setup.tsx): bottom left, or under a Lab's toolbar (below). */

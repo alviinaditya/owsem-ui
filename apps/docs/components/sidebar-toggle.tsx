@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useSyncExternalStore } from "react";
+import { searchHandle } from "./docs-search";
 import { Icon } from "./icons/icon";
 
 // <html data-sidebar="open"> drives the narrow-screen sidebar (globals.css), so the toggle in
@@ -103,6 +104,22 @@ export function SidebarToggle({ label }: { label: string }) {
       onClick={() => setSidebarOpen(!open)}
     >
       <Icon name="menu" size={18} />
+      <span className="dock-label">{label}</span>
+    </button>
+  );
+}
+
+/** The dock's search button, beside Menu (DS-5); the sidebar's own is out of view down here. */
+export function SearchButton({ label }: { label: string }) {
+  return (
+    <button
+      type="button"
+      className="dock-button"
+      aria-haspopup="dialog"
+      aria-keyshortcuts="Meta+K Control+K"
+      onClick={() => searchHandle.open(null)}
+    >
+      <Icon name="search" size={18} />
       <span className="dock-label">{label}</span>
     </button>
   );

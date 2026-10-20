@@ -1,6 +1,6 @@
 ---
 title: Getting Started
-description: Instalasi, tema, salin komponen, dan cara berpindah dari Base ke Owsem.
+description: Instalasi, tema, salin komponen, serta dua tipe, Base dan Owsem.
 ---
 
 OwsemUI berisi komponen React dalam dua keluarga, Base dan Owsem, di atas
@@ -75,12 +75,13 @@ isolated, menyusul.
 
 ## Base dan Owsem
 
-Base adalah komponen tenang untuk dashboard; Owsem menambah motion dan efek yang lebih kaya dengan
-API yang sama. Komponen yang ada di kedua keluarga, dimulai dari Button, akan dipilih lewat prop
-`flavor`, jadi berpindah cukup dengan satu prop:
+Setiap komponen punya satu tipe. Komponen **Base** berasal dari Base UI, dengan gaya OwsemUI dan
+sedikit peningkatan: tenang, untuk dashboard. Komponen **Owsem** adalah komponen OwsemUI sendiri di
+luar Base UI, dengan motion dan efek yang lebih kaya. Masing-masing punya entry point sendiri:
 
 ```tsx
-<Button flavor="owsem">Simpan</Button>
+import { Separator } from "owsem-ui/base";
+import { TreeRailNav } from "owsem-ui/owsem";
 ```
 
-Button dan `flavor` belum dibuat; komponen yang sudah tersedia ada di [halaman komponen](/id).
+[Halaman komponen](/id) menampilkan tipe setiap komponen, dan bisa difilter menurut tipenya.

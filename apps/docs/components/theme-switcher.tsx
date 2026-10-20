@@ -67,7 +67,7 @@ export function ThemeSwitcher({ labels }: { labels: Dictionary["theme"] }) {
             checked={theme === value}
             onChange={() => setTheme(value)}
           />
-          <Icon name={ICONS[value]} size={15} />
+          <Icon name={ICONS[value]} size={14} />
           <span className="visually-hidden">{labels[value]}</span>
         </label>
       ))}

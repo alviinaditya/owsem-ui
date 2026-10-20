@@ -5,7 +5,7 @@ import { useEffect, useRef, useSyncExternalStore } from "react";
 import { Icon } from "./icons/icon";
 
 // <html data-sidebar="open"> drives the narrow-screen sidebar (globals.css), so the toggle in
-// the top bar and the sidebar beside the page share it without a common React parent.
+// the dock and the sidebar share it without a common React parent.
 const listeners = new Set<() => void>();
 
 const isOpen = () => document.documentElement.dataset.sidebar === "open";
@@ -26,7 +26,7 @@ function subscribe(listener: () => void): () => void {
 
 /** Scrolls the sidebar, not the page, so the current page's link (and its scenes) is in view. */
 export function revealCurrentLink(): HTMLElement | undefined {
-  const sidebar = document.getElementById("site-sidebar");
+  const sidebar = document.getElementById("site-sidebar-scroll");
   const link = sidebar?.querySelector<HTMLElement>('[aria-current="page"]');
   if (!sidebar || !link) return undefined;
   const own = link.getBoundingClientRect();
@@ -38,7 +38,7 @@ export function revealCurrentLink(): HTMLElement | undefined {
   return link;
 }
 
-/** Below 1100 px the sidebar is a panel over the page, opened from the top bar. */
+/** Below 1100 px the sidebar is a panel over the page, opened from the dock at the bottom. */
 export function SidebarToggle({ label }: { label: string }) {
   const open = useSyncExternalStore(subscribe, isOpen, () => false);
   const button = useRef<HTMLButtonElement>(null);
@@ -91,13 +91,13 @@ export function SidebarToggle({ label }: { label: string }) {
     <button
       ref={button}
       type="button"
-      className="sidebar-toggle"
+      className="dock-button"
       aria-expanded={open}
       aria-controls="site-sidebar"
       onClick={() => setSidebarOpen(!open)}
     >
       <Icon name={open ? "x" : "menu"} size={18} />
-      <span className="visually-hidden">{label}</span>
+      {label}
     </button>
   );
 }

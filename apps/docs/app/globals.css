@@ -22,16 +22,23 @@
   /* Errors in fields: 4.5:1 on surfaces and wells, light and dark. */
   --docs-critical: light-dark(#b03f2a, #f2ab96);
   --docs-stage: light-dark(#f1eff6, #13121a);
-  /* Depth material for choice controls: a sunken track (lit from above, so its top edge is in
-   * shadow) and a raised thumb, whose 1px edge has 3:1 against the track (DP-6). */
+  /* Depth material for choice controls, after the owner's docs-redesign.html: a sunken track (lit
+   * from above, so its top edge is in shadow) and a softly raised thumb. The chosen option also
+   * reads by its brighter text. */
   --docs-well: light-dark(#eceaf2, #050408);
   --docs-well-shadow:
-    inset 0 1px 2px light-dark(rgb(27 23 38 / 0.1), rgb(0 0 0 / 0.6)), 0 1px 0 var(--ow-line-light);
+    inset 0 1.5px 3px light-dark(rgb(40 30 20 / 0.16), rgb(0 0 0 / 0.75)),
+    inset 0 -1px 0 light-dark(rgb(255 255 255 / 0.75), rgb(255 255 255 / 0.05)),
+    0 0 0 1px light-dark(rgb(30 25 40 / 0.06), rgb(255 255 255 / 0.04));
   --docs-raised: light-dark(#ffffff, #1e1c26);
   --docs-raised-shadow:
-    inset 0 0 0 1px var(--docs-control),
-    0 1px 2px light-dark(rgb(27 23 38 / 0.14), rgb(0 0 0 / 0.5));
+    inset 0 1px 0 light-dark(rgb(255 255 255 / 0.95), rgb(255 255 255 / 0.1)),
+    0 0 0 1px light-dark(rgb(30 25 40 / 0.12), rgb(255 255 255 / 0.075)),
+    0 1.5px 2px light-dark(rgb(40 30 20 / 0.13), rgb(0 0 0 / 0.55));
   --docs-stage-line: light-dark(rgb(40 30 70 / 0.07), rgb(212 203 229 / 0.06));
+  /* A groove: a dark line with a faint highlight under it, so it reads as one thin line. */
+  --docs-groove-dark: light-dark(rgb(40 30 20 / 0.17), rgb(0 0 0 / 0.85));
+  --docs-groove-light: light-dark(rgb(255 255 255 / 0.95), rgb(255 255 255 / 0.075));
   /* Code colors (lib/code-theme.ts); each is at least 4.5:1 on every code background. */
   --tk-bg: var(--docs-surface);
   --tk-text: light-dark(#2a2533, #d9d5e3);
@@ -48,39 +55,40 @@
   /*
    * Etched layout lines, like the Separator: dark, then light (top to bottom, start to end). Both
    * halves sit in the element's own 2px border, so no child or neighbor can cover one. Use with
-   * a 2px border on that edge: `border-block-end: 2px solid var(--ow-line-dark)`.
+   * a 2px border on that edge: `border-block-end: 2px solid var(--docs-groove-dark)`.
    */
   --docs-etch-top: linear-gradient(
-      var(--ow-line-dark) 1px,
-      var(--ow-line-light) 1px 2px,
+      var(--docs-groove-dark) 1px,
+      var(--docs-groove-light) 1px 2px,
       transparent 2px
     )
     2 0 0;
   --docs-etch-bottom: linear-gradient(
       to top,
-      var(--ow-line-light) 1px,
-      var(--ow-line-dark) 1px 2px,
+      var(--docs-groove-light) 1px,
+      var(--docs-groove-dark) 1px 2px,
       transparent 2px
     )
     0 0 2;
   --docs-etch-start: linear-gradient(
       to right,
-      var(--ow-line-dark) 1px,
-      var(--ow-line-light) 1px 2px,
+      var(--docs-groove-dark) 1px,
+      var(--docs-groove-light) 1px 2px,
       transparent 2px
     )
     0 0 0 2;
   --docs-etch-end: linear-gradient(
       to left,
-      var(--ow-line-light) 1px,
-      var(--ow-line-dark) 1px 2px,
+      var(--docs-groove-light) 1px,
+      var(--docs-groove-dark) 1px 2px,
       transparent 2px
     )
     0 2 0 0;
 }
 
 :root {
-  --top-h: 56px;
+  /* No top bar (the sidebar holds the brand and the settings); kept for the offsets that use it. */
+  --top-h: 0px;
   /* Radius scale (TK-8): a part inside a track is the track's radius minus the 3px between them. */
   --docs-radius-inner: 7px;
   --docs-radius: 10px;
@@ -232,78 +240,15 @@ body {
   color: var(--docs-fg);
 }
 
-/* Top bar */
-
-/*
- * Fixed rather than sticky: a sticky bar sits inside the scroll-padding that keeps focused
- * content clear of it (FR-12b), so focusing its links would scroll the page.
- */
-.site-header {
-  position: fixed;
-  inset-block-start: 0;
-  inset-inline: 0;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  gap: 8px 20px;
-  box-sizing: border-box;
-  block-size: var(--top-h);
-  padding-inline: 12px 16px;
-  border-block-end: 2px solid var(--ow-line-dark);
-  border-image: var(--docs-etch-bottom);
-  background-color: var(--docs-bg);
-  font-size: 14px;
-}
-
-.sidebar-toggle {
-  display: inline-grid;
-  place-items: center;
-  inline-size: 36px;
-  block-size: 36px;
-  border: 0;
-  border-radius: var(--docs-radius);
-  background: none;
-}
-
-.sidebar-toggle:hover {
-  background-color: var(--docs-hover);
-}
-
-.site-brand {
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  text-decoration: none;
-}
-
-.site-nav {
-  display: flex;
-  gap: 16px;
-}
-
-.site-nav a {
-  color: var(--docs-muted);
-  text-decoration: none;
-}
-
-.site-nav a:hover {
-  color: var(--docs-fg);
-}
-
-.site-tools {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-inline-start: auto;
-}
-
-/* Token setup (components/token-setup.tsx): the header's button, made like the switchers beside
- * it (a sunken track, the current value raised in it), and the panel it opens. */
+/* Token setup (components/token-setup.tsx): the sidebar foot's button, made like the switchers
+ * under it (a sunken track, the current value raised in it), and the panel it opens. */
 .token-button {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 6px;
+  inline-size: 100%;
   box-sizing: border-box;
-  block-size: 32px;
+  block-size: 30px;
   padding: 3px 8px 3px 10px;
   border: 0;
   border-radius: var(--docs-radius);
@@ -328,9 +273,12 @@ body {
 }
 
 .token-button-text {
-  display: inline-flex;
+  display: flex;
+  flex: 1;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
+  min-inline-size: 0;
 }
 
 /* A long prefix ends in an ellipsis; the whole name is in the panel. */
@@ -338,7 +286,7 @@ body {
   display: inline-block;
   box-sizing: border-box;
   max-inline-size: 24ch;
-  block-size: 26px;
+  block-size: 24px;
   padding-inline: 8px;
   overflow: hidden;
   border-radius: var(--docs-radius-inner);
@@ -346,15 +294,14 @@ body {
   box-shadow: var(--docs-raised-shadow);
   color: var(--docs-fg);
   font-size: 12px;
-  line-height: 26px;
+  line-height: 24px;
   text-overflow: ellipsis;
 }
 
 .language-switcher .seg-item {
   padding-inline: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-size: 12.5px;
+  font-weight: 500;
 }
 
 /* Light, dark, system: THEMES order in lib/theme.ts. The thumb slides under the theme in use. */
@@ -375,11 +322,12 @@ body {
   position: absolute;
   inset-block: 3px;
   inset-inline-start: 3px;
-  inline-size: 28px;
+  /* One of three segments, however wide they stretch (2px gaps, 3px padding). */
+  inline-size: calc((100% - 10px) / 3);
   border-radius: var(--docs-radius-inner);
   background-color: var(--docs-raised);
   box-shadow: var(--docs-raised-shadow);
-  translate: calc(var(--theme-index) * 30px) 0;
+  translate: calc(var(--theme-index) * (100% + 2px)) 0;
   transition: translate 0.3s var(--ease);
 }
 
@@ -392,64 +340,6 @@ body {
 :root[data-theme="dark"] .theme-switcher [data-option="dark"],
 :root:not([data-theme]) .theme-switcher [data-option="system"] {
   color: var(--docs-fg);
-}
-
-@media (width <= 640px) {
-  .site-header {
-    gap: 8px 12px;
-    padding-inline: 12px;
-  }
-
-  .site-nav {
-    gap: 12px;
-  }
-
-  /* Room for everything down to 320 px: the brand already links to the components, and the docs
-   * link shortens if it must. */
-  .site-nav a:first-child {
-    display: none;
-  }
-
-  .site-nav {
-    min-inline-size: 0;
-  }
-
-  .site-nav a {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-}
-
-/* Below 900 px the text would push the switchers off the bar: the icons stay, the text is still
- * the button's name. */
-@media (width <= 900px) {
-  .token-button {
-    padding-inline: 8px 6px;
-  }
-
-  .token-button-text {
-    position: absolute;
-    inline-size: 1px;
-    block-size: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-}
-
-/* Too narrow for a readable docs link: Getting Started is first in the menu. */
-@media (width < 480px) {
-  .site-nav {
-    display: none;
-  }
-}
-
-/* No room left in the bar: the token line in a Lab or on Theming opens the same panel. */
-@media (width < 360px) {
-  .token-button {
-    display: none;
-  }
 }
 
 /* Plain pages */
@@ -520,7 +410,7 @@ body {
 
 .install-head {
   padding: 6px;
-  border-block-end: 2px solid var(--ow-line-dark);
+  border-block-end: 2px solid var(--docs-groove-dark);
   border-image: var(--docs-etch-bottom);
 }
 
@@ -683,11 +573,6 @@ body {
 
 .badge[data-family="owsem"]::before {
   border-radius: 50%;
-}
-
-.badge[data-family="base+owsem"]::before {
-  border-start-end-radius: 50%;
-  border-end-end-radius: 50%;
 }
 
 /* Index */
@@ -956,6 +841,10 @@ body {
     --fade-right 0.2s ease;
 }
 
+.scroll-fade[data-instant] {
+  transition: none;
+}
+
 .scroll-fade::-webkit-scrollbar {
   display: none;
 }
@@ -987,8 +876,9 @@ body {
 }
 
 /*
- * Site layout: the sidebar beside every page. From 1100 px it is a sticky column; below, a panel
- * over the page, opened from the top bar (<html data-sidebar="open">).
+ * Site layout: the sidebar beside every page, and no top bar. From 1100 px the sidebar is a sticky
+ * column; below, a panel over the page, opened from the dock (<html data-sidebar="open">). Its
+ * tree scrolls, and its foot keeps the site's settings in view.
  */
 
 .site {
@@ -1001,23 +891,108 @@ body {
 }
 
 .site-sidebar {
-  --fade-size: 48px;
   display: none;
+  flex-direction: column;
   background-color: var(--docs-bg);
 }
 
-.site-sidebar > .scroll-fade {
-  padding: 8px 12px 32px;
+.site-sidebar-scroll {
+  --fade-size: 48px;
+  flex: 1;
+  min-block-size: 0;
+}
+
+.site-sidebar-scroll > .scroll-fade {
+  padding: 8px 12px 24px;
+}
+
+.site-sidebar-foot {
+  display: grid;
+  flex: none;
+  gap: 8px;
+  padding: 12px;
+  border-block-start: 2px solid var(--docs-groove-dark);
+  border-image: var(--docs-etch-top);
+}
+
+/* Theme and language side by side, each half the width, their segments sharing it. */
+.site-sidebar-switchers {
+  display: flex;
+  gap: 8px;
+}
+
+.site-sidebar-switchers > *,
+.site-sidebar-switchers .seg,
+.site-sidebar-switchers li,
+.site-sidebar-switchers .seg-item {
+  flex: 1;
+}
+
+.site-sidebar-switchers .seg {
+  display: flex;
+}
+
+.site-sidebar-foot .seg-item {
+  block-size: 24px;
+}
+
+.site-sidebar-switchers .language-switcher .seg-item {
+  inline-size: 100%;
 }
 
 :root[data-sidebar="open"] .site-sidebar {
-  display: block;
+  display: flex;
   position: fixed;
-  inset: var(--top-h) auto 0 0;
+  inset: 0 auto 0 0;
   z-index: 40;
   inline-size: min(300px, 86vw);
-  border-inline-end: 2px solid var(--ow-line-dark);
+  border-inline-end: 2px solid var(--docs-groove-dark);
   border-image: var(--docs-etch-end);
+}
+
+/* Below 1100 px: the dock at the bottom opens the sidebar. The page and the open sidebar's foot
+ * leave room for it. */
+.dock {
+  position: fixed;
+  inset-block-end: 16px;
+  inset-inline-start: 50%;
+  z-index: 50;
+  display: flex;
+  padding: 4px;
+  border-radius: 999px;
+  background-color: var(--docs-surface);
+  box-shadow:
+    inset 0 0 0 1px var(--docs-line-strong),
+    0 12px 32px -12px rgb(0 0 0 / 0.6);
+  translate: -50% 0;
+}
+
+.dock-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  block-size: 40px;
+  padding-inline: 14px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--docs-fg);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.dock-button:hover {
+  background-color: var(--docs-hover);
+}
+
+@media (width < 1100px) {
+  .site-main {
+    padding-block-end: 72px;
+  }
+
+  .site-sidebar-foot {
+    padding-block-end: 76px;
+  }
 }
 
 @media (width >= 1100px) {
@@ -1027,23 +1002,23 @@ body {
 
   .site-sidebar,
   :root[data-sidebar="open"] .site-sidebar {
-    display: block;
+    display: flex;
     position: sticky;
-    inset: var(--top-h) auto auto;
+    inset: 0 auto auto;
     z-index: 1;
     align-self: start;
     inline-size: auto;
-    block-size: calc(100vh - var(--top-h));
+    block-size: 100vh;
     border: 0;
   }
 
   /* The etched divider between the sidebar and the page. */
   .site-main {
-    border-inline-start: 2px solid var(--ow-line-dark);
+    border-inline-start: 2px solid var(--docs-groove-dark);
     border-image: var(--docs-etch-start);
   }
 
-  .sidebar-toggle {
+  .dock {
     display: none;
   }
 }
@@ -1082,6 +1057,7 @@ body {
 .sidebar-brand {
   color: var(--docs-fg);
   font-weight: 600;
+  text-decoration: none;
 }
 
 .sidebar-version {
@@ -1201,7 +1177,7 @@ figure[data-code-block] pre {
   th,
   td {
     padding: 8px 12px;
-    border-block-end: 2px solid var(--ow-line-dark);
+    border-block-end: 2px solid var(--docs-groove-dark);
     border-image: var(--docs-etch-bottom);
     text-align: start;
   }
@@ -1258,7 +1234,7 @@ figure[data-code-block] pre {
   inset-block-start: var(--top-h);
   inset-inline: 0;
   z-index: 20;
-  border-block-end: 2px solid var(--ow-line-dark);
+  border-block-end: 2px solid var(--docs-groove-dark);
   border-image: var(--docs-etch-bottom);
 }
 
@@ -1317,7 +1293,7 @@ figure[data-code-block] pre {
     align-self: start;
     inset-block-start: var(--top-h);
     block-size: calc(100vh - var(--top-h));
-    border-inline-start: 2px solid var(--ow-line-dark);
+    border-inline-start: 2px solid var(--docs-groove-dark);
     border-image: var(--docs-etch-start);
   }
 
@@ -1428,7 +1404,7 @@ figure[data-code-block] pre {
   block-size: 48px;
   box-sizing: border-box;
   padding-inline: 16px 8px;
-  border-block-end: 2px solid var(--ow-line-dark);
+  border-block-end: 2px solid var(--docs-groove-dark);
   border-image: var(--docs-etch-bottom);
   background-color: var(--docs-bg);
 }
@@ -1440,7 +1416,10 @@ figure[data-code-block] pre {
   min-inline-size: 0;
   margin: 0;
   color: var(--docs-body);
-  font-size: 12.5px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .lab-stage-title-text {
@@ -1490,8 +1469,9 @@ figure[data-code-block] pre {
 }
 
 .lab-tool[aria-pressed="true"] {
-  background-color: var(--docs-accent);
-  color: var(--docs-on-accent);
+  background-color: var(--docs-raised);
+  box-shadow: var(--docs-raised-shadow);
+  color: var(--docs-accent);
 }
 
 .lab-tool-label {
@@ -1628,9 +1608,9 @@ figure[data-code-block] pre {
 }
 
 .lab-part[aria-pressed="true"] {
-  background-color: var(--docs-accent);
-  box-shadow: none;
-  color: var(--docs-on-accent);
+  background-color: var(--docs-raised);
+  box-shadow: var(--docs-raised-shadow);
+  color: var(--docs-accent);
 }
 
 /*
@@ -1862,7 +1842,7 @@ figure[data-code-block] pre {
   flex-direction: column;
   block-size: 48%;
   overflow: hidden;
-  border-block-start: 2px solid var(--ow-line-dark);
+  border-block-start: 2px solid var(--docs-groove-dark);
   border-image: var(--docs-etch-top);
   background-color: var(--docs-surface);
   transform: translateY(100%);
@@ -1894,7 +1874,7 @@ figure[data-code-block] pre {
     inline-size: 280px;
     block-size: auto;
     border-block-start: 0;
-    border-inline-start: 2px solid var(--ow-line-dark);
+    border-inline-start: 2px solid var(--docs-groove-dark);
     border-image: var(--docs-etch-start);
     transform: translateX(100%);
   }
@@ -2034,7 +2014,7 @@ figure[data-code-block] pre {
   justify-content: space-between;
   gap: 8px;
   padding: 6px 8px;
-  border-block-end: 2px solid var(--ow-line-dark);
+  border-block-end: 2px solid var(--docs-groove-dark);
   border-image: var(--docs-etch-bottom);
 }
 
@@ -2179,14 +2159,14 @@ figure[data-code-block] pre {
   padding-inline-end: 14px;
 }
 
-/* Token setup panel (components/token-setup.tsx), under the header's right end wherever it
- * was opened from. */
+/* Token setup panel (components/token-setup.tsx), above the sidebar foot wherever it was opened
+ * from; above the dock below 1100 px. */
 .token-setup {
   position: fixed;
-  inset: calc(var(--top-h) + 8px) 16px auto auto;
+  inset: auto auto 112px 12px;
   box-sizing: border-box;
-  inline-size: min(380px, calc(100vw - 32px));
-  max-block-size: calc(100dvh - var(--top-h) - 24px);
+  inline-size: min(380px, calc(100vw - 24px));
+  max-block-size: calc(100dvh - 136px);
   margin: 0;
   padding: 16px;
   overflow: auto;
@@ -2499,7 +2479,7 @@ figure[data-code-block] pre {
   justify-items: start;
   gap: 6px;
   padding-block: 12px;
-  border-block-end: 2px solid var(--ow-line-dark);
+  border-block-end: 2px solid var(--docs-groove-dark);
   border-image: var(--docs-etch-bottom);
 }
 

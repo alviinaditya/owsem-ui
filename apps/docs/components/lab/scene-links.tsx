@@ -1,6 +1,6 @@
 "use client";
 
-import { TreeRailNav } from "owsem-ui/base";
+import { TreeRailNav } from "owsem-ui/owsem";
 import type { SceneInfo } from "./lab-shell";
 import { useActiveScene } from "./scene-store";
 

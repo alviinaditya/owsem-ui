@@ -306,7 +306,14 @@ export function Stage({ lab, lang, labels, title, state, item, pane }: StageProp
   return (
     // tabIndex -1: a click anywhere on the stage focuses it, so its shortcuts work right away;
     // it stays out of the tab order.
-    <section ref={stageRef} className="lab-stage" aria-label={labels.stage} tabIndex={-1}>
+    // The stage theme covers the whole preview: its toolbar, controls, and code too.
+    <section
+      ref={stageRef}
+      className="lab-stage"
+      aria-label={labels.stage}
+      tabIndex={-1}
+      data-theme={state.theme}
+    >
       <div className="lab-stage-bar">
         <p className="lab-stage-title">
           <span className="lab-live" aria-hidden="true" />
@@ -351,7 +358,6 @@ export function Stage({ lab, lang, labels, title, state, item, pane }: StageProp
       <div
         ref={bodyRef}
         className="lab-stage-body"
-        data-theme={state.theme}
         data-code={code ? "" : undefined}
         data-controls={controls ? "" : undefined}
       >

@@ -11,9 +11,9 @@ each part.
 
 ## The trail [#trail]
 
-The stage shows the Owsem flavor. A rail runs down each level, with a dot for every row. The trail
-starts at the origin dot at the top and runs down through each parent's rail, curving onto the
-next level, until it reaches the current row. Each dot lights up as the trail passes it.
+A rail runs down each level, with a dot for every row. The trail starts at the origin dot at the
+top and runs down through each parent's rail, curving onto the next level, until it reaches the
+current row. Each dot lights up as the trail passes it.
 
 The stage plays it: a pointer picks a few pages in turn. Each time, the trail backs up to the
 branch both routes share, then runs down to the new row and pulses when it lands, while a tint
@@ -49,16 +49,19 @@ on the stage, to see its tokens.
 
 ## States and variants [#states]
 
-The stage puts the two flavors side by side, each with its group open and closed. Both have the
-same parts and keys; only the trail differs. The pointer picks Installation in each: Base's trail
-is there at once, Owsem's travels and pulses when it lands. Density is disabled in every cell.
+The stage sets the light and dark themes side by side, each with its group open and closed. The
+pointer picks Installation in each, and the trail travels there and pulses when it lands. Density
+is disabled in every cell.
 
-| Flavor | Trail |
+| State | What shows it |
 | --- | --- |
-| `flavor="base"` (default) | Neutral, drawn at once, no pulse |
-| `flavor="owsem"` | Accent; travels along the rail and pulses on arrival (Kinetic) |
+| Current | The trail ends at the row, its dot lit, and a tint sweeps in behind it |
+| Inside a closed group | The trail stops at the group's row, and the marker turns hollow |
+| Disabled | Dimmed text; arrow keys and the hover highlight skip it |
+| Hover | One highlight glides to the nearest row |
+| Keyboard focus | A ring inside the row, so a panel never cuts it |
 
-Owsem adds no glow, so the Lumen budget stays at three components.
+Tree Rail Nav is an Owsem component (Kinetic): it moves, but has no glow.
 
 `current` marks the row of the page shown: `true` or `"page"` sets `aria-current="page"`, and
 `"step"` sets `aria-current="step"`, for the section being read on a long page. If several rows are
@@ -86,8 +89,8 @@ is mirrored.
 
 ## Customization [#customization]
 
-The stage controls are open; switch the flavor to compare the two trails. Colors and rail positions
-are component tokens that you set in your own CSS.
+The stage controls are open: pick a trail or rail color and the code follows. Colors and rail
+positions are component tokens that you set in your own CSS.
 
 <ForMode mode="theme">
 
@@ -132,12 +135,11 @@ Glide's, so `--ow-glide-bg` and `--ow-glide-radius` set its color and corners.
 
 ## Ship it [#ship]
 
-The code drawer writes the component exactly as the stage is set up. Switch the flavor and the line
-that moved lights up.
+The code drawer writes the component exactly as the stage is set up. Pick a color in the controls
+and the lines that change light up.
 
 | Part | Prop | Type | Default |
 | --- | --- | --- | --- |
-| Root | `flavor` | `"base" \| "owsem"` | `"base"` |
 | Node | `open` | `boolean` | |
 | Node | `defaultOpen` | `boolean` | `false` |
 | Node | `onOpenChange` | `(open, eventDetails) => void` | |
@@ -148,5 +150,4 @@ that moved lights up.
 Node's `open`, `defaultOpen`, and `onOpenChange` come from Base UI Collapsible. Other props pass
 through to the element or to Base UI as they are.
 
-In the registry, `tree-rail-nav` defaults to Base and `tree-rail-nav-owsem` defaults to Owsem; both
-write the same files.
+Import it from `owsem-ui/owsem`. In the registry, it is the `tree-rail-nav` item.

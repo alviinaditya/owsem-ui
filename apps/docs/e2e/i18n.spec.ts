@@ -21,9 +21,15 @@ for (const [acceptLanguage, lang] of [
   });
 }
 
-test("renders each language with its own lang, text, and hreflang links", async ({ page }) => {
+test("renders each language with its own lang, text, and hreflang links", async ({
+  page,
+}, testInfo) => {
+  // Below 1100 px the language switcher lives in the sidebar, which the dock's Menu opens.
+  const menu = page.getByRole("button", { name: "Menu", exact: true });
+  const mobile = testInfo.project.name === "mobile-390";
   await page.goto("/en/docs");
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  if (mobile) await menu.click();
   await expect(page.getByRole("navigation", { name: "Language" })).toBeVisible();
   await expect(page.locator('link[rel="alternate"][hreflang="id"]')).toHaveAttribute(
     "href",
@@ -37,6 +43,7 @@ test("renders each language with its own lang, text, and hreflang links", async 
   await page.getByRole("link", { name: "Bahasa Indonesia" }).click();
   await expect(page).toHaveURL(/\/id\/docs$/);
   await expect(page.locator("html")).toHaveAttribute("lang", "id");
+  if (mobile) await menu.click();
   await expect(page.getByRole("navigation", { name: "Bahasa" })).toBeVisible();
 });
 

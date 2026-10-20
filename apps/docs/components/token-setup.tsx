@@ -171,8 +171,35 @@ function PrefixField({ setup, labels }: { setup: TokenSetup; labels: Labels }) {
   );
 }
 
-/** The header's button and the panel it opens (a popover: Escape and a click outside close it). */
-export function TokenSetupMenu({ labels }: { labels: Labels }) {
+/** The sidebar foot's button for the panel: like the switchers under it, a sunken track. */
+export function TokenSetupButton({ labels }: { labels: Labels }) {
+  const setup = useTokenSetup();
+  return (
+    <button
+      type="button"
+      className="token-button"
+      popoverTarget={TOKEN_SETUP_ID}
+      aria-haspopup="dialog"
+      title={labels.title}
+    >
+      <Icon name="palette" size={15} />
+      <span className="token-button-text">
+        {labels.button}{" "}
+        <code>
+          --{setup.prefix}
+          {setup.mode === "isolated" ? " · isolated" : ""}
+        </code>
+      </span>
+      <Icon name="chevron-down" size={14} />
+    </button>
+  );
+}
+
+/**
+ * The panel the button and every Token chip open (a popover: Escape and a click outside close it).
+ * Rendered once, outside the sidebar, so it opens even while the narrow screen's sidebar is shut.
+ */
+export function TokenSetupPanel({ labels }: { labels: Labels }) {
   const setup = useTokenSetup();
   const titleId = useId();
   const modes = useId();
@@ -184,86 +211,66 @@ export function TokenSetupMenu({ labels }: { labels: Labels }) {
       ? ["accent", "bg", "line-dark"]
       : ["separator-line-dark", "separator-line-light"];
   return (
-    <>
-      {/* Like the switchers beside it: a sunken track, the current value raised in it. */}
+    <div
+      ref={panel}
+      id={TOKEN_SETUP_ID}
+      popover="auto"
+      role="dialog"
+      aria-labelledby={titleId}
+      className="token-setup"
+      onToggle={(event) => {
+        if (event.newState !== "open") return;
+        setOpened((n) => n + 1);
+        panel.current?.querySelector<HTMLInputElement>("input:checked")?.focus();
+      }}
+    >
+      <div className="token-setup-head">
+        <h2 id={titleId}>{labels.title}</h2>
+        <p>{labels.scope}</p>
+      </div>
+      <fieldset className="seg">
+        <legend className="visually-hidden">{labels.mode}</legend>
+        {TOKEN_MODES.map((mode) => (
+          <label
+            key={mode}
+            className="seg-item"
+            data-selected={setup.mode === mode ? "" : undefined}
+          >
+            <input
+              type="radio"
+              name={modes}
+              value={mode}
+              checked={setup.mode === mode}
+              onChange={() => setTokenSetup({ ...setup, mode })}
+            />
+            {labels[mode]}
+          </label>
+        ))}
+      </fieldset>
+      <p className="token-setup-note">
+        {setup.mode === "theme" ? labels.themeNote : labels.isolatedNote}
+      </p>
+      <PrefixField key={opened} setup={setup} labels={labels} />
+      <OwsemJson setup={setup} />
+      <h3 className="token-setup-names">{labels.names}</h3>
+      <ul className="token-names">
+        {names.map((name) => (
+          <li key={name}>
+            <code>
+              --{setup.prefix}-{name}
+            </code>
+          </li>
+        ))}
+      </ul>
+      {isDefaultSetup(setup) ? null : <p className="token-setup-note">{labels.cli}</p>}
       <button
         type="button"
-        className="token-button"
-        popoverTarget={TOKEN_SETUP_ID}
-        aria-haspopup="dialog"
-        title={labels.title}
+        className="text-button"
+        onClick={() => setTokenSetup(DEFAULT_TOKEN_SETUP)}
       >
-        <Icon name="palette" size={15} />
-        <span className="token-button-text">
-          {labels.button}{" "}
-          <code>
-            --{setup.prefix}
-            {setup.mode === "isolated" ? " · isolated" : ""}
-          </code>
-        </span>
-        <Icon name="chevron-down" size={14} />
+        {labels.reset}
       </button>
-      <div
-        ref={panel}
-        id={TOKEN_SETUP_ID}
-        popover="auto"
-        role="dialog"
-        aria-labelledby={titleId}
-        className="token-setup"
-        onToggle={(event) => {
-          if (event.newState !== "open") return;
-          setOpened((n) => n + 1);
-          panel.current?.querySelector<HTMLInputElement>("input:checked")?.focus();
-        }}
-      >
-        <div className="token-setup-head">
-          <h2 id={titleId}>{labels.title}</h2>
-          <p>{labels.scope}</p>
-        </div>
-        <fieldset className="seg">
-          <legend className="visually-hidden">{labels.mode}</legend>
-          {TOKEN_MODES.map((mode) => (
-            <label
-              key={mode}
-              className="seg-item"
-              data-selected={setup.mode === mode ? "" : undefined}
-            >
-              <input
-                type="radio"
-                name={modes}
-                value={mode}
-                checked={setup.mode === mode}
-                onChange={() => setTokenSetup({ ...setup, mode })}
-              />
-              {labels[mode]}
-            </label>
-          ))}
-        </fieldset>
-        <p className="token-setup-note">
-          {setup.mode === "theme" ? labels.themeNote : labels.isolatedNote}
-        </p>
-        <PrefixField key={opened} setup={setup} labels={labels} />
-        <OwsemJson setup={setup} />
-        <h3 className="token-setup-names">{labels.names}</h3>
-        <ul className="token-names">
-          {names.map((name) => (
-            <li key={name}>
-              <code>
-                --{setup.prefix}-{name}
-              </code>
-            </li>
-          ))}
-        </ul>
-        {isDefaultSetup(setup) ? null : <p className="token-setup-note">{labels.cli}</p>}
-        <button
-          type="button"
-          className="text-button"
-          onClick={() => setTokenSetup(DEFAULT_TOKEN_SETUP)}
-        >
-          {labels.reset}
-        </button>
-      </div>
-    </>
+    </div>
   );
 }
 

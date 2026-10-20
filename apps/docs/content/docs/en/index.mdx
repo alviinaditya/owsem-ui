@@ -1,6 +1,6 @@
 ---
 title: Getting Started
-description: Installation, themes, copying components, and moving from Base to Owsem.
+description: Installation, themes, copying components, and the two types, Base and Owsem.
 ---
 
 OwsemUI provides React components in two families, Base and Owsem, built on
@@ -74,12 +74,13 @@ and isolated mode, comes later.
 
 ## Base and Owsem
 
-Base is the calm family for dashboards; Owsem adds richer motion and effects with the same API.
-Components in both families, starting with Button, will take a `flavor` prop, so switching is a
-single prop:
+Every component has one type. **Base** components are Base UI's, with OwsemUI's styling and small
+improvements: calm, for dashboards. **Owsem** components are OwsemUI's own, beyond Base UI, with
+richer motion and effects. Each type has its own entry point:
 
 ```tsx
-<Button flavor="owsem">Save</Button>
+import { Separator } from "owsem-ui/base";
+import { TreeRailNav } from "owsem-ui/owsem";
 ```
 
-Button and `flavor` are not built yet; the [component page](/en) shows what is available.
+The [component page](/en) shows the type of every component, and filters by it.

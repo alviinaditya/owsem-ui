@@ -3,7 +3,7 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { TreeRailNav } from "owsem-ui/base";
+import { TreeRailNav } from "owsem-ui/owsem";
 import { type ReactNode, useEffect } from "react";
 import { revealCurrentLink } from "./sidebar-toggle";
 

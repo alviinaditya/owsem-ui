@@ -1,11 +1,15 @@
 "use client";
 
 import {
+  type CSSProperties,
   createContext,
+  type MouseEvent,
+  type PointerEvent,
   type ReactNode,
   useCallback,
   useContext,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -14,12 +18,12 @@ import {
 import { type Dictionary, format } from "@/lib/dictionaries";
 import type { Lang } from "@/lib/i18n";
 import { Icon } from "../icons/icon";
+import { ScrollFade } from "../scroll-fade";
 import { useTokenNames } from "../token-setup";
-import { PANE_CHROME, paneOpenHeight, SIDE_BY_SIDE } from "./layout";
+import { SHEET_FULL_GAP, SHEET_HALF, SIDE_BY_SIDE } from "./layout";
 import { setActiveScene } from "./scene-store";
 import { Stage, type StageState } from "./stage";
 import type { Config, LabDefinition } from "./types";
-import { usePane } from "./use-pane";
 
 export interface SceneInfo {
   id: string;
@@ -52,20 +56,37 @@ function useLab(): LabContextValue {
 }
 
 const SETTLE_MS = 250; // a scene applies to the stage once scrolling stops on it
+const DRAG_SLOP = 4; // px a handle press may move and still count as a tap
+const SHUT_BELOW = 0.25; // a drag let go under this share of the screen shuts the sheet
+
+/** The narrow screen's documentation sheet: shut, half the screen, or nearly all of it. */
+type Sheet = "closed" | "half" | "full";
+/** How the sheet last moved: rising from shut waits for the stage's caption to fade first. */
+type SheetMove = "open" | "resize" | "close";
 const SCROLL_KEYS = new Set(["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "]);
 const REDUCED = "(prefers-reduced-motion: reduce)";
 
-function subscribeReduced(listener: () => void): () => void {
-  const query = matchMedia(REDUCED);
-  query.addEventListener("change", listener);
-  return () => query.removeEventListener("change", listener);
-}
+const subscribeMedia = (query: string) => (listener: () => void) => {
+  const list = matchMedia(query);
+  list.addEventListener("change", listener);
+  return () => list.removeEventListener("change", listener);
+};
+const subscribeReduced = subscribeMedia(REDUCED);
+const subscribeSideBySide = subscribeMedia(SIDE_BY_SIDE);
 
 /** Whether the visitor prefers reduced motion; true on the server, so nothing plays before it knows. */
 const useReducedMotion = (): boolean =>
   useSyncExternalStore(
     subscribeReduced,
     () => matchMedia(REDUCED).matches,
+    () => true,
+  );
+
+/** Whether the stage sits beside the narrative; true on the server (CSS covers narrow screens). */
+const useSideBySide = (): boolean =>
+  useSyncExternalStore(
+    subscribeSideBySide,
+    () => matchMedia(SIDE_BY_SIDE).matches,
     () => true,
   );
 
@@ -83,6 +104,8 @@ export interface LabShellProps {
   lang: Lang;
   scenes: SceneInfo[];
   intro: ReactNode;
+  /** Under the narrow screen's stage while the sheet is shut: category, name, line, badges. */
+  caption: ReactNode;
   footer: ReactNode;
   labels: Dictionary["lab"];
   /** The registry item, for the install tab. */
@@ -94,8 +117,9 @@ export interface LabShellProps {
 export type LabProps = Omit<LabShellProps, "lab">;
 
 /**
- * The Lab page (DS-2): the narrative scrolls beside, or under, a sticky stage. The scene at the
- * reading line becomes active; once scrolling settles, its SceneSpec shapes the stage.
+ * The Lab page (DS-2): the narrative scrolls beside a sticky stage. Below SIDE_BY_SIDE the stage
+ * fills the screen and the narrative is a sheet over it, opened from the stage's toolbar. The scene
+ * at the reading line becomes active; once scrolling settles, its SceneSpec shapes the stage.
  */
 export function LabShell({
   lab,
@@ -103,6 +127,7 @@ export function LabShell({
   lang,
   scenes,
   intro,
+  caption,
   footer,
   labels,
   item,
@@ -129,10 +154,29 @@ export function LabShell({
   const end = useRef<HTMLDivElement>(null);
   const sections = useRef(new Map<string, HTMLElement>());
   const refs = useRef(new Map<string, (el: HTMLElement | null) => void>());
-  const stageFrame = useRef<HTMLDivElement>(null);
   const narrative = useRef<HTMLDivElement>(null);
+  const scroller = useRef<HTMLDivElement>(null);
+  const sheetTitle = useRef<HTMLParagraphElement>(null);
+  const sceneNav = useRef<HTMLElement>(null);
   useTokenNames(narrative);
-  const [paneHidden, togglePane] = usePane();
+  const [sheetState, setSheetState] = useState<{ at: Sheet; move: SheetMove }>({
+    at: "closed",
+    move: "close",
+  });
+  const sheet = sheetState.at;
+  const setSheet = useCallback((next: Sheet | ((current: Sheet) => Sheet)) => {
+    setSheetState((current) => {
+      const at = typeof next === "function" ? next(current.at) : next;
+      if (at === current.at) return current;
+      const move = at === "closed" ? "close" : current.at === "closed" ? "open" : "resize";
+      return { at, move };
+    });
+  }, []);
+  // The sheet's height while its handle is dragged; null otherwise.
+  const [dragHeight, setDragHeight] = useState<number | null>(null);
+  const drag = useRef<{ y: number; height: number; moved: boolean } | null>(null);
+  const sheetId = useId();
+  const docsButtonId = `${sheetId}-docs`;
 
   const register = useCallback((id: string) => {
     let ref = refs.current.get(id);
@@ -146,52 +190,81 @@ export function LabShell({
     return ref;
   }, []);
 
-  // The reading line: 40% down the window when the stage sits beside the text, else 30% into
-  // the area under the open pane. It ignores folding, so a fold moves neither text nor scene.
-  // A 1px band there tells which scene is being read. Scenes take their natural height, so a
-  // short one may never cross the line: the page's start and end select the first and last
-  // scene, and a scene picked by link (sidebar, hash) holds until the visitor scrolls.
+  // The reading line: 40% down the window when the stage sits beside the text, else 30% into the
+  // sheet's text. A 1px band there tells which scene is being read. Scenes take their natural
+  // height, so a short one may never cross the line: the narrative's start and end select the
+  // first and last scene, and a scene picked by link (sidebar, hash) holds until the visitor
+  // scrolls.
   useEffect(() => {
-    let observer: IntersectionObserver | undefined;
+    let lines: IntersectionObserver | undefined;
+    let edges: IntersectionObserver | undefined;
     const setup = () => {
-      observer?.disconnect();
-      const height = window.innerHeight;
-      const frame = stageFrame.current?.getBoundingClientRect().top ?? 0;
-      const top = matchMedia(SIDE_BY_SIDE).matches ? 0 : frame + paneOpenHeight() + PANE_CHROME;
-      const line = Math.round(top + (height - top) * (top ? 0.3 : 0.4));
-      observer = new IntersectionObserver(
+      lines?.disconnect();
+      edges?.disconnect();
+      const root = matchMedia(SIDE_BY_SIDE).matches ? null : scroller.current;
+      const height = root ? root.clientHeight : window.innerHeight;
+      if (!height) return;
+      const line = Math.round(height * (root ? 0.3 : 0.4));
+      lines = new IntersectionObserver(
         (entries) => {
           for (const entry of entries) {
             const id = (entry.target as HTMLElement).dataset.scene;
             if (entry.isIntersecting && id) setAtLine(id);
           }
         },
-        { rootMargin: `${-line}px 0px ${line + 1 - height}px 0px` },
+        { root, rootMargin: `${-line}px 0px ${line + 1 - height}px 0px` },
       );
-      for (const section of sections.current.values()) observer.observe(section);
+      for (const section of sections.current.values()) lines.observe(section);
+      edges = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.target === start.current) setAtStart(entry.isIntersecting);
+            if (entry.target === end.current) setAtEnd(entry.isIntersecting);
+          }
+        },
+        { root },
+      );
+      if (start.current) edges.observe(start.current);
+      if (end.current) edges.observe(end.current);
     };
     setup();
-    const edges = new IntersectionObserver((entries) => {
-      for (const entry of entries) {
-        if (entry.target === start.current) setAtStart(entry.isIntersecting);
-        if (entry.target === end.current) setAtEnd(entry.isIntersecting);
-      }
-    });
-    if (start.current) edges.observe(start.current);
-    if (end.current) edges.observe(end.current);
+    // The sheet's height changes the line; so does the window.
+    const sizes = new ResizeObserver(setup);
+    if (scroller.current) sizes.observe(scroller.current);
     window.addEventListener("resize", setup);
     return () => {
-      observer?.disconnect();
-      edges.disconnect();
+      lines?.disconnect();
+      edges?.disconnect();
+      sizes.disconnect();
       window.removeEventListener("resize", setup);
     };
   }, []);
+
+  // On a narrow screen a scene picked by link opens the sheet (at half height, or as it is) and
+  // comes up under its tabs. Play scene always wants the stage in view: half height. The sheet
+  // and the stage's panels share the room under the demo, so one shuts the other.
+  const showInSheet = useCallback(
+    (id: string, { smooth = false, half = false } = {}) => {
+      if (matchMedia(SIDE_BY_SIDE).matches) return;
+      setSheet((current) => (half || current === "closed" ? "half" : current));
+      setCode(false);
+      setControls(false);
+      requestAnimationFrame(() =>
+        sections.current
+          .get(id)
+          ?.scrollIntoView({ block: "start", behavior: smooth ? "smooth" : "auto" }),
+      );
+    },
+    [setSheet],
+  );
 
   useEffect(() => {
     const ids = new Set(scenes.map((scene) => scene.id));
     const fromHash = () => {
       const id = decodeURIComponent(location.hash).replace(/^#scene-/, "");
-      if (ids.has(id)) setPicked(id);
+      if (!ids.has(id)) return;
+      setPicked(id);
+      showInSheet(id);
     };
     // Any scroll the visitor starts lets the reading line decide again.
     const release = (event: Event) => {
@@ -209,7 +282,7 @@ export function LabShell({
         window.removeEventListener(type, release);
       }
     };
-  }, [scenes]);
+  }, [scenes, showInSheet]);
 
   useEffect(() => {
     setActiveScene(active);
@@ -245,7 +318,12 @@ export function LabShell({
   const pick = <T,>(key: string, own: T, scene: T | undefined) =>
     touched.has(key) || scene === undefined ? own : scene;
   const userPicked = touched.has("code") || touched.has("controls");
-  const scenePick = spec.code ? "code" : spec.controls ? "controls" : undefined;
+  // Narrow, the sheet covers the stage's panels, so scenes leave them shut: only the visitor
+  // opens them there.
+  const sideBySide = useSideBySide();
+  const sceneCode = sideBySide ? spec.code : undefined;
+  const sceneControls = sideBySide ? spec.controls : undefined;
+  const scenePick = sceneCode ? "code" : sceneControls ? "controls" : undefined;
   const stageTheme = pick("theme", theme, spec.theme);
   const stageInspect = pick("inspect", inspect, spec.inspect);
 
@@ -274,16 +352,24 @@ export function LabShell({
       setCfg(lab.initial);
       setTouched((keys) => new Set([...keys].filter((key) => !(key in lab.initial))));
     },
-    code: pick("code", code, spec.code),
+    code: pick("code", code, sceneCode),
+    codeFromScene: !touched.has("code") && sceneCode !== undefined,
     setCode: (open) => {
       setCode(open);
-      if (open) setLastOpened("code");
+      if (open) {
+        setLastOpened("code");
+        setSheet("closed");
+      }
       touch("code");
     },
-    controls: pick("controls", controls, spec.controls),
+    controls: pick("controls", controls, sceneControls),
+    controlsFromScene: !touched.has("controls") && sceneControls !== undefined,
     setControls: (open) => {
       setControls(open);
-      if (open) setLastOpened("controls");
+      if (open) {
+        setLastOpened("controls");
+        setSheet("closed");
+      }
       touch("controls");
     },
     // Where code and controls share one slot: the visitor's latest pick in this scene, else the
@@ -332,8 +418,9 @@ export function LabShell({
   );
   const parts = useMemo(() => (lab.parts ?? []).map((p) => p.name), [lab]);
 
-  // Play scene (DS-11): picks the scene, plays it once it settles, and on a narrow screen opens
-  // the pane and brings the scene up under it. Pressed while that scene plays, it stops it.
+  // Play scene (DS-11): picks the scene, plays it once it settles, and on a narrow screen sets
+  // the sheet at half height, so the stage shows above it. Pressed while that scene plays, it
+  // stops it.
   const playScene = (id: string) => {
     if (playing && id === settled) {
       stop();
@@ -341,9 +428,91 @@ export function LabShell({
     }
     setPicked(id);
     replay(id);
-    if (matchMedia(SIDE_BY_SIDE).matches) return;
-    if (paneHidden) togglePane();
-    sections.current.get(id)?.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
+    showInSheet(id, { smooth: !reduced, half: true });
+  };
+
+  // The sheet: the stage's Docs button opens it at half height and moves focus to its title;
+  // closing (its button, Escape) hands focus back to that button.
+  const toggleSheet = () => {
+    if (sheet !== "closed") {
+      setSheet("closed");
+      return;
+    }
+    setSheet("half");
+    setCode(false);
+    setControls(false);
+    requestAnimationFrame(() => sheetTitle.current?.focus({ preventScroll: true }));
+  };
+  const closeSheet = useCallback(() => {
+    setSheet("closed");
+    document.getElementById(docsButtonId)?.focus({ preventScroll: true });
+  }, [setSheet, docsButtonId]);
+  // Escape inside the open sheet shuts it.
+  useEffect(() => {
+    const el = narrative.current;
+    if (!el || sheet === "closed") return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || matchMedia(SIDE_BY_SIDE).matches) return;
+      event.stopPropagation();
+      closeSheet();
+    };
+    el.addEventListener("keydown", onKey);
+    return () => el.removeEventListener("keydown", onKey);
+  }, [sheet, closeSheet]);
+  // The active scene's link stays in view in the sheet's row of scenes.
+  useEffect(() => {
+    const row = sceneNav.current?.querySelector<HTMLElement>(".scroll-fade");
+    const link = row?.querySelector<HTMLElement>(`[href="#scene-${CSS.escape(active)}"]`);
+    if (!row || !link || matchMedia(SIDE_BY_SIDE).matches) return;
+    row.scrollTo({ left: link.offsetLeft - 20, behavior: reduced ? "auto" : "smooth" });
+  }, [active, reduced]);
+  // A scene's link scrolls the sheet to it; the scene holds until the visitor scrolls.
+  const onSceneLink = (event: MouseEvent<HTMLAnchorElement>, id: string) => {
+    event.preventDefault();
+    setPicked(id);
+    history.replaceState(null, "", `#scene-${id}`);
+    sections.current
+      .get(id)
+      ?.scrollIntoView({ block: "start", behavior: reduced ? "auto" : "smooth" });
+  };
+  // The handle: a tap (or Enter) switches half and full height; a drag sets the height, then
+  // settles on the nearest height when let go, or shuts the sheet when dragged low enough.
+  const onHandleDown = (event: PointerEvent<HTMLButtonElement>) => {
+    if (event.button !== 0 || !narrative.current) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    drag.current = {
+      y: event.clientY,
+      height: narrative.current.getBoundingClientRect().height,
+      moved: false,
+    };
+  };
+  const onHandleMove = (event: PointerEvent<HTMLButtonElement>) => {
+    const from = drag.current;
+    if (!from) return;
+    const dy = from.y - event.clientY;
+    if (!from.moved && Math.abs(dy) < DRAG_SLOP) return;
+    from.moved = true;
+    setDragHeight(Math.max(0, Math.min(innerHeight - SHEET_FULL_GAP, from.height + dy)));
+  };
+  const onHandleUp = () => {
+    const from = drag.current;
+    if (!from?.moved || dragHeight === null) return;
+    const half = innerHeight * SHEET_HALF;
+    const full = innerHeight - SHEET_FULL_GAP;
+    setSheet(
+      dragHeight < innerHeight * SHUT_BELOW
+        ? "closed"
+        : dragHeight > (half + full) / 2
+          ? "full"
+          : "half",
+    );
+    setDragHeight(null);
+  };
+  const onHandleClick = () => {
+    const from = drag.current;
+    drag.current = null;
+    if (from?.moved) return;
+    setSheet((current) => (current === "full" ? "half" : "full"));
   };
   // A part's name picks the part, and turns Inspect on (the visitor's choice) only if it is off.
   const inspectPart = (name: string) => {
@@ -373,9 +542,17 @@ export function LabShell({
 
   return (
     <LabContext value={context}>
-      <div className="lab">
+      <div
+        className="lab"
+        data-sheet={sheet}
+        data-sheet-move={sheetState.move}
+        data-dragging={dragHeight === null ? undefined : ""}
+        style={
+          dragHeight === null ? undefined : ({ "--sheet-drag": `${dragHeight}px` } as CSSProperties)
+        }
+      >
         <div className="lab-stage-column">
-          <div ref={stageFrame} className="lab-stage-frame">
+          <div className="lab-stage-frame">
             <Stage
               lab={lab}
               lang={lang}
@@ -383,15 +560,64 @@ export function LabShell({
               title={title}
               state={state}
               item={item}
-              pane={[paneHidden, togglePane]}
+              caption={caption}
+              docs={{
+                open: sheet !== "closed",
+                toggle: toggleSheet,
+                sheetId,
+                buttonId: docsButtonId,
+              }}
             />
           </div>
         </div>
-        <div ref={narrative} className="lab-narrative">
-          <div ref={start} />
-          {children}
-          {footer}
-          <div ref={end} />
+        {/* Wide: the narrative beside the stage, scrolled by the window. Narrow: a sheet. */}
+        <div ref={narrative} id={sheetId} className="lab-narrative">
+          <button
+            type="button"
+            className="lab-sheet-handle"
+            aria-label={labels.dragSheet}
+            aria-controls={sheetId}
+            onPointerDown={onHandleDown}
+            onPointerMove={onHandleMove}
+            onPointerUp={onHandleUp}
+            onPointerCancel={onHandleUp}
+            onClick={onHandleClick}
+          />
+          <div className="lab-sheet-head">
+            <p ref={sheetTitle} className="lab-sheet-title" tabIndex={-1}>
+              {format(labels.sheetTitle, { name: componentTitle })}
+            </p>
+            <button
+              type="button"
+              className="lab-sheet-close"
+              aria-label={labels.close}
+              onClick={closeSheet}
+            >
+              <Icon name="x" size={16} />
+            </button>
+          </div>
+          {/* Outside the text's scroller, so its scrollbar runs beside the text alone. */}
+          <nav ref={sceneNav} className="lab-scene-nav" aria-label={labels.scenes}>
+            <ScrollFade wheelX>
+              {scenes.map((scene, index) => (
+                <a
+                  key={scene.id}
+                  href={`#scene-${scene.id}`}
+                  aria-current={scene.id === active ? "true" : undefined}
+                  onClick={(event) => onSceneLink(event, scene.id)}
+                >
+                  <span>{String(index).padStart(2, "0")}</span>
+                  {scene.title}
+                </a>
+              ))}
+            </ScrollFade>
+          </nav>
+          <div ref={scroller} className="lab-narrative-scroll">
+            <div ref={start} />
+            {children}
+            {footer}
+            <div ref={end} />
+          </div>
         </div>
       </div>
     </LabContext>
@@ -442,8 +668,8 @@ export function Scene({
 
 /**
  * The stage's shortcuts, each with its name, in the page header: only the ones this Lab has (R
- * needs a scene with an animation; H, the narrow screen's pane). They work while focus is in the
- * stage (WCAG 2.1.4), and a click anywhere on the stage puts it there.
+ * needs a scene with an animation). They work while focus is in the stage (WCAG 2.1.4), and a
+ * click anywhere on the stage puts it there.
  */
 export function StageShortcuts() {
   const { labels, parts, playable } = useLab();
@@ -462,9 +688,6 @@ export function StageShortcuts() {
           <kbd>{key}</kbd> {name}
         </span>
       ))}
-      <span className="lab-hint-key" data-narrow="">
-        <kbd>H</kbd> {labels.preview}
-      </span>
     </p>
   );
 }

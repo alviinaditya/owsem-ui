@@ -1,6 +1,6 @@
 // Sizes shared with globals.css; keep both in sync.
 
-/** The stage sits beside the narrative from here; below, it is a pane at the top of the screen. */
+/** The stage sits beside the narrative from here; below, it fills the screen under a sheet. */
 export const SIDE_BY_SIDE = "(min-width: 960px)";
 
 /** Stage width from which the controls are a side panel (`@container stage`), else a sheet. */
@@ -9,11 +9,14 @@ export const SIDE_PANEL_MIN = 720;
 /** The side panel's width (.lab-controls). */
 export const SIDE_PANEL_WIDTH = 280;
 
-/** The open pane's height, as `--pane-open: clamp(280px, 46dvh, 520px)`. */
-export const paneOpenHeight = (): number => Math.min(520, Math.max(280, innerHeight * 0.46));
+/** The documentation sheet at half height, as a share of the screen (.lab[data-sheet="half"]). */
+export const SHEET_HALF = 0.58;
 
-/** The narrow pane's etched bottom line, below the stage (.lab-stage-frame). */
-export const PANE_CHROME = 2;
+/** At full height the sheet leaves this much of the stage, its toolbar, in view (px). */
+export const SHEET_FULL_GAP = 64;
+
+/** Stage width below which Inspect docks under the demo: part names in a row, then the card. */
+export const INSPECT_COMPACT = 560;
 
 /** Room Inspect keeps beside the demo for its part names (.lab-ichip). */
 export const INSPECT_CHIPS = 128;

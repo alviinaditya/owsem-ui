@@ -15,7 +15,7 @@ import type { Lang } from "@/lib/i18n";
 import { Icon, type IconName } from "../icons/icon";
 import { InstallPane } from "../install";
 import { ScrollFade } from "../scroll-fade";
-import { useTokenSetup } from "../token-setup";
+import { placeTokenSetup, TOKEN_SETUP_ID, useTokenSetup } from "../token-setup";
 import { ColorField } from "./color-field";
 import { CopyButton } from "./copy-button";
 import { Inspect } from "./inspect";
@@ -24,7 +24,7 @@ import {
   INSPECT_CARD_GAP,
   INSPECT_CARD_MIN,
   INSPECT_CHIPS,
-  SIDE_BY_SIDE,
+  INSPECT_COMPACT,
   SIDE_PANEL_MIN,
   SIDE_PANEL_WIDTH,
 } from "./layout";
@@ -45,6 +45,9 @@ export interface StageState {
   setCode: (open: boolean) => void;
   controls: boolean;
   setControls: (open: boolean) => void;
+  /** Whether the scene, not the visitor, opened code or controls. */
+  codeFromScene: boolean;
+  controlsFromScene: boolean;
   /** Which of code and controls shows when a narrow stage has room for one. */
   prefer: "code" | "controls";
   /** Set only when the visitor or a scene picks one; otherwise the stage follows the site. */
@@ -75,7 +78,10 @@ interface StageProps {
   state: StageState;
   /** The registry item, for the install tab. */
   item: string;
-  pane: [hidden: boolean, toggle: () => void];
+  /** Under the narrow screen's stage while the sheet is shut (LabShellProps.caption). */
+  caption: ReactNode;
+  /** The narrow screen's documentation sheet, opened from the toolbar. */
+  docs: { open: boolean; toggle: () => void; sheetId: string; buttonId: string };
 }
 
 interface Shortcut {
@@ -85,7 +91,7 @@ interface Shortcut {
   focus?: HTMLElement | null | undefined;
 }
 
-export function Stage({ lab, lang, labels, title, state, item, pane }: StageProps) {
+export function Stage({ lab, lang, labels, title, state, item, caption, docs }: StageProps) {
   const id = useId();
   const stageRef = useRef<HTMLElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -93,15 +99,16 @@ export function Stage({ lab, lang, labels, title, state, item, pane }: StageProp
   const demoRef = useRef<HTMLDivElement>(null);
   const controlsRef = useRef<HTMLElement>(null);
   const drawerRef = useRef<HTMLElement>(null);
-  const paneToggleRef = useRef<HTMLButtonElement>(null);
   const ghostRef = useRef<HTMLSpanElement>(null);
   const toolRefs = useRef(new Map<string, HTMLButtonElement | null>());
-  const [paneHidden, togglePane] = pane;
   // Whether the stage is wide enough for the controls beside the demo (same as the container query).
   const [wide, setWide] = useState(true);
   // Where Inspect's part card has room, and the height it keeps for it (its tallest card).
   const [card, setCard] = useState<CardPlace>("none");
   const [cardHeight, setCardHeight] = useState(0);
+  // A narrow stage docks Inspect under the demo, and keeps the dock's height for it.
+  const [compact, setCompact] = useState(false);
+  const [dockHeight, setDockHeight] = useState(0);
   const inspect = state.inspect && Boolean(lab.parts?.length);
 
   // A narrow stage has one slot for the controls and the code.
@@ -125,18 +132,25 @@ export function Stage({ lab, lang, labels, title, state, item, pane }: StageProp
     if (!body || !fit || !demo) return;
     const apply = () => {
       const isWide = body.clientWidth >= SIDE_PANEL_MIN;
+      const isCompact = body.clientWidth < INSPECT_COMPACT;
       setWide(isWide);
+      setCompact(isCompact);
       if (!demo.offsetWidth || !demo.offsetHeight) return;
       const style = getComputedStyle(body);
-      const padX = Number.parseFloat(style.paddingInlineStart) * 2;
-      const padY = Number.parseFloat(style.paddingBlockStart) * 2;
+      // Sides may differ: the narrow stage pads its top for the floating toolbar.
+      const padX =
+        Number.parseFloat(style.paddingInlineStart) + Number.parseFloat(style.paddingInlineEnd);
+      const padY =
+        Number.parseFloat(style.paddingBlockStart) + Number.parseFloat(style.paddingBlockEnd);
       const side = controls && isWide ? SIDE_PANEL_WIDTH : 0;
       const lower = code || (controls && !isWide);
       // Inspect keeps a column for the part names on the end side. Its part card goes on the
       // start side when the stage is wide enough, else under the demo when that leaves the demo
-      // most of its size, else nowhere.
-      const chips = inspect ? INSPECT_CHIPS : 0;
-      const free = inspect && !lower && cardHeight > 0;
+      // most of its size, else nowhere. A narrow stage docks both under the demo instead, until
+      // a panel takes that room.
+      const docked = inspect && isCompact;
+      const chips = inspect && !docked ? INSPECT_CHIPS : 0;
+      const free = inspect && !docked && !lower && cardHeight > 0;
       const below = cardHeight + INSPECT_CARD_GAP;
       const place: CardPlace =
         free && body.clientWidth - side >= INSPECT_CARD_MIN
@@ -147,14 +161,15 @@ export function Stage({ lab, lang, labels, title, state, item, pane }: StageProp
       setCard(place);
       const start = place === "side" ? INSPECT_CARD : 0;
       const under = place === "below" ? below : 0;
+      const dock = docked && !lower ? dockHeight : 0;
       const width = body.clientWidth - padX - side - chips - start;
-      const height = (lower ? body.clientHeight * 0.52 : body.clientHeight) - padY - under;
+      const height = (lower ? body.clientHeight * 0.52 : body.clientHeight) - padY - under - dock;
       const scale = Math.max(
         0.4,
         Math.min(1, (width - 24) / demo.offsetWidth, (height - 16) / demo.offsetHeight),
       );
       const x = (start - side - chips) / 2;
-      const y = lower ? -body.clientHeight * 0.24 : -under / 2;
+      const y = lower ? -body.clientHeight * 0.24 : -(under + dock) / 2;
       fit.style.transform = `translate(${x}px, ${y.toFixed(1)}px) scale(${scale.toFixed(3)})`;
     };
     apply();
@@ -162,7 +177,7 @@ export function Stage({ lab, lang, labels, title, state, item, pane }: StageProp
     observer.observe(body);
     observer.observe(demo);
     return () => observer.disconnect();
-  }, [code, controls, inspect, cardHeight]);
+  }, [code, controls, inspect, cardHeight, dockHeight]);
 
   // Single-key shortcuts only while focus is inside the stage (WCAG 2.1.4). A shortcut that
   // hides the focused element hands focus to its own button, so the next press still works.
@@ -183,11 +198,6 @@ export function Stage({ lab, lang, labels, title, state, item, pane }: StageProp
         hides: code ? drawerRef.current : null,
         focus: toolRefs.current.get("C"),
       },
-      h: {
-        run: togglePane,
-        hides: paneHidden ? null : stageRef.current,
-        focus: paneToggleRef.current,
-      },
     };
   });
   useEffect(() => {
@@ -197,8 +207,6 @@ export function Stage({ lab, lang, labels, title, state, item, pane }: StageProp
       if (event.metaKey || event.ctrlKey || event.altKey || event.repeat) return;
       if ((event.target as Element).closest("input, select, textarea, [role='tab']")) return;
       const key = event.key.toLowerCase();
-      // The pane only exists when the stage sits above the narrative.
-      if (key === "h" && matchMedia(SIDE_BY_SIDE).matches) return;
       const shortcut = shortcuts.current[key];
       if (!shortcut) return;
       event.preventDefault();
@@ -258,12 +266,32 @@ export function Stage({ lab, lang, labels, title, state, item, pane }: StageProp
 
   const setup = useTokenSetup();
   const files = lab.code(state.cfg, setup);
+  // The More menu gives way to the token setup, which opens under the toolbar; focus comes back
+  // to the menu's button when it shuts.
+  const moreId = `${id}-more`;
+  const moreRef = useRef<HTMLFieldSetElement>(null);
+  const moreButtonRef = useRef<HTMLButtonElement>(null);
+  const openTokenSetup = () => {
+    moreRef.current?.hidePopover();
+    const panel = document.getElementById(TOKEN_SETUP_ID);
+    if (!panel) return;
+    placeTokenSetup("stage");
+    panel.showPopover();
+    const back = (event: Event) => {
+      if ((event as ToggleEvent).newState !== "closed") return;
+      panel.removeEventListener("toggle", back);
+      if (document.activeElement === document.body) moreButtonRef.current?.focus();
+    };
+    panel.addEventListener("toggle", back);
+  };
+  // Stage theme and the token setup step into the More menu when the stage is narrow (globals.css).
   const tools: {
     key: string;
     label: string;
     icon: IconName;
     pressed?: boolean;
     controls?: string;
+    more?: boolean;
     act: () => void;
   }[] = [
     ...(lab.parts?.length
@@ -277,7 +305,7 @@ export function Stage({ lab, lang, labels, title, state, item, pane }: StageProp
           },
         ]
       : []),
-    { key: "T", label: labels.theme, icon: "contrast", act: state.toggleTheme },
+    { key: "T", label: labels.theme, icon: "contrast", more: true, act: state.toggleTheme },
     {
       key: "P",
       label: labels.controls,
@@ -333,6 +361,7 @@ export function Stage({ lab, lang, labels, title, state, item, pane }: StageProp
               aria-controls={tool.controls}
               aria-keyshortcuts={tool.key}
               title={`${tool.label} (${tool.key})`}
+              data-more={tool.more ? "" : undefined}
               onClick={tool.act}
             >
               <Icon name={tool.icon} size={15} />
@@ -340,17 +369,61 @@ export function Stage({ lab, lang, labels, title, state, item, pane }: StageProp
             </button>
           ))}
           <button
-            ref={paneToggleRef}
             type="button"
-            className="lab-pane-toggle"
-            aria-expanded={!paneHidden}
-            aria-keyshortcuts="H"
-            // The full name; the visible text is its start, so voice control finds it (2.5.3).
-            aria-label={paneHidden ? labels.show : labels.hide}
-            onClick={togglePane}
+            className="lab-tool"
+            popoverTarget={TOKEN_SETUP_ID}
+            aria-haspopup="dialog"
+            title={labels.tokenSetup}
+            data-more=""
+            onClick={() => placeTokenSetup("stage")}
           >
-            {paneHidden ? labels.show : labels.hideShort}
-            <Icon name="chevron-down" size={15} />
+            <Icon name="palette" size={15} />
+            <span className="lab-tool-label lab-tool-token-label">{labels.tokens}</span>
+          </button>
+          {/* Narrow screens: the documentation sheet opens from here, set apart by a groove. */}
+          <span className="lab-tool-sep" aria-hidden="true" />
+          <button
+            id={docs.buttonId}
+            type="button"
+            className="lab-tool lab-tool-docs"
+            aria-expanded={docs.open}
+            aria-controls={docs.sheetId}
+            onClick={docs.toggle}
+          >
+            <Icon name="book-open" size={15} />
+            <span className="lab-tool-docs-label">{labels.docs}</span>
+          </button>
+          <button
+            ref={moreButtonRef}
+            type="button"
+            className="lab-tool lab-tool-more"
+            popoverTarget={moreId}
+            aria-label={labels.more}
+            title={labels.more}
+          >
+            <Icon name="ellipsis" size={15} />
+          </button>
+        </fieldset>
+        <fieldset ref={moreRef} id={moreId} popover="auto" className="lab-more">
+          <legend className="visually-hidden">{labels.more}</legend>
+          <button
+            type="button"
+            className="lab-more-item"
+            aria-keyshortcuts="T"
+            onClick={state.toggleTheme}
+          >
+            <Icon name="contrast" size={15} />
+            {labels.theme}
+            <kbd>T</kbd>
+          </button>
+          <button
+            type="button"
+            className="lab-more-item"
+            aria-haspopup="dialog"
+            onClick={openTokenSetup}
+          >
+            <Icon name="palette" size={15} />
+            {labels.tokenSetup}
           </button>
         </fieldset>
       </div>
@@ -358,8 +431,8 @@ export function Stage({ lab, lang, labels, title, state, item, pane }: StageProp
       <div
         ref={bodyRef}
         className="lab-stage-body"
-        data-code={code ? "" : undefined}
-        data-controls={controls ? "" : undefined}
+        data-code={code ? (state.codeFromScene ? "scene" : "") : undefined}
+        data-controls={controls ? (state.controlsFromScene ? "scene" : "") : undefined}
       >
         <div ref={fitRef} className="lab-fit">
           <div ref={demoRef} className="lab-demo">
@@ -381,6 +454,9 @@ export function Stage({ lab, lang, labels, title, state, item, pane }: StageProp
             demoRef={demoRef}
             card={card}
             onCardHeight={setCardHeight}
+            compact={compact}
+            brief={docs.open}
+            onDockHeight={setDockHeight}
           />
         ) : null}
 
@@ -418,11 +494,20 @@ export function Stage({ lab, lang, labels, title, state, item, pane }: StageProp
           <CodeDrawer files={files} item={item} labels={labels} />
         </section>
       </div>
+      {/* Two boxes, so the caption's room can fold away (globals.css). */}
+      <div className="lab-caption">
+        <div className="lab-caption-inner">{caption}</div>
+      </div>
     </section>
   );
 }
 
-function ControlsPanel({ lab, lang, labels, state }: Omit<StageProps, "title" | "item" | "pane">) {
+function ControlsPanel({
+  lab,
+  lang,
+  labels,
+  state,
+}: Pick<StageProps, "lab" | "lang" | "labels" | "state">) {
   return (
     <div className="lab-controls-inner">
       {lab.controls.map((control) =>

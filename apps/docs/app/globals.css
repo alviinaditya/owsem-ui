@@ -94,7 +94,13 @@
   --docs-radius: 10px;
   --docs-radius-box: 14px;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
-  --pane-open: clamp(280px, 46dvh, 520px);
+  /* Fluid type: each size grows from a 320 px phone to a wide screen. The rem part keeps browser
+   * zoom working (WCAG 1.4.4); UI labels stay fixed, already small. */
+  --docs-text-display: clamp(1.75rem, 1.2rem + 2.75vw, 3.125rem);
+  --docs-text-title: clamp(1.25rem, 1.05rem + 1vw, 1.75rem);
+  --docs-text-subtitle: clamp(1.0625rem, 1rem + 0.3vw, 1.125rem);
+  --docs-text-lead: clamp(0.9375rem, 0.875rem + 0.35vw, 1.03125rem);
+  --docs-text-body: clamp(0.9375rem, 0.9rem + 0.15vw, 0.96875rem);
   scroll-padding-top: calc(var(--top-h) + 16px);
 }
 
@@ -110,7 +116,7 @@ body {
   background-color: var(--docs-bg);
   color: var(--docs-fg);
   font-family: var(--font-sans), system-ui, sans-serif;
-  font-size: 15.5px;
+  font-size: var(--docs-text-body);
   line-height: 1.7;
 }
 
@@ -211,6 +217,11 @@ body {
   list-style: none;
 }
 
+/* No line box around a list item's segment, so it sits 3px inside the track like the others. */
+.seg > li {
+  display: flex;
+}
+
 .seg-item {
   position: relative;
   display: inline-flex;
@@ -238,64 +249,6 @@ body {
   background-color: var(--docs-raised);
   box-shadow: var(--docs-raised-shadow);
   color: var(--docs-fg);
-}
-
-/* Token setup (components/token-setup.tsx): the sidebar foot's button, made like the switchers
- * under it (a sunken track, the current value raised in it), and the panel it opens. */
-.token-button {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  inline-size: 100%;
-  box-sizing: border-box;
-  block-size: 30px;
-  padding: 3px 8px 3px 10px;
-  border: 0;
-  border-radius: var(--docs-radius);
-  background-color: var(--docs-well);
-  box-shadow: var(--docs-well-shadow);
-  color: var(--docs-muted);
-  font-size: 12.5px;
-  white-space: nowrap;
-}
-
-.token-button:hover,
-.token-button:has(+ :popover-open) {
-  color: var(--docs-fg);
-}
-
-.token-button > svg:last-child {
-  transition: rotate 0.2s var(--ease);
-}
-
-.token-button:has(+ :popover-open) > svg:last-child {
-  rotate: 180deg;
-}
-
-.token-button-text {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  min-inline-size: 0;
-}
-
-/* A long prefix ends in an ellipsis; the whole name is in the panel. */
-.token-button code {
-  display: inline-block;
-  box-sizing: border-box;
-  max-inline-size: 24ch;
-  block-size: 24px;
-  padding-inline: 8px;
-  overflow: hidden;
-  border-radius: var(--docs-radius-inner);
-  background-color: var(--docs-raised);
-  box-shadow: var(--docs-raised-shadow);
-  color: var(--docs-fg);
-  font-size: 12px;
-  line-height: 24px;
-  text-overflow: ellipsis;
 }
 
 .language-switcher .seg-item {
@@ -354,7 +307,7 @@ body {
 @layer docs-base {
   h1 {
     margin-block: 8px 0;
-    font-size: clamp(34px, 5vw, 50px);
+    font-size: var(--docs-text-display);
     font-weight: 600;
     line-height: 1.04;
     letter-spacing: -0.04em;
@@ -363,7 +316,7 @@ body {
 
   h2 {
     margin-block: 0 12px;
-    font-size: clamp(22px, 3vw, 28px);
+    font-size: var(--docs-text-title);
     font-weight: 600;
     line-height: 1.15;
     letter-spacing: -0.03em;
@@ -395,7 +348,7 @@ body {
   max-inline-size: 46ch;
   margin-block: 16px;
   color: var(--docs-body);
-  font-size: 16.5px;
+  font-size: var(--docs-text-lead);
   line-height: 1.6;
 }
 
@@ -626,6 +579,8 @@ body {
   .theme-switcher::before,
   .pm-picker label:has(:checked),
   .lab-tool[aria-pressed="true"],
+  .lab-tool[aria-expanded="true"],
+  .lab-scene-nav a[aria-current="true"],
   .lab-tabs [aria-selected="true"],
   .lab-ichip[aria-pressed="true"],
   .lab-part[aria-pressed="true"] {
@@ -940,18 +895,47 @@ body {
   inline-size: 100%;
 }
 
-:root[data-sidebar="open"] .site-sidebar {
-  display: flex;
-  position: fixed;
-  inset: 0 auto 0 0;
-  z-index: 40;
-  inline-size: min(300px, 86vw);
-  border-inline-end: 2px solid var(--docs-groove-dark);
-  border-image: var(--docs-etch-end);
+/* Below 1100 px the sidebar slides in from the left over a scrim; a tap on the scrim shuts it. */
+@media (width < 1100px) {
+  .site-sidebar {
+    display: flex;
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 40;
+    inline-size: min(300px, 86vw);
+    border-inline-end: 2px solid var(--docs-groove-dark);
+    border-image: var(--docs-etch-end);
+    visibility: hidden;
+    transform: translateX(-100%);
+    transition:
+      transform 0.35s var(--ease),
+      visibility 0s 0.35s;
+  }
+
+  :root[data-sidebar="open"] .site-sidebar {
+    visibility: visible;
+    transform: none;
+    transition: transform 0.35s var(--ease);
+  }
+
+  .site::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 35;
+    background-color: light-dark(rgb(20 16 32 / 0.25), rgb(0 0 0 / 0.5));
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s var(--ease);
+  }
+
+  :root[data-sidebar="open"] .site::before {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 
-/* Below 1100 px: the dock at the bottom opens the sidebar. The page and the open sidebar's foot
- * leave room for it. */
+/* Below 1100 px: the dock at the bottom opens the sidebar. The page leaves room for it. */
 .dock {
   position: fixed;
   inset-block-end: 16px;
@@ -990,8 +974,19 @@ body {
     padding-block-end: 72px;
   }
 
-  .site-sidebar-foot {
-    padding-block-end: 76px;
+  /* Open, the panel has its own close button; the dock steps aside under the scrim. */
+  .dock {
+    transition:
+      opacity 0.2s ease,
+      visibility 0s;
+  }
+
+  :root[data-sidebar="open"] .dock {
+    visibility: hidden;
+    opacity: 0;
+    transition:
+      opacity 0.2s ease,
+      visibility 0s 0.2s;
   }
 }
 
@@ -1054,10 +1049,56 @@ body {
   color: var(--docs-fg);
 }
 
+/* The sidebar's head: the brand, and (as a panel below 1100 px) the close button at its end. */
+.site-sidebar-head {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  block-size: 56px;
+  box-sizing: border-box;
+  padding-inline: 16px 10px;
+  border-block-end: 2px solid var(--docs-groove-dark);
+  border-image: var(--docs-etch-bottom);
+}
+
 .sidebar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
   color: var(--docs-fg);
+  font-size: 15px;
   font-weight: 600;
+  letter-spacing: -0.01em;
   text-decoration: none;
+}
+
+.logo {
+  flex: none;
+}
+
+.sidebar-close {
+  display: grid;
+  place-items: center;
+  inline-size: 36px;
+  block-size: 36px;
+  margin-inline-start: auto;
+  padding: 0;
+  border: 0;
+  border-radius: var(--docs-radius);
+  background: none;
+  color: var(--docs-muted);
+}
+
+.sidebar-close:hover {
+  background-color: var(--docs-hover);
+  color: var(--docs-fg);
+}
+
+@media (width >= 1100px) {
+  .sidebar-close {
+    display: none;
+  }
 }
 
 .sidebar-version {
@@ -1190,15 +1231,9 @@ figure[data-code-block] pre {
 
 /*
  * Lab (DS-2, DS-9, DS-10). From 960 px (SIDE_BY_SIDE in components/lab/layout.ts) the narrative
- * and the stage sit side by side, the stage filling the rest of the window to its right edge.
- * Below, the stage is a pane fixed under the top bar, foldable to its bar. Edges are etched
- * lines, the Base depth material, rather than rounded cards. Inside the stage, container queries
- * follow its own width.
+ * sits beside the stage; below, the stage fills the screen and the narrative is a sheet over it
+ * (--sheet-h). Container queries inside the stage follow its own width.
  */
-
-.lab-main {
-  --pane-h: var(--pane-open);
-}
 
 .lab {
   display: grid;
@@ -1220,59 +1255,83 @@ figure[data-code-block] pre {
   background-color: var(--docs-bg);
 }
 
-/*
- * Narrow: the frame is fixed under the top bar, for the same reason as the bar. The column stays
- * in the flow as its placeholder: a sibling of the narrative, so scroll anchoring keeps the text
- * still when the pane folds (padding on an ancestor would switch anchoring off).
- */
-.lab-stage-column {
-  block-size: calc(var(--pane-h) + 2px);
-}
-
-.lab-stage-frame {
-  position: fixed;
-  inset-block-start: var(--top-h);
-  inset-inline: 0;
-  z-index: 20;
-  border-block-end: 2px solid var(--docs-groove-dark);
-  border-image: var(--docs-etch-bottom);
-}
-
-.lab-stage-frame > .lab-stage {
-  block-size: var(--pane-h);
-  transition: block-size 0.3s var(--ease);
-}
-
 @media (width < 960px) {
-  /* Jumps land just under the pane (FR-12b). */
-  :root:has(.lab-main) {
-    scroll-padding-top: calc(var(--top-h) + var(--pane-open) + 24px);
+  /* SHEET_HALF and SHEET_FULL_GAP in components/lab/layout.ts. */
+  .lab {
+    --sheet-h: 0px;
   }
 
-  :root[data-lab-pane="hidden"]:has(.lab-main) {
-    scroll-padding-top: calc(var(--top-h) + 48px + 24px);
+  .lab[data-sheet="half"] {
+    --sheet-h: 58dvh;
   }
 
-  :root[data-lab-pane="hidden"] .lab-main {
-    --pane-h: 48px;
+  .lab[data-sheet="full"] {
+    --sheet-h: calc(100dvh - 64px);
   }
 
-  :root[data-lab-pane="hidden"] .lab-stage-body {
+  .lab[data-dragging] {
+    --sheet-h: var(--sheet-drag);
+  }
+
+  /* The stage takes the screen above the sheet, the two meeting as the sheet moves. */
+  .lab-stage-frame {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 20;
+    block-size: calc(100dvh - var(--sheet-h));
+    transition: block-size 0.4s var(--ease);
+  }
+
+  .lab-stage-frame > .lab-stage {
+    block-size: 100%;
+  }
+
+  /* Rising from shut, the sheet waits for the caption to fade (.lab-caption). */
+  .lab[data-sheet-move="open"] :is(.lab-stage-frame, .lab-narrative) {
+    transition-delay: 0.15s;
+  }
+
+  .lab[data-dragging] :is(.lab-stage-frame, .lab-narrative) {
+    transition: none;
+  }
+
+  /* Over the stage, under the site's menu (the dock and the sidebar it opens). */
+  .lab-narrative {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    block-size: var(--sheet-h);
+    padding: 0;
+    border-radius: 18px 18px 0 0;
+    background-color: var(--docs-bg);
+    box-shadow:
+      inset 0 1px 0 var(--docs-line-strong),
+      0 -24px 60px -24px rgb(0 0 0 / 0.4);
+    transition: block-size 0.4s var(--ease);
+  }
+
+  .lab[data-sheet="closed"] .lab-narrative {
     visibility: hidden;
+    transition:
+      block-size 0.4s var(--ease),
+      visibility 0s 0.4s;
   }
 
-  /* Folded, the bar is the stage's title and the way back: no tools, and one line under it
-   * (the frame's), not two. */
-  :root[data-lab-pane="hidden"] .lab-tool {
-    display: none;
+  /* The narrative's end picks the last scene (LabShell), so no extra room is needed below it. */
+  .lab-narrative-scroll {
+    flex: 1;
+    min-block-size: 0;
+    padding: 0 20px 24px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-padding-block-start: 12px;
   }
 
-  :root[data-lab-pane="hidden"] .lab-stage-bar {
-    border-block-end: 0;
-  }
-
-  :root[data-lab-pane="hidden"] .lab-pane-toggle {
-    color: var(--docs-fg);
+  .lab-narrative-scroll:focus-visible {
+    outline: 2px solid var(--docs-accent);
+    outline-offset: -2px;
   }
 }
 
@@ -1297,17 +1356,179 @@ figure[data-code-block] pre {
     border-image: var(--docs-etch-start);
   }
 
-  .lab-stage-frame {
-    position: static;
-    block-size: 100%;
-    border: 0;
-  }
-
+  .lab-stage-frame,
   .lab-stage-frame > .lab-stage {
     block-size: 100%;
   }
+}
 
-  .lab-tools .lab-pane-toggle {
+/* The sheet's handle: tap to switch half and full height, drag to set it. */
+.lab-sheet-handle {
+  display: grid;
+  flex: none;
+  place-items: center;
+  block-size: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 18px 18px 0 0;
+  background: none;
+  cursor: grab;
+  touch-action: none;
+}
+
+.lab-sheet-handle::before {
+  content: "";
+  inline-size: 40px;
+  block-size: 5px;
+  border-radius: 5px;
+  background-color: var(--docs-control);
+}
+
+.lab-sheet-handle:focus-visible {
+  outline: 2px solid var(--docs-accent);
+  outline-offset: -2px;
+}
+
+.lab-sheet-head {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  block-size: 44px;
+  padding-inline: 20px 8px;
+}
+
+.lab-sheet-title {
+  margin: 0;
+  color: var(--docs-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.lab-sheet-close {
+  display: grid;
+  place-items: center;
+  inline-size: 36px;
+  block-size: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--docs-radius);
+  background: none;
+  color: var(--docs-muted);
+}
+
+.lab-sheet-close:hover {
+  background-color: var(--docs-hover);
+  color: var(--docs-fg);
+}
+
+/* The scenes, between the sheet's head and its text; the one being read is underlined. */
+.lab-scene-nav {
+  --fade-size: 28px;
+  flex: none;
+  border-block-end: 2px solid var(--docs-groove-dark);
+  border-image: var(--docs-etch-bottom);
+}
+
+/* Positioned, so a link's offsetLeft counts from the row's start (LabShell). */
+.lab-scene-nav .scroll-fade {
+  position: relative;
+  display: flex;
+  gap: 20px;
+  padding-inline: 20px;
+  overflow-y: hidden;
+}
+
+.lab-scene-nav a {
+  display: inline-flex;
+  flex: none;
+  align-items: baseline;
+  gap: 6px;
+  padding-block: 11px;
+  color: var(--docs-muted);
+  font-size: 13px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.lab-scene-nav a:focus-visible {
+  outline-offset: -2px;
+}
+
+.lab-scene-nav a span {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10.5px;
+}
+
+.lab-scene-nav a:hover {
+  color: var(--docs-fg);
+}
+
+.lab-scene-nav a[aria-current="true"] {
+  box-shadow: inset 0 -2px 0 var(--docs-accent);
+  color: var(--docs-fg);
+}
+
+.lab-scene-nav a[aria-current="true"] span {
+  color: var(--docs-accent);
+}
+
+/*
+ * The narrow stage's caption, under the demo. A rising panel waits for it to fade, then takes its
+ * room; closing, the room comes back first, then the caption. minmax(0, 0fr) folds the room.
+ */
+.lab-caption {
+  display: grid;
+  flex: none;
+  grid-template-rows: minmax(0, 1fr);
+  overflow: hidden;
+  transition:
+    grid-template-rows 0.4s var(--ease),
+    opacity 0.25s ease 0.4s;
+}
+
+.lab-caption-inner {
+  padding: 0 20px 24px;
+}
+
+.lab-caption .page-header {
+  margin: 0;
+}
+
+.lab-caption h1 {
+  margin-block-start: 8px;
+}
+
+.lab-caption .lead {
+  display: -webkit-box;
+  max-inline-size: 48ch;
+  margin-block: 10px 0;
+  overflow: hidden;
+  line-height: 1.55;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.lab-caption .badges {
+  margin-block-start: 12px;
+}
+
+.lab:not([data-sheet="closed"]) .lab-caption,
+.lab-stage:has(> .lab-stage-body:is([data-code=""], [data-controls=""]), .lab-inspect-dock)
+  .lab-caption {
+  grid-template-rows: minmax(0, 0fr);
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity 0.15s ease,
+    grid-template-rows 0.4s var(--ease) 0.15s,
+    visibility 0s 0.15s;
+}
+
+/* A phone held sideways keeps its few rows for the demo. */
+@media (width < 960px) and (height < 560px) {
+  .lab-caption {
     display: none;
   }
 }
@@ -1374,18 +1595,18 @@ figure[data-code-block] pre {
   flex-basis: 100%;
 }
 
+/* The shortcuts need a keyboard. */
+@media (hover: none) {
+  .lab-hint {
+    display: none;
+  }
+}
+
 .lab-hint-key {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   white-space: nowrap;
-}
-
-/* The pane, and so H, only exists while the stage sits above the narrative. */
-@media (width >= 960px) {
-  .lab-hint-key[data-narrow] {
-    display: none;
-  }
 }
 
 /* Focused by a click (tabIndex -1), the stage itself shows no ring. */
@@ -1441,20 +1662,20 @@ figure[data-code-block] pre {
   display: flex;
   flex: none;
   align-items: center;
-  gap: 2px;
+  /* Several tools can be pressed at once; the gap keeps neighbors apart. */
+  gap: 4px;
   min-inline-size: 0;
   margin: 0;
   padding: 0;
   border: 0;
 }
 
-.lab-tool,
-.lab-pane-toggle {
+.lab-tool {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   block-size: 32px;
-  padding-inline: 9px;
+  padding-inline: 8px;
   border: 0;
   border-radius: var(--docs-radius);
   background: none;
@@ -1462,13 +1683,28 @@ figure[data-code-block] pre {
   font-size: 12.5px;
 }
 
-.lab-tool:hover,
-.lab-pane-toggle:hover {
+/* Wide: the tools sit in a sunken track like the site's switchers (narrow: the toolbar is one). */
+@media (width >= 960px) {
+  .lab-tools {
+    padding: 3px;
+    border-radius: var(--docs-radius);
+    background-color: var(--docs-well);
+    box-shadow: var(--docs-well-shadow);
+  }
+
+  .lab-tool {
+    block-size: 24px;
+    border-radius: var(--docs-radius-inner);
+  }
+}
+
+.lab-tool:hover {
   background-color: var(--docs-hover);
   color: var(--docs-fg);
 }
 
-.lab-tool[aria-pressed="true"] {
+.lab-tool[aria-pressed="true"],
+.lab-tool[aria-expanded="true"] {
   background-color: var(--docs-raised);
   box-shadow: var(--docs-raised-shadow);
   color: var(--docs-accent);
@@ -1494,8 +1730,226 @@ figure[data-code-block] pre {
   }
 }
 
-.lab-pane-toggle[aria-expanded="true"] svg {
-  transform: rotate(180deg);
+/* The docs open from the same toolbar, set apart by an etched line, labeled while there is room. */
+.lab-tool-docs {
+  color: var(--docs-accent);
+  font-weight: 600;
+}
+
+.lab-tool-more {
+  display: none;
+}
+
+/* Down to a 320 px screen: below 480 px, theme and tokens move into More; below 370 px (420 px
+ * with Replay), Docs keeps its icon only. */
+@container stage (width < 480px) {
+  .lab-tool[data-more] {
+    display: none;
+  }
+
+  .lab-tool-more {
+    display: inline-flex;
+  }
+}
+
+@container stage (width < 370px) {
+  .lab-tool-docs-label {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+@container stage (width < 420px) {
+  .lab-tools:has([aria-keyshortcuts="R"]) .lab-tool-docs-label {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* The Token label waits for a wide stage, so the stage's own name keeps its room. */
+@container stage (width < 760px) {
+  .lab-tool-token-label {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* The More menu: a popover under the toolbar's end, in the stage's theme. */
+.lab-more {
+  position: fixed;
+  inset: 50px 12px auto auto;
+  box-sizing: border-box;
+  min-inline-size: 220px;
+  margin: 0;
+  padding: 4px;
+  border: 1px solid var(--ow-line-dark);
+  border-radius: 12px;
+  background-color: var(--docs-surface);
+  box-shadow:
+    inset 0 1px 0 var(--ow-line-light),
+    0 24px 60px -20px rgb(0 0 0 / 0.5);
+  color: var(--docs-fg);
+  opacity: 0;
+  translate: 0 -4px;
+  transition:
+    opacity 0.2s ease,
+    translate 0.2s var(--ease),
+    display 0.2s allow-discrete,
+    overlay 0.2s allow-discrete;
+}
+
+.lab-more:popover-open {
+  display: grid;
+  opacity: 1;
+  translate: none;
+}
+
+@starting-style {
+  .lab-more:popover-open {
+    opacity: 0;
+    translate: 0 -4px;
+  }
+}
+
+.lab-more-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  block-size: 38px;
+  padding-inline: 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--docs-body);
+  font-size: 13px;
+  text-align: start;
+}
+
+.lab-more-item:hover {
+  background-color: var(--docs-hover);
+  color: var(--docs-fg);
+}
+
+.lab-more-item kbd {
+  margin-inline-start: auto;
+  color: var(--docs-muted);
+  font-size: 11px;
+}
+
+.lab-more-item > :is(svg, kbd) {
+  flex: none;
+}
+
+@media (width >= 960px) {
+  .lab-more {
+    inset: 52px 8px auto auto;
+  }
+}
+
+.lab-tool-sep {
+  flex: none;
+  inline-size: 2px;
+  block-size: 16px;
+  margin-inline: 3px;
+  background: linear-gradient(to right, var(--docs-groove-dark) 50%, var(--docs-groove-light) 50%);
+}
+
+/* Narrow: the toolbar floats at the top right in a well, the site's menu at the top left. */
+@media (width < 960px) {
+  .lab-stage-bar {
+    position: absolute;
+    inset: 12px 12px auto auto;
+    block-size: auto;
+    max-inline-size: calc(100% - 64px);
+    padding: 3px;
+    border: 0;
+    border-radius: var(--docs-radius);
+    background-color: var(--docs-well);
+    box-shadow: var(--docs-well-shadow);
+  }
+
+  .lab-stage-title {
+    display: none;
+  }
+
+  /* The switchers' size (24 px in a 30 px track), with a taller target for a finger. */
+  .lab-stage-bar .lab-tool,
+  :root:has(.lab-main) .dock-button {
+    position: relative;
+    justify-content: center;
+    min-inline-size: 30px;
+    block-size: 24px;
+    padding-inline: 7px;
+    border-radius: var(--docs-radius-inner);
+  }
+
+  .lab-stage-bar .lab-tool::after,
+  :root:has(.lab-main) .dock-button::after {
+    content: "";
+    position: absolute;
+    inset: -5px -2px;
+  }
+
+  /* Under the full sheet, only the toolbar shows: the way back to the stage. */
+  .lab[data-sheet="full"] .lab-stage-body {
+    visibility: hidden;
+  }
+
+  :root:has(.lab-main) .dock {
+    inset: 12px auto auto 12px;
+    padding: 3px;
+    border-radius: var(--docs-radius);
+    background-color: var(--docs-well);
+    box-shadow: var(--docs-well-shadow);
+    translate: none;
+  }
+
+  :root:has(.lab-main) .dock-button {
+    padding: 0;
+    color: var(--docs-muted);
+  }
+
+  :root:has(.lab-main) .dock-button svg {
+    inline-size: 16px;
+    block-size: 16px;
+  }
+
+  :root:has(.lab-main) .dock-button:hover {
+    color: var(--docs-fg);
+  }
+
+  :root:has(.lab-main) .dock-label {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* The sheet, its way in, and the caption exist only on narrow screens. */
+@media (width >= 960px) {
+  .lab-sheet-handle,
+  .lab-sheet-head,
+  .lab-scene-nav,
+  .lab-tool-sep,
+  .lab-tool-docs,
+  .lab-caption {
+    display: none;
+  }
 }
 
 /*
@@ -1513,8 +1967,22 @@ figure[data-code-block] pre {
   place-items: center;
   min-block-size: 0;
   padding: 16px;
+  /* Shut panels wait below its edge, over the caption on a narrow stage. */
+  overflow: clip;
   background: radial-gradient(ellipse 75% 70% at 50% 50%, var(--docs-stage), var(--docs-bg));
   color: var(--docs-fg);
+}
+
+/* Narrow: the whole stage is the canvas, caption included; the top leaves room for the toolbar. */
+@media (width < 960px) {
+  .lab-stage {
+    background: radial-gradient(ellipse 75% 70% at 50% 45%, var(--docs-stage), var(--docs-bg));
+  }
+
+  .lab-stage-body {
+    padding-block-start: 54px;
+    background: none;
+  }
 }
 
 .lab-stage-body::before {
@@ -1800,6 +2268,67 @@ figure[data-code-block] pre {
   grid-area: 1 / 1;
 }
 
+/* Docked Inspect (stage under INSPECT_COMPACT, components/lab/layout.ts): names, then card. */
+.lab-inspect-dock {
+  position: absolute;
+  inset: auto 0 0;
+  display: grid;
+  padding-block-end: 14px;
+  border-radius: 18px 18px 0 0;
+  background-color: var(--docs-surface);
+  box-shadow:
+    inset 0 1px 0 var(--docs-line-strong),
+    0 -24px 60px -24px rgb(0 0 0 / 0.4);
+  pointer-events: auto;
+  transition: translate 0.35s var(--ease) 0.15s;
+}
+
+@starting-style {
+  .lab-inspect-dock {
+    translate: 0 100%;
+  }
+}
+
+.lab-stage-body:is([data-code], [data-controls]) .lab-inspect-dock {
+  display: none;
+}
+
+/* Above the open docs sheet, the names alone, straight on the stage: one sheet is enough. */
+.lab-inspect-dock[data-brief] {
+  padding-block-end: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.lab-inspect-dock .lab-ichips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 14px 16px 10px;
+}
+
+.lab-inspect-dock .lab-ichip {
+  position: static;
+}
+
+.lab-inspect-cards {
+  display: grid;
+}
+
+.lab-part-card[data-place="dock"] {
+  position: static;
+  grid-area: 1 / 1;
+  inline-size: auto;
+  padding: 2px 16px 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.lab-part-card[data-off] {
+  visibility: hidden;
+}
+
 /* A scene script's pointer; the arrow's tip is the point it stands on. */
 .lab-ghost {
   position: absolute;
@@ -1861,9 +2390,17 @@ figure[data-code-block] pre {
     inset-inline-end 0.35s var(--ease);
 }
 
-.lab-stage-body[data-controls] .lab-controls,
-.lab-stage-body[data-code] .lab-drawer {
+.lab-stage-body[data-controls=""] .lab-controls,
+.lab-stage-body[data-code=""] .lab-drawer {
   transform: none;
+}
+
+/* Narrow, scenes leave the panels shut (LabShell); until the page knows its width, CSS does. */
+@media (width >= 960px) {
+  .lab-stage-body[data-controls="scene"] .lab-controls,
+  .lab-stage-body[data-code="scene"] .lab-drawer {
+    transform: none;
+  }
 }
 
 /* SIDE_PANEL_MIN and SIDE_PANEL_WIDTH in components/lab/layout.ts: on a wide stage the controls
@@ -1882,6 +2419,43 @@ figure[data-code-block] pre {
   /* Set by the controls alone, so the drawer keeps its width while it slides away. */
   .lab-stage-body[data-controls] .lab-drawer {
     inset-inline-end: 280px;
+  }
+}
+
+/* Narrow: code and controls wait for the caption to fade, and on a phone-width stage rise as
+ * sheets; wider, they keep their etched edges. */
+@media (width < 960px) {
+  .lab-stage-body[data-code=""] .lab-drawer,
+  .lab-stage-body[data-controls=""] .lab-controls {
+    transition-delay: 0.15s;
+  }
+
+  @container stage (width < 720px) {
+    .lab-drawer,
+    .lab-controls {
+      border: 0;
+      border-image: none;
+      border-radius: 18px 18px 0 0;
+    }
+
+    .lab-stage-body[data-code=""] .lab-drawer {
+      box-shadow:
+        inset 0 1px 0 var(--docs-line-strong),
+        0 -24px 60px -24px rgb(0 0 0 / 0.4);
+    }
+
+    .lab-stage-body[data-controls=""] .lab-controls {
+      box-shadow:
+        inset 0 1px 0 var(--docs-line-strong),
+        0 -24px 60px -24px rgb(0 0 0 / 0.4);
+    }
+  }
+
+  /* Beside the demo, the controls start under the floating toolbar. */
+  @container stage (width >= 720px) {
+    .lab-controls {
+      padding-block-start: 50px;
+    }
   }
 }
 
@@ -2159,8 +2733,7 @@ figure[data-code-block] pre {
   padding-inline-end: 14px;
 }
 
-/* Token setup panel (components/token-setup.tsx), above the sidebar foot wherever it was opened
- * from; above the dock below 1100 px. */
+/* Token setup panel (components/token-setup.tsx): bottom left, or under a Lab's toolbar (below). */
 .token-setup {
   position: fixed;
   inset: auto auto 112px 12px;
@@ -2201,11 +2774,15 @@ figure[data-code-block] pre {
   }
 }
 
-/* The header's end padding is 12px here. */
-@media (width <= 640px) {
-  .token-setup {
-    inset-inline-end: 12px;
-    inline-size: min(380px, calc(100vw - 24px));
+/* Opened from a Lab stage's toolbar: under it, at its end. */
+.token-setup[data-place="stage"] {
+  inset: 50px 12px auto auto;
+  max-block-size: calc(100dvh - 62px);
+}
+
+@media (width >= 960px) {
+  .token-setup[data-place="stage"] {
+    inset: 52px 8px auto auto;
   }
 }
 
@@ -2441,14 +3018,14 @@ figure[data-code-block] pre {
 
 .changelog h3 {
   margin-block: 32px 4px;
-  font-size: 18px;
+  font-size: var(--docs-text-subtitle);
   font-weight: 600;
   line-height: 1.3;
 }
 
 .changelog h4 {
   margin-block: 24px 4px;
-  font-size: 15.5px;
+  font-size: var(--docs-text-body);
   font-weight: 600;
 }
 

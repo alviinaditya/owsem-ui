@@ -50,6 +50,12 @@ interface InspectProps {
   card: "side" | "below" | "none";
   /** Reports the tallest part card, which the stage keeps room for. */
   onCardHeight: (height: number) => void;
+  /** A narrow stage: the names and the card docked under the demo. */
+  compact: boolean;
+  /** Docked, the names alone (the docs sheet is open and explains the parts). */
+  brief: boolean;
+  /** Reports the dock's height, which the stage keeps room for. */
+  onDockHeight: (height: number) => void;
 }
 
 /** One part's name, note, and tokens with their values in use. */
@@ -88,6 +94,7 @@ function PartCard({ part, lang, values }: { part: Part; lang: Lang; values: read
  * Inspect (DS-3): an outline on each part of the live demo, the part names in a column beside it,
  * and leader lines between them; the selected part's card lists its public tokens with their live
  * values. Positions follow the demo every frame while Inspect is on, written straight to the DOM.
+ * On a narrow stage the names and the card dock under the demo instead, without leader lines.
  */
 export function Inspect({
   parts,
@@ -99,8 +106,12 @@ export function Inspect({
   demoRef,
   card,
   onCardHeight,
+  compact,
+  brief,
+  onDockHeight,
 }: InspectProps) {
   const sizer = useRef<HTMLDivElement>(null);
+  const dock = useRef<HTMLDivElement>(null);
   const boxes = useRef<(HTMLSpanElement | null)[]>([]);
   const chips = useRef<(HTMLButtonElement | null)[]>([]);
   const leaders = useRef<(SVGGElement | null)[]>([]);
@@ -126,7 +137,7 @@ export function Inspect({
           : null;
       });
       const edge = demo.getBoundingClientRect().right - stage.left;
-      const key = JSON.stringify([stage.width, stage.height, edge, rects]);
+      const key = JSON.stringify([compact, stage.width, stage.height, edge, rects]);
       if (key === last) return;
       last = key;
 
@@ -165,6 +176,8 @@ export function Inspect({
           box.style.width = `${r.w.toFixed(1)}px`;
           box.style.height = `${r.h.toFixed(1)}px`;
         }
+        // Docked, the names sit in their row and need no lines.
+        if (compact) return;
         const chip = chips.current[i];
         if (chip)
           chip.style.transform = `translate(${column.toFixed(1)}px, ${(y - CHIP_H / 2).toFixed(1)}px)`;
@@ -201,7 +214,18 @@ export function Inspect({
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [parts, part, bodyRef, demoRef]);
+  }, [parts, part, compact, bodyRef, demoRef]);
+
+  useEffect(() => {
+    const el = dock.current;
+    if (!compact || !el) return;
+    const observer = new ResizeObserver(() => onDockHeight(el.offsetHeight));
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      onDockHeight(0);
+    };
+  }, [compact, onDockHeight]);
 
   useEffect(() => {
     const el = sizer.current;
@@ -214,23 +238,45 @@ export function Inspect({
     };
   }, [onCardHeight]);
 
+  const names = parts.map((p, i) => (
+    <button
+      key={p.name}
+      ref={(el) => {
+        chips.current[i] = el;
+      }}
+      type="button"
+      className="lab-ichip"
+      aria-pressed={p === part}
+      onClick={() => onSelect(p.name)}
+      // Beside the demo a mouse picks by pointing. Docked, the names sit close together over the
+      // card, so only a click picks.
+      onPointerEnter={(event) => {
+        if (!compact && event.pointerType === "mouse") onSelect(p.name);
+      }}
+    >
+      {p.name}
+    </button>
+  ));
+
   return (
     <div className="lab-inspect">
       <span ref={probe} hidden />
-      <svg className="lab-inspect-lines" aria-hidden="true">
-        {parts.map((p, i) => (
-          <g
-            key={p.name}
-            ref={(el) => {
-              leaders.current[i] = el;
-            }}
-            data-on={p === part ? "" : undefined}
-          >
-            <path />
-            <circle r="2.5" />
-          </g>
-        ))}
-      </svg>
+      {compact ? null : (
+        <svg className="lab-inspect-lines" aria-hidden="true">
+          {parts.map((p, i) => (
+            <g
+              key={p.name}
+              ref={(el) => {
+                leaders.current[i] = el;
+              }}
+              data-on={p === part ? "" : undefined}
+            >
+              <path />
+              <circle r="2.5" />
+            </g>
+          ))}
+        </svg>
+      )}
       {parts.map((p, i) => (
         <span
           key={p.name}
@@ -242,29 +288,43 @@ export function Inspect({
           aria-hidden="true"
         />
       ))}
-      <fieldset className="lab-ichips">
-        <legend className="visually-hidden">{labels.parts}</legend>
-        {parts.map((p, i) => (
-          <button
-            key={p.name}
-            ref={(el) => {
-              chips.current[i] = el;
-            }}
-            type="button"
-            className="lab-ichip"
-            aria-pressed={p === part}
-            onClick={() => onSelect(p.name)}
-            onPointerEnter={() => onSelect(p.name)}
-          >
-            {p.name}
-          </button>
-        ))}
-      </fieldset>
-      {card !== "none" && part ? (
-        <section className="lab-part-card" data-place={card} aria-label={part.name}>
-          <PartCard part={part} lang={lang} values={values} />
-        </section>
-      ) : null}
+      {compact ? (
+        <div ref={dock} className="lab-inspect-dock" data-brief={brief ? "" : undefined}>
+          {/* The names wrap, so none hides off the edge. */}
+          <fieldset className="lab-ichips">
+            <legend className="visually-hidden">{labels.parts}</legend>
+            {names}
+          </fieldset>
+          {/* Every card in one cell, the selected one shown, so the dock keeps one height. */}
+          {brief || !part ? null : (
+            <div className="lab-inspect-cards">
+              {parts.map((p) => (
+                <section
+                  key={p.name}
+                  className="lab-part-card"
+                  data-place="dock"
+                  data-off={p === part ? undefined : ""}
+                  aria-label={p.name}
+                >
+                  <PartCard part={p} lang={lang} values={p === part ? values : []} />
+                </section>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        <>
+          <fieldset className="lab-ichips">
+            <legend className="visually-hidden">{labels.parts}</legend>
+            {names}
+          </fieldset>
+          {card !== "none" && part ? (
+            <section className="lab-part-card" data-place={card} aria-label={part.name}>
+              <PartCard part={part} lang={lang} values={values} />
+            </section>
+          ) : null}
+        </>
+      )}
       {/* Every card as it would sit under the demo, in one grid cell: as tall as the tallest. */}
       <div ref={sizer} className="lab-part-card-sizer" aria-hidden="true" inert>
         {parts.map((p) => (

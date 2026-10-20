@@ -1,12 +1,15 @@
 import { expect, type Page, test } from "@playwright/test";
 import { SIDE_PANEL_WIDTH } from "../components/lab/layout.ts";
+import { openSheet, stage, stageTool } from "./lab.ts";
 
-const stage = (page: Page) => page.getByRole("region", { name: "Stage" });
 const stageBody = (page: Page) => page.locator(".lab-stage-body");
-const scene = (page: Page, id: string) =>
-  page.evaluate((id) => document.getElementById(`scene-${id}`)?.scrollIntoView(), id);
+const lab = (page: Page) => page.locator(".lab");
+const scene = async (page: Page, id: string) => {
+  await openSheet(page);
+  await page.evaluate((id) => document.getElementById(`scene-${id}`)?.scrollIntoView(), id);
+};
 
-test("scenes shape the stage as you scroll (DS-2)", async ({ page }) => {
+test("scenes shape the stage as you scroll (DS-2)", async ({ page }, testInfo) => {
   const errors: string[] = [];
   page.on("console", (message) => {
     if (message.type() === "error") errors.push(message.text());
@@ -26,12 +29,19 @@ test("scenes shape the stage as you scroll (DS-2)", async ({ page }) => {
   );
 
   await scene(page, "ship");
-  await expect(stageBody(page)).toHaveAttribute("data-code", "");
-  await expect(stage(page).getByRole("tab", { name: "usage.tsx" })).toBeVisible();
+  if (testInfo.project.name === "mobile-390") {
+    // The sheet covers the stage's panels there, so scenes leave them shut.
+    await expect(stage(page)).toContainText("Ship it");
+    await expect(stageBody(page)).not.toHaveAttribute("data-code");
+  } else {
+    await expect(stageBody(page)).toHaveAttribute("data-code", "scene");
+    await expect(stage(page).getByRole("tab", { name: "usage.tsx" })).toBeVisible();
+  }
 
   // Leaving the scene gives the stage back.
   await scene(page, "anatomy");
   await expect(stageBody(page)).not.toHaveAttribute("data-code");
+  await expect(stage(page).getByRole("separator")).toHaveCount(1);
   await expect(stage(page).getByRole("separator")).toHaveAttribute(
     "aria-orientation",
     "horizontal",
@@ -185,7 +195,7 @@ test("stage shortcuts work only with focus on the stage (WCAG 2.1.4)", async ({ 
   await expect(stageBody(page)).not.toHaveAttribute("data-code");
 });
 
-test("the header names each stage shortcut this Lab has", async ({ page }, testInfo) => {
+test("the header names each stage shortcut this Lab has", async ({ page }) => {
   const hint = page.locator(".lab-hint");
   await page.goto("/en/separator");
   await expect(hint).toContainText("I Inspect");
@@ -193,17 +203,21 @@ test("the header names each stage shortcut this Lab has", async ({ page }, testI
   await expect(hint).not.toContainText("Replay");
   await page.goto("/en/tree-rail-nav");
   await expect(hint).toContainText("R Replay");
-  // H folds the pane, which only exists below 960 px.
-  const pane = hint.getByText("Preview");
-  if (testInfo.project.name === "mobile-390") await expect(pane).toBeVisible();
-  else await expect(pane).toBeHidden();
 });
 
 test("the stage theme changes the whole stage, and the stage only (DS-12)", async ({ page }) => {
   await page.emulateMedia({ colorScheme: "dark" });
   await page.goto("/en/separator");
-  // The stage background is a gradient between its own color and the page's.
-  const background = () => stageBody(page).evaluate((el) => getComputedStyle(el).backgroundImage);
+  // The stage background is a gradient between its own color and the page's, on the body beside
+  // the narrative and on the whole stage below 960 px.
+  const background = () =>
+    page
+      .locator(".lab-stage")
+      .evaluate(
+        (el) =>
+          getComputedStyle(el).backgroundImage +
+          getComputedStyle(el.querySelector(".lab-stage-body") ?? el).backgroundImage,
+      );
   const bar = () =>
     page.locator(".lab-stage-bar").evaluate((el) => getComputedStyle(el).backgroundColor);
   // Without a choice the stage follows the site, server render included.
@@ -211,7 +225,7 @@ test("the stage theme changes the whole stage, and the stage only (DS-12)", asyn
   const dark = await background();
   const darkBar = await bar();
 
-  await stage(page).getByRole("button", { name: "Stage theme" }).click();
+  await stageTool(page, "Stage theme");
   await expect(stage(page)).toHaveAttribute("data-theme", "light");
   expect(await background()).not.toBe(dark);
   // The toolbar goes light with the stage.
@@ -245,50 +259,234 @@ test("the code drawer ends at the side panel's line, closing included", async ({
   expect(await edge(".lab-drawer", "right")).toBe(line);
 });
 
-test("the preview pane folds and remembers it (DS-10)", async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== "mobile-390", "the pane only exists below 960 px");
+test("the docs sheet opens from the stage, half or full, and shuts (DS-10)", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile-390", "the sheet only exists below 960 px");
   await page.goto("/id/separator");
-  // The toggle says what it does, not just an arrow.
-  const toggle = stage(page).getByRole("button", { name: "Tutup pratinjau" });
-  await expect(toggle).toHaveText("Tutup");
-  await toggle.click();
-  await expect(page.locator("html")).toHaveAttribute("data-lab-pane", "hidden");
-  await expect(stage(page).getByRole("separator")).toBeHidden();
-  // Folded: the bar keeps its title and the way back, with one line under it.
-  const show = stage(page).getByRole("button", { name: "Tampilkan pratinjau" });
-  await expect(show).toHaveText("Tampilkan pratinjau");
-  await expect(stage(page).getByRole("button", { name: "Kontrol" })).toBeHidden();
-  await expect(page.locator(".lab-stage-bar")).toHaveCSS("border-bottom-width", "0px");
+  // Shut: the stage fills the screen, the caption under the demo names the component.
+  const caption = page.locator(".lab-caption");
+  await expect(caption.getByRole("heading", { level: 1 })).toHaveText("Separator");
+  await expect(page.locator(".lab-narrative")).toBeHidden();
 
-  await page.reload();
-  await expect(page.locator("html")).toHaveAttribute("data-lab-pane", "hidden");
-  await stage(page).getByRole("button", { name: "Tampilkan pratinjau" }).click();
+  const docs = stage(page).getByRole("button", { name: "Dokumentasi" });
+  await expect(docs).toHaveAttribute("aria-expanded", "false");
+  await docs.click();
+  await expect(lab(page)).toHaveAttribute("data-sheet", "half");
+  await expect(docs).toHaveAttribute("aria-expanded", "true");
+  await expect(page.getByText("Dokumentasi Separator")).toBeFocused();
+  await expect(caption).toBeHidden();
   await expect(stage(page).getByRole("separator")).toBeVisible();
+
+  // The handle switches half and full; under the full sheet only the toolbar shows.
+  const handle = page.getByRole("button", { name: "Seret atau ketuk untuk mengubah tinggi" });
+  await handle.click();
+  await expect(lab(page)).toHaveAttribute("data-sheet", "full");
+  await expect(stage(page).getByRole("separator")).toBeHidden();
+  await handle.click();
+  await expect(lab(page)).toHaveAttribute("data-sheet", "half");
+
+  // Escape shuts it and hands focus back to the toolbar.
+  await page.keyboard.press("Escape");
+  await expect(lab(page)).toHaveAttribute("data-sheet", "closed");
+  await expect(docs).toBeFocused();
+  await expect(caption).toBeVisible();
 });
 
-test("H folds the pane without moving the text or the scene", async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== "mobile-390", "the pane only exists below 960 px");
+test("wide screens keep the narrative beside the stage, with no sheet", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "desktop", "the sheet replaces the column below 960 px");
   await page.goto("/en/separator");
-  await scene(page, "keyboard");
-  await expect(stage(page)).toContainText("Keyboard and accessibility");
-  const paragraph = page.locator("#scene-keyboard p").first();
-  // Focusing the fixed stage must not scroll the page either.
-  await stage(page).getByRole("button", { name: "Controls" }).focus();
-  const before = await paragraph.evaluate((el) => el.getBoundingClientRect().top);
-  expect(before).toBeGreaterThan(0);
+  await expect(page.locator(".lab-narrative")).toBeVisible();
+  for (const part of [".lab-tool-docs", ".lab-sheet-handle", ".lab-sheet-head", ".lab-scene-nav"]) {
+    await expect(page.locator(part)).toBeHidden();
+  }
+  await expect(page.locator(".lab-caption")).toBeHidden();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Separator");
+});
 
-  await page.keyboard.press("h");
-  await expect(page.locator("html")).toHaveAttribute("data-lab-pane", "hidden");
-  // The hidden tool handed focus to the pane toggle, so H works again.
-  await expect(stage(page).getByRole("button", { name: "Show preview" })).toBeFocused();
-  expect(
-    Math.abs((await paragraph.evaluate((el) => el.getBoundingClientRect().top)) - before),
-  ).toBeLessThan(2);
-  await page.waitForTimeout(400);
-  await expect(stage(page)).toContainText("Keyboard and accessibility");
+test("the docs sheet and the stage's panels take turns under the demo", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile-390", "the sheet only exists below 960 px");
+  await page.goto("/en/separator");
+  const docs = stage(page).getByRole("button", { name: "Docs", exact: true });
+  await docs.click();
+  await expect(lab(page)).toHaveAttribute("data-sheet", "half");
+  await stage(page).getByRole("button", { name: "Controls" }).click();
+  await expect(lab(page)).toHaveAttribute("data-sheet", "closed");
+  await expect(stageBody(page)).toHaveAttribute("data-controls", "");
+  await docs.click();
+  await expect(lab(page)).toHaveAttribute("data-sheet", "half");
+  await expect(stageBody(page)).not.toHaveAttribute("data-controls");
+});
 
-  await page.keyboard.press("h");
-  await expect(page.locator("html")).not.toHaveAttribute("data-lab-pane");
+test("a narrow Lab has the menu at the top left, the toolbar at the top right", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile-390", "the dock is at the bottom elsewhere");
+  await page.goto("/en/separator");
+  await expect(page.getByRole("button", { name: "Menu", exact: true })).toBeVisible();
+  // The menu button's well and the toolbar's share a row.
+  const menu = await page.locator(".dock").boundingBox();
+  const bar = await page.locator(".lab-stage-bar").boundingBox();
+  if (!menu || !bar) throw new Error("The menu and the toolbar need boxes.");
+  expect(menu.x).toBeLessThan(20);
+  expect(menu.y).toBeLessThan(20);
+  expect(Math.abs(bar.y - menu.y)).toBeLessThan(2);
+  expect(390 - (bar.x + bar.width)).toBeLessThan(20);
+  expect(bar.x).toBeGreaterThan(menu.x + menu.width);
+});
+
+test("the sidebar's head has the brand and its close button; the scrim shuts it too", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile-390", "the sidebar is a panel below 1100 px");
+  await page.goto("/en/separator");
+  const menu = page.getByRole("button", { name: "Menu", exact: true });
+  const sidebar = page.locator("#site-sidebar");
+  await menu.click();
+  await expect(sidebar).toBeVisible();
+  await expect(sidebar.locator(".site-sidebar-head")).toContainText("OwsemUI");
+  // The dock steps aside; the head's button closes the panel and hands focus back to it.
+  await expect(menu).toBeHidden();
+  await sidebar.getByRole("button", { name: "Close menu" }).click();
+  await expect(sidebar).toBeHidden();
+  await expect(menu).toBeFocused();
+
+  await menu.click();
+  await expect(sidebar).toBeVisible();
+  await page.mouse.click(375, 600);
+  await expect(sidebar).toBeHidden();
+  await expect(menu).toHaveAttribute("aria-expanded", "false");
+});
+
+test("the toolbar fits a 320 px screen, stage theme and tokens in its More menu", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile-390", "a phone's widths");
+  await page.setViewportSize({ width: 320, height: 640 });
+  for (const path of ["/id/separator", "/en/tree-rail-nav#scene-trail"]) {
+    await page.goto(path);
+    const bar = await page.locator(".lab-stage-bar").boundingBox();
+    const menu = await page.locator(".dock").boundingBox();
+    if (!bar || !menu) throw new Error("The toolbar and the menu need boxes.");
+    expect(bar.x + bar.width, path).toBeLessThanOrEqual(320);
+    expect(bar.x, path).toBeGreaterThan(menu.x + menu.width);
+  }
+  await page.goto("/en/separator");
+  const more = stage(page).getByRole("button", { name: "More", exact: true });
+  await expect(stage(page).getByRole("button", { name: "Stage theme" })).toBeHidden();
+  await more.click();
+  await page
+    .locator(".lab-more")
+    .getByRole("button", { name: /Stage theme/ })
+    .click();
+  await expect(stage(page)).toHaveAttribute("data-theme");
+
+  // The token setup takes the menu's place, under the toolbar, and gives focus back to More.
+  await page
+    .locator(".lab-more")
+    .getByRole("button", { name: /Token setup/ })
+    .click();
+  const panel = page.getByRole("dialog", { name: "Token setup" });
+  await expect(panel).toBeVisible();
+  await expect(page.locator(".lab-more")).toBeHidden();
+  expect((await panel.boundingBox())?.y).toBeLessThan(100);
+  await page.keyboard.press("Escape");
+  await expect(panel).toBeHidden();
+  await expect(more).toBeFocused();
+});
+
+test("the stage toolbar opens the token setup under it", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "desktop", "a wide stage has its own Tokens button");
+  await page.goto("/en/separator");
+  const tokens = stage(page).getByRole("button", { name: "Tokens", exact: true });
+  // Just the name: the prefix is in the panel.
+  await expect(tokens).not.toContainText("--");
+  await tokens.click();
+  const panel = page.getByRole("dialog", { name: "Token setup" });
+  await expect(panel).toBeVisible();
+  const box = await panel.boundingBox();
+  const viewport = page.viewportSize();
+  if (!box || !viewport) throw new Error("The panel needs a box.");
+  expect(box.y).toBeLessThan(100);
+  expect(viewport.width - (box.x + box.width)).toBeLessThan(24);
+});
+
+test("on a narrow stage Inspect docks under the demo, which keeps its size (DS-3)", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile-390", "a phone's stage");
+  await page.goto("/en/tree-rail-nav");
+  const nav = stage(page).locator(".ow-tree-rail-nav");
+  const before = (await nav.boundingBox())?.width ?? 0;
+  await stage(page).getByRole("button", { name: "Inspect" }).click();
+  const dock = page.locator(".lab-inspect-dock");
+  await expect(dock).toBeVisible();
+  // The names with the card under them, no leader lines, and the demo barely smaller.
+  await expect(dock.getByRole("group", { name: "Parts" }).getByRole("button")).toHaveCount(9);
+  await expect(dock.getByRole("region", { name: "Root" })).toBeVisible();
+  await expect(page.locator(".lab-inspect-lines")).toHaveCount(0);
+  await expect(page.locator(".lab-caption")).toBeHidden();
+  await expect
+    .poll(async () => (await nav.boundingBox())?.width ?? 0)
+    .toBeGreaterThan(before * 0.8);
+  // Every name in view: they wrap rather than scroll. Pointing at one does not pick it.
+  const names = dock.getByRole("group", { name: "Parts" });
+  for (const name of await names.getByRole("button").all()) await expect(name).toBeInViewport();
+  await names.getByRole("button", { name: "Toggle" }).hover();
+  await expect(names.getByRole("button", { name: "Root" })).toHaveAttribute("aria-pressed", "true");
+  await names.getByRole("button", { name: "Toggle" }).click();
+  await expect(names.getByRole("button", { name: "Toggle" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  // Under the open docs sheet, the names alone.
+  await openSheet(page);
+  await expect(dock).toHaveAttribute("data-brief", "");
+  await expect(dock.getByRole("region", { name: "Root" })).toHaveCount(0);
+});
+
+test("a scene link takes the sheet to its scene; a drag down shuts it", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile-390", "the sheet only exists below 960 px");
+  await page.goto("/en/separator");
+  await openSheet(page);
+  const links = page.getByRole("navigation", { name: "Scenes" });
+  await links.getByRole("link", { name: /States and variants/ }).click();
+  await expect(page.locator("#scene-states")).toHaveAttribute("data-active", "");
+  await expect(links.getByRole("link", { name: /States and variants/ })).toHaveAttribute(
+    "aria-current",
+    "true",
+  );
+  await expect(page).toHaveURL(/#scene-states$/);
+  // A mouse wheel over the row scrolls it sideways.
+  const row = page.locator(".lab-scene-nav .scroll-fade");
+  const before = await row.evaluate((el) => el.scrollLeft);
+  await row.hover();
+  await page.mouse.wheel(0, 200);
+  await expect.poll(() => row.evaluate((el) => el.scrollLeft)).toBeGreaterThan(before);
+  await expect(stage(page).getByRole("separator").first()).toHaveAttribute(
+    "aria-orientation",
+    "vertical",
+  );
+
+  const handle = page.getByRole("button", { name: "Drag or tap to change the height" });
+  const box = await handle.boundingBox();
+  if (!box) throw new Error("The handle has no box.");
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2, 800, { steps: 8 });
+  await page.mouse.up();
+  await expect(lab(page)).toHaveAttribute("data-sheet", "closed");
+  // The scene stays as it was read.
+  await expect(stage(page).getByRole("separator").first()).toHaveAttribute(
+    "aria-orientation",
+    "vertical",
+  );
 });
 
 const current = (page: Page) => stage(page).locator("a[aria-current]");

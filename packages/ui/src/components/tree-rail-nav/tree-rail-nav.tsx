@@ -16,6 +16,7 @@ import {
   useContext,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -23,11 +24,6 @@ import { withClassName } from "../../core/class-name";
 import { GlideHighlight, useGlide } from "../../core/glide/use-glide";
 import { createTreeRail } from "./tree-rail";
 import "./tree-rail-nav.css";
-
-export type TreeRailNavFlavor = "base" | "owsem";
-
-// The registry's tree-rail-nav-owsem item rewrites this line to "owsem" (PRD, Base + Owsem items).
-const DEFAULT_FLAVOR: TreeRailNavFlavor = "base";
 
 const cls = {
   root: "ow-tree-rail-nav",
@@ -49,6 +45,10 @@ const MARQUEE_GAP = 32;
 const MARQUEE_SPEED = 40;
 
 const ROW = "[data-tree-rail-item]";
+
+// Drawing before the first paint keeps a nav mounted on the client (a route change) from showing
+// a frame without its trail; the server has no layout, so it falls back without React 18's warning.
+const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 // The level of the list a row is in: 1 for the top list. Panels pass their row's level on.
 // (Context.Provider, not <Context>: React 18.2 is a supported peer.)
@@ -100,27 +100,25 @@ function onArrowKey(tree: HTMLElement, event: KeyboardEvent<HTMLElement>): void 
   next?.focus();
 }
 
-export interface TreeRailNavRootProps extends ComponentPropsWithoutRef<"nav"> {
-  /** `"owsem"`: the trail travels along the rail and pulses on arrival. Default `"base"`. */
-  flavor?: TreeRailNavFlavor | undefined;
-}
+export type TreeRailNavRootProps = ComponentPropsWithoutRef<"nav">;
 
-/** The navigation: a `<nav>` that holds the rail, the hover highlight (Glide), and one `List`. */
+/**
+ * The navigation: a `<nav>` that holds the rail, the hover highlight (Glide), and one `List`. The
+ * trail travels along the rail to a new current row and pulses on arrival.
+ */
 export const TreeRailNavRoot: ForwardRefExoticComponent<
   TreeRailNavRootProps & RefAttributes<HTMLElement>
 > = forwardRef<HTMLElement, TreeRailNavRootProps>(function TreeRailNavRoot(
-  { flavor = DEFAULT_FLAVOR, className, children, onKeyDown, ...props },
+  { className, children, onKeyDown, ...props },
   ref,
 ) {
   const glide = useGlide<HTMLDivElement>({ items: ROW, maxDistance: 40 });
   const tree = useRef<HTMLDivElement | null>(null);
   const svg = useRef<SVGSVGElement>(null);
-  const travel = useRef(flavor === "owsem");
-  travel.current = flavor === "owsem";
 
-  useEffect(() => {
+  useBeforePaint(() => {
     if (!tree.current || !svg.current) return;
-    const rail = createTreeRail(tree.current, svg.current, { travel: () => travel.current });
+    const rail = createTreeRail(tree.current, svg.current);
     return () => rail.destroy();
   }, []);
 
@@ -137,7 +135,6 @@ export const TreeRailNavRoot: ForwardRefExoticComponent<
     <nav
       ref={ref}
       className={className ? `${cls.root} ${className}` : cls.root}
-      data-flavor={flavor}
       onKeyDown={(event) => {
         onKeyDown?.(event);
         if (!event.defaultPrevented && tree.current) onArrowKey(tree.current, event);
@@ -303,7 +300,7 @@ export const TreeRailNavLabel: ForwardRefExoticComponent<
   // The width of one copy of the text, while it overflows; 0 while it fits.
   const [overflow, setOverflow] = useState(0);
 
-  useEffect(() => {
+  useBeforePaint(() => {
     const el = outer.current;
     const text = el?.firstElementChild as HTMLElement | null;
     if (!el || !text) return;

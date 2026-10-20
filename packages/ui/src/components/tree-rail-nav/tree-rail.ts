@@ -3,15 +3,11 @@
  * through each parent to the current item. Framework-free; the React parts render the markup.
  *
  * Geometry is read from the DOM: x positions from the root's --_r0 … --_r2 (one rail per level),
- * y positions from the rows and from the Origin label, when there is one. Redraws run from a ResizeObserver, so they follow panels while they
- * open and close; frames run only while the trail travels (Owsem). The SVG is mirrored in CSS for
- * right-to-left text, so x is always measured from the left.
+ * y positions from the rows and from the Origin label, when there is one. Redraws run from a
+ * ResizeObserver, so they follow panels while they open and close; frames run only while the trail
+ * travels (back to the shared branch, then down to the new item, with a pulse on arrival). The SVG
+ * is mirrored in CSS for right-to-left text, so x is always measured from the left.
  */
-
-export interface TreeRailOptions {
-  /** Owsem travels: back to the shared branch, then down to the new item, and pulses on arrival. */
-  travel: () => boolean;
-}
 
 export interface TreeRail {
   refresh(): void;
@@ -152,11 +148,7 @@ function svgEl<K extends keyof SVGElementTagNameMap>(
   return el;
 }
 
-export function createTreeRail(
-  tree: HTMLElement,
-  svg: SVGSVGElement,
-  options: TreeRailOptions,
-): TreeRail {
+export function createTreeRail(tree: HTMLElement, svg: SVGSVGElement): TreeRail {
   // The SVG's parts; the markup stays out of React so redraws never re-render.
   svg.replaceChildren();
   const base = svg.appendChild(svgEl("g", { "data-part": "base" }));
@@ -409,7 +401,7 @@ export function createTreeRail(
   }
 
   function land(): void {
-    if (!options.travel() || reduced()) return;
+    if (reduced()) return;
     dot.animate([{ transform: "scale(1.7)" }, { transform: "scale(1)" }], {
       duration: 460,
       easing: "cubic-bezier(.34,1.56,.64,1)",
@@ -508,6 +500,22 @@ export function createTreeRail(
   }
 
   function goTo(row: HTMLElement | null): void {
+    // The first draw is simply there: the trail, its dots, the rows on it, and the tint. A nav
+    // mounted on the client would otherwise fade all of them in.
+    const first = !current.row;
+    if (first) tree.setAttribute("data-instant", "");
+    try {
+      place(row, first);
+    } finally {
+      if (first) {
+        // Settle the styles while transitions are off, then let them back.
+        void getComputedStyle(tree).opacity;
+        tree.removeAttribute("data-instant");
+      }
+    }
+  }
+
+  function place(row: HTMLElement | null, first: boolean): void {
     target = row;
     markTrail();
     active.toggleAttribute("data-on", !!row);
@@ -520,8 +528,7 @@ export function createTreeRail(
     }
     locate();
     const to = route(row);
-    const first = !current.row;
-    if (first || !options.travel() || reduced()) {
+    if (first || reduced()) {
       anim = null;
       cancelAnimationFrame(frame);
       current = { row, length: Number.POSITIVE_INFINITY };

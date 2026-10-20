@@ -1,8 +1,8 @@
 @layer owsem.tokens, owsem.components;
 
 /*
- * Tree Rail Nav (tree-rail.ts draws the rail). Base: a neutral trail that is simply there.
- * Owsem (Kinetic): an accent trail that travels and pulses on arrival. No glow (Lumen stays 3).
+ * Tree Rail Nav (tree-rail.ts draws the rail), an Owsem component (Kinetic): an accent trail that
+ * travels and pulses on arrival. No glow; Lumen is for Lumen Rail Nav and Spotlight Card.
  */
 @layer owsem.components {
   .ow-tree-rail-nav {
@@ -10,7 +10,7 @@
     --_muted: var(--ow-muted, #5f5f6b);
     --_rail: var(--ow-tree-rail-rail, var(--ow-line, #d9d9e0));
     --_node: var(--ow-tree-rail-node, color-mix(in oklab, var(--_fg) 24%, transparent));
-    --_trail: var(--ow-tree-rail-trail, var(--_fg));
+    --_trail: var(--ow-tree-rail-trail, var(--ow-accent, #7c6ab8));
     /* Dots are cut out of the rail with the surface color behind them. */
     --_surface: var(--ow-tree-rail-surface, var(--ow-bg, #fbfbfc));
     --_tint: color-mix(in oklab, var(--_trail) 10%, transparent);
@@ -26,10 +26,6 @@
     --_r2: var(--ow-tree-rail-r2, 59px);
     font-size: 13.5px;
     line-height: 1.4;
-  }
-
-  .ow-tree-rail-nav[data-flavor="owsem"] {
-    --_trail: var(--ow-tree-rail-trail, var(--ow-accent, #d4cbe5));
   }
 
   .ow-tree-rail {
@@ -231,9 +227,8 @@
   }
 
   /*
-   * The current row's tint: Base shows it at once, Owsem sweeps it in when the trail arrives and
-   * folds it back toward the rail when the trail leaves (data-leaving, set by the script while
-   * it closes). Only these rows have it, so axe can read every other row's contrast directly.
+   * The current row's tint sweeps in when the trail arrives and folds back toward the rail when
+   * the trail leaves (data-leaving, set by the script while it closes). Only these rows have it, so axe can read every other row's contrast directly.
    */
   .ow-tree-rail-item:is([data-current], [data-arrived], [data-leaving])::before {
     content: "";
@@ -264,12 +259,6 @@
     transition:
       transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
       opacity 0.16s ease 0.14s;
-  }
-
-  .ow-tree-rail-nav[data-flavor="base"]
-    .ow-tree-rail-item:is([data-current], [data-arrived], [data-leaving])::before {
-    transform: none;
-    transition: opacity 0.22s ease;
   }
 
   .ow-tree-rail-item:focus-visible {
@@ -399,6 +388,15 @@
 
   .ow-tree-rail-item[aria-expanded="false"]:dir(rtl) .ow-tree-rail-chevron {
     rotate: 90deg;
+  }
+
+  /*
+   * The first draw (tree-rail.ts sets data-instant on the tree for it): nothing transitions in.
+   * The attribute is doubled to outrank every transition above.
+   */
+  .ow-tree-rail[data-instant][data-instant] *,
+  .ow-tree-rail[data-instant][data-instant] *::before {
+    transition: none;
   }
 
   /* FR-20: no sliding, no sweeping; opacity and color only. */

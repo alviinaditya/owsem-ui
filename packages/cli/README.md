@@ -6,14 +6,13 @@ The OwsemUI CLI copies components from the registry into your project.
 
 ```sh
 npx owsem init
-npx owsem add base/button
-npx owsem add button      # family taken from flavorDefault in owsem.json
+npx owsem add button
 ```
 
 | Command | Purpose |
 | --- | --- |
 | `owsem init` | Choose the token mode and prefix, then write `owsem.json` and `tokens.css` |
-| `owsem add [<family>/]<name>` | Fetch registry items and write the component files |
+| `owsem add <name>` | Fetch a registry item and write the component files |
 | `owsem diff [name]` | Compare local files with the latest registry version |
 | `owsem list` | List every component with its family and status |
 | `owsem tokens` | Rewrite `tokens.css` after changing the mode or prefix |

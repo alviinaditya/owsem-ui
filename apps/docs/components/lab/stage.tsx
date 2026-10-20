@@ -1,6 +1,6 @@
 "use client";
 
-import { Kbd } from "owsem-ui/base";
+import { Kbd, Toggle } from "owsem-ui/base";
 import {
   Fragment,
   type KeyboardEvent,
@@ -359,25 +359,30 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
         </p>
         <fieldset className="lab-tools">
           <legend className="visually-hidden">{labels.tools}</legend>
-          {tools.map((tool) => (
-            <button
-              key={tool.key}
-              ref={(el) => {
+          {tools.map((tool) => {
+            const props = {
+              ref: (el: HTMLButtonElement | null) => {
                 toolRefs.current.set(tool.key, el);
-              }}
-              type="button"
-              className="lab-tool"
-              aria-pressed={tool.pressed}
-              aria-controls={tool.controls}
-              aria-keyshortcuts={tool.key}
-              title={`${tool.label} (${tool.key})`}
-              data-more={tool.more ? "" : undefined}
-              onClick={tool.act}
-            >
-              <Icon name={tool.icon} size={15} />
-              <span className="lab-tool-label">{tool.label}</span>
-            </button>
-          ))}
+              },
+              className: "lab-tool",
+              "aria-controls": tool.controls,
+              "aria-keyshortcuts": tool.key,
+              title: `${tool.label} (${tool.key})`,
+              "data-more": tool.more ? "" : undefined,
+              children: (
+                <>
+                  <Icon name={tool.icon} size={15} />
+                  <span className="lab-tool-label">{tool.label}</span>
+                </>
+              ),
+            };
+            // Tools with an on state are toggles; the others act once.
+            return tool.pressed === undefined ? (
+              <button key={tool.key} type="button" onClick={tool.act} {...props} />
+            ) : (
+              <Toggle key={tool.key} pressed={tool.pressed} onPressedChange={tool.act} {...props} />
+            );
+          })}
           <button
             type="button"
             className="lab-tool"

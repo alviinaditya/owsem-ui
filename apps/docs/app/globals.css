@@ -559,7 +559,6 @@ body {
   .seg-item:is([data-selected], [aria-current="page"]),
   .theme-switcher::before,
   .pm-picker label:has(:checked),
-  .lab-tool[aria-pressed="true"],
   .lab-tool[aria-expanded="true"],
   .lab-scene-nav a[aria-current="true"],
   .lab-tabs [aria-selected="true"],
@@ -1674,6 +1673,14 @@ figure[data-code-block] pre {
 }
 
 .lab-tools {
+  /* The toggles (Inspect, Controls, Code): on is a raised thumb with accent text, like the
+   * site's switchers, rather than the pressed material, which would vanish in the sunken track. */
+  --ow-toggle-fg: var(--docs-muted);
+  --ow-toggle-hover-bg: var(--docs-hover);
+  --ow-toggle-hover-fg: var(--docs-fg);
+  --ow-toggle-pressed-bg: var(--docs-raised);
+  --ow-toggle-pressed-shadow: var(--docs-raised-shadow);
+  --ow-toggle-pressed-fg: var(--docs-accent);
   display: flex;
   flex: none;
   align-items: center;
@@ -1685,17 +1692,17 @@ figure[data-code-block] pre {
   border: 0;
 }
 
+/* 24 px tall, the toggles' floor (--py 0), with the docs' own type and spacing. */
 .lab-tool {
+  --py: 0px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  block-size: 32px;
+  block-size: 24px;
   padding-inline: 8px;
-  border: 0;
-  border-radius: var(--docs-radius);
-  background: none;
-  color: var(--docs-muted);
+  border-radius: var(--docs-radius-inner);
   font-size: 12.5px;
+  font-weight: 400;
 }
 
 /* Wide: the tools sit in a sunken track like the site's switchers (narrow: the toolbar is one). */
@@ -1706,19 +1713,21 @@ figure[data-code-block] pre {
     background-color: var(--docs-well);
     box-shadow: var(--docs-well-shadow);
   }
-
-  .lab-tool {
-    block-size: 24px;
-    border-radius: var(--docs-radius-inner);
-  }
 }
 
-.lab-tool:hover {
+/* The tools that act once (no specificity, so Docs keeps its accent); the toggles take their
+ * colors from the tokens above. */
+:where(.lab-tool:not([aria-pressed])) {
+  border: 0;
+  background: none;
+  color: var(--docs-muted);
+}
+
+.lab-tool:not([aria-pressed]):hover {
   background-color: var(--docs-hover);
   color: var(--docs-fg);
 }
 
-.lab-tool[aria-pressed="true"],
 .lab-tool[aria-expanded="true"] {
   background-color: var(--docs-raised);
   box-shadow: var(--docs-raised-shadow);
@@ -2726,6 +2735,59 @@ figure[data-code-block] pre {
   gap: 14px;
   block-size: 24px;
   padding-inline-end: 14px;
+}
+
+/* The Toggle Lab's note: a title with Pin beside it, the text, and its formatting toggles. */
+.demo-toggle-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.demo-toggle-row {
+  display: flex;
+  gap: 4px;
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* A matrix of controls on the components' own background. */
+.demo-surface {
+  padding: 20px 24px;
+  border: 1px solid var(--ow-line);
+  border-radius: 14px;
+  background-color: var(--ow-bg);
+  color: var(--ow-fg);
+}
+
+/* One cell of a states matrix: a few controls on the cell theme's background. */
+.demo-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--ow-line);
+  border-radius: 12px;
+  background-color: var(--ow-bg);
+  color: var(--ow-fg);
+}
+
+/* A control with its used size under it. */
+.demo-measured {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+}
+
+.demo-measure {
+  color: var(--docs-muted);
+  white-space: nowrap;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Token setup panel (components/token-setup.tsx): bottom left, or under a Lab's toolbar (below). */

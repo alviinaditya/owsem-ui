@@ -1,0 +1,145 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * A ghost button that stays pressed while on: flat and lit on hover while off, in the pressed
+ * material while on (depth, DP-4). Button's geometry (FR-9 to FR-11): --py is the only input.
+ */
+@layer owsem.components {
+  .ow-toggle {
+    --_fg: var(--ow-toggle-fg, var(--ow-muted, #5c5669));
+    --_hover-bg: var(--ow-toggle-hover-bg, var(--ow-hover, rgb(27 23 38 / 0.05)));
+    --_hover-fg: var(--ow-toggle-hover-fg, var(--ow-fg, #1b1726));
+    --_pressed-bg: var(--ow-toggle-pressed-bg, var(--ow-pressed-bg, #e6e3ee));
+    --_pressed-shadow: var(
+      --ow-toggle-pressed-shadow,
+      var(--ow-pressed-shadow, inset 0 1.5px 3px rgb(40 30 20 / 0.2))
+    );
+    --_pressed-fg: var(--ow-toggle-pressed-fg, var(--ow-fg, #1b1726));
+    --py: 0.75em;
+    --_py: max(var(--py), (24px - 1lh) / 2);
+    --px: calc(var(--_py) + (1lh - 1cap) / 2);
+    --icon: calc(1em + 2px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    box-sizing: border-box;
+    margin: 0;
+    padding: var(--_py) var(--px);
+    border: 0;
+    border-radius: var(--ow-radius, 8px);
+    /* Invisible until forced colors draw it as the edge (DP-8). */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: transparent;
+    color: var(--_fg);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    touch-action: manipulation;
+    /* A press lets go on the settle spring (FR-21). */
+    transition: transform var(--ow-spring-settle-duration, 1030ms)
+      var(--ow-spring-settle, cubic-bezier(0.23, 1, 0.32, 1));
+  }
+
+  .ow-toggle[data-size="sm"] {
+    --py: 0.5em;
+    font-size: 0.8125rem;
+  }
+
+  .ow-toggle[data-size="lg"] {
+    --py: 0.875em;
+    font-size: 1rem;
+  }
+
+  /* Icons sit as far from the edge as from the top and bottom (FR-10). */
+  .ow-toggle-icon {
+    display: inline-flex;
+    flex: none;
+    inline-size: var(--icon);
+    block-size: var(--icon);
+  }
+
+  .ow-toggle-icon > :where(svg, img) {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  .ow-toggle-icon[data-side="start"] {
+    margin-inline-start: calc((1cap - var(--icon)) / 2);
+  }
+
+  .ow-toggle-icon[data-side="end"] {
+    margin-inline-end: calc((1cap - var(--icon)) / 2);
+  }
+
+  /* Icon only: a square as tall as a labelled toggle (FR-10a). */
+  .ow-toggle[data-icon-only] {
+    padding: calc(var(--_py) + (1lh - var(--icon)) / 2);
+  }
+
+  .ow-toggle[data-icon-only] > .ow-toggle-icon {
+    margin: 0;
+  }
+
+  @media (hover: hover) {
+    .ow-toggle:hover:not([data-pressed], [data-disabled]) {
+      background-color: var(--_hover-bg);
+      color: var(--_hover-fg);
+    }
+  }
+
+  /* On, and held in by a press: the pressed material. */
+  .ow-toggle[data-pressed],
+  .ow-toggle:active:not([data-disabled]) {
+    background-color: var(--_pressed-bg);
+    box-shadow: var(--_pressed-shadow);
+    color: var(--_pressed-fg);
+  }
+
+  /* A press goes in to 0.97 within 90 ms (DP-4). */
+  .ow-toggle:active:not([data-disabled]) {
+    transform: scale(0.97);
+    transition-duration: 90ms;
+    transition-timing-function: var(--ow-ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+  }
+
+  .ow-toggle:focus-visible {
+    outline: 2px solid var(--ow-focus, #5b4a9a);
+    outline-offset: 2px;
+  }
+
+  .ow-toggle[data-disabled] {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
+  /* FR-20: the material still changes, nothing moves. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-toggle:active:not([data-disabled]) {
+      transform: none;
+    }
+  }
+
+  /* DP-8: the pressed material is gone, so on is the system's highlight. */
+  @media (forced-colors: active) {
+    .ow-toggle[data-pressed] {
+      background-color: Highlight;
+      color: HighlightText;
+    }
+
+    .ow-toggle:focus-visible {
+      outline-color: Highlight;
+    }
+
+    .ow-toggle[data-disabled] {
+      color: GrayText;
+      opacity: 1;
+    }
+  }
+}

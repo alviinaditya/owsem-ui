@@ -173,7 +173,7 @@ deleted CSS:
 | 1 | Field, Input | The prefix field (`.prefix-field`) and the hex field (`.color-field`) |
 | 1 | Scroll Area | `ScrollFade` (sidebar, controls, code drawer, commands) |
 | 2 | Toggle Group | Segmented choices (`.seg`): theme, Orientation, Family filter, and the package manager picker (`.pm-picker`) |
-| 2 | Toggle, Toolbar | The stage tools (`.lab-tool`) |
+| 2 | Toolbar | The stage toolbar (`.lab-tools`, `.lab-tool`, `.lab-tool-sep`); its Inspect, Controls, and Code are Toggles already |
 | 2 | Toast | The Copied status |
 | 2 | Combobox, Dialog | ⌘K search (DS-5), through Command Menu |
 | 3 | Drawer | The sidebar as a menu panel below 1100 px, and the Lab's docs, controls, and code sheets below 960 px (DS-10) |

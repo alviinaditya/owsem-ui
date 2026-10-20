@@ -1672,52 +1672,44 @@ figure[data-code-block] pre {
   background-color: light-dark(#1f8a5c, #8fd9b6);
 }
 
+/*
+ * The stage toolbar (owsem-ui Toolbar). Narrow, the bar around it is the well; wide, the tools sit
+ * in a sunken track like the site's switchers. Toggles (Inspect, Controls, Code) turn on as a
+ * raised thumb with accent text, rather than the pressed material, which would vanish in the
+ * track.
+ */
 .lab-tools {
-  display: flex;
+  --ow-toolbar-bg: transparent;
+  --ow-toolbar-shadow: none;
+  --ow-toolbar-button-fg: var(--docs-muted);
+  --ow-toolbar-button-hover-bg: var(--docs-hover);
+  --ow-toolbar-button-hover-fg: var(--docs-fg);
+  --ow-toolbar-line-dark: var(--docs-groove-dark);
+  --ow-toolbar-line-light: var(--docs-groove-light);
   flex: none;
-  align-items: center;
-  /* Several tools can be pressed at once; the gap keeps neighbors apart. */
-  gap: 4px;
   min-inline-size: 0;
-  margin: 0;
+  /* Several tools can be pressed at once; the toolbar's 4 px gap keeps neighbors apart. */
   padding: 0;
-  border: 0;
 }
 
-/* 24 px tall, the toggles' floor (--py 0), with the docs' own type and spacing. */
+@media (width >= 960px) {
+  .lab-tools {
+    --ow-toolbar-bg: var(--docs-well);
+    --ow-toolbar-shadow: var(--docs-well-shadow);
+    padding: 3px;
+    border-radius: var(--docs-radius);
+  }
+}
+
+/* 24 px tall (--py 0: the 24 px floor), with the docs' own type and spacing. */
 .lab-tool {
   --py: 0px;
-  display: inline-flex;
-  align-items: center;
   gap: 6px;
   block-size: 24px;
   padding-inline: 8px;
   border-radius: var(--docs-radius-inner);
   font-size: 12.5px;
   font-weight: 400;
-}
-
-/* Wide: the tools sit in a flat track like the site's switchers (narrow: the toolbar is one). */
-@media (width >= 960px) {
-  .lab-tools {
-    padding: 3px;
-    border-radius: var(--docs-radius);
-    background-color: var(--docs-well);
-    box-shadow: var(--docs-well-shadow);
-  }
-}
-
-/* The tools that act once (no specificity, so Docs keeps its accent). The toggles (Inspect,
- * Controls, Code) keep Toggle's own look: on is the raised key, like the site's switchers. */
-:where(.lab-tool:not([aria-pressed])) {
-  border: 0;
-  background: none;
-  color: var(--docs-muted);
-}
-
-.lab-tool:not([aria-pressed]):hover {
-  background-color: var(--docs-hover);
-  color: var(--docs-fg);
 }
 
 .lab-tool[aria-expanded="true"] {
@@ -1748,7 +1740,7 @@ figure[data-code-block] pre {
 
 /* The docs open from the same toolbar, set apart by an etched line, labeled while there is room. */
 .lab-tool-docs {
-  color: var(--docs-accent);
+  --ow-toolbar-button-fg: var(--docs-accent);
   font-weight: 600;
 }
 
@@ -1873,11 +1865,7 @@ figure[data-code-block] pre {
 }
 
 .lab-tool-sep {
-  flex: none;
-  inline-size: 2px;
-  block-size: 16px;
   margin-inline: 3px;
-  background: linear-gradient(to right, var(--docs-groove-dark) 50%, var(--docs-groove-light) 50%);
 }
 
 /* Narrow: the toolbar floats at the top right in a well, the site's menu at the top left. */
@@ -2746,6 +2734,19 @@ figure[data-code-block] pre {
   border: 0;
 }
 
+/* The Toolbar Lab's editor: the toolbar over the line it formats. */
+.demo-editor {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+}
+
+.demo-editor-text {
+  margin: 0;
+  color: var(--ow-fg);
+  font-size: 15px;
+}
+
 /* A matrix of controls on the components' own background. */
 .demo-surface {
   padding: 20px 24px;
@@ -2759,6 +2760,7 @@ figure[data-code-block] pre {
 .demo-cell {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   padding: 10px;
   border: 1px solid var(--ow-line);
@@ -2774,7 +2776,9 @@ figure[data-code-block] pre {
   gap: 6px;
 }
 
-.demo-measure {
+/* A small note under a demo, such as a measured size. */
+.demo-caption {
+  margin: 0;
   color: var(--docs-muted);
   white-space: nowrap;
   font-family: var(--font-mono), ui-monospace, monospace;

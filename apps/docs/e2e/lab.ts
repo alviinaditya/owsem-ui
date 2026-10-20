@@ -2,6 +2,9 @@ import type { Page } from "@playwright/test";
 
 export const stage = (page: Page) => page.getByRole("region", { name: "Stage" });
 
+/** The component on the stage, apart from the stage's own toolbar and panels. */
+export const demo = (page: Page) => page.locator(".lab-demo");
+
 /** Below 960 px the narrative is a sheet over the stage, opened from the stage's toolbar. */
 export async function openSheet(page: Page): Promise<void> {
   const docs = page.locator(".lab-tool-docs");

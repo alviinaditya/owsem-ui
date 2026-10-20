@@ -1,0 +1,165 @@
+---
+title: Toolbar
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Toolbar holds buttons, toggles, links, and a field in one row, on the panel material, with etched
+grooves between groups. It is one stop for Tab, and arrow keys move within it. Scroll to start the
+tour; the stage follows each part.
+
+## Buttons and toggles together [#together]
+
+A toolbar mixes kinds of items. Buttons act once; toggles stay on. Both are quiet: flat and muted
+until the pointer is over them, with Button's sizes and spacing. An on toggle sits in the pressed
+material, and a press on either goes in to 0.97, then lets go on the settle spring.
+
+A toggle is a `Toolbar.Button` that renders a Toggle: `render={<Toggle />}`. The toolbar gives it
+its place in the arrow-key order, the Toggle gives it the on state, and the Toggle's look wins,
+because the toolbar's item styles have no specificity.
+
+The stage plays it: the pointer turns Italic and Underline on, presses Undo, then turns them off
+again, and the line under the toolbar follows. Play scene runs it again.
+
+## One Tab stop [#roving]
+
+However many items it holds, a toolbar is a single stop in the Tab order, so a keyboard user
+passes it with one Tab. Inside, arrow keys move between the items and wrap around at the ends. Tab
+leaves the toolbar, and coming back lands on the item used last; the line under the toolbar names
+it.
+
+Try it: click the stage, press Tab until the toolbar has focus, then use the arrow keys. Disabled
+buttons such as Redo stay focusable, so they can be found and announced as unavailable. In the
+field, arrows move the caret and hand over at its ends, so use one field at most, and put it last.
+
+## Anatomy [#anatomy]
+
+Eight parts. Base UI renders the roles and the roving focus; OwsemUI adds the `ow-toolbar-*`
+classes, the sizes, and the icons. Inspect (I) outlines each part on the stage; pick a name, here
+or on the stage, to see its tokens.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-toolbar` | `role="toolbar"`, `aria-orientation`, and `data-size`; the panel |
+| <Part name="Group" /> | `div.ow-toolbar-group` | `role="group"`; name it with `aria-label` |
+| <Part name="Toggle" /> | `button.ow-toggle.ow-toolbar-button` | A Button with `render={<Toggle />}`, so `aria-pressed` |
+| <Part name="Button" /> | `button.ow-toolbar-button` | `data-size`, and `data-icon-only` without a label |
+| <Part name="Icon" /> | `span.ow-toolbar-icon` | Decorative (`aria-hidden`): `startIcon` or `endIcon`, the font size plus 2px |
+| <Part name="Separator" /> | `div.ow-toolbar-separator` | `role="separator"`, across the toolbar's direction |
+| <Part name="Link" /> | `a.ow-toolbar-link` | Looks like a button; `render` swaps in a router link |
+| <Part name="Input" /> | `input.ow-toolbar-input` | A sunken field, as tall as the buttons |
+
+## States and variants [#states]
+
+The stage sets each size in both themes, each toolbar with an on toggle, an off one, a groove, a
+button, and a disabled button. The pointer turns Italic on and off in each theme.
+
+| State | What shows it |
+| --- | --- |
+| Idle | Flat, with muted text |
+| Hover | The `--ow-hover` tint, and text at full strength |
+| Pressing | Scaled to 0.97, in the pressed material, within 90 ms |
+| On, for a toggle | The pressed material, as on its own |
+| Keyboard focus | A 2px ring 2px out, in `--ow-focus` |
+| Disabled | 45% opacity, still focusable |
+
+`orientation="vertical"` stacks the items, Up and Down move between them, and the grooves turn
+across. Pick it in the controls.
+
+## Keyboard and accessibility [#keyboard]
+
+| Key | Action |
+| --- | --- |
+| Tab, Shift+Tab | Into and out of the toolbar, at the item used last |
+| Arrow Right, Arrow Left | The next or previous item, wrapping around (Arrow Down and Arrow Up when vertical) |
+| Space, Enter | Presses the button or turns the toggle on or off |
+
+Right to left, Arrow Left moves on. Screen readers announce the toolbar by its name, each group by
+its own, toggles with their state, and the grooves as separators. `loopFocus={false}` stops the
+wrapping.
+
+With `prefers-reduced-motion`, a press changes material without shrinking. In forced colors
+(Windows High Contrast), the toolbar, its items, and its field keep a 1px edge in the system
+color, the grooves stay, and the focus ring is `Highlight`.
+
+## Customization [#customization]
+
+The stage controls are open: pick the surface or the grooves' dark line, and the code follows.
+
+<ForMode mode="theme">
+
+Component tokens override the theme tokens for every Toolbar inside the element that sets them,
+or the toolbar itself, such as `.editor`.
+
+| Component token | Default | Purpose |
+| --- | --- | --- |
+| `--ow-toolbar-bg` | `--ow-panel` | Surface |
+| `--ow-toolbar-shadow` | `--ow-panel-shadow` | Edge and shadow |
+| `--ow-toolbar-button-fg` | `--ow-muted` | Button and link text |
+| `--ow-toolbar-button-hover-bg` | `--ow-hover` | Tint under the pointer |
+| `--ow-toolbar-button-hover-fg` | `--ow-fg` | Text under the pointer |
+| `--ow-toolbar-button-pressed-bg` | `--ow-pressed-bg` | Surface during a press |
+| `--ow-toolbar-button-pressed-shadow` | `--ow-pressed-shadow` | Inner shadow during a press |
+| `--ow-toolbar-button-pressed-fg` | `--ow-fg` | Text during a press |
+| `--ow-toolbar-input-bg` | `--ow-well-bg` | Field surface |
+| `--ow-toolbar-input-shadow` | `--ow-well-shadow` | Field's inner shadow |
+| `--ow-toolbar-input-edge` | `--ow-edge` | Field edge, at 3:1 |
+| `--ow-toolbar-line-dark` | `--ow-line-dark` | Groove's dark line |
+| `--ow-toolbar-line-light` | `--ow-line-light` | Groove's light line |
+
+</ForMode>
+
+<ForMode mode="isolated">
+
+Each part carries its own values and reads no shared token, so set a token on the part that uses
+it: the surface on the toolbar itself (`.editor`), the grooves' lines on
+`.editor .ow-toolbar-separator`, as `editor.css` does, and the buttons' on
+`.editor .ow-toolbar-button`.
+
+| Component token | Default | Purpose |
+| --- | --- | --- |
+| `--ow-toolbar-bg` | Its own, per theme | Surface |
+| `--ow-toolbar-shadow` | Its own, per theme | Edge and shadow |
+| `--ow-toolbar-button-fg` | Its own, per theme | Button and link text |
+| `--ow-toolbar-button-hover-bg` | Its own, per theme | Tint under the pointer |
+| `--ow-toolbar-button-hover-fg` | Its own, per theme | Text under the pointer |
+| `--ow-toolbar-button-pressed-bg` | Its own, per theme | Surface during a press |
+| `--ow-toolbar-button-pressed-shadow` | Its own, per theme | Inner shadow during a press |
+| `--ow-toolbar-button-pressed-fg` | Its own, per theme | Text during a press |
+| `--ow-toolbar-input-bg` | Its own, per theme | Field surface |
+| `--ow-toolbar-input-shadow` | Its own, per theme | Field's inner shadow |
+| `--ow-toolbar-input-edge` | Its own, per theme | Field edge, at 3:1 |
+| `--ow-toolbar-line-dark` | Its own, per theme | Groove's dark line |
+| `--ow-toolbar-line-light` | Its own, per theme | Groove's light line |
+
+</ForMode>
+
+Toggles in a toolbar keep their own `--ow-toggle-*` tokens. Item corners follow `--ow-radius`, and
+the toolbar's add its 4px padding, so the corners stay concentric.
+
+<TokenChip item="toolbar" lang="en" />
+
+## Ship it [#ship]
+
+The code drawer writes the toolbar exactly as the stage is set up. Change the size, the
+orientation, or a color, and the lines that change light up.
+
+| Part | Prop | Type | Default |
+| --- | --- | --- | --- |
+| Root | `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| Root | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` |
+| Root | `loopFocus` | `boolean` | `true` |
+| Root, Group | `disabled` | `boolean` | `false` |
+| Button, Link, Input | `size` | `"sm" \| "md" \| "lg"` | The toolbar's |
+| Button, Link | `startIcon`, `endIcon` | `ReactNode` | |
+| Button, Input | `disabled` | `boolean` | `false` |
+| Button, Input | `focusableWhenDisabled` | `boolean` | `true` |
+| Every part | `className`, `style`, `render` | | |
+
+`orientation`, `loopFocus`, `disabled`, and `focusableWhenDisabled` come from Base UI. An Input's
+`size` is its type scale, not a width in characters: set `inline-size` instead. Refs go to each
+part's element, and other props pass through to Base UI as they are.
+
+Import it from `owsem-ui/base`. In the registry, it is the `toolbar` item; toggles in it need the
+`toggle` item too.

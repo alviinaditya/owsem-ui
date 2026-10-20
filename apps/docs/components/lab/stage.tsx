@@ -1,6 +1,6 @@
 "use client";
 
-import { Kbd, Toggle } from "owsem-ui/base";
+import { Kbd, Toggle, Toolbar } from "owsem-ui/base";
 import {
   Fragment,
   type KeyboardEvent,
@@ -357,8 +357,8 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
           <span className="lab-live" aria-hidden="true" />
           <span className="lab-stage-title-text">{title}</span>
         </p>
-        <fieldset className="lab-tools">
-          <legend className="visually-hidden">{labels.tools}</legend>
+        {/* One Tab stop; arrow keys move between the tools. */}
+        <Toolbar.Root className="lab-tools" aria-label={labels.tools}>
           {tools.map((tool) => {
             const props = {
               ref: (el: HTMLButtonElement | null) => {
@@ -378,13 +378,16 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
             };
             // Tools with an on state are toggles; the others act once.
             return tool.pressed === undefined ? (
-              <button key={tool.key} type="button" onClick={tool.act} {...props} />
+              <Toolbar.Button key={tool.key} onClick={tool.act} {...props} />
             ) : (
-              <Toggle key={tool.key} pressed={tool.pressed} onPressedChange={tool.act} {...props} />
+              <Toolbar.Button
+                key={tool.key}
+                render={<Toggle pressed={tool.pressed} onPressedChange={tool.act} />}
+                {...props}
+              />
             );
           })}
-          <button
-            type="button"
+          <Toolbar.Button
             className="lab-tool"
             popoverTarget={TOKEN_SETUP_ID}
             aria-haspopup="dialog"
@@ -394,12 +397,11 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
           >
             <Icon name="palette" size={15} />
             <span className="lab-tool-label lab-tool-token-label">{labels.tokens}</span>
-          </button>
+          </Toolbar.Button>
           {/* Narrow screens: the documentation sheet opens from here, set apart by a groove. */}
-          <span className="lab-tool-sep" aria-hidden="true" />
-          <button
+          <Toolbar.Separator className="lab-tool-sep" />
+          <Toolbar.Button
             id={docs.buttonId}
-            type="button"
             className="lab-tool lab-tool-docs"
             aria-expanded={docs.open}
             aria-controls={docs.sheetId}
@@ -407,18 +409,17 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
           >
             <Icon name="book-open" size={15} />
             <span className="lab-tool-docs-label">{labels.docs}</span>
-          </button>
-          <button
+          </Toolbar.Button>
+          <Toolbar.Button
             ref={moreButtonRef}
-            type="button"
             className="lab-tool lab-tool-more"
             popoverTarget={moreId}
             aria-label={labels.more}
             title={labels.more}
           >
             <Icon name="ellipsis" size={15} />
-          </button>
-        </fieldset>
+          </Toolbar.Button>
+        </Toolbar.Root>
         <fieldset ref={moreRef} id={moreId} popover="auto" className="lab-more">
           <legend className="visually-hidden">{labels.more}</legend>
           <button

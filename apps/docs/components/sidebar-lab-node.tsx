@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { TreeRailNav } from "owsem-ui/base";
+import { TreeRailNav } from "owsem-ui/owsem";
 import type { ReactNode } from "react";
 import type { SceneInfo } from "./lab/lab-shell";
 import { SceneLinks } from "./lab/scene-links";

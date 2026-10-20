@@ -4,17 +4,9 @@ import { commands } from "vitest/browser";
 import { render } from "vitest-browser-react";
 import { axeReport } from "../../../test/a11y.ts";
 import { measureIdle, settle } from "../../../test/raf-counter.ts";
-import { TreeRailNav, type TreeRailNavFlavor } from "./index";
+import { TreeRailNav } from "./index";
 
-function Nav({
-  current = "dark",
-  flavor,
-  open = true,
-}: {
-  current?: string;
-  flavor?: TreeRailNavFlavor;
-  open?: boolean;
-}) {
+function Nav({ current = "dark", open = true }: { current?: string; open?: boolean }) {
   const link = (id: string, label: string, extra: { disabled?: boolean } = {}) => (
     <TreeRailNav.Node>
       <TreeRailNav.Link href={`#${id}`} current={current === id} {...extra}>
@@ -23,7 +15,7 @@ function Nav({
     </TreeRailNav.Node>
   );
   return (
-    <TreeRailNav.Root aria-label="Docs" flavor={flavor} style={{ inlineSize: 280 }}>
+    <TreeRailNav.Root aria-label="Docs" style={{ inlineSize: 280 }}>
       <TreeRailNav.List>
         {link("home", "Home")}
         <TreeRailNav.Node defaultOpen={open}>
@@ -120,6 +112,16 @@ describe("Tree Rail Nav", () => {
     // Lit: Home and Settings on the root rail, Profile and Appearance on the next, and Dark mode.
     // About is below the branch, and Density is past the end.
     expect(tree.querySelectorAll('[data-part="node"][data-lit]').length).toBe(5);
+    // The first draw is simply there, as after a client-side route change: the trail, its dots,
+    // the rows on it, and the tint. Nothing fades or sweeps in.
+    const current = row("Dark mode");
+    expect(current.hasAttribute("data-arrived")).toBe(true);
+    const fading = tree
+      .getAnimations({ subtree: true })
+      .filter((a): a is CSSTransition => a instanceof CSSTransition)
+      .map((a) => a.transitionProperty);
+    expect(fading).toEqual([]);
+    expect(getComputedStyle(current, "::before").opacity).toBe("1");
   });
 
   test("draws the trail to the current row inside a scaled ancestor", async () => {
@@ -136,21 +138,12 @@ describe("Tree Rail Nav", () => {
     await expect.poll(() => markerY(tree)).toBeCloseTo(local("About"), 0);
   });
 
-  test("Base moves the trail to a new current row at once", async () => {
+  test("travels to a new current row and marks it on arrival", async () => {
     const { screen, tree, row } = await mount(<Nav />);
-    await expect.poll(() => markerY(tree)).toBeCloseTo(middle(tree, row("Dark mode")), 0);
-    screen.rerender(<Nav current="about" />);
-    await expect
-      .poll(() => markerY(tree), { timeout: 200 })
-      .toBeCloseTo(middle(tree, row("About")), 0);
-  });
-
-  test("Owsem travels to a new current row and marks it on arrival", async () => {
-    const { screen, tree, row } = await mount(<Nav flavor="owsem" />);
     await expect.poll(() => markerY(tree)).toBeCloseTo(middle(tree, row("Dark mode")), 0);
     // The tint has swept in.
     await expect.poll(() => getComputedStyle(row("Dark mode"), "::before").transform).toBe("none");
-    screen.rerender(<Nav flavor="owsem" current="about" />);
+    screen.rerender(<Nav current="about" />);
     const to = middle(tree, row("About"));
     // The old row's tint folds back toward the rail as the trail leaves, then goes.
     const old = row("Dark mode");
@@ -382,12 +375,12 @@ describe("Tree Rail Nav", () => {
     expect(link?.classList.contains("ow-tree-rail-item")).toBe(true);
   });
 
-  test("Owsem does not travel under reduced motion (FR-20)", async () => {
+  test("does not travel under reduced motion (FR-20)", async () => {
     onTestFinished(() => commands.setReducedMotion("no-preference"));
     await commands.setReducedMotion("reduce");
-    const { screen, tree, row } = await mount(<Nav flavor="owsem" />);
+    const { screen, tree, row } = await mount(<Nav />);
     await expect.poll(() => markerY(tree)).toBeCloseTo(middle(tree, row("Dark mode")), 0);
-    screen.rerender(<Nav flavor="owsem" current="home" />);
+    screen.rerender(<Nav current="home" />);
     await expect
       .poll(() => markerY(tree), { timeout: 200 })
       .toBeCloseTo(middle(tree, row("Home")), 0);
@@ -452,9 +445,9 @@ describe("Tree Rail Nav", () => {
     }
   });
 
-  test("runs no rAF and no animations when idle, Owsem included", async () => {
-    const { screen } = await mount(<Nav flavor="owsem" />);
-    screen.rerender(<Nav flavor="owsem" current="home" />);
+  test("runs no rAF and no animations when idle", async () => {
+    const { screen } = await mount(<Nav />);
+    screen.rerender(<Nav current="home" />);
     await settle({ maxMs: 3000 });
     expect(await measureIdle()).toEqual({ rafCalls: 0, runningAnimations: [] });
   });

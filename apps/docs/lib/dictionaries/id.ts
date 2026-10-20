@@ -7,7 +7,6 @@ export const id = {
     description: "Komponen React keluarga Base dan Owsem di atas Base UI.",
   },
   nav: {
-    main: "Navigasi utama",
     components: "Komponen",
     docs: "Dokumentasi",
     sidebar: "Navigasi dokumentasi",
@@ -35,7 +34,6 @@ export const id = {
     families: {
       base: "Base",
       owsem: "Owsem",
-      "base+owsem": "Base + Owsem",
     } satisfies Record<Family, string>,
     categories: {
       action: "Aksi",
@@ -135,7 +133,7 @@ export const id = {
     tabs: "Panel yang berpindah lewat tab, dengan indikator yang mengikuti pilihan.",
     "scroll-area": "Area gulir dengan scrollbar tipis yang muncul saat hover.",
     toggle: "Tombol dua state yang tetap tertekan saat aktif.",
-    "toggle-group": "Sekumpulan toggle; flavor Owsem-nya adalah Segmented Control.",
+    "toggle-group": "Sekumpulan toggle yang bekerja bersama, seperti segmented control.",
     toolbar: "Grup tombol dan toggle dengan navigasi keyboard.",
     "checkbox-group": "Sekumpulan checkbox dengan opsi pilih semua.",
     "number-field": "Input angka dengan tombol tambah dan kurang, serta scrub dengan drag.",

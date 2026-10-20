@@ -11,9 +11,9 @@ mengikuti setiap bagian.
 
 ## Jejak [#trail]
 
-Stage menampilkan flavor Owsem. Setiap tingkat punya rail, dengan satu titik untuk setiap baris.
-Jejak berawal dari titik asal di atas, lalu turun melewati rail setiap induknya dan berbelok ke
-tingkat berikutnya, sampai tiba di baris aktif. Setiap titik menyala begitu dilewati jejak.
+Setiap tingkat punya rail, dengan satu titik untuk setiap baris. Jejak berawal dari titik asal di
+atas, lalu turun melewati rail setiap induknya dan berbelok ke tingkat berikutnya, sampai tiba di
+baris aktif. Setiap titik menyala begitu dilewati jejak.
 
 Stage memutarnya: sebuah pointer memilih beberapa halaman bergantian. Setiap kali, jejak mundur
 dulu ke cabang yang dilalui kedua rute, lalu turun ke baris yang baru dan berdenyut saat tiba,
@@ -50,17 +50,19 @@ sebuah nama, di sini atau di stage, untuk melihat tokennya.
 
 ## State dan varian [#states]
 
-Stage menjajarkan kedua flavor, masing-masing dengan grup terbuka dan tertutup. Keduanya punya
-bagian dan tombol keyboard yang sama; yang berbeda hanya jejaknya. Pointer memilih Instalasi di
-masing-masing: jejak Base langsung ada di sana, jejak Owsem berjalan dan berdenyut saat tiba.
-Kerapatan dinonaktifkan di setiap sel.
+Stage menjajarkan tema terang dan gelap, masing-masing dengan grup terbuka dan tertutup. Pointer
+memilih Instalasi di masing-masing, lalu jejak berjalan ke sana dan berdenyut saat tiba. Kerapatan
+dinonaktifkan di setiap sel.
 
-| Flavor | Jejak |
+| State | Yang menandainya |
 | --- | --- |
-| `flavor="base"` (bawaan) | Netral, langsung tergambar, tanpa denyut |
-| `flavor="owsem"` | Accent; berjalan di sepanjang rail dan berdenyut saat tiba (Kinetic) |
+| Aktif | Jejak berakhir di baris itu, titiknya menyala, dan latarnya muncul dengan sapuan |
+| Di dalam grup tertutup | Jejak berhenti di baris grup, dan penandanya menjadi berongga |
+| Disabled | Teksnya redup; tombol panah dan highlight hover melewatinya |
+| Hover | Satu highlight meluncur ke baris terdekat |
+| Fokus keyboard | Cincin di dalam baris, jadi tidak pernah terpotong panel |
 
-Owsem tidak menambah glow, jadi jatah Lumen tetap tiga komponen.
+Tree Rail Nav adalah komponen Owsem (Kinetic): bergerak, tapi tanpa glow.
 
 `current` menandai baris halaman yang dibuka: `true` atau `"page"` memasang `aria-current="page"`,
 dan `"step"` memasang `aria-current="step"`, untuk bagian yang sedang dibaca di halaman panjang.
@@ -89,8 +91,8 @@ Untuk teks kanan ke kiri, rail dicerminkan.
 
 ## Kustomisasi [#customization]
 
-Kontrol di stage terbuka; ganti flavor untuk membandingkan kedua jejak. Warna dan posisi rail
-adalah token komponen yang Anda atur di CSS sendiri.
+Kontrol di stage terbuka: pilih warna jejak atau rail, dan kodenya ikut berubah. Warna dan posisi
+rail adalah token komponen yang Anda atur di CSS sendiri.
 
 <ForMode mode="theme">
 
@@ -136,12 +138,11 @@ diatur lewat `--ow-glide-bg` dan `--ow-glide-radius`.
 
 ## Ship it [#ship]
 
-Drawer kode menulis komponen persis seperti yang diatur di stage. Ganti flavor, dan baris kode
-yang berubah akan menyala.
+Drawer kode menulis komponen persis seperti yang diatur di stage. Pilih warna di kontrol, dan baris
+kode yang berubah akan menyala.
 
 | Bagian | Prop | Tipe | Bawaan |
 | --- | --- | --- | --- |
-| Root | `flavor` | `"base" \| "owsem"` | `"base"` |
 | Node | `open` | `boolean` | |
 | Node | `defaultOpen` | `boolean` | `false` |
 | Node | `onOpenChange` | `(open, eventDetails) => void` | |
@@ -152,5 +153,4 @@ yang berubah akan menyala.
 `open`, `defaultOpen`, dan `onOpenChange` di Node berasal dari Collapsible Base UI. Props lain
 diteruskan ke elemennya atau ke Base UI apa adanya.
 
-Di registry, `tree-rail-nav` memakai Base sebagai bawaan dan `tree-rail-nav-owsem` memakai Owsem;
-keduanya menulis file yang sama.
+Impor dari `owsem-ui/owsem`. Di registry, item-nya bernama `tree-rail-nav`.

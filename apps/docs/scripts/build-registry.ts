@@ -50,9 +50,6 @@ function rewriteImports(name: string, code: string, uses: Set<string>): string {
 const npmDependencies = (code: string): string[] =>
   code.includes('from "@base-ui/react') ? [`@base-ui/react@~${baseUiVersion}`] : [];
 
-/** The line a Base + Owsem component's flavor defaults on; the -owsem item sets it to "owsem". */
-const FLAVOR_DEFAULT = /^(const DEFAULT_FLAVOR: \w+ = )"base";$/m;
-
 const isSource = (file: string) => /\.(tsx?|css)$/.test(file) && !/\.test\.tsx?$/.test(file);
 
 function assertValidItem(item: RegistryItem): void {
@@ -121,42 +118,29 @@ for (const name of componentNames) {
       `packages/ui/src/components/${name} needs an available entry in lib/catalog.ts.`,
     );
   }
-  // Base + Owsem ship twice from one source: `<name>` defaults to flavor="base" and `<name>-owsem`
-  // to flavor="owsem", by rewriting the DEFAULT_FLAVOR line. Both write the same files (PRD).
-  const flavors =
-    entry.family === "base+owsem" ? (["base", "owsem"] as const) : ([undefined] as const);
-  for (const flavor of flavors) {
-    const item = flavor === "owsem" ? `${name}-owsem` : name;
-    let defaulted = flavor !== "owsem";
-    const dependencies = new Set<string>();
-    const uses = new Set(["@owsem/core"]);
-    const files = readdirSync(join(uiSrc, "components", name))
-      .filter(isSource)
-      .map((file) => ({
-        path: stage(item, `components/${name}/${file}`, file, (code) => {
-          for (const dependency of npmDependencies(code)) dependencies.add(dependency);
-          if (file.endsWith(".css")) return code;
-          const out = rewriteImports(name, code, uses);
-          if (flavor !== "owsem" || !FLAVOR_DEFAULT.test(out)) return out;
-          defaulted = true;
-          return out.replace(FLAVOR_DEFAULT, '$1"owsem";');
-        }),
-        type: file.endsWith(".css") ? ("registry:file" as const) : ("registry:ui" as const),
-        target: `@components/owsem/${name}/${file}`,
-      }));
-    if (!defaulted) throw new Error(`${name}: no DEFAULT_FLAVOR line to set for ${item}.`);
+  const dependencies = new Set<string>();
+  const uses = new Set(["@owsem/core"]);
+  const files = readdirSync(join(uiSrc, "components", name))
+    .filter(isSource)
+    .map((file) => ({
+      path: stage(name, `components/${name}/${file}`, file, (code) => {
+        for (const dependency of npmDependencies(code)) dependencies.add(dependency);
+        return file.endsWith(".css") ? code : rewriteImports(name, code, uses);
+      }),
+      type: file.endsWith(".css") ? ("registry:file" as const) : ("registry:ui" as const),
+      target: `@components/owsem/${name}/${file}`,
+    }));
 
-    items.push({
-      name: item,
-      type: "registry:ui",
-      title: flavor === "owsem" ? `${entry.title} (Owsem)` : entry.title,
-      description: en.components[entry.name],
-      dependencies: [...dependencies],
-      registryDependencies: [...uses],
-      files,
-      meta: { family: entry.family, ...(flavor ? { flavor } : {}), status: entry.status },
-    });
-  }
+  items.push({
+    name,
+    type: "registry:ui",
+    title: entry.title,
+    description: en.components[entry.name],
+    dependencies: [...dependencies],
+    registryDependencies: [...uses],
+    files,
+    meta: { family: entry.family, status: entry.status },
+  });
 }
 
 for (const item of items) assertValidItem(item);

@@ -133,8 +133,9 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Separator** (Base) and **Tree Rail Nav** (Base + Owsem, the only component with `flavor` so far)
-are built.
+**Separator** (Base, from `owsem-ui/base`) and **Tree Rail Nav** (Owsem, from `owsem-ui/owsem`)
+are built. Base components are Base UI components with OwsemUI's styling; Owsem components are
+OwsemUI's own. No component has a `flavor` prop.
 
 ### Separator
 
@@ -156,12 +157,12 @@ import { Separator } from "owsem-ui/base"; // or "@/components/owsem/separator"
 ### Tree Rail Nav
 
 A sidebar navigation in up to three levels: a rail per level and a trail from the top to the
-current row. Registry items: `tree-rail-nav` (Base by default) and `tree-rail-nav-owsem` (Owsem by
-default); both write the same files, so install one.
+current row: the trail travels to a new current row and pulses on arrival. Registry item:
+`tree-rail-nav`.
 
 ```tsx
-import { TreeRailNav } from "owsem-ui/base"; // or "@/components/owsem/tree-rail-nav"
-<TreeRailNav.Root aria-label="Docs" flavor="owsem">
+import { TreeRailNav } from "owsem-ui/owsem"; // or "@/components/owsem/tree-rail-nav"
+<TreeRailNav.Root aria-label="Docs">
   <TreeRailNav.List>
     <TreeRailNav.Node>
       <TreeRailNav.Link href="/" current={path === "/"}>Home</TreeRailNav.Link>
@@ -184,8 +185,7 @@ import { TreeRailNav } from "owsem-ui/base"; // or "@/components/owsem/tree-rail
   an optional label the trail starts beside.
 - `Link`: `current` (`true`, `"page"`, or `"step"`; the trail ends at the deepest current row),
   `disabled`, and `render` for a router link (`render={<Link href="/x" />}`).
-- `Root`: `flavor` (`"base"`: neutral trail, drawn at once; `"owsem"`: accent trail that travels
-  and pulses). Arrow keys, Home, and End move between rows; do not add your own.
+- `Root`: arrow keys, Home, and End move between rows; do not add your own.
 - Tokens: `--ow-tree-rail-trail`, `--ow-tree-rail-rail`, `--ow-tree-rail-node`,
   `--ow-tree-rail-surface` (the background behind the nav), and rail positions
   `--ow-tree-rail-r0` to `--ow-tree-rail-r2` in px.

@@ -30,8 +30,7 @@ export function ComponentIndex({
   labels: Record<Filter, string> & { legend: string };
 }) {
   const [filter, setFilter] = useState<Filter>("all");
-  const shown = (family: Family) =>
-    filter === "all" || family === filter || family === "base+owsem";
+  const shown = (family: Family) => filter === "all" || family === filter;
   return (
     <>
       <fieldset className="seg filter">

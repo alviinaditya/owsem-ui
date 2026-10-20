@@ -1,6 +1,6 @@
 "use client";
 
-import { type HTMLAttributes, useEffect, useRef } from "react";
+import { type HTMLAttributes, useLayoutEffect, useRef } from "react";
 
 /**
  * A scroller without a visible scrollbar: each edge fades (globals.css, .scroll-fade) while there
@@ -11,7 +11,8 @@ import { type HTMLAttributes, useEffect, useRef } from "react";
 export function ScrollFade({ className, children, ...scroller }: HTMLAttributes<HTMLDivElement>) {
   const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  // Before the first paint, so a scroller mounted on the client never shows a frame unfaded.
+  useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
     const update = () => {
@@ -33,7 +34,11 @@ export function ScrollFade({ className, children, ...scroller }: HTMLAttributes<
     const content = new MutationObserver(observe);
     content.observe(el, { childList: true, subtree: true, characterData: true });
     el.addEventListener("scroll", update, { passive: true });
+    // The first fades are simply there; later changes transition.
+    el.setAttribute("data-instant", "");
     observe();
+    void getComputedStyle(el).getPropertyValue("--fade-bottom");
+    el.removeAttribute("data-instant");
     return () => {
       el.removeEventListener("scroll", update);
       content.disconnect();

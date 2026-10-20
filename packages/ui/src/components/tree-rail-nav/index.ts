@@ -1,5 +1,4 @@
 export type {
-  TreeRailNavFlavor,
   TreeRailNavIconProps,
   TreeRailNavLabelProps,
   TreeRailNavLinkProps,

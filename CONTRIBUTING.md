@@ -154,10 +154,12 @@ keyboard calls `setActive()`.
 
 The package and registry builds pick up the folder automatically. Registry copies rewrite imports
 that leave the folder: Core to `@/lib/owsem/...` and other components to
-`@/components/owsem/<name>/...` (CLI-6 in the PRD). A `base+owsem` component ships as two items
-from one source, `<name>` and `<name>-owsem`: its main file declares
-`const DEFAULT_FLAVOR: <Type> = "base";` on one line, and the `-owsem` item rewrites that line to
-`"owsem"` (Tree Rail Nav is the reference).
+`@/components/owsem/<name>/...` (CLI-6 in the PRD). Every component is one item, `<name>`.
+
+A component has one type. **Base** is a Base UI component with OwsemUI's styling and small
+improvements, exported from `src/base.ts` (`owsem-ui/base`). **Owsem** is OwsemUI's own component,
+beyond Base UI, exported from `src/owsem.ts` (`owsem-ui/owsem`); Tree Rail Nav is the reference.
+There is no `flavor` prop, and glow (Lumen) is for Owsem only.
 
 ## Labs
 
@@ -178,7 +180,7 @@ component and marks the one being read. Separator is the reference. A Lab has tw
   after the scene. Controls are `choice` (a segmented radio group) or `color` (a hex field and the
   browser's picker; `token` names the theme token the component uses until a color is chosen).
 
-The token setup in the top bar (mode and prefix, DS-4) reaches every Lab: `code(cfg, setup)` writes
+The token setup in the sidebar's foot (mode and prefix, DS-4) reaches every Lab: `code(cfg, setup)` writes
 token names with `setup.prefix` and any setup but theme with `ow` imports from the owsem CLI's copy,
 the install tab switches to the owsem CLI, and `--ow-` in the narrative's code is renamed in the
 browser (`data-token-literal` keeps a name as written).
@@ -193,7 +195,7 @@ under owsem-ui by `app/layers.css`, so a component on the stage keeps its own co
 ring. Style the docs by class; a new element default goes in `docs-base`.
 
 The `states` scene compares rather than describes: its `demo` returns a `Matrix`
-(`components/lab/matrix.tsx`) of live cells, such as flavors by states or variants by sizes.
+(`components/lab/matrix.tsx`) of live cells, such as variants by sizes or states by themes.
 
 Each part in `parts` has a selector into the demo, a note, and its public tokens, each mapped to
 the private property that holds the value in use (a public token is empty until someone sets it).

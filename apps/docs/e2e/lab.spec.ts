@@ -199,18 +199,23 @@ test("the header names each stage shortcut this Lab has", async ({ page }, testI
   else await expect(pane).toBeHidden();
 });
 
-test("the stage theme changes the stage only (DS-12)", async ({ page }) => {
+test("the stage theme changes the whole stage, and the stage only (DS-12)", async ({ page }) => {
   await page.emulateMedia({ colorScheme: "dark" });
   await page.goto("/en/separator");
   // The stage background is a gradient between its own color and the page's.
   const background = () => stageBody(page).evaluate((el) => getComputedStyle(el).backgroundImage);
+  const bar = () =>
+    page.locator(".lab-stage-bar").evaluate((el) => getComputedStyle(el).backgroundColor);
   // Without a choice the stage follows the site, server render included.
-  await expect(stageBody(page)).not.toHaveAttribute("data-theme");
+  await expect(stage(page)).not.toHaveAttribute("data-theme");
   const dark = await background();
+  const darkBar = await bar();
 
   await stage(page).getByRole("button", { name: "Stage theme" }).click();
-  await expect(stageBody(page)).toHaveAttribute("data-theme", "light");
+  await expect(stage(page)).toHaveAttribute("data-theme", "light");
   expect(await background()).not.toBe(dark);
+  // The toolbar goes light with the stage.
+  expect(await bar()).not.toBe(darkBar);
   await expect(page.locator(".lab-drawer")).not.toHaveCSS(
     "background-color",
     await page.locator("body").evaluate((el) => getComputedStyle(el).backgroundColor),
@@ -383,23 +388,27 @@ test("a Lab without animations has no Play scene or Replay", async ({ page }) =>
   );
 });
 
-test("the states scene sets the flavors side by side, then gives the demo back (DS-2)", async ({
+test("the states scene sets the themes side by side, then gives the demo back (DS-2)", async ({
   page,
 }) => {
   await page.goto("/en/tree-rail-nav");
   const navs = stage(page).getByRole("navigation");
   await expect(navs).toHaveCount(1);
   await scene(page, "states");
-  await expect(stage(page).getByRole("columnheader")).toHaveText(["Base", "Owsem"]);
+  await expect(stage(page).getByRole("columnheader")).toHaveText(["Light", "Dark"]);
   await expect(navs).toHaveCount(4);
   const cell = (name: string) => stage(page).getByRole("navigation", { name });
-  await expect(cell("Owsem, Group closed").getByRole("button", { name: "Guides" })).toHaveAttribute(
+  await expect(cell("Dark, Group closed").getByRole("button", { name: "Guides" })).toHaveAttribute(
     "aria-expanded",
     "false",
   );
-  // The pointer picks Installation in Base, then in Owsem.
-  await expect(cell("Base, Group open").locator("a[aria-current]")).toHaveText("Installation");
-  await expect(cell("Owsem, Group open").locator("a[aria-current]")).toHaveText("Installation");
+  // Each column is in its own theme.
+  const background = (name: string) =>
+    cell(name).evaluate((el) => getComputedStyle(el).backgroundColor);
+  expect(await background("Light, Group open")).not.toBe(await background("Dark, Group open"));
+  // The pointer picks Installation in each.
+  await expect(cell("Light, Group open").locator("a[aria-current]")).toHaveText("Installation");
+  await expect(cell("Dark, Group open").locator("a[aria-current]")).toHaveText("Installation");
 
   await scene(page, "keyboard");
   await expect(navs).toHaveCount(1);

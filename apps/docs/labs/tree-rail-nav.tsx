@@ -1,7 +1,7 @@
 "use client";
 
-import { TreeRailNav } from "owsem-ui/base";
-import { type ReactNode, useState } from "react";
+import { TreeRailNav } from "owsem-ui/owsem";
+import { type CSSProperties, type ReactNode, useState } from "react";
 import { Icon, type IconName } from "@/components/icons/icon";
 import { type LabProps, LabShell } from "@/components/lab/lab-shell";
 import { Matrix } from "@/components/lab/matrix";
@@ -41,11 +41,11 @@ const TEXT = {
 } satisfies Record<Lang, Record<string, string>>;
 
 type Page = keyof (typeof TEXT)["en"];
-type Flavor = "base" | "owsem";
+type Theme = "light" | "dark";
 
 const STATES = {
-  id: { open: "Grup terbuka", closed: "Grup tertutup" },
-  en: { open: "Group open", closed: "Group closed" },
+  id: { open: "Grup terbuka", closed: "Grup tertutup", light: "Terang", dark: "Gelap" },
+  en: { open: "Group open", closed: "Group closed", light: "Light", dark: "Dark" },
 } satisfies Record<Lang, Record<string, string>>;
 
 /** Rows for a demo nav that keeps its own current page: a click picks it, so the trail moves. */
@@ -88,10 +88,10 @@ function useRows(lang: Lang) {
   return { t, link, group };
 }
 
-function Demo({ flavor, lang }: { flavor: Flavor; lang: Lang }) {
+function Demo({ lang, style }: { lang: Lang; style: CSSProperties }) {
   const { t, link, group } = useRows(lang);
   return (
-    <TreeRailNav.Root aria-label={t.nav} flavor={flavor} className="demo-tree-rail">
+    <TreeRailNav.Root aria-label={t.nav} className="demo-tree-rail" style={style}>
       <TreeRailNav.Origin>{t.nav}</TreeRailNav.Origin>
       <TreeRailNav.List>
         {link("overview", "monitor")}
@@ -124,70 +124,74 @@ function Demo({ flavor, lang }: { flavor: Flavor; lang: Lang }) {
   );
 }
 
-/** One cell of the states matrix: a shorter nav, its group open or closed. */
+/** One cell of the states matrix: a shorter nav in one theme, its group open or closed. */
 function Cell({
-  flavor,
+  theme,
   open,
   label,
   lang,
 }: {
-  flavor: Flavor;
+  theme: Theme;
   open: boolean;
   label: string;
   lang: Lang;
 }) {
   const { link, group } = useRows(lang);
   return (
-    <TreeRailNav.Root
-      aria-label={label}
-      flavor={flavor}
-      className="demo-tree-rail"
-      data-compact=""
-      data-cell={`${flavor}-${open ? "open" : "closed"}`}
-    >
-      <TreeRailNav.List>
-        {link("overview", "monitor")}
-        {group(
-          "guides",
-          <>
-            {link("install")}
-            {link("dark")}
-            {link("density", undefined, true)}
-          </>,
-          "sliders-horizontal",
-          open,
-        )}
-        {link("changelog", "rotate-ccw")}
-      </TreeRailNav.List>
-    </TreeRailNav.Root>
+    <div data-theme={theme}>
+      <TreeRailNav.Root
+        aria-label={label}
+        className="demo-tree-rail"
+        data-compact=""
+        data-cell={`${theme}-${open ? "open" : "closed"}`}
+      >
+        <TreeRailNav.List>
+          {link("overview", "monitor")}
+          {group(
+            "guides",
+            <>
+              {link("install")}
+              {link("dark")}
+              {link("density", undefined, true)}
+            </>,
+            "sliders-horizontal",
+            open,
+          )}
+          {link("changelog", "rotate-ccw")}
+        </TreeRailNav.List>
+      </TreeRailNav.Root>
+    </div>
   );
 }
 
-const FLAVORS = [
-  ["base", "Base"],
-  ["owsem", "Owsem"],
-] as const;
+const THEMES: readonly Theme[] = ["light", "dark"];
 
-/** Both flavors side by side, with the current row's group open and closed. */
+/** Both themes side by side, with the current row's group open and closed. */
 function States({ lang }: { lang: Lang }) {
   const text = STATES[lang];
   return (
     <Matrix
-      columns={FLAVORS.map(([, name]) => name)}
+      columns={THEMES.map((theme) => text[theme])}
       rows={[
         { open: true, row: text.open },
         { open: false, row: text.closed },
       ].map(({ open, row }) => ({
         label: row,
-        cells: FLAVORS.map(([flavor, name]) => (
-          <Cell key={flavor} flavor={flavor} open={open} label={`${name}, ${row}`} lang={lang} />
+        cells: THEMES.map((theme) => (
+          <Cell
+            key={theme}
+            theme={theme}
+            open={open}
+            label={`${text[theme]}, ${row}`}
+            lang={lang}
+          />
         )),
       }))}
     />
   );
 }
 
-const initial = { flavor: "owsem" };
+const initial = { trail: "", rail: "" };
 
 // The pointer picks a few pages in turn, and ends where it started.
 const trail: SceneScript = async (stage) => {
@@ -197,11 +201,11 @@ const trail: SceneScript = async (stage) => {
   }
 };
 
-// Picks Installation in each flavor, Base first, then goes back: one jumps, one travels.
+// Picks Installation in each theme, then goes back.
 const states: SceneScript = async (stage) => {
   for (const page of ["install", "dark"]) {
-    for (const [flavor] of FLAVORS) {
-      await stage.click(stage.get(`[data-cell="${flavor}-open"] a[href="#${page}"]`));
+    for (const theme of THEMES) {
+      await stage.click(stage.get(`[data-cell="${theme}-open"] a[href="#${page}"]`));
       await stage.wait(1200);
     }
   }
@@ -220,13 +224,16 @@ const treeRailNavLab = defineLab({
   initial,
   controls: [
     {
-      key: "flavor",
-      type: "choice",
-      label: { id: "Flavor", en: "Flavor" },
-      options: [
-        { value: "base", label: { id: "Base", en: "Base" } },
-        { value: "owsem", label: { id: "Owsem", en: "Owsem" } },
-      ],
+      key: "trail",
+      type: "color",
+      label: { id: "Jejak", en: "Trail" },
+      token: "--ow-accent",
+    },
+    {
+      key: "rail",
+      type: "color",
+      label: { id: "Rail", en: "Rail" },
+      token: "--ow-line",
     },
   ],
 
@@ -315,13 +322,18 @@ const treeRailNavLab = defineLab({
   ],
 
   demo(cfg, lang) {
-    return <Demo flavor={cfg.flavor === "base" ? "base" : "owsem"} lang={lang} />;
+    const style = {
+      "--ow-tree-rail-trail": cfg.trail || undefined,
+      "--ow-tree-rail-rail": cfg.rail || undefined,
+    } as CSSProperties;
+    return <Demo lang={lang} style={style} />;
   },
 
   code(cfg, setup) {
     // Any other token setup comes from the owsem CLI, which copies the component into the project.
-    const from = isDefaultSetup(setup) ? "owsem-ui/base" : "@/components/owsem/tree-rail-nav";
-    const flavor = cfg.flavor === "owsem" ? ' flavor="owsem"' : "";
+    const from = isDefaultSetup(setup) ? "owsem-ui/owsem" : "@/components/owsem/tree-rail-nav";
+    const custom = cfg.trail || cfg.rail;
+    const scope = custom ? ' className="sidebar"' : "";
     const usage = [
       `import { TreeRailNav } from "${from}";`,
       "",
@@ -334,7 +346,7 @@ const treeRailNavLab = defineLab({
       "    </TreeRailNav.Node>",
       "  );",
       "  return (",
-      `    <TreeRailNav.Root aria-label="Documentation"${flavor}>`,
+      `    <TreeRailNav.Root aria-label="Documentation"${scope}>`,
       "      <TreeRailNav.Origin>Documentation</TreeRailNav.Origin>",
       "      <TreeRailNav.List>",
       '        {link("/", "Overview")}',
@@ -352,11 +364,23 @@ const treeRailNavLab = defineLab({
       "  );",
       "}",
     ];
-    return [{ name: "sidebar.tsx", code: usage.join("\n") }];
+    const files = [{ name: "sidebar.tsx", code: usage.join("\n") }];
+    if (custom) {
+      const token = `--${setup.prefix}-tree-rail`;
+      // Isolated tokens are set on each nav's root, so set them there too.
+      const lines = [
+        setup.mode === "isolated" ? ".sidebar.ow-tree-rail-nav {" : ".sidebar {",
+        ...(cfg.trail ? [`  ${token}-trail: ${cfg.trail};`] : []),
+        ...(cfg.rail ? [`  ${token}-rail: ${cfg.rail};`] : []),
+        "}",
+      ];
+      files.push({ name: "sidebar.css", code: lines.join("\n") });
+    }
+    return files;
   },
 
   scenes: {
-    trail: { cfg: { flavor: "owsem" }, play: trail },
+    trail: { play: trail },
     groups: { play: groups },
     anatomy: { inspect: true },
     states: {

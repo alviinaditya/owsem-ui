@@ -1,6 +1,6 @@
 // Sizes shared with globals.css; keep both in sync.
 
-/** The stage sits beside the narrative from here; below, it is a pane under the top bar. */
+/** The stage sits beside the narrative from here; below, it is a pane at the top of the screen. */
 export const SIDE_BY_SIDE = "(min-width: 960px)";
 
 /** Stage width from which the controls are a side panel (`@container stage`), else a sheet. */

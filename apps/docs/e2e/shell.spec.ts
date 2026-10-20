@@ -20,7 +20,7 @@ test("the sidebar fades the edges that have more to scroll", async ({ page }, te
   if (testInfo.project.name === "mobile-390") {
     await page.getByRole("button", { name: "Menu", exact: true }).click();
   }
-  const scroller = page.locator("#site-sidebar");
+  const scroller = page.locator("#site-sidebar-scroll");
   await expect(scroller).not.toHaveAttribute("data-fade-top");
   await expect(scroller).toHaveAttribute("data-fade-bottom", "");
   await scroller.evaluate((el) => el.scrollTo(0, el.scrollHeight));
@@ -61,8 +61,9 @@ test("the index filters components by family", async ({ page }) => {
   await main.getByLabel("Owsem").check();
   await expect(main.getByRole("link", { name: "Separator", exact: true })).toHaveCount(0);
   await expect(main.getByRole("link", { name: "Lumen Rail Nav", exact: true })).toBeVisible();
-  // Base + Owsem components belong to both filters.
-  await expect(main.getByRole("link", { name: "Button", exact: true })).toBeVisible();
+  await expect(main.getByRole("link", { name: "Tree Rail Nav", exact: true })).toBeVisible();
+  // A component has one type: Button, from Base UI, is Base only.
+  await expect(main.getByRole("link", { name: "Button", exact: true })).toHaveCount(0);
 
   await main.getByLabel("Base").check();
   await expect(main.getByRole("link", { name: "Lumen Rail Nav", exact: true })).toHaveCount(0);
@@ -141,4 +142,24 @@ test("the sidebar stays mounted from the docs to a Lab, so the trail travels the
   // Same element: not remounted by the change of layout.
   await expect(sidebar).toHaveAttribute("data-mark", "before");
   await expect(sidebar.locator("[data-arrived]")).toContainText("Overview", { timeout: 4000 });
+});
+
+test("no top bar: the sidebar's foot holds the settings, and a dock opens it below 1100 px", async ({
+  page,
+}, testInfo) => {
+  await page.goto("/en/docs");
+  await expect(page.getByRole("banner")).toHaveCount(0);
+  const menu = page.getByRole("button", { name: "Menu", exact: true });
+  const foot = page.locator(".site-sidebar-foot");
+  if (testInfo.project.name === "mobile-390") {
+    await expect(foot).toBeHidden();
+    await menu.click();
+  } else {
+    await expect(menu).toBeHidden();
+  }
+  await expect(foot.getByRole("group", { name: "Theme" })).toBeVisible();
+  await expect(foot.getByRole("navigation", { name: "Language" })).toBeVisible();
+  // The foot's button opens the token panel; so does the chip in a Lab.
+  await foot.getByRole("button", { name: /Token/ }).click();
+  await expect(page.getByRole("dialog", { name: "Token setup" })).toBeVisible();
 });

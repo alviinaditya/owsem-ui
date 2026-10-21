@@ -25,9 +25,10 @@ shuts it from the button. Play scene runs it again.
 ## Placed and pointed [#placement]
 
 Base UI places the panel on the `side` you ask for, `bottom` by default, 10px from its button, and
-flips it to the other side when it would leave the screen. The arrow sits on the panel's edge,
-with its surface and its 1px edge, and points at the button's middle even when the panel slides
-along to stay on screen; it keeps clear of the rounded corners.
+flips it to the other side when it would leave the screen. The arrow sits on the panel's edge
+with its surface and shadow, so its edges are the panel's (in dark, a light line inside a dark
+ring) and open into it. It points at the button's middle even when the panel slides along to stay
+on screen, and keeps clear of the rounded corners.
 
 The panel is pinned open on the stage: pick a side or turn the arrow off in the controls.
 
@@ -98,8 +99,7 @@ subtree.
 | Component token | Default | Purpose |
 | --- | --- | --- |
 | `--ow-popover-bg` | `--ow-panel` | Surface, the arrow's too |
-| `--ow-popover-shadow` | `--ow-popup-shadow` | Edge and shadow |
-| `--ow-popover-edge` | `--ow-fg` at 10% | The arrow's edge: set it with the shadow |
+| `--ow-popover-shadow` | `--ow-popup-shadow` | Edge and shadow, the arrow's too |
 | `--ow-popover-fg` | `--ow-fg` | Text |
 | `--ow-popover-muted` | `--ow-muted` | The description |
 
@@ -113,8 +113,7 @@ class around the trigger does not reach: the panel renders in a portal.
 | Component token | Default | Purpose |
 | --- | --- | --- |
 | `--ow-popover-bg` | Its own, per theme | Surface, the arrow's too |
-| `--ow-popover-shadow` | Its own, per theme | Edge and shadow |
-| `--ow-popover-edge` | Its own, per theme | The arrow's edge: set it with the shadow |
+| `--ow-popover-shadow` | Its own, per theme | Edge and shadow, the arrow's too |
 | `--ow-popover-fg` | Its own, per theme | Text |
 | `--ow-popover-muted` | Its own, per theme | The description |
 

@@ -9,12 +9,15 @@
     --_bg: var(--ow-popover-bg, var(--ow-panel, #ffffff));
     --_shadow: var(
       --ow-popover-shadow,
-      var(--ow-popup-shadow, 0 0 0 1px rgb(30 25 40 / 0.1), 0 16px 40px -12px rgb(40 30 20 / 0.24))
+      var(
+        --ow-popup-shadow,
+        0 0 0 1px rgb(0 0 0 / 0.08),
+        0 4px 8px -2px rgb(0 0 0 / 0.06),
+        0 16px 32px -8px rgb(0 0 0 / 0.14)
+      )
     );
-    /* The arrow's edge: the popup shadow's 1px ring, in both themes. */
-    --_edge: var(--ow-popover-edge, color-mix(in oklab, var(--ow-fg, #1b1726) 10%, transparent));
-    --_fg: var(--ow-popover-fg, var(--ow-fg, #1b1726));
-    --_muted: var(--ow-popover-muted, var(--ow-muted, #5c5669));
+    --_fg: var(--ow-popover-fg, var(--ow-fg, #18181b));
+    --_muted: var(--ow-popover-muted, var(--ow-muted, #63636b));
     box-sizing: border-box;
     max-inline-size: var(--available-width);
     padding: 16px;
@@ -65,58 +68,101 @@
   }
 
   /*
-   * A 14px box centered on the popup's edge; its outer half shows a square turned 45 degrees, with
-   * the popup's surface and a 1px edge. Base UI centers it on the trigger with top or left.
+   * A 14px box centered on the popup's edge; its outer half shows a square turned 45 degrees with
+   * the popup's surface and shadow, so its edges are the panel's (in dark, a light line inside a
+   * dark ring). The visible half reaches 1px into the popup at the middle, over the panel's inner
+   * line, so the arrow opens into the panel. Base UI centers it on the trigger with top or left.
    */
   .ow-popover-arrow {
+    /* The half that shows when the arrow points right or left. */
+    --_right-half: polygon(
+      50% 0,
+      100% 0,
+      100% 100%,
+      50% 100%,
+      50% 11px,
+      calc(50% - 1px) 11px,
+      calc(50% - 1px) 3px,
+      50% 3px
+    );
+    --_left-half: polygon(
+      0 0,
+      50% 0,
+      50% 3px,
+      calc(50% + 1px) 3px,
+      calc(50% + 1px) 11px,
+      50% 11px,
+      50% 100%,
+      0 100%
+    );
     inline-size: 14px;
     block-size: 14px;
   }
 
+  /* With the 1px ring outside it, the square's diagonal is the box: (7.9 + 2) × √2 = 14. */
   .ow-popover-arrow::before {
     content: "";
     position: absolute;
     inset: 0;
-    box-sizing: border-box;
-    inline-size: 9.9px;
-    block-size: 9.9px;
+    inline-size: 7.9px;
+    block-size: 7.9px;
     margin: auto;
-    border: 1px solid var(--_edge);
+    /* Invisible until forced colors draw it as the edge (DP-8). */
+    outline: 1px solid transparent;
     background-color: var(--_bg);
+    box-shadow: var(--_shadow);
     transform: rotate(45deg);
   }
 
   /* biome-ignore-start lint/nursery/useLogicalProperties: Base UI's physical sides */
   .ow-popover-arrow[data-side="top"] {
     top: calc(100% - 7px);
-    clip-path: inset(50% 0 0);
+    clip-path: polygon(
+      0 50%,
+      3px 50%,
+      3px calc(50% - 1px),
+      11px calc(50% - 1px),
+      11px 50%,
+      100% 50%,
+      100% 100%,
+      0 100%
+    );
   }
 
   .ow-popover-arrow[data-side="bottom"] {
     bottom: calc(100% - 7px);
-    clip-path: inset(0 0 50%);
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% 50%,
+      11px 50%,
+      11px calc(50% + 1px),
+      3px calc(50% + 1px),
+      3px 50%,
+      0 50%
+    );
   }
 
   .ow-popover-arrow[data-side="left"] {
     left: calc(100% - 7px);
-    clip-path: inset(0 0 0 50%);
+    clip-path: var(--_right-half);
   }
 
   .ow-popover-arrow[data-side="right"] {
     right: calc(100% - 7px);
-    clip-path: inset(0 50% 0 0);
+    clip-path: var(--_left-half);
   }
   /* biome-ignore-end lint/nursery/useLogicalProperties: Base UI's physical sides */
 
   /* Logical sides: mirrored right to left. */
   .ow-popover-arrow[data-side="inline-start"] {
     inset-inline-start: calc(100% - 7px);
-    clip-path: inset(0 0 0 50%);
+    clip-path: var(--_right-half);
   }
 
   .ow-popover-arrow[data-side="inline-end"] {
     inset-inline-end: calc(100% - 7px);
-    clip-path: inset(0 50% 0 0);
+    clip-path: var(--_left-half);
   }
 
   .ow-popover-positioner[dir="rtl"]

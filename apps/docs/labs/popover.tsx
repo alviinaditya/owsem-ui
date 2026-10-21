@@ -305,10 +305,10 @@ const popoverLab = defineLab({
       name: "Arrow",
       selector: ".ow-popover-arrow",
       note: {
-        id: "Opsional: permukaan dan tepi panel, di tepinya, tepat di atas trigger.",
-        en: "Optional: the panel's surface and edge, on its edge, over the trigger.",
+        id: "Opsional: permukaan dan bayangan panel, di tepinya, tepat di atas trigger.",
+        en: "Optional: the panel's surface and shadow, on its edge, over the trigger.",
       },
-      tokens: { "--ow-popover-edge": "--_edge" },
+      tokens: { "--ow-popover-bg": "--_bg", "--ow-popover-shadow": "--_shadow" },
     },
     {
       name: "Title",

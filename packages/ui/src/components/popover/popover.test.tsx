@@ -208,12 +208,10 @@ describe("Popover", () => {
       expect(
         getComputedStyle(document.querySelector(".ow-popover-description") as Element).color,
       ).toBe(resolve("color", "var(--ow-muted)"));
+      // The arrow wears the popup's surface and shadow, so its edges are the panel's.
       const tip = getComputedStyle(arrow(), "::before");
       expect(tip.backgroundColor).toBe(resolve("color", "var(--ow-panel)"));
-      // The edge is the popup shadow's 1px ring: the text color, faint.
-      expect(tip.borderTopColor).toBe(
-        resolve("color", "color-mix(in oklab, var(--ow-fg) 10%, transparent)"),
-      );
+      expect(tip.boxShadow).toBe(resolve("box-shadow", "var(--ow-popup-shadow)"));
     }
   });
 
@@ -221,7 +219,6 @@ describe("Popover", () => {
     const tokens = {
       "--ow-popover-bg": "rgb(1, 2, 3)",
       "--ow-popover-shadow": "none",
-      "--ow-popover-edge": "rgb(255, 0, 0)",
       "--ow-popover-fg": "rgb(4, 5, 6)",
       "--ow-popover-muted": "rgb(7, 8, 9)",
     } as CSSProperties;
@@ -236,7 +233,7 @@ describe("Popover", () => {
     ).toBe("rgb(7, 8, 9)");
     const tip = getComputedStyle(arrow(), "::before");
     expect(tip.backgroundColor).toBe("rgb(1, 2, 3)");
-    expect(tip.borderTopColor).toBe("rgb(255, 0, 0)");
+    expect(tip.boxShadow).toBe("none");
   });
 
   test("keeps its edge and its arrow's in forced colors (DP-8)", async () => {
@@ -248,8 +245,8 @@ describe("Popover", () => {
     expect(style.outlineStyle).toBe("solid");
     expect(style.outlineColor).not.toBe("rgba(0, 0, 0, 0)");
     const tip = getComputedStyle(arrow(), "::before");
-    expect(tip.borderTopWidth).toBe("1px");
-    expect(tip.borderTopColor).toBe(style.color);
+    expect(tip.outlineWidth).toBe("1px");
+    expect(tip.outlineColor).toBe(style.color);
   });
 
   test("follows the text direction, also in the portal (FR-16)", async () => {

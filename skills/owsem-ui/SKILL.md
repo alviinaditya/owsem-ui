@@ -238,8 +238,8 @@ import { Popover } from "owsem-ui/base"; // or "@/components/owsem/popover"
 - The panel renders in a portal: set tokens on the Popup's class or on `:root`, and `data-theme` on
   the Positioner when the trigger sits in a themed subtree. Long content scrolls in a container
   inside the popup (the popup itself has no overflow, so the arrow shows).
-- Tokens: `--ow-popover-bg`, `--ow-popover-shadow`, `--ow-popover-edge` (the arrow's edge; set it
-  with the shadow), `--ow-popover-fg`, `--ow-popover-muted`.
+- Tokens: `--ow-popover-bg`, `--ow-popover-shadow` (the arrow takes both), `--ow-popover-fg`,
+  `--ow-popover-muted`.
 
 ### Separator
 

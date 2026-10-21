@@ -26,9 +26,10 @@ menutupnya dari tombol. Putar scene memutarnya lagi.
 ## Ditaruh dan menunjuk [#placement]
 
 Base UI menaruh panel di `side` yang diminta, bawaannya `bottom`, 10px dari tombolnya, dan
-membaliknya ke sisi seberang bila panel akan keluar layar. Panah berada di tepi panel, dengan
-permukaan dan tepi 1px yang sama, dan menunjuk tengah tombol meski panel bergeser agar tetap di
-layar; panah juga menjauh dari sudut yang membulat.
+membaliknya ke sisi seberang bila panel akan keluar layar. Panah berada di tepi panel dengan
+permukaan dan bayangan yang sama, jadi tepinya adalah tepi panel (di tema gelap, garis terang di
+dalam cincin gelap) dan terbuka ke dalamnya. Panah menunjuk tengah tombol meski panel bergeser
+agar tetap di layar, dan menjauh dari sudut yang membulat.
 
 Panel disematkan terbuka di stage: pilih sisi atau matikan panah di kontrol.
 
@@ -98,8 +99,7 @@ di sekitar trigger tidak sampai: panel dirender di portal, di luar subtree trigg
 | Token komponen | Bawaan | Fungsi |
 | --- | --- | --- |
 | `--ow-popover-bg` | `--ow-panel` | Permukaan, juga untuk panah |
-| `--ow-popover-shadow` | `--ow-popup-shadow` | Tepi dan bayangan |
-| `--ow-popover-edge` | `--ow-fg` 10% | Tepi panah: pasang bersama bayangannya |
+| `--ow-popover-shadow` | `--ow-popup-shadow` | Tepi dan bayangan, juga untuk panah |
 | `--ow-popover-fg` | `--ow-fg` | Teks |
 | `--ow-popover-muted` | `--ow-muted` | Deskripsi |
 
@@ -113,8 +113,7 @@ sekitar trigger tidak sampai: panel dirender di portal.
 | Token komponen | Bawaan | Fungsi |
 | --- | --- | --- |
 | `--ow-popover-bg` | Miliknya sendiri, per tema | Permukaan, juga untuk panah |
-| `--ow-popover-shadow` | Miliknya sendiri, per tema | Tepi dan bayangan |
-| `--ow-popover-edge` | Miliknya sendiri, per tema | Tepi panah: pasang bersama bayangannya |
+| `--ow-popover-shadow` | Miliknya sendiri, per tema | Tepi dan bayangan, juga untuk panah |
 | `--ow-popover-fg` | Miliknya sendiri, per tema | Teks |
 | `--ow-popover-muted` | Miliknya sendiri, per tema | Deskripsi |
 

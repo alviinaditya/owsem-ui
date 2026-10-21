@@ -6,8 +6,8 @@
  */
 @layer owsem.components {
   .ow-tooltip-popup {
-    --_bg: var(--ow-tooltip-bg, #1b1726);
-    --_fg: var(--ow-tooltip-fg, #f4f2f8);
+    --_bg: var(--ow-tooltip-bg, #18181b);
+    --_fg: var(--ow-tooltip-fg, #fafafa);
     box-sizing: border-box;
     max-inline-size: min(20rem, var(--available-width, 20rem));
     /* One line is 24px tall. */

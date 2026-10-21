@@ -132,7 +132,7 @@ describe("light, dark, and system themes (TK-5)", () => {
 
   test("the depth materials and springs are valid CSS (TK-7, FR-21)", () => {
     const tokens = themeOf(root);
-    for (const material of ["panel", "raised", "well", "pressed", "socket", "primary"]) {
+    for (const material of ["panel", "raised", "well", "pressed", "primary"]) {
       const shadow = tokens[`--ow-${material}-shadow`] ?? "";
       expect(CSS.supports("box-shadow", shadow), material).toBe(true);
     }

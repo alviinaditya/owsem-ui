@@ -8,7 +8,7 @@
   .ow-tree-rail-nav {
     --_fg: var(--ow-fg, #18181b);
     --_muted: var(--ow-muted, #5f5f6b);
-    --_rail: var(--ow-tree-rail-rail, var(--ow-line, #d9d9e0));
+    --_rail: var(--ow-tree-rail-rail, var(--ow-line, #e4e4e7));
     --_node: var(--ow-tree-rail-node, color-mix(in oklab, var(--_fg) 24%, transparent));
     --_trail: var(--ow-tree-rail-trail, var(--ow-accent, #7c6ab8));
     /* Dots are cut out of the rail with the surface color behind them. */

@@ -157,10 +157,12 @@ that leave the folder: Core to `@/lib/owsem/...` and other components to
 
 ### Materials and motion
 
-Surfaces come from the depth materials in `tokens.css` (TK-7): `--ow-panel` and `--ow-popup-shadow`
-for popups, `--ow-raised-*` for buttons and thumbs, `--ow-well-*` for tracks and fields,
-`--ow-pressed-*` for pressed and on states, `--ow-socket-*` around important buttons, and
-`--ow-primary-*` for the primary button. Base never glows (DP-1).
+Surfaces come from the materials in `tokens.css` (TK-7): `--ow-panel` and `--ow-popup-shadow` for
+panels and popups, `--ow-raised-*` for buttons, thumbs, and on states, `--ow-well-*` for tracks and
+fields, `--ow-pressed-*` while a control is held down, and `--ow-primary-*` for the primary button.
+Depth comes from flat fills and crisp 1px edges, drawn as inset shadows so they add no size; never
+use soft, blurred, or sunken (inset blur) shadows, which read as neumorphism. Separators and layout
+lines stay etched grooves (`--ow-line-dark` over `--ow-line-light`). Base never glows (DP-1).
 
 Motion explains a state change (principle 4), with these rules:
 

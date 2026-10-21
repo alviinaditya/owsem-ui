@@ -8,35 +8,35 @@
  * property is declared, so the stage's own data-theme needs its own copy. */
 :root,
 [data-theme] {
-  --docs-bg: light-dark(#fbfafd, #09080d);
-  --docs-surface: light-dark(#ffffff, #0f0e14);
-  --docs-line-strong: light-dark(rgb(27 23 38 / 0.16), rgb(255 255 255 / 0.12));
+  --docs-bg: light-dark(#fafafa, #19191b);
+  --docs-surface: light-dark(#ffffff, #1f1f21);
+  --docs-line-strong: light-dark(rgb(0 0 0 / 0.14), rgb(255 255 255 / 0.1));
   /* Control boundaries need 3:1 (WCAG 1.4.11). */
-  --docs-control: light-dark(#8a8497, #6a6578);
-  --docs-fg: light-dark(#1b1726, #ece9f3);
-  --docs-body: light-dark(#3e3950, #b3aec0);
-  --docs-muted: light-dark(#5c5669, #9893a6);
+  --docs-control: light-dark(#82828b, #6e6e76);
+  --docs-fg: light-dark(#18181b, #ededef);
+  --docs-body: light-dark(#3f3f46, #b4b4bb);
+  --docs-muted: light-dark(#63636b, #a1a1a8);
   --docs-accent: light-dark(#5b4a9a, #d4cbe5);
-  --docs-on-accent: light-dark(#ffffff, #17141f);
-  --docs-hover: light-dark(rgb(27 23 38 / 0.05), rgb(255 255 255 / 0.05));
+  --docs-on-accent: light-dark(#ffffff, #18181a);
+  --docs-hover: light-dark(rgb(0 0 0 / 0.04), rgb(255 255 255 / 0.05));
   /* Errors in fields: 4.5:1 on surfaces and wells, light and dark. */
   --docs-critical: light-dark(#b03f2a, #f2ab96);
-  --docs-stage: light-dark(#f1eff6, #13121a);
-  /* Depth material from owsem-ui's tokens (TK-7): a sunken track lit from above and a softly
-   * raised thumb, so the docs and the library share one source. */
+  --docs-stage: light-dark(#f4f4f5, #1c1c1f);
+  /* Materials from owsem-ui's tokens (TK-7): a flat darker track and a crisp-edged thumb, so the
+   * docs and the library share one source. */
   --docs-well: var(--ow-well-bg);
   --docs-well-shadow: var(--ow-well-shadow);
   --docs-raised: var(--ow-raised-bg);
   --docs-raised-shadow: var(--ow-raised-shadow);
-  --docs-stage-line: light-dark(rgb(40 30 70 / 0.07), rgb(212 203 229 / 0.06));
+  --docs-stage-line: light-dark(rgb(0 0 0 / 0.06), rgb(255 255 255 / 0.05));
   /* A groove: a dark line with a faint highlight under it, so it reads as one thin line. */
-  --docs-groove-dark: light-dark(rgb(40 30 20 / 0.17), rgb(0 0 0 / 0.85));
-  --docs-groove-light: light-dark(rgb(255 255 255 / 0.95), rgb(255 255 255 / 0.075));
+  --docs-groove-dark: light-dark(rgb(0 0 0 / 0.12), rgb(0 0 0 / 0.8));
+  --docs-groove-light: light-dark(rgb(255 255 255 / 0.95), rgb(255 255 255 / 0.06));
   /* Code colors (lib/code-theme.ts); each is at least 4.5:1 on every code background. */
   --tk-bg: var(--docs-surface);
-  --tk-text: light-dark(#2a2533, #d9d5e3);
-  --tk-punct: light-dark(#5f5970, #a19cb1);
-  --tk-com: light-dark(#6b6578, #8f8aa3);
+  --tk-text: light-dark(#27272a, #d9d9de);
+  --tk-punct: light-dark(#5f5f68, #a1a1aa);
+  --tk-com: light-dark(#6b6b74, #8e8e96);
   --tk-kw: light-dark(#6a4fb8, #c8b9f3);
   --tk-str: light-dark(#8a5413, #e3c9a8);
   --tk-num: light-dark(#b03f2a, #f2ab96);
@@ -916,7 +916,7 @@ body {
     position: fixed;
     inset: 0;
     z-index: 35;
-    background-color: light-dark(rgb(20 16 32 / 0.25), rgb(0 0 0 / 0.5));
+    background-color: light-dark(rgb(0 0 0 / 0.25), rgb(0 0 0 / 0.5));
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.35s var(--ease);
@@ -2342,7 +2342,7 @@ figure[data-code-block] pre {
   display: block;
   margin: -3px 0 0 -4px;
   fill: #fff;
-  stroke: #17141f;
+  stroke: #18181b;
   stroke-width: 1.3;
   stroke-linejoin: round;
   transform-origin: 4px 3px;
@@ -2505,8 +2505,8 @@ figure[data-code-block] pre {
   background-color: var(--swatch);
   /* Light and dark swatches both keep an edge. */
   box-shadow:
-    inset 0 0 0 1px light-dark(rgb(27 23 38 / 0.22), rgb(255 255 255 / 0.22)),
-    0 1px 2px light-dark(rgb(27 23 38 / 0.14), rgb(0 0 0 / 0.5));
+    inset 0 0 0 1px light-dark(rgb(0 0 0 / 0.22), rgb(255 255 255 / 0.22)),
+    0 1px 2px light-dark(rgb(0 0 0 / 0.14), rgb(0 0 0 / 0.5));
 }
 
 .color-swatch input {

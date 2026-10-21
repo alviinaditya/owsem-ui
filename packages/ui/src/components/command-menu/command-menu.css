@@ -9,13 +9,13 @@
  * through className or style.
  */
 @layer owsem.components {
-  /* The trigger: a sunken search field (the well material), as tall as other controls (FR-9). */
+  /* The trigger: a search field on the well (a flat darker fill), as tall as controls (FR-9). */
   .ow-command-menu-trigger {
     --py: 0.75em;
     --_py: max(var(--py), (24px - 1lh) / 2);
     --px: calc(var(--_py) + (1lh - 1cap) / 2);
     --icon: calc(1em + 2px);
-    --_muted: var(--ow-muted, #5c5669);
+    --_muted: var(--ow-muted, #63636b);
     display: inline-flex;
     align-items: center;
     gap: 0.5em;
@@ -28,11 +28,11 @@
     /* DP-8: invisible until forced colors drop the shadows. */
     outline: 1px solid transparent;
     outline-offset: -1px;
-    background-color: var(--ow-well-bg, #eceaf2);
-    /* The ring keeps the field's edge at 3:1 (DP-6); the well shadow sinks it. */
+    background-color: var(--ow-well-bg, #f0f0f2);
+    /* A crisp 1px edge at 3:1 (DP-6), over the well's own. */
     box-shadow:
-      inset 0 0 0 1px var(--ow-edge, #8a8497),
-      var(--ow-well-shadow, inset 0 1.5px 3px rgb(40 30 20 / 0.16));
+      inset 0 0 0 1px var(--ow-edge, #82828b),
+      var(--ow-well-shadow, inset 0 0 0 1px rgb(0 0 0 / 0.04));
     color: var(--_muted);
     font: inherit;
     font-size: 14px;
@@ -55,7 +55,7 @@
 
   @media (hover: hover) and (pointer: fine) {
     .ow-command-menu-trigger:hover {
-      color: var(--ow-fg, #1b1726);
+      color: var(--ow-fg, #18181b);
     }
   }
 
@@ -82,7 +82,7 @@
   }
 
   .ow-command-menu-backdrop {
-    --_scrim: var(--ow-command-menu-backdrop, rgb(14 11 24 / 0.3));
+    --_scrim: var(--ow-command-menu-backdrop, rgb(0 0 0 / 0.3));
     position: fixed;
     inset: 0;
     background-color: var(--_scrim);
@@ -100,38 +100,34 @@
   }
 
   /*
-   * The glass panel (Surface): a translucent panel material over a blur of the page, a light edge
-   * that fades down from the top, a faint grain, and layered shadows. The radius is the items'
-   * plus the padding around them (FR-10b).
+   * The glass panel (Surface): the panel material, translucent over a blur of the page, with the
+   * popup's crisp edge and drop shadow. The radius is the items' plus the padding around them
+   * (FR-10b).
    */
   .ow-command-menu-popup {
     /* Item --py in em, per size (FR-11); the field and labels line up with the items from it. */
     --_n: 0.75;
     --_p: 6px;
     --_radius: var(--ow-radius, 8px);
-    --_fg: var(--ow-fg, #1b1726);
-    --_muted: var(--ow-muted, #5c5669);
+    --_fg: var(--ow-fg, #18181b);
+    --_muted: var(--ow-muted, #63636b);
     --_focus: var(--ow-focus, #5b4a9a);
-    --_line-dark: var(--ow-line-dark, #d9d9e0);
+    --_line-dark: var(--ow-line-dark, #e2e2e6);
     --_line-light: var(--ow-line-light, #ffffff);
     --_solid: var(--ow-panel, #ffffff);
-    --_bg: var(--ow-command-menu-bg, color-mix(in oklab, var(--_solid) 76%, transparent));
+    --_bg: var(--ow-command-menu-bg, color-mix(in oklab, var(--_solid) 80%, transparent));
     --_blur: var(--ow-command-menu-blur, 24px);
-    --_edge: var(--ow-command-menu-edge, var(--_line-light));
-    --_grain: var(--ow-command-menu-grain, 0.05);
     --_width: var(--ow-command-menu-width, 560px);
     --_shadow: var(
       --ow-command-menu-shadow,
       var(
         --ow-popup-shadow,
-        0 0 0 1px rgb(30 25 40 / 0.1),
-        0 2px 6px -2px rgb(40 30 20 / 0.08),
-        0 16px 40px -12px rgb(40 30 20 / 0.24)
-      ),
-      0 40px 80px -32px rgb(0 0 0 / 0.32)
+        0 0 0 1px rgb(0 0 0 / 0.08),
+        0 4px 8px -2px rgb(0 0 0 / 0.06),
+        0 16px 32px -8px rgb(0 0 0 / 0.14)
+      )
     );
     position: relative;
-    isolation: isolate;
     display: flex;
     flex-direction: column;
     inline-size: min(100%, var(--_width));
@@ -171,30 +167,6 @@
         backdrop-filter: none;
       }
     }
-  }
-
-  /* The edge: one pixel of light at the top, fading down the sides. */
-  .ow-command-menu-popup::before,
-  .ow-command-menu-popup::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    border-radius: inherit;
-    pointer-events: none;
-  }
-
-  .ow-command-menu-popup::before {
-    padding: 1px;
-    background: linear-gradient(var(--_edge), transparent 55%);
-    mask:
-      linear-gradient(#000 0 0) content-box exclude,
-      linear-gradient(#000 0 0);
-  }
-
-  .ow-command-menu-popup::after {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
-    opacity: var(--_grain);
   }
 
   /* The search row, its icon and text in line with the items' (FR-9, FR-10). */
@@ -365,7 +337,7 @@
     color: var(--_muted);
   }
 
-  /* Keys as small raised keycaps. */
+  /* Keys as small keycaps: the raised material, a flat fill with a crisp edge. */
   .ow-command-menu-shortcut {
     display: inline-flex;
     flex: none;
@@ -381,11 +353,10 @@
     background-color: var(--ow-raised-bg, #ffffff);
     box-shadow: var(
       --ow-raised-shadow,
-      inset 0 1px 0 rgb(255 255 255 / 0.95),
-      0 0 0 1px rgb(30 25 40 / 0.12),
-      0 1.5px 2px rgb(40 30 20 / 0.13)
+      inset 0 0 0 1px rgb(0 0 0 / 0.14),
+      0 1px 0 rgb(0 0 0 / 0.04)
     );
-    color: var(--ow-muted, #5c5669);
+    color: var(--ow-muted, #63636b);
     font: inherit;
     font-size: 0.75em;
     line-height: 1.25;
@@ -398,6 +369,7 @@
     margin-inline-start: auto;
   }
 
+  /* Past an etched groove: a dark line, then a light one. */
   .ow-command-menu-footer {
     display: flex;
     flex: none;
@@ -420,18 +392,7 @@
 
   /* DP-8: backgrounds and shadows drop out; outlines and system colors carry the shapes. */
   @media (forced-colors: active) {
-    .ow-command-menu-popup::before,
-    .ow-command-menu-popup::after {
-      display: none;
-    }
-
     .ow-command-menu-field,
-    /* At the end of the trigger or the item. */
-      .ow-command-menu-trigger > .ow-command-menu-shortcut,
-    .ow-command-menu-item > .ow-command-menu-shortcut {
-      margin-inline-start: auto;
-    }
-
     .ow-command-menu-footer {
       border-color: CanvasText;
     }

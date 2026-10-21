@@ -1036,7 +1036,7 @@ body {
 }
 
 /*
- * The search at the rail's origin (DS-5): the library's sunken trigger, as wide as a first-level
+ * The search at the rail's origin (DS-5): the library's flat trigger, as wide as a first-level
  * row, its icon and text in line with the rows' (16px icon 10px in, an 8px gap).
  */
 .sidebar-nav .sidebar-origin {
@@ -2896,7 +2896,7 @@ figure[data-code-block] pre {
   background-color: color-mix(in oklab, var(--ow-accent) 75%, transparent);
 }
 
-/* Keys a scene script presses, as keycaps over the window. */
+/* Keys a scene script presses, as flat keycaps (the raised material) over the window. */
 .demo-keys {
   position: absolute;
   inset-block-end: 18px;
@@ -2921,9 +2921,7 @@ figure[data-code-block] pre {
   border: 0;
   border-radius: 8px;
   background-color: var(--ow-raised-bg);
-  box-shadow:
-    var(--ow-raised-shadow),
-    0 6px 16px -6px rgb(0 0 0 / 0.35);
+  box-shadow: var(--ow-raised-shadow);
   color: var(--ow-fg);
   font-family: var(--font-sans), system-ui, sans-serif;
   font-size: 15px;

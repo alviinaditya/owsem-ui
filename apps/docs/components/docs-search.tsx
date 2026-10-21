@@ -127,7 +127,7 @@ export function DocsSearch({ groups, labels, families, soon }: DocsSearchProps) 
   );
 }
 
-/** The sidebar's search, at the rail's origin: a sunken field that opens the search. */
+/** The sidebar's search, at the rail's origin: a flat field that opens the search. */
 export function SearchTrigger({ label }: { label: string }) {
   const keys = useShortcutKeys();
   return (

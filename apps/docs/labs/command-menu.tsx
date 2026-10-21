@@ -455,8 +455,8 @@ const commandMenuLab = defineLab({
       name: "Trigger",
       selector: ".ow-command-menu-trigger",
       note: {
-        id: "Tombol berupa kolom cari yang cekung. Shortcut Root diumumkan lewat aria-keyshortcuts.",
-        en: "A button shaped like a sunken search field. Root's shortcut is announced with aria-keyshortcuts.",
+        id: "Tombol berupa kolom cari yang datar. Shortcut Root diumumkan lewat aria-keyshortcuts.",
+        en: "A button shaped like a flat search field. Root's shortcut is announced with aria-keyshortcuts.",
       },
     },
     {
@@ -469,8 +469,6 @@ const commandMenuLab = defineLab({
       tokens: {
         "--ow-command-menu-bg": "--_bg",
         "--ow-command-menu-blur": "--_blur",
-        "--ow-command-menu-edge": "--_edge",
-        "--ow-command-menu-grain": "--_grain",
         "--ow-command-menu-width": "--_width",
         "--ow-command-menu-shadow": "--_shadow",
       },
@@ -535,8 +533,8 @@ const commandMenuLab = defineLab({
       name: "Shortcut",
       selector: ".ow-command-menu-item .ow-command-menu-shortcut",
       note: {
-        id: "Tombol sebagai keycap timbul, di ujung item, di Trigger, atau di Footer.",
-        en: "Keys as raised keycaps, at an item's end, in the Trigger, or in the Footer.",
+        id: "Tombol sebagai keycap kecil bertepi tegas, di ujung item, di Trigger, atau di Footer.",
+        en: "Keys as small crisp keycaps, at an item's end, in the Trigger, or in the Footer.",
       },
     },
     {

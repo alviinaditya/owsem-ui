@@ -39,7 +39,7 @@ rank the results yourself, as the docs search does with fuzzy matching.
 
 Items sit in groups, each named by a GroupLabel, which also labels the group for screen readers.
 An item lays its parts out in one row: ItemIcon, ItemLabel, ItemDescription, which gives way first
-when the row runs short, and a Shortcut of raised keycaps at the end.
+when the row runs short, and a Shortcut of small keycaps at the end.
 
 The stage moves the pointer over both groups, then steps back with the arrow keys. The highlight
 follows either one, and stays put when the pointer leaves, on the item Enter runs. Restore version
@@ -54,7 +54,7 @@ stage; pick a name, here or on the stage, to see its tokens.
 | Part | Element | Notes |
 | --- | --- | --- |
 | Root | none | Dialog.Root, the list's items and query, and the `shortcut` |
-| <Part name="Trigger" /> | `button` | Dialog.Trigger, a sunken field with a search icon and `aria-keyshortcuts` |
+| <Part name="Trigger" /> | `button` | Dialog.Trigger, a flat field with a search icon and `aria-keyshortcuts` |
 | <Part name="Popup" /> | `div` | A `dialog`: Dialog's portal, backdrop, viewport, and popup, with Autocomplete.Root inside |
 | <Part name="Input" /> | `input` | A `combobox`: Autocomplete.Input, after a search icon |
 | <Part name="List" /> | `div` | A `listbox`: Autocomplete.List; it scrolls, and holds the Glide highlight |
@@ -65,7 +65,7 @@ stage; pick a name, here or on the stage, to see its tokens.
 | <Part name="ItemIcon" /> | `span` | Decorative (`aria-hidden`), the font size plus 2px |
 | ItemLabel | `span` | One line |
 | <Part name="ItemDescription" /> | `span` | Muted, on the same line; gives way first |
-| <Part name="Shortcut" /> | `kbd` | Raised keycaps, at an item's end, in the Trigger, or in the Footer |
+| <Part name="Shortcut" /> | `kbd` | Keycaps with a crisp edge, at an item's end, in the Trigger, or in the Footer |
 | Empty | `div` | Shown when nothing matches, and announced politely |
 | <Part name="Footer" /> | `div` | Key hints, past an etched line |
 
@@ -91,8 +91,9 @@ icon as far from the side as from the top; the search row is a little taller. Tr
 controls (P).
 
 Command Menu is an Owsem component, Kinetic and Surface: the highlight glides, and the panel is
-glass, the panel material over a blur of the page, with an edge of light fading down from the top,
-a faint grain, and layered shadows. It has no glow.
+glass, the panel material over a blur of the page, with the popup's crisp 1px edge and drop shadow.
+The rest is flat: the Trigger is a well, a flat darker fill, and the keycaps are flat keys with a
+1px edge. It has no grain and no glow.
 
 ## Keyboard and accessibility [#keyboard]
 
@@ -124,17 +125,16 @@ The stage controls are open: pick a size or an opaque surface, and the code foll
 <ForMode mode="theme">
 
 The Popup renders in the body, outside your layout, so set its tokens on `:root`, or on the Popup
-itself through `className`. The theme tokens set the rest: `--ow-panel` colors the glass,
-`--ow-well-bg` and `--ow-edge` the Trigger, `--ow-raised-*` the keycaps, and `--ow-line-dark` with
-`--ow-line-light` the etched lines. Items take `--ow-radius`, and the panel adds its padding to it.
+itself through `className`. The theme tokens set the rest: `--ow-panel` colors the glass and
+`--ow-popup-shadow` draws its edge, `--ow-well-*` and `--ow-edge` the Trigger, `--ow-raised-*`
+the keycaps, and `--ow-line-dark` with `--ow-line-light` the etched lines. Items take
+`--ow-radius`, and the panel adds its padding to it.
 
 | Component token | Default | Purpose |
 | --- | --- | --- |
-| `--ow-command-menu-bg` | `--ow-panel` at 76% | The glass |
+| `--ow-command-menu-bg` | `--ow-panel` at 80% | The glass |
 | `--ow-command-menu-blur` | `24px` | How much the page blurs behind it |
-| `--ow-command-menu-edge` | `--ow-line-light` | The light along the top edge |
-| `--ow-command-menu-grain` | `0.05` | The grain's opacity; `0` turns it off |
-| `--ow-command-menu-shadow` | `--ow-popup-shadow` and one deeper layer | The layered shadow |
+| `--ow-command-menu-shadow` | `--ow-popup-shadow` | The panel's edge and drop shadow |
 | `--ow-command-menu-width` | `560px` | The panel's widest |
 | `--ow-command-menu-backdrop` | Dark at 30% | The scrim over the page |
 
@@ -147,11 +147,9 @@ itself, as in `.commands.ow-command-menu-popup`.
 
 | Component token | Default | Purpose |
 | --- | --- | --- |
-| `--ow-command-menu-bg` | Its own panel color at 76%, per theme | The glass |
+| `--ow-command-menu-bg` | Its own panel color at 80%, per theme | The glass |
 | `--ow-command-menu-blur` | `24px` | How much the page blurs behind it |
-| `--ow-command-menu-edge` | Its own, per theme | The light along the top edge |
-| `--ow-command-menu-grain` | `0.05` | The grain's opacity; `0` turns it off |
-| `--ow-command-menu-shadow` | Its own, per theme | The layered shadow |
+| `--ow-command-menu-shadow` | Its own, per theme | The panel's edge and drop shadow |
 | `--ow-command-menu-width` | `560px` | The panel's widest |
 | `--ow-command-menu-backdrop` | Dark at 30% | The scrim over the page |
 

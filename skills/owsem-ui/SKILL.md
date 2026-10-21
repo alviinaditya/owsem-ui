@@ -256,8 +256,9 @@ import { CommandMenu } from "owsem-ui/owsem"; // or "@/components/owsem/command-
   Root, give it the Root's `handle` from `CommandMenu.createHandle()`.
 - No open or close animation, by design: do not add one.
 - Tokens, set on `:root` or on the Popup (it renders in the body): `--ow-command-menu-bg`,
-  `--ow-command-menu-blur`, `--ow-command-menu-edge`, `--ow-command-menu-grain`,
-  `--ow-command-menu-shadow`, `--ow-command-menu-width`, `--ow-command-menu-backdrop`.
+  `--ow-command-menu-blur`, `--ow-command-menu-shadow`, `--ow-command-menu-width`,
+  `--ow-command-menu-backdrop`. The panel is glass with the popup's crisp edge, the Trigger a flat
+  well, the shortcuts crisp keys; do not add soft shadows, inset blurs, or glow.
 
 ## Rules
 

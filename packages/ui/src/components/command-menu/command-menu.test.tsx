@@ -121,6 +121,16 @@ function resolveColor(value: string, scope: Element = document.body): string {
   return color;
 }
 
+/** Resolves a box-shadow to its computed value inside `scope`. */
+function resolveShadow(value: string, scope: Element = document.body): string {
+  const probe = document.createElement("span");
+  probe.style.boxShadow = value;
+  scope.append(probe);
+  const shadow = getComputedStyle(probe).boxShadow;
+  probe.remove();
+  return shadow;
+}
+
 /** Paints `colors` in order on one pixel: a translucent layer over what is under it. */
 function composite(...colors: string[]): number[] {
   const context = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
@@ -477,7 +487,7 @@ describe("Command Menu", () => {
     expect(refs.shortcut.current?.tagName).toBe("KBD");
   });
 
-  test("a glass panel and a sunken trigger from the theme tokens, in light and dark", async () => {
+  test("crisp-edged glass, a flat well trigger, and crisp keys, in light and dark", async () => {
     onTestFinished(() => {
       delete root.dataset.theme;
     });
@@ -485,18 +495,38 @@ describe("Command Menu", () => {
     await expect.poll(popup).not.toBeNull();
     const panel = popup() as HTMLElement;
     const trigger = document.querySelector(".ow-command-menu-trigger") as HTMLElement;
+    const key = panel.querySelector(".ow-command-menu-shortcut") as HTMLElement;
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
       const style = getComputedStyle(panel);
       expect(style.backgroundColor).toBe(
-        resolveColor("color-mix(in oklab, var(--ow-panel) 76%, transparent)"),
+        resolveColor("color-mix(in oklab, var(--ow-panel) 80%, transparent)"),
       );
       expect(style.backdropFilter).toBe("blur(24px) saturate(1.6)");
-      // Layered: the popup material's shadows and one more, deeper.
-      expect(style.boxShadow.split("px, ").length).toBeGreaterThan(3);
+      // The popup material's crisp edge and drop shadow, nothing softer on top.
+      expect(style.boxShadow).toBe(resolveShadow("var(--ow-popup-shadow)"));
+      expect(getComputedStyle(panel, "::before").content).toBe("none");
+      expect(getComputedStyle(panel, "::after").content).toBe("none");
+      expect(style.color).toBe(resolveColor("var(--ow-fg)"));
       expect(getComputedStyle(trigger).backgroundColor).toBe(resolveColor("var(--ow-well-bg)"));
-      expect(getComputedStyle(panel).color).toBe(resolveColor("var(--ow-fg)"));
+      expect(getComputedStyle(trigger).boxShadow).toBe(
+        resolveShadow("inset 0 0 0 1px var(--ow-edge), var(--ow-well-shadow)"),
+      );
+      expect(getComputedStyle(key).backgroundColor).toBe(resolveColor("var(--ow-raised-bg)"));
+      expect(getComputedStyle(key).boxShadow).toBe(resolveShadow("var(--ow-raised-shadow)"));
     }
+  });
+
+  test("the glass turns opaque under prefers-reduced-transparency", async () => {
+    onTestFinished(() => commands.setReducedTransparency("no-preference"));
+    await commands.setReducedTransparency("reduce");
+    expect(matchMedia("(prefers-reduced-transparency: reduce)").matches).toBe(true);
+    await render(<Menu defaultOpen />);
+    await expect.poll(popup).not.toBeNull();
+    const style = getComputedStyle(popup() as Element);
+    expect(style.backgroundColor).toBe(resolveColor("var(--ow-panel)"));
+    expect(style.backdropFilter).toBe("none");
+    expect(style.boxShadow).toBe(resolveShadow("var(--ow-popup-shadow)"));
   });
 
   test("component tokens override the theme tokens", async () => {
@@ -508,6 +538,7 @@ describe("Command Menu", () => {
             "--ow-command-menu-bg": "rgb(255, 0, 0)",
             "--ow-command-menu-width": "400px",
             "--ow-command-menu-blur": "8px",
+            "--ow-command-menu-shadow": "none",
           } as CSSProperties
         }
       />,
@@ -516,6 +547,7 @@ describe("Command Menu", () => {
     const style = getComputedStyle(popup() as Element);
     expect(style.backgroundColor).toBe("rgb(255, 0, 0)");
     expect(style.backdropFilter).toBe("blur(8px) saturate(1.6)");
+    expect(style.boxShadow).toBe("none");
     expect((popup() as HTMLElement).getBoundingClientRect().width).toBe(400);
   });
 

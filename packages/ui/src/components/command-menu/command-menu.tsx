@@ -175,7 +175,7 @@ export interface CommandMenuTriggerProps extends Omit<Dialog.Trigger.Props, "ref
 }
 
 /**
- * A button that looks like a search field: a sunken well with a search icon. Put the prompt
+ * A button that looks like a search field: a flat well with a search icon. Put the prompt
  * inside, and the shortcut as a `Shortcut`; inside Root, Root's shortcut is announced with
  * aria-keyshortcuts. Outside Root, pass the Root's `handle`.
  */
@@ -449,7 +449,7 @@ export const CommandMenuItemDescription: ForwardRefExoticComponent<
 
 export type CommandMenuShortcutProps = ComponentPropsWithoutRef<"kbd">;
 
-/** Keys as raised keycaps: an item's shortcut (at its end), the Trigger's, or a hint in the Footer. */
+/** Small keycaps: an item's shortcut (at its end), the Trigger's, or a hint in the Footer. */
 export const CommandMenuShortcut: ForwardRefExoticComponent<
   CommandMenuShortcutProps & RefAttributes<HTMLElement>
 > = forwardRef<HTMLElement, CommandMenuShortcutProps>(function CommandMenuShortcut(

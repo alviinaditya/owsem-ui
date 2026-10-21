@@ -129,7 +129,7 @@ describe("Toggle Group", () => {
     expect(span?.textContent).toBe("Right");
   });
 
-  test("draws a sunken track and a raised thumb from the theme tokens, in light and dark", async () => {
+  test("draws a flat track and a raised thumb from the theme tokens, in light and dark", async () => {
     onTestFinished(() => {
       delete root.dataset.theme;
     });
@@ -150,6 +150,32 @@ describe("Toggle Group", () => {
         .poll(() => getComputedStyle(item("Day")).color, { message: theme })
         .toBe(resolveColor("var(--ow-muted)"));
     }
+  });
+
+  test("without the theme tokens, it falls back to the light theme's values", async () => {
+    const unset = Object.fromEntries(
+      ["well-bg", "well-shadow", "raised-bg", "raised-shadow", "fg", "muted"].map((name) => [
+        `--ow-${name}`,
+        "initial",
+      ]),
+    ) as CSSProperties;
+    const look = async (wrapper: Record<string, unknown>) => {
+      const { group, thumb, item } = await mount(
+        <div {...wrapper}>
+          <Views />
+        </div>,
+      );
+      const [track, raised] = [getComputedStyle(group), getComputedStyle(thumb)];
+      return [
+        track.backgroundColor,
+        track.boxShadow,
+        raised.backgroundColor,
+        raised.boxShadow,
+        getComputedStyle(item("Week")).color,
+        getComputedStyle(item("Day")).color,
+      ];
+    };
+    expect(await look({ style: unset })).toEqual(await look({ "data-theme": "light" }));
   });
 
   test("component tokens override the theme tokens", async () => {
@@ -236,6 +262,34 @@ describe("Toggle Group", () => {
     expect(raised("Month")).toBe(true);
     expect(raised("Week")).toBe(false);
     expect(getComputedStyle(item("Day")).boxShadow).toBe(resolveShadow("var(--ow-raised-shadow)"));
+  });
+
+  test("a hovered key shifts its fill a little and keeps its edge; the thumb does not", async () => {
+    const hover = (group: Element, el: Element) => {
+      const r = el.getBoundingClientRect();
+      group.dispatchEvent(
+        new PointerEvent("pointermove", {
+          bubbles: true,
+          clientX: r.left + r.width / 2,
+          clientY: r.top + r.height / 2,
+          pointerType: "mouse",
+        }),
+      );
+    };
+    const raised = resolveColor("var(--ow-raised-bg)");
+    const edge = resolveShadow("var(--ow-raised-shadow)");
+
+    // The selected segment is not an action.
+    const single = await mount(<Views />);
+    hover(single.group, single.item("Week"));
+    expect(single.item("Week").hasAttribute("data-glide-active")).toBe(true);
+    expect(getComputedStyle(single.thumb).backgroundColor).toBe(raised);
+
+    const multiple = await mount(<Views multiple defaultValue={["day", "month"]} />);
+    hover(multiple.group, multiple.item("Month"));
+    expect(getComputedStyle(multiple.item("Month")).backgroundColor).not.toBe(raised);
+    expect(getComputedStyle(multiple.item("Month")).boxShadow).toBe(edge);
+    expect(getComputedStyle(multiple.item("Day")).backgroundColor).toBe(raised);
   });
 
   test("the pressed item raises itself until the thumb is placed", async () => {

@@ -161,8 +161,8 @@ import { Separator } from "owsem-ui/base"; // or "@/components/owsem/separator"
 
 ### Toggle Group
 
-Toggle buttons that work as one, and the segmented control: a sunken track, with a raised thumb
-that slides to the pressed item. Registry item: `toggle-group`.
+Toggle buttons that work as one, and the segmented control: a flat track, with a thumb (the raised
+key: a flat fill with crisp edges) that slides to the pressed item. Registry item: `toggle-group`.
 
 ```tsx
 import { ToggleGroup } from "owsem-ui/base"; // or "@/components/owsem/toggle-group"
@@ -178,7 +178,7 @@ const [view, setView] = useState("list");
 ```
 
 - `Root` is Base UI's ToggleGroup: `value` and `defaultValue` are arrays, `multiple` lets several
-  items be pressed (each is raised on its own, with no thumb), plus `orientation`, `disabled`,
+  items be pressed (each is a key of its own, with no thumb), plus `orientation`, `disabled`,
   and `loopFocus`. OwsemUI adds `size` (`"sm"`, `"md"`, the default, or `"lg"`) and `equal`
   (every item as wide as the widest; equal shares when the group is stretched).
 - `Item` is Base UI's Toggle with a `value`. Give an item with only an icon an `aria-label`; it is

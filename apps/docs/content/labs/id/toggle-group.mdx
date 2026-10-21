@@ -6,17 +6,17 @@ import { Part } from "@/components/lab/lab-shell";
 import { ForMode, TokenChip } from "@/components/token-setup";
 
 Toggle Group adalah sederet tombol toggle yang bekerja sebagai satu kesatuan. Dengan satu pilihan
-dalam satu waktu, komponen ini menjadi segmented control: track cekung dengan thumb timbul yang
-bergeser ke item yang ditekan. Dengan `multiple`, setiap item menyala dan padam sendiri. Gulir
+dalam satu waktu, komponen ini menjadi segmented control: track datar dengan thumb bertepi tegas
+yang bergeser ke item yang ditekan. Dengan `multiple`, setiap item menyala dan padam sendiri. Gulir
 untuk mulai tur; stage mengikuti setiap bagian.
 
 ## Segmented control [#segmented]
 
-Hanya satu item yang ditekan dalam satu waktu, dan thumb timbul berada di bawahnya. Pilih item
-lain, dan thumb bergeser ke sana dengan spring travel (`--ow-spring-travel`); label yang
-ditinggalkan meredup, dan label yang dituju menyala. Pointer menyalakan item terdekat dengan Glide
-di sumbu x, jadi highlight tidak pernah padam di celah, dan klik di celah diteruskan ke item yang
-menyala.
+Hanya satu item yang ditekan dalam satu waktu, dan thumb berada di bawahnya: tombol timbul berupa
+isian datar dengan tepi 1 px yang tegas. Pilih item lain, dan thumb bergeser ke sana dengan spring
+travel (`--ow-spring-travel`); label yang ditinggalkan meredup, dan label yang dituju menyala.
+Pointer menyalakan item terdekat dengan Glide di sumbu x, jadi highlight tidak pernah padam di
+celah, dan klik di celah diteruskan ke item yang menyala.
 
 Stage memutarnya: sebuah pointer memilih setiap tampilan bergantian. Base UI membolehkan item yang
 sedang ditekan ditekan lagi sampai tidak ada yang terpilih; segmented control selalu menyimpan
@@ -38,7 +38,7 @@ bergeser.
 
 ## Spring pada thumb [#spring]
 
-Thumb ini Tactile. Tahan item yang sedang ditekan, dan item itu masuk ke 0,97 dalam 90 ms bersama
+Thumb ini Tactile. Tahan item yang sedang ditekan, dan item itu mengecil ke 0,97 dalam 90 ms bersama
 thumb-nya, lalu memantul kembali dengan spring settle (`--ow-spring-settle`) saat dilepas. Kalau
 berubah pikiran di tengah jalan, thumb berbelok dari posisinya saat itu: geserannya adalah transisi
 CSS pada `translate` dan `transform`, jadi tidak ada frame yang berjalan begitu thumb tiba.
@@ -49,9 +49,10 @@ Kalau lebar item berbeda, thumb ikut menyesuaikan lebarnya di perjalanan, diskal
 ## Banyak pilihan [#multiple]
 
 Dengan `multiple`, setiap item menyala dan padam sendiri, dan tidak ada thumb: setiap item yang
-ditekan timbul sendiri, dengan material yang sama seperti thumb. Material ditekan yang cekung
-hampir tidak berbeda dari track tempatnya berada, jadi di sini timbul berarti menyala. Stage
-menyalakan Miring dan Garis bawah, lalu memadamkannya lagi.
+ditekan menjadi tombol tersendiri, dengan material yang sama seperti thumb, seperti setiap toggle
+yang menyala. Arahkan pointer ke tombol itu, dan isiannya bergeser 3% ke arah warna label, karena
+klik akan memadamkannya; tepinya tetap. Stage menyalakan Miring dan Garis bawah, lalu memadamkannya
+lagi.
 
 ## Anatomi [#anatomy]
 
@@ -84,8 +85,8 @@ gelap. Pointer memilih Kalender di grup `md` setiap tema, lalu Papan lagi.
 | State | Yang menandainya |
 | --- | --- |
 | Ditekan | Thumb di bawahnya, dan labelnya tampil penuh |
-| Hover | Highlight Glide, dan labelnya tampil penuh |
-| Ditahan | Item masuk ke dalam, bersama thumb kalau item itu yang sedang ditekan |
+| Hover | Highlight Glide, dan labelnya tampil penuh; dengan `multiple`, isian tombol yang ditekan bergeser 3% |
+| Ditahan | Item mengecil ke 0,97, bersama thumb kalau item itu yang sedang ditekan |
 | Disabled | Labelnya redup; tombol panah dan Glide melewatinya |
 | Fokus keyboard | Cincin 2 px, berjarak 2 px, di atas item tetangganya |
 
@@ -108,10 +109,10 @@ Dengan `orientation="vertical"`, Panah Bawah dan Panah Atas yang berpindah. Scre
 setiap item sebagai tombol toggle beserta state ditekannya: beri nama grup dengan `aria-label`
 atau `aria-labelledby`, dan item yang hanya berisi ikon dengan `aria-label`.
 
-Dengan `prefers-reduced-motion`, thumb langsung berpindah dan tidak ada yang masuk ke dalam saat
-ditekan; thumb yang ditahan meredup sebagai gantinya. Di mode forced colors (Windows High
-Contrast), item yang ditekan diisi `Highlight` dengan label `HighlightText`, dan track tetap punya
-tepi yang terlihat. Untuk teks kanan ke kiri, item pertama berada di kanan, begitu juga thumb-nya.
+Dengan `prefers-reduced-motion`, thumb langsung berpindah dan tidak ada yang mengecil saat ditahan;
+thumb yang ditahan meredup sebagai gantinya. Di mode forced colors (Windows High Contrast), item
+yang ditekan diisi `Highlight` dengan label `HighlightText`, dan track tetap punya tepi yang
+terlihat. Untuk teks kanan ke kiri, item pertama berada di kanan, begitu juga thumb-nya.
 
 ## Kustomisasi [#customization]
 
@@ -125,9 +126,9 @@ Token komponen menimpa token tema untuk grup di dalam elemen tempat token itu di
 | Token komponen | Bawaan | Fungsi |
 | --- | --- | --- |
 | `--ow-toggle-group-track` | `--ow-well-bg` | Track |
-| `--ow-toggle-group-track-shadow` | `--ow-well-shadow` | Tepi cekung track |
+| `--ow-toggle-group-track-shadow` | `--ow-well-shadow` | Tepi tipis track |
 | `--ow-toggle-group-thumb` | `--ow-raised-bg` | Thumb, dan item yang ditekan pada banyak pilihan |
-| `--ow-toggle-group-thumb-shadow` | `--ow-raised-shadow` | Tepi timbulnya |
+| `--ow-toggle-group-thumb-shadow` | `--ow-raised-shadow` | Tepi tegasnya |
 | `--ow-toggle-group-fg` | `--ow-fg` | Label item yang ditekan dan di-hover |
 | `--ow-toggle-group-muted` | `--ow-muted` | Label lainnya |
 
@@ -141,16 +142,16 @@ jadi atur token di grup itu sendiri, seperti CSS di stage dengan `.view-switcher
 | Token komponen | Bawaan | Fungsi |
 | --- | --- | --- |
 | `--ow-toggle-group-track` | Nilainya sendiri, per tema | Track |
-| `--ow-toggle-group-track-shadow` | Nilainya sendiri, per tema | Tepi cekung track |
+| `--ow-toggle-group-track-shadow` | Nilainya sendiri, per tema | Tepi tipis track |
 | `--ow-toggle-group-thumb` | Nilainya sendiri, per tema | Thumb, dan item yang ditekan pada banyak pilihan |
-| `--ow-toggle-group-thumb-shadow` | Nilainya sendiri, per tema | Tepi timbulnya |
+| `--ow-toggle-group-thumb-shadow` | Nilainya sendiri, per tema | Tepi tegasnya |
 | `--ow-toggle-group-fg` | Nilainya sendiri, per tema | Label item yang ditekan dan di-hover |
 | `--ow-toggle-group-muted` | Nilainya sendiri, per tema | Label lainnya |
 
 </ForMode>
 
 Geraknya berasal dari Core: `--ow-spring-travel` untuk geseran, `--ow-spring-settle` untuk
-pelepasan, dan `--ow-motion-scale` untuk seberapa dalam tekanan (0 mematikannya). Highlight hover
+pelepasan, dan `--ow-motion-scale` untuk seberapa jauh tekanan (0 mematikannya). Highlight hover
 milik Glide, diatur lewat `--ow-glide-bg` dan `--ow-glide-radius`. Padding item adalah `--py` milik
 item itu sendiri (FR-11): pasang di item, bukan di grup.
 

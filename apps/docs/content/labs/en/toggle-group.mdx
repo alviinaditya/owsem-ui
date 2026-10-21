@@ -6,15 +6,16 @@ import { Part } from "@/components/lab/lab-shell";
 import { ForMode, TokenChip } from "@/components/token-setup";
 
 Toggle Group is a row of toggle buttons that work as one. With one choice at a time it is the
-segmented control: a sunken track, and a raised thumb that slides to the pressed item. With
+segmented control: a flat track, and a thumb with crisp edges that slides to the pressed item. With
 `multiple`, each item toggles on its own. Scroll to start the tour; the stage follows each part.
 
 ## The segmented control [#segmented]
 
-One item is pressed at a time, and a raised thumb sits under it. Pick another and the thumb slides
-there with the travel spring (`--ow-spring-travel`); the label it leaves dims, and the one it
-reaches lights up. The pointer lights the nearest item with Glide along the x axis, so the
-highlight never blinks out in the gaps, and a click in a gap goes to the lit item.
+One item is pressed at a time, and the thumb sits under it: the raised key, a flat fill with a crisp
+1 px edge. Pick another and the thumb slides there with the travel spring (`--ow-spring-travel`);
+the label it leaves dims, and the one it reaches lights up. The pointer lights the nearest item with
+Glide along the x axis, so the highlight never blinks out in the gaps, and a click in a gap goes to
+the lit item.
 
 The stage plays it: a pointer picks each view in turn. Base UI lets a pressed item be pressed
 again to leave nothing pressed; a segmented control keeps one choice, so the demo ignores an empty
@@ -35,20 +36,20 @@ appears in place; only a change from one item to another slides.
 
 ## The thumb's spring [#spring]
 
-The thumb is Tactile. Hold the pressed item and the item presses in to 0.97 in 90 ms, the thumb
-with it, then springs back with the settle spring (`--ow-spring-settle`) when you let go. Change
-your mind mid-slide and the thumb turns from where it is: the slide is a CSS transition of
-`translate` and `transform`, so it also costs no frames once it lands.
+The thumb is Tactile. Hold the pressed item and the item scales to 0.97 in 90 ms, the thumb with it,
+then springs back with the settle spring (`--ow-spring-settle`) when you let go. Change your mind
+mid-slide and the thumb turns from where it is: the slide is a CSS transition of `translate` and
+`transform`, so it also costs no frames once it lands.
 
 The stage presses the chosen view, then picks Calendar and, mid-slide, Board. When the items differ
 in width, the thumb takes the new width on the way, scaled from its centre.
 
 ## Multiple selection [#multiple]
 
-With `multiple`, each item toggles on its own and there is no thumb: every pressed item is raised
-on its own, in the thumb's material. The pressed material, sunken, would hardly differ from the
-track it sits in, so here raised means on. The stage turns Italic and Underline on, then off
-again.
+With `multiple`, each item toggles on its own and there is no thumb: every pressed item is a key of
+its own, in the thumb's material, like any toggle that is on. Hover a key and its fill moves 3%
+toward the label color, since a click turns it off; its edge stays as it is. The stage turns Italic
+and Underline on, then off again.
 
 ## Anatomy [#anatomy]
 
@@ -81,8 +82,8 @@ A pointer picks Calendar in each theme's `md` group, then Board again.
 | State | What marks it |
 | --- | --- |
 | Pressed | The thumb under it, and its label at full strength |
-| Hover | Glide's highlight, and its label at full strength |
-| Held | It presses in, with the thumb if it is the pressed item |
+| Hover | Glide's highlight, and its label at full strength; with `multiple`, a pressed key's fill shifts 3% |
+| Held | It scales to 0.97, with the thumb if it is the pressed item |
 | Disabled | A dimmed label; the arrows and Glide skip it |
 | Keyboard focus | A 2 px ring, 2 px out, above its neighbours |
 
@@ -105,8 +106,8 @@ With `orientation="vertical"`, Arrow Down and Arrow Up move instead. Screen read
 item as a toggle button with its pressed state: name the group with `aria-label` or
 `aria-labelledby`, and an item with only an icon with `aria-label`.
 
-With `prefers-reduced-motion`, the thumb moves at once and nothing presses in; a held thumb dims
-instead. In forced colors (Windows High Contrast), the pressed item is filled with `Highlight`
+With `prefers-reduced-motion`, the thumb moves at once and nothing scales when held; a held thumb
+dims instead. In forced colors (Windows High Contrast), the pressed item is filled with `Highlight`
 behind `HighlightText`, and the track keeps a visible edge. Right to left, the first item sits on
 the right, and so does its thumb.
 
@@ -122,9 +123,9 @@ Component tokens override the theme tokens for groups inside the element that se
 | Component token | Default | Purpose |
 | --- | --- | --- |
 | `--ow-toggle-group-track` | `--ow-well-bg` | Track |
-| `--ow-toggle-group-track-shadow` | `--ow-well-shadow` | The track's sunken edge |
+| `--ow-toggle-group-track-shadow` | `--ow-well-shadow` | The track's faint edge |
 | `--ow-toggle-group-thumb` | `--ow-raised-bg` | Thumb, and pressed items with multiple selection |
-| `--ow-toggle-group-thumb-shadow` | `--ow-raised-shadow` | Their raised edge |
+| `--ow-toggle-group-thumb-shadow` | `--ow-raised-shadow` | Their crisp edge |
 | `--ow-toggle-group-fg` | `--ow-fg` | Labels of pressed and hovered items |
 | `--ow-toggle-group-muted` | `--ow-muted` | Other labels |
 
@@ -138,9 +139,9 @@ the group itself, as the stage's CSS does with `.view-switcher.ow-toggle-group`.
 | Component token | Default | Purpose |
 | --- | --- | --- |
 | `--ow-toggle-group-track` | Its own, per theme | Track |
-| `--ow-toggle-group-track-shadow` | Its own, per theme | The track's sunken edge |
+| `--ow-toggle-group-track-shadow` | Its own, per theme | The track's faint edge |
 | `--ow-toggle-group-thumb` | Its own, per theme | Thumb, and pressed items with multiple selection |
-| `--ow-toggle-group-thumb-shadow` | Its own, per theme | Their raised edge |
+| `--ow-toggle-group-thumb-shadow` | Its own, per theme | Their crisp edge |
 | `--ow-toggle-group-fg` | Its own, per theme | Labels of pressed and hovered items |
 | `--ow-toggle-group-muted` | Its own, per theme | Other labels |
 

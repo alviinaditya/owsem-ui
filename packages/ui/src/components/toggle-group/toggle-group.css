@@ -1,35 +1,27 @@
 @layer owsem.tokens, owsem.components;
 
 /*
- * Toggle Group (Base; Tactile and Kinetic), also the segmented control: a sunken track and a
- * raised thumb that slides under the pressed item (thumb.ts writes its box as --_x, --_y, --_w,
- * --_h, and --_sx, --_sy while it changes size). With multiple selection there is no thumb:
- * each pressed item is raised on its own. Glide lights the hovered item.
+ * Toggle Group (Base; Tactile and Kinetic), also the segmented control: a flat track (the well) and
+ * a thumb, the raised key with crisp edges, that slides under the pressed item (thumb.ts writes its
+ * box as --_x, --_y, --_w, --_h, and --_sx, --_sy while it changes size). With multiple selection
+ * there is no thumb: each pressed item is a key of its own. Glide lights the hovered item.
  */
 @layer owsem.components {
   .ow-toggle-group {
-    --_track: var(--ow-toggle-group-track, var(--ow-well-bg, #eceaf2));
+    --_track: var(--ow-toggle-group-track, var(--ow-well-bg, #f0f0f2));
     --_track-shadow: var(
       --ow-toggle-group-track-shadow,
-      var(
-        --ow-well-shadow,
-        inset 0 1.5px 3px rgb(40 30 20 / 0.16),
-        inset 0 -1px 0 rgb(255 255 255 / 0.75),
-        0 0 0 1px rgb(30 25 40 / 0.06)
-      )
+      var(--ow-well-shadow, inset 0 0 0 1px rgb(0 0 0 / 0.04))
     );
     --_thumb: var(--ow-toggle-group-thumb, var(--ow-raised-bg, #ffffff));
+    /* A key's fill with multiple selection: the thumb's, shifted a little on hover (below). */
+    --_key: var(--_thumb);
     --_thumb-shadow: var(
       --ow-toggle-group-thumb-shadow,
-      var(
-        --ow-raised-shadow,
-        inset 0 1px 0 rgb(255 255 255 / 0.95),
-        0 0 0 1px rgb(30 25 40 / 0.12),
-        0 1.5px 2px rgb(40 30 20 / 0.13)
-      )
+      var(--ow-raised-shadow, inset 0 0 0 1px rgb(0 0 0 / 0.14), 0 1px 0 rgb(0 0 0 / 0.04))
     );
-    --_fg: var(--ow-toggle-group-fg, var(--ow-fg, #1b1726));
-    --_muted: var(--ow-toggle-group-muted, var(--ow-muted, #5c5669));
+    --_fg: var(--ow-toggle-group-fg, var(--ow-fg, #18181b));
+    --_muted: var(--ow-toggle-group-muted, var(--ow-muted, #63636b));
     --_focus: var(--ow-focus, #5b4a9a);
     /* The items' and the thumb's radius; the track adds its padding (FR-10b, TK-8). */
     --_radius: var(--ow-radius, 8px);
@@ -156,12 +148,20 @@
   }
 
   /*
-   * An item raised on its own: with multiple selection, and before the script places the thumb
-   * (server-rendered HTML). It changes with the state, at once (DP-5).
+   * A pressed item as a key of its own: with multiple selection, and before the script places the
+   * thumb (server-rendered HTML). It changes with the state, at once (DP-5).
    */
   .ow-toggle-group:is(:not([data-thumb]), [data-multiple]) > .ow-toggle-group-item[data-pressed] {
-    background-color: var(--_thumb);
+    background-color: var(--_key);
     box-shadow: var(--_thumb-shadow);
+  }
+
+  /*
+   * A hovered key with multiple selection, which a click turns off: its fill moves 3% toward the
+   * label color; the edge stays. The thumb is not an action, so it keeps its fill.
+   */
+  .ow-toggle-group[data-multiple] > .ow-toggle-group-item[data-glide-active] {
+    --_key: color-mix(in oklab, var(--_thumb), var(--_fg) 3%);
   }
 
   .ow-toggle-group-item:is([data-pressed], [data-glide-active]) {

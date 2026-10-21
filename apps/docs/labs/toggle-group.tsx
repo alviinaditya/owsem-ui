@@ -329,8 +329,8 @@ const toggleGroupLab = defineLab({
       name: "Root",
       selector: ".ow-toggle-group",
       note: {
-        id: "Track cekung dengan role group. Memuat item, thumb, dan highlight hover (Glide).",
-        en: "The sunken track, with the group role. Holds the items, the thumb, and Glide's hover highlight.",
+        id: "Track datar dengan role group. Memuat item, thumb, dan highlight hover (Glide).",
+        en: "The flat track, with the group role. Holds the items, the thumb, and Glide's hover highlight.",
       },
       tokens: {
         "--ow-toggle-group-track": "--_track",
@@ -351,8 +351,8 @@ const toggleGroupLab = defineLab({
       name: "Thumb",
       selector: ".ow-toggle-group-thumb",
       note: {
-        id: "Permukaan timbul di bawah item yang ditekan. Dekoratif; hanya ada di pilihan tunggal.",
-        en: "The raised surface under the pressed item. Decorative; single selection only.",
+        id: "Tombol timbul bertepi tegas di bawah item yang ditekan. Dekoratif; hanya di pilihan tunggal.",
+        en: "The raised key with crisp edges, under the pressed item. Decorative; single selection only.",
       },
       tokens: {
         "--ow-toggle-group-thumb": "--_thumb",

@@ -28,7 +28,7 @@ const cls = {
 const ITEM = "[data-toggle-group-item]";
 
 // The thumb is placed before the first paint; the server has no layout, so it falls back without
-// React 18's warning (and the pressed item draws its own raised surface until then).
+// React 18's warning (and the pressed item draws its own key until then).
 const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 export type ToggleGroupSize = "sm" | "md" | "lg";
@@ -49,7 +49,7 @@ type ToggleGroupRootComponent = <Value extends string = string>(
 ) => JSX.Element;
 
 /**
- * The group: a sunken track holding the items, the thumb that slides under the pressed one
+ * The group: a flat track holding the items, the thumb that slides under the pressed one
  * (single selection), and the hover highlight (Glide).
  */
 export const ToggleGroupRoot: ToggleGroupRootComponent = forwardRef<

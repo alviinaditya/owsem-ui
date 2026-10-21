@@ -193,7 +193,7 @@ body {
 }
 
 /*
- * The Token setup's mode: radios in a sunken track, the chosen one raised. The last hand-built
+ * The Token setup's mode: radios in a flat track, the chosen one a raised key. The last hand-built
  * segmented choice in the docs; it becomes a Toggle Group with the Popover that replaces the panel.
  */
 .seg {
@@ -250,7 +250,7 @@ body {
 
 /*
  * Segmented choices (the theme, Lab controls, the family filter, the package manager): OwsemUI's
- * Toggle Group, a sunken track with a raised thumb (DP-1: no accent fill), at the docs' compact
+ * Toggle Group, a flat track with a crisp raised thumb (DP-1: no accent fill), at the docs' compact
  * size. --py on the items sets their height: 26px here, 24px in the sidebar's foot.
  */
 .docs-choice {

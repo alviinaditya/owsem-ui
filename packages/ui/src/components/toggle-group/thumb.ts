@@ -1,5 +1,5 @@
 /**
- * The segmented thumb: one raised surface under the pressed item of a single-selection group.
+ * The segmented thumb: the raised key under the pressed item of a single-selection group.
  *
  * - It moves by `translate` and `transform` through CSS transitions (toggle-group.css), so it
  *   costs no frames once it lands.

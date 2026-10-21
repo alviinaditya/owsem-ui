@@ -33,14 +33,29 @@ async function mount(ui: ReactNode) {
 const press = (el: Element, key: string, init: KeyboardEventInit = {}) =>
   el.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true, ...init }));
 
-/** Resolves a color (e.g. `var(--ow-panel)`) to its computed rgb() inside `scope`. */
-function resolveColor(value: string, scope: Element = document.body): string {
+/** Resolves a value (e.g. `var(--ow-panel)`) to its computed form inside `scope`. */
+function resolve(value: string, scope: Element = document.body, property = "color"): string {
   const probe = document.createElement("span");
-  probe.style.color = value;
+  probe.style.setProperty(property, value);
   scope.append(probe);
-  const color = getComputedStyle(probe).color;
+  const computed = getComputedStyle(probe).getPropertyValue(property);
   probe.remove();
-  return color;
+  return computed;
+}
+
+const resolveColor = (value: string, scope?: Element) => resolve(value, scope);
+const resolveShadow = (value: string) => resolve(value, document.body, "box-shadow");
+
+/** The largest blur among an element's box shadows, in px. */
+function maxBlur(el: Element): number {
+  const shadow = getComputedStyle(el).boxShadow;
+  if (shadow === "none") return 0;
+  return Math.max(
+    ...shadow.split(/,(?![^(]*\))/).map((layer) => {
+      const lengths = layer.replace(/[a-z-]+\([^)]*\)/g, "").match(/-?[\d.]+px/g) ?? [];
+      return Number.parseFloat(lengths[2] ?? "0");
+    }),
+  );
 }
 
 function Controlled({ onChange }: { onChange?: (value: string) => void }) {
@@ -387,6 +402,10 @@ describe("ColorPicker", () => {
       expect(getComputedStyle(q(".ow-color-picker-format")).backgroundColor).toBe(
         resolveColor("var(--ow-raised-bg)"),
       );
+      expect(getComputedStyle(picker()).boxShadow).toBe(resolveShadow("var(--ow-panel-shadow)"));
+      expect(getComputedStyle(q(".ow-color-picker-format")).boxShadow).toBe(
+        resolveShadow("var(--ow-raised-shadow)"),
+      );
       expect(getComputedStyle(q(".ow-color-picker-swatches")).borderBlockStartColor).toBe(
         resolveColor("var(--ow-line-dark)"),
       );
@@ -396,6 +415,44 @@ describe("ColorPicker", () => {
         resolveColor("var(--ow-focus)"),
       );
     }
+  });
+
+  test("draws crisp edges: no part sinks or casts a soft shadow, in light and dark", async () => {
+    onTestFinished(() => {
+      delete root.dataset.theme;
+    });
+    const { screen, q } = await mount(
+      <>
+        <ColorPicker defaultValue="#7c6ab880" />
+        <ColorPickerPopover />
+        <ColorPickerPopover variant="swatch" aria-label="Fill" />
+      </>,
+    );
+    const names = "area track thumb preview tool format input swatch trigger chip".split(" ");
+    const parts = [
+      ...screen.container.querySelectorAll(names.map((name) => `.ow-color-picker-${name}`).join()),
+    ];
+    expect(parts.length).toBeGreaterThan(20);
+    for (const theme of ["light", "dark"]) {
+      root.dataset.theme = theme;
+      // A key's top light line may soften by under 1px; nothing else blurs.
+      for (const part of parts) expect(maxBlur(part), part.className).toBeLessThanOrEqual(1);
+      // The area and the tracks share the swatches' 1px edge.
+      const edge = getComputedStyle(q(".ow-color-picker-swatch")).boxShadow;
+      expect(edge).toMatch(/ 0px 0px 0px 1px inset$/);
+      expect(getComputedStyle(q(".ow-color-picker-area")).boxShadow).toBe(edge);
+      expect(getComputedStyle(q(".ow-color-picker-track")).boxShadow).toBe(edge);
+    }
+  });
+
+  test("a raised key's hover tints its fill and keeps its edge", async () => {
+    const { q } = await mount(<ColorPicker />);
+    const format = q(".ow-color-picker-format");
+    const fill = getComputedStyle(format).backgroundColor;
+    const edge = getComputedStyle(format).boxShadow;
+    await userEvent.hover(format);
+    await expect.poll(() => getComputedStyle(format).backgroundColor).not.toBe(fill);
+    expect(getComputedStyle(format).boxShadow).toBe(edge);
   });
 
   test("component tokens override the theme tokens", async () => {
@@ -476,6 +533,7 @@ describe("ColorPicker", () => {
     const { area } = await mount(<ColorPicker />);
     const thumb = area().querySelector(".ow-color-picker-thumb");
     if (!thumb) throw new Error("no thumb");
+    const edge = getComputedStyle(thumb).boxShadow;
     expect(getComputedStyle(thumb).transitionProperty).toBe("scale");
     expect(getComputedStyle(thumb).transitionTimingFunction).toContain("linear(");
     area().dispatchEvent(
@@ -483,6 +541,8 @@ describe("ColorPicker", () => {
     );
     await expect.poll(() => area().hasAttribute("data-dragging")).toBe(true);
     await expect.poll(() => getComputedStyle(thumb).scale).toBe("0.88");
+    // Only the size moves; the edges stay.
+    expect(getComputedStyle(thumb).boxShadow).toBe(edge);
     area().dispatchEvent(new PointerEvent("pointerup", { button: 0, pointerId: 1, bubbles: true }));
     await expect.poll(() => getComputedStyle(thumb).scale, { timeout: 2000 }).toBe("none");
 

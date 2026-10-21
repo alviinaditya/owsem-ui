@@ -1,30 +1,25 @@
 @layer owsem.tokens, owsem.components;
 
 /*
- * Color Picker, an Owsem component (Tactile): a panel of depth materials. The area and tracks are
- * wells, the thumbs are raised and compact when pressed, and the popover is a popup panel that
- * scales out of its trigger. The colors being picked are painted inline; the rest are tokens.
+ * Color Picker, an Owsem component (Tactile): flat fills with crisp 1px edges (TK-7). The area,
+ * tracks, and swatches are colors inside a 1px edge, the thumbs are rings that compact when
+ * pressed, the buttons are raised keys, the fields are wells, and the popover is a popup panel
+ * that scales out of its trigger. The colors being picked are painted inline; the rest are tokens.
  */
 @layer owsem.components {
   .ow-color-picker,
   .ow-color-picker-trigger {
-    --_fg: var(--ow-fg, #1b1726);
-    --_muted: var(--ow-muted, #5c5669);
+    --_fg: var(--ow-fg, #18181b);
+    --_muted: var(--ow-muted, #63636b);
     --_focus: var(--ow-focus, #5b4a9a);
-    --_edge: var(--ow-edge, #8a8497);
+    --_edge: var(--ow-edge, #82828b);
     --_radius: var(--ow-radius, 8px);
-    --_well: var(--ow-well-bg, #eceaf2);
-    --_well-shadow: var(
-      --ow-well-shadow,
-      inset 0 1.5px 3px rgb(40 30 20 / 0.16),
-      inset 0 -1px 0 rgb(255 255 255 / 0.75),
-      0 0 0 1px rgb(30 25 40 / 0.06)
-    );
+    --_well: var(--ow-well-bg, #f0f0f2);
     --_bg: var(--ow-color-picker-bg, var(--ow-panel, #ffffff));
-    /* A color's own edge, inside it: visible on light and dark colors alike. */
-    --_chip-edge: inset 0 0 0 1px color-mix(in oklab, var(--_fg) 22%, transparent);
+    /* A color's own 1px edge, inside it and darker than it, like a key's edge. */
+    --_color-edge: inset 0 0 0 1px rgb(0 0 0 / 0.2);
     /* Translucent colors sit on a checkerboard of the panel and the checker color. */
-    --_checker: var(--ow-color-picker-checker, var(--ow-line, #d9d9e0));
+    --_checker: var(--ow-color-picker-checker, var(--ow-line, #e4e4e7));
     --_checkers: repeating-conic-gradient(var(--_checker) 0 25%, var(--_bg) 0 50%);
     /* Tactile: a press compacts by up to 12%, scaled by the motion intensity. */
     --_press: calc(1 - 0.12 * var(--ow-motion-scale, 1));
@@ -55,9 +50,8 @@
     background-color: var(--_bg);
     box-shadow: var(
       --ow-panel-shadow,
-      0 0 0 1px rgb(30 25 40 / 0.1),
-      inset 0 1px 0 rgb(255 255 255 / 0.9),
-      0 1px 2px rgb(40 30 20 / 0.06)
+      inset 0 0 0 1px rgb(0 0 0 / 0.08),
+      0 1px 2px rgb(0 0 0 / 0.04)
     );
     color: var(--_fg);
     font-size: 13px;
@@ -79,8 +73,7 @@
     border-radius: var(--_radius);
     background-image:
       linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, transparent);
-    /* The well's inset shadow falls over the colors, so the area reads as sunken. */
-    box-shadow: var(--_well-shadow);
+    box-shadow: var(--_color-edge);
     cursor: crosshair;
     touch-action: none;
     forced-color-adjust: none;
@@ -97,8 +90,8 @@
   }
 
   /*
-   * A raised ring around the color: light inside, a dark hairline outside, so it shows on every
-   * color. It compacts while pressed and springs back (Tactile); shadows switch, never animate.
+   * A ring around the color with a 1px dark edge outside and a faint one inside, so it shows on
+   * every color. It compacts while pressed and springs back (Tactile); its edges stay the same.
    */
   .ow-color-picker-thumb {
     position: absolute;
@@ -108,9 +101,8 @@
     border: 2px solid var(--_thumb);
     border-radius: 50%;
     box-shadow:
-      0 0 0 1px rgb(0 0 0 / 0.32),
-      inset 0 0 0 1px rgb(0 0 0 / 0.12),
-      0 1.5px 3px rgb(0 0 0 / 0.3);
+      0 0 0 1px rgb(0 0 0 / 0.4),
+      inset 0 0 0 1px rgb(0 0 0 / 0.12);
     forced-color-adjust: none;
     transition: scale var(--_settle-duration) var(--_settle);
   }
@@ -129,10 +121,6 @@
     .ow-color-picker-thumb[data-dragging]
   ) {
     scale: var(--_press);
-    box-shadow:
-      0 0 0 1px rgb(0 0 0 / 0.4),
-      inset 0 0 0 1px rgb(0 0 0 / 0.2),
-      0 0.5px 1px rgb(0 0 0 / 0.35);
     transition: scale 120ms var(--_ease-out);
   }
 
@@ -174,7 +162,7 @@
     flex: 1;
     block-size: var(--_track);
     border-radius: calc(var(--_track) / 2);
-    box-shadow: var(--_well-shadow);
+    box-shadow: var(--_color-edge);
     forced-color-adjust: none;
   }
 
@@ -221,7 +209,7 @@
   .ow-color-picker-swatch {
     flex: none;
     background-color: var(--_color);
-    box-shadow: var(--_chip-edge);
+    box-shadow: var(--_color-edge);
     forced-color-adjust: none;
   }
 
@@ -252,9 +240,10 @@
     stroke-linejoin: round;
   }
 
-  /* Raised buttons that press into the panel (DP-4). */
+  /* Raised keys: a flat fill with a crisp edge, the pressed material while held (DP-4). */
   .ow-color-picker-tool,
   .ow-color-picker-format {
+    --_key: var(--ow-raised-bg, #ffffff);
     display: inline-flex;
     flex: none;
     align-items: center;
@@ -263,12 +252,11 @@
     margin: 0;
     border: 0;
     border-radius: var(--_radius);
-    background-color: var(--ow-raised-bg, #ffffff);
+    background-color: var(--_key);
     box-shadow: var(
       --ow-raised-shadow,
-      inset 0 1px 0 rgb(255 255 255 / 0.95),
-      0 0 0 1px rgb(30 25 40 / 0.12),
-      0 1.5px 2px rgb(40 30 20 / 0.13)
+      inset 0 0 0 1px rgb(0 0 0 / 0.14),
+      0 1px 0 rgb(0 0 0 / 0.04)
     );
     color: var(--_fg);
     font: inherit;
@@ -284,9 +272,16 @@
     padding: 0;
   }
 
+  /* Hover tints the fill a little toward the text; the edge stays. */
+  @media (hover: hover) and (pointer: fine) {
+    :is(.ow-color-picker-tool, .ow-color-picker-format):hover:not(:disabled) {
+      background-color: color-mix(in oklab, var(--_key), var(--_fg) 4%);
+    }
+  }
+
   :is(.ow-color-picker-tool, .ow-color-picker-format):active:not(:disabled) {
-    background-color: var(--ow-pressed-bg, #e6e3ee);
-    box-shadow: var(--ow-pressed-shadow, inset 0 1.5px 3px rgb(40 30 20 / 0.2));
+    background-color: var(--ow-pressed-bg, #f4f4f5);
+    box-shadow: var(--ow-pressed-shadow, inset 0 0 0 1px rgb(0 0 0 / 0.16));
     scale: 0.97;
     transition: scale 90ms var(--_ease-out);
   }
@@ -340,11 +335,9 @@
     padding-inline: 2px;
     border: 0;
     border-radius: var(--_radius);
-    /* A field's edge needs 3:1 (DP-6). */
+    /* A flat well; a field's edge needs 3:1 (DP-6). */
     background-color: var(--_well);
-    box-shadow:
-      inset 0 0 0 1px var(--_edge),
-      var(--_well-shadow);
+    box-shadow: inset 0 0 0 1px var(--_edge);
     color: var(--_fg);
     font-variant-numeric: tabular-nums;
     text-align: center;
@@ -371,7 +364,7 @@
     grid-template-columns: repeat(auto-fill, minmax(24px, 1fr));
     gap: 6px;
     padding-block-start: var(--_pad);
-    border-block-start: 1px solid var(--ow-line-dark, #d9d9e0);
+    border-block-start: 1px solid var(--ow-line-dark, #e2e2e6);
     box-shadow: inset 0 1px 0 var(--ow-line-light, #ffffff);
   }
 
@@ -403,7 +396,7 @@
     visibility: hidden;
   }
 
-  /* The trigger: a field that shows the color and its value, or a square of the color. */
+  /* The trigger: a flat field that shows the color and its value, or a square of the color. */
   .ow-color-picker-trigger {
     --py: 0.75em;
     --_py: max(var(--py), (24px - 1lh) / 2);
@@ -418,9 +411,7 @@
     border: 0;
     border-radius: var(--_radius);
     background-color: var(--_well);
-    box-shadow:
-      inset 0 0 0 1px var(--_edge),
-      var(--_well-shadow);
+    box-shadow: inset 0 0 0 1px var(--_edge);
     color: var(--_fg);
     font: inherit;
     font-size: 14px;
@@ -512,9 +503,9 @@
   .ow-color-picker-popup > .ow-color-picker {
     box-shadow: var(
       --ow-popup-shadow,
-      0 0 0 1px rgb(30 25 40 / 0.1),
-      0 2px 6px -2px rgb(40 30 20 / 0.08),
-      0 16px 40px -12px rgb(40 30 20 / 0.24)
+      0 0 0 1px rgb(0 0 0 / 0.08),
+      0 4px 8px -2px rgb(0 0 0 / 0.06),
+      0 16px 32px -8px rgb(0 0 0 / 0.14)
     );
   }
 

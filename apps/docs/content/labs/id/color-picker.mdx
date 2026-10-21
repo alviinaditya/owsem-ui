@@ -52,7 +52,7 @@ stage; pilih sebuah nama, di sini atau di stage, untuk melihat tokennya.
 | --- | --- | --- |
 | <Part name="Root" /> | `div.ow-color-picker` | Panelnya; token komponen dipasang di sini |
 | <Part name="Area" /> | `div` | `role="slider"` dua dimensi, dengan tombolnya sendiri |
-| <Part name="Thumb" /> | `span` | Cincin timbul berisi warnanya, juga di setiap slider |
+| <Part name="Thumb" /> | `span` | Cincin berisi warnanya dengan tepi gelap 1px, juga di setiap slider |
 | <Part name="Hue" /> | `div` | `Slider` dari Base UI |
 | <Part name="Alpha" /> | `div` | `Slider` dari Base UI di atas papan catur |
 | <Part name="EyeDropper" /> | `button` | Hanya di browser yang punya EyeDropper API |
@@ -73,7 +73,7 @@ trigger-nya dalam 180 ms dan kembali dalam 140 ms; bila dibuka dari keyboard, po
 
 | State | Yang menandainya |
 | --- | --- |
-| Ditekan | Thumb memadat selama digeser lalu memantul kembali; tombol dan contoh warna ikut tertekan |
+| Ditekan | Thumb memadat selama digeser lalu memantul kembali; tombol dan contoh warna sedikit mengecil |
 | Fokus keyboard | Cincin 2 px dari `--ow-focus` di sekeliling area, thumb, kolom, atau contoh warna |
 | Contoh warna aktif | Tanda centang, gelap atau terang mengikuti warnanya |
 | Transparan | Papan catur di bawah pratinjau, contoh warna, dan warna di trigger |
@@ -81,7 +81,8 @@ trigger-nya dalam 180 ms dan kembali dalam 140 ms; bila dibuka dari keyboard, po
 
 Ukurannya mengikuti aturan `--py`: tinggi trigger 29,25, 38,5, atau 48 px, dan jarak warnanya ke
 tepi sama dengan jaraknya ke atas dan bawah. Color Picker adalah komponen Owsem (Tactile): thumb dan
-contoh warna tertekan dengan spring, dan tidak ada yang berpendar.
+contoh warna tertekan dengan spring, dan tidak ada yang berpendar. Setiap bagiannya bertepi 1px yang
+tegas, tanpa bayangan lembut atau cekung; hanya popover yang melayang.
 
 ## Keyboard dan aksesibilitas [#keyboard]
 
@@ -104,10 +105,11 @@ Kecerahan 72%". Rona dan opasitas adalah slider Base UI, dengan input range di s
 kata yang ditampilkan atau dibacakan ada di `labels` (FR-17); halaman ini memakai label bahasa
 Indonesia. Huruf format dan kanal (HEX, R, G, B, H, S, L, A) adalah notasi dan tidak diterjemahkan.
 
-Dengan `prefers-reduced-motion`, popover hanya memudar tanpa membesar, dan thumb serta contoh warna
-tidak tertekan. Di forced colors (Windows High Contrast), area, track, dan contoh warna tetap memakai
-warnanya sendiri di dalam outline warna sistem, fokus memakai `Highlight`, dan contoh warna aktif
-diberi outline `Highlight`. Dari kanan ke kiri, saturasi, rona, dan opasitas naik ke arah kiri.
+Dengan `prefers-reduced-motion`, popover hanya memudar tanpa membesar, dan thumb, tombol, serta
+contoh warna tidak mengecil. Di forced colors (Windows High Contrast), area, track, dan contoh warna
+tetap memakai warnanya sendiri di dalam outline warna sistem, fokus memakai `Highlight`, dan contoh
+warna aktif diberi outline `Highlight`. Dari kanan ke kiri, saturasi, rona, dan opasitas naik ke
+arah kiri.
 
 ## Kustomisasi [#customization]
 
@@ -143,10 +145,12 @@ pasang token di picker itu sendiri, seperti `.brand-picker.ow-color-picker`.
 
 </ForMode>
 
-Sisanya datang dari material depth: cekungan di bawah area, track, dan kolom (`--ow-well-*`), tombol
-timbul (`--ow-raised-*`), bayangan popup (`--ow-popup-shadow`), serta `--ow-focus` dan `--ow-edge`.
-Panel popover di-portal ke body, jadi pasang tokennya di tempat yang terbaca oleh popup, misalnya
-`:root`; tema dan arah trigger-nya ikut terbawa dengan sendirinya.
+Sisanya datang dari material: tepi panel (`--ow-panel-shadow`), isian kolom (`--ow-well-bg`) dengan
+tepi 3:1 (`--ow-edge`), eye dropper dan tombol format sebagai tombol timbul (`--ow-raised-*`, dan
+`--ow-pressed-*` selama ditekan), bayangan popup (`--ow-popup-shadow`), garis terukir di atas contoh
+warna (`--ow-line-dark`, `--ow-line-light`), serta `--ow-focus`. Panel popover di-portal ke body,
+jadi pasang tokennya di tempat yang terbaca oleh popup, misalnya `:root`; tema dan arah trigger-nya
+ikut terbawa dengan sendirinya.
 
 <TokenChip item="color-picker" lang="id" />
 

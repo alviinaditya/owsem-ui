@@ -13,7 +13,7 @@ Use it controlled (`value`) or not (`defaultValue`); `onChange` follows every mo
 `onChangeComplete` arrives when a drag, key, edit, or swatch is done. Values can be any CSS color
 the browser reads, tokens such as `var(--ow-accent)` included; `format` sets the string you get
 back. Every label is in `labels` for translation. Thumbs compact when pressed and spring back
-(Tactile). Restyle it with `--ow-color-picker-bg`, `--ow-color-picker-checker`,
-`--ow-color-picker-thumb`, `--ow-color-picker-width`, and `--ow-color-picker-area-height`. The
-color utilities are exported too: `parseColor`, `formatColor`, and conversions between hex, RGB,
-HSL, and HSV.
+(Tactile). Every part has a crisp 1px edge, with no soft or sunken shadow; only the popover floats.
+Restyle it with `--ow-color-picker-bg`, `--ow-color-picker-checker`, `--ow-color-picker-thumb`,
+`--ow-color-picker-width`, and `--ow-color-picker-area-height`. The color utilities are exported
+too: `parseColor`, `formatColor`, and conversions between hex, RGB, HSL, and HSV.

@@ -225,8 +225,8 @@ const colorPickerLab = defineLab({
       name: "Root",
       selector: ".ow-color-picker",
       note: {
-        id: "Panel bermaterial depth. Token komponen dipasang di sini.",
-        en: "The panel, in depth materials. Component tokens go here.",
+        id: "Panel datar dengan tepi tegas. Token komponen dipasang di sini.",
+        en: "The panel: a flat fill with a crisp edge. Component tokens go here.",
       },
       tokens: {
         "--ow-color-picker-width": "--_width",
@@ -248,16 +248,16 @@ const colorPickerLab = defineLab({
       name: "Thumb",
       selector: ".ow-color-picker-area .ow-color-picker-thumb",
       note: {
-        id: "Cincin timbul berisi warnanya; memadat saat ditekan, memantul saat dilepas.",
-        en: "A raised ring holding the color; it compacts when pressed and springs back.",
+        id: "Cincin warna bertepi gelap 1px; memadat saat ditekan, memantul saat dilepas.",
+        en: "A ring with a 1px dark edge around the color; compacts when pressed, springs back.",
       },
     },
     {
       name: "Hue",
       selector: '[data-channel="hue"]',
       note: {
-        id: "Slider dari Base UI di atas track cekung berisi pelangi rona.",
-        en: "A Base UI Slider over a sunken track painted with every hue.",
+        id: "Slider dari Base UI di atas track bertepi 1px berisi pelangi rona.",
+        en: "A Base UI Slider over a track painted with every hue, inside a 1px edge.",
       },
     },
     {
@@ -296,8 +296,8 @@ const colorPickerLab = defineLab({
       name: "Field",
       selector: ".ow-color-picker-field",
       note: {
-        id: "Kolom cekung. Angka berlaku saat diketik; hex saat Enter atau blur.",
-        en: "A sunken field. Numbers apply as you type; hex on Enter or blur.",
+        id: "Kolom datar bertepi 3:1. Angka berlaku saat diketik; hex saat Enter atau blur.",
+        en: "A flat field with a 3:1 edge. Numbers apply as you type; hex on Enter or blur.",
       },
     },
     {

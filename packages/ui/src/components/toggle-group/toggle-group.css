@@ -203,8 +203,11 @@
     margin-inline-end: calc((1cap - var(--icon)) / 2);
   }
 
+  /* Room for glyphs whose ink passes their advance (a monospace "m"), without changing the width. */
   .ow-toggle-group-label {
     min-inline-size: 0;
+    margin-inline: -0.125em;
+    padding-inline: 0.125em;
     overflow: hidden;
     text-overflow: ellipsis;
   }

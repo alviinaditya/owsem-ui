@@ -101,7 +101,8 @@ export const MenuPopup: ForwardRefExoticComponent<MenuPopupProps & RefAttributes
     const follow = (event: Parameters<NonNullable<MenuPopupProps["onFocus"]>>[0]) => {
       onFocus?.(event);
       const item = event.target as HTMLElement;
-      if (item.matches(ITEMS)) setActive(item);
+      // A submenu's focus bubbles here through React's tree; its items are not this popup's.
+      if (item.matches(ITEMS) && event.currentTarget.contains(item)) setActive(item);
     };
     return (
       <BaseMenu.Popup

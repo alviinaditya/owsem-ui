@@ -149,7 +149,10 @@ describe("Menu", () => {
     expect(document.activeElement).toBe(item("Word wrap"));
     await userEvent.keyboard("{End}{ArrowRight}");
     await expect.poll(() => document.activeElement).toBe(item("Email"));
-    await expect.poll(lit).toBe("Email");
+    // The submenu lights Email; the parent keeps Share lit.
+    const allLit = () =>
+      [...document.querySelectorAll("[data-glide-active]")].map((el) => el.textContent);
+    await expect.poll(allLit).toEqual(["Share", "Email"]);
     await userEvent.keyboard("{ArrowLeft}");
     await expect.poll(() => document.activeElement).toBe(item("Share"));
     await userEvent.keyboard("{Escape}");
@@ -226,6 +229,14 @@ describe("Menu", () => {
     await userEvent.hover(first);
     expect(share.hasAttribute("data-popup-open")).toBe(true);
     expect(getComputedStyle(share).backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
+    // Focus in the submenu leaves the parent's highlight home, so the parent does not scroll.
+    await expect.poll(() => document.activeElement).toBe(first);
+    await settle();
+    const parent = popup() as HTMLElement;
+    expect([parent.scrollWidth, parent.scrollHeight]).toEqual([
+      parent.clientWidth,
+      parent.clientHeight,
+    ]);
   });
 
   test("a shortcut sits at the item's end, muted; the label leads with its icon", async () => {

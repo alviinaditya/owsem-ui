@@ -1,20 +1,26 @@
 @layer owsem.tokens, owsem.components;
 
 /*
- * A ghost button that stays pressed while on: flat and lit on hover while off, in the pressed
- * material while on (depth, DP-4). Button's geometry (FR-9 to FR-11): --py is the only input.
+ * A ghost button that stays up while on: flat and tinted on hover while off, the raised key while
+ * on, and the pressed material only while held down (DP-4). Button's geometry (FR-9 to FR-11):
+ * --py is the only input.
  */
 @layer owsem.components {
   .ow-toggle {
-    --_fg: var(--ow-toggle-fg, var(--ow-muted, #5c5669));
-    --_hover-bg: var(--ow-toggle-hover-bg, var(--ow-hover, rgb(27 23 38 / 0.05)));
-    --_hover-fg: var(--ow-toggle-hover-fg, var(--ow-fg, #1b1726));
-    --_pressed-bg: var(--ow-toggle-pressed-bg, var(--ow-pressed-bg, #e6e3ee));
+    --_fg: var(--ow-toggle-fg, var(--ow-muted, #63636b));
+    --_hover-bg: var(--ow-toggle-hover-bg, var(--ow-hover, rgb(0 0 0 / 0.04)));
+    --_hover-fg: var(--ow-toggle-hover-fg, var(--ow-fg, #18181b));
+    --_on-bg: var(--ow-toggle-on-bg, var(--ow-raised-bg, #ffffff));
+    --_on-shadow: var(
+      --ow-toggle-on-shadow,
+      var(--ow-raised-shadow, inset 0 0 0 1px rgb(0 0 0 / 0.14), 0 1px 0 rgb(0 0 0 / 0.04))
+    );
+    --_on-fg: var(--ow-toggle-on-fg, var(--ow-fg, #18181b));
+    --_pressed-bg: var(--ow-toggle-pressed-bg, var(--ow-pressed-bg, #f4f4f5));
     --_pressed-shadow: var(
       --ow-toggle-pressed-shadow,
-      var(--ow-pressed-shadow, inset 0 1.5px 3px rgb(40 30 20 / 0.2))
+      var(--ow-pressed-shadow, inset 0 0 0 1px rgb(0 0 0 / 0.16))
     );
-    --_pressed-fg: var(--ow-toggle-pressed-fg, var(--ow-fg, #1b1726));
     --py: 0.75em;
     --_py: max(var(--py), (24px - 1lh) / 2);
     --px: calc(var(--_py) + (1lh - 1cap) / 2);
@@ -87,23 +93,30 @@
     margin: 0;
   }
 
+  /* On: the raised key, a flat fill with crisp edges. */
+  .ow-toggle[data-pressed] {
+    background-color: var(--_on-bg);
+    box-shadow: var(--_on-shadow);
+    color: var(--_on-fg);
+  }
+
   @media (hover: hover) {
     .ow-toggle:hover:not([data-pressed], [data-disabled]) {
       background-color: var(--_hover-bg);
       color: var(--_hover-fg);
     }
+
+    /* The key tints a few percent toward its text; its edges stay. */
+    .ow-toggle[data-pressed]:hover:not(:active, [data-disabled]) {
+      background-color: color-mix(in oklab, var(--_on-bg), var(--_on-fg) 4%);
+    }
   }
 
-  /* On, and held in by a press: the pressed material. */
-  .ow-toggle[data-pressed],
+  /* Held down, on or off: the pressed material, going in to 0.97 within 90 ms (DP-4). */
   .ow-toggle:active:not([data-disabled]) {
     background-color: var(--_pressed-bg);
     box-shadow: var(--_pressed-shadow);
-    color: var(--_pressed-fg);
-  }
-
-  /* A press goes in to 0.97 within 90 ms (DP-4). */
-  .ow-toggle:active:not([data-disabled]) {
+    color: var(--_on-fg);
     transform: scale(0.97);
     transition-duration: 90ms;
     transition-timing-function: var(--ow-ease-out, cubic-bezier(0.23, 1, 0.32, 1));
@@ -126,7 +139,7 @@
     }
   }
 
-  /* DP-8: the pressed material is gone, so on is the system's highlight. */
+  /* DP-8: the raised key is gone, so on is the system's highlight. */
   @media (forced-colors: active) {
     .ow-toggle[data-pressed] {
       background-color: Highlight;

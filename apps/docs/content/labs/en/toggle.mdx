@@ -5,19 +5,19 @@ title: Toggle
 import { Part } from "@/components/lab/lab-shell";
 import { ForMode, TokenChip } from "@/components/token-setup";
 
-Toggle is a button with two states, on and off. Off, it is flat and lights up under the pointer;
-on, it sits in the pressed material, sunk into the surface. Its sizes and spacing are Button's.
-Scroll to start the tour; the stage follows each part.
+Toggle is a button with two states, on and off. Off, it is flat and tinted under the pointer; on,
+it is a raised key with crisp edges. Its sizes and spacing are Button's. Scroll to start the tour;
+the stage follows each part.
 
-## Pressed in [#pressing]
+## A key that stays up [#pressing]
 
-On is a place, not a color. An on toggle sits in the pressed material: a slightly darker surface
-with an inner shadow along its top edge, as if pushed into the page with light from above. Off, it
-is flat like a ghost button: muted text, and a faint tint under the pointer.
+On is a material, not a color. An on toggle is the raised key: a flat fill with a 1px edge darker
+than the fill and a light line inside it, like a selected segment. Off, it is flat like a ghost
+button: muted text, and a faint tint under the pointer. Text turns from muted to full strength.
 
-Every press goes in first. The toggle shrinks to 0.97 and takes the pressed material within 90 ms,
-then lets go on the settle spring, with a small overshoot. Under reduced motion it changes material
-without moving.
+Every press goes in first. While held, the toggle shrinks to 0.97 and takes the pressed material
+within 90 ms, then lets go on the settle spring, with a small overshoot, and comes up raised or
+flat. Under reduced motion it changes material without moving.
 
 The stage plays it: the pointer turns Italic and Underline on, then off again, and the note's text
 follows them. Play scene runs it again; press the toggles yourself to feel the press.
@@ -62,12 +62,13 @@ rests on the off toggle in each theme, then turns it on and off.
 | --- | --- |
 | Off | Flat, with muted text |
 | Hover, while off | The `--ow-hover` tint, and text at full strength |
-| Pressing | Scaled to 0.97, in the pressed material, within 90 ms |
-| On | The pressed material: `--ow-pressed-bg` and `--ow-pressed-shadow`, with text in `--ow-fg` |
+| Pressing | Scaled to 0.97 within 90 ms, in the pressed material: `--ow-pressed-bg` and `--ow-pressed-shadow` |
+| On | The raised key: `--ow-raised-bg` and `--ow-raised-shadow`, with text in `--ow-fg` |
+| Hover, while on | The fill tints 4% toward the text; the edges stay |
 | Keyboard focus | A 2px ring 2px out, in `--ow-focus` |
 | Disabled | 45% opacity, and presses do nothing |
 
-An on toggle keeps its material under the pointer, so hovering never looks like turning it off.
+An on toggle keeps its edges under the pointer, so hovering never looks like turning it off.
 
 ## Keyboard and accessibility [#keyboard]
 
@@ -99,9 +100,11 @@ such as `.note`.
 | `--ow-toggle-fg` | `--ow-muted` | Text while off |
 | `--ow-toggle-hover-bg` | `--ow-hover` | Tint under the pointer while off |
 | `--ow-toggle-hover-fg` | `--ow-fg` | Text under the pointer while off |
-| `--ow-toggle-pressed-bg` | `--ow-pressed-bg` | Surface while on or pressed |
-| `--ow-toggle-pressed-shadow` | `--ow-pressed-shadow` | Inner shadow while on or pressed |
-| `--ow-toggle-pressed-fg` | `--ow-fg` | Text while on or pressed |
+| `--ow-toggle-on-bg` | `--ow-raised-bg` | Fill while on |
+| `--ow-toggle-on-shadow` | `--ow-raised-shadow` | Edges while on |
+| `--ow-toggle-on-fg` | `--ow-fg` | Text while on or held down |
+| `--ow-toggle-pressed-bg` | `--ow-pressed-bg` | Fill while held down |
+| `--ow-toggle-pressed-shadow` | `--ow-pressed-shadow` | Edges while held down |
 
 </ForMode>
 
@@ -115,9 +118,11 @@ toggle itself, as `note.css` does with `.note .ow-toggle`.
 | `--ow-toggle-fg` | Its own, per theme | Text while off |
 | `--ow-toggle-hover-bg` | Its own, per theme | Tint under the pointer while off |
 | `--ow-toggle-hover-fg` | Its own, per theme | Text under the pointer while off |
-| `--ow-toggle-pressed-bg` | Its own, per theme | Surface while on or pressed |
-| `--ow-toggle-pressed-shadow` | Its own, per theme | Inner shadow while on or pressed |
-| `--ow-toggle-pressed-fg` | Its own, per theme | Text while on or pressed |
+| `--ow-toggle-on-bg` | Its own, per theme | Fill while on |
+| `--ow-toggle-on-shadow` | Its own, per theme | Edges while on |
+| `--ow-toggle-on-fg` | Its own, per theme | Text while on or held down |
+| `--ow-toggle-pressed-bg` | Its own, per theme | Fill while held down |
+| `--ow-toggle-pressed-shadow` | Its own, per theme | Edges while held down |
 
 </ForMode>
 

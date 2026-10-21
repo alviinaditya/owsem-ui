@@ -178,7 +178,8 @@ import { Kbd } from "owsem-ui/base"; // or "@/components/owsem/kbd"
 
 ### Toggle
 
-A two-state button: flat while off, in the pressed material while on. Registry item: `toggle`.
+A two-state button: flat with muted text while off, the raised key while on, and the pressed
+material only while held down. Registry item: `toggle`.
 
 ```tsx
 import { Toggle } from "owsem-ui/base"; // or "@/components/owsem/toggle"
@@ -195,8 +196,9 @@ import { Toggle } from "owsem-ui/base"; // or "@/components/owsem/toggle"
   `value`, `className`, `style`, and `render`. Without children it is a square icon button: give
   it an `aria-label`. The ref goes to the `button`.
 - Height comes from `--py` (set it in `style` on the toggle, never under a 24 px target).
-- Tokens: `--ow-toggle-fg`, `--ow-toggle-hover-bg`, `--ow-toggle-hover-fg`,
-  `--ow-toggle-pressed-bg`, `--ow-toggle-pressed-shadow`, `--ow-toggle-pressed-fg`.
+- Tokens: `--ow-toggle-fg`, `--ow-toggle-hover-bg`, `--ow-toggle-hover-fg` (off);
+  `--ow-toggle-on-bg`, `--ow-toggle-on-shadow`, `--ow-toggle-on-fg` (on); `--ow-toggle-pressed-bg`,
+  `--ow-toggle-pressed-shadow` (held down).
 
 ### Tree Rail Nav
 

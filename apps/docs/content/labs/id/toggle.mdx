@@ -5,20 +5,20 @@ title: Toggle
 import { Part } from "@/components/lab/lab-shell";
 import { ForMode, TokenChip } from "@/components/token-setup";
 
-Toggle adalah tombol dengan dua state, menyala dan mati. Saat mati, ia datar dan menyala tipis di
-bawah pointer; saat menyala, ia duduk di material ditekan, masuk ke dalam permukaan. Ukuran dan
-spacing-nya sama dengan Button. Gulir untuk mulai tur; stage mengikuti setiap bagian.
+Toggle adalah tombol dengan dua state, menyala dan mati. Saat mati, ia datar dan sedikit berwarna
+di bawah pointer; saat menyala, ia menjadi tombol timbul dengan tepi tegas. Ukuran dan spacing-nya
+sama dengan Button. Gulir untuk mulai tur; stage mengikuti setiap bagian.
 
-## Tertekan ke dalam [#pressing]
+## Tombol yang tetap timbul [#pressing]
 
-Menyala adalah posisi, bukan warna. Toggle yang menyala memakai material ditekan: permukaan yang
-sedikit lebih gelap dengan bayangan dalam di tepi atasnya, seolah didorong masuk ke halaman dengan
-cahaya dari atas. Saat mati, ia datar seperti tombol ghost: teksnya muted, dan sedikit berwarna di
-bawah pointer.
+Menyala adalah material, bukan warna. Toggle yang menyala memakai tombol timbul: isian datar dengan
+tepi 1px yang lebih gelap dari isiannya dan garis terang di dalamnya, seperti segmen yang dipilih.
+Saat mati, ia datar seperti tombol ghost: teksnya muted, dan sedikit berwarna di bawah pointer.
+Teksnya berubah dari muted ke kontras penuh.
 
-Setiap tekanan masuk lebih dulu. Toggle mengecil ke 0,97 dan berpindah ke material ditekan dalam
-90 ms, lalu dilepas dengan spring settle yang sedikit melewati batas. Dengan reduced motion,
-materialnya tetap berganti tanpa ada yang bergerak.
+Setiap tekanan masuk lebih dulu. Selama ditahan, toggle mengecil ke 0,97 dan berpindah ke material
+ditekan dalam 90 ms, lalu dilepas dengan spring settle yang sedikit melewati batas, dan kembali
+timbul atau datar. Dengan reduced motion, materialnya tetap berganti tanpa ada yang bergerak.
 
 Stage memutarnya: pointer menyalakan Miring dan Garis bawah, lalu mematikannya lagi, dan teks
 catatan mengikutinya. Putar scene memutarnya lagi; tekan sendiri toggle-nya untuk merasakan
@@ -64,12 +64,13 @@ Pointer singgah di toggle yang mati di setiap tema, lalu menyalakan dan mematika
 | --- | --- |
 | Mati | Datar, dengan teks muted |
 | Hover, saat mati | Warna `--ow-hover`, dan teks dengan kontras penuh |
-| Sedang ditekan | Mengecil ke 0,97, dengan material ditekan, dalam 90 ms |
-| Menyala | Material ditekan: `--ow-pressed-bg` dan `--ow-pressed-shadow`, dengan teks `--ow-fg` |
+| Sedang ditekan | Mengecil ke 0,97 dalam 90 ms, dengan material ditekan: `--ow-pressed-bg` dan `--ow-pressed-shadow` |
+| Menyala | Tombol timbul: `--ow-raised-bg` dan `--ow-raised-shadow`, dengan teks `--ow-fg` |
+| Hover, saat menyala | Isiannya bergeser 4% ke warna teks; tepinya tetap |
 | Fokus keyboard | Ring 2px dengan jarak 2px, warna `--ow-focus` |
 | Disabled | Opacity 45%, dan tekanan tidak berpengaruh |
 
-Toggle yang menyala tetap memakai materialnya di bawah pointer, jadi hover tidak pernah terlihat
+Toggle yang menyala tetap mempertahankan tepinya di bawah pointer, jadi hover tidak pernah terlihat
 seperti mematikannya.
 
 ## Keyboard dan aksesibilitas [#keyboard]
@@ -101,9 +102,11 @@ misalnya `.note`.
 | `--ow-toggle-fg` | `--ow-muted` | Teks saat mati |
 | `--ow-toggle-hover-bg` | `--ow-hover` | Warna di bawah pointer saat mati |
 | `--ow-toggle-hover-fg` | `--ow-fg` | Teks di bawah pointer saat mati |
-| `--ow-toggle-pressed-bg` | `--ow-pressed-bg` | Permukaan saat menyala atau ditekan |
-| `--ow-toggle-pressed-shadow` | `--ow-pressed-shadow` | Bayangan dalam saat menyala atau ditekan |
-| `--ow-toggle-pressed-fg` | `--ow-fg` | Teks saat menyala atau ditekan |
+| `--ow-toggle-on-bg` | `--ow-raised-bg` | Isian saat menyala |
+| `--ow-toggle-on-shadow` | `--ow-raised-shadow` | Tepi saat menyala |
+| `--ow-toggle-on-fg` | `--ow-fg` | Teks saat menyala atau ditahan |
+| `--ow-toggle-pressed-bg` | `--ow-pressed-bg` | Isian saat ditahan |
+| `--ow-toggle-pressed-shadow` | `--ow-pressed-shadow` | Tepi saat ditahan |
 
 </ForMode>
 
@@ -117,9 +120,11 @@ atur token di toggle itu sendiri, seperti `note.css` dengan `.note .ow-toggle`.
 | `--ow-toggle-fg` | Nilainya sendiri, per tema | Teks saat mati |
 | `--ow-toggle-hover-bg` | Nilainya sendiri, per tema | Warna di bawah pointer saat mati |
 | `--ow-toggle-hover-fg` | Nilainya sendiri, per tema | Teks di bawah pointer saat mati |
-| `--ow-toggle-pressed-bg` | Nilainya sendiri, per tema | Permukaan saat menyala atau ditekan |
-| `--ow-toggle-pressed-shadow` | Nilainya sendiri, per tema | Bayangan dalam saat menyala atau ditekan |
-| `--ow-toggle-pressed-fg` | Nilainya sendiri, per tema | Teks saat menyala atau ditekan |
+| `--ow-toggle-on-bg` | Nilainya sendiri, per tema | Isian saat menyala |
+| `--ow-toggle-on-shadow` | Nilainya sendiri, per tema | Tepi saat menyala |
+| `--ow-toggle-on-fg` | Nilainya sendiri, per tema | Teks saat menyala atau ditahan |
+| `--ow-toggle-pressed-bg` | Nilainya sendiri, per tema | Isian saat ditahan |
+| `--ow-toggle-pressed-shadow` | Nilainya sendiri, per tema | Tepi saat ditahan |
 
 </ForMode>
 

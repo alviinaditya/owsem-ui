@@ -61,7 +61,7 @@ type Theme = "light" | "dark";
 const SIZES: readonly ToggleSize[] = ["sm", "md", "lg"];
 const THEMES: readonly Theme[] = ["light", "dark"];
 
-const initial = { size: "md", pressed: "", text: "" };
+const initial = { size: "md", on: "", text: "" };
 type Cfg = typeof initial;
 
 /** A note whose text follows its own formatting toggles, with a Pin toggle beside its title. */
@@ -74,8 +74,8 @@ function Demo({ cfg, lang }: { cfg: Cfg; lang: Lang }) {
     underline: false,
   });
   const style = {
-    "--ow-toggle-pressed-bg": cfg.pressed || undefined,
-    "--ow-toggle-pressed-fg": cfg.text || undefined,
+    "--ow-toggle-on-bg": cfg.on || undefined,
+    "--ow-toggle-on-fg": cfg.text || undefined,
   } as CSSProperties;
   const mark = (key: Format) => (
     <Toggle
@@ -226,10 +226,10 @@ const toggleLab = defineLab({
       options: SIZES.map((size) => ({ value: size, label: { id: size, en: size } })),
     },
     {
-      key: "pressed",
+      key: "on",
       type: "color",
       label: { id: "Permukaan menyala", en: "On surface" },
-      token: "--ow-pressed-bg",
+      token: "--ow-raised-bg",
     },
     {
       key: "text",
@@ -244,16 +244,18 @@ const toggleLab = defineLab({
       name: "Root",
       selector: '[data-demo="pin"]',
       note: {
-        id: "button dari Base UI, dengan aria-pressed. Datar saat mati, memakai material ditekan saat menyala.",
-        en: "Base UI's button, with aria-pressed. Flat while off, in the pressed material while on.",
+        id: "button dari Base UI, dengan aria-pressed. Datar saat mati, tombol timbul saat menyala.",
+        en: "Base UI's button, with aria-pressed. Flat while off, the raised key while on.",
       },
       tokens: {
         "--ow-toggle-fg": "--_fg",
         "--ow-toggle-hover-bg": "--_hover-bg",
         "--ow-toggle-hover-fg": "--_hover-fg",
+        "--ow-toggle-on-bg": "--_on-bg",
+        "--ow-toggle-on-shadow": "--_on-shadow",
+        "--ow-toggle-on-fg": "--_on-fg",
         "--ow-toggle-pressed-bg": "--_pressed-bg",
         "--ow-toggle-pressed-shadow": "--_pressed-shadow",
-        "--ow-toggle-pressed-fg": "--_pressed-fg",
       },
     },
     {
@@ -273,7 +275,7 @@ const toggleLab = defineLab({
   code(cfg, setup) {
     // Any other setup comes from the owsem CLI, which copies the component into the project.
     const from = isDefaultSetup(setup) ? "owsem-ui/base" : "@/components/owsem/toggle";
-    const custom = cfg.pressed || cfg.text;
+    const custom = cfg.on || cfg.text;
     const scope = custom ? ' className="note"' : "";
     const size = cfg.size === "md" ? "" : ` size="${cfg.size}"`;
     const usage = [
@@ -292,12 +294,12 @@ const toggleLab = defineLab({
     ];
     const files = [{ name: "note-tools.tsx", code: usage.join("\n") }];
     if (custom) {
-      const token = `--${setup.prefix}-toggle-pressed`;
+      const token = `--${setup.prefix}-toggle-on`;
       // Isolated tokens are set on each Toggle's root, so an inherited value would lose.
       const lines = [
         "/* Every Toggle inside .note */",
         setup.mode === "isolated" ? ".note .ow-toggle {" : ".note {",
-        ...(cfg.pressed ? [`  ${token}-bg: ${cfg.pressed};`] : []),
+        ...(cfg.on ? [`  ${token}-bg: ${cfg.on};`] : []),
         ...(cfg.text ? [`  ${token}-fg: ${cfg.text};`] : []),
         "}",
       ];

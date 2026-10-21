@@ -25,7 +25,7 @@ async function one(ui: ReactNode): Promise<HTMLButtonElement> {
   return toggle;
 }
 
-/** Resolves a value (e.g. `var(--ow-pressed-bg)`) of `property` to its computed form in `scope`. */
+/** Resolves a value (e.g. `var(--ow-raised-bg)`) of `property` to its computed form in `scope`. */
 function resolve(property: "color" | "box-shadow", value: string, scope: Element = document.body) {
   const probe = document.createElement("span");
   probe.style.setProperty(property, value);
@@ -150,7 +150,7 @@ describe("Toggle", () => {
     expect(sm?.querySelector(".ow-toggle-icon")?.getAttribute("data-side")).toBe("end");
   });
 
-  test("is flat while off and in the pressed material while on, in light and dark", async () => {
+  test("is flat while off and the raised key while on, in light and dark", async () => {
     onTestFinished(() => {
       delete root.dataset.theme;
     });
@@ -169,13 +169,13 @@ describe("Toggle", () => {
       expect(offStyle.boxShadow).toBe("none");
       expect(offStyle.color).toBe(resolve("color", "var(--ow-muted)"));
       const onStyle = getComputedStyle(on);
-      expect(onStyle.backgroundColor).toBe(resolve("color", "var(--ow-pressed-bg)"));
-      expect(onStyle.boxShadow).toBe(resolve("box-shadow", "var(--ow-pressed-shadow)"));
+      expect(onStyle.backgroundColor).toBe(resolve("color", "var(--ow-raised-bg)"));
+      expect(onStyle.boxShadow).toBe(resolve("box-shadow", "var(--ow-raised-shadow)"));
       expect(onStyle.color).toBe(resolve("color", "var(--ow-fg)"));
     }
   });
 
-  test("lights up on hover while off, and keeps its material while on", async () => {
+  test("is tinted on hover while off, and keeps its edges while on", async () => {
     const [off, on] = await mount(
       <>
         <Toggle>Off</Toggle>
@@ -187,20 +187,27 @@ describe("Toggle", () => {
     expect(getComputedStyle(off).backgroundColor).toBe(resolve("color", "var(--ow-hover)"));
     expect(getComputedStyle(off).color).toBe(resolve("color", "var(--ow-fg)"));
     await userEvent.hover(on);
-    expect(getComputedStyle(on).backgroundColor).toBe(resolve("color", "var(--ow-pressed-bg)"));
+    // A raised key tints a few percent toward its text under the pointer; its edges stay.
+    expect(getComputedStyle(on).backgroundColor).toBe(
+      resolve("color", "color-mix(in oklab, var(--ow-raised-bg), var(--ow-fg) 4%)"),
+    );
+    expect(getComputedStyle(on).boxShadow).toBe(resolve("box-shadow", "var(--ow-raised-shadow)"));
   });
 
-  test("a press goes in to 0.97 in the pressed material, then lets go (DP-4)", async () => {
+  test("a press goes in to 0.97 in the pressed material, then lets go raised (DP-4)", async () => {
     const toggle = await one(<Toggle>Pin</Toggle>);
+    await pointerAway();
     toggle.focus();
     await userEvent.keyboard("{Space>}");
     await wait(150);
     const held = getComputedStyle(toggle);
     expect(held.transform).toBe("matrix(0.97, 0, 0, 0.97, 0, 0)");
     expect(held.backgroundColor).toBe(resolve("color", "var(--ow-pressed-bg)"));
+    expect(held.boxShadow).toBe(resolve("box-shadow", "var(--ow-pressed-shadow)"));
     expect(held.transitionDuration).toBe("0.09s");
     await userEvent.keyboard("{/Space}");
     expect(toggle.getAttribute("aria-pressed")).toBe("true");
+    expect(getComputedStyle(toggle).backgroundColor).toBe(resolve("color", "var(--ow-raised-bg)"));
     // The release rides the settle spring.
     expect(getComputedStyle(toggle).transitionDuration).toBe("1.03s");
     await settle();
@@ -233,9 +240,10 @@ describe("Toggle", () => {
   test("component tokens override the theme tokens", async () => {
     const tokens = {
       "--ow-toggle-fg": "rgb(1, 2, 3)",
-      "--ow-toggle-pressed-bg": "rgb(255, 0, 0)",
-      "--ow-toggle-pressed-shadow": "none",
-      "--ow-toggle-pressed-fg": "rgb(0, 0, 255)",
+      "--ow-toggle-on-bg": "rgb(255, 0, 0)",
+      "--ow-toggle-on-shadow": "none",
+      "--ow-toggle-on-fg": "rgb(0, 0, 255)",
+      "--ow-toggle-pressed-bg": "rgb(0, 128, 0)",
     } as CSSProperties;
     const [off, on] = await mount(
       <div style={tokens}>
@@ -249,6 +257,10 @@ describe("Toggle", () => {
     expect(getComputedStyle(on).backgroundColor).toBe("rgb(255, 0, 0)");
     expect(getComputedStyle(on).boxShadow).toBe("none");
     expect(getComputedStyle(on).color).toBe("rgb(0, 0, 255)");
+    off.focus();
+    await userEvent.keyboard("{Space>}");
+    expect(getComputedStyle(off).backgroundColor).toBe("rgb(0, 128, 0)");
+    await userEvent.keyboard("{/Space}");
   });
 
   test("keeps an edge and shows on as the system highlight in forced colors (DP-8)", async () => {

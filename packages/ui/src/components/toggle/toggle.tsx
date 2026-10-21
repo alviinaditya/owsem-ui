@@ -31,8 +31,8 @@ const icon = (node: ReactNode, side: "start" | "end") =>
   );
 
 /**
- * A two-state button: flat while off, in the pressed material while on. Without children it is a
- * square icon button; give it an `aria-label`.
+ * A two-state button: flat while off, the raised key while on. Without children it is a square
+ * icon button; give it an `aria-label`.
  */
 export const Toggle: ForwardRefExoticComponent<ToggleProps & RefAttributes<HTMLButtonElement>> =
   forwardRef<HTMLButtonElement, ToggleProps>(function Toggle(

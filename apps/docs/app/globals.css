@@ -1673,14 +1673,6 @@ figure[data-code-block] pre {
 }
 
 .lab-tools {
-  /* The toggles (Inspect, Controls, Code): on is a raised thumb with accent text, like the
-   * site's switchers, rather than the pressed material, which would vanish in the sunken track. */
-  --ow-toggle-fg: var(--docs-muted);
-  --ow-toggle-hover-bg: var(--docs-hover);
-  --ow-toggle-hover-fg: var(--docs-fg);
-  --ow-toggle-pressed-bg: var(--docs-raised);
-  --ow-toggle-pressed-shadow: var(--docs-raised-shadow);
-  --ow-toggle-pressed-fg: var(--docs-accent);
   display: flex;
   flex: none;
   align-items: center;
@@ -1705,7 +1697,7 @@ figure[data-code-block] pre {
   font-weight: 400;
 }
 
-/* Wide: the tools sit in a sunken track like the site's switchers (narrow: the toolbar is one). */
+/* Wide: the tools sit in a flat track like the site's switchers (narrow: the toolbar is one). */
 @media (width >= 960px) {
   .lab-tools {
     padding: 3px;
@@ -1715,8 +1707,8 @@ figure[data-code-block] pre {
   }
 }
 
-/* The tools that act once (no specificity, so Docs keeps its accent); the toggles take their
- * colors from the tokens above. */
+/* The tools that act once (no specificity, so Docs keeps its accent). The toggles (Inspect,
+ * Controls, Code) keep Toggle's own look: on is the raised key, like the site's switchers. */
 :where(.lab-tool:not([aria-pressed])) {
   border: 0;
   background: none;
@@ -1731,7 +1723,7 @@ figure[data-code-block] pre {
 .lab-tool[aria-expanded="true"] {
   background-color: var(--docs-raised);
   box-shadow: var(--docs-raised-shadow);
-  color: var(--docs-accent);
+  color: var(--docs-fg);
 }
 
 .lab-tool-label {

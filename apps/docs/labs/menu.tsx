@@ -370,8 +370,8 @@ const menuLab = defineLab({
       name: "Popup",
       selector: ".ow-menu-popup",
       note: {
-        id: "Material panel dengan bayangan popup. Radiusnya radius item ditambah padding 4px.",
-        en: "The panel material with the popup shadow. Its radius is the item's plus the 4px padding.",
+        id: "Material panel dengan bayangan popup: tepi 1px yang tegas. Radiusnya radius item ditambah padding 4px.",
+        en: "The panel material with the popup shadow: a crisp 1px edge. Its radius is the item's plus the 4px padding.",
       },
       tokens: {
         "--ow-menu-bg": "--_bg",

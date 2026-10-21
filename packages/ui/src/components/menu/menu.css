@@ -10,10 +10,15 @@
     --_bg: var(--ow-menu-bg, var(--ow-panel, #ffffff));
     --_shadow: var(
       --ow-menu-shadow,
-      var(--ow-popup-shadow, 0 0 0 1px rgb(30 25 40 / 0.1), 0 16px 40px -12px rgb(40 30 20 / 0.24))
+      var(
+        --ow-popup-shadow,
+        0 0 0 1px rgb(0 0 0 / 0.08),
+        0 4px 8px -2px rgb(0 0 0 / 0.06),
+        0 16px 32px -8px rgb(0 0 0 / 0.14)
+      )
     );
-    --_fg: var(--ow-menu-fg, var(--ow-fg, #1b1726));
-    --_muted: var(--ow-menu-muted, var(--ow-muted, #5c5669));
+    --_fg: var(--ow-menu-fg, var(--ow-fg, #18181b));
+    --_muted: var(--ow-menu-muted, var(--ow-muted, #63636b));
     --_highlight: var(--ow-glide-bg, color-mix(in oklab, var(--ow-fg, #18181b) 7%, transparent));
     --_pad: 4px;
     box-sizing: border-box;
@@ -169,7 +174,7 @@
 
   /* An etched groove: a dark line with a light one under it, as borders for forced colors. */
   .ow-menu-separator {
-    --_dark: var(--ow-menu-line-dark, var(--ow-line-dark, #d9d9e0));
+    --_dark: var(--ow-menu-line-dark, var(--ow-line-dark, #e2e2e6));
     --_light: var(--ow-menu-line-light, var(--ow-line-light, #ffffff));
     margin-block: var(--_pad);
     border-block: 1px solid;

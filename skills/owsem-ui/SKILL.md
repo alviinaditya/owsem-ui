@@ -224,12 +224,13 @@ import { Toggle, Toolbar } from "owsem-ui/base"; // or "@/components/owsem/toolb
   `orientation="vertical"`) move between items and wrap. Do not add key handlers or `tabIndex`.
   Give it an `aria-label`. `size` (`"sm"`, `"md"` default, `"lg"`) sets every item's size.
 - `Button` and `Link` are quiet ghost buttons with `size`, `startIcon`, and `endIcon`; without a
-  label they are square and need an `aria-label`. A disabled `Button` stays focusable.
+  label they are square and need an `aria-label`. A disabled `Button` stays focusable. A Toggle
+  passed to `render` keeps its own look: the raised key while on.
 - On/off items: pass a Toggle to `render` (`render={<Toggle pressed={on} onPressedChange={setOn} />}`)
   and keep the item's other props on `Toolbar.Button`. A Base UI popup trigger goes the same way
   (`render={<Menu.Trigger />}`).
-- `Input` is a sunken field as tall as the buttons; put at most one, last, since arrows move its
-  caret. Its `size` is the type scale, not a width: set `inline-size` in CSS.
+- `Input` is a flat well with a 3:1 edge, as tall as the buttons; put at most one, last, since
+  arrows move its caret. Its `size` is the type scale, not a width: set `inline-size` in CSS.
 - `Separator` is an etched groove across the toolbar's direction; `Group` takes an `aria-label`.
 - Tokens: `--ow-toolbar-bg`, `--ow-toolbar-shadow`, `--ow-toolbar-button-fg`,
   `--ow-toolbar-button-hover-bg`, `--ow-toolbar-button-hover-fg`,

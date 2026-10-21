@@ -128,12 +128,14 @@ describe("Toolbar", () => {
     expect(bold.hasAttribute("data-icon-only")).toBe(true);
     await userEvent.click(bold);
     expect(bold.getAttribute("aria-pressed")).toBe("true");
+    // Clicked, it is still under the pointer: the raised key, tinted, never the item's hover tint.
     const style = getComputedStyle(bold);
-    expect(style.backgroundColor).toBe(resolve("color", "var(--ow-pressed-bg)"));
-    expect(style.boxShadow).toBe(resolve("box-shadow", "var(--ow-pressed-shadow)"));
-    // Hovered while on, it keeps the pressed material, not the button's hover tint.
-    await userEvent.hover(bold);
-    expect(getComputedStyle(bold).backgroundColor).toBe(resolve("color", "var(--ow-pressed-bg)"));
+    expect(style.backgroundColor).toBe(
+      resolve("color", "color-mix(in oklab, var(--ow-raised-bg), var(--ow-fg) 4%)"),
+    );
+    expect(style.boxShadow).toBe(resolve("box-shadow", "var(--ow-raised-shadow)"));
+    await pointerAway();
+    expect(getComputedStyle(bold).backgroundColor).toBe(resolve("color", "var(--ow-raised-bg)"));
   });
 
   test("items take the toolbar's size unless they set their own (FR-3)", async () => {
@@ -203,6 +205,10 @@ describe("Toolbar", () => {
       expect(getComputedStyle(share).backgroundColor).toBe("rgba(0, 0, 0, 0)");
       expect(getComputedStyle(share).color).toBe(resolve("color", "var(--ow-muted)"));
       expect(getComputedStyle(field).backgroundColor).toBe(resolve("color", "var(--ow-well-bg)"));
+      // A flat well with a crisp 3:1 edge (DP-6).
+      expect(getComputedStyle(field).boxShadow).toBe(
+        resolve("box-shadow", "inset 0 0 0 1px var(--ow-edge), var(--ow-well-shadow)"),
+      );
       expect(getComputedStyle(groove).borderInlineStartColor).toBe(
         resolve("color", "var(--ow-line-dark)"),
       );
@@ -223,6 +229,9 @@ describe("Toolbar", () => {
     await wait(150);
     expect(getComputedStyle(share).transform).toBe("matrix(0.97, 0, 0, 0.97, 0, 0)");
     expect(getComputedStyle(share).backgroundColor).toBe(resolve("color", "var(--ow-pressed-bg)"));
+    expect(getComputedStyle(share).boxShadow).toBe(
+      resolve("box-shadow", "var(--ow-pressed-shadow)"),
+    );
     await commands.mouse("up");
     expect(getComputedStyle(share).transitionDuration).toBe("1.03s");
     await settle();

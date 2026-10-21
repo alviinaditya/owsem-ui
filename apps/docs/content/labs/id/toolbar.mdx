@@ -13,8 +13,8 @@ berpindah di dalamnya. Gulir untuk mulai tur; stage mengikuti setiap bagian.
 
 Satu toolbar memuat beberapa jenis item. Tombol bekerja sekali; toggle tetap menyala. Keduanya
 tenang: datar dan muted sampai pointer berada di atasnya, dengan ukuran dan spacing Button. Toggle
-yang menyala memakai material ditekan, dan tekanan pada keduanya masuk ke 0,97, lalu dilepas
-dengan spring settle.
+yang menyala menjadi tombol timbul, isian datar dengan tepi tegas. Selama ditahan, keduanya memakai
+material ditekan dan masuk ke 0,97, lalu dilepas dengan spring settle.
 
 Toggle di toolbar adalah `Toolbar.Button` yang merender Toggle: `render={<Toggle />}`. Toolbar
 memberinya tempat dalam urutan tombol panah, Toggle memberinya state menyala, dan tampilan Toggle
@@ -50,7 +50,7 @@ di sini atau di stage, untuk melihat tokennya.
 | <Part name="Icon" /> | `span.ow-toolbar-icon` | Dekoratif (`aria-hidden`): `startIcon` atau `endIcon`, ukuran font ditambah 2px |
 | <Part name="Separator" /> | `div.ow-toolbar-separator` | `role="separator"`, melintang arah toolbar |
 | <Part name="Link" /> | `a.ow-toolbar-link` | Tampil seperti tombol; `render` menggantinya dengan link router |
-| <Part name="Input" /> | `input.ow-toolbar-input` | Field cekung, setinggi tombol |
+| <Part name="Input" /> | `input.ow-toolbar-input` | Well datar dengan tepi 3:1, setinggi tombol |
 
 ## State dan varian [#states]
 
@@ -62,8 +62,8 @@ mematikan Miring di setiap tema.
 | --- | --- |
 | Diam | Datar, dengan teks muted |
 | Hover | Warna `--ow-hover`, dan teks dengan kontras penuh |
-| Sedang ditekan | Mengecil ke 0,97, dengan material ditekan, dalam 90 ms |
-| Menyala, untuk toggle | Material ditekan, sama seperti Toggle sendiri |
+| Sedang ditekan | Mengecil ke 0,97 dalam 90 ms, dengan material ditekan |
+| Menyala, untuk toggle | Tombol timbul, sama seperti Toggle sendiri |
 | Fokus keyboard | Ring 2px dengan jarak 2px, warna `--ow-focus` |
 | Disabled | Opacity 45%, tetap bisa difokus |
 
@@ -102,11 +102,11 @@ atau di toolbar itu sendiri, misalnya `.editor`.
 | `--ow-toolbar-button-fg` | `--ow-muted` | Teks tombol dan link |
 | `--ow-toolbar-button-hover-bg` | `--ow-hover` | Warna di bawah pointer |
 | `--ow-toolbar-button-hover-fg` | `--ow-fg` | Teks di bawah pointer |
-| `--ow-toolbar-button-pressed-bg` | `--ow-pressed-bg` | Permukaan saat ditekan |
-| `--ow-toolbar-button-pressed-shadow` | `--ow-pressed-shadow` | Bayangan dalam saat ditekan |
-| `--ow-toolbar-button-pressed-fg` | `--ow-fg` | Teks saat ditekan |
-| `--ow-toolbar-input-bg` | `--ow-well-bg` | Permukaan field |
-| `--ow-toolbar-input-shadow` | `--ow-well-shadow` | Bayangan dalam field |
+| `--ow-toolbar-button-pressed-bg` | `--ow-pressed-bg` | Isian saat ditahan |
+| `--ow-toolbar-button-pressed-shadow` | `--ow-pressed-shadow` | Tepi saat ditahan |
+| `--ow-toolbar-button-pressed-fg` | `--ow-fg` | Teks saat ditahan |
+| `--ow-toolbar-input-bg` | `--ow-well-bg` | Isian field |
+| `--ow-toolbar-input-shadow` | `--ow-well-shadow` | Garis dalam field, di bawah tepinya |
 | `--ow-toolbar-input-edge` | `--ow-edge` | Tepi field, dengan kontras 3:1 |
 | `--ow-toolbar-line-dark` | `--ow-line-dark` | Garis gelap alur |
 | `--ow-toolbar-line-light` | `--ow-line-light` | Garis terang alur |
@@ -127,11 +127,11 @@ yang memakainya: permukaan di toolbar itu sendiri (`.editor`), garis alur di
 | `--ow-toolbar-button-fg` | Nilainya sendiri, per tema | Teks tombol dan link |
 | `--ow-toolbar-button-hover-bg` | Nilainya sendiri, per tema | Warna di bawah pointer |
 | `--ow-toolbar-button-hover-fg` | Nilainya sendiri, per tema | Teks di bawah pointer |
-| `--ow-toolbar-button-pressed-bg` | Nilainya sendiri, per tema | Permukaan saat ditekan |
-| `--ow-toolbar-button-pressed-shadow` | Nilainya sendiri, per tema | Bayangan dalam saat ditekan |
-| `--ow-toolbar-button-pressed-fg` | Nilainya sendiri, per tema | Teks saat ditekan |
-| `--ow-toolbar-input-bg` | Nilainya sendiri, per tema | Permukaan field |
-| `--ow-toolbar-input-shadow` | Nilainya sendiri, per tema | Bayangan dalam field |
+| `--ow-toolbar-button-pressed-bg` | Nilainya sendiri, per tema | Isian saat ditahan |
+| `--ow-toolbar-button-pressed-shadow` | Nilainya sendiri, per tema | Tepi saat ditahan |
+| `--ow-toolbar-button-pressed-fg` | Nilainya sendiri, per tema | Teks saat ditahan |
+| `--ow-toolbar-input-bg` | Nilainya sendiri, per tema | Isian field |
+| `--ow-toolbar-input-shadow` | Nilainya sendiri, per tema | Garis dalam field, di bawah tepinya |
 | `--ow-toolbar-input-edge` | Nilainya sendiri, per tema | Tepi field, dengan kontras 3:1 |
 | `--ow-toolbar-line-dark` | Nilainya sendiri, per tema | Garis gelap alur |
 | `--ow-toolbar-line-light` | Nilainya sendiri, per tema | Garis terang alur |

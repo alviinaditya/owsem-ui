@@ -287,8 +287,8 @@ const toolbarLab = defineLab({
       name: "Input",
       selector: ".ow-toolbar-input",
       note: {
-        id: "Field cekung setinggi tombol. Panah menggeser caret dulu, jadi letakkan di akhir.",
-        en: "A sunken field as tall as the buttons. Arrows move the caret first, so put it last.",
+        id: "Field datar bertepi 3:1, setinggi tombol. Panah menggeser caret dulu, jadi letakkan di akhir.",
+        en: "A flat field with a 3:1 edge, as tall as the buttons. Arrows move the caret first, so put it last.",
       },
       tokens: {
         "--ow-toolbar-input-bg": "--_bg",

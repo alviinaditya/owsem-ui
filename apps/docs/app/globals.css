@@ -1674,9 +1674,8 @@ figure[data-code-block] pre {
 
 /*
  * The stage toolbar (owsem-ui Toolbar). Narrow, the bar around it is the well; wide, the tools sit
- * in a sunken track like the site's switchers. Toggles (Inspect, Controls, Code) turn on as a
- * raised thumb with accent text, rather than the pressed material, which would vanish in the
- * track.
+ * in a flat track like the site's switchers. Toggles (Inspect, Controls, Code) keep Toggle's own
+ * look: on is the raised key.
  */
 .lab-tools {
   --ow-toolbar-bg: transparent;

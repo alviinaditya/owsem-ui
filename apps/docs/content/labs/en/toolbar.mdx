@@ -12,8 +12,9 @@ tour; the stage follows each part.
 ## Buttons and toggles together [#together]
 
 A toolbar mixes kinds of items. Buttons act once; toggles stay on. Both are quiet: flat and muted
-until the pointer is over them, with Button's sizes and spacing. An on toggle sits in the pressed
-material, and a press on either goes in to 0.97, then lets go on the settle spring.
+until the pointer is over them, with Button's sizes and spacing. An on toggle is the raised key, a
+flat fill with crisp edges. While held, either takes the pressed material and goes in to 0.97, then
+lets go on the settle spring.
 
 A toggle is a `Toolbar.Button` that renders a Toggle: `render={<Toggle />}`. The toolbar gives it
 its place in the arrow-key order, the Toggle gives it the on state, and the Toggle's look wins,
@@ -48,7 +49,7 @@ or on the stage, to see its tokens.
 | <Part name="Icon" /> | `span.ow-toolbar-icon` | Decorative (`aria-hidden`): `startIcon` or `endIcon`, the font size plus 2px |
 | <Part name="Separator" /> | `div.ow-toolbar-separator` | `role="separator"`, across the toolbar's direction |
 | <Part name="Link" /> | `a.ow-toolbar-link` | Looks like a button; `render` swaps in a router link |
-| <Part name="Input" /> | `input.ow-toolbar-input` | A sunken field, as tall as the buttons |
+| <Part name="Input" /> | `input.ow-toolbar-input` | A flat well with a 3:1 edge, as tall as the buttons |
 
 ## States and variants [#states]
 
@@ -59,8 +60,8 @@ button, and a disabled button. The pointer turns Italic on and off in each theme
 | --- | --- |
 | Idle | Flat, with muted text |
 | Hover | The `--ow-hover` tint, and text at full strength |
-| Pressing | Scaled to 0.97, in the pressed material, within 90 ms |
-| On, for a toggle | The pressed material, as on its own |
+| Pressing | Scaled to 0.97 within 90 ms, in the pressed material |
+| On, for a toggle | The raised key, as on its own |
 | Keyboard focus | A 2px ring 2px out, in `--ow-focus` |
 | Disabled | 45% opacity, still focusable |
 
@@ -99,11 +100,11 @@ or the toolbar itself, such as `.editor`.
 | `--ow-toolbar-button-fg` | `--ow-muted` | Button and link text |
 | `--ow-toolbar-button-hover-bg` | `--ow-hover` | Tint under the pointer |
 | `--ow-toolbar-button-hover-fg` | `--ow-fg` | Text under the pointer |
-| `--ow-toolbar-button-pressed-bg` | `--ow-pressed-bg` | Surface during a press |
-| `--ow-toolbar-button-pressed-shadow` | `--ow-pressed-shadow` | Inner shadow during a press |
-| `--ow-toolbar-button-pressed-fg` | `--ow-fg` | Text during a press |
-| `--ow-toolbar-input-bg` | `--ow-well-bg` | Field surface |
-| `--ow-toolbar-input-shadow` | `--ow-well-shadow` | Field's inner shadow |
+| `--ow-toolbar-button-pressed-bg` | `--ow-pressed-bg` | Fill while held down |
+| `--ow-toolbar-button-pressed-shadow` | `--ow-pressed-shadow` | Edges while held down |
+| `--ow-toolbar-button-pressed-fg` | `--ow-fg` | Text while held down |
+| `--ow-toolbar-input-bg` | `--ow-well-bg` | Field fill |
+| `--ow-toolbar-input-shadow` | `--ow-well-shadow` | Field's inner line, under its edge |
 | `--ow-toolbar-input-edge` | `--ow-edge` | Field edge, at 3:1 |
 | `--ow-toolbar-line-dark` | `--ow-line-dark` | Groove's dark line |
 | `--ow-toolbar-line-light` | `--ow-line-light` | Groove's light line |
@@ -124,11 +125,11 @@ it: the surface on the toolbar itself (`.editor`), the grooves' lines on
 | `--ow-toolbar-button-fg` | Its own, per theme | Button and link text |
 | `--ow-toolbar-button-hover-bg` | Its own, per theme | Tint under the pointer |
 | `--ow-toolbar-button-hover-fg` | Its own, per theme | Text under the pointer |
-| `--ow-toolbar-button-pressed-bg` | Its own, per theme | Surface during a press |
-| `--ow-toolbar-button-pressed-shadow` | Its own, per theme | Inner shadow during a press |
-| `--ow-toolbar-button-pressed-fg` | Its own, per theme | Text during a press |
-| `--ow-toolbar-input-bg` | Its own, per theme | Field surface |
-| `--ow-toolbar-input-shadow` | Its own, per theme | Field's inner shadow |
+| `--ow-toolbar-button-pressed-bg` | Its own, per theme | Fill while held down |
+| `--ow-toolbar-button-pressed-shadow` | Its own, per theme | Edges while held down |
+| `--ow-toolbar-button-pressed-fg` | Its own, per theme | Text while held down |
+| `--ow-toolbar-input-bg` | Its own, per theme | Field fill |
+| `--ow-toolbar-input-shadow` | Its own, per theme | Field's inner line, under its edge |
 | `--ow-toolbar-input-edge` | Its own, per theme | Field edge, at 3:1 |
 | `--ow-toolbar-line-dark` | Its own, per theme | Groove's dark line |
 | `--ow-toolbar-line-light` | Its own, per theme | Groove's light line |

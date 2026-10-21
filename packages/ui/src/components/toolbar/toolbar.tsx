@@ -155,7 +155,7 @@ export interface ToolbarInputProps extends Omit<BaseToolbar.Input.Props, "ref" |
   size?: ToolbarSize | undefined;
 }
 
-/** A sunken field, as tall as the buttons. Arrow keys move the caret, so put it last. */
+/** A flat field with a 3:1 edge, as tall as the buttons. Arrow keys move the caret: put it last. */
 export const ToolbarInput: ForwardRefExoticComponent<
   ToolbarInputProps & RefAttributes<HTMLInputElement>
 > = forwardRef<HTMLInputElement, ToolbarInputProps>(function ToolbarInput(

@@ -6,16 +6,17 @@ import { Part } from "@/components/lab/lab-shell";
 import { ForMode, TokenChip } from "@/components/token-setup";
 
 Button menjalankan sebuah aksi. Base UI memberinya semantik tombol, keyboard, dan state loading
-yang tetap memegang fokus; OwsemUI menambahkan material depth, satu angka untuk semua ukuran,
-tekanan yang membuatnya masuk ke dalam dengan riak dari titik tekan, dan spinner yang tidak pernah
-mengubah lebar. Gulir untuk mulai tur; stage mengikuti setiap bagian.
+yang tetap memegang fokus; OwsemUI menambahkan isi datar dengan tepi yang tegas, satu angka untuk
+semua ukuran, tekanan dengan riak dari titik tekan, dan spinner yang tidak pernah mengubah lebar.
+Gulir untuk mulai tur; stage mengikuti setiap bagian.
 
 ## Tekan dan riak [#press]
 
-Saat ditekan, tombol masuk ke dalam: dalam 90 ms ia mengecil ke 0,97 dan berpindah ke material
-ditekan, sementara socket-nya diskalakan balik sehingga alur di sekelilingnya tetap berukuran sama.
-Saat dilepas, ia kembali dengan spring settle dari Core. Riak tumbuh dari titik yang ditekan,
-terpotong mengikuti permukaan tombol, lalu memudar saat dilepas.
+Saat ditekan, tombol mengecil ke 0,97 dalam 90 ms. Selama ditahan, secondary dan ghost memakai
+material ditekan, outline terisi material itu dan garisnya tetap, sedangkan primary dan destructive
+mempertahankan tepinya dan isinya sedikit menggelap. Saat dilepas, ia kembali dengan spring settle
+dari Core. Riak tumbuh dari titik yang ditekan, terpotong mengikuti permukaan tombol, lalu memudar
+saat dilepas.
 
 Stage memutarnya: sebuah pointer menekan empat varian bergantian. Tekan tombol mana saja untuk
 mencobanya sendiri. Kedua efek hanya menggerakkan `transform` dan `opacity` lewat transisi CSS,
@@ -54,9 +55,9 @@ baris. Pasang `--py` di tombolnya sendiri untuk membuat ukuran lain, misalnya
 
 ## Anatomi [#anatomy]
 
-Base UI merender `<button>`; OwsemUI menambahkan class `ow-button` dan menggambar permukaan serta
-socket-nya sebagai pseudo-element, sehingga tombol tetap satu elemen. Inspeksi (I) menandai setiap
-bagian di stage, beserta tokennya.
+Base UI merender `<button>`; OwsemUI menambahkan class `ow-button` dan menggambar permukaannya
+sebagai pseudo-element, sehingga tombol tetap satu elemen. Tepinya berupa inset shadow, jadi tidak
+menambah ukuran. Inspeksi (I) menandai setiap bagian di stage, beserta tokennya.
 
 | Bagian | Elemen | Catatan |
 | --- | --- | --- |
@@ -73,22 +74,22 @@ kontrol (P) dan nyalakan Soft untuk melihat varian soft di sini juga.
 
 | Varian | Material |
 | --- | --- |
-| `primary` (bawaan) | Material primary, di dalam socket |
-| `secondary` | Timbul, di dalam socket |
-| `outline` | Datar, dengan garis tepi |
+| `primary` (bawaan) | Isi primary: tepi 1px yang lebih gelap dari isinya, dan garis terang tipis di dalam tepi atasnya |
+| `secondary` | Tombol timbul: isi datar dengan tepi yang tegas |
+| `outline` | Transparan, dengan garis `--ow-edge` 1px |
 | `ghost` | Datar; berwarna hanya saat hover |
 | `link` | Teks; bergaris bawah saat hover |
-| `destructive` | Nada critical, di dalam socket |
+| `destructive` | Nada critical, dengan tepi seperti primary |
 
 `soft` mengubah `primary`, `secondary`, dan `destructive` menjadi warna tipis dari nadanya yang
-datar, dengan teks bernada sama. Base tidak pernah bercahaya: hierarki dibangun dari kedalaman,
-bukan cahaya.
+datar, dengan teks bernada sama. Tidak ada yang memberi bayangan dan Base tidak pernah bercahaya:
+hierarki dibangun dari isi dan tepi, dan semua varian dalam satu ukuran sama tingginya.
 
 | State | Yang menandainya |
 | --- | --- |
-| Hover | `--ow-hover` di atas permukaan, hanya untuk mouse atau pena |
-| Ditekan | Mengecil ke 0,97, material ditekan, dan riak |
-| Fokus keyboard | Ring 2px, 2px di luar tombol atau socket-nya |
+| Hover | `--ow-hover` di atas permukaan, hanya untuk mouse atau pena; tepinya tetap |
+| Ditekan | Mengecil ke 0,97, material ditekan (isi solid sedikit menggelap), dan riak |
+| Fokus keyboard | Ring 2px, 2px di luar tombol |
 | Disabled | `data-disabled`; meredup dan keluar dari urutan Tab |
 | Loading | `data-loading` dan `aria-busy`; spinner, fokus tetap |
 
@@ -125,14 +126,13 @@ Token komponen menimpa token tema untuk setiap Button di dalam elemen yang memas
 
 | Token komponen | Bawaan | Fungsi |
 | --- | --- | --- |
-| `--ow-button-radius` | `--ow-radius` | Radius sudut; socket menambahkan 3px-nya |
+| `--ow-button-radius` | `--ow-radius` | Radius sudut |
 | `--ow-button-primary-bg` | `--ow-primary-bg` | Isi primary |
 | `--ow-button-on-primary` | `--ow-on-primary` | Teks di atas isi primary |
 | `--ow-button-critical` | `--ow-critical` | Isi destructive |
 | `--ow-button-on-critical` | `--ow-surface` | Teks di atas isi destructive |
 | `--ow-button-raised-bg`, `-raised-shadow` | `--ow-raised-*` | Permukaan secondary |
 | `--ow-button-pressed-bg`, `-pressed-shadow` | `--ow-pressed-*` | Permukaan saat ditekan |
-| `--ow-button-socket-bg`, `-socket-shadow` | `--ow-socket-*` | Alur di sekeliling varian timbul |
 | `--ow-button-primary-shadow` | `--ow-primary-shadow` | Tepi primary dan destructive |
 | `--ow-button-edge` | `--ow-edge` | Garis outline |
 | `--ow-button-hover` | `--ow-hover` | Warna hover |
@@ -150,14 +150,13 @@ tokennya di tombol itu sendiri, seperti `actions.css` memasangnya di `.actions .
 
 | Token komponen | Bawaan | Fungsi |
 | --- | --- | --- |
-| `--ow-button-radius` | `8px` | Radius sudut; socket menambahkan 3px-nya |
+| `--ow-button-radius` | `8px` | Radius sudut |
 | `--ow-button-primary-bg` | Miliknya sendiri, per tema | Isi primary |
 | `--ow-button-on-primary` | Miliknya sendiri, per tema | Teks di atas isi primary |
 | `--ow-button-critical` | Miliknya sendiri, per tema | Isi destructive |
 | `--ow-button-on-critical` | Miliknya sendiri, per tema | Teks di atas isi destructive |
 | `--ow-button-raised-bg`, `-raised-shadow` | Miliknya sendiri, per tema | Permukaan secondary |
 | `--ow-button-pressed-bg`, `-pressed-shadow` | Miliknya sendiri, per tema | Permukaan saat ditekan |
-| `--ow-button-socket-bg`, `-socket-shadow` | Miliknya sendiri, per tema | Alur di sekeliling varian timbul |
 | `--ow-button-primary-shadow` | Miliknya sendiri, per tema | Tepi primary dan destructive |
 | `--ow-button-edge` | Miliknya sendiri, per tema | Garis outline |
 | `--ow-button-hover` | Miliknya sendiri, per tema | Warna hover |

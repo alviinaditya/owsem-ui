@@ -120,7 +120,7 @@ export const id = {
   },
   components: {
     button:
-      "Tombol aksi yang masuk ke dalam saat ditekan, dengan ikon dan state loading yang tidak mengubah lebar.",
+      "Tombol aksi bertepi tegas, dengan riak saat ditekan, ikon, dan state loading yang tidak mengubah lebar.",
     separator: "Garis terukir pemisah antarbagian, horizontal atau vertikal.",
     field: "Label, deskripsi, dan pesan error yang terhubung ke kontrolnya.",
     fieldset: "Grup field dengan legend dan jarak yang konsisten.",

@@ -6,16 +6,16 @@ import { Part } from "@/components/lab/lab-shell";
 import { ForMode, TokenChip } from "@/components/token-setup";
 
 Button runs an action. Base UI gives it button semantics, the keyboard, and a loading state that
-keeps focus; OwsemUI adds the depth materials, one number for every size, a press that sinks with
-a ripple from the point you pressed, and a spinner that never changes the width. Scroll to start
-the tour; the stage follows each part.
+keeps focus; OwsemUI adds flat fills with crisp edges, one number for every size, a press with a
+ripple from the point you pressed, and a spinner that never changes the width. Scroll to start the
+tour; the stage follows each part.
 
 ## Press and ripple [#press]
 
-A press sinks the button: within 90 ms it scales to 0.97 and moves into the pressed material,
-while its socket scales back, so the groove around it keeps its size. Letting go, it settles with
-the Core settle spring. A ripple grows from the point you pressed, clipped to the face, and fades
-when you let go.
+A press scales the button to 0.97 within 90 ms. While you hold it, secondary and ghost take the
+pressed material, outline fills with it and keeps its line, and primary and destructive keep their
+edges while their fill darkens a little. Letting go, it settles with the Core settle spring.
+A ripple grows from the point you pressed, clipped to the face, and fades when you let go.
 
 The stage plays it: a pointer presses four variants in turn. Press any button to try it yourself.
 Both effects move only `transform` and `opacity`, as CSS transitions, so nothing runs between
@@ -53,9 +53,9 @@ padding never lets a target drop below 24px.
 
 ## Anatomy [#anatomy]
 
-Base UI renders a `<button>`; OwsemUI adds the `ow-button` class and draws the face and the socket
-as pseudo-elements, so the button stays one element. Inspect (I) outlines each part on the stage,
-with its tokens.
+Base UI renders a `<button>`; OwsemUI adds the `ow-button` class and draws the face as a
+pseudo-element, so the button stays one element. Its edges are inset shadows, so they add no size.
+Inspect (I) outlines each part on the stage, with its tokens.
 
 | Part | Element | Notes |
 | --- | --- | --- |
@@ -72,21 +72,22 @@ controls (P) and turn on Soft to see the soft variants here too.
 
 | Variant | Material |
 | --- | --- |
-| `primary` (default) | The primary material, in a socket |
-| `secondary` | Raised, in a socket |
-| `outline` | Flat, with an edge line |
+| `primary` (default) | The primary fill: a 1px edge darker than the fill, and a thin light line inside its top |
+| `secondary` | The raised key: a flat fill with a crisp edge |
+| `outline` | Transparent, with a 1px `--ow-edge` line |
 | `ghost` | Flat; tinted only on hover |
 | `link` | Text; underlined on hover |
-| `destructive` | The critical tone, in a socket |
+| `destructive` | The critical tone, with the primary's edges |
 
 `soft` turns `primary`, `secondary`, and `destructive` into a flat tint of their tone, with text in
-that tone. Base never glows: depth, not light, sets the hierarchy.
+that tone. Nothing casts a shadow and Base never glows: fills and edges set the hierarchy, and every
+variant of a size is the same height.
 
 | State | What marks it |
 | --- | --- |
-| Hover | `--ow-hover` over the face, only for a mouse or a pen |
-| Pressed | Scaled to 0.97, the pressed material, and the ripple |
-| Keyboard focus | A 2px ring, 2px outside the button or its socket |
+| Hover | `--ow-hover` over the face, only for a mouse or a pen; the edges stay |
+| Pressed | Scaled to 0.97, the pressed material (solid fills darken a little), and the ripple |
+| Keyboard focus | A 2px ring, 2px outside the button |
 | Disabled | `data-disabled`; dimmed, and out of the tab order |
 | Loading | `data-loading` and `aria-busy`; a spinner, focus kept |
 
@@ -122,15 +123,14 @@ such as `.actions`.
 
 | Component token | Default | Purpose |
 | --- | --- | --- |
-| `--ow-button-radius` | `--ow-radius` | Corner radius; the socket adds its 3px |
+| `--ow-button-radius` | `--ow-radius` | Corner radius |
 | `--ow-button-primary-bg` | `--ow-primary-bg` | Primary fill |
 | `--ow-button-on-primary` | `--ow-on-primary` | Text on the primary fill |
 | `--ow-button-critical` | `--ow-critical` | Destructive fill |
 | `--ow-button-on-critical` | `--ow-surface` | Text on the destructive fill |
 | `--ow-button-raised-bg`, `-raised-shadow` | `--ow-raised-*` | Secondary face |
 | `--ow-button-pressed-bg`, `-pressed-shadow` | `--ow-pressed-*` | Pressed face |
-| `--ow-button-socket-bg`, `-socket-shadow` | `--ow-socket-*` | The groove around raised variants |
-| `--ow-button-primary-shadow` | `--ow-primary-shadow` | Primary and destructive edge |
+| `--ow-button-primary-shadow` | `--ow-primary-shadow` | Primary and destructive edges |
 | `--ow-button-edge` | `--ow-edge` | Outline's line |
 | `--ow-button-hover` | `--ow-hover` | Hover tint |
 | `--ow-button-fg` | `--ow-fg` | Text on secondary, outline, and ghost |
@@ -147,15 +147,14 @@ button itself, as `actions.css` does with `.actions .ow-button`.
 
 | Component token | Default | Purpose |
 | --- | --- | --- |
-| `--ow-button-radius` | `8px` | Corner radius; the socket adds its 3px |
+| `--ow-button-radius` | `8px` | Corner radius |
 | `--ow-button-primary-bg` | Its own, per theme | Primary fill |
 | `--ow-button-on-primary` | Its own, per theme | Text on the primary fill |
 | `--ow-button-critical` | Its own, per theme | Destructive fill |
 | `--ow-button-on-critical` | Its own, per theme | Text on the destructive fill |
 | `--ow-button-raised-bg`, `-raised-shadow` | Its own, per theme | Secondary face |
 | `--ow-button-pressed-bg`, `-pressed-shadow` | Its own, per theme | Pressed face |
-| `--ow-button-socket-bg`, `-socket-shadow` | Its own, per theme | The groove around raised variants |
-| `--ow-button-primary-shadow` | Its own, per theme | Primary and destructive edge |
+| `--ow-button-primary-shadow` | Its own, per theme | Primary and destructive edges |
 | `--ow-button-edge` | Its own, per theme | Outline's line |
 | `--ow-button-hover` | Its own, per theme | Hover tint |
 | `--ow-button-fg` | Its own, per theme | Text on secondary, outline, and ghost |

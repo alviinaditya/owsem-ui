@@ -40,7 +40,7 @@ test("Previous and Next are links styled as Buttons", async ({ page }) => {
   }
 });
 
-test("a press in the Button Lab sinks the button and ripples from the pointer", async ({
+test("a press in the Button Lab scales the button and ripples from the pointer", async ({
   page,
 }) => {
   await page.goto("/en/button");

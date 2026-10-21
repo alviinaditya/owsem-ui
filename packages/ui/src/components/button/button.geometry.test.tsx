@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
-import { concentric, insets, rect, TOL } from "../../../test/geometry.ts";
+import { insets, rect, TOL, usedRadius } from "../../../test/geometry.ts";
 import { Button, type ButtonSize, type ButtonVariant, IconButton } from "./index";
 
 const Plus = () => (
@@ -114,19 +114,20 @@ describe("Button geometry", () => {
     }
   });
 
-  test.each(["primary", "secondary", "destructive"] as const)(
-    "%s sits in a 3px socket, concentric with it (FR-10b)",
-    async (variant) => {
-      const [button] = await mount(<Button variant={variant}>Save</Button>);
-      if (!button) throw new Error("no button");
-      const socket = { el: button, pseudo: "::after" } as const;
-      const gap = insets(socket, button);
-      for (const side of [gap.top, gap.right, gap.bottom, gap.left]) expect(side).toBeCloseTo(3, 1);
-      const r = concentric(socket, button);
-      expect(r.delta).toBeLessThanOrEqual(TOL);
-      expect(r.insetDelta).toBeLessThanOrEqual(TOL);
-    },
-  );
+  test("the face fills the button exactly, with nothing around it", async () => {
+    const buttons = await mount(
+      VARIANTS.filter((variant) => variant !== "link").map((variant) => (
+        <Button key={variant} variant={variant}>
+          Save
+        </Button>
+      )),
+    );
+    for (const button of buttons) {
+      const gap = insets(button, { el: button, pseudo: "::before" });
+      for (const side of Object.values(gap)) expect(side).toBeCloseTo(0, 1);
+      expect(usedRadius({ el: button, pseudo: "::before" })).toBeCloseTo(usedRadius(button), 1);
+    }
+  });
 
   test("loading keeps the width, with the spinner in the icon's place or centered (FR-23)", async () => {
     const screen = await render(

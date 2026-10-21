@@ -140,8 +140,8 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
 **Button** and **Separator** (Base, from `owsem-ui/base`) and **Tree Rail Nav** (Owsem, from
-`owsem-ui/owsem`) are built. Base components are Base UI components with OwsemUI's styling; Owsem components are
-OwsemUI's own. No component has a `flavor` prop.
+`owsem-ui/owsem`) are built. Base components are Base UI components with OwsemUI's styling; Owsem
+components are OwsemUI's own. No component has a `flavor` prop.
 
 ### Button
 
@@ -167,6 +167,10 @@ import { Button, ButtonIcon, buttonStyles, IconButton } from "owsem-ui/base"; //
   Keep the label the same while loading. Use a boolean (`loading={saving}`) on buttons that can
   load, so the spinner fades in.
 - `IconButton`: `icon` and a required `aria-label`; square; `ghost` by default.
+- Look: flat fills with crisp 1px edges drawn as inset shadows, so every variant of a size is the
+  same height. `secondary` is the raised key, `primary` and `destructive` are solid fills with an
+  edge darker than the fill, `outline` is a 1px `--ow-edge` line, and `ghost` is flat until hovered.
+  There is no drop shadow and no socket; do not add a `box-shadow` around a button.
 - Links: never render a link through Button. Spread `buttonStyles({ variant, size, soft,
   className })` on the `<a>` or router `Link`, and wrap icons in `ButtonIcon` (`side`). Pass icons
   as elements; their size is the font size plus 2px, so do not size them.
@@ -175,8 +179,7 @@ import { Button, ButtonIcon, buttonStyles, IconButton } from "owsem-ui/base"; //
 - Tokens: `--ow-button-radius`, `--ow-button-primary-bg`, `--ow-button-on-primary`,
   `--ow-button-critical`, `--ow-button-on-critical`, `--ow-button-edge`, `--ow-button-hover`,
   `--ow-button-fg`, `--ow-button-link`, `--ow-button-focus`, `--ow-button-ripple`, and the
-  material pairs `--ow-button-{raised,pressed,socket}-{bg,shadow}` and
-  `--ow-button-primary-shadow`.
+  material pairs `--ow-button-{raised,pressed}-{bg,shadow}` and `--ow-button-primary-shadow`.
 
 ### Separator
 

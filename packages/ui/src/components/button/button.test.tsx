@@ -47,7 +47,6 @@ function resolveShadow(value: string, scope: Element = document.body): string {
 }
 
 const face = (button: Element) => getComputedStyle(button, "::before");
-const socket = (button: Element) => getComputedStyle(button, "::after");
 const scaleOf = (transform: string) =>
   transform === "none" ? 1 : new DOMMatrixReadOnly(transform).a;
 
@@ -229,7 +228,7 @@ describe("Button", () => {
     expect(link?.querySelector('.ow-button-icon[data-side="end"]')).not.toBeNull();
   });
 
-  test("paints each variant from the depth materials, in light and dark (DP-7)", async () => {
+  test("paints each variant from the materials, in light and dark (DP-7)", async () => {
     onTestFinished(() => {
       delete root.dataset.theme;
     });
@@ -253,17 +252,20 @@ describe("Button", () => {
       expect(face(secondary).backgroundColor).toBe(resolveColor("var(--ow-raised-bg)"));
       expect(face(secondary).boxShadow).toBe(resolveShadow("var(--ow-raised-shadow)"));
       expect(face(primary).backgroundColor).toBe(resolveColor("var(--ow-primary-bg)"));
+      expect(face(primary).boxShadow).toBe(resolveShadow("var(--ow-primary-shadow)"));
       expect(getComputedStyle(primary).color).toBe(resolveColor("var(--ow-on-primary)"));
+      // The critical fill with the primary's crisp edges.
       expect(face(destructive).backgroundColor).toBe(resolveColor("var(--ow-critical)"));
+      expect(face(destructive).boxShadow).toBe(resolveShadow("var(--ow-primary-shadow)"));
+      expect(face(outline).backgroundColor).toBe("rgba(0, 0, 0, 0)");
       expect(face(outline).boxShadow).toBe(resolveShadow("inset 0 0 0 1px var(--ow-edge)"));
       expect(face(ghost).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+      expect(face(ghost).boxShadow).toBe("none");
       expect(getComputedStyle(ghost).color).toBe(resolveColor("var(--ow-fg)"));
-      // Raised variants sit in a socket; flat ones do not (DP-7).
-      for (const raised of [primary, secondary, destructive]) {
-        expect(socket(raised).backgroundColor).toBe(resolveColor("var(--ow-socket-bg)"));
-        expect(socket(raised).boxShadow).toBe(resolveShadow("var(--ow-socket-shadow)"));
+      // No socket around any variant.
+      for (const button of [primary, secondary, outline, ghost, destructive, soft]) {
+        expect(getComputedStyle(button, "::after").content).toBe("none");
       }
-      for (const flat of [outline, ghost, soft]) expect(socket(flat).content).toBe("none");
     }
   });
 
@@ -285,19 +287,28 @@ describe("Button", () => {
     expect(face(button).backgroundColor).toBe("rgb(255, 0, 0)");
     expect(getComputedStyle(button).color).toBe("rgb(0, 0, 255)");
     expect(getComputedStyle(button).borderTopLeftRadius).toBe("4px");
-    // The socket stays concentric: the control's radius plus the 3px groove (TK-8).
-    expect(socket(button).borderTopLeftRadius).toBe("7px");
+    expect(face(button).borderTopLeftRadius).toBe("4px");
   });
 
-  test("hover tints the face with --ow-hover", async () => {
-    const button = await one(<Button variant="ghost">Ghost</Button>);
+  test("hover tints the face with --ow-hover, and leaves its edges alone", async () => {
+    const screen = await render(
+      <>
+        <Button variant="secondary">Secondary</Button>
+        <p>Away</p>
+      </>,
+    );
+    const button = screen.container.querySelector<HTMLElement>(".ow-button");
+    if (!button) throw new Error("no button");
+    // The pointer may still rest where an earlier test clicked.
+    await userEvent.hover(screen.getByText("Away"));
     expect(face(button).backgroundImage).toContain("rgba(0, 0, 0, 0)");
     await userEvent.hover(button);
     expect(face(button).backgroundImage).toContain(resolveColor("var(--ow-hover)"));
+    expect(face(button).boxShadow).toBe(resolveShadow("var(--ow-raised-shadow)"));
     await userEvent.unhover(button);
   });
 
-  test("a press sinks into the pressed material, and the socket keeps its size (DP-4)", async () => {
+  test("a press scales the button into the pressed material (DP-4)", async () => {
     const button = await one(<Button variant="secondary">Press</Button>);
     const box = button.getBoundingClientRect();
     pointer("pointerdown", button, box.left + 10, box.top + 10);
@@ -307,15 +318,43 @@ describe("Button", () => {
     // In within 90 ms.
     expect(getComputedStyle(button).transitionDuration).toBe("0.09s");
     await expect.poll(() => scaleOf(getComputedStyle(button).transform)).toBeCloseTo(0.97, 3);
-    await expect
-      .poll(() => scaleOf(getComputedStyle(button).transform) * scaleOf(socket(button).transform))
-      .toBeCloseTo(1, 3);
     pointer("pointerup", button, box.left + 10, box.top + 10);
     expect(button.hasAttribute("data-pressed")).toBe(false);
     // Released with the settle spring and its duration.
     const style = getComputedStyle(button);
     expect(style.transitionDuration).toBe("1.03s");
     expect(style.transitionTimingFunction).toContain("linear(");
+  });
+
+  test("held down, ghost takes the pressed pair, and solid fills keep their edges", async () => {
+    const [ghost, outline, primary, destructive] = await mount(
+      <>
+        <Button variant="ghost">Ghost</Button>
+        <Button variant="outline">Outline</Button>
+        <Button variant="primary">Primary</Button>
+        <Button variant="destructive">Delete</Button>
+      </>,
+    );
+    if (!ghost || !outline || !primary || !destructive) throw new Error("no buttons");
+    for (const button of [ghost, outline, primary, destructive]) {
+      const box = button.getBoundingClientRect();
+      pointer("pointerdown", button, box.left + 5, box.top + 5);
+    }
+    expect(face(ghost).backgroundColor).toBe(resolveColor("var(--ow-pressed-bg)"));
+    expect(face(ghost).boxShadow).toBe(resolveShadow("var(--ow-pressed-shadow)"));
+    // Outline keeps its line over the pressed fill.
+    expect(face(outline).backgroundColor).toBe(resolveColor("var(--ow-pressed-bg)"));
+    expect(face(outline).boxShadow).toBe(resolveShadow("inset 0 0 0 1px var(--ow-edge)"));
+    // Solid fills darken a little.
+    const darker = (fill: string) => resolveColor(`color-mix(in oklab, ${fill}, black 10%)`);
+    expect(face(primary).backgroundColor).toBe(darker("var(--ow-primary-bg)"));
+    expect(face(primary).boxShadow).toBe(resolveShadow("var(--ow-primary-shadow)"));
+    expect(face(destructive).backgroundColor).toBe(darker("var(--ow-critical)"));
+    expect(face(destructive).boxShadow).toBe(resolveShadow("var(--ow-primary-shadow)"));
+    for (const button of [ghost, outline, primary, destructive]) {
+      const box = button.getBoundingClientRect();
+      pointer("pointerup", button, box.left + 5, box.top + 5);
+    }
   });
 
   test("ripples from the press point, then fades on release (Tactile)", async () => {
@@ -337,7 +376,7 @@ describe("Button", () => {
     await expect.poll(() => getComputedStyle(ripple).opacity).toBe("0");
   });
 
-  test("links neither ripple nor sink; they dim and underline", async () => {
+  test("links neither ripple nor scale; they dim and underline", async () => {
     const button = await one(<Button variant="link">Docs</Button>);
     expect(button.querySelector(".ow-button-ripple")).toBeNull();
     expect(face(button).content).toBe("none");
@@ -346,7 +385,7 @@ describe("Button", () => {
     await userEvent.unhover(button);
   });
 
-  test("draws a focus ring outside the socket (FR-13)", async () => {
+  test("draws a focus ring 2px outside the face (FR-13)", async () => {
     const [primary, ghost] = await mount(
       <>
         <Button variant="primary">Primary</Button>
@@ -360,7 +399,7 @@ describe("Button", () => {
     expect(style.outlineStyle).toBe("solid");
     expect(style.outlineWidth).toBe("2px");
     expect(style.outlineColor).toBe(resolveColor("var(--ow-focus)"));
-    expect(style.outlineOffset).toBe("5px");
+    expect(style.outlineOffset).toBe("2px");
     await userEvent.tab();
     style = getComputedStyle(ghost);
     expect(style.outlineOffset).toBe("2px");

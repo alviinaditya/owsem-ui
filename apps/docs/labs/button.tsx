@@ -284,7 +284,7 @@ function States({ cfg, lang }: { cfg: Cfg; lang: Lang }) {
   );
 }
 
-// Presses four variants in turn: each sinks, ripples from the pointer, and springs back.
+// Presses four variants in turn: each scales in, ripples from the pointer, and springs back.
 const press: SceneScript = async (stage) => {
   for (const variant of ["primary", "secondary", "outline", "ghost"]) {
     await stage.click(stage.get(`[data-demo="${variant}"]`));
@@ -365,15 +365,14 @@ const buttonLab = defineLab({
       name: "Root",
       selector: ".ow-button",
       note: {
-        id: "Button dari Base UI. Permukaannya (::before) dan socket di sekelilingnya (::after) digambar dari material depth.",
-        en: "Base UI's button. Its face (::before) and the socket around it (::after) are drawn from the depth materials.",
+        id: "Button dari Base UI. Permukaannya (::before) digambar dari material: isi datar dengan tepi inset shadow yang tidak menambah ukuran.",
+        en: "Base UI's button. Its face (::before) is drawn from the materials: a flat fill with inset-shadow edges that add no size.",
       },
       tokens: {
         "--ow-button-radius": "--_radius",
         "--ow-button-fg": "--_ink",
         "--ow-button-raised-bg": "--_raised-bg",
         "--ow-button-pressed-bg": "--_pressed-bg",
-        "--ow-button-socket-bg": "--_socket-bg",
         "--ow-button-primary-bg": "--_primary-bg",
         "--ow-button-on-primary": "--_on-primary",
         "--ow-button-critical": "--_critical",

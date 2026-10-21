@@ -2,9 +2,10 @@
 
 /*
  * Button. Geometry comes from one number, --py (FR-9 to FR-11). Materials (DP-7): secondary is
- * raised and primary is the primary material, both in a socket; ghost is flat until hovered;
- * outline has an edge line; link is text. Only transform and opacity move: the press (DP-4), the
- * ripple (Tactile), and the loading swap.
+ * the raised key, primary the primary material, and destructive a critical fill with the same
+ * edges; outline has an edge line, ghost is flat until hovered, and link is text. Edges are inset
+ * shadows, so they add no size. Only transform and opacity move: the press (DP-4), the ripple
+ * (Tactile), and the loading swap.
  */
 @layer owsem.components {
   .ow-button {
@@ -14,50 +15,31 @@
     --px: calc(var(--_py) + (1lh - 1cap) / 2);
     --icon: calc(1em + 2px);
     --_radius: var(--ow-button-radius, var(--ow-radius, 8px));
-    /* The socket's groove; raised variants set it to 3px. */
-    --_socket: 0px;
     --_press: calc(1 - 0.03 * var(--ow-motion-scale, 1));
 
-    --_ink: var(--ow-button-fg, var(--ow-fg, #1b1726));
-    --_hover: var(--ow-button-hover, var(--ow-hover, rgb(27 23 38 / 0.05)));
+    --_ink: var(--ow-button-fg, var(--ow-fg, #18181b));
+    --_hover: var(--ow-button-hover, var(--ow-hover, rgb(0 0 0 / 0.04)));
     --_focus: var(--ow-button-focus, var(--ow-focus, #5b4a9a));
-    --_edge: var(--ow-button-edge, var(--ow-edge, #8a8497));
+    --_edge: var(--ow-button-edge, var(--ow-edge, #82828b));
     --_raised-bg: var(--ow-button-raised-bg, var(--ow-raised-bg, #ffffff));
     --_raised-shadow: var(
       --ow-button-raised-shadow,
-      var(
-        --ow-raised-shadow,
-        inset 0 1px 0 rgb(255 255 255 / 0.95),
-        0 0 0 1px rgb(30 25 40 / 0.12),
-        0 1.5px 2px rgb(40 30 20 / 0.13)
-      )
+      var(--ow-raised-shadow, inset 0 0 0 1px rgb(0 0 0 / 0.14), 0 1px 0 rgb(0 0 0 / 0.04))
     );
-    --_pressed-bg: var(--ow-button-pressed-bg, var(--ow-pressed-bg, #e6e3ee));
+    --_pressed-bg: var(--ow-button-pressed-bg, var(--ow-pressed-bg, #f4f4f5));
     --_pressed-shadow: var(
       --ow-button-pressed-shadow,
-      var(
-        --ow-pressed-shadow,
-        inset 0 1.5px 3px rgb(40 30 20 / 0.2),
-        inset 0 0 0 1px rgb(30 25 40 / 0.1)
-      )
-    );
-    --_socket-bg: var(--ow-button-socket-bg, var(--ow-socket-bg, #e9e6f0));
-    --_socket-shadow: var(
-      --ow-button-socket-shadow,
-      var(
-        --ow-socket-shadow,
-        inset 0 1px 2px rgb(40 30 20 / 0.16),
-        inset 0 -1px 0 rgb(255 255 255 / 0.8)
-      )
+      var(--ow-pressed-shadow, inset 0 0 0 1px rgb(0 0 0 / 0.16))
     );
     --_primary-bg: var(--ow-button-primary-bg, var(--ow-primary-bg, #7c6ab8));
+    /* A 1px edge darker than the fill and a thin light line inside its top; no drop shadow, which
+     * would make the button look taller than its neighbors. */
     --_primary-shadow: var(
       --ow-button-primary-shadow,
       var(
         --ow-primary-shadow,
-        inset 0 1px 0 rgb(255 255 255 / 0.28),
-        0 0 0 1px rgb(55 40 110 / 0.55),
-        0 1.5px 2px rgb(40 30 20 / 0.2)
+        inset 0 0 0 1px rgb(0 0 0 / 0.28),
+        inset 0 1.5px 0.75px rgb(255 255 255 / 0.3)
       )
     );
     --_on-primary: var(--ow-button-on-primary, var(--ow-on-primary, #ffffff));
@@ -68,16 +50,17 @@
     --_link: var(--ow-button-link, color-mix(in oklab, var(--ow-accent, #7c6ab8) 70%, var(--_ink)));
     --_ripple: var(--ow-button-ripple, currentColor);
 
-    /* The face, set per variant; pressing swaps in the pressed pair. */
+    /* The face, set per variant; held down, it takes the pressed pair unless the variant keeps its
+     * own. */
     --_fg: var(--_ink);
     --_bg: transparent;
-    --_shadow: 0 0 #0000;
+    --_shadow: none;
     --_bg-pressed: var(--_pressed-bg);
     --_shadow-pressed: var(--_pressed-shadow);
     --_tint: transparent;
 
     position: relative;
-    /* Keeps the socket and the face under the content, pressed or not. */
+    /* Keeps the face and the ripple under the content, pressed or not. */
     isolation: isolate;
     display: inline-flex;
     align-items: center;
@@ -127,53 +110,33 @@
     pointer-events: none;
   }
 
-  /* Raised variants sit in a socket: a groove around the face, concentric with it (FR-10b). */
-  .ow-button:is(
-    [data-variant="primary"],
-    [data-variant="secondary"],
-    [data-variant="destructive"]
-  ):not([data-soft]) {
-    --_socket: 3px;
-  }
-
-  .ow-button:is(
-    [data-variant="primary"],
-    [data-variant="secondary"],
-    [data-variant="destructive"]
-  ):not([data-soft])::after {
-    content: "";
-    position: absolute;
-    inset: calc(var(--_socket) * -1);
-    z-index: -2;
-    border-radius: calc(var(--_radius) + var(--_socket));
-    background: var(--_socket-bg);
-    box-shadow: var(--_socket-shadow);
-    pointer-events: none;
-    transition: inherit;
-  }
-
+  /* The raised key. */
   .ow-button[data-variant="secondary"] {
     --_bg: var(--_raised-bg);
     --_shadow: var(--_raised-shadow);
   }
 
-  .ow-button[data-variant="primary"] {
-    --_fg: var(--_on-primary);
+  /* Solid fills keep their edges while held, and the fill darkens a little in both themes. */
+  .ow-button:is([data-variant="primary"], [data-variant="destructive"]) {
     --_bg: var(--_primary-bg);
     --_shadow: var(--_primary-shadow);
-    --_bg-pressed: var(--_primary-bg);
+    --_bg-pressed: color-mix(in oklab, var(--_bg), black 10%);
+    --_shadow-pressed: var(--_shadow);
+  }
+
+  .ow-button[data-variant="primary"] {
+    --_fg: var(--_on-primary);
   }
 
   .ow-button[data-variant="destructive"] {
     --_fg: var(--_on-critical);
     --_bg: var(--_critical);
-    --_shadow: var(--_primary-shadow);
-    --_bg-pressed: var(--_critical);
   }
 
+  /* Held down, it takes the pressed fill and keeps its line. */
   .ow-button[data-variant="outline"] {
     --_shadow: inset 0 0 0 1px var(--_edge);
-    --_shadow-pressed: inset 0 0 0 1px var(--_edge), var(--_pressed-shadow);
+    --_shadow-pressed: var(--_shadow);
   }
 
   /* Soft: a flat tint of the variant's tone, with text in that tone. */
@@ -186,7 +149,7 @@
     --_bg: color-mix(in oklab, var(--_tone) 12%, transparent);
     --_shadow: inset 0 0 0 1px color-mix(in oklab, var(--_tone) 18%, transparent);
     --_bg-pressed: color-mix(in oklab, var(--_tone) 18%, transparent);
-    --_shadow-pressed: var(--_pressed-shadow);
+    --_shadow-pressed: var(--_shadow);
   }
 
   .ow-button[data-soft][data-variant="primary"] {
@@ -201,7 +164,7 @@
     --_tone: var(--_critical);
   }
 
-  /* Link: text only, underlined on hover; a press dims it instead of sinking it. */
+  /* Link: text only, underlined on hover; a press dims it instead of scaling it. */
   .ow-button[data-variant="link"] {
     --_fg: var(--_link);
     --_press: 1;
@@ -226,27 +189,26 @@
     }
   }
 
-  /* DP-4: in within 90 ms, into the pressed material; the socket scales back to keep its size. */
+  /* DP-4: in within 90 ms, and into the pressed material. */
   .ow-button:is(:active, [data-pressed]):not([data-disabled]) {
-    --_bg: var(--_bg-pressed);
-    --_shadow: var(--_shadow-pressed);
-    --_tint: transparent;
     transform: scale(var(--_press));
     transition-duration: 90ms;
     transition-timing-function: var(--ow-ease-out, ease-out);
   }
 
-  .ow-button:is(:active, [data-pressed]):not([data-disabled])::after {
-    transform: scale(calc(1 / var(--_press)));
+  .ow-button:is(:active, [data-pressed]):not([data-disabled])::before {
+    background: var(--_bg-pressed);
+    box-shadow: var(--_shadow-pressed);
   }
 
   .ow-button[data-variant="link"]:is(:active, [data-pressed]):not([data-disabled]) {
     opacity: 0.7;
   }
 
+  /* FR-13: 2px outside the face. */
   .ow-button:focus-visible {
     outline: 2px solid var(--_focus);
-    outline-offset: calc(2px + var(--_socket));
+    outline-offset: 2px;
   }
 
   .ow-button[data-disabled]:not([data-loading]) {

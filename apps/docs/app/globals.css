@@ -1673,30 +1673,30 @@ figure[data-code-block] pre {
 }
 
 /*
- * The stage toolbar (owsem-ui Toolbar). Narrow, the bar around it is the well; wide, the tools sit
- * in a flat track like the site's switchers. Toggles (Inspect, Controls, Code) keep Toggle's own
- * look: on is the raised key.
+ * The stage toolbar (owsem-ui Toolbar) in the docs' colors, set as theme tokens on it. Narrow, the
+ * bar around it is the well; wide, the tools sit in a flat track like the site's switchers.
+ * Toggles (Inspect, Controls, Code) keep Toggle's own look: on is the raised key.
  */
 .lab-tools {
-  --ow-toolbar-bg: transparent;
-  --ow-toolbar-shadow: none;
-  --ow-toolbar-button-fg: var(--docs-muted);
-  --ow-toolbar-button-hover-bg: var(--docs-hover);
-  --ow-toolbar-button-hover-fg: var(--docs-fg);
-  --ow-toolbar-line-dark: var(--docs-groove-dark);
-  --ow-toolbar-line-light: var(--docs-groove-light);
+  --ow-muted: var(--docs-muted);
+  --ow-fg: var(--docs-fg);
+  --ow-hover: var(--docs-hover);
+  --ow-line-dark: var(--docs-groove-dark);
+  --ow-line-light: var(--docs-groove-light);
   flex: none;
   min-inline-size: 0;
   /* Several tools can be pressed at once; the toolbar's 4 px gap keeps neighbors apart. */
   padding: 0;
+  background: none;
+  box-shadow: none;
 }
 
 @media (width >= 960px) {
   .lab-tools {
-    --ow-toolbar-bg: var(--docs-well);
-    --ow-toolbar-shadow: var(--docs-well-shadow);
     padding: 3px;
     border-radius: var(--docs-radius);
+    background-color: var(--docs-well);
+    box-shadow: var(--docs-well-shadow);
   }
 }
 
@@ -1737,9 +1737,12 @@ figure[data-code-block] pre {
   }
 }
 
-/* The docs open from the same toolbar, set apart by an etched line, labeled while there is room. */
+/*
+ * The docs open from the same toolbar, set apart by an etched line, labeled while there is room.
+ * Its resting text (the toolbar's --ow-muted) is the accent.
+ */
 .lab-tool-docs {
-  --ow-toolbar-button-fg: var(--docs-accent);
+  --ow-muted: var(--docs-accent);
   font-weight: 600;
 }
 

@@ -90,58 +90,36 @@ tetap terlihat, dan ring fokusnya `Highlight`.
 
 Kontrol di stage terbuka: pilih warna permukaan atau garis gelap alur, dan kodenya mengikuti.
 
-<ForMode mode="theme">
+Toolbar membaca token tema berikut. Pasang di toolbar itu sendiri, seperti `editor.css` dengan
+`.editor`, atau di elemen di sekitarnya, untuk mengubah toolbar di dalamnya.
 
-Token komponen menimpa token tema untuk setiap Toolbar di dalam elemen tempat token itu dipasang,
-atau di toolbar itu sendiri, misalnya `.editor`.
-
-| Token komponen | Bawaan | Fungsi |
-| --- | --- | --- |
-| `--ow-toolbar-bg` | `--ow-panel` | Permukaan |
-| `--ow-toolbar-shadow` | `--ow-panel-shadow` | Tepi dan bayangan |
-| `--ow-toolbar-button-fg` | `--ow-muted` | Teks tombol dan link |
-| `--ow-toolbar-button-hover-bg` | `--ow-hover` | Warna di bawah pointer |
-| `--ow-toolbar-button-hover-fg` | `--ow-fg` | Teks di bawah pointer |
-| `--ow-toolbar-button-pressed-bg` | `--ow-pressed-bg` | Isian saat ditahan |
-| `--ow-toolbar-button-pressed-shadow` | `--ow-pressed-shadow` | Tepi saat ditahan |
-| `--ow-toolbar-button-pressed-fg` | `--ow-fg` | Teks saat ditahan |
-| `--ow-toolbar-input-bg` | `--ow-well-bg` | Isian field |
-| `--ow-toolbar-input-shadow` | `--ow-well-shadow` | Garis dalam field, di bawah tepinya |
-| `--ow-toolbar-input-edge` | `--ow-edge` | Tepi field, dengan kontras 3:1 |
-| `--ow-toolbar-line-dark` | `--ow-line-dark` | Garis gelap alur |
-| `--ow-toolbar-line-light` | `--ow-line-light` | Garis terang alur |
-
-</ForMode>
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-panel` | Permukaan |
+| `--ow-panel-shadow` | Tepi dan bayangan |
+| `--ow-muted` | Teks tombol dan link, serta placeholder field |
+| `--ow-hover` | Warna di bawah pointer |
+| `--ow-fg` | Teks di bawah pointer atau saat ditahan, serta teks field |
+| `--ow-pressed-bg` | Isian saat ditahan |
+| `--ow-pressed-shadow` | Tepi saat ditahan |
+| `--ow-well-bg` | Isian field |
+| `--ow-well-shadow` | Garis dalam field, di bawah tepinya |
+| `--ow-edge` | Tepi field, dengan kontras 3:1 |
+| `--ow-line-dark` | Garis gelap alur |
+| `--ow-line-light` | Garis terang alur |
+| `--ow-radius` | Sudut item; sudut toolbar menambahkan padding 4px-nya, sehingga tetap konsentris |
+| `--ow-focus` | Ring fokus |
 
 <ForMode mode="isolated">
 
-Setiap bagian membawa nilainya sendiri dan tidak membaca token bersama, jadi atur token di bagian
-yang memakainya: permukaan di toolbar itu sendiri (`.editor`), garis alur di
-`.editor .ow-toolbar-separator`, seperti `editor.css`, dan token tombol di
-`.editor .ow-toolbar-button`.
-
-| Token komponen | Bawaan | Fungsi |
-| --- | --- | --- |
-| `--ow-toolbar-bg` | Nilainya sendiri, per tema | Permukaan |
-| `--ow-toolbar-shadow` | Nilainya sendiri, per tema | Tepi dan bayangan |
-| `--ow-toolbar-button-fg` | Nilainya sendiri, per tema | Teks tombol dan link |
-| `--ow-toolbar-button-hover-bg` | Nilainya sendiri, per tema | Warna di bawah pointer |
-| `--ow-toolbar-button-hover-fg` | Nilainya sendiri, per tema | Teks di bawah pointer |
-| `--ow-toolbar-button-pressed-bg` | Nilainya sendiri, per tema | Isian saat ditahan |
-| `--ow-toolbar-button-pressed-shadow` | Nilainya sendiri, per tema | Tepi saat ditahan |
-| `--ow-toolbar-button-pressed-fg` | Nilainya sendiri, per tema | Teks saat ditahan |
-| `--ow-toolbar-input-bg` | Nilainya sendiri, per tema | Isian field |
-| `--ow-toolbar-input-shadow` | Nilainya sendiri, per tema | Garis dalam field, di bawah tepinya |
-| `--ow-toolbar-input-edge` | Nilainya sendiri, per tema | Tepi field, dengan kontras 3:1 |
-| `--ow-toolbar-line-dark` | Nilainya sendiri, per tema | Garis gelap alur |
-| `--ow-toolbar-line-light` | Nilainya sendiri, per tema | Garis terang alur |
+Di mode isolated, nilainya ada di root setiap Toolbar, jadi atur di toolbar itu sendiri, seperti
+`editor.css`. Toggle di dalamnya punya root sendiri: atur nilainya di `.editor .ow-toggle`.
 
 </ForMode>
 
-Toggle di dalam toolbar tetap memakai tokennya sendiri, `--ow-toggle-*`. Sudut item mengikuti
-`--ow-radius`, dan sudut toolbar menambahkan padding 4px-nya, sehingga tetap konsentris.
+Toggle di dalam toolbar tetap tampil seperti Toggle, dari token tema yang sama.
 
-<TokenChip item="toolbar" lang="id" />
+<TokenChip lang="id" />
 
 ## Ship it [#ship]
 

@@ -280,19 +280,15 @@ describe("Toolbar", () => {
     expect(clicks).toBe(0);
   });
 
-  test("component tokens override the theme tokens", async () => {
+  test("a theme token set on it changes it alone (TK-9)", async () => {
     const tokens = {
-      "--ow-toolbar-bg": "rgb(1, 2, 3)",
-      "--ow-toolbar-shadow": "none",
-      "--ow-toolbar-button-fg": "rgb(4, 5, 6)",
-      "--ow-toolbar-input-bg": "rgb(7, 8, 9)",
-      "--ow-toolbar-line-dark": "rgb(255, 0, 0)",
+      "--ow-panel": "rgb(1, 2, 3)",
+      "--ow-panel-shadow": "none",
+      "--ow-muted": "rgb(4, 5, 6)",
+      "--ow-well-bg": "rgb(7, 8, 9)",
+      "--ow-line-dark": "rgb(255, 0, 0)",
     } as CSSProperties;
-    const { q } = await mount(
-      <div style={tokens}>
-        <Editor />
-      </div>,
-    );
+    const { q } = await mount(<Editor style={tokens} />);
     await pointerAway();
     expect(getComputedStyle(q(".ow-toolbar")).backgroundColor).toBe("rgb(1, 2, 3)");
     expect(getComputedStyle(q(".ow-toolbar")).boxShadow).toBe("none");

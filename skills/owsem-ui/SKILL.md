@@ -232,12 +232,10 @@ import { Toggle, Toolbar } from "owsem-ui/base"; // or "@/components/owsem/toolb
 - `Input` is a flat well with a 3:1 edge, as tall as the buttons; put at most one, last, since
   arrows move its caret. Its `size` is the type scale, not a width: set `inline-size` in CSS.
 - `Separator` is an etched groove across the toolbar's direction; `Group` takes an `aria-label`.
-- Tokens: `--ow-toolbar-bg`, `--ow-toolbar-shadow`, `--ow-toolbar-button-fg`,
-  `--ow-toolbar-button-hover-bg`, `--ow-toolbar-button-hover-fg`,
-  `--ow-toolbar-button-pressed-bg`, `--ow-toolbar-button-pressed-shadow`,
-  `--ow-toolbar-button-pressed-fg`, `--ow-toolbar-input-bg`, `--ow-toolbar-input-shadow`,
-  `--ow-toolbar-input-edge`, `--ow-toolbar-line-dark`, `--ow-toolbar-line-light`. Toggles in a
-  toolbar keep their `--ow-toggle-*` tokens.
+- Reads `--ow-panel` and `--ow-panel-shadow` (the bar), `--ow-muted`, `--ow-fg`, `--ow-hover`,
+  `--ow-pressed-bg`, and `--ow-pressed-shadow` (buttons and links), `--ow-well-bg`,
+  `--ow-well-shadow`, and `--ow-edge` (the field), `--ow-line-dark` and `--ow-line-light` (grooves),
+  `--ow-radius`, and `--ow-focus`.
 
 ### Tree Rail Nav
 

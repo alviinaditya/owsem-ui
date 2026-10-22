@@ -88,58 +88,36 @@ color, the grooves stay, and the focus ring is `Highlight`.
 
 The stage controls are open: pick the surface or the grooves' dark line, and the code follows.
 
-<ForMode mode="theme">
+Toolbar reads these theme tokens. Set one on the toolbar, as `editor.css` does with `.editor`, or
+on an element around it, to change the toolbars inside.
 
-Component tokens override the theme tokens for every Toolbar inside the element that sets them,
-or the toolbar itself, such as `.editor`.
-
-| Component token | Default | Purpose |
-| --- | --- | --- |
-| `--ow-toolbar-bg` | `--ow-panel` | Surface |
-| `--ow-toolbar-shadow` | `--ow-panel-shadow` | Edge and shadow |
-| `--ow-toolbar-button-fg` | `--ow-muted` | Button and link text |
-| `--ow-toolbar-button-hover-bg` | `--ow-hover` | Tint under the pointer |
-| `--ow-toolbar-button-hover-fg` | `--ow-fg` | Text under the pointer |
-| `--ow-toolbar-button-pressed-bg` | `--ow-pressed-bg` | Fill while held down |
-| `--ow-toolbar-button-pressed-shadow` | `--ow-pressed-shadow` | Edges while held down |
-| `--ow-toolbar-button-pressed-fg` | `--ow-fg` | Text while held down |
-| `--ow-toolbar-input-bg` | `--ow-well-bg` | Field fill |
-| `--ow-toolbar-input-shadow` | `--ow-well-shadow` | Field's inner line, under its edge |
-| `--ow-toolbar-input-edge` | `--ow-edge` | Field edge, at 3:1 |
-| `--ow-toolbar-line-dark` | `--ow-line-dark` | Groove's dark line |
-| `--ow-toolbar-line-light` | `--ow-line-light` | Groove's light line |
-
-</ForMode>
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-panel` | Surface |
+| `--ow-panel-shadow` | Edge and shadow |
+| `--ow-muted` | Button and link text, and the field's placeholder |
+| `--ow-hover` | Tint under the pointer |
+| `--ow-fg` | Text under the pointer or held down, and the field's text |
+| `--ow-pressed-bg` | Fill while held down |
+| `--ow-pressed-shadow` | Edges while held down |
+| `--ow-well-bg` | Field fill |
+| `--ow-well-shadow` | Field's inner line, under its edge |
+| `--ow-edge` | Field edge, at 3:1 |
+| `--ow-line-dark` | Groove's dark line |
+| `--ow-line-light` | Groove's light line |
+| `--ow-radius` | Item corners; the toolbar's add its 4px padding, so they stay concentric |
+| `--ow-focus` | Focus ring |
 
 <ForMode mode="isolated">
 
-Each part carries its own values and reads no shared token, so set a token on the part that uses
-it: the surface on the toolbar itself (`.editor`), the grooves' lines on
-`.editor .ow-toolbar-separator`, as `editor.css` does, and the buttons' on
-`.editor .ow-toolbar-button`.
-
-| Component token | Default | Purpose |
-| --- | --- | --- |
-| `--ow-toolbar-bg` | Its own, per theme | Surface |
-| `--ow-toolbar-shadow` | Its own, per theme | Edge and shadow |
-| `--ow-toolbar-button-fg` | Its own, per theme | Button and link text |
-| `--ow-toolbar-button-hover-bg` | Its own, per theme | Tint under the pointer |
-| `--ow-toolbar-button-hover-fg` | Its own, per theme | Text under the pointer |
-| `--ow-toolbar-button-pressed-bg` | Its own, per theme | Fill while held down |
-| `--ow-toolbar-button-pressed-shadow` | Its own, per theme | Edges while held down |
-| `--ow-toolbar-button-pressed-fg` | Its own, per theme | Text while held down |
-| `--ow-toolbar-input-bg` | Its own, per theme | Field fill |
-| `--ow-toolbar-input-shadow` | Its own, per theme | Field's inner line, under its edge |
-| `--ow-toolbar-input-edge` | Its own, per theme | Field edge, at 3:1 |
-| `--ow-toolbar-line-dark` | Its own, per theme | Groove's dark line |
-| `--ow-toolbar-line-light` | Its own, per theme | Groove's light line |
+In isolated mode the values sit on each Toolbar's root, so set yours on the toolbar itself, as
+`editor.css` does. A Toggle in it has its own root: set its values on `.editor .ow-toggle`.
 
 </ForMode>
 
-Toggles in a toolbar keep their own `--ow-toggle-*` tokens. Item corners follow `--ow-radius`, and
-the toolbar's add its 4px padding, so the corners stay concentric.
+Toggles in a toolbar keep Toggle's own look, from the same theme tokens.
 
-<TokenChip item="toolbar" lang="en" />
+<TokenChip lang="en" />
 
 ## Ship it [#ship]
 

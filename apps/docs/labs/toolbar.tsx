@@ -67,8 +67,8 @@ function Editor({ cfg, lang, stop }: { cfg: Cfg; lang: Lang; stop?: boolean }) {
   });
   const [tabStop, setTabStop] = useState(t.bold);
   const style = {
-    "--ow-toolbar-bg": cfg.bg || undefined,
-    "--ow-toolbar-line-dark": cfg.line || undefined,
+    "--ow-panel": cfg.bg || undefined,
+    "--ow-line-dark": cfg.line || undefined,
   } as CSSProperties;
   const onFocus = (event: FocusEvent<HTMLDivElement>) => {
     const item = event.target;
@@ -224,7 +224,7 @@ const toolbarLab = defineLab({
         id: "div role=toolbar di atas material panel: satu perhentian Tab, lalu tombol panah.",
         en: "A div with role=toolbar on the panel material: one Tab stop, then arrow keys.",
       },
-      tokens: { "--ow-toolbar-bg": "--_bg", "--ow-toolbar-shadow": "--_shadow" },
+      tokens: { "--ow-panel": "--_bg", "--ow-panel-shadow": "--_shadow" },
     },
     {
       name: "Group",
@@ -250,12 +250,11 @@ const toolbarLab = defineLab({
         en: "A quiet ghost button with Button's geometry. Still focusable while disabled.",
       },
       tokens: {
-        "--ow-toolbar-button-fg": "--_fg",
-        "--ow-toolbar-button-hover-bg": "--_hover-bg",
-        "--ow-toolbar-button-hover-fg": "--_hover-fg",
-        "--ow-toolbar-button-pressed-bg": "--_pressed-bg",
-        "--ow-toolbar-button-pressed-shadow": "--_pressed-shadow",
-        "--ow-toolbar-button-pressed-fg": "--_pressed-fg",
+        "--ow-muted": "--_muted",
+        "--ow-fg": "--_fg",
+        "--ow-hover": "--_hover",
+        "--ow-pressed-bg": "--_pressed-bg",
+        "--ow-pressed-shadow": "--_pressed-shadow",
       },
     },
     {
@@ -273,7 +272,7 @@ const toolbarLab = defineLab({
         id: "Alur terukir di antara grup, melintang arah toolbar.",
         en: "An etched groove between groups, across the toolbar's direction.",
       },
-      tokens: { "--ow-toolbar-line-dark": "--_dark", "--ow-toolbar-line-light": "--_light" },
+      tokens: { "--ow-line-dark": "--_dark", "--ow-line-light": "--_light" },
     },
     {
       name: "Link",
@@ -291,9 +290,9 @@ const toolbarLab = defineLab({
         en: "A flat field with a 3:1 edge, as tall as the buttons. Arrows move the caret first, so put it last.",
       },
       tokens: {
-        "--ow-toolbar-input-bg": "--_bg",
-        "--ow-toolbar-input-shadow": "--_shadow",
-        "--ow-toolbar-input-edge": "--_edge",
+        "--ow-well-bg": "--_bg",
+        "--ow-well-shadow": "--_shadow",
+        "--ow-edge": "--_edge",
       },
     },
   ],
@@ -354,18 +353,15 @@ const toolbarLab = defineLab({
     ];
     const files = [{ name: "editor-toolbar.tsx", code: usage.join("\n") }];
     if (custom) {
-      const token = `--${setup.prefix}-toolbar`;
-      const bg = cfg.bg ? [`  ${token}-bg: ${cfg.bg};`] : [];
-      const line = cfg.line ? [`  ${token}-line-dark: ${cfg.line};`] : [];
-      // Isolated tokens sit on each part that reads them, so the groove's go on the groove.
-      const lines =
-        setup.mode === "isolated"
-          ? [
-              ...(bg.length ? [".editor {", ...bg, "}"] : []),
-              ...(bg.length && line.length ? [""] : []),
-              ...(line.length ? [".editor .ow-toolbar-separator {", ...line, "}"] : []),
-            ]
-          : ['/* The toolbar with className="editor" */', ".editor {", ...bg, ...line, "}"];
+      const token = `--${setup.prefix}`;
+      // On the toolbar's root, where isolated values sit too.
+      const lines = [
+        '/* The toolbar with className="editor" */',
+        ".editor {",
+        ...(cfg.bg ? [`  ${token}-panel: ${cfg.bg};`] : []),
+        ...(cfg.line ? [`  ${token}-line-dark: ${cfg.line};`] : []),
+        "}",
+      ];
       files.push({ name: "editor.css", code: lines.join("\n") });
     }
     return files;

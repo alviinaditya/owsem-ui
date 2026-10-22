@@ -8,11 +8,8 @@
  */
 @layer owsem.components {
   .ow-toolbar {
-    --_bg: var(--ow-toolbar-bg, var(--ow-panel, #ffffff));
-    --_shadow: var(
-      --ow-toolbar-shadow,
-      var(--ow-panel-shadow, inset 0 0 0 1px rgb(0 0 0 / 0.08), 0 1px 2px rgb(0 0 0 / 0.04))
-    );
+    --_bg: var(--ow-panel);
+    --_shadow: var(--ow-panel-shadow);
     --_pad: 4px;
     display: flex;
     align-items: center;
@@ -22,13 +19,13 @@
     max-inline-size: 100%;
     padding: var(--_pad);
     /* Concentric with the items (FR-10b). */
-    border-radius: calc(var(--ow-radius, 8px) + var(--_pad));
+    border-radius: calc(var(--ow-radius) + var(--_pad));
     /* Invisible until forced colors draw it as the edge (DP-8). */
     outline: 1px solid transparent;
     outline-offset: -1px;
     background-color: var(--_bg);
     box-shadow: var(--_shadow);
-    color: var(--ow-fg, #18181b);
+    color: var(--ow-fg);
     /* The separators' length follows the type scale. */
     font-size: 0.875rem;
     line-height: 1.25;
@@ -62,7 +59,7 @@
     margin: 0;
     padding: var(--_py) var(--px);
     border: 0;
-    border-radius: var(--ow-radius, 8px);
+    border-radius: var(--ow-radius);
     /* Invisible until forced colors draw it as the edge (DP-8). */
     outline: 1px solid transparent;
     outline-offset: -1px;
@@ -83,30 +80,25 @@
 
   /* Buttons and links: flat, tinted under the pointer, the pressed material while held (DP-4). */
   :where(.ow-toolbar-button, .ow-toolbar-link) {
-    --_fg: var(--ow-toolbar-button-fg, var(--ow-muted, #63636b));
-    --_hover-bg: var(--ow-toolbar-button-hover-bg, var(--ow-hover, rgb(0 0 0 / 0.04)));
-    --_hover-fg: var(--ow-toolbar-button-hover-fg, var(--ow-fg, #18181b));
-    --_pressed-bg: var(--ow-toolbar-button-pressed-bg, var(--ow-pressed-bg, #f4f4f5));
-    --_pressed-shadow: var(
-      --ow-toolbar-button-pressed-shadow,
-      var(--ow-pressed-shadow, inset 0 0 0 1px rgb(0 0 0 / 0.16))
-    );
-    --_pressed-fg: var(--ow-toolbar-button-pressed-fg, var(--ow-fg, #18181b));
+    --_muted: var(--ow-muted);
+    --_fg: var(--ow-fg);
+    --_hover: var(--ow-hover);
+    --_pressed-bg: var(--ow-pressed-bg);
+    --_pressed-shadow: var(--ow-pressed-shadow);
     display: inline-flex;
     flex: none;
     align-items: center;
     justify-content: center;
     gap: 0.5em;
     background-color: transparent;
-    color: var(--_fg);
+    color: var(--_muted);
     font-weight: 500;
     text-decoration: none;
     white-space: nowrap;
     cursor: pointer;
     touch-action: manipulation;
     /* A press lets go on the settle spring (FR-21). */
-    transition: transform var(--ow-spring-settle-duration, 1030ms)
-      var(--ow-spring-settle, cubic-bezier(0.23, 1, 0.32, 1));
+    transition: transform var(--ow-spring-settle-duration) var(--ow-spring-settle);
   }
 
   /* Icons sit as far from the edge as from the top and bottom (FR-10). */
@@ -142,8 +134,8 @@
 
   @media (hover: hover) {
     :where(.ow-toolbar-button, .ow-toolbar-link):where(:hover:not([data-disabled])) {
-      background-color: var(--_hover-bg);
-      color: var(--_hover-fg);
+      background-color: var(--_hover);
+      color: var(--_fg);
     }
   }
 
@@ -151,14 +143,14 @@
   :where(.ow-toolbar-button, .ow-toolbar-link):where(:active:not([data-disabled])) {
     background-color: var(--_pressed-bg);
     box-shadow: var(--_pressed-shadow);
-    color: var(--_pressed-fg);
+    color: var(--_fg);
     transform: scale(0.97);
     transition-duration: 90ms;
-    transition-timing-function: var(--ow-ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+    transition-timing-function: var(--ow-ease-out);
   }
 
   :where(.ow-toolbar-button, .ow-toolbar-link, .ow-toolbar-input):where(:focus-visible) {
-    outline: 2px solid var(--ow-focus, #5b4a9a);
+    outline: 2px solid var(--ow-focus);
     outline-offset: 2px;
   }
 
@@ -169,12 +161,9 @@
 
   /* The field: a flat well, with an edge at 3:1 (DP-6). */
   :where(.ow-toolbar-input) {
-    --_bg: var(--ow-toolbar-input-bg, var(--ow-well-bg, #f0f0f2));
-    --_shadow: var(
-      --ow-toolbar-input-shadow,
-      var(--ow-well-shadow, inset 0 0 0 1px rgb(0 0 0 / 0.04))
-    );
-    --_edge: var(--ow-toolbar-input-edge, var(--ow-edge, #82828b));
+    --_bg: var(--ow-well-bg);
+    --_shadow: var(--ow-well-shadow);
+    --_edge: var(--ow-edge);
     flex: 0 1 auto;
     inline-size: 9em;
     min-inline-size: 0;
@@ -184,18 +173,18 @@
     box-shadow:
       inset 0 0 0 1px var(--_edge),
       var(--_shadow);
-    color: var(--ow-fg, #18181b);
+    color: var(--ow-fg);
   }
 
   :where(.ow-toolbar-input)::placeholder {
-    color: var(--ow-muted, #63636b);
+    color: var(--ow-muted);
     opacity: 1;
   }
 
   /* An etched groove: a dark line with a light one beside it, as borders for forced colors. */
   .ow-toolbar-separator {
-    --_dark: var(--ow-toolbar-line-dark, var(--ow-line-dark, #e2e2e6));
-    --_light: var(--ow-toolbar-line-light, var(--ow-line-light, #ffffff));
+    --_dark: var(--ow-line-dark);
+    --_light: var(--ow-line-light);
     flex: none;
     border: 0 solid;
   }

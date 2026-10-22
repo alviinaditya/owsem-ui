@@ -125,42 +125,37 @@ Semua teks bisa Anda terjemahkan: label dan placeholder Input, Empty, nama grup,
 
 Kontrol di stage terbuka: pilih ukuran atau permukaan padat, dan kodenya ikut berubah.
 
-<ForMode mode="theme">
+Command Menu membaca token tema berikut. Popup dirender di body, di luar layout Anda, jadi pasang
+tokennya di `:root`, atau di Popup itu sendiri lewat `className` atau `style`.
 
-Popup dirender di body, di luar layout Anda, jadi pasang tokennya di `:root`, atau di Popup itu
-sendiri lewat `className`. Token tema mengatur sisanya: `--ow-panel` mewarnai kaca dan
-`--ow-popup-shadow` menggambar tepinya, `--ow-well-*` dan `--ow-edge` untuk Trigger,
-`--ow-raised-*` untuk keycap, serta `--ow-line-dark` dan `--ow-line-light` untuk garis terukir.
-Item memakai `--ow-radius`, dan panel menambahkan padding-nya.
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-panel` | Kaca, 80% di atas halaman yang diburamkan, dan panel padat |
+| `--ow-popup-shadow` | Tepi tegas dan bayangan jatuh panel |
+| `--ow-backdrop` | Scrim di atas halaman |
+| `--ow-fg` | Teks, dan ikon item yang menyala |
+| `--ow-muted` | Teks Trigger, nama grup, deskripsi, ikon, keycap, dan item nonaktif |
+| `--ow-focus` | Garis baris cari saat fokus, dan cincin fokus Trigger |
+| `--ow-hover` | Highlight (Glide) |
+| `--ow-radius` | Sudut item; panel menambahkan padding-nya, dan keycap memakai setengahnya |
+| `--ow-well-bg`, `--ow-well-shadow`, `--ow-edge` | Trigger, kolom datar bertepi 3:1 |
+| `--ow-raised-bg`, `--ow-raised-shadow` | Keycap |
+| `--ow-line-dark`, `--ow-line-light` | Garis terukir di bawah baris cari dan di atas footer |
 
-| Token komponen | Bawaan | Fungsi |
-| --- | --- | --- |
-| `--ow-command-menu-bg` | `--ow-panel` 80% | Kaca |
-| `--ow-command-menu-blur` | `24px` | Seberapa buram halaman di belakangnya |
-| `--ow-command-menu-shadow` | `--ow-popup-shadow` | Tepi dan bayangan jatuh panel |
-| `--ow-command-menu-width` | `560px` | Lebar maksimum panel |
-| `--ow-command-menu-backdrop` | Gelap 30% | Scrim di atas halaman |
-
-</ForMode>
+Scrim berada di luar Popup, jadi pasang `--ow-backdrop` di `:root`, tempat token itu meredupkan
+semua lapisan modal. Lebar panel paling besar 560px: untuk mengubahnya, atur `inline-size` Popup
+lewat `className` atau `style`, misalnya `min(100%, 720px)`. Untuk panel padat, seperti permukaan
+Padat, beri `background-color: var(--ow-panel)` dan `backdrop-filter: none`.
 
 <ForMode mode="isolated">
 
-Setiap Command Menu membawa nilainya sendiri dan tidak membaca token bersama, jadi pasang token di
-Popup itu sendiri, seperti `.commands.ow-command-menu-popup`.
-
-| Token komponen | Bawaan | Fungsi |
-| --- | --- | --- |
-| `--ow-command-menu-bg` | Warna panelnya sendiri 80%, per tema | Kaca |
-| `--ow-command-menu-blur` | `24px` | Seberapa buram halaman di belakangnya |
-| `--ow-command-menu-shadow` | Nilainya sendiri, per tema | Tepi dan bayangan jatuh panel |
-| `--ow-command-menu-width` | `560px` | Lebar maksimum panel |
-| `--ow-command-menu-backdrop` | Gelap 30% | Scrim di atas halaman |
+Di mode isolated, nilainya ada di root setiap bagian, yaitu Trigger, Popup, dan scrim, jadi nilai di
+`:root` tidak sampai ke sana. Atur di bagian itu sendiri, seperti `commands.css` lewat `className`
+Popup.
 
 </ForMode>
 
-Highlight-nya milik Glide, jadi `--ow-glide-bg` dan `--ow-glide-radius` mengatur warna dan sudutnya.
-
-<TokenChip item="command-menu" lang="id" />
+<TokenChip lang="id" />
 
 ## Ship it [#ship]
 

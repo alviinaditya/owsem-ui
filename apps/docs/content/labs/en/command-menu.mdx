@@ -122,42 +122,37 @@ Footer, and `closeLabel`.
 
 The stage controls are open: pick a size or an opaque surface, and the code follows.
 
-<ForMode mode="theme">
+Command Menu reads these theme tokens. The Popup renders in the body, outside your layout, so set
+them on `:root`, or on the Popup itself through `className` or `style`.
 
-The Popup renders in the body, outside your layout, so set its tokens on `:root`, or on the Popup
-itself through `className`. The theme tokens set the rest: `--ow-panel` colors the glass and
-`--ow-popup-shadow` draws its edge, `--ow-well-*` and `--ow-edge` the Trigger, `--ow-raised-*`
-the keycaps, and `--ow-line-dark` with `--ow-line-light` the etched lines. Items take
-`--ow-radius`, and the panel adds its padding to it.
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-panel` | The glass, at 80% over a blur of the page, and the opaque panel |
+| `--ow-popup-shadow` | The panel's crisp edge and drop shadow |
+| `--ow-backdrop` | The scrim over the page |
+| `--ow-fg` | Text, and the lit item's icon |
+| `--ow-muted` | The Trigger's text, group names, descriptions, icons, keys, and disabled items |
+| `--ow-focus` | The search row's line while it has focus, and the Trigger's ring |
+| `--ow-hover` | The highlight (Glide) |
+| `--ow-radius` | Items' corners; the panel adds its padding, and keys take half |
+| `--ow-well-bg`, `--ow-well-shadow`, `--ow-edge` | The Trigger, a flat field with a 3:1 edge |
+| `--ow-raised-bg`, `--ow-raised-shadow` | The keycaps |
+| `--ow-line-dark`, `--ow-line-light` | The etched lines under the search row and over the footer |
 
-| Component token | Default | Purpose |
-| --- | --- | --- |
-| `--ow-command-menu-bg` | `--ow-panel` at 80% | The glass |
-| `--ow-command-menu-blur` | `24px` | How much the page blurs behind it |
-| `--ow-command-menu-shadow` | `--ow-popup-shadow` | The panel's edge and drop shadow |
-| `--ow-command-menu-width` | `560px` | The panel's widest |
-| `--ow-command-menu-backdrop` | Dark at 30% | The scrim over the page |
-
-</ForMode>
+The scrim sits outside the Popup, so set `--ow-backdrop` on `:root`, where it dims every modal
+layer. The panel is at most 560px wide: to change that, set the Popup's `inline-size` through
+`className` or `style`, such as `min(100%, 720px)`. For an opaque panel, as the Solid surface
+does, give it `background-color: var(--ow-panel)` and `backdrop-filter: none`.
 
 <ForMode mode="isolated">
 
-Each Command Menu carries its own values and reads no shared token, so set them on the Popup
-itself, as in `.commands.ow-command-menu-popup`.
-
-| Component token | Default | Purpose |
-| --- | --- | --- |
-| `--ow-command-menu-bg` | Its own panel color at 80%, per theme | The glass |
-| `--ow-command-menu-blur` | `24px` | How much the page blurs behind it |
-| `--ow-command-menu-shadow` | Its own, per theme | The panel's edge and drop shadow |
-| `--ow-command-menu-width` | `560px` | The panel's widest |
-| `--ow-command-menu-backdrop` | Dark at 30% | The scrim over the page |
+In isolated mode the values sit on each part's own root, the Trigger, the Popup, and the scrim, so
+a value on `:root` does not reach them. Set yours on the part itself, as `commands.css` does with
+the Popup's `className`.
 
 </ForMode>
 
-The highlight is Glide's, so `--ow-glide-bg` and `--ow-glide-radius` set its color and corners.
-
-<TokenChip item="command-menu" lang="en" />
+<TokenChip lang="en" />
 
 ## Ship it [#ship]
 

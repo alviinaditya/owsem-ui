@@ -5,8 +5,8 @@
  * highlight gliding through the results. No glow, and no open or close animation: a palette opened
  * from the keyboard many times a day appears and goes at once. Only Glide moves.
  *
- * The popup renders in the body, so set its component tokens on :root, or on the Popup itself
- * through className or style.
+ * It reads the theme tokens only (TK-9). The popup renders in the body, so set them on :root, or
+ * on the Popup itself through className or style.
  */
 @layer owsem.components {
   /* The trigger: a search field on the well (a flat darker fill), as tall as controls (FR-9). */
@@ -15,7 +15,6 @@
     --_py: max(var(--py), (24px - 1lh) / 2);
     --px: calc(var(--_py) + (1lh - 1cap) / 2);
     --icon: calc(1em + 2px);
-    --_muted: var(--ow-muted, #63636b);
     display: inline-flex;
     align-items: center;
     gap: 0.5em;
@@ -24,16 +23,16 @@
     padding: var(--_py) var(--px);
     overflow: hidden;
     border: 0;
-    border-radius: var(--ow-radius, 8px);
+    border-radius: var(--ow-radius);
     /* DP-8: invisible until forced colors drop the shadows. */
     outline: 1px solid transparent;
     outline-offset: -1px;
-    background-color: var(--ow-well-bg, #f0f0f2);
+    background-color: var(--ow-well-bg);
     /* A crisp 1px edge at 3:1 (DP-6), over the well's own. */
     box-shadow:
-      inset 0 0 0 1px var(--ow-edge, #82828b),
-      var(--ow-well-shadow, inset 0 0 0 1px rgb(0 0 0 / 0.04));
-    color: var(--_muted);
+      inset 0 0 0 1px var(--ow-edge),
+      var(--ow-well-shadow);
+    color: var(--ow-muted);
     font: inherit;
     font-size: 14px;
     line-height: 1.25;
@@ -55,12 +54,12 @@
 
   @media (hover: hover) and (pointer: fine) {
     .ow-command-menu-trigger:hover {
-      color: var(--ow-fg, #18181b);
+      color: var(--ow-fg);
     }
   }
 
   .ow-command-menu-trigger:focus-visible {
-    outline: 2px solid var(--ow-focus, #5b4a9a);
+    outline: 2px solid var(--ow-focus);
     outline-offset: 2px;
   }
 
@@ -82,10 +81,9 @@
   }
 
   .ow-command-menu-backdrop {
-    --_scrim: var(--ow-command-menu-backdrop, rgb(0 0 0 / 0.3));
     position: fixed;
     inset: 0;
-    background-color: var(--_scrim);
+    background-color: var(--ow-backdrop);
   }
 
   /* The popup hangs from the upper part of the screen, so its top stays put as results change. */
@@ -100,37 +98,23 @@
   }
 
   /*
-   * The glass panel (Surface): the panel material, translucent over a blur of the page, with the
-   * popup's crisp edge and drop shadow. The radius is the items' plus the padding around them
-   * (FR-10b).
+   * The glass panel (Surface): the panel material at 80% over a blur of the page, with the popup's
+   * crisp edge and drop shadow. The radius is the items' plus the padding around them (FR-10b).
+   * The width is a default: set inline-size on the Popup to change it.
    */
   .ow-command-menu-popup {
     /* Item --py in em, per size (FR-11); the field and labels line up with the items from it. */
     --_n: 0.75;
     --_p: 6px;
-    --_radius: var(--ow-radius, 8px);
-    --_fg: var(--ow-fg, #18181b);
-    --_muted: var(--ow-muted, #63636b);
-    --_focus: var(--ow-focus, #5b4a9a);
-    --_line-dark: var(--ow-line-dark, #e2e2e6);
-    --_line-light: var(--ow-line-light, #ffffff);
-    --_solid: var(--ow-panel, #ffffff);
-    --_bg: var(--ow-command-menu-bg, color-mix(in oklab, var(--_solid) 80%, transparent));
-    --_blur: var(--ow-command-menu-blur, 24px);
-    --_width: var(--ow-command-menu-width, 560px);
-    --_shadow: var(
-      --ow-command-menu-shadow,
-      var(
-        --ow-popup-shadow,
-        0 0 0 1px rgb(0 0 0 / 0.08),
-        0 4px 8px -2px rgb(0 0 0 / 0.06),
-        0 16px 32px -8px rgb(0 0 0 / 0.14)
-      )
-    );
+    --_radius: var(--ow-radius);
+    --_solid: var(--ow-panel);
+    --_glass: color-mix(in oklab, var(--_solid) 80%, transparent);
+    --_blur: 24px;
+    --_shadow: var(--ow-popup-shadow);
     position: relative;
     display: flex;
     flex-direction: column;
-    inline-size: min(100%, var(--_width));
+    inline-size: min(100%, 560px);
     max-block-size: min(100%, 32rem);
     box-sizing: border-box;
     border-radius: calc(var(--_radius) + var(--_p));
@@ -138,7 +122,7 @@
     outline-offset: -1px;
     background-color: var(--_solid);
     box-shadow: var(--_shadow);
-    color: var(--_fg);
+    color: var(--ow-fg);
     font-size: 14px;
     line-height: 1.25;
   }
@@ -155,7 +139,7 @@
 
   @supports (backdrop-filter: blur(1px)) {
     .ow-command-menu-popup {
-      background-color: var(--_bg);
+      background-color: var(--_glass);
       backdrop-filter: blur(var(--_blur)) saturate(1.6);
     }
 
@@ -181,14 +165,14 @@
     padding-block: var(--_py);
     padding-inline: calc(var(--_p) + max(var(--_n) * 1em, (24px - 1lh) / 2) + (1lh - 1cap) / 2);
     /* An etched line under it, which turns the focus color while the input has focus (FR-13). */
-    border-block-end: 1px solid var(--_line-dark);
-    box-shadow: 0 1px 0 var(--_line-light);
-    color: var(--_muted);
+    border-block-end: 1px solid var(--ow-line-dark);
+    box-shadow: 0 1px 0 var(--ow-line-light);
+    color: var(--ow-muted);
   }
 
   .ow-command-menu-field:has(:focus-visible) {
-    border-block-end-color: var(--_focus);
-    box-shadow: 0 1px 0 var(--_focus);
+    border-block-end-color: var(--ow-focus);
+    box-shadow: 0 1px 0 var(--ow-focus);
   }
 
   .ow-command-menu-input {
@@ -198,13 +182,13 @@
     border: 0;
     outline: none;
     background: none;
-    color: var(--_fg);
+    color: var(--ow-fg);
     font: inherit;
     line-height: inherit;
   }
 
   .ow-command-menu-input::placeholder {
-    color: var(--_muted);
+    color: var(--ow-muted);
     opacity: 1;
   }
 
@@ -221,7 +205,7 @@
     border: 0;
     border-radius: var(--_radius);
     background: none;
-    color: var(--_muted);
+    color: var(--ow-muted);
   }
 
   .ow-command-menu-close:not(:focus-visible) {
@@ -232,7 +216,7 @@
   }
 
   .ow-command-menu-close:focus-visible {
-    outline: 2px solid var(--_focus);
+    outline: 2px solid var(--ow-focus);
     outline-offset: -2px;
   }
 
@@ -264,7 +248,7 @@
 
   .ow-command-menu-empty:not(:empty) {
     padding: 2.25em 1em;
-    color: var(--_muted);
+    color: var(--ow-muted);
     text-align: center;
   }
 
@@ -272,7 +256,7 @@
   .ow-command-menu-group-label {
     padding-block: 0.75em 0.375em;
     padding-inline: calc((var(--_n) + 0.125) / 0.857 * 1em - 1px);
-    color: var(--_muted);
+    color: var(--ow-muted);
     font-size: 0.857em;
     font-weight: 500;
   }
@@ -292,13 +276,13 @@
     box-sizing: border-box;
     padding: var(--_py) var(--px);
     border-radius: var(--_radius);
-    color: var(--_fg);
+    color: var(--ow-fg);
     cursor: default;
     outline: none;
   }
 
   .ow-command-menu-item[data-disabled] {
-    color: var(--_muted);
+    color: var(--ow-muted);
   }
 
   .ow-command-menu-item-icon {
@@ -307,11 +291,11 @@
     inline-size: var(--icon);
     block-size: var(--icon);
     margin-inline-start: calc((1cap - var(--icon)) / 2);
-    color: var(--_muted);
+    color: var(--ow-muted);
   }
 
   .ow-command-menu-item[data-highlighted]:not([data-disabled]) > .ow-command-menu-item-icon {
-    color: var(--_fg);
+    color: var(--ow-fg);
   }
 
   .ow-command-menu-item-icon > svg {
@@ -334,7 +318,7 @@
 
   .ow-command-menu-item-description {
     flex: 1 1 0;
-    color: var(--_muted);
+    color: var(--ow-muted);
   }
 
   /* Keys as small keycaps: the raised material, a flat fill with a crisp edge. */
@@ -347,16 +331,13 @@
     box-sizing: border-box;
     min-inline-size: 1.75em;
     padding: 0.125em 0.4em;
-    border-radius: 4px;
+    /* Half the control radius, as a small key inside a control (FR-10b). */
+    border-radius: calc(var(--ow-radius) / 2);
     outline: 1px solid transparent;
     outline-offset: -1px;
-    background-color: var(--ow-raised-bg, #ffffff);
-    box-shadow: var(
-      --ow-raised-shadow,
-      inset 0 0 0 1px rgb(0 0 0 / 0.14),
-      0 1px 0 rgb(0 0 0 / 0.04)
-    );
-    color: var(--ow-muted, #63636b);
+    background-color: var(--ow-raised-bg);
+    box-shadow: var(--ow-raised-shadow);
+    color: var(--ow-muted);
     font: inherit;
     font-size: 0.75em;
     line-height: 1.25;
@@ -378,9 +359,9 @@
     gap: 0.5em 1.25em;
     padding-block: 0.625em;
     padding-inline: calc((var(--_n) + 0.125) / 0.857 * 1em - 1px + var(--_p));
-    border-block-start: 1px solid var(--_line-dark);
-    box-shadow: inset 0 1px 0 var(--_line-light);
-    color: var(--_muted);
+    border-block-start: 1px solid var(--ow-line-dark);
+    box-shadow: inset 0 1px 0 var(--ow-line-light);
+    color: var(--ow-muted);
     font-size: 0.857em;
   }
 

@@ -12,6 +12,6 @@ Its panel is glass: the panel material over a blur of the page, with the popup's
 and drop shadow, opaque under `prefers-reduced-transparency`. Items lay out an icon, a label, a
 description that gives way first, and shortcuts as small keycaps with a crisp edge; the Trigger is
 a flat search field (the well), and etched grooves set off the search row and the footer. Sizes
-`sm`, `md`, and `lg`. `CommandMenu.createHandle()` opens it from a button outside Root. Restyle it
-with `--ow-command-menu-bg`, `--ow-command-menu-blur`, `--ow-command-menu-shadow`,
-`--ow-command-menu-width`, and `--ow-command-menu-backdrop`.
+`sm`, `md`, and `lg`. `CommandMenu.createHandle()` opens it from a button outside Root. It reads
+the theme tokens only, such as `--ow-panel` for the glass and `--ow-backdrop` for the scrim; set
+the Popup's `inline-size` to change its width.

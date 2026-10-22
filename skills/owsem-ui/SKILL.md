@@ -255,10 +255,13 @@ import { CommandMenu } from "owsem-ui/owsem"; // or "@/components/owsem/command-
   `closeLabel` for the hidden close button (translate it). `Trigger` also takes `size`; outside
   Root, give it the Root's `handle` from `CommandMenu.createHandle()`.
 - No open or close animation, by design: do not add one.
-- Tokens, set on `:root` or on the Popup (it renders in the body): `--ow-command-menu-bg`,
-  `--ow-command-menu-blur`, `--ow-command-menu-shadow`, `--ow-command-menu-width`,
-  `--ow-command-menu-backdrop`. The panel is glass with the popup's crisp edge, the Trigger a flat
-  well, the shortcuts crisp keys; do not add soft shadows, inset blurs, or glow.
+- Reads `--ow-panel` (the glass, at 80%), `--ow-popup-shadow`, `--ow-backdrop` (the scrim),
+  `--ow-fg`, `--ow-muted`, `--ow-focus`, `--ow-hover` (the highlight), `--ow-radius`,
+  `--ow-well-bg`, `--ow-well-shadow`, and `--ow-edge` (the Trigger), `--ow-raised-bg` and
+  `--ow-raised-shadow` (keys), and `--ow-line-dark` with `--ow-line-light`. The Popup renders in
+  the body: set them on `:root` or on the Popup. Its width is `min(100%, 560px)`; set
+  `inline-size` on the Popup to change it. The panel is glass with the popup's crisp edge, the
+  Trigger a flat well, the shortcuts crisp keys; do not add soft shadows, inset blurs, or glow.
 
 ## Rules
 

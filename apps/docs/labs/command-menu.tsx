@@ -133,10 +133,8 @@ type Text = (typeof TEXT)[Lang];
 // The bars of the app's chart, behind the glass (each height once: it is the key).
 const BARS = [38, 52, 44, 70, 58, 84, 66, 92, 74, 60, 80, 96];
 
-const solidStyle = {
-  "--ow-command-menu-bg": "var(--ow-panel)",
-  "--ow-command-menu-blur": "0px",
-} as CSSProperties;
+// An opaque panel: no token covers it, so the Popup is styled itself.
+const solidStyle: CSSProperties = { backgroundColor: "var(--ow-panel)", backdropFilter: "none" };
 
 /** The menu's panel and list, shared by the demo and the states matrix. */
 function Palette({
@@ -467,10 +465,9 @@ const commandMenuLab = defineLab({
         en: "The glass panel: a Base UI Dialog over a backdrop, holding the Autocomplete that filters the list.",
       },
       tokens: {
-        "--ow-command-menu-bg": "--_bg",
-        "--ow-command-menu-blur": "--_blur",
-        "--ow-command-menu-width": "--_width",
-        "--ow-command-menu-shadow": "--_shadow",
+        "--ow-panel": "--_solid",
+        "--ow-popup-shadow": "--_shadow",
+        "--ow-radius": "--_radius",
       },
     },
     {
@@ -601,13 +598,12 @@ const commandMenuLab = defineLab({
     ];
     const files = [{ name: "commands.tsx", code: usage.join("\n") }];
     if (solid) {
-      const token = `--${setup.prefix}-command-menu`;
-      // The popup renders in the body, so its tokens go on the popup itself.
+      // No token covers the glass, so the Popup itself takes the panel color.
       const lines = [
         "/* An opaque panel instead of glass. */",
-        setup.mode === "isolated" ? ".commands.ow-command-menu-popup {" : ".commands {",
-        `  ${token}-bg: var(--${setup.prefix}-panel);`,
-        `  ${token}-blur: 0px;`,
+        ".commands {",
+        `  background-color: var(--${setup.prefix}-panel);`,
+        "  backdrop-filter: none;",
         "}",
       ];
       files.push({ name: "commands.css", code: lines.join("\n") });

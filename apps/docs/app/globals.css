@@ -2867,7 +2867,7 @@ figure[data-code-block] pre {
 .demo-command-card {
   padding: 12px 14px;
   border-radius: 12px;
-  background-color: var(--ow-surface);
+  background-color: var(--ow-panel);
   box-shadow: var(--ow-panel-shadow);
 }
 

@@ -529,26 +529,47 @@ describe("Command Menu", () => {
     expect(style.boxShadow).toBe(resolveShadow("var(--ow-popup-shadow)"));
   });
 
-  test("component tokens override the theme tokens", async () => {
+  test("a theme token set on it changes it alone (TK-9)", async () => {
     await render(
       <Menu
         defaultOpen
         popupStyle={
           {
-            "--ow-command-menu-bg": "rgb(255, 0, 0)",
-            "--ow-command-menu-width": "400px",
-            "--ow-command-menu-blur": "8px",
-            "--ow-command-menu-shadow": "none",
+            "--ow-panel": "rgb(255, 0, 0)",
+            "--ow-popup-shadow": "none",
+            "--ow-radius": "2px",
+            inlineSize: "400px",
           } as CSSProperties
         }
       />,
     );
     await expect.poll(popup).not.toBeNull();
     const style = getComputedStyle(popup() as Element);
-    expect(style.backgroundColor).toBe("rgb(255, 0, 0)");
-    expect(style.backdropFilter).toBe("blur(8px) saturate(1.6)");
+    expect(style.backgroundColor).toBe(resolveColor("color-mix(in oklab, red 80%, transparent)"));
     expect(style.boxShadow).toBe("none");
+    // Items take the radius, and the panel adds its 6px padding.
+    expect(style.borderTopLeftRadius).toBe("8px");
+    expect(getComputedStyle(option("New file")).borderTopLeftRadius).toBe("2px");
+    // The width is the Popup's own inline-size.
     expect((popup() as HTMLElement).getBoundingClientRect().width).toBe(400);
+    // The Trigger, outside the Popup, keeps the theme's.
+    const trigger = document.querySelector(".ow-command-menu-trigger") as Element;
+    expect(getComputedStyle(trigger).borderTopLeftRadius).toBe("8px");
+  });
+
+  test("the scrim is the theme's backdrop, and a key's corners half the radius", async () => {
+    onTestFinished(() => {
+      delete root.dataset.theme;
+    });
+    await render(<Menu defaultOpen />);
+    await expect.poll(popup).not.toBeNull();
+    const backdrop = document.querySelector(".ow-command-menu-backdrop") as Element;
+    const key = popup()?.querySelector(".ow-command-menu-shortcut") as Element;
+    for (const theme of ["light", "dark"]) {
+      root.dataset.theme = theme;
+      expect(getComputedStyle(backdrop).backgroundColor).toBe(resolveColor("var(--ow-backdrop)"));
+      expect(getComputedStyle(key).borderTopLeftRadius).toBe("4px");
+    }
   });
 
   test("keeps its shapes in forced colors (DP-8)", async () => {

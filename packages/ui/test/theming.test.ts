@@ -36,7 +36,7 @@ function declarations(css: string): Declaration[] {
     const colon = chunk.indexOf(":");
     if (colon < 1 || chunk.startsWith("@")) return;
     const property = chunk.slice(0, colon).trim();
-    if (!/^(--)?[a-z][\w-]*$/i.test(property)) return;
+    if (!/^(--)?[a-z_][\w-]*$/i.test(property)) return;
     found.push({
       property,
       value: chunk

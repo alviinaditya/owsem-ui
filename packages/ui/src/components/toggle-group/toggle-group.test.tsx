@@ -152,42 +152,16 @@ describe("Toggle Group", () => {
     }
   });
 
-  test("without the theme tokens, it falls back to the light theme's values", async () => {
-    const unset = Object.fromEntries(
-      ["well-bg", "well-shadow", "raised-bg", "raised-shadow", "fg", "muted"].map((name) => [
-        `--ow-${name}`,
-        "initial",
-      ]),
-    ) as CSSProperties;
-    const look = async (wrapper: Record<string, unknown>) => {
-      const { group, thumb, item } = await mount(
-        <div {...wrapper}>
-          <Views />
-        </div>,
-      );
-      const [track, raised] = [getComputedStyle(group), getComputedStyle(thumb)];
-      return [
-        track.backgroundColor,
-        track.boxShadow,
-        raised.backgroundColor,
-        raised.boxShadow,
-        getComputedStyle(item("Week")).color,
-        getComputedStyle(item("Day")).color,
-      ];
-    };
-    expect(await look({ style: unset })).toEqual(await look({ "data-theme": "light" }));
-  });
-
-  test("component tokens override the theme tokens", async () => {
+  test("a theme token set on it changes it alone (TK-9)", async () => {
     const { group, thumb, item } = await mount(
       <Views
         style={
           {
-            "--ow-toggle-group-track": "rgb(1, 2, 3)",
-            "--ow-toggle-group-thumb": "rgb(4, 5, 6)",
-            "--ow-toggle-group-thumb-shadow": "none",
-            "--ow-toggle-group-fg": "rgb(7, 8, 9)",
-            "--ow-toggle-group-muted": "rgb(10, 11, 12)",
+            "--ow-well-bg": "rgb(1, 2, 3)",
+            "--ow-raised-bg": "rgb(4, 5, 6)",
+            "--ow-raised-shadow": "none",
+            "--ow-fg": "rgb(7, 8, 9)",
+            "--ow-muted": "rgb(10, 11, 12)",
           } as CSSProperties
         }
       />,

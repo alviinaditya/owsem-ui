@@ -333,10 +333,11 @@ const toggleGroupLab = defineLab({
         en: "The flat track, with the group role. Holds the items, the thumb, and Glide's hover highlight.",
       },
       tokens: {
-        "--ow-toggle-group-track": "--_track",
-        "--ow-toggle-group-track-shadow": "--_track-shadow",
-        "--ow-toggle-group-fg": "--_fg",
-        "--ow-toggle-group-muted": "--_muted",
+        "--ow-well-bg": "--_track",
+        "--ow-well-shadow": "--_track-shadow",
+        "--ow-fg": "--_fg",
+        "--ow-muted": "--_muted",
+        "--ow-radius": "--_radius",
       },
     },
     {
@@ -355,16 +356,16 @@ const toggleGroupLab = defineLab({
         en: "The raised key with crisp edges, under the pressed item. Decorative; single selection only.",
       },
       tokens: {
-        "--ow-toggle-group-thumb": "--_thumb",
-        "--ow-toggle-group-thumb-shadow": "--_thumb-shadow",
+        "--ow-raised-bg": "--_thumb",
+        "--ow-raised-shadow": "--_thumb-shadow",
       },
     },
   ],
 
   demo(cfg, lang) {
     const style = {
-      "--ow-toggle-group-thumb": cfg.thumb || undefined,
-      "--ow-toggle-group-track": cfg.track || undefined,
+      "--ow-raised-bg": cfg.thumb || undefined,
+      "--ow-well-bg": cfg.track || undefined,
     } as CSSProperties;
     // Remounted when the selection changes, so each demo starts from its own value.
     return cfg.selection === "multiple" ? (
@@ -438,12 +439,12 @@ const toggleGroupLab = defineLab({
       { name: `${multiple ? "formatting" : "view-switcher"}.tsx`, code: usage.join("\n") },
     ];
     if (custom) {
-      const token = `--${setup.prefix}-toggle-group`;
-      // Isolated tokens are set on each group's root, so set them there too.
+      const token = `--${setup.prefix}`;
+      // Isolated values sit on each group's root, so set them there too.
       const lines = [
         setup.mode === "isolated" ? `.${scope}.ow-toggle-group {` : `.${scope} {`,
-        ...(cfg.thumb ? [`  ${token}-thumb: ${cfg.thumb};`] : []),
-        ...(cfg.track ? [`  ${token}-track: ${cfg.track};`] : []),
+        ...(cfg.thumb ? [`  ${token}-raised-bg: ${cfg.thumb};`] : []),
+        ...(cfg.track ? [`  ${token}-well-bg: ${cfg.track};`] : []),
         "}",
       ];
       files.push({ name: `${scope}.css`, code: lines.join("\n") });

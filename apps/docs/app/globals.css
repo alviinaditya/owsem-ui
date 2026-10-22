@@ -255,8 +255,7 @@ body {
  */
 .docs-choice {
   --ow-radius: var(--docs-radius-inner);
-  --ow-glide-bg: var(--docs-hover);
-  --ow-glide-pressed-bg: color-mix(in oklab, var(--docs-fg) 9%, transparent);
+  --ow-hover: var(--docs-hover);
   font-size: 12.5px;
 }
 
@@ -282,8 +281,7 @@ body {
  */
 .language-switcher {
   --ow-radius: var(--docs-radius-inner);
-  --ow-glide-bg: var(--docs-hover);
-  --ow-glide-pressed-bg: color-mix(in oklab, var(--docs-fg) 9%, transparent);
+  --ow-hover: var(--docs-hover);
   display: flex;
   box-sizing: border-box;
   padding: 3px;

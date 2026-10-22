@@ -8,31 +8,23 @@
  */
 @layer owsem.components {
   .ow-toggle-group {
-    --_track: var(--ow-toggle-group-track, var(--ow-well-bg, #f0f0f2));
-    --_track-shadow: var(
-      --ow-toggle-group-track-shadow,
-      var(--ow-well-shadow, inset 0 0 0 1px rgb(0 0 0 / 0.04))
-    );
-    --_thumb: var(--ow-toggle-group-thumb, var(--ow-raised-bg, #ffffff));
+    --_track: var(--ow-well-bg);
+    --_track-shadow: var(--ow-well-shadow);
+    --_thumb: var(--ow-raised-bg);
     /* A key's fill with multiple selection: the thumb's, shifted a little on hover (below). */
     --_key: var(--_thumb);
-    --_thumb-shadow: var(
-      --ow-toggle-group-thumb-shadow,
-      var(--ow-raised-shadow, inset 0 0 0 1px rgb(0 0 0 / 0.14), 0 1px 0 rgb(0 0 0 / 0.04))
-    );
-    --_fg: var(--ow-toggle-group-fg, var(--ow-fg, #18181b));
-    --_muted: var(--ow-toggle-group-muted, var(--ow-muted, #63636b));
-    --_focus: var(--ow-focus, #5b4a9a);
+    --_thumb-shadow: var(--ow-raised-shadow);
+    --_fg: var(--ow-fg);
+    --_muted: var(--ow-muted);
+    --_focus: var(--ow-focus);
     /* The items' and the thumb's radius; the track adds its padding (FR-10b, TK-8). */
-    --_radius: var(--ow-radius, 8px);
+    --_radius: var(--ow-radius);
     --_inset: 3px;
     /* How far a held item presses in (DP-4), scaled by the motion intensity. */
-    --_press: calc(1 - 0.03 * var(--ow-motion-scale, 1));
-    --_travel: var(--ow-spring-travel-duration, 300ms)
-      var(--ow-spring-travel, cubic-bezier(0.77, 0, 0.175, 1));
-    --_settle: var(--ow-spring-settle-duration, 300ms)
-      var(--ow-spring-settle, cubic-bezier(0.23, 1, 0.32, 1));
-    --_press-in: 90ms var(--ow-ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+    --_press: calc(1 - 0.03 * var(--ow-motion-scale));
+    --_travel: var(--ow-spring-travel-duration) var(--ow-spring-travel);
+    --_settle: var(--ow-spring-settle-duration) var(--ow-spring-settle);
+    --_press-in: 90ms var(--ow-ease-out);
     position: relative;
     isolation: isolate;
     display: inline-flex;

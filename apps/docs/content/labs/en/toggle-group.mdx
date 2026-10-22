@@ -59,7 +59,7 @@ pick a name, here or on the stage, to see its tokens. The hover highlight is Gli
 
 | Part | Element | Notes |
 | --- | --- | --- |
-| <Part name="Root" /> | `div.ow-toggle-group` | Base UI's `ToggleGroup`, with `role="group"`: the track, which holds the component tokens |
+| <Part name="Root" /> | `div.ow-toggle-group` | Base UI's `ToggleGroup`, with `role="group"`: the track. Theme tokens set on it apply to it alone |
 | <Part name="Item" /> | `button.ow-toggle-group-item` | Base UI's `Toggle`, with `aria-pressed`. Its text is wrapped in a span, so an item with only an icon is square |
 | <Part name="Thumb" /> | `span.ow-toggle-group-thumb` | Decorative (`aria-hidden`): placed by a script, moved by CSS |
 
@@ -116,43 +116,33 @@ the right, and so does its thumb.
 The stage controls are open: size, selection, item width, content, and the colors of the thumb
 and the track. Once you pick a color, its CSS is in its own tab of the code drawer.
 
-<ForMode mode="theme">
+Toggle Group reads these theme tokens; set them on the group, or on an element around it such as
+`.toolbar`.
 
-Component tokens override the theme tokens for groups inside the element that sets them.
-
-| Component token | Default | Purpose |
-| --- | --- | --- |
-| `--ow-toggle-group-track` | `--ow-well-bg` | Track |
-| `--ow-toggle-group-track-shadow` | `--ow-well-shadow` | The track's faint edge |
-| `--ow-toggle-group-thumb` | `--ow-raised-bg` | Thumb, and pressed items with multiple selection |
-| `--ow-toggle-group-thumb-shadow` | `--ow-raised-shadow` | Their crisp edge |
-| `--ow-toggle-group-fg` | `--ow-fg` | Labels of pressed and hovered items |
-| `--ow-toggle-group-muted` | `--ow-muted` | Other labels |
-
-</ForMode>
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-well-bg` | Track |
+| `--ow-well-shadow` | The track's faint edge |
+| `--ow-raised-bg` | Thumb, and pressed items with multiple selection |
+| `--ow-raised-shadow` | Their crisp edge |
+| `--ow-fg` | Labels of pressed and hovered items |
+| `--ow-muted` | Other labels |
+| `--ow-focus` | The keyboard focus ring |
+| `--ow-hover` | The hover highlight (Glide) |
+| `--ow-radius` | The items', the thumb's, and the highlight's corners; the track adds its 3 px |
 
 <ForMode mode="isolated">
 
-Each Toggle Group carries its own values on its root and reads no shared token, so set them on
-the group itself, as the stage's CSS does with `.view-switcher.ow-toggle-group`.
-
-| Component token | Default | Purpose |
-| --- | --- | --- |
-| `--ow-toggle-group-track` | Its own, per theme | Track |
-| `--ow-toggle-group-track-shadow` | Its own, per theme | The track's faint edge |
-| `--ow-toggle-group-thumb` | Its own, per theme | Thumb, and pressed items with multiple selection |
-| `--ow-toggle-group-thumb-shadow` | Its own, per theme | Their crisp edge |
-| `--ow-toggle-group-fg` | Its own, per theme | Labels of pressed and hovered items |
-| `--ow-toggle-group-muted` | Its own, per theme | Other labels |
+In isolated mode the values sit on each group's root, so set yours on the group itself, as the
+stage's CSS does with `.view-switcher.ow-toggle-group`.
 
 </ForMode>
 
 The motion comes from Core: `--ow-spring-travel` for the slide, `--ow-spring-settle` for the
-release, and `--ow-motion-scale` for how far a press goes (0 turns it off). The hover highlight is
-Glide's, set with `--ow-glide-bg` and `--ow-glide-radius`. An item's padding is its own `--py`
-(FR-11): set it on the items, not on the group.
+release, and `--ow-motion-scale` for how far a press goes (0 turns it off). An item's padding is
+its own `--py` (FR-11): set it on the items, not on the group.
 
-<TokenChip item="toggle-group" lang="en" />
+<TokenChip lang="en" />
 
 ## Ship it [#ship]
 

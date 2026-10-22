@@ -62,7 +62,7 @@ hover-nya adalah Glide dari `owsem-ui/core`.
 
 | Bagian | Elemen | Catatan |
 | --- | --- | --- |
-| <Part name="Root" /> | `div.ow-toggle-group` | `ToggleGroup` dari Base UI, dengan `role="group"`: track-nya, tempat token komponen dipasang |
+| <Part name="Root" /> | `div.ow-toggle-group` | `ToggleGroup` dari Base UI, dengan `role="group"`: track-nya. Token tema yang dipasang di sini hanya berlaku untuknya |
 | <Part name="Item" /> | `button.ow-toggle-group-item` | `Toggle` dari Base UI, dengan `aria-pressed`. Teksnya dibungkus span, jadi item yang hanya berisi ikon tetap persegi |
 | <Part name="Thumb" /> | `span.ow-toggle-group-thumb` | Dekoratif (`aria-hidden`): ditempatkan oleh skrip, digerakkan oleh CSS |
 
@@ -119,43 +119,33 @@ terlihat. Untuk teks kanan ke kiri, item pertama berada di kanan, begitu juga th
 Kontrol di stage terbuka: ukuran, jenis pilihan, lebar item, isi, serta warna thumb dan track.
 Begitu Anda memilih warna, CSS-nya muncul di tab tersendiri di drawer kode.
 
-<ForMode mode="theme">
+Toggle Group membaca token tema berikut; pasang di grup, atau di elemen di sekitarnya seperti
+`.toolbar`.
 
-Token komponen menimpa token tema untuk grup di dalam elemen tempat token itu dipasang.
-
-| Token komponen | Bawaan | Fungsi |
-| --- | --- | --- |
-| `--ow-toggle-group-track` | `--ow-well-bg` | Track |
-| `--ow-toggle-group-track-shadow` | `--ow-well-shadow` | Tepi tipis track |
-| `--ow-toggle-group-thumb` | `--ow-raised-bg` | Thumb, dan item yang ditekan pada banyak pilihan |
-| `--ow-toggle-group-thumb-shadow` | `--ow-raised-shadow` | Tepi tegasnya |
-| `--ow-toggle-group-fg` | `--ow-fg` | Label item yang ditekan dan di-hover |
-| `--ow-toggle-group-muted` | `--ow-muted` | Label lainnya |
-
-</ForMode>
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-well-bg` | Track |
+| `--ow-well-shadow` | Tepi tipis track |
+| `--ow-raised-bg` | Thumb, dan item yang ditekan pada banyak pilihan |
+| `--ow-raised-shadow` | Tepi tegasnya |
+| `--ow-fg` | Label item yang ditekan dan di-hover |
+| `--ow-muted` | Label lainnya |
+| `--ow-focus` | Cincin fokus keyboard |
+| `--ow-hover` | Highlight hover (Glide) |
+| `--ow-radius` | Sudut item, thumb, dan highlight; track menambah 3 px-nya |
 
 <ForMode mode="isolated">
 
-Setiap Toggle Group membawa nilainya sendiri di elemen root-nya dan tidak membaca token bersama,
-jadi atur token di grup itu sendiri, seperti CSS di stage dengan `.view-switcher.ow-toggle-group`.
-
-| Token komponen | Bawaan | Fungsi |
-| --- | --- | --- |
-| `--ow-toggle-group-track` | Nilainya sendiri, per tema | Track |
-| `--ow-toggle-group-track-shadow` | Nilainya sendiri, per tema | Tepi tipis track |
-| `--ow-toggle-group-thumb` | Nilainya sendiri, per tema | Thumb, dan item yang ditekan pada banyak pilihan |
-| `--ow-toggle-group-thumb-shadow` | Nilainya sendiri, per tema | Tepi tegasnya |
-| `--ow-toggle-group-fg` | Nilainya sendiri, per tema | Label item yang ditekan dan di-hover |
-| `--ow-toggle-group-muted` | Nilainya sendiri, per tema | Label lainnya |
+Di mode isolated, nilainya ada di root setiap grup, jadi atur di grup itu sendiri, seperti CSS di
+stage dengan `.view-switcher.ow-toggle-group`.
 
 </ForMode>
 
 Geraknya berasal dari Core: `--ow-spring-travel` untuk geseran, `--ow-spring-settle` untuk
-pelepasan, dan `--ow-motion-scale` untuk seberapa jauh tekanan (0 mematikannya). Highlight hover
-milik Glide, diatur lewat `--ow-glide-bg` dan `--ow-glide-radius`. Padding item adalah `--py` milik
-item itu sendiri (FR-11): pasang di item, bukan di grup.
+pelepasan, dan `--ow-motion-scale` untuk seberapa jauh tekanan (0 mematikannya). Padding item
+adalah `--py` milik item itu sendiri (FR-11): pasang di item, bukan di grup.
 
-<TokenChip item="toggle-group" lang="id" />
+<TokenChip lang="id" />
 
 ## Ship it [#ship]
 

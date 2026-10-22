@@ -187,9 +187,9 @@ const [view, setView] = useState("list");
   hydration, so the thumb appears in place instead of sliding from a default.
 - Name the group with `aria-label` or `aria-labelledby`. Arrows, Home, and End move focus, Space
   and Enter press; do not add your own.
-- Tokens: `--ow-toggle-group-track`, `--ow-toggle-group-track-shadow`, `--ow-toggle-group-thumb`,
-  `--ow-toggle-group-thumb-shadow`, `--ow-toggle-group-fg`, and `--ow-toggle-group-muted`; the
-  radius is `--ow-radius`, and an item's height its own `--py`.
+- Reads `--ow-well-bg` and `--ow-well-shadow` (the track), `--ow-raised-bg` and
+  `--ow-raised-shadow` (the thumb, and pressed items with `multiple`), `--ow-fg`, `--ow-muted`,
+  `--ow-focus`, `--ow-hover` (Glide), and `--ow-radius`. An item's height is its own `--py`.
 
 ### Tree Rail Nav
 

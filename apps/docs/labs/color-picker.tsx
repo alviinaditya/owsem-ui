@@ -225,15 +225,14 @@ const colorPickerLab = defineLab({
       name: "Root",
       selector: ".ow-color-picker",
       note: {
-        id: "Panel datar dengan tepi tegas. Token komponen dipasang di sini.",
-        en: "The panel: a flat fill with a crisp edge. Component tokens go here.",
+        id: "Panel datar dengan tepi tegas. Token tema yang dipasang di sini hanya berlaku untuknya.",
+        en: "The panel: a flat fill with a crisp edge. Theme tokens set here apply to it alone.",
       },
       tokens: {
-        "--ow-color-picker-width": "--_width",
-        "--ow-color-picker-area-height": "--_area-height",
-        "--ow-color-picker-bg": "--_bg",
-        "--ow-color-picker-checker": "--_checker",
-        "--ow-color-picker-thumb": "--_thumb",
+        "--ow-panel": "--_bg",
+        "--ow-line": "--_checker",
+        "--ow-fg": "--_fg",
+        "--ow-radius": "--_radius",
       },
     },
     {
@@ -275,6 +274,7 @@ const colorPickerLab = defineLab({
         id: "Mengambil warna dari layar; hanya muncul di browser yang punya EyeDropper API.",
         en: "Picks a color off the screen; shown only where the browser has the EyeDropper API.",
       },
+      tokens: { "--ow-raised-bg": "--_key" },
     },
     {
       name: "Preview",
@@ -291,6 +291,7 @@ const colorPickerLab = defineLab({
         id: "Berganti antara kolom HEX, RGB, dan HSL.",
         en: "Switches between the HEX, RGB, and HSL fields.",
       },
+      tokens: { "--ow-raised-bg": "--_key" },
     },
     {
       name: "Field",
@@ -299,6 +300,7 @@ const colorPickerLab = defineLab({
         id: "Kolom datar bertepi 3:1. Angka berlaku saat diketik; hex saat Enter atau blur.",
         en: "A flat field with a 3:1 edge. Numbers apply as you type; hex on Enter or blur.",
       },
+      tokens: { "--ow-well-bg": "--_well", "--ow-edge": "--_edge" },
     },
     {
       name: "Swatches",
@@ -312,8 +314,8 @@ const colorPickerLab = defineLab({
 
   demo(cfg, lang) {
     const style = {
-      "--ow-color-picker-bg": cfg.bg || undefined,
-      "--ow-color-picker-checker": cfg.checker || undefined,
+      "--ow-panel": cfg.bg || undefined,
+      "--ow-line": cfg.checker || undefined,
     } as CSSProperties;
     return <Demo cfg={cfg} lang={lang} style={style} />;
   },
@@ -344,12 +346,12 @@ const colorPickerLab = defineLab({
     ];
     const files = [{ name: "brand-color.tsx", code: usage.join("\n") }];
     if (custom) {
-      const token = `--${setup.prefix}-color-picker`;
-      // Isolated tokens are set on each picker's root, so set them there too.
+      const token = `--${setup.prefix}`;
+      // Isolated values sit on each picker's root, so set them there too.
       const lines = [
         setup.mode === "isolated" ? ".brand-picker.ow-color-picker {" : ".brand-picker {",
-        ...(cfg.bg ? [`  ${token}-bg: ${cfg.bg};`] : []),
-        ...(cfg.checker ? [`  ${token}-checker: ${cfg.checker};`] : []),
+        ...(cfg.bg ? [`  ${token}-panel: ${cfg.bg};`] : []),
+        ...(cfg.checker ? [`  ${token}-line: ${cfg.checker};`] : []),
         "}",
       ];
       files.push({ name: "brand-color.css", code: lines.join("\n") });

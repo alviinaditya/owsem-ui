@@ -14,6 +14,8 @@ Use it controlled (`value`) or not (`defaultValue`); `onChange` follows every mo
 the browser reads, tokens such as `var(--ow-accent)` included; `format` sets the string you get
 back. Every label is in `labels` for translation. Thumbs compact when pressed and spring back
 (Tactile). Every part has a crisp 1px edge, with no soft or sunken shadow; only the popover floats.
-Restyle it with `--ow-color-picker-bg`, `--ow-color-picker-checker`, `--ow-color-picker-thumb`,
-`--ow-color-picker-width`, and `--ow-color-picker-area-height`. The color utilities are exported
-too: `parseColor`, `formatColor`, and conversions between hex, RGB, HSL, and HSV.
+It reads the theme tokens and has none of its own: `--ow-panel` and `--ow-line` paint the panel
+and the checkerboard behind translucent colors, and the materials paint its keys, fields, and
+popover. Set a token on the picker to restyle it alone; its width and the area's height are layout,
+set with `className` or `style`. The color utilities are exported too: `parseColor`, `formatColor`,
+and conversions between hex, RGB, HSL, and HSV.

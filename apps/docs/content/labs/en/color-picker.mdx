@@ -47,7 +47,7 @@ on the stage, to see its tokens.
 
 | Part | Element | Notes |
 | --- | --- | --- |
-| <Part name="Root" /> | `div.ow-color-picker` | The panel; component tokens go here |
+| <Part name="Root" /> | `div.ow-color-picker` | The panel; theme tokens set here apply to it alone |
 | <Part name="Area" /> | `div` | `role="slider"` in two dimensions, with its own keys |
 | <Part name="Thumb" /> | `span` | A ring around the color with a 1px dark edge, on each slider too |
 | <Part name="Hue" /> | `div` | A Base UI `Slider` |
@@ -110,46 +110,37 @@ gets a `Highlight` outline. Right to left, saturation, hue, and opacity grow tow
 
 ## Customization [#customization]
 
-The stage controls are open: pick a panel or checkerboard color and the code follows.
+The stage controls are open: pick a panel or checkerboard color and the code follows. Color Picker
+reads these theme tokens; set them on the picker, or on an element around it such as
+`.brand-picker`.
 
-<ForMode mode="theme">
-
-Component tokens override the theme tokens for every Color Picker inside the element that sets
-them, such as `.brand-picker`.
-
-| Component token | Default | Purpose |
-| --- | --- | --- |
-| `--ow-color-picker-bg` | `--ow-panel` | The panel, and the light squares of the checkerboard |
-| `--ow-color-picker-checker` | `--ow-line` | The dark squares of the checkerboard |
-| `--ow-color-picker-thumb` | `#ffffff` | Thumb rings, in both themes |
-| `--ow-color-picker-width` | `256px` | Panel width |
-| `--ow-color-picker-area-height` | `160px` | Area height |
-
-</ForMode>
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-panel` | The panel, and the light squares of the checkerboard |
+| `--ow-line` | The dark squares of the checkerboard |
+| `--ow-panel-shadow` | The panel's edge; in the popover, `--ow-popup-shadow` |
+| `--ow-well-bg`, `--ow-edge` | Fields and the trigger: a flat well inside a 3:1 edge |
+| `--ow-raised-bg`, `--ow-raised-shadow` | The eye dropper and the format switch, as raised keys |
+| `--ow-pressed-bg`, `--ow-pressed-shadow` | Those keys while held |
+| `--ow-line-dark`, `--ow-line-light` | The etched line over the swatches |
+| `--ow-fg`, `--ow-muted`, `--ow-focus` | Text, labels, and focus rings |
+| `--ow-radius` | Corners of the area, fields, and keys; the panel's and the swatches' follow |
 
 <ForMode mode="isolated">
 
-Each Color Picker carries its own values on its root and reads no shared token, so set them on the
-picker itself, as in `.brand-picker.ow-color-picker`.
-
-| Component token | Default | Purpose |
-| --- | --- | --- |
-| `--ow-color-picker-bg` | Its own, per theme | The panel, and the light squares of the checkerboard |
-| `--ow-color-picker-checker` | Its own, per theme | The dark squares of the checkerboard |
-| `--ow-color-picker-thumb` | `#ffffff` | Thumb rings, in both themes |
-| `--ow-color-picker-width` | `256px` | Panel width |
-| `--ow-color-picker-area-height` | `160px` | Area height |
+In isolated mode the values sit on each picker's root, so set yours on the picker itself, as in
+`.brand-picker.ow-color-picker`.
 
 </ForMode>
 
-The rest comes from the materials: the panel's edge (`--ow-panel-shadow`), the fields' well
-(`--ow-well-bg`) inside a 3:1 edge (`--ow-edge`), the eye dropper and format switch as raised keys
-(`--ow-raised-*`, `--ow-pressed-*` while held), the popup's shadow (`--ow-popup-shadow`), the etched
-line over the swatches (`--ow-line-dark`, `--ow-line-light`), and `--ow-focus`. The popover's panel
-is portaled to the body, so set its tokens where the popup can read them, such as `:root`; it
-carries its trigger's theme and direction itself.
+The width (256 px) and the area's height (160 px) are layout: set `inline-size` on the picker with
+`className` or `style`, and `block-size` on its `.ow-color-picker-area`. The gradients, the hue
+spectrum, the thumbs' white ring with its dark edges, and the check on a swatch stay the same in
+every theme, so they read on any color. The popover's panel is portaled to the body, so set its
+tokens where the popup can read them, such as `:root` or `.ow-color-picker`; it carries its
+trigger's theme and direction itself.
 
-<TokenChip item="color-picker" lang="en" />
+<TokenChip lang="en" />
 
 ## Ship it [#ship]
 

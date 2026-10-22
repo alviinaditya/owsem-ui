@@ -219,9 +219,14 @@ import { ColorPicker, ColorPickerPopover } from "owsem-ui/owsem"; // or "@/compo
   `aria-label`.
 - Do not wrap it in another popover or add keyboard handling: the area, sliders, fields, and
   swatches have their own.
-- Tokens: `--ow-color-picker-bg`, `--ow-color-picker-checker`, `--ow-color-picker-thumb`,
-  `--ow-color-picker-width`, `--ow-color-picker-area-height`. The popover's panel is portaled to
-  the body: set its tokens on `:root` or `.ow-color-picker`, not on the trigger's parent.
+- Reads `--ow-panel` (the panel, and the checkerboard behind translucent colors with
+  `--ow-line`), `--ow-panel-shadow` (`--ow-popup-shadow` in the popover), `--ow-well-bg` and
+  `--ow-edge` (fields and the trigger), `--ow-raised-*` and `--ow-pressed-*` (the eye dropper and
+  format keys), `--ow-line-dark` and `--ow-line-light` (over the swatches), `--ow-fg`,
+  `--ow-muted`, `--ow-focus`, and `--ow-radius`. The popover's panel is portaled to the body: set
+  its tokens on `:root` or `.ow-color-picker`, not on the trigger's parent.
+- Width (256px) and area height (160px) are layout: set `inline-size` on the picker with
+  `className` or `style`, and `block-size` on `.ow-color-picker-area` from your CSS.
 - `parseColor`, `formatColor`, and the conversions (`hsvaToRgba`, `rgbaToHsva`, `hsvaToHsla`,
   `hslaToHsva`, `rgbaToHex`) are exported too.
 

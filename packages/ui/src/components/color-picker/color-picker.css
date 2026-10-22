@@ -4,36 +4,35 @@
  * Color Picker, an Owsem component (Tactile): flat fills with crisp 1px edges (TK-7). The area,
  * tracks, and swatches are colors inside a 1px edge, the thumbs are rings that compact when
  * pressed, the buttons are raised keys, the fields are wells, and the popover is a popup panel
- * that scales out of its trigger. The colors being picked are painted inline; the rest are tokens.
+ * that scales out of its trigger. The colors being picked are painted inline; the rest are theme
+ * tokens (TK-9), apart from the literals that must read on any color.
  */
 @layer owsem.components {
   .ow-color-picker,
   .ow-color-picker-trigger {
-    --_fg: var(--ow-fg, #18181b);
-    --_muted: var(--ow-muted, #63636b);
-    --_focus: var(--ow-focus, #5b4a9a);
-    --_edge: var(--ow-edge, #82828b);
-    --_radius: var(--ow-radius, 8px);
-    --_well: var(--ow-well-bg, #f0f0f2);
-    --_bg: var(--ow-color-picker-bg, var(--ow-panel, #ffffff));
-    /* A color's own 1px edge, inside it and darker than it, like a key's edge. */
+    --_fg: var(--ow-fg);
+    --_muted: var(--ow-muted);
+    --_focus: var(--ow-focus);
+    --_edge: var(--ow-edge);
+    --_radius: var(--ow-radius);
+    --_well: var(--ow-well-bg);
+    --_bg: var(--ow-panel);
+    /* literal: a color's own 1px edge, darker than the color under it in any theme */
     --_color-edge: inset 0 0 0 1px rgb(0 0 0 / 0.2);
-    /* Translucent colors sit on a checkerboard of the panel and the checker color. */
-    --_checker: var(--ow-color-picker-checker, var(--ow-line, #e4e4e7));
+    /* Translucent colors sit on a checkerboard of the panel and the line color. */
+    --_checker: var(--ow-line);
     --_checkers: repeating-conic-gradient(var(--_checker) 0 25%, var(--_bg) 0 50%);
     /* Tactile: a press compacts by up to 12%, scaled by the motion intensity. */
-    --_press: calc(1 - 0.12 * var(--ow-motion-scale, 1));
-    --_ease-out: var(--ow-ease-out, cubic-bezier(0.23, 1, 0.32, 1));
-    --_settle: var(--ow-spring-settle, cubic-bezier(0.23, 1, 0.32, 1));
-    --_settle-duration: var(--ow-spring-settle-duration, 400ms);
+    --_press: calc(1 - 0.12 * var(--ow-motion-scale));
+    --_ease-out: var(--ow-ease-out);
+    --_settle: var(--ow-spring-settle);
+    --_settle-duration: var(--ow-spring-settle-duration);
     --_mono: var(--ow-font-mono, ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace);
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* The width and the area's height are layout: change them with className or style. */
   .ow-color-picker {
-    --_width: var(--ow-color-picker-width, 256px);
-    --_area-height: var(--ow-color-picker-area-height, 160px);
-    --_thumb: var(--ow-color-picker-thumb, #ffffff);
     --_pad: 10px;
     --_track: 12px;
     /* Each slider is a 24px target (FR-14) around its track. */
@@ -42,17 +41,13 @@
     flex-direction: column;
     gap: var(--_pad);
     box-sizing: border-box;
-    inline-size: var(--_width);
+    inline-size: 256px;
     max-inline-size: 100%;
     padding: var(--_pad);
     /* Concentric with the area (FR-10b). */
     border-radius: calc(var(--_radius) + var(--_pad));
     background-color: var(--_bg);
-    box-shadow: var(
-      --ow-panel-shadow,
-      inset 0 0 0 1px rgb(0 0 0 / 0.08),
-      0 1px 2px rgb(0 0 0 / 0.04)
-    );
+    box-shadow: var(--ow-panel-shadow);
     color: var(--_fg);
     font-size: 13px;
     line-height: 1.25;
@@ -69,8 +64,9 @@
   .ow-color-picker-area {
     position: relative;
     flex: none;
-    block-size: var(--_area-height);
+    block-size: 160px;
     border-radius: var(--_radius);
+    /* literal: the value and saturation gradients over the hue, the same in every theme */
     background-image:
       linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, transparent);
     box-shadow: var(--_color-edge);
@@ -80,6 +76,7 @@
   }
 
   .ow-color-picker-area:dir(rtl) {
+    /* literal: the value and saturation gradients over the hue, the same in every theme */
     background-image:
       linear-gradient(to top, #000, transparent), linear-gradient(to left, #fff, transparent);
   }
@@ -98,8 +95,10 @@
     box-sizing: border-box;
     inline-size: 16px;
     block-size: 16px;
-    border: 2px solid var(--_thumb);
+    /* literal: a white ring, so the thumb reads on any color in either theme */
+    border: 2px solid #ffffff;
     border-radius: 50%;
+    /* literal: its dark edges, so the ring also reads on light colors */
     box-shadow:
       0 0 0 1px rgb(0 0 0 / 0.4),
       inset 0 0 0 1px rgb(0 0 0 / 0.12);
@@ -167,6 +166,7 @@
   }
 
   [data-channel="hue"] .ow-color-picker-track {
+    /* literal: the hue spectrum, the same in every theme */
     background-image: linear-gradient(
       to right,
       #f00 0%,
@@ -180,6 +180,7 @@
   }
 
   [data-channel="hue"] .ow-color-picker-track:dir(rtl) {
+    /* literal: the hue spectrum, the same in every theme */
     background-image: linear-gradient(
       to left,
       #f00 0%,
@@ -243,7 +244,7 @@
   /* Raised keys: a flat fill with a crisp edge, the pressed material while held (DP-4). */
   .ow-color-picker-tool,
   .ow-color-picker-format {
-    --_key: var(--ow-raised-bg, #ffffff);
+    --_key: var(--ow-raised-bg);
     display: inline-flex;
     flex: none;
     align-items: center;
@@ -253,11 +254,7 @@
     border: 0;
     border-radius: var(--_radius);
     background-color: var(--_key);
-    box-shadow: var(
-      --ow-raised-shadow,
-      inset 0 0 0 1px rgb(0 0 0 / 0.14),
-      0 1px 0 rgb(0 0 0 / 0.04)
-    );
+    box-shadow: var(--ow-raised-shadow);
     color: var(--_fg);
     font: inherit;
     cursor: pointer;
@@ -280,8 +277,8 @@
   }
 
   :is(.ow-color-picker-tool, .ow-color-picker-format):active:not(:disabled) {
-    background-color: var(--ow-pressed-bg, #f4f4f5);
-    box-shadow: var(--ow-pressed-shadow, inset 0 0 0 1px rgb(0 0 0 / 0.16));
+    background-color: var(--ow-pressed-bg);
+    box-shadow: var(--ow-pressed-shadow);
     scale: 0.97;
     transition: scale 90ms var(--_ease-out);
   }
@@ -364,8 +361,8 @@
     grid-template-columns: repeat(auto-fill, minmax(24px, 1fr));
     gap: 6px;
     padding-block-start: var(--_pad);
-    border-block-start: 1px solid var(--ow-line-dark, #e2e2e6);
-    box-shadow: inset 0 1px 0 var(--ow-line-light, #ffffff);
+    border-block-start: 1px solid var(--ow-line-dark);
+    box-shadow: inset 0 1px 0 var(--ow-line-light);
   }
 
   .ow-color-picker-swatch {
@@ -376,6 +373,7 @@
     padding: 0;
     border: 0;
     border-radius: calc(var(--_radius) - 2px);
+    /* literal: the check contrasts with the swatch's own color, not with the theme */
     color: #fff;
     font-size: 13px;
     cursor: pointer;
@@ -383,6 +381,7 @@
   }
 
   .ow-color-picker-swatch[data-light] {
+    /* literal: a dark check on a light swatch, in either theme */
     color: #000;
   }
 
@@ -482,8 +481,8 @@
   .ow-color-picker-popup {
     transform-origin: var(--transform-origin);
     transition:
-      opacity 180ms var(--_ease-out, cubic-bezier(0.23, 1, 0.32, 1)),
-      transform 180ms var(--_ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+      opacity 180ms var(--ow-ease-out),
+      transform 180ms var(--ow-ease-out);
   }
 
   .ow-color-picker-popup:is([data-starting-style], [data-ending-style]) {
@@ -501,12 +500,7 @@
   }
 
   .ow-color-picker-popup > .ow-color-picker {
-    box-shadow: var(
-      --ow-popup-shadow,
-      0 0 0 1px rgb(0 0 0 / 0.08),
-      0 4px 8px -2px rgb(0 0 0 / 0.06),
-      0 16px 32px -8px rgb(0 0 0 / 0.14)
-    );
+    box-shadow: var(--ow-popup-shadow);
   }
 
   /* FR-20: no scaling and no compacting; the popover still fades. */

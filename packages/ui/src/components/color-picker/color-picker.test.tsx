@@ -409,6 +409,10 @@ describe("ColorPicker", () => {
       expect(getComputedStyle(q(".ow-color-picker-swatches")).borderBlockStartColor).toBe(
         resolveColor("var(--ow-line-dark)"),
       );
+      // The thumb ring must read on any color, so it is white in both themes.
+      expect(getComputedStyle(q(".ow-color-picker-thumb")).borderTopColor).toBe(
+        "rgb(255, 255, 255)",
+      );
       field("Hex").focus();
       await userEvent.keyboard("{Shift>}{Tab}{/Shift}");
       expect(getComputedStyle(q(".ow-color-picker-format")).outlineColor).toBe(
@@ -455,30 +459,34 @@ describe("ColorPicker", () => {
     expect(getComputedStyle(format).boxShadow).toBe(edge);
   });
 
-  test("component tokens override the theme tokens", async () => {
-    const { picker, q } = await mount(
-      <ColorPicker
-        defaultValue="#ff000080"
-        style={
-          {
-            "--ow-color-picker-bg": "rgb(1, 2, 3)",
-            "--ow-color-picker-width": "300px",
-            "--ow-color-picker-area-height": "120px",
-            "--ow-color-picker-thumb": "rgb(4, 5, 6)",
-            "--ow-color-picker-checker": "rgb(7, 8, 9)",
-          } as CSSProperties
-        }
-      />,
+  test("a theme token set on it changes it alone (TK-9)", async () => {
+    const { screen } = await mount(
+      <>
+        <ColorPicker
+          defaultValue="#ff000080"
+          style={{ "--ow-panel": "rgb(1, 2, 3)", "--ow-line": "rgb(7, 8, 9)" } as CSSProperties}
+        />
+        <ColorPicker defaultValue="#ff000080" />
+      </>,
     );
-    expect(getComputedStyle(picker()).backgroundColor).toBe("rgb(1, 2, 3)");
+    const [own, other] = screen.container.querySelectorAll(".ow-color-picker");
+    if (!own || !other) throw new Error("no pickers");
+    const checkers = (el: Element) =>
+      getComputedStyle(el.querySelector(".ow-color-picker-preview") as Element).backgroundImage;
+    expect(getComputedStyle(own).backgroundColor).toBe("rgb(1, 2, 3)");
+    expect(checkers(own)).toContain("rgb(7, 8, 9)");
+    expect(getComputedStyle(other).backgroundColor).toBe(resolveColor("var(--ow-panel)"));
+    expect(checkers(other)).not.toContain("rgb(7, 8, 9)");
+  });
+
+  test("className and style set its width and the area's height", async () => {
+    const sheet = document.createElement("style");
+    sheet.textContent = ".tall .ow-color-picker-area { block-size: 120px; }";
+    document.head.append(sheet);
+    onTestFinished(() => sheet.remove());
+    const { picker, q } = await mount(<ColorPicker className="tall" style={{ inlineSize: 300 }} />);
     expect(picker().getBoundingClientRect().width).toBe(300);
     expect(q(".ow-color-picker-area").getBoundingClientRect().height).toBe(120);
-    expect(getComputedStyle(q(".ow-color-picker-area .ow-color-picker-thumb")).borderTopColor).toBe(
-      "rgb(4, 5, 6)",
-    );
-    expect(getComputedStyle(q(".ow-color-picker-preview")).backgroundImage).toContain(
-      "rgb(7, 8, 9)",
-    );
   });
 
   test("keeps its colors, and draws edges and focus in system colors, in forced colors (DP-8)", async () => {

@@ -50,7 +50,7 @@ stage; pilih sebuah nama, di sini atau di stage, untuk melihat tokennya.
 
 | Bagian | Elemen | Catatan |
 | --- | --- | --- |
-| <Part name="Root" /> | `div.ow-color-picker` | Panelnya; token komponen dipasang di sini |
+| <Part name="Root" /> | `div.ow-color-picker` | Panelnya; token tema yang dipasang di sini hanya berlaku untuknya |
 | <Part name="Area" /> | `div` | `role="slider"` dua dimensi, dengan tombolnya sendiri |
 | <Part name="Thumb" /> | `span` | Cincin berisi warnanya dengan tepi gelap 1px, juga di setiap slider |
 | <Part name="Hue" /> | `div` | `Slider` dari Base UI |
@@ -113,46 +113,37 @@ arah kiri.
 
 ## Kustomisasi [#customization]
 
-Kontrol stage sudah terbuka: pilih warna panel atau papan catur, dan kodenya ikut berubah.
+Kontrol stage sudah terbuka: pilih warna panel atau papan catur, dan kodenya ikut berubah. Color
+Picker membaca token tema berikut; pasang di picker, atau di elemen yang membungkusnya seperti
+`.brand-picker`.
 
-<ForMode mode="theme">
-
-Token komponen menimpa token tema untuk setiap Color Picker di dalam elemen yang memasangnya,
-misalnya `.brand-picker`.
-
-| Token komponen | Bawaan | Fungsi |
-| --- | --- | --- |
-| `--ow-color-picker-bg` | `--ow-panel` | Panel, sekaligus kotak terang papan catur |
-| `--ow-color-picker-checker` | `--ow-line` | Kotak gelap papan catur |
-| `--ow-color-picker-thumb` | `#ffffff` | Cincin thumb, di kedua tema |
-| `--ow-color-picker-width` | `256px` | Lebar panel |
-| `--ow-color-picker-area-height` | `160px` | Tinggi area |
-
-</ForMode>
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-panel` | Panel, sekaligus kotak terang papan catur |
+| `--ow-line` | Kotak gelap papan catur |
+| `--ow-panel-shadow` | Tepi panel; di popover, `--ow-popup-shadow` |
+| `--ow-well-bg`, `--ow-edge` | Kolom dan trigger: well datar dengan tepi 3:1 |
+| `--ow-raised-bg`, `--ow-raised-shadow` | Eye dropper dan tombol format, sebagai tombol timbul |
+| `--ow-pressed-bg`, `--ow-pressed-shadow` | Kedua tombol itu selama ditekan |
+| `--ow-line-dark`, `--ow-line-light` | Garis terukir di atas contoh warna |
+| `--ow-fg`, `--ow-muted`, `--ow-focus` | Teks, label, dan cincin fokus |
+| `--ow-radius` | Sudut area, kolom, dan tombol; sudut panel dan contoh warna mengikutinya |
 
 <ForMode mode="isolated">
 
-Setiap Color Picker membawa nilainya sendiri di root-nya dan tidak membaca token bersama, jadi
-pasang token di picker itu sendiri, seperti `.brand-picker.ow-color-picker`.
-
-| Token komponen | Bawaan | Fungsi |
-| --- | --- | --- |
-| `--ow-color-picker-bg` | Miliknya sendiri, per tema | Panel, sekaligus kotak terang papan catur |
-| `--ow-color-picker-checker` | Miliknya sendiri, per tema | Kotak gelap papan catur |
-| `--ow-color-picker-thumb` | `#ffffff` | Cincin thumb, di kedua tema |
-| `--ow-color-picker-width` | `256px` | Lebar panel |
-| `--ow-color-picker-area-height` | `160px` | Tinggi area |
+Di mode isolated, nilainya ada di root setiap picker, jadi atur di picker itu sendiri, seperti
+`.brand-picker.ow-color-picker`.
 
 </ForMode>
 
-Sisanya datang dari material: tepi panel (`--ow-panel-shadow`), isian kolom (`--ow-well-bg`) dengan
-tepi 3:1 (`--ow-edge`), eye dropper dan tombol format sebagai tombol timbul (`--ow-raised-*`, dan
-`--ow-pressed-*` selama ditekan), bayangan popup (`--ow-popup-shadow`), garis terukir di atas contoh
-warna (`--ow-line-dark`, `--ow-line-light`), serta `--ow-focus`. Panel popover di-portal ke body,
-jadi pasang tokennya di tempat yang terbaca oleh popup, misalnya `:root`; tema dan arah trigger-nya
-ikut terbawa dengan sendirinya.
+Lebar (256 px) dan tinggi area (160 px) adalah layout: atur `inline-size` di picker lewat
+`className` atau `style`, dan `block-size` di `.ow-color-picker-area`-nya. Gradien, spektrum rona,
+cincin putih thumb dengan tepi gelapnya, dan centang di contoh warna sama di setiap tema, sehingga
+terbaca di warna apa pun. Panel popover di-portal ke body, jadi pasang tokennya di tempat yang
+terbaca oleh popup, misalnya `:root` atau `.ow-color-picker`; tema dan arah trigger-nya ikut
+terbawa dengan sendirinya.
 
-<TokenChip item="color-picker" lang="id" />
+<TokenChip lang="id" />
 
 ## Ship it [#ship]
 

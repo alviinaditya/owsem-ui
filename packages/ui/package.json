@@ -42,6 +42,7 @@
     },
     "./styles.css": "./dist/styles.css",
     "./tokens.css": "./dist/tokens.css",
+    "./tailwind.css": "./dist/tailwind.css",
     "./css/*.css": "./dist/css/*.css",
     "./package.json": "./package.json"
   },
@@ -58,7 +59,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "size": "size-limit",
-    "lint:pkg": "rm -rf .pack && pnpm pack --pack-destination .pack && publint --strict .pack/*.tgz && attw .pack/*.tgz --profile esm-only --exclude-entrypoints ./styles.css ./tokens.css"
+    "lint:pkg": "rm -rf .pack && pnpm pack --pack-destination .pack && publint --strict .pack/*.tgz && attw .pack/*.tgz --profile esm-only --exclude-entrypoints ./styles.css ./tokens.css ./tailwind.css"
   },
   "peerDependencies": {
     "@types/react": "^18.2.7 || ^19.0.0",
@@ -76,6 +77,7 @@
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
     "@size-limit/preset-small-lib": "^14.2.0",
+    "@tailwindcss/node": "^4.3.3",
     "@tsdown/css": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
@@ -90,6 +92,7 @@
     "react-dom": "catalog:",
     "react-dom-18": "npm:react-dom@18.2.0",
     "size-limit": "^14.2.0",
+    "tailwindcss": "^4.3.3",
     "tsdown": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",

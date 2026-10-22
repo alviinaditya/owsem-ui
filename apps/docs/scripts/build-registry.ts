@@ -71,7 +71,7 @@ rmSync(stageDir, { recursive: true, force: true });
 rmSync(outDir, { recursive: true, force: true });
 
 // Core modules and their CSS keep their path under @lib/owsem/. index.ts only re-exports (Base UI
-// providers for npm users); tokens.css is listed on its own.
+// providers for npm users); tokens.css and tailwind.css are listed on their own.
 const coreModules = readdirSync(join(uiSrc, "core"), { recursive: true, encoding: "utf8" }).filter(
   (file) => isSource(file) && file !== "index.ts" && file !== "tokens/tokens.css",
 );
@@ -82,12 +82,18 @@ const items: RegistryItem[] = [
     type: "registry:lib",
     title: "Owsem Core",
     description:
-      "Theme tokens with the --ow- prefix, the OwsemUI @layer order, Glide, and helpers.",
+      "Theme tokens with the --ow- prefix, the OwsemUI @layer order, Glide, helpers, and a Tailwind CSS v4 theme.",
     files: [
       {
         path: stage("core", "core/tokens/tokens.css", "tokens.css"),
         type: "registry:file",
         target: "@lib/owsem/tokens.css",
+      },
+      // CLI-7: a plain file, not the item's cssVars or tailwind fields.
+      {
+        path: stage("core", "tailwind.css", "tailwind.css"),
+        type: "registry:file",
+        target: "@lib/owsem/tailwind.css",
       },
       ...coreModules.map((file) => ({
         path: stage("core", `core/${file}`, file),
@@ -96,7 +102,7 @@ const items: RegistryItem[] = [
       })),
     ],
     meta: { family: "core" },
-    docs: "Import @/lib/owsem/tokens.css once in your app's CSS entry.",
+    docs: "Import @/lib/owsem/tokens.css once in your app's CSS entry. With Tailwind CSS v4, import @/lib/owsem/tailwind.css there first, before tailwindcss.",
   },
 ];
 

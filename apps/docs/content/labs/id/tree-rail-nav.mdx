@@ -91,50 +91,31 @@ Untuk teks kanan ke kiri, rail dicerminkan.
 
 ## Kustomisasi [#customization]
 
-Kontrol di stage terbuka: pilih warna jejak atau rail, dan kodenya ikut berubah. Warna dan posisi
-rail adalah token komponen yang Anda atur di CSS sendiri.
+Kontrol di stage terbuka: pilih warna jejak atau rail, dan kodenya ikut berubah. Tree Rail Nav
+membaca token tema berikut; pasang di nav-nya, atau di elemen di sekitarnya seperti `.sidebar`.
 
-<ForMode mode="theme">
-
-Token komponen menimpa token tema hanya untuk Tree Rail Nav di dalam elemen tempat token itu
-dipasang, misalnya `.sidebar`.
-
-| Token komponen | Bawaan | Fungsi |
-| --- | --- | --- |
-| `--ow-tree-rail-trail` | `--ow-fg` di Base, `--ow-accent` di Owsem | Jejak, titik yang menyala, penanda, dan latar baris aktif |
-| `--ow-tree-rail-rail` | `--ow-line` | Rail |
-| `--ow-tree-rail-node` | `--ow-fg` 24% | Titik yang belum dinyalakan jejak |
-| `--ow-tree-rail-surface` | `--ow-bg` | Memotong titik dari rail; samakan dengan latar di belakang nav |
-| `--ow-tree-rail-r0` | `9px` | Posisi x rail tingkat 1 |
-| `--ow-tree-rail-r1` | `34px` | Posisi x rail tingkat 2 |
-| `--ow-tree-rail-r2` | `59px` | Posisi x rail tingkat 3 |
-
-</ForMode>
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-accent` | Jejak, titik yang menyala, penanda, dan latar baris aktif |
+| `--ow-line` | Rail |
+| `--ow-fg` | Teks, dan pada 24% titik yang belum dinyalakan jejak |
+| `--ow-muted` | Label origin |
+| `--ow-bg` | Memotong titik dari rail; samakan dengan latar di belakang nav |
+| `--ow-hover` | Highlight hover (Glide) |
+| `--ow-radius` | Sudut baris dan highlight |
 
 <ForMode mode="isolated">
 
-Setiap Tree Rail Nav membawa nilainya sendiri di elemen root-nya dan tidak membaca token bersama,
-jadi atur token di nav itu sendiri, misalnya `.sidebar .ow-tree-rail-nav`.
-
-| Token komponen | Bawaan | Fungsi |
-| --- | --- | --- |
-| `--ow-tree-rail-trail` | Nilainya sendiri: netral di Base, accent di Owsem | Jejak, titik yang menyala, penanda, dan latar baris aktif |
-| `--ow-tree-rail-rail` | Nilainya sendiri, per tema | Rail |
-| `--ow-tree-rail-node` | Nilainya sendiri, per tema | Titik yang belum dinyalakan jejak |
-| `--ow-tree-rail-surface` | Nilainya sendiri, per tema | Memotong titik dari rail; samakan dengan latar di belakang nav |
-| `--ow-tree-rail-r0` | `9px` | Posisi x rail tingkat 1 |
-| `--ow-tree-rail-r1` | `34px` | Posisi x rail tingkat 2 |
-| `--ow-tree-rail-r2` | `59px` | Posisi x rail tingkat 3 |
+Di mode isolated, nilainya ada di root setiap nav, jadi atur di nav itu sendiri, misalnya
+`.sidebar.ow-tree-rail-nav`.
 
 </ForMode>
 
 Rail berjarak 25px satu sama lain: setiap cabang melengkung dengan cara yang sama, dan anak dari
-baris tingkat pertama segaris dengan teksnya, setelah ikon. Tulis posisi rail dalam px biasa,
-karena skripnya membaca nilai itu sebagai angka. Baris menjorok sedikit melewati rail-nya, jadi
-menggeser rail ikut menggeser barisnya. Highlight hover milik Glide, jadi warna dan sudutnya
-diatur lewat `--ow-glide-bg` dan `--ow-glide-radius`.
+baris tingkat pertama segaris dengan teksnya, setelah ikon. Baris menjorok sedikit melewati
+rail-nya.
 
-<TokenChip item="tree-rail-nav" lang="id" />
+<TokenChip lang="id" />
 
 ## Ship it [#ship]
 

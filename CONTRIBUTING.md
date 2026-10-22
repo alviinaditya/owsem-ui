@@ -68,6 +68,15 @@ subtree. The dark set is written twice (media query and `[data-theme="dark"]`); 
 they drift. The docs site stores the visitor's choice (light, dark, or system) in `localStorage`
 and applies it from an inline `<head>` script before first paint.
 
+The theme tokens are the only public tokens (TK-9). Component CSS reads them directly: no
+component tokens such as `--ow-menu-bg`, and no fallbacks such as `var(--ow-panel, #fff)`, since
+`tokens.css` always ships with the components. A value without a token is derived from one:
+inner radii from `--ow-radius` (FR-10b), tints with `color-mix()` from `--ow-fg` or `--ow-accent`.
+Add a theme token only for a theming value (color, radius, shadow, font, motion) that no token
+gives and that more than one component needs. `test/theming.test.ts` fails on any other `--ow-*`
+name, a fallback, or a literal color, radius, or font. A literal that is not theming, such as a
+color picker's hue spectrum, takes a `/* literal: <reason> */` comment right before it.
+
 ## Icons
 
 Icons come from [Lucide](https://lucide.dev) (ISC). Copy an icon's inner SVG elements into the
@@ -110,7 +119,7 @@ To build one, use Separator as the reference:
    | File | Contents |
    | --- | --- |
    | `<name>.tsx` | Styled Base UI parts. Imports its own CSS; class names are constants (FR-6a) |
-   | `<name>.css` | Layer order first, rules in `@layer owsem.components`, tokens read as component token, then theme token, then a literal |
+   | `<name>.css` | Layer order first, rules in `@layer owsem.components`, theme tokens read directly (TK-9) |
    | `<name>.test.tsx` | Behavior, tokens in light and dark, forced colors, axe, and idle cost |
    | `index.ts` | Public exports |
 
@@ -126,7 +135,7 @@ To build one, use Separator as the reference:
 
 ### Docs stand-ins
 
-Until a component exists, the docs build its job by hand, in the same depth material (sunken
+Until a component exists, the docs build its job by hand, in the same depth material (flat
 `--docs-well`, raised `--docs-raised`, the `--docs-radius*` scale), so the swap is markup and
 deleted CSS:
 
@@ -159,7 +168,8 @@ that leave the folder: Core to `@/lib/owsem/...` and other components to
 
 Surfaces come from the materials in `tokens.css` (TK-7): `--ow-panel` and `--ow-popup-shadow` for
 panels and popups, `--ow-raised-*` for buttons, thumbs, and on states, `--ow-well-*` for tracks and
-fields, `--ow-pressed-*` while a control is held down, and `--ow-primary-*` for the primary button.
+fields, `--ow-pressed-*` while a control is held down, and `--ow-accent` with `--ow-on-accent` and
+`--ow-primary-shadow` for the primary button.
 Depth comes from flat fills and crisp 1px edges, drawn as inset shadows so they add no size; never
 use soft, blurred, or sunken (inset blur) shadows, which read as neumorphism. Separators and layout
 lines stay etched grooves (`--ow-line-dark` over `--ow-line-light`). Base never glows (DP-1).
@@ -221,8 +231,8 @@ ring. Style the docs by class; a new element default goes in `docs-base`.
 The `states` scene compares rather than describes: its `demo` returns a `Matrix`
 (`components/lab/matrix.tsx`) of live cells, such as variants by sizes or states by themes.
 
-Each part in `parts` has a selector into the demo, a note, and its public tokens, each mapped to
-the private property that holds the value in use (a public token is empty until someone sets it).
+Each part in `parts` has a selector into the demo, a note, and the theme tokens it reads, each
+mapped to the private property that holds the value in use.
 In the anatomy table, `<Part name="Root" />` names a part and picks it on the stage.
 
 A `play` script drives the demo through `ScriptStage`: `click` and `point` move a drawn pointer

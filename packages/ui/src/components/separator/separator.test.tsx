@@ -117,9 +117,9 @@ describe("Separator", () => {
     expect(style.borderLeftColor).toBe(resolveColor("var(--ow-line-light)"));
   });
 
-  test("component tokens override the theme tokens", async () => {
+  test("a theme token set on it changes it alone (TK-9)", async () => {
     const [line] = await mount(
-      <Separator style={{ "--ow-separator-line-dark": "rgb(255, 0, 0)" } as CSSProperties} />,
+      <Separator style={{ "--ow-line-dark": "rgb(255, 0, 0)" } as CSSProperties} />,
     );
     if (!line) throw new Error("no separator");
     expect(getComputedStyle(line).borderBlockStartColor).toBe("rgb(255, 0, 0)");

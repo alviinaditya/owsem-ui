@@ -105,7 +105,7 @@ export const en = {
     themeNote:
       "Components read one shared set of tokens. Change the accent once and every component follows. Best when the app has one design system.",
     isolatedNote:
-      "Each component carries its own tokens on its root and shares none. Use it to give one component its own theme, or to add components to an app with another design system without name clashes.",
+      "The same tokens, with their values on each component's root instead of the page root, so nothing is shared. Use it to give one component its own theme, or to add components to an app with another design system.",
     prefix: "Prefix",
     prefixHelp:
       "Starts with a letter; lowercase letters, numbers, and single hyphens; up to 16 characters.",

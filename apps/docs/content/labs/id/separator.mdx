@@ -17,7 +17,7 @@ border. Inspeksi (I) menandainya di stage, beserta tokennya.
 
 | Bagian | Elemen | Token |
 | --- | --- | --- |
-| <Part name="Root" /> | `div.ow-separator` | `--ow-separator-line-dark`, `--ow-separator-line-light` |
+| <Part name="Root" /> | `div.ow-separator` | `--ow-line-dark`, `--ow-line-light` |
 
 ## State dan varian [#states]
 
@@ -35,30 +35,21 @@ Contrast), kedua garis memakai warna sistem sehingga tetap terlihat.
 
 Kontrol di stage terbuka; CSS-nya ada di tab `settings.css` setelah warna diganti.
 
-<ForMode mode="theme">
+Separator membaca token tema berikut. Pasang di sebuah elemen untuk mengubah separator di dalamnya.
 
-Token komponen menimpa token tema hanya untuk Separator di dalam elemen tempat token itu dipasang.
-
-| Token komponen | Bawaan | Fungsi |
-| --- | --- | --- |
-| `--ow-separator-line-dark` | `--ow-line-dark` | Garis gelap |
-| `--ow-separator-line-light` | `--ow-line-light` | Garis terang di sebelahnya |
-
-</ForMode>
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-line-dark` | Garis gelap |
+| `--ow-line-light` | Garis terang di sebelahnya |
 
 <ForMode mode="isolated">
 
-Setiap Separator membawa nilainya sendiri di elemen root-nya dan tidak membaca token bersama, jadi
-atur token di Separator itu sendiri, seperti `settings.css` dengan `.settings .ow-separator`.
-
-| Token komponen | Bawaan | Fungsi |
-| --- | --- | --- |
-| `--ow-separator-line-dark` | Nilainya sendiri, per tema | Garis gelap |
-| `--ow-separator-line-light` | Nilainya sendiri, per tema | Garis terang di sebelahnya |
+Di mode isolated, nilainya ada di root setiap Separator, jadi atur di Separator itu sendiri, seperti
+`settings.css` dengan `.settings .ow-separator`.
 
 </ForMode>
 
-<TokenChip item="separator" lang="id" />
+<TokenChip lang="id" />
 
 ## Ship it [#ship]
 

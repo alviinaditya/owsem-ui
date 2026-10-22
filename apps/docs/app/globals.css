@@ -1012,19 +1012,19 @@ body {
 }
 
 /*
- * The sidebar is a Tree Rail Nav (owsem-ui, DS-14) in the docs' colors: an accent trail to the
- * current page or scene, and the docs' hover for Glide. Groups have icons, so the default rails fit.
+ * The sidebar is a Tree Rail Nav (owsem-ui, DS-14) in the docs' colors, set as theme tokens on the
+ * nav: an accent trail to the current page or scene, and the docs' hover for Glide. Groups have
+ * icons, so the default rails fit.
  */
 .sidebar-nav {
   --ow-fg: var(--docs-fg);
   --ow-muted: var(--docs-muted);
   --ow-focus: var(--docs-accent);
   --ow-radius: var(--docs-radius);
-  --ow-tree-rail-trail: var(--docs-accent);
-  --ow-tree-rail-rail: var(--docs-line-strong);
-  --ow-tree-rail-surface: var(--docs-bg);
-  --ow-glide-bg: var(--docs-hover);
-  --ow-glide-pressed-bg: color-mix(in oklab, var(--docs-fg) 9%, transparent);
+  --ow-accent: var(--docs-accent);
+  --ow-line: var(--docs-line-strong);
+  --ow-bg: var(--docs-bg);
+  --ow-hover: var(--docs-hover);
   font-size: 14px;
 }
 

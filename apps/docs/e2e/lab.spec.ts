@@ -107,7 +107,7 @@ test("controls rewrite the code", async ({ page }) => {
   const code = stage(page).getByRole("tabpanel");
   await expect(code).toContainText('<Separator orientation="vertical" />');
   await stage(page).getByRole("tab", { name: "settings.css" }).click();
-  await expect(code).toContainText("--ow-separator-line-dark: #ff0000;");
+  await expect(code).toContainText("--ow-line-dark: #ff0000;");
 });
 
 test("a color takes short hex and goes back to the theme's own", async ({ page }) => {
@@ -522,10 +522,7 @@ test("the anatomy scene outlines each part, and a part's name picks it (DS-3)", 
   if (testInfo.project.name !== "mobile-390") {
     await chips.filter({ hasText: "Root" }).click();
     const card = page.locator("section.lab-part-card");
-    await expect(card.locator("li", { hasText: "--ow-tree-rail-r1" })).toContainText("34px");
-    await expect(card.locator("li", { hasText: "--ow-tree-rail-trail" })).toContainText(
-      /#[0-9A-F]{6}/,
-    );
+    await expect(card.locator("li", { hasText: "--ow-accent" })).toContainText(/#[0-9A-F]{6}/);
   }
 
   await scene(page, "states");

@@ -68,17 +68,17 @@ sudah memasang atribut sebelum React melakukan hydration.
 
 ## Mengganti warna
 
-Token terbagi dalam beberapa tingkat. Setiap komponen membaca token komponennya dulu, lalu token
-tema, lalu nilai bawaan.
+Token tema adalah satu-satunya token. Komponen membacanya langsung, tanpa token sendiri, jadi satu
+nilai mengubah semua komponen yang memakainya.
 
-| Tingkat | Contoh | Diatur oleh |
+| Jenis | Contoh | Diatur oleh |
 | --- | --- | --- |
-| Semantic | `--ow-bg`, `--ow-fg`, `--ow-muted`, `--ow-line`, `--ow-accent` | App, sekali untuk semua komponen |
-| Material depth | `--ow-line-dark`, `--ow-line-light` | OwsemUI per tema; app boleh menimpanya |
-| Komponen | `--ow-separator-line-dark`, `--ow-separator-line-light` | Per komponen, untuk perubahan lokal |
+| Semantic | `--ow-bg`, `--ow-fg`, `--ow-muted`, `--ow-line`, `--ow-accent`, `--ow-hover` | App, sekali untuk semua komponen |
+| Material depth | `--ow-panel`, `--ow-raised-bg`, `--ow-line-dark`, `--ow-line-light` | OwsemUI per tema; app boleh menimpanya |
+| Bentuk dan motion | `--ow-radius`, `--ow-motion-scale` | App |
 
 Pasang token tema di `:root` untuk mengganti warna semua komponen, atau di elemen mana pun untuk
-subtree itu saja:
+isinya saja:
 
 ```css
 :root {
@@ -120,24 +120,34 @@ Token material depth ditulis lengkap untuk setiap tema, bukan diturunkan dari to
 Anda mengganti warna netral seperti `--ow-bg`, ganti juga `--ow-line-dark` dan `--ow-line-light`
 di setiap tema supaya garis terukir tetap terlihat.
 
-Untuk mengubah satu komponen saja, pasang token komponennya. Separator, misalnya, membaca
-`--ow-separator-line-dark`, lalu `--ow-line-dark`, lalu nilai bawaan:
+## Mengubah satu komponen
+
+Token yang sama mengubah satu komponen, atau satu instance-nya: pasang di komponen itu, atau di
+elemen di sekitarnya.
 
 ```css
-.ow-separator {
-  --_dark: var(--ow-separator-line-dark, var(--ow-line-dark, #e2e2e6));
-}
-```
-
-Nama yang diawali `--_` bersifat privat dan bisa berubah. Timpa token publiknya saja:
-
-```css
+/* Semua separator di halaman pengaturan */
 .settings {
-  --ow-separator-line-dark: #b9b0d0;
+  --ow-line-dark: #b9b0d0;
 }
 ```
 
-Token sebuah komponen terdaftar di bagian Kustomisasi pada Lab-nya, contohnya
+Nilai yang tidak punya token sendiri diambil dari token tema: sudut bagian dalam dari `--ow-radius`
+(setiap lapisan menambahkan padding-nya), warna tipis dari `--ow-fg` atau `--ow-accent` lewat
+`color-mix()`, dan highlight Glide dari `--ow-hover`. Nama yang diawali `--_` bersifat privat dan
+bisa berubah.
+
+Untuk hal yang tidak dicakup token, beri style langsung ke part-nya. Setiap part menerima
+`className` dan `style`, dan state-nya berupa atribut data, seperti `data-orientation`. CSS Anda
+tidak memakai layer, jadi menang atas CSS komponen (lihat di bawah):
+
+```css
+.settings .ow-separator[data-orientation="horizontal"] {
+  border-block-start-style: dashed;
+}
+```
+
+Bagian Kustomisasi di setiap Lab mendaftar token tema yang dibaca komponennya, contohnya
 [Separator](/id/separator#scene-customization).
 
 ## Layer CSS
@@ -149,31 +159,29 @@ yang menentukan; lihat [Tailwind CSS v4](/id/docs#tailwind-css-v4).
 
 ## Daftar token
 
-Semua token tema di `tokens.css` milik library beserta nilai terang dan gelapnya, dibaca saat docs
-ini di-build. Token komponen terdaftar di Lab masing-masing komponen. Nilai netral masih sementara
-dan akan berubah bersama set token lengkap. Token lain, seperti radius dan font, menyusul.
+Semua token di `tokens.css` milik library beserta nilai terang dan gelapnya, dibaca saat docs ini
+di-build. Tidak ada token lain: komponen hanya membaca token ini.
 
 <TokenTable lang="id" />
 
 ## Mode token dan prefix
 
-Semua bagian di atas memakai mode theme: semua komponen berbagi satu set token. Mode isolated
-memberi setiap komponen token sendiri:
+Semua bagian di atas memakai mode theme: nilai token ditulis sekali di root halaman. Mode isolated
+memakai token yang sama, tetapi nilainya ditulis di root setiap komponen:
 
 | | Theme | Isolated |
 | --- | --- | --- |
-| Nama token | `--{prefix}-accent` | `--{prefix}-{komponen}-accent` |
+| Nama token | `--{prefix}-accent` | `--{prefix}-accent` |
 | Tempat nilai | Di `:root` dan setiap tema, ditulis sekali | Di root setiap komponen, bersama komponennya |
 | Mengganti accent | Satu baris untuk semua komponen | Per komponen |
-| Bentrok nama | Bisa terjadi, kalau app sudah punya token bernama sama | Hampir tidak ada |
 | Cocok untuk | App dengan satu design system | Satu komponen dengan tema tersendiri, atau komponen di app dengan design system lain |
 
-Komponen isolated tidak membaca token bersama, jadi mengubah satu komponen tidak menyentuh komponen
-lain. Nilainya ada di root komponen itu sendiri, jadi atur di komponennya, bukan di elemen induk:
+Komponen isolated tidak berbagi nilai, jadi mengubah satu komponen tidak menyentuh komponen lain,
+dan nilai di elemen induk tidak sampai kepadanya. Atur nilainya di komponen itu sendiri:
 
 ```css
 .settings .ow-separator {
-  --acme-separator-line-dark: #b9b0d0;
+  --acme-line-dark: #b9b0d0;
 }
 ```
 

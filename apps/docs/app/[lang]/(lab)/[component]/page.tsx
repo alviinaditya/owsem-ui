@@ -93,7 +93,7 @@ function Intro({
       {install ? (
         <>
           <InstallCommand item={entry.name} labels={dict.lab} />
-          <TokenChip item={entry.name} lang={lang} />
+          <TokenChip lang={lang} />
         </>
       ) : null}
       {shortcuts ? <StageShortcuts /> : null}

@@ -5,6 +5,8 @@
  * forces a theme on any subtree. The dark set appears twice and must stay identical (tested).
  * Materials (TK-7) are written in full per theme, never derived from the accent: flat fills with
  * crisp 1px edges drawn as inset shadows (so they add no size), never soft or sunken shadows.
+ * These are the only public tokens (TK-9): components read them without fallbacks, and setting
+ * one on any element themes that element and what is inside it.
  */
 @layer owsem.tokens {
   /* The same in both themes: the control radius (TK-8), motion intensity, and easings. */
@@ -130,7 +132,6 @@
   [data-theme="light"] {
     color-scheme: light;
     --ow-bg: #fafafa;
-    --ow-surface: #ffffff;
     --ow-fg: #18181b;
     --ow-muted: #63636b;
     --ow-accent: #7c6ab8;
@@ -139,7 +140,8 @@
     --ow-line: #e4e4e7;
     /* A control's boundary where it needs 3:1 (DP-6), such as a field or a checkbox. */
     --ow-edge: #82828b;
-    --ow-hover: rgb(0 0 0 / 0.04);
+    /* Hover on quiet controls, and the lit item of a list (Glide). */
+    --ow-hover: rgb(0 0 0 / 0.06);
     --ow-good: #1f7a4d;
     --ow-warning: #8a5a00;
     --ow-critical: #b03f2a;
@@ -156,21 +158,21 @@
     --ow-well-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.04);
     --ow-pressed-bg: #f4f4f5;
     --ow-pressed-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.16);
-    --ow-primary-bg: #7c6ab8;
+    /* The edge of a solid fill: the accent (primary) or the critical tone (destructive). */
     --ow-primary-shadow:
       inset 0 0 0 1px rgb(0 0 0 / 0.28), inset 0 1.5px 0.75px rgb(255 255 255 / 0.3);
-    --ow-on-primary: #ffffff;
     --ow-line-dark: #e2e2e6;
     --ow-line-light: #ffffff;
     --ow-tooltip-bg: #18181b;
     --ow-tooltip-fg: #fafafa;
+    /* The scrim behind a modal layer. */
+    --ow-backdrop: rgb(0 0 0 / 0.3);
   }
 
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       color-scheme: dark;
       --ow-bg: #19191b;
-      --ow-surface: #1f1f21;
       --ow-fg: #ededef;
       --ow-muted: #a1a1a8;
       --ow-accent: #d4cbe5;
@@ -178,7 +180,7 @@
       --ow-focus: #d4cbe5;
       --ow-line: #2e2e32;
       --ow-edge: #6e6e76;
-      --ow-hover: rgb(255 255 255 / 0.05);
+      --ow-hover: rgb(255 255 255 / 0.07);
       --ow-good: #8fd9b6;
       --ow-warning: #e8c27a;
       --ow-critical: #f2ab96;
@@ -196,21 +198,19 @@
       --ow-pressed-bg: #2c2c2f;
       --ow-pressed-shadow:
         inset 0 0 0 1px rgb(0 0 0 / 0.8), inset 0 0 0 2px rgb(255 255 255 / 0.03);
-      --ow-primary-bg: #d4cbe5;
       --ow-primary-shadow:
         inset 0 0 0 1px rgb(0 0 0 / 0.35), inset 0 1.5px 0.75px rgb(255 255 255 / 0.6);
-      --ow-on-primary: #18181a;
       --ow-line-dark: #0b0b0c;
       --ow-line-light: #2a2a2d;
       --ow-tooltip-bg: #36363a;
       --ow-tooltip-fg: #f4f4f5;
+      --ow-backdrop: rgb(0 0 0 / 0.5);
     }
   }
 
   [data-theme="dark"] {
     color-scheme: dark;
     --ow-bg: #19191b;
-    --ow-surface: #1f1f21;
     --ow-fg: #ededef;
     --ow-muted: #a1a1a8;
     --ow-accent: #d4cbe5;
@@ -218,7 +218,7 @@
     --ow-focus: #d4cbe5;
     --ow-line: #2e2e32;
     --ow-edge: #6e6e76;
-    --ow-hover: rgb(255 255 255 / 0.05);
+    --ow-hover: rgb(255 255 255 / 0.07);
     --ow-good: #8fd9b6;
     --ow-warning: #e8c27a;
     --ow-critical: #f2ab96;
@@ -235,13 +235,12 @@
     --ow-well-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.03);
     --ow-pressed-bg: #2c2c2f;
     --ow-pressed-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.8), inset 0 0 0 2px rgb(255 255 255 / 0.03);
-    --ow-primary-bg: #d4cbe5;
     --ow-primary-shadow:
       inset 0 0 0 1px rgb(0 0 0 / 0.35), inset 0 1.5px 0.75px rgb(255 255 255 / 0.6);
-    --ow-on-primary: #18181a;
     --ow-line-dark: #0b0b0c;
     --ow-line-light: #2a2a2d;
     --ow-tooltip-bg: #36363a;
     --ow-tooltip-fg: #f4f4f5;
+    --ow-backdrop: rgb(0 0 0 / 0.5);
   }
 }

@@ -242,17 +242,14 @@ const treeRailNavLab = defineLab({
       name: "Root",
       selector: ".ow-tree-rail-nav",
       note: {
-        id: "nav yang memuat SVG rail dan highlight hover. Token komponen dipasang di sini.",
-        en: "The nav, holding the rail SVG and the hover highlight. Component tokens go here.",
+        id: "nav yang memuat SVG rail dan highlight hover. Token tema yang dipasang di sini hanya berlaku untuknya.",
+        en: "The nav, holding the rail SVG and the hover highlight. Theme tokens set here apply to it alone.",
       },
       tokens: {
-        "--ow-tree-rail-trail": "--_trail",
-        "--ow-tree-rail-rail": "--_rail",
-        "--ow-tree-rail-node": "--_node",
-        "--ow-tree-rail-surface": "--_surface",
-        "--ow-tree-rail-r0": "--_r0",
-        "--ow-tree-rail-r1": "--_r1",
-        "--ow-tree-rail-r2": "--_r2",
+        "--ow-accent": "--_trail",
+        "--ow-line": "--_rail",
+        "--ow-fg": "--_node",
+        "--ow-bg": "--_surface",
       },
     },
     {
@@ -323,8 +320,8 @@ const treeRailNavLab = defineLab({
 
   demo(cfg, lang) {
     const style = {
-      "--ow-tree-rail-trail": cfg.trail || undefined,
-      "--ow-tree-rail-rail": cfg.rail || undefined,
+      "--ow-accent": cfg.trail || undefined,
+      "--ow-line": cfg.rail || undefined,
     } as CSSProperties;
     return <Demo lang={lang} style={style} />;
   },
@@ -366,12 +363,12 @@ const treeRailNavLab = defineLab({
     ];
     const files = [{ name: "sidebar.tsx", code: usage.join("\n") }];
     if (custom) {
-      const token = `--${setup.prefix}-tree-rail`;
-      // Isolated tokens are set on each nav's root, so set them there too.
+      const token = `--${setup.prefix}`;
+      // Isolated values sit on each nav's root, so set them there too.
       const lines = [
         setup.mode === "isolated" ? ".sidebar.ow-tree-rail-nav {" : ".sidebar {",
-        ...(cfg.trail ? [`  ${token}-trail: ${cfg.trail};`] : []),
-        ...(cfg.rail ? [`  ${token}-rail: ${cfg.rail};`] : []),
+        ...(cfg.trail ? [`  ${token}-accent: ${cfg.trail};`] : []),
+        ...(cfg.rail ? [`  ${token}-line: ${cfg.rail};`] : []),
         "}",
       ];
       files.push({ name: "sidebar.css", code: lines.join("\n") });

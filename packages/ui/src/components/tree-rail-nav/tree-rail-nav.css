@@ -6,24 +6,24 @@
  */
 @layer owsem.components {
   .ow-tree-rail-nav {
-    --_fg: var(--ow-fg, #18181b);
-    --_muted: var(--ow-muted, #5f5f6b);
-    --_rail: var(--ow-tree-rail-rail, var(--ow-line, #e4e4e7));
-    --_node: var(--ow-tree-rail-node, color-mix(in oklab, var(--_fg) 24%, transparent));
-    --_trail: var(--ow-tree-rail-trail, var(--ow-accent, #7c6ab8));
-    /* Dots are cut out of the rail with the surface color behind them. */
-    --_surface: var(--ow-tree-rail-surface, var(--ow-bg, #fbfbfc));
+    --_fg: var(--ow-fg);
+    --_muted: var(--ow-muted);
+    --_rail: var(--ow-line);
+    --_node: color-mix(in oklab, var(--_fg) 24%, transparent);
+    --_trail: var(--ow-accent);
+    /* Dots are cut out of the rail with the page color behind them. */
+    --_surface: var(--ow-bg);
     --_tint: color-mix(in oklab, var(--_trail) 10%, transparent);
-    --_focus: var(--ow-focus, #7c6ab8);
-    --_radius: var(--ow-radius, 8px);
+    --_focus: var(--ow-focus);
+    --_radius: var(--ow-radius);
     --_ease: cubic-bezier(0.22, 1, 0.36, 1);
     /*
      * One rail per level, 25px apart (px, read by the script); rows indent just past their rail.
      * 25px puts a first-level row's children in line with its text, after the icon.
      */
-    --_r0: var(--ow-tree-rail-r0, 9px);
-    --_r1: var(--ow-tree-rail-r1, 34px);
-    --_r2: var(--ow-tree-rail-r2, 59px);
+    --_r0: 9px;
+    --_r1: 34px;
+    --_r2: 59px;
     font-size: 13.5px;
     line-height: 1.4;
   }

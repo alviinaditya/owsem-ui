@@ -196,9 +196,9 @@ import { Toggle } from "owsem-ui/base"; // or "@/components/owsem/toggle"
   `value`, `className`, `style`, and `render`. Without children it is a square icon button: give
   it an `aria-label`. The ref goes to the `button`.
 - Height comes from `--py` (set it in `style` on the toggle, never under a 24 px target).
-- Tokens: `--ow-toggle-fg`, `--ow-toggle-hover-bg`, `--ow-toggle-hover-fg` (off);
-  `--ow-toggle-on-bg`, `--ow-toggle-on-shadow`, `--ow-toggle-on-fg` (on); `--ow-toggle-pressed-bg`,
-  `--ow-toggle-pressed-shadow` (held down).
+- Reads `--ow-muted` (text while off), `--ow-hover`, `--ow-fg`, `--ow-raised-bg` and
+  `--ow-raised-shadow` (on), `--ow-pressed-bg` and `--ow-pressed-shadow` (held down),
+  `--ow-radius`, and `--ow-focus`.
 
 ### Tree Rail Nav
 

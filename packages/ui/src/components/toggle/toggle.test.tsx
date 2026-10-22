@@ -237,26 +237,30 @@ describe("Toggle", () => {
     expect(style.outlineColor).toBe(resolve("color", "var(--ow-focus)"));
   });
 
-  test("component tokens override the theme tokens", async () => {
+  test("a theme token set on it changes it alone (TK-9)", async () => {
     const tokens = {
-      "--ow-toggle-fg": "rgb(1, 2, 3)",
-      "--ow-toggle-on-bg": "rgb(255, 0, 0)",
-      "--ow-toggle-on-shadow": "none",
-      "--ow-toggle-on-fg": "rgb(0, 0, 255)",
-      "--ow-toggle-pressed-bg": "rgb(0, 128, 0)",
+      "--ow-muted": "rgb(1, 2, 3)",
+      "--ow-raised-bg": "rgb(255, 0, 0)",
+      "--ow-raised-shadow": "none",
+      "--ow-fg": "rgb(0, 0, 255)",
+      "--ow-pressed-bg": "rgb(0, 128, 0)",
     } as CSSProperties;
-    const [off, on] = await mount(
-      <div style={tokens}>
-        <Toggle>Off</Toggle>
-        <Toggle defaultPressed>On</Toggle>
-      </div>,
+    const [off, on, other] = await mount(
+      <>
+        <Toggle style={tokens}>Off</Toggle>
+        <Toggle style={tokens} defaultPressed>
+          On
+        </Toggle>
+        <Toggle defaultPressed>Other</Toggle>
+      </>,
     );
-    if (!off || !on) throw new Error("no toggles");
+    if (!off || !on || !other) throw new Error("no toggles");
     await pointerAway();
     expect(getComputedStyle(off).color).toBe("rgb(1, 2, 3)");
     expect(getComputedStyle(on).backgroundColor).toBe("rgb(255, 0, 0)");
     expect(getComputedStyle(on).boxShadow).toBe("none");
     expect(getComputedStyle(on).color).toBe("rgb(0, 0, 255)");
+    expect(getComputedStyle(other).backgroundColor).toBe(resolve("color", "var(--ow-raised-bg)"));
     off.focus();
     await userEvent.keyboard("{Space>}");
     expect(getComputedStyle(off).backgroundColor).toBe("rgb(0, 128, 0)");

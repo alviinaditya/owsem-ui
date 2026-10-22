@@ -7,20 +7,13 @@
  */
 @layer owsem.components {
   .ow-toggle {
-    --_fg: var(--ow-toggle-fg, var(--ow-muted, #63636b));
-    --_hover-bg: var(--ow-toggle-hover-bg, var(--ow-hover, rgb(0 0 0 / 0.04)));
-    --_hover-fg: var(--ow-toggle-hover-fg, var(--ow-fg, #18181b));
-    --_on-bg: var(--ow-toggle-on-bg, var(--ow-raised-bg, #ffffff));
-    --_on-shadow: var(
-      --ow-toggle-on-shadow,
-      var(--ow-raised-shadow, inset 0 0 0 1px rgb(0 0 0 / 0.14), 0 1px 0 rgb(0 0 0 / 0.04))
-    );
-    --_on-fg: var(--ow-toggle-on-fg, var(--ow-fg, #18181b));
-    --_pressed-bg: var(--ow-toggle-pressed-bg, var(--ow-pressed-bg, #f4f4f5));
-    --_pressed-shadow: var(
-      --ow-toggle-pressed-shadow,
-      var(--ow-pressed-shadow, inset 0 0 0 1px rgb(0 0 0 / 0.16))
-    );
+    --_muted: var(--ow-muted);
+    --_fg: var(--ow-fg);
+    --_hover: var(--ow-hover);
+    --_raised-bg: var(--ow-raised-bg);
+    --_raised-shadow: var(--ow-raised-shadow);
+    --_pressed-bg: var(--ow-pressed-bg);
+    --_pressed-shadow: var(--ow-pressed-shadow);
     --py: 0.75em;
     --_py: max(var(--py), (24px - 1lh) / 2);
     --px: calc(var(--_py) + (1lh - 1cap) / 2);
@@ -33,12 +26,12 @@
     margin: 0;
     padding: var(--_py) var(--px);
     border: 0;
-    border-radius: var(--ow-radius, 8px);
+    border-radius: var(--ow-radius);
     /* Invisible until forced colors draw it as the edge (DP-8). */
     outline: 1px solid transparent;
     outline-offset: -1px;
     background-color: transparent;
-    color: var(--_fg);
+    color: var(--_muted);
     font: inherit;
     font-size: 0.875rem;
     font-weight: 500;
@@ -48,8 +41,7 @@
     cursor: pointer;
     touch-action: manipulation;
     /* A press lets go on the settle spring (FR-21). */
-    transition: transform var(--ow-spring-settle-duration, 1030ms)
-      var(--ow-spring-settle, cubic-bezier(0.23, 1, 0.32, 1));
+    transition: transform var(--ow-spring-settle-duration) var(--ow-spring-settle);
   }
 
   .ow-toggle[data-size="sm"] {
@@ -95,20 +87,20 @@
 
   /* On: the raised key, a flat fill with crisp edges. */
   .ow-toggle[data-pressed] {
-    background-color: var(--_on-bg);
-    box-shadow: var(--_on-shadow);
-    color: var(--_on-fg);
+    background-color: var(--_raised-bg);
+    box-shadow: var(--_raised-shadow);
+    color: var(--_fg);
   }
 
   @media (hover: hover) {
     .ow-toggle:hover:not([data-pressed], [data-disabled]) {
-      background-color: var(--_hover-bg);
-      color: var(--_hover-fg);
+      background-color: var(--_hover);
+      color: var(--_fg);
     }
 
     /* The key tints a few percent toward its text; its edges stay. */
     .ow-toggle[data-pressed]:hover:not(:active, [data-disabled]) {
-      background-color: color-mix(in oklab, var(--_on-bg), var(--_on-fg) 4%);
+      background-color: color-mix(in oklab, var(--_raised-bg), var(--_fg) 4%);
     }
   }
 
@@ -116,14 +108,14 @@
   .ow-toggle:active:not([data-disabled]) {
     background-color: var(--_pressed-bg);
     box-shadow: var(--_pressed-shadow);
-    color: var(--_on-fg);
+    color: var(--_fg);
     transform: scale(0.97);
     transition-duration: 90ms;
-    transition-timing-function: var(--ow-ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+    transition-timing-function: var(--ow-ease-out);
   }
 
   .ow-toggle:focus-visible {
-    outline: 2px solid var(--ow-focus, #5b4a9a);
+    outline: 2px solid var(--ow-focus);
     outline-offset: 2px;
   }
 

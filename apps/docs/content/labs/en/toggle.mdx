@@ -90,45 +90,29 @@ right.
 
 The stage controls are open: pick the on surface or its text, and the code follows.
 
-<ForMode mode="theme">
+Toggle reads these theme tokens. Set one on an element to change the toggles inside it. `note.css`
+sets them on the toggles themselves, so `--ow-fg` leaves the note's own text alone.
 
-Component tokens override the theme tokens for every Toggle inside the element that sets them,
-such as `.note`.
-
-| Component token | Default | Purpose |
-| --- | --- | --- |
-| `--ow-toggle-fg` | `--ow-muted` | Text while off |
-| `--ow-toggle-hover-bg` | `--ow-hover` | Tint under the pointer while off |
-| `--ow-toggle-hover-fg` | `--ow-fg` | Text under the pointer while off |
-| `--ow-toggle-on-bg` | `--ow-raised-bg` | Fill while on |
-| `--ow-toggle-on-shadow` | `--ow-raised-shadow` | Edges while on |
-| `--ow-toggle-on-fg` | `--ow-fg` | Text while on or held down |
-| `--ow-toggle-pressed-bg` | `--ow-pressed-bg` | Fill while held down |
-| `--ow-toggle-pressed-shadow` | `--ow-pressed-shadow` | Edges while held down |
-
-</ForMode>
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-muted` | Text while off |
+| `--ow-hover` | Tint under the pointer while off |
+| `--ow-fg` | Text under the pointer, while on, or held down |
+| `--ow-raised-bg` | Fill while on |
+| `--ow-raised-shadow` | Edges while on |
+| `--ow-pressed-bg` | Fill while held down |
+| `--ow-pressed-shadow` | Edges while held down |
+| `--ow-radius` | Corners |
+| `--ow-focus` | Focus ring |
 
 <ForMode mode="isolated">
 
-Each Toggle carries its own values on its root and reads no shared token, so set them on the
-toggle itself, as `note.css` does with `.note .ow-toggle`.
-
-| Component token | Default | Purpose |
-| --- | --- | --- |
-| `--ow-toggle-fg` | Its own, per theme | Text while off |
-| `--ow-toggle-hover-bg` | Its own, per theme | Tint under the pointer while off |
-| `--ow-toggle-hover-fg` | Its own, per theme | Text under the pointer while off |
-| `--ow-toggle-on-bg` | Its own, per theme | Fill while on |
-| `--ow-toggle-on-shadow` | Its own, per theme | Edges while on |
-| `--ow-toggle-on-fg` | Its own, per theme | Text while on or held down |
-| `--ow-toggle-pressed-bg` | Its own, per theme | Fill while held down |
-| `--ow-toggle-pressed-shadow` | Its own, per theme | Edges while held down |
+In isolated mode the values sit on each Toggle's root, so set yours on the toggle itself, as
+`note.css` does.
 
 </ForMode>
 
-The corners follow `--ow-radius`, and the focus ring `--ow-focus`.
-
-<TokenChip item="toggle" lang="en" />
+<TokenChip lang="en" />
 
 ## Ship it [#ship]
 

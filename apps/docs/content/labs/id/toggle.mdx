@@ -92,45 +92,29 @@ Dengan `prefers-reduced-motion`, tekanan mengganti material tanpa mengecil. Di m
 
 Kontrol di stage terbuka: pilih warna permukaan atau teks saat menyala, dan kodenya mengikuti.
 
-<ForMode mode="theme">
+Toggle membaca token tema berikut. Pasang di sebuah elemen untuk mengubah toggle di dalamnya.
+`note.css` memasangnya di toggle itu sendiri, sehingga `--ow-fg` tidak mengubah teks catatannya.
 
-Token komponen menimpa token tema untuk setiap Toggle di dalam elemen tempat token itu dipasang,
-misalnya `.note`.
-
-| Token komponen | Bawaan | Fungsi |
-| --- | --- | --- |
-| `--ow-toggle-fg` | `--ow-muted` | Teks saat mati |
-| `--ow-toggle-hover-bg` | `--ow-hover` | Warna di bawah pointer saat mati |
-| `--ow-toggle-hover-fg` | `--ow-fg` | Teks di bawah pointer saat mati |
-| `--ow-toggle-on-bg` | `--ow-raised-bg` | Isian saat menyala |
-| `--ow-toggle-on-shadow` | `--ow-raised-shadow` | Tepi saat menyala |
-| `--ow-toggle-on-fg` | `--ow-fg` | Teks saat menyala atau ditahan |
-| `--ow-toggle-pressed-bg` | `--ow-pressed-bg` | Isian saat ditahan |
-| `--ow-toggle-pressed-shadow` | `--ow-pressed-shadow` | Tepi saat ditahan |
-
-</ForMode>
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-muted` | Teks saat mati |
+| `--ow-hover` | Warna di bawah pointer saat mati |
+| `--ow-fg` | Teks di bawah pointer, saat menyala, atau ditahan |
+| `--ow-raised-bg` | Isian saat menyala |
+| `--ow-raised-shadow` | Tepi saat menyala |
+| `--ow-pressed-bg` | Isian saat ditahan |
+| `--ow-pressed-shadow` | Tepi saat ditahan |
+| `--ow-radius` | Sudut |
+| `--ow-focus` | Ring fokus |
 
 <ForMode mode="isolated">
 
-Setiap Toggle membawa nilainya sendiri di elemen root-nya dan tidak membaca token bersama, jadi
-atur token di toggle itu sendiri, seperti `note.css` dengan `.note .ow-toggle`.
-
-| Token komponen | Bawaan | Fungsi |
-| --- | --- | --- |
-| `--ow-toggle-fg` | Nilainya sendiri, per tema | Teks saat mati |
-| `--ow-toggle-hover-bg` | Nilainya sendiri, per tema | Warna di bawah pointer saat mati |
-| `--ow-toggle-hover-fg` | Nilainya sendiri, per tema | Teks di bawah pointer saat mati |
-| `--ow-toggle-on-bg` | Nilainya sendiri, per tema | Isian saat menyala |
-| `--ow-toggle-on-shadow` | Nilainya sendiri, per tema | Tepi saat menyala |
-| `--ow-toggle-on-fg` | Nilainya sendiri, per tema | Teks saat menyala atau ditahan |
-| `--ow-toggle-pressed-bg` | Nilainya sendiri, per tema | Isian saat ditahan |
-| `--ow-toggle-pressed-shadow` | Nilainya sendiri, per tema | Tepi saat ditahan |
+Di mode isolated, nilainya ada di root setiap Toggle, jadi atur di toggle itu sendiri, seperti
+`note.css`.
 
 </ForMode>
 
-Sudutnya mengikuti `--ow-radius`, dan ring fokusnya `--ow-focus`.
-
-<TokenChip item="toggle" lang="id" />
+<TokenChip lang="id" />
 
 ## Ship it [#ship]
 

@@ -73,13 +73,15 @@ function Demo({ cfg, lang }: { cfg: Cfg; lang: Lang }) {
     italic: false,
     underline: false,
   });
+  // On the toggles, so the text color leaves the note's own text alone.
   const style = {
-    "--ow-toggle-on-bg": cfg.on || undefined,
-    "--ow-toggle-on-fg": cfg.text || undefined,
+    "--ow-raised-bg": cfg.on || undefined,
+    "--ow-fg": cfg.text || undefined,
   } as CSSProperties;
   const mark = (key: Format) => (
     <Toggle
       size={size}
+      style={style}
       aria-label={t[key]}
       startIcon={<Icon name={key} />}
       pressed={format[key]}
@@ -88,10 +90,10 @@ function Demo({ cfg, lang }: { cfg: Cfg; lang: Lang }) {
     />
   );
   return (
-    <div className="demo-card demo-toggle" style={style}>
+    <div className="demo-card demo-toggle">
       <div className="demo-toggle-head">
         <p className="demo-title">{t.title}</p>
-        <Toggle size={size} startIcon={<Icon name="pin" />} data-demo="pin">
+        <Toggle size={size} style={style} startIcon={<Icon name="pin" />} data-demo="pin">
           {t.pin}
         </Toggle>
       </div>
@@ -248,14 +250,13 @@ const toggleLab = defineLab({
         en: "Base UI's button, with aria-pressed. Flat while off, the raised key while on.",
       },
       tokens: {
-        "--ow-toggle-fg": "--_fg",
-        "--ow-toggle-hover-bg": "--_hover-bg",
-        "--ow-toggle-hover-fg": "--_hover-fg",
-        "--ow-toggle-on-bg": "--_on-bg",
-        "--ow-toggle-on-shadow": "--_on-shadow",
-        "--ow-toggle-on-fg": "--_on-fg",
-        "--ow-toggle-pressed-bg": "--_pressed-bg",
-        "--ow-toggle-pressed-shadow": "--_pressed-shadow",
+        "--ow-muted": "--_muted",
+        "--ow-fg": "--_fg",
+        "--ow-hover": "--_hover",
+        "--ow-raised-bg": "--_raised-bg",
+        "--ow-raised-shadow": "--_raised-shadow",
+        "--ow-pressed-bg": "--_pressed-bg",
+        "--ow-pressed-shadow": "--_pressed-shadow",
       },
     },
     {
@@ -294,12 +295,13 @@ const toggleLab = defineLab({
     ];
     const files = [{ name: "note-tools.tsx", code: usage.join("\n") }];
     if (custom) {
-      const token = `--${setup.prefix}-toggle-on`;
-      // Isolated tokens are set on each Toggle's root, so an inherited value would lose.
+      const token = `--${setup.prefix}`;
+      // On the toggles: the text color would recolor the note's own text, and isolated values
+      // sit on each Toggle's root, so an inherited value would lose.
       const lines = [
         "/* Every Toggle inside .note */",
-        setup.mode === "isolated" ? ".note .ow-toggle {" : ".note {",
-        ...(cfg.on ? [`  ${token}-bg: ${cfg.on};`] : []),
+        ".note .ow-toggle {",
+        ...(cfg.on ? [`  ${token}-raised-bg: ${cfg.on};`] : []),
         ...(cfg.text ? [`  ${token}-fg: ${cfg.text};`] : []),
         "}",
       ];

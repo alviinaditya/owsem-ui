@@ -12,5 +12,4 @@ becomes its shortcut, at the end and muted. Indicators draw a check or a dot and
 while off, so labels stay in line; submenu triggers get a chevron, and separators are etched
 grooves. `size` on the popup (`sm`, `md`, `lg`) follows Button's `--py` rule. The menu grows from
 its trigger in 180 ms and leaves in 120 ms; opened from the keyboard it appears at once, and under
-reduced motion it only fades. Restyle it with `--ow-menu-bg`, `--ow-menu-shadow`, `--ow-menu-fg`,
-`--ow-menu-muted`, `--ow-menu-line-dark`, `--ow-menu-line-light`, and Glide's `--ow-glide-bg`.
+reduced motion it only fades. It reads the theme tokens; the highlight is `--ow-hover`.

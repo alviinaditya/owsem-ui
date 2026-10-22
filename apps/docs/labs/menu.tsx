@@ -75,8 +75,8 @@ const keepFocus = { initialFocus: false } as object;
 
 function tokens(cfg: Cfg) {
   return {
-    "--ow-menu-bg": cfg.bg || undefined,
-    "--ow-menu-fg": cfg.fg || undefined,
+    "--ow-panel": cfg.bg || undefined,
+    "--ow-fg": cfg.fg || undefined,
   } as CSSProperties;
 }
 
@@ -374,11 +374,11 @@ const menuLab = defineLab({
         en: "The panel material with the popup shadow: a crisp 1px edge. Its radius is the item's plus the 4px padding.",
       },
       tokens: {
-        "--ow-menu-bg": "--_bg",
-        "--ow-menu-shadow": "--_shadow",
-        "--ow-menu-fg": "--_fg",
-        "--ow-menu-muted": "--_muted",
-        "--ow-glide-bg": "--_highlight",
+        "--ow-panel": "--_bg",
+        "--ow-popup-shadow": "--_shadow",
+        "--ow-fg": "--_fg",
+        "--ow-muted": "--_muted",
+        "--ow-hover": "--_highlight",
       },
     },
     {
@@ -428,7 +428,7 @@ const menuLab = defineLab({
         id: "Alur terukir di antara grup.",
         en: "An etched groove between groups.",
       },
-      tokens: { "--ow-menu-line-dark": "--_dark", "--ow-menu-line-light": "--_light" },
+      tokens: { "--ow-line-dark": "--_dark", "--ow-line-light": "--_light" },
     },
     {
       name: "SubmenuTrigger",
@@ -566,8 +566,8 @@ const menuLab = defineLab({
         code: [
           "/* The popups themselves: menus render in a portal, outside the trigger's subtree. */",
           ".menu {",
-          ...(cfg.bg ? [`  --${setup.prefix}-menu-bg: ${cfg.bg};`] : []),
-          ...(cfg.fg ? [`  --${setup.prefix}-menu-fg: ${cfg.fg};`] : []),
+          ...(cfg.bg ? [`  --${setup.prefix}-panel: ${cfg.bg};`] : []),
+          ...(cfg.fg ? [`  --${setup.prefix}-fg: ${cfg.fg};`] : []),
           "}",
         ].join("\n"),
       });

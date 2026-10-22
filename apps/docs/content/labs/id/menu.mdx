@@ -114,43 +114,29 @@ tetap ada, sorotannya menjadi outline `Highlight`, dan centangnya mengikuti warn
 
 Kontrol stage terbuka: pilih ukuran, permukaan, atau warna teks, dan kodenya ikut berubah.
 
-<ForMode mode="theme">
+Menu membaca token tema berikut. Pasang di popup lewat class, seperti `menu.css`, atau untuk semua
+menu di `:root`. Class di sekitar trigger tidak sampai: menu dirender di portal, di luar subtree
+trigger-nya.
 
-Pasang token di popup lewat class, seperti `menu.css`, atau untuk semua menu di `:root`. Class di
-sekitar trigger tidak sampai: menu dirender di portal, di luar subtree trigger-nya.
-
-| Token komponen | Bawaan | Fungsi |
-| --- | --- | --- |
-| `--ow-menu-bg` | `--ow-panel` | Permukaan |
-| `--ow-menu-shadow` | `--ow-popup-shadow` | Tepi dan bayangan |
-| `--ow-menu-fg` | `--ow-fg` | Teks item |
-| `--ow-menu-muted` | `--ow-muted` | Label grup, shortcut, dan chevron |
-| `--ow-menu-line-dark` | `--ow-line-dark` | Garis gelap alur |
-| `--ow-menu-line-light` | `--ow-line-light` | Garis terang alur |
-| `--ow-glide-bg` | `--ow-fg` 7% | Sorotan (token milik Glide) |
-
-</ForMode>
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-panel` | Permukaan |
+| `--ow-popup-shadow` | Tepi dan bayangan |
+| `--ow-fg` | Teks item |
+| `--ow-muted` | Label grup, shortcut, dan chevron |
+| `--ow-hover` | Sorotan (Glide) |
+| `--ow-line-dark` | Garis gelap alur |
+| `--ow-line-light` | Garis terang alur |
+| `--ow-radius` | Sudut item; sudut popup menambahkan padding 4px-nya |
+| `--ow-focus` | Ring fokus |
 
 <ForMode mode="isolated">
 
-Popup membawa nilainya sendiri: pasang token di Popup lewat class, seperti `menu.css`, dan di
-separator untuk garisnya. Class di sekitar trigger tidak sampai: menu dirender di portal.
-
-| Token komponen | Bawaan | Fungsi |
-| --- | --- | --- |
-| `--ow-menu-bg` | Miliknya sendiri, per tema | Permukaan |
-| `--ow-menu-shadow` | Miliknya sendiri, per tema | Tepi dan bayangan |
-| `--ow-menu-fg` | Miliknya sendiri, per tema | Teks item |
-| `--ow-menu-muted` | Miliknya sendiri, per tema | Label grup, shortcut, dan chevron |
-| `--ow-menu-line-dark` | Miliknya sendiri, per tema | Garis gelap alur |
-| `--ow-menu-line-light` | Miliknya sendiri, per tema | Garis terang alur |
-| `--ow-glide-bg` | Miliknya sendiri, per tema | Sorotan (token milik Glide) |
+Di mode isolated, nilainya ada di setiap Popup, jadi atur di Popup lewat class, seperti `menu.css`.
 
 </ForMode>
 
-Sudut item mengikuti `--ow-radius`, dan sudut popup menambahkan padding 4px-nya.
-
-<TokenChip item="menu" lang="id" />
+<TokenChip lang="id" />
 
 ## Ship it [#ship]
 

@@ -7,19 +7,12 @@
  */
 @layer owsem.components {
   .ow-menu-popup {
-    --_bg: var(--ow-menu-bg, var(--ow-panel, #ffffff));
-    --_shadow: var(
-      --ow-menu-shadow,
-      var(
-        --ow-popup-shadow,
-        0 0 0 1px rgb(0 0 0 / 0.08),
-        0 4px 8px -2px rgb(0 0 0 / 0.06),
-        0 16px 32px -8px rgb(0 0 0 / 0.14)
-      )
-    );
-    --_fg: var(--ow-menu-fg, var(--ow-fg, #18181b));
-    --_muted: var(--ow-menu-muted, var(--ow-muted, #63636b));
-    --_highlight: var(--ow-glide-bg, color-mix(in oklab, var(--ow-fg, #18181b) 7%, transparent));
+    --_bg: var(--ow-panel);
+    --_shadow: var(--ow-popup-shadow);
+    --_fg: var(--ow-fg);
+    --_muted: var(--ow-muted);
+    /* The highlight, as Glide's, for an item whose submenu is open. */
+    --_highlight: var(--ow-hover);
     --_pad: 4px;
     box-sizing: border-box;
     min-inline-size: 10rem;
@@ -28,7 +21,7 @@
     overflow-y: auto;
     overscroll-behavior: contain;
     /* Concentric with the items (FR-10b). */
-    border-radius: calc(var(--ow-radius, 8px) + var(--_pad));
+    border-radius: calc(var(--ow-radius) + var(--_pad));
     /* Invisible until forced colors draw it as the edge (DP-8). */
     outline: 1px solid transparent;
     outline-offset: -1px;
@@ -39,8 +32,8 @@
     line-height: 1.25;
     transform-origin: var(--transform-origin);
     transition:
-      opacity 180ms var(--ow-ease-out, cubic-bezier(0.23, 1, 0.32, 1)),
-      transform 180ms var(--ow-ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+      opacity 180ms var(--ow-ease-out),
+      transform 180ms var(--ow-ease-out);
   }
 
   .ow-menu-popup[data-size="sm"] {
@@ -68,7 +61,7 @@
 
   /* Glide's highlight takes the items' corners. */
   .ow-menu-popup > .ow-glide {
-    --_radius: var(--ow-radius, 8px);
+    --_radius: var(--ow-radius);
   }
 
   /* Items: Button's geometry rule (FR-9), --py the only input; an icon or indicator first. */
@@ -82,7 +75,7 @@
     gap: 0.5em;
     box-sizing: border-box;
     padding: var(--_py) var(--px);
-    border-radius: var(--ow-radius, 8px);
+    border-radius: var(--ow-radius);
     outline: 0;
     color: var(--_fg);
     text-decoration: none;
@@ -154,7 +147,7 @@
 
   /* FR-13: a 2px ring, inside the item so the popup does not clip it. */
   .ow-menu-item:focus-visible {
-    outline: 2px solid var(--ow-focus, #5b4a9a);
+    outline: 2px solid var(--ow-focus);
     outline-offset: -2px;
   }
 
@@ -174,8 +167,8 @@
 
   /* An etched groove: a dark line with a light one under it, as borders for forced colors. */
   .ow-menu-separator {
-    --_dark: var(--ow-menu-line-dark, var(--ow-line-dark, #e2e2e6));
-    --_light: var(--ow-menu-line-light, var(--ow-line-light, #ffffff));
+    --_dark: var(--ow-line-dark);
+    --_light: var(--ow-line-light);
     margin-block: var(--_pad);
     border-block: 1px solid;
     border-block-color: var(--_dark) var(--_light);

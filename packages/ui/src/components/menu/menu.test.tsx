@@ -399,13 +399,14 @@ describe("Menu", () => {
     }
   });
 
-  test("component tokens override the theme tokens", async () => {
+  test("a theme token set on it changes it alone (TK-9)", async () => {
     const tokens = {
-      "--ow-menu-bg": "rgb(1, 2, 3)",
-      "--ow-menu-shadow": "none",
-      "--ow-menu-fg": "rgb(4, 5, 6)",
-      "--ow-menu-muted": "rgb(7, 8, 9)",
-      "--ow-menu-line-dark": "rgb(255, 0, 0)",
+      "--ow-panel": "rgb(1, 2, 3)",
+      "--ow-popup-shadow": "none",
+      "--ow-fg": "rgb(4, 5, 6)",
+      "--ow-muted": "rgb(7, 8, 9)",
+      "--ow-line-dark": "rgb(255, 0, 0)",
+      "--ow-hover": "rgb(0, 128, 0)",
     } as CSSProperties;
     await render(<Edit open popupStyle={tokens} />);
     await expect.poll(popup).not.toBeNull();
@@ -419,6 +420,11 @@ describe("Menu", () => {
     expect(
       getComputedStyle(document.querySelector(".ow-menu-separator") as HTMLElement).borderTopColor,
     ).toBe("rgb(255, 0, 0)");
+    // Glide's highlight is the hover tint.
+    await userEvent.hover(item("Copy"));
+    await expect.poll(lit).toBe("Copy");
+    const highlight = popup()?.querySelector(".ow-glide") as HTMLElement;
+    expect(getComputedStyle(highlight).backgroundColor).toBe("rgb(0, 128, 0)");
   });
 
   test("keeps its edge, grooves, checks, and focus in forced colors (DP-8)", async () => {

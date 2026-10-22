@@ -191,8 +191,8 @@ import { Menu } from "owsem-ui/base"; // or "@/components/owsem/menu"
 
 - Keyboard, focus, typeahead, and ARIA come from Base UI; do not add handlers. Inside a Toolbar,
   open it from an item: `<Toolbar.Button render={<Menu.Trigger />}>Edit</Toolbar.Button>`.
-- Do not style item hover or `data-highlighted`: Glide lights items (restyle it with
-  `--ow-glide-bg`). An `svg` first in an item is its icon; a `kbd` last is its shortcut (the menu
+- Do not style item hover or `data-highlighted`: Glide lights items (recolor it with
+  `--ow-hover`). An `svg` first in an item is its icon; a `kbd` last is its shortcut (the menu
   shows it, the app handles the keys).
 - `Menu.CheckboxItemIndicator` and `Menu.RadioItemIndicator` draw a check and a dot by default and
   keep their room while off (`keepMounted`); put them first. Checkbox and radio items keep the menu
@@ -201,8 +201,8 @@ import { Menu } from "owsem-ui/base"; // or "@/components/owsem/menu"
   sits 6px from the trigger (`side`, `align`, `sideOffset`); a submenu lines its first item up with
   its trigger. The menu renders in a portal: set tokens on the Popup's class or on `:root`, and
   `data-theme` on the Positioner when the trigger sits in a themed subtree.
-- Tokens: `--ow-menu-bg`, `--ow-menu-shadow`, `--ow-menu-fg`, `--ow-menu-muted`,
-  `--ow-menu-line-dark`, `--ow-menu-line-light`.
+- Reads `--ow-panel`, `--ow-popup-shadow`, `--ow-fg`, `--ow-muted`, `--ow-hover` (Glide),
+  `--ow-line-dark` and `--ow-line-light` (grooves), `--ow-radius`, and `--ow-focus`.
 
 ### Separator
 

@@ -112,44 +112,30 @@ grooves stay, the highlight is an outline in `Highlight`, and the checks follow 
 
 The stage controls are open: pick a size, the surface, or the text color, and the code follows.
 
-<ForMode mode="theme">
+Menu reads these theme tokens. Set them on the popup with a class, as `menu.css` does, or for every
+menu on `:root`. A class around the trigger does not reach: the menu renders in a portal, outside
+the trigger's subtree.
 
-Set the tokens on the popup with a class, as `menu.css` does, or for every menu on `:root`. A class
-around the trigger does not reach: the menu renders in a portal, outside the trigger's subtree.
-
-| Component token | Default | Purpose |
-| --- | --- | --- |
-| `--ow-menu-bg` | `--ow-panel` | Surface |
-| `--ow-menu-shadow` | `--ow-popup-shadow` | Edge and shadow |
-| `--ow-menu-fg` | `--ow-fg` | Item text |
-| `--ow-menu-muted` | `--ow-muted` | Group labels, shortcuts, and chevrons |
-| `--ow-menu-line-dark` | `--ow-line-dark` | Groove's dark line |
-| `--ow-menu-line-light` | `--ow-line-light` | Groove's light line |
-| `--ow-glide-bg` | `--ow-fg` at 7% | The highlight (Glide's own token) |
-
-</ForMode>
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-panel` | Surface |
+| `--ow-popup-shadow` | Edge and shadow |
+| `--ow-fg` | Item text |
+| `--ow-muted` | Group labels, shortcuts, and chevrons |
+| `--ow-hover` | The highlight (Glide) |
+| `--ow-line-dark` | Groove's dark line |
+| `--ow-line-light` | Groove's light line |
+| `--ow-radius` | Item corners; the popup's add its 4px padding |
+| `--ow-focus` | Focus ring |
 
 <ForMode mode="isolated">
 
-The popup carries its own values: set a token on the Popup with a class, as `menu.css` does, and
-on the separators for their lines. A class around the trigger does not reach: the menu renders in a
-portal.
-
-| Component token | Default | Purpose |
-| --- | --- | --- |
-| `--ow-menu-bg` | Its own, per theme | Surface |
-| `--ow-menu-shadow` | Its own, per theme | Edge and shadow |
-| `--ow-menu-fg` | Its own, per theme | Item text |
-| `--ow-menu-muted` | Its own, per theme | Group labels, shortcuts, and chevrons |
-| `--ow-menu-line-dark` | Its own, per theme | Groove's dark line |
-| `--ow-menu-line-light` | Its own, per theme | Groove's light line |
-| `--ow-glide-bg` | Its own, per theme | The highlight (Glide's own token) |
+In isolated mode the values sit on each Popup, so set yours on the Popup with a class, as
+`menu.css` does.
 
 </ForMode>
 
-Item corners follow `--ow-radius`, and the popup's add its 4px padding.
-
-<TokenChip item="menu" lang="en" />
+<TokenChip lang="en" />
 
 ## Ship it [#ship]
 

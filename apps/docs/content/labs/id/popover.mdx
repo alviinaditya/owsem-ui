@@ -91,37 +91,27 @@ Contrast), panel tetap punya tepi 1px dengan warna sistem, begitu pula panahnya.
 
 Kontrol stage terbuka: pilih sisi, panah, permukaan, atau warna teks, dan kodenya ikut berubah.
 
-<ForMode mode="theme">
+Popover membaca token tema berikut. Pasang di popup lewat class, seperti `share.css`, atau untuk
+semua popover di `:root`. Class di sekitar trigger tidak sampai: panel dirender di portal, di luar
+subtree trigger-nya.
 
-Pasang token di popup lewat class, seperti `share.css`, atau untuk semua popover di `:root`. Class
-di sekitar trigger tidak sampai: panel dirender di portal, di luar subtree trigger-nya.
-
-| Token komponen | Bawaan | Fungsi |
-| --- | --- | --- |
-| `--ow-popover-bg` | `--ow-panel` | Permukaan, juga untuk panah |
-| `--ow-popover-shadow` | `--ow-popup-shadow` | Tepi dan bayangan, juga untuk panah |
-| `--ow-popover-fg` | `--ow-fg` | Teks |
-| `--ow-popover-muted` | `--ow-muted` | Deskripsi |
-
-</ForMode>
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-panel` | Permukaan, juga untuk panah |
+| `--ow-popup-shadow` | Tepi dan bayangan, juga untuk panah |
+| `--ow-fg` | Teks |
+| `--ow-muted` | Deskripsi |
+| `--ow-radius` | Sudut, ditambah 4px seperti menu |
 
 <ForMode mode="isolated">
 
-Popup membawa nilainya sendiri: pasang token di Popup lewat class, seperti `share.css`. Class di
-sekitar trigger tidak sampai: panel dirender di portal.
-
-| Token komponen | Bawaan | Fungsi |
-| --- | --- | --- |
-| `--ow-popover-bg` | Miliknya sendiri, per tema | Permukaan, juga untuk panah |
-| `--ow-popover-shadow` | Miliknya sendiri, per tema | Tepi dan bayangan, juga untuk panah |
-| `--ow-popover-fg` | Miliknya sendiri, per tema | Teks |
-| `--ow-popover-muted` | Miliknya sendiri, per tema | Deskripsi |
+Di mode isolated, nilainya ada di setiap Popup, jadi atur di Popup lewat class, seperti `share.css`.
 
 </ForMode>
 
-Sudutnya `--ow-radius` ditambah 4px, sama seperti menu, dan panel punya padding 16px.
+Panel punya padding 16px; class di Popup bisa mengubahnya.
 
-<TokenChip item="popover" lang="id" />
+<TokenChip lang="id" />
 
 ## Ship it [#ship]
 

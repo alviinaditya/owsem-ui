@@ -90,38 +90,28 @@ Contrast), the panel keeps a 1px edge in the system color, and so does the arrow
 The stage controls are open: pick the side, the arrow, the surface, or the text color, and the code
 follows.
 
-<ForMode mode="theme">
+Popover reads these theme tokens. Set them on the popup with a class, as `share.css` does, or for
+every popover on `:root`. A class around the trigger does not reach: the panel renders in a portal,
+outside the trigger's subtree.
 
-Set the tokens on the popup with a class, as `share.css` does, or for every popover on `:root`. A
-class around the trigger does not reach: the panel renders in a portal, outside the trigger's
-subtree.
-
-| Component token | Default | Purpose |
-| --- | --- | --- |
-| `--ow-popover-bg` | `--ow-panel` | Surface, the arrow's too |
-| `--ow-popover-shadow` | `--ow-popup-shadow` | Edge and shadow, the arrow's too |
-| `--ow-popover-fg` | `--ow-fg` | Text |
-| `--ow-popover-muted` | `--ow-muted` | The description |
-
-</ForMode>
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-panel` | Surface, the arrow's too |
+| `--ow-popup-shadow` | Edge and shadow, the arrow's too |
+| `--ow-fg` | Text |
+| `--ow-muted` | The description |
+| `--ow-radius` | Corners, plus 4px as a menu's |
 
 <ForMode mode="isolated">
 
-The popup carries its own values: set a token on the Popup with a class, as `share.css` does. A
-class around the trigger does not reach: the panel renders in a portal.
-
-| Component token | Default | Purpose |
-| --- | --- | --- |
-| `--ow-popover-bg` | Its own, per theme | Surface, the arrow's too |
-| `--ow-popover-shadow` | Its own, per theme | Edge and shadow, the arrow's too |
-| `--ow-popover-fg` | Its own, per theme | Text |
-| `--ow-popover-muted` | Its own, per theme | The description |
+In isolated mode the values sit on each Popup, so set yours on the Popup with a class, as
+`share.css` does.
 
 </ForMode>
 
-The corners are `--ow-radius` plus 4px, as a menu's, and the panel has 16px of padding.
+The panel has 16px of padding; a class on the Popup changes it.
 
-<TokenChip item="popover" lang="en" />
+<TokenChip lang="en" />
 
 ## Ship it [#ship]
 

@@ -215,12 +215,12 @@ describe("Popover", () => {
     }
   });
 
-  test("component tokens override the theme tokens", async () => {
+  test("a theme token set on it changes it alone (TK-9)", async () => {
     const tokens = {
-      "--ow-popover-bg": "rgb(1, 2, 3)",
-      "--ow-popover-shadow": "none",
-      "--ow-popover-fg": "rgb(4, 5, 6)",
-      "--ow-popover-muted": "rgb(7, 8, 9)",
+      "--ow-panel": "rgb(1, 2, 3)",
+      "--ow-popup-shadow": "none",
+      "--ow-fg": "rgb(4, 5, 6)",
+      "--ow-muted": "rgb(7, 8, 9)",
     } as CSSProperties;
     await render(<Share open popupStyle={tokens} />);
     await expect.poll(popup).not.toBeNull();

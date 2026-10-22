@@ -64,8 +64,8 @@ const pinned = { open: true } as const;
 
 function tokens(cfg: Cfg) {
   return {
-    "--ow-popover-bg": cfg.bg || undefined,
-    "--ow-popover-fg": cfg.fg || undefined,
+    "--ow-panel": cfg.bg || undefined,
+    "--ow-fg": cfg.fg || undefined,
   } as CSSProperties;
 }
 
@@ -295,10 +295,10 @@ const popoverLab = defineLab({
         en: "The panel material with the popup shadow; role=dialog, named by its Title.",
       },
       tokens: {
-        "--ow-popover-bg": "--_bg",
-        "--ow-popover-shadow": "--_shadow",
-        "--ow-popover-fg": "--_fg",
-        "--ow-popover-muted": "--_muted",
+        "--ow-panel": "--_bg",
+        "--ow-popup-shadow": "--_shadow",
+        "--ow-fg": "--_fg",
+        "--ow-muted": "--_muted",
       },
     },
     {
@@ -308,7 +308,7 @@ const popoverLab = defineLab({
         id: "Opsional: permukaan dan bayangan panel, di tepinya, tepat di atas trigger.",
         en: "Optional: the panel's surface and shadow, on its edge, over the trigger.",
       },
-      tokens: { "--ow-popover-bg": "--_bg", "--ow-popover-shadow": "--_shadow" },
+      tokens: { "--ow-panel": "--_bg", "--ow-popup-shadow": "--_shadow" },
     },
     {
       name: "Title",
@@ -379,8 +379,8 @@ const popoverLab = defineLab({
         code: [
           "/* The popup itself: popovers render in a portal, outside the trigger's subtree. */",
           ".share {",
-          ...(cfg.bg ? [`  --${setup.prefix}-popover-bg: ${cfg.bg};`] : []),
-          ...(cfg.fg ? [`  --${setup.prefix}-popover-fg: ${cfg.fg};`] : []),
+          ...(cfg.bg ? [`  --${setup.prefix}-panel: ${cfg.bg};`] : []),
+          ...(cfg.fg ? [`  --${setup.prefix}-fg: ${cfg.fg};`] : []),
           "}",
         ].join("\n"),
       });

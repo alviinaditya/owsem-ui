@@ -6,22 +6,14 @@
  */
 @layer owsem.components {
   .ow-popover-popup {
-    --_bg: var(--ow-popover-bg, var(--ow-panel, #ffffff));
-    --_shadow: var(
-      --ow-popover-shadow,
-      var(
-        --ow-popup-shadow,
-        0 0 0 1px rgb(0 0 0 / 0.08),
-        0 4px 8px -2px rgb(0 0 0 / 0.06),
-        0 16px 32px -8px rgb(0 0 0 / 0.14)
-      )
-    );
-    --_fg: var(--ow-popover-fg, var(--ow-fg, #18181b));
-    --_muted: var(--ow-popover-muted, var(--ow-muted, #63636b));
+    --_bg: var(--ow-panel);
+    --_shadow: var(--ow-popup-shadow);
+    --_fg: var(--ow-fg);
+    --_muted: var(--ow-muted);
     box-sizing: border-box;
     max-inline-size: var(--available-width);
     padding: 16px;
-    border-radius: calc(var(--ow-radius, 8px) + 4px);
+    border-radius: calc(var(--ow-radius) + 4px);
     /* Invisible until forced colors draw it as the edge (DP-8). */
     outline: 1px solid transparent;
     outline-offset: -1px;
@@ -32,8 +24,8 @@
     line-height: 1.5;
     transform-origin: var(--transform-origin);
     transition:
-      opacity 180ms var(--ow-ease-out, cubic-bezier(0.23, 1, 0.32, 1)),
-      transform 180ms var(--ow-ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+      opacity 180ms var(--ow-ease-out),
+      transform 180ms var(--ow-ease-out);
   }
 
   .ow-popover-popup:is([data-starting-style], [data-ending-style]) {

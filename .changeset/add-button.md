@@ -9,5 +9,6 @@ from the top. Faces are flat fills with crisp 1px edges drawn as inset shadows, 
 shadow: secondary is the raised key, and primary and destructive have an edge darker than the fill
 and a thin light line inside its top. A press scales the button and ripples from the press point,
 with nothing running between presses. `loading` shows a spinner without changing the width
-and keeps focus. Style a link as a button with `buttonStyles()` and `ButtonIcon`. Restyle it with
-`--ow-button-*` tokens, such as `--ow-button-primary-bg` and `--ow-button-radius`.
+and keeps focus. Style a link as a button with `buttonStyles()` and `ButtonIcon`. It reads the
+theme tokens: primary is `--ow-accent` with `--ow-on-accent`, and destructive is `--ow-critical`
+with `--ow-bg` as its text.

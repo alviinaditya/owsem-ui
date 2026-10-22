@@ -116,61 +116,38 @@ kanan.
 
 ## Kustomisasi [#customization]
 
-Panel kontrol di stage terbuka: ubah ukuran, ikon, soft, loading, radius, atau warna primary, dan
-kodenya ikut berubah. Warna adalah token komponen yang kamu pasang di CSS sendiri.
+Panel kontrol di stage terbuka: ubah ukuran, ikon, soft, loading, radius, atau warna accent, dan
+kodenya ikut berubah. Warna dan radius adalah token tema yang kamu pasang di CSS sendiri.
 
-<ForMode mode="theme">
+Button membaca token tema berikut. Pasang di sebuah elemen untuk mengubah tombol di dalamnya,
+misalnya `.actions`.
 
-Token komponen menimpa token tema untuk setiap Button di dalam elemen yang memasangnya, misalnya
-`.actions`.
-
-| Token komponen | Bawaan | Fungsi |
-| --- | --- | --- |
-| `--ow-button-radius` | `--ow-radius` | Radius sudut |
-| `--ow-button-primary-bg` | `--ow-primary-bg` | Isi primary |
-| `--ow-button-on-primary` | `--ow-on-primary` | Teks di atas isi primary |
-| `--ow-button-critical` | `--ow-critical` | Isi destructive |
-| `--ow-button-on-critical` | `--ow-surface` | Teks di atas isi destructive |
-| `--ow-button-raised-bg`, `-raised-shadow` | `--ow-raised-*` | Permukaan secondary |
-| `--ow-button-pressed-bg`, `-pressed-shadow` | `--ow-pressed-*` | Permukaan saat ditekan |
-| `--ow-button-primary-shadow` | `--ow-primary-shadow` | Tepi primary dan destructive |
-| `--ow-button-edge` | `--ow-edge` | Garis outline |
-| `--ow-button-hover` | `--ow-hover` | Warna hover |
-| `--ow-button-fg` | `--ow-fg` | Teks secondary, outline, dan ghost |
-| `--ow-button-link` | `--ow-accent` dicampur ke arah `--ow-fg` | Teks link, minimal 4,5:1 |
-| `--ow-button-focus` | `--ow-focus` | Ring fokus |
-| `--ow-button-ripple` | `currentColor` | Riak |
-
-</ForMode>
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-radius` | Radius sudut |
+| `--ow-accent` | Isi primary; teks link, dicampur ke arah `--ow-fg` agar minimal 4,5:1 |
+| `--ow-on-accent` | Teks di atas isi primary |
+| `--ow-critical` | Isi destructive |
+| `--ow-bg` | Teks di atas isi destructive |
+| `--ow-primary-shadow` | Tepi primary dan destructive |
+| `--ow-raised-bg`, `--ow-raised-shadow` | Permukaan secondary |
+| `--ow-pressed-bg`, `--ow-pressed-shadow` | Permukaan saat ditekan |
+| `--ow-edge` | Garis outline |
+| `--ow-hover` | Warna hover |
+| `--ow-fg` | Teks secondary, outline, dan ghost |
+| `--ow-focus` | Ring fokus |
 
 <ForMode mode="isolated">
 
-Setiap Button membawa nilainya sendiri di root-nya dan tidak membaca token bersama, jadi pasang
-tokennya di tombol itu sendiri, seperti `actions.css` memasangnya di `.actions .ow-button`.
-
-| Token komponen | Bawaan | Fungsi |
-| --- | --- | --- |
-| `--ow-button-radius` | `8px` | Radius sudut |
-| `--ow-button-primary-bg` | Miliknya sendiri, per tema | Isi primary |
-| `--ow-button-on-primary` | Miliknya sendiri, per tema | Teks di atas isi primary |
-| `--ow-button-critical` | Miliknya sendiri, per tema | Isi destructive |
-| `--ow-button-on-critical` | Miliknya sendiri, per tema | Teks di atas isi destructive |
-| `--ow-button-raised-bg`, `-raised-shadow` | Miliknya sendiri, per tema | Permukaan secondary |
-| `--ow-button-pressed-bg`, `-pressed-shadow` | Miliknya sendiri, per tema | Permukaan saat ditekan |
-| `--ow-button-primary-shadow` | Miliknya sendiri, per tema | Tepi primary dan destructive |
-| `--ow-button-edge` | Miliknya sendiri, per tema | Garis outline |
-| `--ow-button-hover` | Miliknya sendiri, per tema | Warna hover |
-| `--ow-button-fg` | Miliknya sendiri, per tema | Teks secondary, outline, dan ghost |
-| `--ow-button-link` | Miliknya sendiri, per tema | Teks link, minimal 4,5:1 |
-| `--ow-button-focus` | Miliknya sendiri, per tema | Ring fokus |
-| `--ow-button-ripple` | `currentColor` | Riak |
+Di mode isolated, nilainya ada di root setiap Button, jadi atur di tombol itu sendiri, seperti
+`actions.css` dengan `.actions .ow-button`.
 
 </ForMode>
 
 `--py` bukan warna: pasang lewat `style` di tombolnya sendiri (lihat Geometri). Tekanan dan riak
 mengikuti `--ow-motion-scale`: nilai `0` membuat tombol diam.
 
-<TokenChip item="button" lang="id" />
+<TokenChip lang="id" />
 
 ## Ship it [#ship]
 

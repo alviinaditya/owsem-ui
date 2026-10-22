@@ -45,7 +45,7 @@ const initial = {
   icon: "start",
   soft: "",
   loading: "",
-  primary: "",
+  accent: "",
   radius: "",
 };
 type Cfg = typeof initial;
@@ -88,8 +88,8 @@ function Board({ cfg, style }: { cfg: Cfg; style?: CSSProperties }) {
 
 const tokens = (cfg: Cfg) =>
   ({
-    "--ow-button-primary-bg": cfg.primary || undefined,
-    "--ow-button-radius": cfg.radius || undefined,
+    "--ow-accent": cfg.accent || undefined,
+    "--ow-radius": cfg.radius || undefined,
   }) as CSSProperties;
 
 /** A button that loads for a moment when pressed, and shows that its width holds. */
@@ -353,10 +353,10 @@ const buttonLab = defineLab({
       ],
     },
     {
-      key: "primary",
+      key: "accent",
       type: "color",
-      label: { id: "Primary", en: "Primary" },
-      token: "--ow-primary-bg",
+      label: { id: "Accent", en: "Accent" },
+      token: "--ow-accent",
     },
   ],
 
@@ -369,19 +369,17 @@ const buttonLab = defineLab({
         en: "Base UI's button. Its face (::before) is drawn from the materials: a flat fill with inset-shadow edges that add no size.",
       },
       tokens: {
-        "--ow-button-radius": "--_radius",
-        "--ow-button-fg": "--_ink",
-        "--ow-button-raised-bg": "--_raised-bg",
-        "--ow-button-pressed-bg": "--_pressed-bg",
-        "--ow-button-primary-bg": "--_primary-bg",
-        "--ow-button-on-primary": "--_on-primary",
-        "--ow-button-critical": "--_critical",
-        "--ow-button-on-critical": "--_on-critical",
-        "--ow-button-edge": "--_edge",
-        "--ow-button-hover": "--_hover",
-        "--ow-button-link": "--_link",
-        "--ow-button-focus": "--_focus",
-        "--ow-button-ripple": "--_ripple",
+        "--ow-radius": "--_radius",
+        "--ow-fg": "--_ink",
+        "--ow-raised-bg": "--_raised-bg",
+        "--ow-pressed-bg": "--_pressed-bg",
+        "--ow-accent": "--_primary-bg",
+        "--ow-on-accent": "--_on-primary",
+        "--ow-critical": "--_critical",
+        "--ow-bg": "--_on-critical",
+        "--ow-edge": "--_edge",
+        "--ow-hover": "--_hover",
+        "--ow-focus": "--_focus",
       },
     },
     {
@@ -426,7 +424,7 @@ const buttonLab = defineLab({
     // Any other setup comes from the owsem CLI, which copies the component into the project.
     const from = isDefaultSetup(setup) ? "owsem-ui/base" : "@/components/owsem/button";
     const only = cfg.icon === "only";
-    const custom = cfg.primary || cfg.radius;
+    const custom = cfg.accent || cfg.radius;
     const icons = [
       cfg.icon === "end" ? "ArrowRight" : "",
       cfg.icon && cfg.icon !== "end" ? "Plus" : "",
@@ -465,12 +463,12 @@ const buttonLab = defineLab({
     ];
     const files = [{ name: "actions.tsx", code: usage.join("\n") }];
     if (custom) {
-      const token = `--${setup.prefix}-button`;
+      const token = `--${setup.prefix}`;
       const lines = [
         "/* Every Button inside .actions */",
-        // Isolated tokens are set on each button's root, so an inherited value would lose.
+        // Isolated values sit on each button's root, so an inherited value would lose.
         setup.mode === "isolated" ? ".actions .ow-button {" : ".actions {",
-        ...(cfg.primary ? [`  ${token}-primary-bg: ${cfg.primary};`] : []),
+        ...(cfg.accent ? [`  ${token}-accent: ${cfg.accent};`] : []),
         ...(cfg.radius ? [`  ${token}-radius: ${cfg.radius};`] : []),
         "}",
       ];

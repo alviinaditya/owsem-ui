@@ -251,12 +251,13 @@ describe("Button", () => {
       root.dataset.theme = theme;
       expect(face(secondary).backgroundColor).toBe(resolveColor("var(--ow-raised-bg)"));
       expect(face(secondary).boxShadow).toBe(resolveShadow("var(--ow-raised-shadow)"));
-      expect(face(primary).backgroundColor).toBe(resolveColor("var(--ow-primary-bg)"));
+      expect(face(primary).backgroundColor).toBe(resolveColor("var(--ow-accent)"));
       expect(face(primary).boxShadow).toBe(resolveShadow("var(--ow-primary-shadow)"));
-      expect(getComputedStyle(primary).color).toBe(resolveColor("var(--ow-on-primary)"));
-      // The critical fill with the primary's crisp edges.
+      expect(getComputedStyle(primary).color).toBe(resolveColor("var(--ow-on-accent)"));
+      // The critical fill with the primary's crisp edges, and the page background as its text.
       expect(face(destructive).backgroundColor).toBe(resolveColor("var(--ow-critical)"));
       expect(face(destructive).boxShadow).toBe(resolveShadow("var(--ow-primary-shadow)"));
+      expect(getComputedStyle(destructive).color).toBe(resolveColor("var(--ow-bg)"));
       expect(face(outline).backgroundColor).toBe("rgba(0, 0, 0, 0)");
       expect(face(outline).boxShadow).toBe(resolveShadow("inset 0 0 0 1px var(--ow-edge)"));
       expect(face(ghost).backgroundColor).toBe("rgba(0, 0, 0, 0)");
@@ -269,25 +270,30 @@ describe("Button", () => {
     }
   });
 
-  test("component tokens override the theme tokens", async () => {
-    const button = await one(
-      <Button
-        variant="primary"
-        style={
-          {
-            "--ow-button-primary-bg": "rgb(255, 0, 0)",
-            "--ow-button-on-primary": "rgb(0, 0, 255)",
-            "--ow-button-radius": "4px",
-          } as CSSProperties
-        }
-      >
-        Save
-      </Button>,
+  test("a theme token set on it changes it alone (TK-9)", async () => {
+    const [button, other] = await mount(
+      <>
+        <Button
+          variant="primary"
+          style={
+            {
+              "--ow-accent": "rgb(255, 0, 0)",
+              "--ow-on-accent": "rgb(0, 0, 255)",
+              "--ow-radius": "4px",
+            } as CSSProperties
+          }
+        >
+          Save
+        </Button>
+        <Button variant="primary">Other</Button>
+      </>,
     );
+    if (!button || !other) throw new Error("no buttons");
     expect(face(button).backgroundColor).toBe("rgb(255, 0, 0)");
     expect(getComputedStyle(button).color).toBe("rgb(0, 0, 255)");
     expect(getComputedStyle(button).borderTopLeftRadius).toBe("4px");
     expect(face(button).borderTopLeftRadius).toBe("4px");
+    expect(face(other).backgroundColor).toBe(resolveColor("var(--ow-accent)"));
   });
 
   test("hover tints the face with --ow-hover, and leaves its edges alone", async () => {
@@ -347,7 +353,7 @@ describe("Button", () => {
     expect(face(outline).boxShadow).toBe(resolveShadow("inset 0 0 0 1px var(--ow-edge)"));
     // Solid fills darken a little.
     const darker = (fill: string) => resolveColor(`color-mix(in oklab, ${fill}, black 10%)`);
-    expect(face(primary).backgroundColor).toBe(darker("var(--ow-primary-bg)"));
+    expect(face(primary).backgroundColor).toBe(darker("var(--ow-accent)"));
     expect(face(primary).boxShadow).toBe(resolveShadow("var(--ow-primary-shadow)"));
     expect(face(destructive).backgroundColor).toBe(darker("var(--ow-critical)"));
     expect(face(destructive).boxShadow).toBe(resolveShadow("var(--ow-primary-shadow)"));

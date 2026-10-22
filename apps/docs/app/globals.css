@@ -674,7 +674,7 @@ body {
  * pointing the way. A quieter edge than the default, as befits the end of a page.
  */
 .neighbors {
-  --ow-button-edge: var(--docs-line-strong);
+  --ow-edge: var(--docs-line-strong);
   display: flex;
   gap: 12px;
   margin-block: 40px 16px;

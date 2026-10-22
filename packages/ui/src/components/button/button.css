@@ -14,41 +14,29 @@
     --_py: max(var(--py), (24px - 1lh) / 2);
     --px: calc(var(--_py) + (1lh - 1cap) / 2);
     --icon: calc(1em + 2px);
-    --_radius: var(--ow-button-radius, var(--ow-radius, 8px));
-    --_press: calc(1 - 0.03 * var(--ow-motion-scale, 1));
+    --_radius: var(--ow-radius);
+    --_press: calc(1 - 0.03 * var(--ow-motion-scale));
 
-    --_ink: var(--ow-button-fg, var(--ow-fg, #18181b));
-    --_hover: var(--ow-button-hover, var(--ow-hover, rgb(0 0 0 / 0.04)));
-    --_focus: var(--ow-button-focus, var(--ow-focus, #5b4a9a));
-    --_edge: var(--ow-button-edge, var(--ow-edge, #82828b));
-    --_raised-bg: var(--ow-button-raised-bg, var(--ow-raised-bg, #ffffff));
-    --_raised-shadow: var(
-      --ow-button-raised-shadow,
-      var(--ow-raised-shadow, inset 0 0 0 1px rgb(0 0 0 / 0.14), 0 1px 0 rgb(0 0 0 / 0.04))
-    );
-    --_pressed-bg: var(--ow-button-pressed-bg, var(--ow-pressed-bg, #f4f4f5));
-    --_pressed-shadow: var(
-      --ow-button-pressed-shadow,
-      var(--ow-pressed-shadow, inset 0 0 0 1px rgb(0 0 0 / 0.16))
-    );
-    --_primary-bg: var(--ow-button-primary-bg, var(--ow-primary-bg, #7c6ab8));
+    /* The theme tokens it reads (TK-9); set one on the button, or around it, to restyle it. */
+    --_ink: var(--ow-fg);
+    --_hover: var(--ow-hover);
+    --_focus: var(--ow-focus);
+    --_edge: var(--ow-edge);
+    --_raised-bg: var(--ow-raised-bg);
+    --_raised-shadow: var(--ow-raised-shadow);
+    --_pressed-bg: var(--ow-pressed-bg);
+    --_pressed-shadow: var(--ow-pressed-shadow);
+    --_primary-bg: var(--ow-accent);
     /* A 1px edge darker than the fill and a thin light line inside its top; no drop shadow, which
      * would make the button look taller than its neighbors. */
-    --_primary-shadow: var(
-      --ow-button-primary-shadow,
-      var(
-        --ow-primary-shadow,
-        inset 0 0 0 1px rgb(0 0 0 / 0.28),
-        inset 0 1.5px 0.75px rgb(255 255 255 / 0.3)
-      )
-    );
-    --_on-primary: var(--ow-button-on-primary, var(--ow-on-primary, #ffffff));
-    --_critical: var(--ow-button-critical, var(--ow-critical, #b03f2a));
-    /* The page's own surface reads on the critical tone in both themes. */
-    --_on-critical: var(--ow-button-on-critical, var(--ow-surface, #ffffff));
+    --_primary-shadow: var(--ow-primary-shadow);
+    --_on-primary: var(--ow-on-accent);
+    --_critical: var(--ow-critical);
+    /* The page background reads on the critical tone in both themes. */
+    --_on-critical: var(--ow-bg);
     /* Text needs 4.5:1, more than the accent's 3:1, so the link leans toward the text color. */
-    --_link: var(--ow-button-link, color-mix(in oklab, var(--ow-accent, #7c6ab8) 70%, var(--_ink)));
-    --_ripple: var(--ow-button-ripple, currentColor);
+    --_link: color-mix(in oklab, var(--ow-accent) 70%, var(--_ink));
+    --_ripple: currentColor;
 
     /* The face, set per variant; held down, it takes the pressed pair unless the variant keeps its
      * own. */
@@ -84,8 +72,7 @@
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     /* Releasing settles with the Core spring. */
-    transition: transform var(--ow-spring-settle-duration, 1030ms)
-      var(--ow-spring-settle, cubic-bezier(0.23, 1, 0.32, 1));
+    transition: transform var(--ow-spring-settle-duration) var(--ow-spring-settle);
   }
 
   .ow-button[data-size="sm"] {
@@ -120,6 +107,7 @@
   .ow-button:is([data-variant="primary"], [data-variant="destructive"]) {
     --_bg: var(--_primary-bg);
     --_shadow: var(--_primary-shadow);
+    /* literal: black darkens any fill */
     --_bg-pressed: color-mix(in oklab, var(--_bg), black 10%);
     --_shadow-pressed: var(--_shadow);
   }
@@ -172,7 +160,7 @@
     text-decoration-color: transparent;
     text-decoration-thickness: 1px;
     text-underline-offset: 0.25em;
-    transition: opacity 150ms var(--ow-ease-out, ease-out);
+    transition: opacity 150ms var(--ow-ease-out);
   }
 
   .ow-button[data-variant="link"]::before {
@@ -193,7 +181,7 @@
   .ow-button:is(:active, [data-pressed]):not([data-disabled]) {
     transform: scale(var(--_press));
     transition-duration: 90ms;
-    transition-timing-function: var(--ow-ease-out, ease-out);
+    transition-timing-function: var(--ow-ease-out);
   }
 
   .ow-button:is(:active, [data-pressed]):not([data-disabled])::before {
@@ -226,8 +214,8 @@
   .ow-button-icon,
   .ow-button-spinner {
     transition:
-      opacity 150ms var(--ow-ease-out, ease-out),
-      transform 200ms var(--ow-ease-out, ease-out);
+      opacity 150ms var(--ow-ease-out),
+      transform 200ms var(--ow-ease-out);
   }
 
   /* Icons: font size + 2px, pulled toward the edge so they sit as far from it as from the top. */
@@ -302,12 +290,12 @@
   .ow-button-ripple[data-state] {
     transform: none;
     transition:
-      opacity 300ms var(--ow-ease-out, ease-out),
-      transform 450ms var(--ow-ease-out, ease-out);
+      opacity 300ms var(--ow-ease-out),
+      transform 450ms var(--ow-ease-out);
   }
 
   .ow-button-ripple[data-state="on"] {
-    opacity: calc(0.1 * var(--ow-motion-scale, 1));
+    opacity: calc(0.1 * var(--ow-motion-scale));
     transition-duration: 90ms, 450ms;
   }
 

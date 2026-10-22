@@ -113,61 +113,38 @@ outline and its focus ring uses `Highlight`. Right to left, the start icon is on
 
 ## Customization [#customization]
 
-The stage controls are open: change the size, the icons, soft, loading, the radius, or the primary
-color, and the code follows. Colors are component tokens that you set in your own CSS.
+The stage controls are open: change the size, the icons, soft, loading, the radius, or the accent
+color, and the code follows. Colors and the radius are theme tokens that you set in your own CSS.
 
-<ForMode mode="theme">
+Button reads these theme tokens. Set one on an element to change the buttons inside it, such as
+`.actions`.
 
-Component tokens override the theme tokens for every Button inside the element that sets them,
-such as `.actions`.
-
-| Component token | Default | Purpose |
-| --- | --- | --- |
-| `--ow-button-radius` | `--ow-radius` | Corner radius |
-| `--ow-button-primary-bg` | `--ow-primary-bg` | Primary fill |
-| `--ow-button-on-primary` | `--ow-on-primary` | Text on the primary fill |
-| `--ow-button-critical` | `--ow-critical` | Destructive fill |
-| `--ow-button-on-critical` | `--ow-surface` | Text on the destructive fill |
-| `--ow-button-raised-bg`, `-raised-shadow` | `--ow-raised-*` | Secondary face |
-| `--ow-button-pressed-bg`, `-pressed-shadow` | `--ow-pressed-*` | Pressed face |
-| `--ow-button-primary-shadow` | `--ow-primary-shadow` | Primary and destructive edges |
-| `--ow-button-edge` | `--ow-edge` | Outline's line |
-| `--ow-button-hover` | `--ow-hover` | Hover tint |
-| `--ow-button-fg` | `--ow-fg` | Text on secondary, outline, and ghost |
-| `--ow-button-link` | `--ow-accent` mixed toward `--ow-fg` | Link text, at 4.5:1 |
-| `--ow-button-focus` | `--ow-focus` | Focus ring |
-| `--ow-button-ripple` | `currentColor` | Ripple |
-
-</ForMode>
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-radius` | Corner radius |
+| `--ow-accent` | Primary fill; the link's text, mixed toward `--ow-fg` for 4.5:1 |
+| `--ow-on-accent` | Text on the primary fill |
+| `--ow-critical` | Destructive fill |
+| `--ow-bg` | Text on the destructive fill |
+| `--ow-primary-shadow` | Primary and destructive edges |
+| `--ow-raised-bg`, `--ow-raised-shadow` | Secondary face |
+| `--ow-pressed-bg`, `--ow-pressed-shadow` | Pressed face |
+| `--ow-edge` | Outline's line |
+| `--ow-hover` | Hover tint |
+| `--ow-fg` | Text on secondary, outline, and ghost |
+| `--ow-focus` | Focus ring |
 
 <ForMode mode="isolated">
 
-Each Button carries its own values on its root and reads no shared token, so set them on the
-button itself, as `actions.css` does with `.actions .ow-button`.
-
-| Component token | Default | Purpose |
-| --- | --- | --- |
-| `--ow-button-radius` | `8px` | Corner radius |
-| `--ow-button-primary-bg` | Its own, per theme | Primary fill |
-| `--ow-button-on-primary` | Its own, per theme | Text on the primary fill |
-| `--ow-button-critical` | Its own, per theme | Destructive fill |
-| `--ow-button-on-critical` | Its own, per theme | Text on the destructive fill |
-| `--ow-button-raised-bg`, `-raised-shadow` | Its own, per theme | Secondary face |
-| `--ow-button-pressed-bg`, `-pressed-shadow` | Its own, per theme | Pressed face |
-| `--ow-button-primary-shadow` | Its own, per theme | Primary and destructive edges |
-| `--ow-button-edge` | Its own, per theme | Outline's line |
-| `--ow-button-hover` | Its own, per theme | Hover tint |
-| `--ow-button-fg` | Its own, per theme | Text on secondary, outline, and ghost |
-| `--ow-button-link` | Its own, per theme | Link text, at 4.5:1 |
-| `--ow-button-focus` | Its own, per theme | Focus ring |
-| `--ow-button-ripple` | `currentColor` | Ripple |
+In isolated mode the values sit on each Button's root, so set yours on the button itself, as
+`actions.css` does with `.actions .ow-button`.
 
 </ForMode>
 
 `--py` is not a color: set it with `style` on the button itself (see Geometry). The press and the
 ripple follow `--ow-motion-scale`: `0` keeps the button still.
 
-<TokenChip item="button" lang="en" />
+<TokenChip lang="en" />
 
 ## Ship it [#ship]
 

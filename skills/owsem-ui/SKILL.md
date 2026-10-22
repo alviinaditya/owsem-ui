@@ -176,10 +176,10 @@ import { Button, ButtonIcon, buttonStyles, IconButton } from "owsem-ui/base"; //
   as elements; their size is the font size plus 2px, so do not size them.
 - Size: `--py` (padding above and below the text) sets any custom size, through `style` on the
   button itself: `style={{ "--py": "0.6em" }}`. Do not set `height` or `padding`.
-- Tokens: `--ow-button-radius`, `--ow-button-primary-bg`, `--ow-button-on-primary`,
-  `--ow-button-critical`, `--ow-button-on-critical`, `--ow-button-edge`, `--ow-button-hover`,
-  `--ow-button-fg`, `--ow-button-link`, `--ow-button-focus`, `--ow-button-ripple`, and the
-  material pairs `--ow-button-{raised,pressed}-{bg,shadow}` and `--ow-button-primary-shadow`.
+- Reads `--ow-accent` with `--ow-on-accent` (primary; the link mixes the accent toward `--ow-fg`),
+  `--ow-critical` with `--ow-bg` as its text (destructive), `--ow-primary-shadow` (both fills'
+  edges), `--ow-raised-*` (secondary), `--ow-pressed-*` (held down), `--ow-edge` (outline),
+  `--ow-fg`, `--ow-hover`, `--ow-focus`, `--ow-radius`, and `--ow-motion-scale`.
 
 ### Separator
 

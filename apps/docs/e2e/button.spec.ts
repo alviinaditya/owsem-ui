@@ -44,6 +44,8 @@ test("a press in the Button Lab scales the button and ripples from the pointer",
   page,
 }) => {
   await page.goto("/en/button");
+  // Once hydrated, the stage scales the demo to fit; measure after that.
+  await expect(stage(page).locator(".lab-fit")).toHaveAttribute("style", /scale/);
   const button = stage(page).locator('[data-demo="secondary"]');
   const ripple = button.locator(".ow-button-ripple");
   const box = await button.boundingBox();

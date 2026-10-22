@@ -6,13 +6,13 @@
  */
 @layer owsem.components {
   .ow-tooltip-popup {
-    --_bg: var(--ow-tooltip-bg, #18181b);
-    --_fg: var(--ow-tooltip-fg, #fafafa);
+    --_bg: var(--ow-tooltip-bg);
+    --_fg: var(--ow-tooltip-fg);
     box-sizing: border-box;
     max-inline-size: min(20rem, var(--available-width, 20rem));
     /* One line is 24px tall. */
     padding: calc((24px - 1lh) / 2) 8px;
-    border-radius: calc(var(--ow-radius, 8px) - 2px);
+    border-radius: calc(var(--ow-radius) - 2px);
     /* Invisible until forced colors draw it as the edge (DP-8). */
     outline: 1px solid transparent;
     outline-offset: -1px;
@@ -24,8 +24,8 @@
     overflow-wrap: break-word;
     transform-origin: var(--transform-origin);
     transition:
-      opacity 125ms var(--ow-ease-out, cubic-bezier(0.23, 1, 0.32, 1)),
-      transform 125ms var(--ow-ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+      opacity 125ms var(--ow-ease-out),
+      transform 125ms var(--ow-ease-out);
   }
 
   .ow-tooltip-popup:is([data-starting-style], [data-ending-style]) {
@@ -49,7 +49,7 @@
     margin-inline-start: 0.5em;
     padding-inline: 0.3em;
     border: 0;
-    border-radius: 4px;
+    border-radius: calc(var(--ow-radius) / 2);
     background-color: color-mix(in oklab, var(--_fg) 14%, transparent);
     color: color-mix(in oklab, var(--_fg) 80%, transparent);
     font: inherit;

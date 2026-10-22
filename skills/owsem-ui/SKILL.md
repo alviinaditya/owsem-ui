@@ -272,7 +272,7 @@ import { Toggle, Toolbar, Tooltip } from "owsem-ui/base"; // or "@/components/ow
 - The popup renders in a portal on `body`: a `data-theme` or token set around the trigger does not
   reach it. Set tokens on `:root` or on the Popup's class, and pass `data-theme` to the Positioner
   when the trigger sits in a themed subtree. Wrap the app in `DirectionProvider` for right to left.
-- Tokens: `--ow-tooltip-bg` and `--ow-tooltip-fg` (theme tokens, shared by every tooltip).
+- Reads `--ow-tooltip-bg`, `--ow-tooltip-fg`, and `--ow-radius`.
 
 ### Tree Rail Nav
 

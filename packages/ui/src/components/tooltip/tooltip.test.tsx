@@ -221,6 +221,14 @@ describe("Tooltip", () => {
     }
   });
 
+  test("its corners and the shortcut's come from the control radius (FR-10b)", async () => {
+    await mount(<Labelled name="Bold" shortcut="B" open />);
+    await expect.poll(popup).not.toBeNull();
+    const surface = popup() as HTMLElement;
+    expect(getComputedStyle(surface).borderRadius).toBe("6px");
+    expect(getComputedStyle(surface.querySelector("kbd") as Element).borderRadius).toBe("4px");
+  });
+
   test("its tokens restyle it, set on the page or on a part", async () => {
     function Scoped() {
       // A container from state: Base UI waits while it is null.

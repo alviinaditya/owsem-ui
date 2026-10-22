@@ -2738,7 +2738,7 @@ figure[data-code-block] pre {
 }
 
 /* One theme's backdrop in the states matrix. */
-.demo-surface {
+.demo-button-surface {
   flex-wrap: nowrap;
   justify-content: flex-start;
   max-inline-size: none;
@@ -2753,19 +2753,19 @@ figure[data-code-block] pre {
 }
 
 /* A bracket as wide as the button, and its width in px. */
-.demo-measure {
+.demo-button-measure {
   display: inline-grid;
   gap: 8px;
   margin: 0;
 }
 
-.demo-measure-rule {
+.demo-button-measure-rule {
   block-size: 5px;
   border: 1px solid var(--docs-muted);
   border-block-start: 0;
 }
 
-.demo-measure figcaption {
+.demo-button-measure figcaption {
   justify-self: center;
   min-block-size: 1lh;
   color: var(--docs-muted);

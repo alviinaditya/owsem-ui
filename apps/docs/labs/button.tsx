@@ -119,7 +119,7 @@ function Loader({
     return () => clearTimeout(timer);
   }, [loading]);
   return (
-    <figure className="demo-measure">
+    <figure className="demo-button-measure">
       <Button
         ref={ref}
         variant={variant}
@@ -130,7 +130,7 @@ function Loader({
       >
         {label}
       </Button>
-      <span className="demo-measure-rule" aria-hidden="true" />
+      <span className="demo-button-measure-rule" aria-hidden="true" />
       <figcaption>{width ? `${width}px` : ""}</figcaption>
     </figure>
   );
@@ -264,7 +264,7 @@ function States({ cfg, lang }: { cfg: Cfg; lang: Lang }) {
         return {
           label: soft ? `${variant} soft` : variant,
           cells: THEMES.map((theme) => (
-            <div key={theme} data-theme={theme} className="demo-buttons demo-surface">
+            <div key={theme} data-theme={theme} className="demo-buttons demo-button-surface">
               {(["sm", "md", "lg"] as const).map((size) => (
                 <Button key={size} variant={variant} soft={soft} size={size}>
                   {t.save}

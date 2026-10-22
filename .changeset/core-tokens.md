@@ -9,6 +9,4 @@ easings with the Core springs (`--ow-spring-travel`, `--ow-spring-settle`, `--ow
 as CSS easings with their durations.
 
 They are the only tokens. Components read them without fallbacks, and setting one on an element
-restyles only what is inside it. Glide's highlight is `--ow-hover` and moves with the glide spring;
-Separator and Tree Rail Nav read the theme tokens directly. The component tokens
-`--ow-glide-*`, `--ow-separator-*`, and `--ow-tree-rail-*` are gone.
+restyles only what is inside it.

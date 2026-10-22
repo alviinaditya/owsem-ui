@@ -2754,7 +2754,7 @@ figure[data-code-block] pre {
   justify-self: start;
 }
 
-.demo-toggle-head {
+.demo-toggle-group-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2766,7 +2766,7 @@ figure[data-code-block] pre {
   text-decoration-thickness: 1px;
 }
 
-.demo-surface {
+.demo-toggle-group-surface {
   padding: 12px;
   border: 1px solid var(--ow-line);
   border-radius: 14px;

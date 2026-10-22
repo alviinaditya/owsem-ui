@@ -108,7 +108,7 @@ function Views({ cfg, lang, style }: { cfg: Cfg; lang: Lang; style?: CSSProperti
   const [view, setView] = useState<View>("list");
   return (
     <div className="demo-card demo-toggle" style={style}>
-      <div className="demo-toggle-head">
+      <div className="demo-toggle-group-head">
         <p className="demo-title">{t.tasks}</p>
         <ToggleGroup.Root
           aria-label={t.view}
@@ -188,7 +188,7 @@ function Cell({
   const [view, setView] = useState<View>("board");
   const multiple = row === "multiple";
   return (
-    <div data-theme={theme} className="demo-surface" data-cell={`${theme}-${row}`}>
+    <div data-theme={theme} className="demo-toggle-group-surface" data-cell={`${theme}-${row}`}>
       {multiple ? (
         <ToggleGroup.Root aria-label={t.formatting} multiple defaultValue={["bold"]}>
           {FORMATS.map((value) => (

@@ -155,9 +155,13 @@ describe("Button geometry", () => {
     if (!withIcon || !centered) throw new Error("no buttons");
     const spinner = withIcon.querySelector(".ow-button__spinner");
     if (!spinner) throw new Error("no spinner");
-    // Once it has scaled in, the spinner fills the icon's cell exactly.
+    // Once it has scaled in, the spinner fills the icon's cell exactly. Finish the scale-in rather
+    // than wait for it: WebKit can hold transitions in a test frame.
+    for (const animation of screen.container.getAnimations({ subtree: true })) {
+      if (animation instanceof CSSTransition) animation.finish();
+    }
     const slot = icon(withIcon, "start");
-    await expect.poll(() => rect(spinner).width).toBeCloseTo(rect(slot).width, 1);
+    expect(rect(spinner).width).toBeCloseTo(rect(slot).width, 1);
     for (const side of Object.values(insets(slot, spinner))) {
       expect(Math.abs(side)).toBeLessThanOrEqual(TOL);
     }

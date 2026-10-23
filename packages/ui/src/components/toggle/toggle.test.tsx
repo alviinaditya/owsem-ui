@@ -144,10 +144,10 @@ describe("Toggle", () => {
     expect(sm?.dataset.size).toBe("sm");
     expect(md?.hasAttribute("data-icon-only")).toBe(false);
     expect(iconOnly?.hasAttribute("data-icon-only")).toBe(true);
-    const icon = md?.querySelector(".ow-toggle-icon");
+    const icon = md?.querySelector(".ow-toggle__icon");
     expect(icon?.getAttribute("aria-hidden")).toBe("true");
     expect(icon?.getAttribute("data-side")).toBe("start");
-    expect(sm?.querySelector(".ow-toggle-icon")?.getAttribute("data-side")).toBe("end");
+    expect(sm?.querySelector(".ow-toggle__icon")?.getAttribute("data-side")).toBe("end");
   });
 
   test("is flat while off and the raised key while on, in light and dark", async () => {
@@ -292,7 +292,7 @@ describe("Toggle", () => {
         <Toggle startIcon={<Star />}>Star</Toggle>
       </div>,
     );
-    const icon = toggle.querySelector<HTMLElement>(".ow-toggle-icon");
+    const icon = toggle.querySelector<HTMLElement>(".ow-toggle__icon");
     if (!icon) throw new Error("no icon");
     // Inline start is the right side in RTL: the icon sits there, pulled toward the edge.
     const box = toggle.getBoundingClientRect();

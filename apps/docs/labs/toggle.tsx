@@ -261,7 +261,7 @@ const toggleLab = defineLab({
     },
     {
       name: "Icon",
-      selector: '[data-demo="pin"] .ow-toggle-icon',
+      selector: '[data-demo="pin"] .ow-toggle__icon',
       note: {
         id: "startIcon atau endIcon: ukuran font ditambah 2px, sejauh jarak atas dari tepi.",
         en: "startIcon or endIcon: the font size plus 2px, as far from the edge as from the top.",

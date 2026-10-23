@@ -16,7 +16,7 @@ async function mount(ui: ReactNode): Promise<HTMLElement[]> {
 }
 
 const iconOf = (toggle: HTMLElement | undefined) => {
-  const icon = toggle?.querySelector(".ow-toggle-icon");
+  const icon = toggle?.querySelector(".ow-toggle__icon");
   if (!toggle || !icon) throw new Error("no icon");
   return { toggle, icon };
 };

@@ -55,24 +55,24 @@
   }
 
   /* Icons sit as far from the edge as from the top and bottom (FR-10). */
-  .ow-toggle-icon {
+  .ow-toggle__icon {
     display: inline-flex;
     flex: none;
     inline-size: var(--icon);
     block-size: var(--icon);
   }
 
-  .ow-toggle-icon > :where(svg, img) {
+  .ow-toggle__icon > :where(svg, img) {
     display: block;
     inline-size: 100%;
     block-size: 100%;
   }
 
-  .ow-toggle-icon[data-side="start"] {
+  .ow-toggle__icon[data-side="start"] {
     margin-inline-start: calc((1cap - var(--icon)) / 2);
   }
 
-  .ow-toggle-icon[data-side="end"] {
+  .ow-toggle__icon[data-side="end"] {
     margin-inline-end: calc((1cap - var(--icon)) / 2);
   }
 
@@ -81,7 +81,7 @@
     padding: calc(var(--_py) + (1lh - var(--icon)) / 2);
   }
 
-  .ow-toggle[data-icon-only] > .ow-toggle-icon {
+  .ow-toggle[data-icon-only] > .ow-toggle__icon {
     margin: 0;
   }
 

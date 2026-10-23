@@ -10,7 +10,7 @@ import {
 import { withClassName } from "../../core/class-name";
 import "./toggle.css";
 
-const cls = { root: "ow-toggle", icon: "ow-toggle-icon" } as const;
+const cls = { root: "ow-toggle", icon: "ow-toggle__icon" } as const;
 
 export type ToggleSize = "sm" | "md" | "lg";
 

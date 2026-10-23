@@ -163,7 +163,7 @@ function Geometry({ lang }: { lang: Lang }) {
       const y = (v: number) => (v - box.top) * k;
       const next: Guide[] = [];
       for (const button of host.querySelectorAll<HTMLElement>(".ow-button")) {
-        const icon = button.querySelector(".ow-button-icon");
+        const icon = button.querySelector(".ow-button__icon");
         if (!icon) continue;
         const b = button.getBoundingClientRect();
         const i = icon.getBoundingClientRect();
@@ -174,7 +174,7 @@ function Geometry({ lang }: { lang: Lang }) {
           { axis: "y", x: cx, y: y(i.bottom), length: (b.bottom - i.bottom) * k },
           { axis: "x", x: x(b.left), y: cy, length: (i.left - b.left) * k },
         ];
-        if (!button.querySelector(".ow-button-label")) {
+        if (!button.querySelector(".ow-button__label")) {
           sides.push({ axis: "x", x: x(i.right), y: cy, length: (b.right - i.right) * k });
         }
         for (const side of sides) {
@@ -384,7 +384,7 @@ const buttonLab = defineLab({
     },
     {
       name: "Icon",
-      selector: '.ow-button-icon[data-side="start"]',
+      selector: '.ow-button__icon[data-side="start"]',
       note: {
         id: "Ukuran font ditambah 2px, ditarik ke tepi sejauh jaraknya ke atas. Dekoratif.",
         en: "The font size plus 2px, pulled toward the edge as far as it sits from the top. Decorative.",
@@ -392,7 +392,7 @@ const buttonLab = defineLab({
     },
     {
       name: "Label",
-      selector: ".ow-button-label",
+      selector: ".ow-button__label",
       note: {
         id: "Teks tombol, satu baris. Saat loading tanpa ikon awal, ia memudar tapi tetap mengisi ruangnya.",
         en: "The button's text, on one line. Loading without a start icon fades it but keeps its box.",
@@ -400,7 +400,7 @@ const buttonLab = defineLab({
     },
     {
       name: "Spinner",
-      selector: ".ow-button-spinner",
+      selector: ".ow-button__spinner",
       note: {
         id: "Hanya ada pada tombol yang punya prop loading. Menempati sel ikon awal, atau di tengah.",
         en: "Only on buttons with a loading prop. It takes the start icon's cell, or the middle.",
@@ -408,7 +408,7 @@ const buttonLab = defineLab({
     },
     {
       name: "Ripple",
-      selector: ".ow-button-layer",
+      selector: ".ow-button__layer",
       note: {
         id: "Lapisan yang memotong riak ke bentuk permukaan. Riaknya tumbuh dari titik tekan.",
         en: "The layer that clips the ripple to the face. The ripple grows from the press point.",

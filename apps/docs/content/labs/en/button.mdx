@@ -59,11 +59,11 @@ Inspect (I) outlines each part on the stage, with its tokens.
 
 | Part | Element | Notes |
 | --- | --- | --- |
-| <Part name="Root" /> | `button.ow-button` | Base UI Button; `data-variant`, `data-size`, and `data-soft` choose the look |
-| <Part name="Icon" /> | `span.ow-button-icon` | `startIcon` or `endIcon`, with `data-side`; decorative (`aria-hidden`) |
-| <Part name="Label" /> | `span.ow-button-label` | The children |
-| <Part name="Spinner" /> | `span.ow-button-spinner` | Only on buttons with a `loading` prop |
-| <Part name="Ripple" /> | `span.ow-button-layer` | Clips the ripple to the face; not on `link` |
+| <Part name="Root" /> | `button.ow-button` | Base UI Button; `data-variant`, `data-size`, and `data-soft` choose the look; `data-held` while held down, `data-loading`, `data-disabled`, and `data-icon-only` on IconButton |
+| <Part name="Icon" /> | `span.ow-button__icon` | `startIcon` or `endIcon`, with `data-side`; decorative (`aria-hidden`). Button wraps the icon in `span.ow-button__glyph` |
+| <Part name="Label" /> | `span.ow-button__label` | The children |
+| <Part name="Spinner" /> | `span.ow-button__spinner` | Only on buttons with a `loading` prop |
+| <Part name="Ripple" /> | `span.ow-button__layer` | Clips the ripple, `span.ow-button__ripple`, to the face; not on `link` |
 
 ## States and variants [#states]
 
@@ -86,7 +86,7 @@ variant of a size is the same height.
 | State | What marks it |
 | --- | --- |
 | Hover | `--ow-hover` over the face, only for a mouse or a pen; the edges stay |
-| Pressed | Scaled to 0.97, the pressed material (solid fills darken a little), and the ripple |
+| Pressed | `data-held` (or `:active`); scaled to 0.97, the pressed material (solid fills darken a little), and the ripple |
 | Keyboard focus | A 2px ring, 2px outside the button |
 | Disabled | `data-disabled`; dimmed, and out of the tab order |
 | Loading | `data-loading` and `aria-busy`; a spinner, focus kept |

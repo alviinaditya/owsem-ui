@@ -31,7 +31,7 @@ async function mount(ui: ReactNode): Promise<HTMLElement[]> {
 }
 
 const icon = (button: Element, side: "start" | "end") => {
-  const el = button.querySelector(`.ow-button-icon[data-side="${side}"]`);
+  const el = button.querySelector(`.ow-button__icon[data-side="${side}"]`);
   if (!el) throw new Error(`no ${side} icon`);
   return el;
 };
@@ -153,7 +153,7 @@ describe("Button geometry", () => {
     expect(buttons.map((b) => rect(b).width)).toEqual(before);
     const [withIcon, centered] = buttons;
     if (!withIcon || !centered) throw new Error("no buttons");
-    const spinner = withIcon.querySelector(".ow-button-spinner");
+    const spinner = withIcon.querySelector(".ow-button__spinner");
     if (!spinner) throw new Error("no spinner");
     // Once it has scaled in, the spinner fills the icon's cell exactly.
     const slot = icon(withIcon, "start");
@@ -161,7 +161,7 @@ describe("Button geometry", () => {
     for (const side of Object.values(insets(slot, spinner))) {
       expect(Math.abs(side)).toBeLessThanOrEqual(TOL);
     }
-    const middle = centered.querySelector(":scope > .ow-button-spinner");
+    const middle = centered.querySelector(":scope > .ow-button__spinner");
     if (!middle) throw new Error("no centered spinner");
     const gap = insets(centered, middle);
     expect(Math.abs(gap.left - gap.right)).toBeLessThanOrEqual(TOL);

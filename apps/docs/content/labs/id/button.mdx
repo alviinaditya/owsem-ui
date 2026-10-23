@@ -61,11 +61,11 @@ menambah ukuran. Inspeksi (I) menandai setiap bagian di stage, beserta tokennya.
 
 | Bagian | Elemen | Catatan |
 | --- | --- | --- |
-| <Part name="Root" /> | `button.ow-button` | Button dari Base UI; `data-variant`, `data-size`, dan `data-soft` menentukan tampilannya |
-| <Part name="Icon" /> | `span.ow-button-icon` | `startIcon` atau `endIcon`, dengan `data-side`; dekoratif (`aria-hidden`) |
-| <Part name="Label" /> | `span.ow-button-label` | Children-nya |
-| <Part name="Spinner" /> | `span.ow-button-spinner` | Hanya pada tombol yang punya prop `loading` |
-| <Part name="Ripple" /> | `span.ow-button-layer` | Memotong riak mengikuti permukaan; tidak ada pada `link` |
+| <Part name="Root" /> | `button.ow-button` | Button dari Base UI; `data-variant`, `data-size`, dan `data-soft` menentukan tampilannya; `data-held` selama ditahan, `data-loading`, `data-disabled`, dan `data-icon-only` pada IconButton |
+| <Part name="Icon" /> | `span.ow-button__icon` | `startIcon` atau `endIcon`, dengan `data-side`; dekoratif (`aria-hidden`). Button membungkus ikonnya dengan `span.ow-button__glyph` |
+| <Part name="Label" /> | `span.ow-button__label` | Children-nya |
+| <Part name="Spinner" /> | `span.ow-button__spinner` | Hanya pada tombol yang punya prop `loading` |
+| <Part name="Ripple" /> | `span.ow-button__layer` | Memotong riak, `span.ow-button__ripple`, mengikuti permukaan; tidak ada pada `link` |
 
 ## State dan varian [#states]
 
@@ -88,7 +88,7 @@ hierarki dibangun dari isi dan tepi, dan semua varian dalam satu ukuran sama tin
 | State | Yang menandainya |
 | --- | --- |
 | Hover | `--ow-hover` di atas permukaan, hanya untuk mouse atau pena; tepinya tetap |
-| Ditekan | Mengecil ke 0,97, material ditekan (isi solid sedikit menggelap), dan riak |
+| Ditekan | `data-held` (atau `:active`); mengecil ke 0,97, material ditekan (isi solid sedikit menggelap), dan riak |
 | Fokus keyboard | Ring 2px, 2px di luar tombol |
 | Disabled | `data-disabled`; meredup dan keluar dari urutan Tab |
 | Loading | `data-loading` dan `aria-busy`; spinner, fokus tetap |

@@ -13,7 +13,7 @@ import { withClassName } from "../../core/class-name";
 import { ButtonIcon, type ButtonStyleOptions, cls, styleAttributes } from "./button-styles";
 import "./button.css";
 
-const PRESSED = "data-pressed";
+const HELD = "data-held";
 
 export interface ButtonProps extends Omit<BaseButton.Props, "ref">, ButtonStyleOptions {
   /**
@@ -93,7 +93,7 @@ export const Button: ForwardRefExoticComponent<ButtonProps & RefAttributes<HTMLE
     // Mounted only for buttons that can load, so the spinner can fade in and out.
     const spinner = loading === undefined ? null : <Spinner />;
     const release = (button: HTMLElement) => {
-      button.removeAttribute(PRESSED);
+      button.removeAttribute(HELD);
       if (ripple.current?.dataset.state === "on") ripple.current.dataset.state = "off";
     };
     return (
@@ -111,7 +111,7 @@ export const Button: ForwardRefExoticComponent<ButtonProps & RefAttributes<HTMLE
         onPointerDown={(event) => {
           onPointerDown?.(event);
           if (event.defaultPrevented || event.button !== 0) return;
-          event.currentTarget.setAttribute(PRESSED, "");
+          event.currentTarget.setAttribute(HELD, "");
           if (ripple.current) startRipple(event.currentTarget, ripple.current, event);
         }}
         onPointerUp={(event) => {

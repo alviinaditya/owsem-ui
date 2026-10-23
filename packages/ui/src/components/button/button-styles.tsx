@@ -3,12 +3,12 @@ import type { ComponentPropsWithoutRef, ReactElement } from "react";
 
 export const cls = {
   root: "ow-button",
-  layer: "ow-button-layer",
-  ripple: "ow-button-ripple",
-  icon: "ow-button-icon",
-  glyph: "ow-button-glyph",
-  label: "ow-button-label",
-  spinner: "ow-button-spinner",
+  layer: "ow-button__layer",
+  ripple: "ow-button__ripple",
+  icon: "ow-button__icon",
+  glyph: "ow-button__glyph",
+  label: "ow-button__label",
+  spinner: "ow-button__spinner",
 } as const;
 
 export type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "link" | "destructive";

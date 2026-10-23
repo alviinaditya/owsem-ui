@@ -178,18 +178,18 @@
   }
 
   /* DP-4: in within 90 ms, and into the pressed material. */
-  .ow-button:is(:active, [data-pressed]):not([data-disabled]) {
+  .ow-button:is(:active, [data-held]):not([data-disabled]) {
     transform: scale(var(--_press));
     transition-duration: 90ms;
     transition-timing-function: var(--ow-ease-out);
   }
 
-  .ow-button:is(:active, [data-pressed]):not([data-disabled])::before {
+  .ow-button:is(:active, [data-held]):not([data-disabled])::before {
     background: var(--_bg-pressed);
     box-shadow: var(--_shadow-pressed);
   }
 
-  .ow-button[data-variant="link"]:is(:active, [data-pressed]):not([data-disabled]) {
+  .ow-button[data-variant="link"]:is(:active, [data-held]):not([data-disabled]) {
     opacity: 0.7;
   }
 
@@ -209,17 +209,17 @@
   }
 
   /* The parts that fade while loading. */
-  .ow-button-glyph,
-  .ow-button-label,
-  .ow-button-icon,
-  .ow-button-spinner {
+  .ow-button__glyph,
+  .ow-button__label,
+  .ow-button__icon,
+  .ow-button__spinner {
     transition:
       opacity 150ms var(--ow-ease-out),
       transform 200ms var(--ow-ease-out);
   }
 
   /* Icons: font size + 2px, pulled toward the edge so they sit as far from it as from the top. */
-  .ow-button-icon {
+  .ow-button__icon {
     display: inline-grid;
     place-items: center;
     flex: none;
@@ -227,28 +227,28 @@
     block-size: var(--icon);
   }
 
-  .ow-button-icon[data-side="start"] {
+  .ow-button__icon[data-side="start"] {
     margin-inline-start: calc((1cap - var(--icon)) / 2);
   }
 
-  .ow-button-icon[data-side="end"] {
+  .ow-button__icon[data-side="end"] {
     margin-inline-end: calc((1cap - var(--icon)) / 2);
   }
 
   /* The glyph and the spinner share one cell, so swapping them moves nothing. */
-  .ow-button-icon > * {
+  .ow-button__icon > * {
     grid-area: 1 / 1;
     inline-size: 100%;
     block-size: 100%;
   }
 
-  .ow-button-glyph {
+  .ow-button__glyph {
     display: grid;
     place-items: center;
   }
 
-  .ow-button-icon :where(svg, img),
-  .ow-button-spinner > svg {
+  .ow-button__icon :where(svg, img),
+  .ow-button__spinner > svg {
     display: block;
     inline-size: 100%;
     block-size: 100%;
@@ -259,12 +259,12 @@
     padding: calc(var(--_py) + (1lh - var(--icon)) / 2);
   }
 
-  .ow-button[data-icon-only] > .ow-button-icon {
+  .ow-button[data-icon-only] > .ow-button__icon {
     margin: 0;
   }
 
   /* Ripple (Tactile): grows from the press point, fades on release. Clipped to the face. */
-  .ow-button-layer {
+  .ow-button__layer {
     position: absolute;
     inset: 0;
     z-index: -1;
@@ -273,7 +273,7 @@
     pointer-events: none;
   }
 
-  .ow-button-ripple {
+  .ow-button__ripple {
     position: absolute;
     /* biome-ignore lint/nursery/useLogicalProperties: the press point is measured from the left */
     left: var(--_x, 50%);
@@ -287,26 +287,26 @@
     transform: scale(0.2);
   }
 
-  .ow-button-ripple[data-state] {
+  .ow-button__ripple[data-state] {
     transform: none;
     transition:
       opacity 300ms var(--ow-ease-out),
       transform 450ms var(--ow-ease-out);
   }
 
-  .ow-button-ripple[data-state="on"] {
+  .ow-button__ripple[data-state="on"] {
     opacity: calc(0.1 * var(--ow-motion-scale));
     transition-duration: 90ms, 450ms;
   }
 
   /* Loading: the spinner takes the start icon's place, or the centre, and nothing resizes. */
-  .ow-button-spinner {
+  .ow-button__spinner {
     display: grid;
     opacity: 0;
     transform: scale(0.5);
   }
 
-  .ow-button > .ow-button-spinner {
+  .ow-button > .ow-button__spinner {
     position: absolute;
     inset: 0;
     margin: auto;
@@ -314,22 +314,22 @@
     block-size: var(--icon);
   }
 
-  .ow-button[data-loading] .ow-button-spinner {
+  .ow-button[data-loading] .ow-button__spinner {
     opacity: 1;
     transform: none;
   }
 
-  .ow-button[data-loading] .ow-button-spinner > svg {
+  .ow-button[data-loading] .ow-button__spinner > svg {
     animation: ow-button-spin 0.8s linear infinite;
   }
 
-  .ow-button[data-loading] > [data-side="start"] > .ow-button-glyph {
+  .ow-button[data-loading] > [data-side="start"] > .ow-button__glyph {
     opacity: 0;
     transform: scale(0.5);
   }
 
   /* Centred: the content fades but keeps its box. */
-  .ow-button[data-loading] > .ow-button-spinner ~ * {
+  .ow-button[data-loading] > .ow-button__spinner ~ * {
     opacity: 0;
   }
 
@@ -351,15 +351,15 @@
       --_press: 1;
     }
 
-    .ow-button-ripple {
+    .ow-button__ripple {
       display: none;
     }
 
-    .ow-button :is(.ow-button-glyph, .ow-button-spinner) {
+    .ow-button :is(.ow-button__glyph, .ow-button__spinner) {
       transform: none;
     }
 
-    .ow-button[data-loading] .ow-button-spinner > svg {
+    .ow-button[data-loading] .ow-button__spinner > svg {
       animation: ow-button-pulse 0.8s ease-in-out infinite alternate;
     }
   }
@@ -380,7 +380,7 @@
       color: GrayText;
     }
 
-    .ow-button-layer {
+    .ow-button__layer {
       display: none;
     }
   }
@@ -392,11 +392,11 @@
       --px: calc(var(--_py) + 0.3em);
     }
 
-    .ow-button-icon[data-side="start"] {
+    .ow-button__icon[data-side="start"] {
       margin-inline-start: calc((0.65em - var(--icon)) / 2);
     }
 
-    .ow-button-icon[data-side="end"] {
+    .ow-button__icon[data-side="end"] {
       margin-inline-end: calc((0.65em - var(--icon)) / 2);
     }
 

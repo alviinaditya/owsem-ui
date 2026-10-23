@@ -36,7 +36,7 @@ test("Previous and Next are links styled as Buttons", async ({ page }) => {
   for (const link of await nav.getByRole("link").all()) {
     await expect(link).toHaveClass(/\bow-button\b/);
     await expect(link).toHaveAttribute("data-variant", "outline");
-    await expect(link.locator('.ow-button-icon[aria-hidden="true"] svg')).toHaveCount(1);
+    await expect(link.locator('.ow-button__icon[aria-hidden="true"] svg')).toHaveCount(1);
   }
 });
 
@@ -47,14 +47,14 @@ test("a press in the Button Lab scales the button and ripples from the pointer",
   // Once hydrated, the stage scales the demo to fit; measure after that.
   await expect(stage(page).locator(".lab-fit")).toHaveAttribute("style", /scale/);
   const button = stage(page).locator('[data-demo="secondary"]');
-  const ripple = button.locator(".ow-button-ripple");
+  const ripple = button.locator(".ow-button__ripple");
   const box = await button.boundingBox();
   if (!box) throw new Error("no button");
   await page.mouse.move(box.x + box.width - 8, box.y + 8);
   await page.mouse.down();
-  await expect(button).toHaveAttribute("data-pressed", "");
+  await expect(button).toHaveAttribute("data-held", "");
   await expect(ripple).toHaveAttribute("data-state", "on");
   await page.mouse.up();
-  await expect(button).not.toHaveAttribute("data-pressed");
+  await expect(button).not.toHaveAttribute("data-held");
   await expect(ripple).toHaveAttribute("data-state", "off");
 });

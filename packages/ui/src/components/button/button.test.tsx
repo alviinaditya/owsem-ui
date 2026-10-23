@@ -98,7 +98,7 @@ describe("Button", () => {
     expect(button.dataset.size).toBe("md");
     expect(button.textContent).toBe("Save");
     // The ripple layer is decorative.
-    expect(button.querySelector(".ow-button-layer")?.getAttribute("aria-hidden")).toBe("true");
+    expect(button.querySelector(".ow-button__layer")?.getAttribute("aria-hidden")).toBe("true");
   });
 
   test("passes className, style, render, and ref through (FR-2, FR-5)", async () => {
@@ -169,7 +169,7 @@ describe("Button", () => {
     await userEvent.keyboard(" ");
     expect(onClick).not.toHaveBeenCalled();
     // The spinner takes the start icon's place; the label stays readable.
-    const spinner = button.querySelector('[data-side="start"] .ow-button-spinner');
+    const spinner = button.querySelector('[data-side="start"] .ow-button__spinner');
     expect(spinner).not.toBeNull();
     expect(button.textContent).toBe("Save");
     await screen.rerender(
@@ -192,13 +192,13 @@ describe("Button", () => {
       </>,
     );
     if (!plain || !never) throw new Error("no buttons");
-    const spinner = plain.querySelector(":scope > .ow-button-spinner");
+    const spinner = plain.querySelector(":scope > .ow-button__spinner");
     expect(spinner).not.toBeNull();
-    const label = plain.querySelector(".ow-button-label");
+    const label = plain.querySelector(".ow-button__label");
     await expect.poll(() => label && getComputedStyle(label).opacity).toBe("0");
     expect(label?.getBoundingClientRect().width).toBeGreaterThan(0);
     // A button that never loads renders no spinner.
-    expect(never.querySelector(".ow-button-spinner")).toBeNull();
+    expect(never.querySelector(".ow-button__spinner")).toBeNull();
   });
 
   test("IconButton is square, ghost by default, and named by aria-label", async () => {
@@ -206,8 +206,8 @@ describe("Button", () => {
     expect(button.getAttribute("aria-label")).toBe("Add");
     expect(button.dataset.variant).toBe("ghost");
     expect(button.hasAttribute("data-icon-only")).toBe(true);
-    expect(button.querySelector(".ow-button-label")).toBeNull();
-    expect(button.querySelector(".ow-button-icon")?.getAttribute("aria-hidden")).toBe("true");
+    expect(button.querySelector(".ow-button__label")).toBeNull();
+    expect(button.querySelector(".ow-button__icon")?.getAttribute("aria-hidden")).toBe("true");
   });
 
   test("buttonStyles() styles a link, which keeps its own semantics", async () => {
@@ -225,7 +225,7 @@ describe("Button", () => {
     expect(link?.dataset.size).toBe("sm");
     expect(link?.getAttribute("role")).toBeNull();
     expect(link && getComputedStyle(link).display).toBe("inline-flex");
-    expect(link?.querySelector('.ow-button-icon[data-side="end"]')).not.toBeNull();
+    expect(link?.querySelector('.ow-button__icon[data-side="end"]')).not.toBeNull();
   });
 
   test("paints each variant from the materials, in light and dark (DP-7)", async () => {
@@ -318,14 +318,14 @@ describe("Button", () => {
     const button = await one(<Button variant="secondary">Press</Button>);
     const box = button.getBoundingClientRect();
     pointer("pointerdown", button, box.left + 10, box.top + 10);
-    expect(button.hasAttribute("data-pressed")).toBe(true);
+    expect(button.hasAttribute("data-held")).toBe(true);
     expect(face(button).backgroundColor).toBe(resolveColor("var(--ow-pressed-bg)"));
     expect(face(button).boxShadow).toBe(resolveShadow("var(--ow-pressed-shadow)"));
     // In within 90 ms.
     expect(getComputedStyle(button).transitionDuration).toBe("0.09s");
     await expect.poll(() => scaleOf(getComputedStyle(button).transform)).toBeCloseTo(0.97, 3);
     pointer("pointerup", button, box.left + 10, box.top + 10);
-    expect(button.hasAttribute("data-pressed")).toBe(false);
+    expect(button.hasAttribute("data-held")).toBe(false);
     // Released with the settle spring and its duration.
     const style = getComputedStyle(button);
     expect(style.transitionDuration).toBe("1.03s");
@@ -365,7 +365,7 @@ describe("Button", () => {
 
   test("ripples from the press point, then fades on release (Tactile)", async () => {
     const button = await one(<Button variant="secondary">Ripple</Button>);
-    const ripple = button.querySelector<HTMLElement>(".ow-button-ripple");
+    const ripple = button.querySelector<HTMLElement>(".ow-button__ripple");
     if (!ripple) throw new Error("no ripple");
     const box = button.getBoundingClientRect();
     pointer("pointerdown", button, box.left + 12, box.top + 8);
@@ -384,7 +384,7 @@ describe("Button", () => {
 
   test("links neither ripple nor scale; they dim and underline", async () => {
     const button = await one(<Button variant="link">Docs</Button>);
-    expect(button.querySelector(".ow-button-ripple")).toBeNull();
+    expect(button.querySelector(".ow-button__ripple")).toBeNull();
     expect(face(button).content).toBe("none");
     await userEvent.hover(button);
     expect(getComputedStyle(button).textDecorationColor).toBe(getComputedStyle(button).color);
@@ -417,8 +417,8 @@ describe("Button", () => {
         <Button startIcon={<Plus />}>Save</Button>
       </div>,
     );
-    const icon = button.querySelector(".ow-button-icon");
-    const label = button.querySelector(".ow-button-label");
+    const icon = button.querySelector(".ow-button__icon");
+    const label = button.querySelector(".ow-button__label");
     if (!icon || !label) throw new Error("no parts");
     expect(icon.getBoundingClientRect().left).toBeGreaterThan(label.getBoundingClientRect().left);
     expect(Number.parseFloat(getComputedStyle(icon).marginRight)).toBeLessThan(0);
@@ -432,14 +432,14 @@ describe("Button", () => {
         Save
       </Button>,
     );
-    const spinner = button.querySelector(".ow-button-spinner svg");
+    const spinner = button.querySelector(".ow-button__spinner svg");
     expect(spinner && getComputedStyle(spinner).animationName).toBe("ow-button-pulse");
     const still = await one(<Button variant="secondary">Press</Button>);
     const box = still.getBoundingClientRect();
     pointer("pointerdown", still, box.left + 5, box.top + 5);
     expect(face(still).backgroundColor).toBe(resolveColor("var(--ow-pressed-bg)"));
     expect(getComputedStyle(still).transform).toBe("matrix(1, 0, 0, 1, 0, 0)");
-    const ripple = still.querySelector(".ow-button-ripple");
+    const ripple = still.querySelector(".ow-button__ripple");
     expect(ripple && getComputedStyle(ripple).display).toBe("none");
     pointer("pointerup", still, box.left + 5, box.top + 5);
   });

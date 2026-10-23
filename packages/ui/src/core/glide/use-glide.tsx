@@ -13,6 +13,8 @@ import {
 import { createGlide, type Glide, type GlideOptions } from "./glide";
 import "./glide.css";
 
+const cls = { root: "ow-glide" } as const;
+
 export interface UseGlide<T extends HTMLElement> {
   /** For the container: the items and the highlight go inside it. */
   ref: RefCallback<T>;
@@ -69,7 +71,7 @@ export function GlideHighlight({
       {...props}
       ref={glide.highlightRef}
       aria-hidden="true"
-      className={className ? `ow-glide ${className}` : "ow-glide"}
+      className={className ? `${cls.root} ${className}` : cls.root}
     />
   );
 }

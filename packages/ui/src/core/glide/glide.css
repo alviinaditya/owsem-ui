@@ -39,7 +39,7 @@
     opacity: 1;
   }
 
-  .ow-glide[data-pressed] {
+  .ow-glide[data-held] {
     --_bg: color-mix(in oklab, var(--ow-hover), var(--ow-fg) 5%);
   }
 

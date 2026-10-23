@@ -1801,7 +1801,7 @@ figure[data-code-block] pre {
   min-inline-size: 220px;
 }
 
-.lab-more .ow-menu-item {
+.lab-more .ow-menu__item {
   --py: 0.75em;
 }
 
@@ -2789,7 +2789,7 @@ figure[data-code-block] pre {
 }
 
 /* A scaled stage skews Base UI's room below the anchor; the cell holds the popup whole. */
-.demo-menu-cell .ow-menu-popup {
+.demo-menu-cell .ow-menu__popup {
   max-block-size: none;
 }
 

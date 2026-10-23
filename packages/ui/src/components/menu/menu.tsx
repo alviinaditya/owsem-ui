@@ -8,13 +8,13 @@ import { GlideHighlight, useGlide } from "../../core/glide/use-glide";
 import "./menu.css";
 
 const cls = {
-  positioner: "ow-menu-positioner",
-  popup: "ow-menu-popup",
-  item: "ow-menu-item",
-  indicator: "ow-menu-indicator",
-  chevron: "ow-menu-chevron",
-  groupLabel: "ow-menu-group-label",
-  separator: "ow-menu-separator",
+  positioner: "ow-menu__positioner",
+  popup: "ow-menu__popup",
+  item: "ow-menu__item",
+  indicator: "ow-menu__indicator",
+  chevron: "ow-menu__chevron",
+  groupLabel: "ow-menu__group-label",
+  separator: "ow-menu__separator",
 } as const;
 
 /** Every kind of item Glide lights: plain, link, checkbox, radio, and submenu triggers. */

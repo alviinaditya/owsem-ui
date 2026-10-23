@@ -44,7 +44,7 @@ describe("Menu geometry (FR-9, FR-10, FR-10b)", () => {
         </Menu.Root>,
       );
       await settle();
-      const items = [...document.querySelectorAll<HTMLElement>(".ow-menu-item")];
+      const items = [...document.querySelectorAll<HTMLElement>(".ow-menu__item")];
       expect(items).toHaveLength(3);
       for (const item of items) {
         expect(item.getBoundingClientRect().height, item.textContent ?? "").toBeCloseTo(
@@ -56,17 +56,17 @@ describe("Menu geometry (FR-9, FR-10, FR-10b)", () => {
       const [cut, wrap, more] = items as [HTMLElement, HTMLElement, HTMLElement];
       for (const [el, icon] of [
         [cut, cut.querySelector("svg")],
-        [wrap, wrap.querySelector(".ow-menu-indicator")],
-        [more, more.querySelector(".ow-menu-chevron")],
+        [wrap, wrap.querySelector(".ow-menu__indicator")],
+        [more, more.querySelector(".ow-menu__chevron")],
       ] as const) {
         if (!icon) throw new Error("no icon");
         const box = icon.getBoundingClientRect();
         expect(box.width).toBeCloseTo(expected.icon, 1);
         const gap = insets(el, icon);
-        const side = icon === more.querySelector(".ow-menu-chevron") ? gap.right : gap.left;
+        const side = icon === more.querySelector(".ow-menu__chevron") ? gap.right : gap.left;
         expect(Math.abs(side - gap.top)).toBeLessThanOrEqual(TOL);
       }
-      const popup = document.querySelector(".ow-menu-popup") as HTMLElement;
+      const popup = document.querySelector(".ow-menu__popup") as HTMLElement;
       const ring = concentric(popup, cut);
       expect(ring.delta).toBeLessThanOrEqual(TOL);
       expect(ring.insetDelta).toBeLessThanOrEqual(TOL);

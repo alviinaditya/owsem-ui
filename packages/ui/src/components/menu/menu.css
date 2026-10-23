@@ -6,7 +6,7 @@
  * geometry rule (FR-9) with a tighter --py, and the popup's corners stay concentric with theirs.
  */
 @layer owsem.components {
-  .ow-menu-popup {
+  .ow-menu__popup {
     --_bg: var(--ow-panel);
     --_shadow: var(--ow-popup-shadow);
     --_fg: var(--ow-fg);
@@ -36,36 +36,36 @@
       transform 180ms var(--ow-ease-out);
   }
 
-  .ow-menu-popup[data-size="sm"] {
+  .ow-menu__popup[data-size="sm"] {
     font-size: 0.8125rem;
   }
 
-  .ow-menu-popup[data-size="lg"] {
+  .ow-menu__popup[data-size="lg"] {
     font-size: 1rem;
   }
 
-  .ow-menu-popup:is([data-starting-style], [data-ending-style]) {
+  .ow-menu__popup:is([data-starting-style], [data-ending-style]) {
     opacity: 0;
     transform: scale(0.96);
   }
 
   /* Leaving is quicker than arriving. */
-  .ow-menu-popup[data-ending-style] {
+  .ow-menu__popup[data-ending-style] {
     transition-duration: 120ms;
   }
 
   /* Opened from the keyboard, or shut with Escape: no animation. */
-  .ow-menu-popup[data-instant] {
+  .ow-menu__popup[data-instant] {
     transition: none;
   }
 
   /* Glide's highlight takes the items' corners. */
-  .ow-menu-popup > .ow-glide {
+  .ow-menu__popup > .ow-glide {
     --_radius: var(--ow-radius);
   }
 
   /* Items: Button's geometry rule (FR-9), --py the only input; an icon or indicator first. */
-  .ow-menu-item {
+  .ow-menu__item {
     --py: 0.5em;
     --_py: max(var(--py), (24px - 1lh) / 2);
     --px: calc(var(--_py) + (1lh - 1cap) / 2);
@@ -84,36 +84,36 @@
   }
 
   /* Icons and indicators sit as far from the edge as from the top and bottom (FR-10). */
-  .ow-menu-item > svg,
-  .ow-menu-indicator {
+  .ow-menu__item > svg,
+  .ow-menu__indicator {
     display: inline-flex;
     flex: none;
     inline-size: var(--icon);
     block-size: var(--icon);
   }
 
-  .ow-menu-item > :is(svg, .ow-menu-indicator):first-child {
+  .ow-menu__item > :is(svg, .ow-menu__indicator):first-child {
     margin-inline-start: calc((1cap - var(--icon)) / 2);
   }
 
-  .ow-menu-indicator > svg {
+  .ow-menu__indicator > svg {
     inline-size: 100%;
     block-size: 100%;
   }
 
   /* Unchecked, the indicator keeps its room, so the labels stay in line. */
-  .ow-menu-indicator[data-unchecked] {
+  .ow-menu__indicator[data-unchecked] {
     visibility: hidden;
   }
 
   /* A shortcut (<kbd>) or the submenu chevron at the end, muted. */
-  .ow-menu-item > kbd,
-  .ow-menu-chevron {
+  .ow-menu__item > kbd,
+  .ow-menu__chevron {
     margin-inline-start: auto;
     color: var(--_muted);
   }
 
-  .ow-menu-item > kbd {
+  .ow-menu__item > kbd {
     display: inline;
     padding: 0;
     padding-inline-start: 1.5em;
@@ -123,7 +123,7 @@
     letter-spacing: 0.04em;
   }
 
-  .ow-menu-chevron {
+  .ow-menu__chevron {
     display: inline-flex;
     flex: none;
     inline-size: var(--icon);
@@ -131,32 +131,32 @@
     margin-inline-end: calc((1cap - var(--icon)) / 2);
   }
 
-  .ow-menu-chevron > svg {
+  .ow-menu__chevron > svg {
     inline-size: 100%;
     block-size: 100%;
   }
 
-  .ow-menu-positioner[dir="rtl"] .ow-menu-chevron {
+  .ow-menu__positioner[dir="rtl"] .ow-menu__chevron {
     transform: scaleX(-1);
   }
 
   /* The item whose submenu is open stays lit while the pointer is in the submenu. */
-  .ow-menu-popup:not(:hover) .ow-menu-item[data-popup-open] {
+  .ow-menu__popup:not(:hover) .ow-menu__item[data-popup-open] {
     background-color: var(--_highlight);
   }
 
   /* FR-13: a 2px ring, inside the item so the popup does not clip it. */
-  .ow-menu-item:focus-visible {
+  .ow-menu__item:focus-visible {
     outline: 2px solid var(--ow-focus);
     outline-offset: -2px;
   }
 
-  .ow-menu-item[data-disabled] {
+  .ow-menu__item[data-disabled] {
     opacity: 0.45;
   }
 
   /* Smaller than the items (12px of 14), with their inline padding: the item's --px in its em. */
-  .ow-menu-group-label {
+  .ow-menu__group-label {
     padding-block: 0.6em 0.3em;
     padding-inline: calc((0.5em + (1.25em - 1cap) / 2) / 0.8571);
     color: var(--_muted);
@@ -166,7 +166,7 @@
   }
 
   /* An etched groove: a dark line with a light one under it, as borders for forced colors. */
-  .ow-menu-separator {
+  .ow-menu__separator {
     --_dark: var(--ow-line-dark);
     --_light: var(--ow-line-light);
     margin-block: var(--_pad);
@@ -176,17 +176,17 @@
 
   /* FR-20: it fades, without growing. */
   @media (prefers-reduced-motion: reduce) {
-    .ow-menu-popup:is([data-starting-style], [data-ending-style]) {
+    .ow-menu__popup:is([data-starting-style], [data-ending-style]) {
       transform: none;
     }
   }
 
   @media (forced-colors: active) {
-    .ow-menu-item:focus-visible {
+    .ow-menu__item:focus-visible {
       outline-color: Highlight;
     }
 
-    .ow-menu-item[data-disabled] {
+    .ow-menu__item[data-disabled] {
       color: GrayText;
       opacity: 1;
     }

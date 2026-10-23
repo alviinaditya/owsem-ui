@@ -368,7 +368,7 @@ const menuLab = defineLab({
     },
     {
       name: "Popup",
-      selector: ".ow-menu-popup",
+      selector: ".ow-menu__popup",
       note: {
         id: "Material panel dengan bayangan popup: tepi 1px yang tegas. Radiusnya radius item ditambah padding 4px.",
         en: "The panel material with the popup shadow: a crisp 1px edge. Its radius is the item's plus the 4px padding.",
@@ -399,7 +399,7 @@ const menuLab = defineLab({
     },
     {
       name: "GroupLabel",
-      selector: ".ow-menu-group-label",
+      selector: ".ow-menu__group-label",
       note: {
         id: "Nama grup, kecil dan muted; juga menamai grup untuk teknologi asistif.",
         en: "A group's name, small and muted; it names the group for assistive technology too.",
@@ -415,7 +415,7 @@ const menuLab = defineLab({
     },
     {
       name: "Indicator",
-      selector: '[data-demo="wrap"] .ow-menu-indicator',
+      selector: '[data-demo="wrap"] .ow-menu__indicator',
       note: {
         id: "Centang (atau titik untuk radio). Tetap menyimpan tempatnya saat mati.",
         en: "A check (or a dot for radios). It keeps its room while off.",
@@ -423,7 +423,7 @@ const menuLab = defineLab({
     },
     {
       name: "Separator",
-      selector: ".ow-menu-separator",
+      selector: ".ow-menu__separator",
       note: {
         id: "Alur terukir di antara grup.",
         en: "An etched groove between groups.",

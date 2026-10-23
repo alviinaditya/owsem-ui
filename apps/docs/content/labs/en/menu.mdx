@@ -57,15 +57,16 @@ outlines the other parts on the stage; pick a name, here or on the stage, to see
 | Part | Element | Notes |
 | --- | --- | --- |
 | <Part name="Trigger" /> | Your button | Passed to `render`; `aria-haspopup="menu"` and `aria-expanded` |
-| Positioner | `div.ow-menu-positioner` | 6px from the trigger; a submenu beside its item, first rows in line |
-| <Part name="Popup" /> | `div.ow-menu-popup` | `role="menu"`, `data-size`, and the Glide highlight inside |
-| <Part name="Item" /> | `div.ow-menu-item` | `role="menuitem"`; an `svg` first is sized as its icon |
+| Positioner | `div.ow-menu__positioner` | 6px from the trigger; a submenu beside its item, first rows in line |
+| <Part name="Popup" /> | `div.ow-menu__popup` | `role="menu"`, `data-size`, `data-instant` when it skips the animation, and the Glide highlight inside |
+| <Part name="Item" /> | `div.ow-menu__item` | `role="menuitem"` and `data-disabled`; an `svg` first is sized as its icon |
 | <Part name="Shortcut" /> | `kbd` | Last in an item, at its end |
-| <Part name="GroupLabel" /> | `div.ow-menu-group-label` | Names its `Menu.Group` or `Menu.RadioGroup` |
-| <Part name="CheckboxItem" /> | `div.ow-menu-item` | `role="menuitemcheckbox"`, `aria-checked` |
-| <Part name="Indicator" /> | `span.ow-menu-indicator` | A check, or a dot in a RadioItem; `data-checked` or `data-unchecked` |
-| <Part name="Separator" /> | `div.ow-menu-separator` | `role="separator"`, an etched groove |
-| <Part name="SubmenuTrigger" /> | `div.ow-menu-item` | `aria-haspopup`, `data-popup-open`, and a chevron |
+| <Part name="GroupLabel" /> | `div.ow-menu__group-label` | Names its `Menu.Group` or `Menu.RadioGroup` |
+| <Part name="CheckboxItem" /> | `div.ow-menu__item` | `role="menuitemcheckbox"`, `aria-checked` |
+| <Part name="Indicator" /> | `span.ow-menu__indicator` | A check, or a dot in a RadioItem; `data-checked` or `data-unchecked` |
+| <Part name="Separator" /> | `div.ow-menu__separator` | `role="separator"`, an etched groove |
+| <Part name="SubmenuTrigger" /> | `div.ow-menu__item` | `aria-haspopup`, `data-popup-open`, and a chevron |
+| Chevron | `span.ow-menu__chevron` | At a SubmenuTrigger's end, mirrored for right-to-left text |
 
 `Menu.LinkItem` is an item that is a link; `render` swaps in a router link.
 

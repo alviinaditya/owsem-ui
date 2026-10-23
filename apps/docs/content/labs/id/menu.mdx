@@ -59,15 +59,16 @@ menandai bagian lainnya di stage; pilih sebuah nama, di sini atau di stage, untu
 | Bagian | Elemen | Catatan |
 | --- | --- | --- |
 | <Part name="Trigger" /> | Tombol Anda | Diberikan lewat `render`; `aria-haspopup="menu"` dan `aria-expanded` |
-| Positioner | `div.ow-menu-positioner` | 6px dari trigger; submenu di samping item-nya, baris pertama sejajar |
-| <Part name="Popup" /> | `div.ow-menu-popup` | `role="menu"`, `data-size`, dan sorotan Glide di dalamnya |
-| <Part name="Item" /> | `div.ow-menu-item` | `role="menuitem"`; `svg` di awal menjadi ikonnya |
+| Positioner | `div.ow-menu__positioner` | 6px dari trigger; submenu di samping item-nya, baris pertama sejajar |
+| <Part name="Popup" /> | `div.ow-menu__popup` | `role="menu"`, `data-size`, `data-instant` saat melewati animasi, dan sorotan Glide di dalamnya |
+| <Part name="Item" /> | `div.ow-menu__item` | `role="menuitem"` dan `data-disabled`; `svg` di awal menjadi ikonnya |
 | <Part name="Shortcut" /> | `kbd` | Terakhir di item, di ujungnya |
-| <Part name="GroupLabel" /> | `div.ow-menu-group-label` | Menamai `Menu.Group` atau `Menu.RadioGroup`-nya |
-| <Part name="CheckboxItem" /> | `div.ow-menu-item` | `role="menuitemcheckbox"`, `aria-checked` |
-| <Part name="Indicator" /> | `span.ow-menu-indicator` | Centang, atau titik di RadioItem; `data-checked` atau `data-unchecked` |
-| <Part name="Separator" /> | `div.ow-menu-separator` | `role="separator"`, alur terukir |
-| <Part name="SubmenuTrigger" /> | `div.ow-menu-item` | `aria-haspopup`, `data-popup-open`, dan chevron |
+| <Part name="GroupLabel" /> | `div.ow-menu__group-label` | Menamai `Menu.Group` atau `Menu.RadioGroup`-nya |
+| <Part name="CheckboxItem" /> | `div.ow-menu__item` | `role="menuitemcheckbox"`, `aria-checked` |
+| <Part name="Indicator" /> | `span.ow-menu__indicator` | Centang, atau titik di RadioItem; `data-checked` atau `data-unchecked` |
+| <Part name="Separator" /> | `div.ow-menu__separator` | `role="separator"`, alur terukir |
+| <Part name="SubmenuTrigger" /> | `div.ow-menu__item` | `aria-haspopup`, `data-popup-open`, dan chevron |
+| Chevron | `span.ow-menu__chevron` | Di ujung SubmenuTrigger, dicerminkan untuk teks kanan-ke-kiri |
 
 `Menu.LinkItem` adalah item berupa link; `render` menggantinya dengan link router.
 

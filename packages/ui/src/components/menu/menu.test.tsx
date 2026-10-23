@@ -87,10 +87,10 @@ function Edit({
   );
 }
 
-const popups = () => [...document.querySelectorAll<HTMLElement>(".ow-menu-popup")];
+const popups = () => [...document.querySelectorAll<HTMLElement>(".ow-menu__popup")];
 const popup = () => popups()[0] ?? null;
 const item = (name: string) => {
-  const el = [...document.querySelectorAll<HTMLElement>(".ow-menu-item")].find(
+  const el = [...document.querySelectorAll<HTMLElement>(".ow-menu__item")].find(
     (candidate) => candidate.textContent?.replace(/⌘./, "").trim() === name,
   );
   if (!el) throw new Error(`no item ${name}`);
@@ -122,11 +122,11 @@ describe("Menu", () => {
     expect(item("Cut").getAttribute("role")).toBe("menuitem");
     expect(item("Word wrap").getAttribute("role")).toBe("menuitemcheckbox");
     expect(item("Light").getAttribute("role")).toBe("menuitemradio");
-    expect(document.querySelector(".ow-menu-separator")?.getAttribute("role")).toBe("separator");
+    expect(document.querySelector(".ow-menu__separator")?.getAttribute("role")).toBe("separator");
     // The group is named by its label.
-    const group = item("Light").closest('[role="group"]:has(.ow-menu-group-label)');
+    const group = item("Light").closest('[role="group"]:has(.ow-menu__group-label)');
     expect(group?.getAttribute("aria-labelledby")).toBe(
-      document.querySelector(".ow-menu-group-label")?.id,
+      document.querySelector(".ow-menu__group-label")?.id,
     );
     await userEvent.keyboard("{ArrowDown}");
     expect(document.activeElement).toBe(item("Cut"));
@@ -190,7 +190,7 @@ describe("Menu", () => {
     await render(<Edit open />);
     await expect.poll(popup).not.toBeNull();
     const wrap = item("Word wrap");
-    const check = wrap.querySelector<HTMLElement>(".ow-menu-indicator");
+    const check = wrap.querySelector<HTMLElement>(".ow-menu__indicator");
     expect(wrap.getAttribute("aria-checked")).toBe("true");
     expect(getComputedStyle(check as HTMLElement).visibility).toBe("visible");
     await userEvent.click(wrap);
@@ -215,7 +215,7 @@ describe("Menu", () => {
     await render(<Edit open />);
     await expect.poll(popup).not.toBeNull();
     const share = item("Share");
-    expect(share.querySelector(".ow-menu-chevron svg")).not.toBeNull();
+    expect(share.querySelector(".ow-menu__chevron svg")).not.toBeNull();
     await userEvent.hover(share);
     await expect.poll(() => popups().length).toBe(2);
     const sub = popups()[1] as HTMLElement;
@@ -224,7 +224,7 @@ describe("Menu", () => {
     expect(
       sub.getBoundingClientRect().left - (popup() as HTMLElement).getBoundingClientRect().right,
     ).toBeCloseTo(2, 0);
-    const first = sub.querySelector(".ow-menu-item") as HTMLElement;
+    const first = sub.querySelector(".ow-menu__item") as HTMLElement;
     expect(first.getBoundingClientRect().top).toBeCloseTo(share.getBoundingClientRect().top, 0);
     await userEvent.hover(first);
     expect(share.hasAttribute("data-popup-open")).toBe(true);
@@ -258,7 +258,7 @@ describe("Menu", () => {
     const runs: { property: string; frames: Keyframe[] }[] = [];
     const onRun = (event: TransitionEvent) => {
       const target = event.target as HTMLElement;
-      if (!target.classList.contains("ow-menu-popup")) return;
+      if (!target.classList.contains("ow-menu__popup")) return;
       const transition = target
         .getAnimations()
         .find((a) => (a as CSSTransition).transitionProperty === event.propertyName);
@@ -363,19 +363,19 @@ describe("Menu", () => {
       </Menu.Root>,
     );
     await expect.poll(() => refs.popup.current).not.toBeNull();
-    expect(refs.positioner.current?.className).toBe("ow-menu-positioner p");
-    expect(refs.popup.current?.className).toBe("ow-menu-popup u");
+    expect(refs.positioner.current?.className).toBe("ow-menu__positioner p");
+    expect(refs.popup.current?.className).toBe("ow-menu__popup u");
     expect(refs.popup.current?.style.zIndex).toBe("3");
     expect(refs.popup.current?.dataset.size).toBe("md");
-    expect(refs.item.current?.className).toBe("ow-menu-item i");
+    expect(refs.item.current?.className).toBe("ow-menu__item i");
     expect(refs.item.current?.tagName).toBe("SECTION");
-    expect(refs.link.current?.className).toBe("ow-menu-item l");
+    expect(refs.link.current?.className).toBe("ow-menu__item l");
     expect(refs.link.current?.tagName).toBe("A");
-    expect(refs.label.current?.className).toBe("ow-menu-group-label g");
-    expect(refs.indicator.current?.className).toBe("ow-menu-indicator c");
+    expect(refs.label.current?.className).toBe("ow-menu__group-label g");
+    expect(refs.indicator.current?.className).toBe("ow-menu__indicator c");
     // Children replace the default check; unchecked, it still keeps its room.
     expect(refs.indicator.current?.textContent).toBe("✓");
-    expect(refs.separator.current?.className).toBe("ow-menu-separator s");
+    expect(refs.separator.current?.className).toBe("ow-menu__separator s");
   });
 
   test("sits on the panel material with the popup shadow, in light and dark", async () => {
@@ -385,7 +385,7 @@ describe("Menu", () => {
     await render(<Edit open />);
     await expect.poll(popup).not.toBeNull();
     const surface = popup() as HTMLElement;
-    const groove = document.querySelector(".ow-menu-separator") as HTMLElement;
+    const groove = document.querySelector(".ow-menu__separator") as HTMLElement;
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
       const style = getComputedStyle(surface);
@@ -418,7 +418,7 @@ describe("Menu", () => {
       "rgb(7, 8, 9)",
     );
     expect(
-      getComputedStyle(document.querySelector(".ow-menu-separator") as HTMLElement).borderTopColor,
+      getComputedStyle(document.querySelector(".ow-menu__separator") as HTMLElement).borderTopColor,
     ).toBe("rgb(255, 0, 0)");
     // Glide's highlight is the hover tint.
     await userEvent.hover(item("Copy"));
@@ -437,7 +437,7 @@ describe("Menu", () => {
     const style = getComputedStyle(popup() as HTMLElement);
     expect(style.outlineStyle).toBe("solid");
     expect(style.outlineColor).not.toBe("rgba(0, 0, 0, 0)");
-    const groove = getComputedStyle(document.querySelector(".ow-menu-separator") as HTMLElement);
+    const groove = getComputedStyle(document.querySelector(".ow-menu__separator") as HTMLElement);
     expect(groove.borderTopWidth).toBe("1px");
     const check = item("Word wrap").querySelector("svg") as SVGElement;
     expect(getComputedStyle(check).stroke).not.toBe("none");
@@ -455,10 +455,10 @@ describe("Menu", () => {
       </DirectionProvider>,
     );
     await expect.poll(popup).not.toBeNull();
-    const positioner = document.querySelector(".ow-menu-positioner") as HTMLElement;
+    const positioner = document.querySelector(".ow-menu__positioner") as HTMLElement;
     expect(positioner.getAttribute("dir")).toBe("rtl");
     const share = item("Share");
-    const chevron = share.querySelector(".ow-menu-chevron") as HTMLElement;
+    const chevron = share.querySelector(".ow-menu__chevron") as HTMLElement;
     expect(getComputedStyle(chevron).transform).toBe("matrix(-1, 0, 0, 1, 0, 0)");
     // The chevron is at the start of the line's end: the left.
     expect(chevron.getBoundingClientRect().left).toBeLessThan(

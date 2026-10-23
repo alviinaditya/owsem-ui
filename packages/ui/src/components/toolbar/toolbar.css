@@ -39,18 +39,18 @@
     font-size: 1rem;
   }
 
-  .ow-toolbar-group {
+  .ow-toolbar__group {
     display: flex;
     align-items: center;
     gap: 4px;
   }
 
-  :is(.ow-toolbar, .ow-toolbar-group)[data-orientation="vertical"] {
+  :is(.ow-toolbar, .ow-toolbar__group)[data-orientation="vertical"] {
     flex-direction: column;
   }
 
   /* Items: Button's geometry, --py the only input. */
-  :where(.ow-toolbar-button, .ow-toolbar-link, .ow-toolbar-input) {
+  :where(.ow-toolbar__button, .ow-toolbar__link, .ow-toolbar__input) {
     --py: 0.75em;
     --_py: max(var(--py), (24px - 1lh) / 2);
     --px: calc(var(--_py) + (1lh - 1cap) / 2);
@@ -68,18 +68,18 @@
     line-height: 1.25;
   }
 
-  :where(.ow-toolbar-button, .ow-toolbar-link, .ow-toolbar-input):where([data-size="sm"]) {
+  :where(.ow-toolbar__button, .ow-toolbar__link, .ow-toolbar__input):where([data-size="sm"]) {
     --py: 0.5em;
     font-size: 0.8125rem;
   }
 
-  :where(.ow-toolbar-button, .ow-toolbar-link, .ow-toolbar-input):where([data-size="lg"]) {
+  :where(.ow-toolbar__button, .ow-toolbar__link, .ow-toolbar__input):where([data-size="lg"]) {
     --py: 0.875em;
     font-size: 1rem;
   }
 
   /* Buttons and links: flat, tinted under the pointer, the pressed material while held (DP-4). */
-  :where(.ow-toolbar-button, .ow-toolbar-link) {
+  :where(.ow-toolbar__button, .ow-toolbar__link) {
     --_muted: var(--ow-muted);
     --_fg: var(--ow-fg);
     --_hover: var(--ow-hover);
@@ -102,45 +102,45 @@
   }
 
   /* Icons sit as far from the edge as from the top and bottom (FR-10). */
-  :where(.ow-toolbar-icon) {
+  :where(.ow-toolbar__icon) {
     display: inline-flex;
     flex: none;
     inline-size: var(--icon);
     block-size: var(--icon);
   }
 
-  :where(.ow-toolbar-icon) > :where(svg, img) {
+  :where(.ow-toolbar__icon) > :where(svg, img) {
     display: block;
     inline-size: 100%;
     block-size: 100%;
   }
 
-  :where(.ow-toolbar-icon[data-side="start"]) {
+  :where(.ow-toolbar__icon[data-side="start"]) {
     margin-inline-start: calc((1cap - var(--icon)) / 2);
   }
 
-  :where(.ow-toolbar-icon[data-side="end"]) {
+  :where(.ow-toolbar__icon[data-side="end"]) {
     margin-inline-end: calc((1cap - var(--icon)) / 2);
   }
 
   /* Icon only: a square as tall as the other items (FR-10a). */
-  :where(.ow-toolbar-button, .ow-toolbar-link):where([data-icon-only]) {
+  :where(.ow-toolbar__button, .ow-toolbar__link):where([data-icon-only]) {
     padding: calc(var(--_py) + (1lh - var(--icon)) / 2);
   }
 
-  :where([data-icon-only] > .ow-toolbar-icon) {
+  :where([data-icon-only] > .ow-toolbar__icon) {
     margin: 0;
   }
 
   @media (hover: hover) {
-    :where(.ow-toolbar-button, .ow-toolbar-link):where(:hover:not([data-disabled])) {
+    :where(.ow-toolbar__button, .ow-toolbar__link):where(:hover:not([data-disabled])) {
       background-color: var(--_hover);
       color: var(--_fg);
     }
   }
 
   /* Held down: in to 0.97 and the pressed material within 90 ms (DP-4). */
-  :where(.ow-toolbar-button, .ow-toolbar-link):where(:active:not([data-disabled])) {
+  :where(.ow-toolbar__button, .ow-toolbar__link):where(:active:not([data-disabled])) {
     background-color: var(--_pressed-bg);
     box-shadow: var(--_pressed-shadow);
     color: var(--_fg);
@@ -149,18 +149,18 @@
     transition-timing-function: var(--ow-ease-out);
   }
 
-  :where(.ow-toolbar-button, .ow-toolbar-link, .ow-toolbar-input):where(:focus-visible) {
+  :where(.ow-toolbar__button, .ow-toolbar__link, .ow-toolbar__input):where(:focus-visible) {
     outline: 2px solid var(--ow-focus);
     outline-offset: 2px;
   }
 
-  :where(.ow-toolbar-button, .ow-toolbar-link, .ow-toolbar-input):where([data-disabled]) {
+  :where(.ow-toolbar__button, .ow-toolbar__link, .ow-toolbar__input):where([data-disabled]) {
     cursor: not-allowed;
     opacity: 0.45;
   }
 
   /* The field: a flat well, with an edge at 3:1 (DP-6). */
-  :where(.ow-toolbar-input) {
+  :where(.ow-toolbar__input) {
     --_bg: var(--ow-well-bg);
     --_shadow: var(--ow-well-shadow);
     --_edge: var(--ow-edge);
@@ -176,20 +176,20 @@
     color: var(--ow-fg);
   }
 
-  :where(.ow-toolbar-input)::placeholder {
+  :where(.ow-toolbar__input)::placeholder {
     color: var(--ow-muted);
     opacity: 1;
   }
 
   /* An etched groove: a dark line with a light one beside it, as borders for forced colors. */
-  .ow-toolbar-separator {
+  .ow-toolbar__separator {
     --_dark: var(--ow-line-dark);
     --_light: var(--ow-line-light);
     flex: none;
     border: 0 solid;
   }
 
-  .ow-toolbar-separator[data-orientation="vertical"] {
+  .ow-toolbar__separator[data-orientation="vertical"] {
     inline-size: 0;
     block-size: calc(1em + 2px);
     margin-inline: 4px;
@@ -197,7 +197,7 @@
     border-inline-color: var(--_dark) var(--_light);
   }
 
-  .ow-toolbar-separator[data-orientation="horizontal"] {
+  .ow-toolbar__separator[data-orientation="horizontal"] {
     inline-size: calc(1em + 2px);
     block-size: 0;
     margin-block: 4px;
@@ -207,17 +207,17 @@
 
   /* FR-20: the material still changes, nothing moves. */
   @media (prefers-reduced-motion: reduce) {
-    :where(.ow-toolbar-button, .ow-toolbar-link):where(:active:not([data-disabled])) {
+    :where(.ow-toolbar__button, .ow-toolbar__link):where(:active:not([data-disabled])) {
       transform: none;
     }
   }
 
   @media (forced-colors: active) {
-    :where(.ow-toolbar-button, .ow-toolbar-link, .ow-toolbar-input):where(:focus-visible) {
+    :where(.ow-toolbar__button, .ow-toolbar__link, .ow-toolbar__input):where(:focus-visible) {
       outline-color: Highlight;
     }
 
-    :where(.ow-toolbar-button, .ow-toolbar-link, .ow-toolbar-input):where([data-disabled]) {
+    :where(.ow-toolbar__button, .ow-toolbar__link, .ow-toolbar__input):where([data-disabled]) {
       color: GrayText;
       opacity: 1;
     }

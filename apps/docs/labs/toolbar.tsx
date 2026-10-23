@@ -228,7 +228,7 @@ const toolbarLab = defineLab({
     },
     {
       name: "Group",
-      selector: ".ow-toolbar-group",
+      selector: ".ow-toolbar__group",
       note: {
         id: "Item yang satu kelompok, dengan role=group dan namanya sendiri.",
         en: "Items that belong together, with role=group and a name of their own.",
@@ -259,7 +259,7 @@ const toolbarLab = defineLab({
     },
     {
       name: "Icon",
-      selector: '[data-demo="undo"] .ow-toolbar-icon',
+      selector: '[data-demo="undo"] .ow-toolbar__icon',
       note: {
         id: "startIcon atau endIcon: ukuran font ditambah 2px. Tanpa label, itemnya persegi.",
         en: "startIcon or endIcon: the font size plus 2px. Without a label, the item is square.",
@@ -267,7 +267,7 @@ const toolbarLab = defineLab({
     },
     {
       name: "Separator",
-      selector: ".ow-toolbar-separator",
+      selector: ".ow-toolbar__separator",
       note: {
         id: "Alur terukir di antara grup, melintang arah toolbar.",
         en: "An etched groove between groups, across the toolbar's direction.",
@@ -276,7 +276,7 @@ const toolbarLab = defineLab({
     },
     {
       name: "Link",
-      selector: ".ow-toolbar-link",
+      selector: ".ow-toolbar__link",
       note: {
         id: "Link yang tampil seperti tombol toolbar, ikut navigasi panah.",
         en: "A link that looks like the toolbar's buttons, in the arrow-key order.",
@@ -284,7 +284,7 @@ const toolbarLab = defineLab({
     },
     {
       name: "Input",
-      selector: ".ow-toolbar-input",
+      selector: ".ow-toolbar__input",
       note: {
         id: "Field datar bertepi 3:1, setinggi tombol. Panah menggeser caret dulu, jadi letakkan di akhir.",
         en: "A flat field with a 3:1 edge, as tall as the buttons. Arrows move the caret first, so put it last.",

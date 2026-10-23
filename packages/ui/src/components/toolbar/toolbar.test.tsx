@@ -76,12 +76,12 @@ describe("Toolbar", () => {
     expect(bar.getAttribute("role")).toBe("toolbar");
     expect(bar.getAttribute("aria-orientation")).toBe("horizontal");
     expect(bar.getAttribute("aria-label")).toBe("Formatting");
-    expect(q(".ow-toolbar-group").getAttribute("role")).toBe("group");
-    const groove = q(".ow-toolbar-separator");
+    expect(q(".ow-toolbar__group").getAttribute("role")).toBe("group");
+    const groove = q(".ow-toolbar__separator");
     expect(groove.getAttribute("role")).toBe("separator");
     expect(groove.getAttribute("aria-orientation")).toBe("vertical");
-    expect(q(".ow-toolbar-link").tagName).toBe("A");
-    expect(q(".ow-toolbar-input").tagName).toBe("INPUT");
+    expect(q(".ow-toolbar__link").tagName).toBe("A");
+    expect(q(".ow-toolbar__input").tagName).toBe("INPUT");
     expect(screen.container.querySelectorAll('[aria-pressed="true"]').length).toBe(1);
   });
 
@@ -111,9 +111,9 @@ describe("Toolbar", () => {
 
   test("a vertical toolbar moves with Up and Down, its grooves across it", async () => {
     const { q } = await mount(<Editor orientation="vertical" />);
-    expect(q(".ow-toolbar-separator").getAttribute("aria-orientation")).toBe("horizontal");
+    expect(q(".ow-toolbar__separator").getAttribute("aria-orientation")).toBe("horizontal");
     expect(getComputedStyle(q(".ow-toolbar")).flexDirection).toBe("column");
-    expect(getComputedStyle(q(".ow-toolbar-group")).flexDirection).toBe("column");
+    expect(getComputedStyle(q(".ow-toolbar__group")).flexDirection).toBe("column");
     await userEvent.tab();
     await userEvent.keyboard("{ArrowDown}");
     expect(focused()).toBe("Italic");
@@ -123,7 +123,7 @@ describe("Toolbar", () => {
     const { q } = await mount();
     await pointerAway();
     const bold = q<HTMLButtonElement>('[aria-label="Bold"]');
-    expect(bold.className).toBe("ow-toggle ow-toolbar-button");
+    expect(bold.className).toBe("ow-toggle ow-toolbar__button");
     expect(bold.dataset.size).toBe("md");
     expect(bold.hasAttribute("data-icon-only")).toBe(true);
     await userEvent.click(bold);
@@ -180,12 +180,12 @@ describe("Toolbar", () => {
     expect(refs.root.current).toBe(q(".ow-toolbar"));
     expect(refs.root.current?.className).toBe("ow-toolbar r");
     expect(refs.root.current?.style.marginBlock).toBe("1px");
-    expect(refs.group.current?.className).toBe("ow-toolbar-group g");
-    expect(refs.button.current?.className).toBe("ow-toolbar-button b");
-    expect(refs.separator.current?.className).toBe("ow-toolbar-separator s");
-    expect(refs.link.current?.className).toBe("ow-toolbar-link l");
+    expect(refs.group.current?.className).toBe("ow-toolbar__group g");
+    expect(refs.button.current?.className).toBe("ow-toolbar__button b");
+    expect(refs.separator.current?.className).toBe("ow-toolbar__separator s");
+    expect(refs.link.current?.className).toBe("ow-toolbar__link l");
     expect(refs.link.current?.hasAttribute("data-router")).toBe(true);
-    expect(refs.input.current?.className).toBe("ow-toolbar-input i");
+    expect(refs.input.current?.className).toBe("ow-toolbar__input i");
   });
 
   test("sits on the panel, its buttons quiet until hovered, in light and dark", async () => {
@@ -195,9 +195,9 @@ describe("Toolbar", () => {
     const { q } = await mount();
     await pointerAway();
     const bar = q(".ow-toolbar");
-    const share = q<HTMLButtonElement>(".ow-toolbar-button:not(.ow-toggle)");
-    const field = q(".ow-toolbar-input");
-    const groove = q(".ow-toolbar-separator");
+    const share = q<HTMLButtonElement>(".ow-toolbar__button:not(.ow-toggle)");
+    const field = q(".ow-toolbar__input");
+    const groove = q(".ow-toolbar__separator");
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
       expect(getComputedStyle(bar).backgroundColor).toBe(resolve("color", "var(--ow-panel)"));
@@ -223,7 +223,7 @@ describe("Toolbar", () => {
 
   test("a press goes in to 0.97 in the pressed material, then lets go (DP-4)", async () => {
     const { q } = await mount();
-    const share = q<HTMLButtonElement>(".ow-toolbar-button:not(.ow-toggle)");
+    const share = q<HTMLButtonElement>(".ow-toolbar__button:not(.ow-toggle)");
     await userEvent.hover(share);
     await commands.mouse("down");
     await wait(150);
@@ -242,7 +242,7 @@ describe("Toolbar", () => {
     onTestFinished(() => commands.setReducedMotion("no-preference"));
     await commands.setReducedMotion("reduce");
     const { q } = await mount();
-    const share = q<HTMLButtonElement>(".ow-toolbar-button:not(.ow-toggle)");
+    const share = q<HTMLButtonElement>(".ow-toolbar__button:not(.ow-toggle)");
     await userEvent.hover(share);
     await commands.mouse("down");
     await wait(150);
@@ -273,7 +273,7 @@ describe("Toolbar", () => {
         </Toolbar.Button>
       </Toolbar.Root>,
     );
-    const redo = q<HTMLButtonElement>(".ow-toolbar-button");
+    const redo = q<HTMLButtonElement>(".ow-toolbar__button");
     expect(redo.getAttribute("aria-disabled")).toBe("true");
     expect(getComputedStyle(redo).opacity).toBe("0.45");
     await userEvent.click(redo, { force: true });
@@ -292,9 +292,9 @@ describe("Toolbar", () => {
     await pointerAway();
     expect(getComputedStyle(q(".ow-toolbar")).backgroundColor).toBe("rgb(1, 2, 3)");
     expect(getComputedStyle(q(".ow-toolbar")).boxShadow).toBe("none");
-    expect(getComputedStyle(q(".ow-toolbar-button:not(.ow-toggle)")).color).toBe("rgb(4, 5, 6)");
-    expect(getComputedStyle(q(".ow-toolbar-input")).backgroundColor).toBe("rgb(7, 8, 9)");
-    expect(getComputedStyle(q(".ow-toolbar-separator")).borderInlineStartColor).toBe(
+    expect(getComputedStyle(q(".ow-toolbar__button:not(.ow-toggle)")).color).toBe("rgb(4, 5, 6)");
+    expect(getComputedStyle(q(".ow-toolbar__input")).backgroundColor).toBe("rgb(7, 8, 9)");
+    expect(getComputedStyle(q(".ow-toolbar__separator")).borderInlineStartColor).toBe(
       "rgb(255, 0, 0)",
     );
   });
@@ -305,15 +305,15 @@ describe("Toolbar", () => {
     await commands.setForcedColors("active");
     for (const selector of [
       ".ow-toolbar",
-      ".ow-toolbar-button:not(.ow-toggle)",
-      ".ow-toolbar-input",
+      ".ow-toolbar__button:not(.ow-toggle)",
+      ".ow-toolbar__input",
     ]) {
       const style = getComputedStyle(q(selector));
       expect(style.outlineStyle, selector).toBe("solid");
       expect(style.outlineWidth, selector).toBe("1px");
       expect(style.outlineColor, selector).not.toBe("rgba(0, 0, 0, 0)");
     }
-    const groove = getComputedStyle(q(".ow-toolbar-separator"));
+    const groove = getComputedStyle(q(".ow-toolbar__separator"));
     expect(groove.borderInlineStartWidth).toBe("1px");
     expect(groove.borderInlineStartColor).not.toBe(getComputedStyle(document.body).backgroundColor);
   });
@@ -326,8 +326,8 @@ describe("Toolbar", () => {
         </div>
       </DirectionProvider>,
     );
-    const share = q(".ow-toolbar-button:not(.ow-toggle)");
-    const glyph = share.querySelector(".ow-toolbar-icon");
+    const share = q(".ow-toolbar__button:not(.ow-toggle)");
+    const glyph = share.querySelector(".ow-toolbar__icon");
     if (!glyph) throw new Error("no icon");
     // The start icon sits on the right, and Left moves on toward the end.
     expect(share.getBoundingClientRect().right - glyph.getBoundingClientRect().right).toBeLessThan(

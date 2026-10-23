@@ -14,12 +14,12 @@ import "./toolbar.css";
 
 const cls = {
   root: "ow-toolbar",
-  group: "ow-toolbar-group",
-  button: "ow-toolbar-button",
-  link: "ow-toolbar-link",
-  icon: "ow-toolbar-icon",
-  input: "ow-toolbar-input",
-  separator: "ow-toolbar-separator",
+  group: "ow-toolbar__group",
+  button: "ow-toolbar__button",
+  link: "ow-toolbar__link",
+  icon: "ow-toolbar__icon",
+  input: "ow-toolbar__input",
+  separator: "ow-toolbar__separator",
 } as const;
 
 export type ToolbarSize = "sm" | "md" | "lg";

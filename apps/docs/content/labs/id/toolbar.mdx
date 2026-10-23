@@ -38,19 +38,19 @@ paling banyak satu field, dan letakkan di akhir.
 ## Anatomi [#anatomy]
 
 Delapan bagian. Base UI merender role dan fokus berpindah (roving focus); OwsemUI menambahkan class
-`ow-toolbar-*`, ukuran, dan ikon. Inspeksi (I) menandai setiap bagian di stage; pilih sebuah nama,
-di sini atau di stage, untuk melihat tokennya.
+`ow-toolbar` dan `ow-toolbar__*`, ukuran, dan ikon. Inspeksi (I) menandai setiap bagian di stage;
+pilih sebuah nama, di sini atau di stage, untuk melihat tokennya.
 
 | Bagian | Elemen | Catatan |
 | --- | --- | --- |
-| <Part name="Root" /> | `div.ow-toolbar` | `role="toolbar"`, `aria-orientation`, dan `data-size`; panelnya |
-| <Part name="Group" /> | `div.ow-toolbar-group` | `role="group"`; beri nama dengan `aria-label` |
-| <Part name="Toggle" /> | `button.ow-toggle.ow-toolbar-button` | Button dengan `render={<Toggle />}`, jadi punya `aria-pressed` |
-| <Part name="Button" /> | `button.ow-toolbar-button` | `data-size`, dan `data-icon-only` bila tanpa label |
-| <Part name="Icon" /> | `span.ow-toolbar-icon` | Dekoratif (`aria-hidden`): `startIcon` atau `endIcon`, ukuran font ditambah 2px |
-| <Part name="Separator" /> | `div.ow-toolbar-separator` | `role="separator"`, melintang arah toolbar |
-| <Part name="Link" /> | `a.ow-toolbar-link` | Tampil seperti tombol; `render` menggantinya dengan link router |
-| <Part name="Input" /> | `input.ow-toolbar-input` | Well datar dengan tepi 3:1, setinggi tombol |
+| <Part name="Root" /> | `div.ow-toolbar` | `role="toolbar"`, `aria-orientation`, `data-orientation`, dan `data-size`; panelnya |
+| <Part name="Group" /> | `div.ow-toolbar__group` | `role="group"`; beri nama dengan `aria-label` |
+| <Part name="Toggle" /> | `button.ow-toggle.ow-toolbar__button` | Button dengan `render={<Toggle />}`, jadi punya `aria-pressed`, dan `data-pressed` selama menyala |
+| <Part name="Button" /> | `button.ow-toolbar__button` | `data-size`, dan `data-icon-only` bila tanpa label |
+| <Part name="Icon" /> | `span.ow-toolbar__icon` | Dekoratif (`aria-hidden`): `startIcon` atau `endIcon`, ukuran font ditambah 2px; `data-side="start"` atau `"end"` |
+| <Part name="Separator" /> | `div.ow-toolbar__separator` | `role="separator"` dan `data-orientation`, melintang arah toolbar |
+| <Part name="Link" /> | `a.ow-toolbar__link` | Tampil seperti tombol; `render` menggantinya dengan link router |
+| <Part name="Input" /> | `input.ow-toolbar__input` | Well datar dengan tepi 3:1, setinggi tombol |
 
 ## State dan varian [#states]
 

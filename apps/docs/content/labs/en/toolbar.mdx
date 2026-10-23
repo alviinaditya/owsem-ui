@@ -36,20 +36,20 @@ field, arrows move the caret and hand over at its ends, so use one field at most
 
 ## Anatomy [#anatomy]
 
-Eight parts. Base UI renders the roles and the roving focus; OwsemUI adds the `ow-toolbar-*`
-classes, the sizes, and the icons. Inspect (I) outlines each part on the stage; pick a name, here
-or on the stage, to see its tokens.
+Eight parts. Base UI renders the roles and the roving focus; OwsemUI adds the `ow-toolbar` and
+`ow-toolbar__*` classes, the sizes, and the icons. Inspect (I) outlines each part on the stage; pick
+a name, here or on the stage, to see its tokens.
 
 | Part | Element | Notes |
 | --- | --- | --- |
-| <Part name="Root" /> | `div.ow-toolbar` | `role="toolbar"`, `aria-orientation`, and `data-size`; the panel |
-| <Part name="Group" /> | `div.ow-toolbar-group` | `role="group"`; name it with `aria-label` |
-| <Part name="Toggle" /> | `button.ow-toggle.ow-toolbar-button` | A Button with `render={<Toggle />}`, so `aria-pressed` |
-| <Part name="Button" /> | `button.ow-toolbar-button` | `data-size`, and `data-icon-only` without a label |
-| <Part name="Icon" /> | `span.ow-toolbar-icon` | Decorative (`aria-hidden`): `startIcon` or `endIcon`, the font size plus 2px |
-| <Part name="Separator" /> | `div.ow-toolbar-separator` | `role="separator"`, across the toolbar's direction |
-| <Part name="Link" /> | `a.ow-toolbar-link` | Looks like a button; `render` swaps in a router link |
-| <Part name="Input" /> | `input.ow-toolbar-input` | A flat well with a 3:1 edge, as tall as the buttons |
+| <Part name="Root" /> | `div.ow-toolbar` | `role="toolbar"`, `aria-orientation`, `data-orientation`, and `data-size`; the panel |
+| <Part name="Group" /> | `div.ow-toolbar__group` | `role="group"`; name it with `aria-label` |
+| <Part name="Toggle" /> | `button.ow-toggle.ow-toolbar__button` | A Button with `render={<Toggle />}`, so `aria-pressed`, and `data-pressed` while on |
+| <Part name="Button" /> | `button.ow-toolbar__button` | `data-size`, and `data-icon-only` without a label |
+| <Part name="Icon" /> | `span.ow-toolbar__icon` | Decorative (`aria-hidden`): `startIcon` or `endIcon`, the font size plus 2px; `data-side="start"` or `"end"` |
+| <Part name="Separator" /> | `div.ow-toolbar__separator` | `role="separator"` and `data-orientation`, across the toolbar's direction |
+| <Part name="Link" /> | `a.ow-toolbar__link` | Looks like a button; `render` swaps in a router link |
+| <Part name="Input" /> | `input.ow-toolbar__input` | A flat well with a 3:1 edge, as tall as the buttons |
 
 ## States and variants [#states]
 

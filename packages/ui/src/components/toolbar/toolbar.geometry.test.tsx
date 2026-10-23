@@ -39,7 +39,7 @@ describe("Toolbar geometry (FR-9 to FR-11, FR-10b)", () => {
           <Toolbar.Input aria-label="Field" />
         </Toolbar.Root>,
       );
-      const items = all(".ow-toolbar-button, .ow-toolbar-link, .ow-toolbar-input");
+      const items = all(".ow-toolbar__button, .ow-toolbar__link, .ow-toolbar__input");
       expect(items).toHaveLength(5);
       for (const item of items) {
         expect(item.getBoundingClientRect().height, item.className).toBeCloseTo(expected.height, 1);
@@ -52,7 +52,7 @@ describe("Toolbar geometry (FR-9 to FR-11, FR-10b)", () => {
       }
 
       // A start icon sits as far from the side as from the top; an end icon too.
-      const [start, end] = all(".ow-toolbar-icon").filter(
+      const [start, end] = all(".ow-toolbar__icon").filter(
         (icon) => !icon.parentElement?.hasAttribute("data-icon-only"),
       );
       if (!start?.parentElement || !end?.parentElement) throw new Error("no icons");
@@ -63,11 +63,11 @@ describe("Toolbar geometry (FR-9 to FR-11, FR-10b)", () => {
       expect(Math.abs(b.right - b.top)).toBeLessThanOrEqual(TOL);
 
       // The groove is as long as an icon; the panel's corners are its items' plus the padding.
-      expect(one(".ow-toolbar-separator").getBoundingClientRect().height).toBeCloseTo(
+      expect(one(".ow-toolbar__separator").getBoundingClientRect().height).toBeCloseTo(
         expected.icon,
         1,
       );
-      const r = concentric(one(".ow-toolbar"), one(".ow-toolbar-button"));
+      const r = concentric(one(".ow-toolbar"), one(".ow-toolbar__button"));
       expect(r.delta).toBeLessThanOrEqual(TOL);
       expect(r.insetDelta).toBeLessThanOrEqual(TOL);
     });

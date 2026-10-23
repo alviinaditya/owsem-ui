@@ -47,19 +47,25 @@ on the stage, to see its tokens.
 
 | Part | Element | Notes |
 | --- | --- | --- |
-| <Part name="Root" /> | `div.ow-color-picker` | The panel; theme tokens set here apply to it alone |
-| <Part name="Area" /> | `div` | `role="slider"` in two dimensions, with its own keys |
-| <Part name="Thumb" /> | `span` | A ring around the color with a 1px dark edge, on each slider too |
-| <Part name="Hue" /> | `div` | A Base UI `Slider` |
-| <Part name="Alpha" /> | `div` | A Base UI `Slider` over the checkerboard |
-| <Part name="EyeDropper" /> | `button` | Only where the browser has the EyeDropper API |
-| <Part name="Preview" /> | `span` | The current color, as tall as both tracks |
-| <Part name="Format" /> | `button` | Cycles HEX, RGB, and HSL |
-| <Part name="Field" /> | `input` | In a `label`; the letter under it is notation |
-| <Part name="Swatches" /> | `div` | A Base UI `ToggleGroup`; each swatch has `aria-pressed` |
+| <Part name="Root" /> | `div.ow-color-picker` | The panel; theme tokens set here apply to it alone; `data-disabled` |
+| <Part name="Area" /> | `div.ow-color-picker__area` | `role="slider"` in two dimensions, with its own keys; `data-dragging` while dragged |
+| <Part name="Thumb" /> | `span.ow-color-picker__thumb` | A ring around the color with a 1px dark edge, on each slider too (a `div` with `data-dragging`) |
+| <Part name="Hue" /> | `div.ow-color-picker__slider` | A Base UI `Slider`, `data-channel="hue"`; its `div.ow-color-picker__control` holds the `div.ow-color-picker__track` |
+| <Part name="Alpha" /> | `div.ow-color-picker__slider` | A Base UI `Slider` over the checkerboard, `data-channel="alpha"` |
+| <Part name="EyeDropper" /> | `button.ow-color-picker__tool` | Only where the browser has the EyeDropper API |
+| <Part name="Preview" /> | `span.ow-color-picker__preview` | The current color, as tall as both tracks |
+| <Part name="Format" /> | `button.ow-color-picker__format` | Cycles HEX, RGB, and HSL |
+| <Part name="Field" /> | `label.ow-color-picker__field` | Holds an `input.ow-color-picker__input`; the letter under it, `span.ow-color-picker__label`, is notation |
+| <Part name="Swatches" /> | `div.ow-color-picker__swatches` | A Base UI `ToggleGroup`; each `button.ow-color-picker__swatch` has `aria-pressed` and `data-pressed`, and `data-alpha` when translucent |
 
-`ColorPickerPopover` adds a trigger, `button.ow-color-picker-trigger` (Base UI `Popover.Trigger`),
-and a popup, `div.ow-color-picker-popup` (`Popover.Popup`, a dialog), that holds the panel.
+`div.ow-color-picker__tools` holds the eye dropper, the sliders (in `div.ow-color-picker__sliders`),
+and the preview; `div.ow-color-picker__inputs` holds the format switch and the fields. Icons are
+`svg.ow-color-picker__icon`.
+
+`ColorPickerPopover` adds a trigger, `button.ow-color-picker__trigger` (Base UI `Popover.Trigger`,
+with `data-size` and `data-variant`), that shows `span.ow-color-picker__chip` (`data-alpha` when
+translucent) and `span.ow-color-picker__value`, and a popup, `div.ow-color-picker__popup`
+(`Popover.Popup`, a dialog, in `div.ow-color-picker__positioner`), that holds the panel.
 
 ## States and variants [#states]
 
@@ -134,7 +140,7 @@ In isolated mode the values sit on each picker's root, so set yours on the picke
 </ForMode>
 
 The width (256 px) and the area's height (160 px) are layout: set `inline-size` on the picker with
-`className` or `style`, and `block-size` on its `.ow-color-picker-area`. The gradients, the hue
+`className` or `style`, and `block-size` on its `.ow-color-picker__area`. The gradients, the hue
 spectrum, the thumbs' white ring with its dark edges, and the check on a swatch stay the same in
 every theme, so they read on any color. The popover's panel is portaled to the body, so set its
 tokens where the popup can read them, such as `:root` or `.ow-color-picker`; it carries its

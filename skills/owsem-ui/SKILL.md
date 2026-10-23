@@ -226,7 +226,7 @@ import { ColorPicker, ColorPickerPopover } from "owsem-ui/owsem"; // or "@/compo
   `--ow-muted`, `--ow-focus`, and `--ow-radius`. The popover's panel is portaled to the body: set
   its tokens on `:root` or `.ow-color-picker`, not on the trigger's parent.
 - Width (256px) and area height (160px) are layout: set `inline-size` on the picker with
-  `className` or `style`, and `block-size` on `.ow-color-picker-area` from your CSS.
+  `className` or `style`, and `block-size` on `.ow-color-picker__area` from your CSS.
 - `parseColor`, `formatColor`, and the conversions (`hsvaToRgba`, `rgbaToHsva`, `hsvaToHsla`,
   `hslaToHsva`, `rgbaToHex`) are exported too.
 

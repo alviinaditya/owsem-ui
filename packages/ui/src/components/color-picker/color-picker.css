@@ -9,7 +9,7 @@
  */
 @layer owsem.components {
   .ow-color-picker,
-  .ow-color-picker-trigger {
+  .ow-color-picker__trigger {
     --_fg: var(--ow-fg);
     --_muted: var(--ow-muted);
     --_focus: var(--ow-focus);
@@ -61,7 +61,7 @@
   }
 
   /* Saturation from the start edge, brightness from the bottom; the hue is painted inline. */
-  .ow-color-picker-area {
+  .ow-color-picker__area {
     position: relative;
     flex: none;
     block-size: 160px;
@@ -75,13 +75,13 @@
     forced-color-adjust: none;
   }
 
-  .ow-color-picker-area:dir(rtl) {
+  .ow-color-picker__area:dir(rtl) {
     /* literal: the value and saturation gradients over the hue, the same in every theme */
     background-image:
       linear-gradient(to top, #000, transparent), linear-gradient(to left, #fff, transparent);
   }
 
-  .ow-color-picker-area:focus-visible {
+  .ow-color-picker__area:focus-visible {
     outline: 2px solid var(--_focus);
     outline-offset: 2px;
   }
@@ -90,7 +90,7 @@
    * A ring around the color with a 1px dark edge outside and a faint one inside, so it shows on
    * every color. It compacts while pressed and springs back (Tactile); its edges stay the same.
    */
-  .ow-color-picker-thumb {
+  .ow-color-picker__thumb {
     position: absolute;
     box-sizing: border-box;
     inline-size: 16px;
@@ -106,49 +106,49 @@
     transition: scale var(--_settle-duration) var(--_settle);
   }
 
-  .ow-color-picker-area > .ow-color-picker-thumb {
+  .ow-color-picker__area > .ow-color-picker__thumb {
     translate: -50% -50%;
     pointer-events: none;
   }
 
-  .ow-color-picker-area:dir(rtl) > .ow-color-picker-thumb {
+  .ow-color-picker__area:dir(rtl) > .ow-color-picker__thumb {
     translate: 50% -50%;
   }
 
   :is(
-    .ow-color-picker-area[data-dragging] > .ow-color-picker-thumb,
-    .ow-color-picker-thumb[data-dragging]
+    .ow-color-picker__area[data-dragging] > .ow-color-picker__thumb,
+    .ow-color-picker__thumb[data-dragging]
   ) {
     scale: var(--_press);
     transition: scale 120ms var(--_ease-out);
   }
 
   /* Base UI focuses the range input inside the thumb (FR-13). */
-  .ow-color-picker-thumb:has(:focus-visible) {
+  .ow-color-picker__thumb:has(:focus-visible) {
     outline: 2px solid var(--_focus);
     outline-offset: 2px;
   }
 
   /* The eye dropper, the sliders, and the preview, as tall as the two tracks together. */
-  .ow-color-picker-tools {
+  .ow-color-picker__tools {
     --_tool: var(--_slider);
     display: flex;
     align-items: center;
     gap: var(--_pad);
   }
 
-  .ow-color-picker-tools[data-stack] {
+  .ow-color-picker__tools[data-stack] {
     --_tool: calc(var(--_slider) + var(--_track));
   }
 
-  .ow-color-picker-sliders {
+  .ow-color-picker__sliders {
     flex: 1;
     min-inline-size: 0;
     /* Room for a thumb at either end, and its focus ring. */
     padding-inline: 6px;
   }
 
-  .ow-color-picker-control {
+  .ow-color-picker__control {
     display: flex;
     align-items: center;
     block-size: var(--_slider);
@@ -156,7 +156,7 @@
     touch-action: none;
   }
 
-  .ow-color-picker-track {
+  .ow-color-picker__track {
     position: relative;
     flex: 1;
     block-size: var(--_track);
@@ -165,7 +165,7 @@
     forced-color-adjust: none;
   }
 
-  [data-channel="hue"] .ow-color-picker-track {
+  [data-channel="hue"] .ow-color-picker__track {
     /* literal: the hue spectrum, the same in every theme */
     background-image: linear-gradient(
       to right,
@@ -179,7 +179,7 @@
     );
   }
 
-  [data-channel="hue"] .ow-color-picker-track:dir(rtl) {
+  [data-channel="hue"] .ow-color-picker__track:dir(rtl) {
     /* literal: the hue spectrum, the same in every theme */
     background-image: linear-gradient(
       to left,
@@ -193,29 +193,29 @@
     );
   }
 
-  [data-channel="alpha"] .ow-color-picker-track {
+  [data-channel="alpha"] .ow-color-picker__track {
     background-image: linear-gradient(to right, transparent, var(--_alpha)), var(--_checkers);
     background-size:
       100% 100%,
       8px 8px;
   }
 
-  [data-channel="alpha"] .ow-color-picker-track:dir(rtl) {
+  [data-channel="alpha"] .ow-color-picker__track:dir(rtl) {
     background-image: linear-gradient(to left, transparent, var(--_alpha)), var(--_checkers);
   }
 
   /* One element paints the color over the checkerboard, so no light edge shows at the corners. */
-  .ow-color-picker-preview,
-  .ow-color-picker-chip,
-  .ow-color-picker-swatch {
+  .ow-color-picker__preview,
+  .ow-color-picker__chip,
+  .ow-color-picker__swatch {
     flex: none;
     background-color: var(--_color);
     box-shadow: var(--_color-edge);
     forced-color-adjust: none;
   }
 
-  .ow-color-picker-preview,
-  :is(.ow-color-picker-chip, .ow-color-picker-swatch)[data-alpha] {
+  .ow-color-picker__preview,
+  :is(.ow-color-picker__chip, .ow-color-picker__swatch)[data-alpha] {
     background-color: transparent;
     background-image: linear-gradient(var(--_color), var(--_color)), var(--_checkers);
     background-size:
@@ -223,14 +223,14 @@
       8px 8px;
   }
 
-  .ow-color-picker-preview {
+  .ow-color-picker__preview {
     inline-size: var(--_tool);
     block-size: var(--_tool);
     border-radius: var(--_radius);
   }
 
   /* An icon is the font size plus 2px (FR-10). */
-  .ow-color-picker-icon {
+  .ow-color-picker__icon {
     flex: none;
     inline-size: calc(1em + 2px);
     block-size: calc(1em + 2px);
@@ -242,8 +242,8 @@
   }
 
   /* Raised keys: a flat fill with a crisp edge, the pressed material while held (DP-4). */
-  .ow-color-picker-tool,
-  .ow-color-picker-format {
+  .ow-color-picker__tool,
+  .ow-color-picker__format {
     --_key: var(--ow-raised-bg);
     display: inline-flex;
     flex: none;
@@ -263,7 +263,7 @@
     transition: scale var(--_settle-duration) var(--_settle);
   }
 
-  .ow-color-picker-tool {
+  .ow-color-picker__tool {
     inline-size: var(--_tool);
     block-size: var(--_tool);
     padding: 0;
@@ -271,12 +271,12 @@
 
   /* Hover tints the fill a little toward the text; the edge stays. */
   @media (hover: hover) and (pointer: fine) {
-    :is(.ow-color-picker-tool, .ow-color-picker-format):hover:not(:disabled) {
+    :is(.ow-color-picker__tool, .ow-color-picker__format):hover:not(:disabled) {
       background-color: color-mix(in oklab, var(--_key), var(--_fg) 4%);
     }
   }
 
-  :is(.ow-color-picker-tool, .ow-color-picker-format):active:not(:disabled) {
+  :is(.ow-color-picker__tool, .ow-color-picker__format):active:not(:disabled) {
     background-color: var(--ow-pressed-bg);
     box-shadow: var(--ow-pressed-shadow);
     scale: 0.97;
@@ -284,14 +284,14 @@
   }
 
   /* Fields and the format switch: one-line controls on the --py rule (FR-9), sm size. */
-  .ow-color-picker-inputs {
+  .ow-color-picker__inputs {
     display: flex;
     align-items: flex-start;
     gap: 6px;
   }
 
-  .ow-color-picker-format,
-  .ow-color-picker-input {
+  .ow-color-picker__format,
+  .ow-color-picker__input {
     --py: 0.5em;
     --_py: max(var(--py), (24px - 1lh) / 2);
     --px: calc(var(--_py) + (1lh - 1cap) / 2);
@@ -304,18 +304,18 @@
     line-height: 1.25;
   }
 
-  .ow-color-picker-format {
+  .ow-color-picker__format {
     gap: 2px;
     padding-inline-end: calc(var(--px) - 4px);
     font-weight: 600;
   }
 
-  .ow-color-picker-format > .ow-color-picker-icon {
+  .ow-color-picker__format > .ow-color-picker__icon {
     margin-inline-end: calc((1cap - (1em + 2px)) / 2);
     color: var(--_muted);
   }
 
-  .ow-color-picker-field {
+  .ow-color-picker__field {
     display: flex;
     flex: 1 1 0;
     flex-direction: column;
@@ -323,11 +323,11 @@
     min-inline-size: 0;
   }
 
-  .ow-color-picker-field[data-wide] {
+  .ow-color-picker__field[data-wide] {
     flex-grow: 3;
   }
 
-  .ow-color-picker-input {
+  .ow-color-picker__input {
     box-sizing: border-box;
     inline-size: 100%;
     min-inline-size: 0;
@@ -345,21 +345,21 @@
     outline-offset: -1px;
   }
 
-  .ow-color-picker-label {
+  .ow-color-picker__label {
     color: var(--_muted);
     font-size: 11px;
     letter-spacing: 0.04em;
     text-align: center;
   }
 
-  :is(.ow-color-picker-tool, .ow-color-picker-format, .ow-color-picker-swatch):focus-visible,
-  .ow-color-picker-input:focus-visible {
+  :is(.ow-color-picker__tool, .ow-color-picker__format, .ow-color-picker__swatch):focus-visible,
+  .ow-color-picker__input:focus-visible {
     outline: 2px solid var(--_focus);
     outline-offset: 2px;
   }
 
   /* Swatches under an etched line: a dark line, and a light one inside it. */
-  .ow-color-picker-swatches {
+  .ow-color-picker__swatches {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(24px, 1fr));
     gap: 6px;
@@ -368,7 +368,7 @@
     box-shadow: inset 0 1px 0 var(--ow-line-light);
   }
 
-  .ow-color-picker-swatch {
+  .ow-color-picker__swatch {
     display: grid;
     place-items: center;
     aspect-ratio: 1;
@@ -383,23 +383,23 @@
     transition: scale var(--_settle-duration) var(--_settle);
   }
 
-  .ow-color-picker-swatch[data-light] {
+  .ow-color-picker__swatch[data-light] {
     /* literal: a dark check on a light swatch, in either theme */
     color: #000;
   }
 
-  .ow-color-picker-swatch:active:not(:disabled) {
+  .ow-color-picker__swatch:active:not(:disabled) {
     scale: 0.9;
     transition: scale 100ms var(--_ease-out);
   }
 
   /* The swatch of the current color carries a check. */
-  .ow-color-picker-swatch:not([data-pressed]) > .ow-color-picker-icon {
+  .ow-color-picker__swatch:not([data-pressed]) > .ow-color-picker__icon {
     visibility: hidden;
   }
 
   /* The trigger: a flat field that shows the color and its value, or a square of the color. */
-  .ow-color-picker-trigger {
+  .ow-color-picker__trigger {
     --py: 0.75em;
     --_py: max(var(--py), (24px - 1lh) / 2);
     --px: calc(var(--_py) + (1lh - 1cap) / 2);
@@ -424,47 +424,47 @@
     transition: scale var(--_settle-duration) var(--_settle);
   }
 
-  .ow-color-picker-trigger[data-size="sm"] {
+  .ow-color-picker__trigger[data-size="sm"] {
     --py: 0.5em;
     font-size: 13px;
   }
 
-  .ow-color-picker-trigger[data-size="lg"] {
+  .ow-color-picker__trigger[data-size="lg"] {
     --py: 0.875em;
     font-size: 16px;
   }
 
-  .ow-color-picker-trigger:active:not(:disabled) {
+  .ow-color-picker__trigger:active:not(:disabled) {
     scale: 0.97;
     transition: scale 90ms var(--_ease-out);
   }
 
-  .ow-color-picker-trigger:focus-visible {
+  .ow-color-picker__trigger:focus-visible {
     outline: 2px solid var(--_focus);
     outline-offset: 2px;
   }
 
-  .ow-color-picker-trigger:disabled {
+  .ow-color-picker__trigger:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
 
   /* The color is the leading icon: as far from the edges as from the top and bottom (FR-10). */
-  .ow-color-picker-chip {
+  .ow-color-picker__chip {
     inline-size: var(--icon);
     block-size: var(--icon);
     margin-inline-start: calc((1cap - var(--icon)) / 2);
     border-radius: calc(var(--_radius) / 2);
   }
 
-  .ow-color-picker-value {
+  .ow-color-picker__value {
     font-family: var(--_mono);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
 
   /* A square as tall as the field, filled with the color. */
-  .ow-color-picker-trigger[data-variant="swatch"] {
+  .ow-color-picker__trigger[data-variant="swatch"] {
     justify-content: center;
     inline-size: calc(2 * var(--_py) + 1lh);
     block-size: calc(2 * var(--_py) + 1lh);
@@ -473,7 +473,7 @@
     box-shadow: none;
   }
 
-  .ow-color-picker-trigger[data-variant="swatch"] > .ow-color-picker-chip {
+  .ow-color-picker__trigger[data-variant="swatch"] > .ow-color-picker__chip {
     inline-size: 100%;
     block-size: 100%;
     margin: 0;
@@ -481,48 +481,48 @@
   }
 
   /* Scales out of the trigger (Base UI's --transform-origin), and back into it. */
-  .ow-color-picker-popup {
+  .ow-color-picker__popup {
     transform-origin: var(--transform-origin);
     transition:
       opacity 180ms var(--ow-ease-out),
       transform 180ms var(--ow-ease-out);
   }
 
-  .ow-color-picker-popup:is([data-starting-style], [data-ending-style]) {
+  .ow-color-picker__popup:is([data-starting-style], [data-ending-style]) {
     opacity: 0;
     transform: scale(0.96);
   }
 
-  .ow-color-picker-popup[data-ending-style] {
+  .ow-color-picker__popup[data-ending-style] {
     transition-duration: 140ms;
   }
 
   /* Opened from the keyboard, or dismissed: no motion (Base UI's data-instant). */
-  .ow-color-picker-popup[data-instant] {
+  .ow-color-picker__popup[data-instant] {
     transition: none;
   }
 
-  .ow-color-picker-popup > .ow-color-picker {
+  .ow-color-picker__popup > .ow-color-picker {
     box-shadow: var(--ow-popup-shadow);
   }
 
   /* FR-20: no scaling and no compacting; the popover still fades. */
   @media (prefers-reduced-motion: reduce) {
-    .ow-color-picker-popup:is([data-starting-style], [data-ending-style]) {
+    .ow-color-picker__popup:is([data-starting-style], [data-ending-style]) {
       transform: none;
     }
 
-    .ow-color-picker-popup {
+    .ow-color-picker__popup {
       transition: opacity 180ms ease;
     }
 
     :is(
-        .ow-color-picker-area[data-dragging] > .ow-color-picker-thumb,
-        .ow-color-picker-thumb[data-dragging]
+        .ow-color-picker__area[data-dragging] > .ow-color-picker__thumb,
+        .ow-color-picker__thumb[data-dragging]
       ),
-    :is(.ow-color-picker-tool, .ow-color-picker-format):active:not(:disabled),
-    .ow-color-picker-swatch:active:not(:disabled),
-    .ow-color-picker-trigger:active:not(:disabled) {
+    :is(.ow-color-picker__tool, .ow-color-picker__format):active:not(:disabled),
+    .ow-color-picker__swatch:active:not(:disabled),
+    .ow-color-picker__trigger:active:not(:disabled) {
       scale: none;
     }
   }
@@ -530,29 +530,29 @@
   /* DP-8: colors keep their own paint; edges, the selected swatch, and focus use system colors. */
   @media (forced-colors: active) {
     :is(
-        .ow-color-picker-area,
-        .ow-color-picker-track,
-        .ow-color-picker-preview,
-        .ow-color-picker-chip,
-        .ow-color-picker-swatch
+        .ow-color-picker__area,
+        .ow-color-picker__track,
+        .ow-color-picker__preview,
+        .ow-color-picker__chip,
+        .ow-color-picker__swatch
       ) {
       outline: 1px solid CanvasText;
       outline-offset: 0;
     }
 
-    .ow-color-picker-swatch[data-pressed] {
+    .ow-color-picker__swatch[data-pressed] {
       outline: 3px solid Highlight;
     }
 
     :is(
-        .ow-color-picker-area,
-        .ow-color-picker-tool,
-        .ow-color-picker-format,
-        .ow-color-picker-input,
-        .ow-color-picker-swatch,
-        .ow-color-picker-trigger
+        .ow-color-picker__area,
+        .ow-color-picker__tool,
+        .ow-color-picker__format,
+        .ow-color-picker__input,
+        .ow-color-picker__swatch,
+        .ow-color-picker__trigger
       ):focus-visible,
-    .ow-color-picker-thumb:has(:focus-visible) {
+    .ow-color-picker__thumb:has(:focus-visible) {
       outline: 2px solid Highlight;
       outline-offset: 2px;
     }

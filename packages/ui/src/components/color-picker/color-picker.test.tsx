@@ -23,7 +23,7 @@ async function mount(ui: ReactNode) {
     screen,
     q,
     picker: () => q(".ow-color-picker"),
-    area: () => q('[role="slider"].ow-color-picker-area'),
+    area: () => q('[role="slider"].ow-color-picker__area'),
     hue: () => q<HTMLInputElement>('[data-channel="hue"] input'),
     alpha: () => q<HTMLInputElement>('[data-channel="alpha"] input'),
     field: (label: string) => q<HTMLInputElement>(`input[aria-label="${label}"]`),
@@ -293,7 +293,7 @@ describe("ColorPicker", () => {
 
   test("the format switch cycles the fields", async () => {
     const { q, field } = await mount(<ColorPicker defaultValue="#7c6ab8" />);
-    const format = q<HTMLButtonElement>(".ow-color-picker-format");
+    const format = q<HTMLButtonElement>(".ow-color-picker__format");
     format.click();
     await expect.poll(() => format.getAttribute("aria-label")).toBe("Format: RGB");
     expect([field("Red").value, field("Green").value, field("Blue").value]).toEqual([
@@ -350,10 +350,10 @@ describe("ColorPicker", () => {
       expect.anything(),
     );
     expect(screen.container.querySelector('[data-channel="alpha"]')).toBeNull();
-    expect(screen.container.querySelector(".ow-color-picker-inputs")).toBeNull();
-    expect(screen.container.querySelector(".ow-color-picker-swatches")).toBeNull();
-    expect(screen.container.querySelector(".ow-color-picker-tool")).toBeNull();
-    expect(q(".ow-color-picker-tools").hasAttribute("data-stack")).toBe(false);
+    expect(screen.container.querySelector(".ow-color-picker__inputs")).toBeNull();
+    expect(screen.container.querySelector(".ow-color-picker__swatches")).toBeNull();
+    expect(screen.container.querySelector(".ow-color-picker__tool")).toBeNull();
+    expect(q(".ow-color-picker__tools").hasAttribute("data-stack")).toBe(false);
   });
 
   test("the eye dropper picks from the screen where the browser can, keeping the opacity", async () => {
@@ -399,23 +399,23 @@ describe("ColorPicker", () => {
       expect(getComputedStyle(field("Hex")).backgroundColor).toBe(
         resolveColor("var(--ow-well-bg)"),
       );
-      expect(getComputedStyle(q(".ow-color-picker-format")).backgroundColor).toBe(
+      expect(getComputedStyle(q(".ow-color-picker__format")).backgroundColor).toBe(
         resolveColor("var(--ow-raised-bg)"),
       );
       expect(getComputedStyle(picker()).boxShadow).toBe(resolveShadow("var(--ow-panel-shadow)"));
-      expect(getComputedStyle(q(".ow-color-picker-format")).boxShadow).toBe(
+      expect(getComputedStyle(q(".ow-color-picker__format")).boxShadow).toBe(
         resolveShadow("var(--ow-raised-shadow)"),
       );
-      expect(getComputedStyle(q(".ow-color-picker-swatches")).borderBlockStartColor).toBe(
+      expect(getComputedStyle(q(".ow-color-picker__swatches")).borderBlockStartColor).toBe(
         resolveColor("var(--ow-line-dark)"),
       );
       // The thumb ring must read on any color, so it is white in both themes.
-      expect(getComputedStyle(q(".ow-color-picker-thumb")).borderTopColor).toBe(
+      expect(getComputedStyle(q(".ow-color-picker__thumb")).borderTopColor).toBe(
         "rgb(255, 255, 255)",
       );
       field("Hex").focus();
       await userEvent.keyboard("{Shift>}{Tab}{/Shift}");
-      expect(getComputedStyle(q(".ow-color-picker-format")).outlineColor).toBe(
+      expect(getComputedStyle(q(".ow-color-picker__format")).outlineColor).toBe(
         resolveColor("var(--ow-focus)"),
       );
     }
@@ -434,7 +434,7 @@ describe("ColorPicker", () => {
     );
     const names = "area track thumb preview tool format input swatch trigger chip".split(" ");
     const parts = [
-      ...screen.container.querySelectorAll(names.map((name) => `.ow-color-picker-${name}`).join()),
+      ...screen.container.querySelectorAll(names.map((name) => `.ow-color-picker__${name}`).join()),
     ];
     expect(parts.length).toBeGreaterThan(20);
     for (const theme of ["light", "dark"]) {
@@ -442,16 +442,16 @@ describe("ColorPicker", () => {
       // A key's top light line may soften by under 1px; nothing else blurs.
       for (const part of parts) expect(maxBlur(part), part.className).toBeLessThanOrEqual(1);
       // The area and the tracks share the swatches' 1px edge.
-      const edge = getComputedStyle(q(".ow-color-picker-swatch")).boxShadow;
+      const edge = getComputedStyle(q(".ow-color-picker__swatch")).boxShadow;
       expect(edge).toMatch(/ 0px 0px 0px 1px inset$/);
-      expect(getComputedStyle(q(".ow-color-picker-area")).boxShadow).toBe(edge);
-      expect(getComputedStyle(q(".ow-color-picker-track")).boxShadow).toBe(edge);
+      expect(getComputedStyle(q(".ow-color-picker__area")).boxShadow).toBe(edge);
+      expect(getComputedStyle(q(".ow-color-picker__track")).boxShadow).toBe(edge);
     }
   });
 
   test("a raised key's hover tints its fill and keeps its edge", async () => {
     const { q } = await mount(<ColorPicker />);
-    const format = q(".ow-color-picker-format");
+    const format = q(".ow-color-picker__format");
     const fill = getComputedStyle(format).backgroundColor;
     const edge = getComputedStyle(format).boxShadow;
     await userEvent.hover(format);
@@ -472,7 +472,7 @@ describe("ColorPicker", () => {
     const [own, other] = screen.container.querySelectorAll(".ow-color-picker");
     if (!own || !other) throw new Error("no pickers");
     const checkers = (el: Element) =>
-      getComputedStyle(el.querySelector(".ow-color-picker-preview") as Element).backgroundImage;
+      getComputedStyle(el.querySelector(".ow-color-picker__preview") as Element).backgroundImage;
     expect(getComputedStyle(own).backgroundColor).toBe("rgb(1, 2, 3)");
     expect(checkers(own)).toContain("rgb(7, 8, 9)");
     expect(getComputedStyle(other).backgroundColor).toBe(resolveColor("var(--ow-panel)"));
@@ -481,12 +481,12 @@ describe("ColorPicker", () => {
 
   test("className and style set its width and the area's height", async () => {
     const sheet = document.createElement("style");
-    sheet.textContent = ".tall .ow-color-picker-area { block-size: 120px; }";
+    sheet.textContent = ".tall .ow-color-picker__area { block-size: 120px; }";
     document.head.append(sheet);
     onTestFinished(() => sheet.remove());
     const { picker, q } = await mount(<ColorPicker className="tall" style={{ inlineSize: 300 }} />);
     expect(picker().getBoundingClientRect().width).toBe(300);
-    expect(q(".ow-color-picker-area").getBoundingClientRect().height).toBe(120);
+    expect(q(".ow-color-picker__area").getBoundingClientRect().height).toBe(120);
   });
 
   test("keeps its colors, and draws edges and focus in system colors, in forced colors (DP-8)", async () => {
@@ -522,24 +522,24 @@ describe("ColorPicker", () => {
     // Saturation grows toward the inline end, the left.
     expect(getComputedStyle(area()).backgroundImage).toContain("to left");
     const box = area().getBoundingClientRect();
-    const thumb = q(".ow-color-picker-area .ow-color-picker-thumb").getBoundingClientRect();
+    const thumb = q(".ow-color-picker__area .ow-color-picker__thumb").getBoundingClientRect();
     expect(thumb.left + thumb.width / 2).toBeCloseTo(box.left, 0);
     press(area(), "ArrowLeft");
     await expect.poll(() => area().getAttribute("aria-valuenow")).toBe("100");
     press(area(), "ArrowRight");
     await expect.poll(() => area().getAttribute("aria-valuenow")).toBe("99");
     // Base UI mirrors the sliders: hue 0 sits at the right end.
-    const track = q('[data-channel="hue"] .ow-color-picker-track').getBoundingClientRect();
-    const hueThumb = q('[data-channel="hue"] .ow-color-picker-thumb').getBoundingClientRect();
+    const track = q('[data-channel="hue"] .ow-color-picker__track').getBoundingClientRect();
+    const hueThumb = q('[data-channel="hue"] .ow-color-picker__thumb').getBoundingClientRect();
     expect(hueThumb.left + hueThumb.width / 2).toBeCloseTo(track.right, 0);
     expect(
-      getComputedStyle(q('[data-channel="hue"] .ow-color-picker-track')).backgroundImage,
+      getComputedStyle(q('[data-channel="hue"] .ow-color-picker__track')).backgroundImage,
     ).toContain("to left");
   });
 
   test("a thumb compacts while pressed and springs back (Tactile), but not under reduced motion", async () => {
     const { area } = await mount(<ColorPicker />);
-    const thumb = area().querySelector(".ow-color-picker-thumb");
+    const thumb = area().querySelector(".ow-color-picker__thumb");
     if (!thumb) throw new Error("no thumb");
     const edge = getComputedStyle(thumb).boxShadow;
     expect(getComputedStyle(thumb).transitionProperty).toBe("scale");
@@ -601,15 +601,17 @@ describe("ColorPickerPopover", () => {
     const { screen, q } = await mount(
       <ColorPickerPopover defaultValue="#7c6ab8" format="rgb" onChange={onChange} />,
     );
-    const trigger = q<HTMLButtonElement>(".ow-color-picker-trigger", screen.container);
+    const trigger = q<HTMLButtonElement>(".ow-color-picker__trigger", screen.container);
     expect(trigger.textContent).toBe("rgb(124, 106, 184)");
-    expect(getComputedStyle(q(".ow-color-picker-chip")).backgroundColor).toBe("rgb(124, 106, 184)");
+    expect(getComputedStyle(q(".ow-color-picker__chip")).backgroundColor).toBe(
+      "rgb(124, 106, 184)",
+    );
     expect(trigger.getAttribute("aria-haspopup")).toBe("dialog");
     await userEvent.click(trigger);
     await expect.poll(popup).toBeTruthy();
     expect(popup()?.getAttribute("aria-label")).toBe("Color picker");
     // Focus moves into the picker, onto the area.
-    await expect.poll(() => document.activeElement?.className).toBe("ow-color-picker-area");
+    await expect.poll(() => document.activeElement?.className).toBe("ow-color-picker__area");
     await userEvent.keyboard("{ArrowDown}");
     await expect.poll(() => trigger.textContent).toMatch(/^rgb\(\d+, \d+, \d+\)$/);
     expect(trigger.textContent).not.toBe("rgb(124, 106, 184)");
@@ -646,13 +648,13 @@ describe("ColorPickerPopover", () => {
       </>,
     );
     const [first, second, third] = screen.container.querySelectorAll<HTMLElement>(
-      ".ow-color-picker-trigger",
+      ".ow-color-picker__trigger",
     );
     expect(ref.current).toBe(first);
-    expect(first?.className).toBe("ow-color-picker-trigger mine");
+    expect(first?.className).toBe("ow-color-picker__trigger mine");
     expect(first?.style.marginBlock).toBe("3px");
     expect(first?.getAttribute("aria-label")).toBe("Brand");
-    expect(second?.className).toBe("ow-color-picker-trigger shut");
+    expect(second?.className).toBe("ow-color-picker__trigger shut");
     expect(third?.tagName).toBe("SPAN");
   });
 
@@ -664,19 +666,19 @@ describe("ColorPickerPopover", () => {
       </>,
     );
     const [swatch, custom] = screen.container.querySelectorAll<HTMLElement>(
-      ".ow-color-picker-trigger",
+      ".ow-color-picker__trigger",
     );
     if (!swatch || !custom) throw new Error("no triggers");
     expect(swatch.textContent).toBe("");
     const box = swatch.getBoundingClientRect();
     expect(box.width).toBeCloseTo(box.height, 1);
-    expect(swatch.querySelector(".ow-color-picker-chip")?.hasAttribute("data-alpha")).toBe(true);
+    expect(swatch.querySelector(".ow-color-picker__chip")?.hasAttribute("data-alpha")).toBe(true);
     expect(custom.textContent).toBe("Aa");
   });
 
   test("the popup scales out of the trigger, and only fades under reduced motion", async () => {
     const { q, screen } = await mount(<ColorPickerPopover />);
-    await userEvent.click(q(".ow-color-picker-trigger", screen.container));
+    await userEvent.click(q(".ow-color-picker__trigger", screen.container));
     await expect.poll(popup).toBeTruthy();
     const style = () => getComputedStyle(popup() as HTMLElement);
     expect(style().transformOrigin).not.toBe("");
@@ -689,7 +691,7 @@ describe("ColorPickerPopover", () => {
 
     onTestFinished(() => commands.setReducedMotion("no-preference"));
     await commands.setReducedMotion("reduce");
-    await userEvent.click(q(".ow-color-picker-trigger", screen.container));
+    await userEvent.click(q(".ow-color-picker__trigger", screen.container));
     await expect.poll(popup).toBeTruthy();
     expect(style().transitionProperty).toBe("opacity");
   });
@@ -703,8 +705,10 @@ describe("ColorPickerPopover", () => {
       </DirectionProvider>,
     );
     // The trigger paints the token itself, so it follows the theme around it.
-    expect(getComputedStyle(q(".ow-color-picker-chip")).backgroundColor).toBe("rgb(212, 203, 229)");
-    await userEvent.click(q(".ow-color-picker-trigger", screen.container));
+    expect(getComputedStyle(q(".ow-color-picker__chip")).backgroundColor).toBe(
+      "rgb(212, 203, 229)",
+    );
+    await userEvent.click(q(".ow-color-picker__trigger", screen.container));
     await expect.poll(popup).toBeTruthy();
     const positioner = popup()?.parentElement;
     expect(positioner?.getAttribute("data-theme")).toBe("dark");
@@ -721,7 +725,7 @@ describe("ColorPickerPopover", () => {
     const { screen, q } = await mount(
       <ColorPickerPopover value="#336699" open={false} onOpenChange={onOpenChange} />,
     );
-    const trigger = q(".ow-color-picker-trigger", screen.container);
+    const trigger = q(".ow-color-picker__trigger", screen.container);
     expect(trigger.textContent).toBe("#336699");
     await userEvent.click(trigger);
     expect(onOpenChange).toHaveBeenCalledWith(true, expect.anything());
@@ -733,7 +737,7 @@ describe("ColorPickerPopover", () => {
 
   test("disabled: the trigger does not open", async () => {
     const { q, screen } = await mount(<ColorPickerPopover disabled />);
-    const trigger = q<HTMLButtonElement>(".ow-color-picker-trigger", screen.container);
+    const trigger = q<HTMLButtonElement>(".ow-color-picker__trigger", screen.container);
     expect(trigger.disabled).toBe(true);
     trigger.click();
     await new Promise((resolve) => setTimeout(resolve, 50));
@@ -755,7 +759,7 @@ describe("ColorPickerPopover", () => {
       root.dataset.theme = theme;
       expect(await axeReport(screen.container)).toEqual({ violations: [], contrastUnknown: [] });
     }
-    await userEvent.click(q(".ow-color-picker-trigger", screen.container));
+    await userEvent.click(q(".ow-color-picker__trigger", screen.container));
     await expect.poll(popup).toBeTruthy();
     await settle();
     for (const theme of ["light", "dark"]) {
@@ -771,7 +775,7 @@ describe("ColorPickerPopover", () => {
     const { q, screen } = await mount(<ColorPickerPopover />);
     await settle();
     expect(await measureIdle(1500)).toEqual({ rafCalls: 0, runningAnimations: [] });
-    await userEvent.click(q(".ow-color-picker-trigger", screen.container));
+    await userEvent.click(q(".ow-color-picker__trigger", screen.container));
     await expect.poll(popup).toBeTruthy();
     await settle({ maxMs: 3000 });
     expect(await measureIdle(1500)).toEqual({ rafCalls: 0, runningAnimations: [] });

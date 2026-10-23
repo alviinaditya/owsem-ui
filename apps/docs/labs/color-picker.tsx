@@ -131,7 +131,7 @@ function States({ lang }: { lang: Lang }) {
 
 // Drags the area's thumb around, and back to where it started (lilac: saturation 42, brightness 72).
 const area: SceneScript = async (stage) => {
-  const target = stage.get(".ow-color-picker-area");
+  const target = stage.get(".ow-color-picker__area");
   await stage.drag(target, [
     { x: 0.42, y: 0.28 },
     { x: 0.9, y: 0.1 },
@@ -144,7 +144,7 @@ const area: SceneScript = async (stage) => {
 
 // Drags the opacity down over the checkerboard, and back up.
 const alpha: SceneScript = async (stage) => {
-  const track = stage.get('[data-channel="alpha"] .ow-color-picker-track');
+  const track = stage.get('[data-channel="alpha"] .ow-color-picker__track');
   await stage.drag(track, [
     { x: 1, y: 0.5 },
     { x: 0.15, y: 0.5 },
@@ -160,13 +160,13 @@ const alpha: SceneScript = async (stage) => {
 
 // Cycles the fields through RGB and HSL, tries two swatches, and comes back to lilac and hex.
 const formats: SceneScript = async (stage) => {
-  const format = stage.get(".ow-color-picker-format");
+  const format = stage.get(".ow-color-picker__format");
   for (let i = 0; i < 2; i++) {
     await stage.click(format);
     await stage.wait(1000);
   }
   for (const n of [2, 7, 1]) {
-    await stage.click(stage.get(`.ow-color-picker-swatch:nth-child(${n})`));
+    await stage.click(stage.get(`.ow-color-picker__swatch:nth-child(${n})`));
     await stage.wait(900);
   }
   await stage.click(format);
@@ -176,7 +176,7 @@ const formats: SceneScript = async (stage) => {
 // Opens the medium trigger's popover in each theme, then shuts it.
 const states: SceneScript = async (stage) => {
   for (const theme of THEMES) {
-    const trigger = stage.get(`[data-cell="${theme}-md"] .ow-color-picker-trigger`);
+    const trigger = stage.get(`[data-cell="${theme}-md"] .ow-color-picker__trigger`);
     await stage.click(trigger);
     await stage.wait(1800);
     await stage.click(trigger);
@@ -237,7 +237,7 @@ const colorPickerLab = defineLab({
     },
     {
       name: "Area",
-      selector: ".ow-color-picker-area",
+      selector: ".ow-color-picker__area",
       note: {
         id: "Saturasi ke kanan, kecerahan ke atas. Slider 2D dengan keyboard dan ARIA sendiri.",
         en: "Saturation to the right, brightness up. A 2D slider with its own keyboard and ARIA.",
@@ -245,7 +245,7 @@ const colorPickerLab = defineLab({
     },
     {
       name: "Thumb",
-      selector: ".ow-color-picker-area .ow-color-picker-thumb",
+      selector: ".ow-color-picker__area .ow-color-picker__thumb",
       note: {
         id: "Cincin warna bertepi gelap 1px; memadat saat ditekan, memantul saat dilepas.",
         en: "A ring with a 1px dark edge around the color; compacts when pressed, springs back.",
@@ -269,7 +269,7 @@ const colorPickerLab = defineLab({
     },
     {
       name: "EyeDropper",
-      selector: ".ow-color-picker-tool",
+      selector: ".ow-color-picker__tool",
       note: {
         id: "Mengambil warna dari layar; hanya muncul di browser yang punya EyeDropper API.",
         en: "Picks a color off the screen; shown only where the browser has the EyeDropper API.",
@@ -278,7 +278,7 @@ const colorPickerLab = defineLab({
     },
     {
       name: "Preview",
-      selector: ".ow-color-picker-preview",
+      selector: ".ow-color-picker__preview",
       note: {
         id: "Warna saat ini di atas papan catur, setinggi kedua track.",
         en: "The current color over the checkerboard, as tall as both tracks.",
@@ -286,7 +286,7 @@ const colorPickerLab = defineLab({
     },
     {
       name: "Format",
-      selector: ".ow-color-picker-format",
+      selector: ".ow-color-picker__format",
       note: {
         id: "Berganti antara kolom HEX, RGB, dan HSL.",
         en: "Switches between the HEX, RGB, and HSL fields.",
@@ -295,7 +295,7 @@ const colorPickerLab = defineLab({
     },
     {
       name: "Field",
-      selector: ".ow-color-picker-field",
+      selector: ".ow-color-picker__field",
       note: {
         id: "Kolom datar bertepi 3:1. Angka berlaku saat diketik; hex saat Enter atau blur.",
         en: "A flat field with a 3:1 edge. Numbers apply as you type; hex on Enter or blur.",
@@ -304,7 +304,7 @@ const colorPickerLab = defineLab({
     },
     {
       name: "Swatches",
-      selector: ".ow-color-picker-swatches",
+      selector: ".ow-color-picker__swatches",
       note: {
         id: "Toggle Group dari Base UI di bawah garis terukir; yang cocok diberi centang.",
         en: "A Base UI Toggle Group under an etched line; the match carries a check.",

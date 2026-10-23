@@ -50,19 +50,26 @@ stage; pilih sebuah nama, di sini atau di stage, untuk melihat tokennya.
 
 | Bagian | Elemen | Catatan |
 | --- | --- | --- |
-| <Part name="Root" /> | `div.ow-color-picker` | Panelnya; token tema yang dipasang di sini hanya berlaku untuknya |
-| <Part name="Area" /> | `div` | `role="slider"` dua dimensi, dengan tombolnya sendiri |
-| <Part name="Thumb" /> | `span` | Cincin berisi warnanya dengan tepi gelap 1px, juga di setiap slider |
-| <Part name="Hue" /> | `div` | `Slider` dari Base UI |
-| <Part name="Alpha" /> | `div` | `Slider` dari Base UI di atas papan catur |
-| <Part name="EyeDropper" /> | `button` | Hanya di browser yang punya EyeDropper API |
-| <Part name="Preview" /> | `span` | Warna saat ini, setinggi kedua track |
-| <Part name="Format" /> | `button` | Berganti antara HEX, RGB, dan HSL |
-| <Part name="Field" /> | `input` | Di dalam `label`; huruf di bawahnya adalah notasi |
-| <Part name="Swatches" /> | `div` | `ToggleGroup` dari Base UI; setiap contoh warna punya `aria-pressed` |
+| <Part name="Root" /> | `div.ow-color-picker` | Panelnya; token tema yang dipasang di sini hanya berlaku untuknya; `data-disabled` |
+| <Part name="Area" /> | `div.ow-color-picker__area` | `role="slider"` dua dimensi, dengan tombolnya sendiri; `data-dragging` selama diseret |
+| <Part name="Thumb" /> | `span.ow-color-picker__thumb` | Cincin berisi warnanya dengan tepi gelap 1px, juga di setiap slider (sebuah `div` dengan `data-dragging`) |
+| <Part name="Hue" /> | `div.ow-color-picker__slider` | `Slider` dari Base UI, `data-channel="hue"`; `div.ow-color-picker__control`-nya memuat `div.ow-color-picker__track` |
+| <Part name="Alpha" /> | `div.ow-color-picker__slider` | `Slider` dari Base UI di atas papan catur, `data-channel="alpha"` |
+| <Part name="EyeDropper" /> | `button.ow-color-picker__tool` | Hanya di browser yang punya EyeDropper API |
+| <Part name="Preview" /> | `span.ow-color-picker__preview` | Warna saat ini, setinggi kedua track |
+| <Part name="Format" /> | `button.ow-color-picker__format` | Berganti antara HEX, RGB, dan HSL |
+| <Part name="Field" /> | `label.ow-color-picker__field` | Memuat `input.ow-color-picker__input`; huruf di bawahnya, `span.ow-color-picker__label`, adalah notasi |
+| <Part name="Swatches" /> | `div.ow-color-picker__swatches` | `ToggleGroup` dari Base UI; setiap `button.ow-color-picker__swatch` punya `aria-pressed` dan `data-pressed`, serta `data-alpha` bila transparan |
 
-`ColorPickerPopover` menambah trigger, `button.ow-color-picker-trigger` (`Popover.Trigger` dari Base
-UI), dan popup, `div.ow-color-picker-popup` (`Popover.Popup`, sebuah dialog), yang memuat panelnya.
+`div.ow-color-picker__tools` memuat eye dropper, slider-slider (di dalam
+`div.ow-color-picker__sliders`), dan preview; `div.ow-color-picker__inputs` memuat tombol format dan
+kolom-kolomnya. Ikonnya `svg.ow-color-picker__icon`.
+
+`ColorPickerPopover` menambah trigger, `button.ow-color-picker__trigger` (`Popover.Trigger` dari Base
+UI, dengan `data-size` dan `data-variant`), yang menampilkan `span.ow-color-picker__chip`
+(`data-alpha` bila transparan) dan `span.ow-color-picker__value`, dan popup,
+`div.ow-color-picker__popup` (`Popover.Popup`, sebuah dialog, di dalam
+`div.ow-color-picker__positioner`), yang memuat panelnya.
 
 ## State dan varian [#states]
 
@@ -137,7 +144,7 @@ Di mode isolated, nilainya ada di root setiap picker, jadi atur di picker itu se
 </ForMode>
 
 Lebar (256 px) dan tinggi area (160 px) adalah layout: atur `inline-size` di picker lewat
-`className` atau `style`, dan `block-size` di `.ow-color-picker-area`-nya. Gradien, spektrum rona,
+`className` atau `style`, dan `block-size` di `.ow-color-picker__area`-nya. Gradien, spektrum rona,
 cincin putih thumb dengan tepi gelapnya, dan centang di contoh warna sama di setiap tema, sehingga
 terbaca di warna apa pun. Panel popover di-portal ke body, jadi pasang tokennya di tempat yang
 terbaca oleh popup, misalnya `:root` atau `.ow-color-picker`; tema dan arah trigger-nya ikut

@@ -119,7 +119,7 @@ test("a color takes short hex, picks from Color Picker, and goes back to the the
   const swatch = stage(page).getByRole("button", { name: "Dark line (color picker)" });
   const picker = page.getByRole("dialog", { name: "Dark line" });
   await hex.fill("f00");
-  await expect(swatch.locator(".ow-color-picker-chip")).toHaveCSS(
+  await expect(swatch.locator(".ow-color-picker__chip")).toHaveCSS(
     "background-color",
     "rgb(255, 0, 0)",
   );

@@ -295,6 +295,9 @@
     --py: 0.5em;
     --_py: max(var(--py), (24px - 1lh) / 2);
     --px: calc(var(--_py) + (1lh - 1cap) / 2);
+    box-sizing: border-box;
+    /* Firefox grows a field to its font's own line height when that is taller; pin both. */
+    block-size: calc(1lh + 2 * var(--_py));
     padding: var(--_py) var(--px);
     font-family: var(--_mono);
     font-size: 13px;

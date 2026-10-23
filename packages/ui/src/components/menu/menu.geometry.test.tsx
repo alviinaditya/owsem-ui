@@ -1,7 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 import { concentric, insets, TOL } from "../../../test/geometry.ts";
-import { settle } from "../../../test/raf-counter.ts";
 import { Menu, type MenuSize } from "./index";
 
 const Glyph = () => (
@@ -43,7 +42,14 @@ describe("Menu geometry (FR-9, FR-10, FR-10b)", () => {
           </Menu.Portal>
         </Menu.Root>,
       );
-      await settle();
+      // Open, then finish the open transition rather than wait for idle: WebKit in CI can keep
+      // frames coming long after it (idle cost has its own test).
+      await expect
+        .poll(() => document.querySelector(".ow-menu__popup:not([data-starting-style])"))
+        .not.toBeNull();
+      for (const animation of document.getAnimations()) {
+        if (animation instanceof CSSTransition) animation.finish();
+      }
       const items = [...document.querySelectorAll<HTMLElement>(".ow-menu__item")];
       expect(items).toHaveLength(3);
       for (const item of items) {

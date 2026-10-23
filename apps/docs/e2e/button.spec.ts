@@ -24,9 +24,15 @@ test("Reset in the stage controls is a Button", async ({ page }) => {
   await stage(page).getByRole("button", { name: "Controls" }).click();
   const reset = stage(page).getByRole("button", { name: "Reset" });
   await expect(reset).toHaveClass(/\bow-button\b/);
-  await stage(page).getByLabel("Vertical").check();
+  // The stage's choices are radios, or Toggle Group items once those replace them.
+  await stage(page)
+    .getByRole("radio", { name: "Vertical" })
+    .or(stage(page).getByRole("button", { name: "Vertical", exact: true }))
+    .click();
+  const separator = stage(page).locator(".ow-separator").first();
+  await expect(separator).toHaveAttribute("aria-orientation", "vertical");
   await reset.click();
-  await expect(stage(page).getByLabel("Horizontal")).toBeChecked();
+  await expect(separator).toHaveAttribute("aria-orientation", "horizontal");
 });
 
 test("Previous and Next are links styled as Buttons", async ({ page }) => {

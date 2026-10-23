@@ -39,14 +39,14 @@ sebuah nama, di sini atau di stage, untuk melihat tokennya.
 | Bagian | Elemen | Catatan |
 | --- | --- | --- |
 | <Part name="Root" /> | `nav.ow-tree-rail-nav` | Memuat SVG rail dan highlight hover |
-| <Part name="List" /> | `ul` | List bersarang diberi label oleh barisnya (`aria-labelledby`) |
-| <Part name="Node" /> | `li` | `Collapsible.Root` dari Base UI |
-| <Part name="Toggle" /> | `button` | Baris grup: `Collapsible.Trigger`, dengan `aria-expanded` |
-| <Part name="Link" /> | `a` | `render` menggantinya dengan link router; `current` memasang `aria-current` |
-| <Part name="Panel" /> | `div` | `Collapsible.Panel`, tetap ada di DOM saat tertutup supaya rail bisa berakhir di barisnya |
-| <Part name="Icon" /> | `span` | Dekoratif (`aria-hidden`); ukurannya font baris ditambah 2px, dan ikon apa pun di dalamnya mengikuti ukuran itu |
-| <Part name="Label" /> | `span` | Satu baris; teks yang tidak muat memudar di ujung, dan berjalan ke kiri berulang selama barisnya di-hover atau difokus |
-| <Part name="Origin" /> | `div` | Label opsional di paling atas; jejak berawal di sampingnya |
+| <Part name="List" /> | `ul.ow-tree-rail-nav__list` | List bersarang diberi label oleh barisnya (`aria-labelledby`); `data-depth` mulai dari 1 |
+| <Part name="Node" /> | `li.ow-tree-rail-nav__node` | `Collapsible.Root` dari Base UI |
+| <Part name="Toggle" /> | `button.ow-tree-rail-nav__item` | Baris grup: `Collapsible.Trigger`, dengan `aria-expanded`, `data-panel-open`, dan `data-depth` |
+| <Part name="Link" /> | `a.ow-tree-rail-nav__item` | `render` menggantinya dengan link router; `current` memasang `aria-current` dan `data-current`; `data-depth` |
+| <Part name="Panel" /> | `div.ow-tree-rail-nav__panel` | `Collapsible.Panel`, tetap ada di DOM saat tertutup supaya rail bisa berakhir di barisnya |
+| <Part name="Icon" /> | `span.ow-tree-rail-nav__icon` | Dekoratif (`aria-hidden`); ukurannya font baris ditambah 2px, dan ikon apa pun di dalamnya mengikuti ukuran itu |
+| <Part name="Label" /> | `span.ow-tree-rail-nav__label` | Satu baris; teks yang tidak muat memudar di ujung (`data-overflow`), dan berjalan ke kiri berulang selama barisnya di-hover atau difokus |
+| <Part name="Origin" /> | `div.ow-tree-rail-nav__origin` | Label opsional di paling atas; jejak berawal di sampingnya |
 
 ## State dan varian [#states]
 

@@ -1038,7 +1038,7 @@ body {
 }
 
 /* Available pages read as such; planned ones stay muted, with the "Soon" tag beside them. */
-.sidebar-nav .ow-tree-rail-node:not([data-planned]) > .ow-tree-rail-item[data-depth="2"] {
+.sidebar-nav .ow-tree-rail-nav__node:not([data-planned]) > .ow-tree-rail-nav__item[data-depth="2"] {
   color: var(--docs-fg);
 }
 

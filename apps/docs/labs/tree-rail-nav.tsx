@@ -213,7 +213,7 @@ const states: SceneScript = async (stage) => {
 
 // Closes the group holding the current row, then opens it again.
 const groups: SceneScript = async (stage) => {
-  const toggle = stage.get('[data-demo="theming"] > .ow-tree-rail-item');
+  const toggle = stage.get('[data-demo="theming"] > .ow-tree-rail-nav__item');
   for (let i = 0; i < 2; i++) {
     await stage.click(toggle);
     await stage.wait(1500);
@@ -254,7 +254,7 @@ const treeRailNavLab = defineLab({
     },
     {
       name: "List",
-      selector: ".ow-tree-rail-list",
+      selector: ".ow-tree-rail-nav__list",
       note: {
         id: "Satu tingkat, dengan satu rail. List bersarang diberi label oleh barisnya.",
         en: "One level, with one rail. A nested List is labelled by its row.",
@@ -270,7 +270,7 @@ const treeRailNavLab = defineLab({
     },
     {
       name: "Toggle",
-      selector: '[data-demo="guides"] > .ow-tree-rail-item',
+      selector: '[data-demo="guides"] > .ow-tree-rail-nav__item',
       note: {
         id: "Baris grup: membuka dan menutup Panel-nya, dengan aria-expanded.",
         en: "A group's row: opens and closes its Panel, with aria-expanded.",
@@ -286,7 +286,7 @@ const treeRailNavLab = defineLab({
     },
     {
       name: "Panel",
-      selector: '[data-demo="theming"] > .ow-tree-rail-panel',
+      selector: '[data-demo="theming"] > .ow-tree-rail-nav__panel',
       note: {
         id: "Tingkat berikutnya dari grup, tetap ada di DOM supaya rail bisa berakhir di barisnya.",
         en: "A group's next level, kept mounted so the rail can end at its row.",
@@ -294,7 +294,7 @@ const treeRailNavLab = defineLab({
     },
     {
       name: "Icon",
-      selector: '[href="#changelog"] .ow-tree-rail-icon',
+      selector: '[href="#changelog"] .ow-tree-rail-nav__icon',
       note: {
         id: "Ikon dekoratif sebelum label, seukuran font baris ditambah 2px.",
         en: "A decorative icon before the label, the row's font size plus 2px.",
@@ -302,7 +302,7 @@ const treeRailNavLab = defineLab({
     },
     {
       name: "Label",
-      selector: '[href="#install"] .ow-tree-rail-label',
+      selector: '[href="#install"] .ow-tree-rail-nav__label',
       note: {
         id: "Satu baris. Teks yang tidak muat memudar, lalu berjalan selama barisnya di-hover.",
         en: "One line. Text that does not fit fades, and runs while its row is hovered.",
@@ -310,7 +310,7 @@ const treeRailNavLab = defineLab({
     },
     {
       name: "Origin",
-      selector: ".ow-tree-rail-origin",
+      selector: ".ow-tree-rail-nav__origin",
       note: {
         id: "Label opsional di paling atas; jejak berawal di sampingnya.",
         en: "An optional label at the top; the trail starts beside it.",

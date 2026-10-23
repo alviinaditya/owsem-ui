@@ -38,14 +38,14 @@ on the stage, to see its tokens.
 | Part | Element | Notes |
 | --- | --- | --- |
 | <Part name="Root" /> | `nav.ow-tree-rail-nav` | Holds the rail SVG and the hover highlight |
-| <Part name="List" /> | `ul` | A nested List is labelled by its row (`aria-labelledby`) |
-| <Part name="Node" /> | `li` | A Base UI `Collapsible.Root` |
-| <Part name="Toggle" /> | `button` | A group's row: `Collapsible.Trigger`, with `aria-expanded` |
-| <Part name="Link" /> | `a` | `render` swaps in a router link; `current` sets `aria-current` |
-| <Part name="Panel" /> | `div` | `Collapsible.Panel`, kept mounted so the rail can end at its row |
-| <Part name="Icon" /> | `span` | Decorative (`aria-hidden`); the row's font size plus 2px, any icon inside it filled to fit |
-| <Part name="Label" /> | `span` | One line; text that does not fit fades, and runs left in a loop while its row is hovered or focused |
-| <Part name="Origin" /> | `div` | Optional label at the top; the trail starts beside it |
+| <Part name="List" /> | `ul.ow-tree-rail-nav__list` | A nested List is labelled by its row (`aria-labelledby`); `data-depth` from 1 |
+| <Part name="Node" /> | `li.ow-tree-rail-nav__node` | A Base UI `Collapsible.Root` |
+| <Part name="Toggle" /> | `button.ow-tree-rail-nav__item` | A group's row: `Collapsible.Trigger`, with `aria-expanded`, `data-panel-open`, and `data-depth` |
+| <Part name="Link" /> | `a.ow-tree-rail-nav__item` | `render` swaps in a router link; `current` sets `aria-current` and `data-current`; `data-depth` |
+| <Part name="Panel" /> | `div.ow-tree-rail-nav__panel` | `Collapsible.Panel`, kept mounted so the rail can end at its row |
+| <Part name="Icon" /> | `span.ow-tree-rail-nav__icon` | Decorative (`aria-hidden`); the row's font size plus 2px, any icon inside it filled to fit |
+| <Part name="Label" /> | `span.ow-tree-rail-nav__label` | One line; text that does not fit fades (`data-overflow`), and runs left in a loop while its row is hovered or focused |
+| <Part name="Origin" /> | `div.ow-tree-rail-nav__origin` | Optional label at the top; the trail starts beside it |
 
 ## States and variants [#states]
 

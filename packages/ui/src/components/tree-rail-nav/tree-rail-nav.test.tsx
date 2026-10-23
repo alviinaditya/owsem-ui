@@ -44,10 +44,10 @@ function Nav({ current = "dark", open = true }: { current?: string; open?: boole
 async function mount(ui: ReactNode) {
   const screen = await render(ui);
   const nav = screen.container.querySelector<HTMLElement>("nav");
-  const tree = screen.container.querySelector<HTMLElement>(".ow-tree-rail");
+  const tree = screen.container.querySelector<HTMLElement>(".ow-tree-rail-nav__tree");
   if (!nav || !tree) throw new Error("not mounted");
   const row = (name: string) => {
-    const el = [...tree.querySelectorAll<HTMLElement>("[data-tree-rail-item]")].find(
+    const el = [...tree.querySelectorAll<HTMLElement>(".ow-tree-rail-nav__item")].find(
       (r) => r.textContent === name,
     );
     if (!el) throw new Error(`no row ${name}`);
@@ -81,7 +81,7 @@ function contrast(a: number[], b: number[]): number {
 
 /** The marker's y in the tree, and a row's middle, to compare where the trail ends. */
 const markerY = (tree: HTMLElement) => {
-  const t = tree.querySelector('[data-part="marker"]')?.getAttribute("transform") ?? "";
+  const t = tree.querySelector(".ow-tree-rail-nav__rail-marker")?.getAttribute("transform") ?? "";
   return Number(/translate\([\d.-]+ ([\d.-]+)\)/.exec(t)?.[1] ?? Number.NaN);
 };
 const middle = (tree: HTMLElement, row: HTMLElement) => {
@@ -111,7 +111,7 @@ describe("Tree Rail Nav", () => {
     expect(row("Home").hasAttribute("data-trail")).toBe(false);
     // Lit: Home and Settings on the root rail, Profile and Appearance on the next, and Dark mode.
     // About is below the branch, and Density is past the end.
-    expect(tree.querySelectorAll('[data-part="node"][data-lit]').length).toBe(5);
+    expect(tree.querySelectorAll(".ow-tree-rail-nav__rail-node[data-lit]").length).toBe(5);
     // The first draw is simply there, as after a client-side route change: the trail, its dots,
     // the rows on it, and the tint. Nothing fades or sweeps in.
     const current = row("Dark mode");
@@ -170,7 +170,9 @@ describe("Tree Rail Nav", () => {
     await expect
       .poll(() => markerY(tree), { timeout: 2000 })
       .toBeCloseTo(middle(tree, settings), 0);
-    expect(tree.querySelector('[data-part="marker"]')?.hasAttribute("data-hollow")).toBe(true);
+    expect(tree.querySelector(".ow-tree-rail-nav__rail-marker")?.hasAttribute("data-hollow")).toBe(
+      true,
+    );
     expect(row("Dark mode").hasAttribute("data-arrived")).toBe(false);
     settings.click();
     await expect
@@ -253,11 +255,12 @@ describe("Tree Rail Nav", () => {
         </TreeRailNav.List>
       </TreeRailNav.Root>,
     );
-    const tree = screen.container.querySelector<HTMLElement>(".ow-tree-rail");
-    const label = screen.container.querySelector<HTMLElement>("[data-tree-rail-origin]");
+    const tree = screen.container.querySelector<HTMLElement>(".ow-tree-rail-nav__tree");
+    const label = screen.container.querySelector<HTMLElement>(".ow-tree-rail-nav__origin");
     if (!tree || !label) throw new Error("not mounted");
     const originY = () => {
-      const t = tree.querySelector('[data-part="origin"]')?.getAttribute("transform") ?? "";
+      const t =
+        tree.querySelector(".ow-tree-rail-nav__rail-origin")?.getAttribute("transform") ?? "";
       return Number(/translate\([\d.-]+ ([\d.-]+)\)/.exec(t)?.[1] ?? Number.NaN);
     };
     await expect.poll(originY).toBeCloseTo(label.offsetTop + label.offsetHeight / 2, 0);
@@ -281,7 +284,7 @@ describe("Tree Rail Nav", () => {
       </TreeRailNav.Root>,
     );
     const [short, long] = [
-      ...screen.container.querySelectorAll<HTMLElement>(".ow-tree-rail-label"),
+      ...screen.container.querySelectorAll<HTMLElement>(".ow-tree-rail-nav__label"),
     ];
     if (!short || !long) throw new Error("no labels");
     await expect.poll(() => long.hasAttribute("data-overflow")).toBe(true);
@@ -299,8 +302,8 @@ describe("Tree Rail Nav", () => {
     const fade = () => getComputedStyle(long).maskPosition;
     expect(fade()).toBe("-16px 0px, 0px 0px");
     expect(getComputedStyle(long).transitionDuration).toBe("0s");
-    const row = long.closest<HTMLElement>("[data-tree-rail-item]");
-    const tree = screen.container.querySelector<HTMLElement>(".ow-tree-rail");
+    const row = long.closest<HTMLElement>(".ow-tree-rail-nav__item");
+    const tree = screen.container.querySelector<HTMLElement>(".ow-tree-rail-nav__tree");
     const r = row?.getBoundingClientRect();
     if (!row || !tree || !r) throw new Error("no row");
     tree.dispatchEvent(
@@ -333,8 +336,8 @@ describe("Tree Rail Nav", () => {
         </TreeRailNav.List>
       </TreeRailNav.Root>,
     );
-    const label = screen.container.querySelector<HTMLElement>(".ow-tree-rail-label");
-    const row = label?.closest<HTMLElement>("[data-tree-rail-item]");
+    const label = screen.container.querySelector<HTMLElement>(".ow-tree-rail-nav__label");
+    const row = label?.closest<HTMLElement>(".ow-tree-rail-nav__item");
     if (!label || !row) throw new Error("no label");
     await expect.poll(() => label.title).toBe("Keyboard and accessibility");
     row.setAttribute("data-glide-active", "");
@@ -372,7 +375,7 @@ describe("Tree Rail Nav", () => {
     );
     const link = screen.container.querySelector("[data-router]");
     expect(link?.getAttribute("aria-current")).toBe("page");
-    expect(link?.classList.contains("ow-tree-rail-item")).toBe(true);
+    expect(link?.classList.contains("ow-tree-rail-nav__item")).toBe(true);
   });
 
   test("does not travel under reduced motion (FR-20)", async () => {
@@ -384,7 +387,7 @@ describe("Tree Rail Nav", () => {
     await expect
       .poll(() => markerY(tree), { timeout: 200 })
       .toBeCloseTo(middle(tree, row("Home")), 0);
-    const panel = tree.querySelector(".ow-tree-rail-panel");
+    const panel = tree.querySelector(".ow-tree-rail-nav__panel");
     expect(panel && getComputedStyle(panel).transitionDuration).toBe("0s");
   });
 
@@ -392,7 +395,7 @@ describe("Tree Rail Nav", () => {
     onTestFinished(() => commands.setForcedColors("none"));
     const { tree } = await mount(<Nav />);
     await commands.setForcedColors("active");
-    const trail = tree.querySelector('[data-part="trail"]');
+    const trail = tree.querySelector(".ow-tree-rail-nav__rail-trail");
     const probe = document.createElement("span");
     probe.style.color = "Highlight";
     document.body.append(probe);
@@ -406,7 +409,7 @@ describe("Tree Rail Nav", () => {
         <Nav />
       </div>,
     );
-    const svg = screen.container.querySelector(".ow-tree-rail-svg");
+    const svg = screen.container.querySelector(".ow-tree-rail-nav__rail");
     expect(svg && getComputedStyle(svg).scale).toBe("-1 1");
   });
 
@@ -417,16 +420,16 @@ describe("Tree Rail Nav", () => {
     const { screen, tree, row } = await mount(<Nav />);
     // The rail draws only in the indent left of each row, never behind its text: every dot sits
     // left of its row. axe counts any SVG behind text as an image, so it measures without it.
-    await expect.poll(() => tree.querySelectorAll('[data-part="node"]').length).toBe(7);
+    await expect.poll(() => tree.querySelectorAll(".ow-tree-rail-nav__rail-node").length).toBe(7);
     for (const name of ["Home", "Settings", "Profile", "Dark mode"]) {
       const r = row(name).getBoundingClientRect();
-      const dots = [...tree.querySelectorAll('[data-part="node"]')].map((d) =>
+      const dots = [...tree.querySelectorAll(".ow-tree-rail-nav__rail-node")].map((d) =>
         d.getBoundingClientRect(),
       );
       const dot = dots.find((d) => Math.abs(d.top + d.height / 2 - (r.top + r.height / 2)) < 1);
       expect(dot?.right).toBeLessThan(r.left);
     }
-    const svg = tree.querySelector<SVGElement>(".ow-tree-rail-svg");
+    const svg = tree.querySelector<SVGElement>(".ow-tree-rail-nav__rail");
     if (svg) svg.style.display = "none";
     for (const theme of ["light", "dark"]) {
       document.documentElement.dataset.theme = theme;

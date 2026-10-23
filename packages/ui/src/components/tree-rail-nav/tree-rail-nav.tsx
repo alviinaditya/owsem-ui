@@ -22,29 +22,14 @@ import {
 } from "react";
 import { withClassName } from "../../core/class-name";
 import { GlideHighlight, useGlide } from "../../core/glide/use-glide";
-import { createTreeRail } from "./tree-rail";
+import { cls, createTreeRail } from "./tree-rail";
 import "./tree-rail-nav.css";
-
-const cls = {
-  root: "ow-tree-rail-nav",
-  tree: "ow-tree-rail",
-  svg: "ow-tree-rail-svg",
-  list: "ow-tree-rail-list",
-  node: "ow-tree-rail-node",
-  item: "ow-tree-rail-item",
-  chevron: "ow-tree-rail-chevron",
-  panel: "ow-tree-rail-panel",
-  icon: "ow-tree-rail-icon",
-  origin: "ow-tree-rail-origin",
-  label: "ow-tree-rail-label",
-  labelText: "ow-tree-rail-label-text",
-} as const;
 
 // Marquee: px between the two copies of a label, and how fast they travel (px per second).
 const MARQUEE_GAP = 32;
 const MARQUEE_SPEED = 40;
 
-const ROW = "[data-tree-rail-item]";
+const ROW = `.${cls.item}`;
 
 // Drawing before the first paint keeps a nav mounted on the client (a route change) from showing
 // a frame without its trail; the server has no layout, so it falls back without React 18's warning.
@@ -65,7 +50,7 @@ function onArrowKey(tree: HTMLElement, event: KeyboardEvent<HTMLElement>): void 
   if (!row || !tree.contains(row)) return;
   const rows = [...tree.querySelectorAll<HTMLElement>(ROW)].filter(visible);
   const i = rows.indexOf(row);
-  const panel = row.parentElement?.querySelector<HTMLElement>(":scope > [data-tree-rail-panel]");
+  const panel = row.parentElement?.querySelector<HTMLElement>(`:scope > .${cls.panel}`);
   const expanded = row.getAttribute("aria-expanded");
   let next: HTMLElement | null | undefined = null;
   switch (event.key) {
@@ -89,7 +74,7 @@ function onArrowKey(tree: HTMLElement, event: KeyboardEvent<HTMLElement>): void 
     case "ArrowLeft":
       if (expanded === "true") row.click();
       else {
-        const parent = row.parentElement?.closest("[data-tree-rail-panel]");
+        const parent = row.parentElement?.closest(`.${cls.panel}`);
         next = parent?.parentElement?.querySelector<HTMLElement>(`:scope > ${ROW}`);
       }
       break;
@@ -143,7 +128,7 @@ export const TreeRailNavRoot: ForwardRefExoticComponent<
     >
       <div ref={setTree} className={cls.tree}>
         <GlideHighlight glide={glide} />
-        <svg ref={svg} className={cls.svg} aria-hidden="true" focusable="false" />
+        <svg ref={svg} className={cls.rail} aria-hidden="true" focusable="false" />
         {children}
       </div>
     </nav>
@@ -212,7 +197,6 @@ export const TreeRailNavToggle: ForwardRefExoticComponent<
     <Collapsible.Trigger
       ref={ref}
       id={rowId}
-      data-tree-rail-item=""
       data-depth={depth}
       className={withClassName(cls.item, className)}
       {...props}
@@ -250,7 +234,6 @@ export const TreeRailNavLink: ForwardRefExoticComponent<
       {
         id: rowId,
         className: className ? `${cls.item} ${className}` : cls.item,
-        "data-tree-rail-item": "",
         "data-depth": depth,
         "data-current": current ? "" : undefined,
         "aria-current": current === true ? "page" : current || undefined,
@@ -276,7 +259,6 @@ export const TreeRailNavPanel: ForwardRefExoticComponent<
     <Collapsible.Panel
       ref={ref}
       keepMounted
-      data-tree-rail-panel=""
       data-depth={depth}
       className={withClassName(cls.panel, className)}
       {...props}
@@ -376,12 +358,7 @@ export const TreeRailNavOrigin: ForwardRefExoticComponent<
   ref,
 ) {
   return (
-    <div
-      ref={ref}
-      data-tree-rail-origin=""
-      className={className ? `${cls.origin} ${className}` : cls.origin}
-      {...props}
-    />
+    <div ref={ref} className={className ? `${cls.origin} ${className}` : cls.origin} {...props} />
   );
 });
 

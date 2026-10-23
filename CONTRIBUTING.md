@@ -92,11 +92,14 @@ Class names follow BEM blocks and elements; modifiers are data attributes (FR-6b
 - One meaning, one name: `data-held` while the pointer holds a control down (never
   `data-pressed`, which Base UI uses for on), `data-visible` while an indicator shows, and
   `data-instant` for a change without a transition.
+- Keyframes are named after the block too: `ow-<block>-<name>`, such as
+  `ow-tree-rail-nav-marquee`.
 - The classes and the states in a Lab's parts table are public. Other data attributes are
   private, like `--_*` properties.
 
 `test/naming.test.ts` fails on a class outside this pattern, a class in a folder that is not its
-block, CSS for a class no component renders, and `data-part`.
+block, CSS for a class no component renders, keyframes named after another block, and
+`data-part`.
 
 ## Icons
 

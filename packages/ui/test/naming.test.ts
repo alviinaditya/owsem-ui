@@ -82,6 +82,16 @@ describe("Class names (FR-6b)", () => {
     expect(problems).toEqual([]);
   });
 
+  test("keyframes are named ow-<block>-<name>, after their folder", () => {
+    const problems: string[] = [];
+    for (const [path, css] of Object.entries(sheets)) {
+      for (const [, name] of uncomment(css).matchAll(/@keyframes\s+([\w-]+)/g)) {
+        if (!name?.startsWith(`ow-${blockOf(path)}-`)) problems.push(`${path}: @keyframes ${name}`);
+      }
+    }
+    expect(problems).toEqual([]);
+  });
+
   test("parts are classes, and a state has one name", () => {
     const problems: string[] = [];
     const files = { ...sheets, ...sources };

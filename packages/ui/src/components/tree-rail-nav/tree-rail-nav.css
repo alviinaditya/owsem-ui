@@ -355,22 +355,22 @@
   .ow-tree-rail-nav__item:is([data-glide-active], :focus-visible)
     .ow-tree-rail-nav__label[data-overflow]
     > .ow-tree-rail-nav__label-text {
-    animation: ow-tree-rail-marquee var(--_marquee-duration) linear 0.4s infinite;
+    animation: ow-tree-rail-nav-marquee var(--_marquee-duration) linear 0.4s infinite;
   }
 
   .ow-tree-rail-nav__item:is([data-glide-active], :focus-visible)
     .ow-tree-rail-nav__label[data-overflow]:dir(rtl)
     > .ow-tree-rail-nav__label-text {
-    animation-name: ow-tree-rail-marquee-rtl;
+    animation-name: ow-tree-rail-nav-marquee-rtl;
   }
 
-  @keyframes ow-tree-rail-marquee {
+  @keyframes ow-tree-rail-nav-marquee {
     to {
       transform: translateX(calc(-1 * var(--_loop)));
     }
   }
 
-  @keyframes ow-tree-rail-marquee-rtl {
+  @keyframes ow-tree-rail-nav-marquee-rtl {
     to {
       transform: translateX(var(--_loop));
     }

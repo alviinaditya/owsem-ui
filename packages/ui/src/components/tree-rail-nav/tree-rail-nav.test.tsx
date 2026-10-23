@@ -166,6 +166,8 @@ describe("Tree Rail Nav", () => {
   test("ends at the group's row while the current row is closed inside it", async () => {
     const { tree, row } = await mount(<Nav />);
     const settings = row("Settings");
+    // The first draw puts the trail on the current row; closing its group starts from there.
+    await expect.poll(() => markerY(tree)).toBeCloseTo(middle(tree, row("Dark mode")), 0);
     settings.click();
     await expect
       .poll(() => markerY(tree), { timeout: 2000 })

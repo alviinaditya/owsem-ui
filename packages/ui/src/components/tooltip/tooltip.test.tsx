@@ -118,10 +118,15 @@ describe("Tooltip", () => {
     await pointerAway();
     await userEvent.hover(button("Bold"));
     await expect.poll(popup, { timeout: 1500 }).not.toBeNull();
-    const opened = performance.now();
+    // Timed from the pointer's arrival, not from the hover command, which a busy runner slows.
+    let entered = Number.NaN;
+    const enter = () => {
+      entered = performance.now();
+    };
+    button("Italic").addEventListener("pointerenter", enter, { once: true });
     await userEvent.hover(button("Italic"));
     await expect.poll(() => popups().find((p) => p.textContent === "Italic")).toBeTruthy();
-    expect(performance.now() - opened).toBeLessThan(250);
+    expect(performance.now() - entered).toBeLessThan(250);
     const italic = popups().find((p) => p.textContent === "Italic");
     expect(italic?.dataset.instant).toBe("delay");
     expect(getComputedStyle(italic as HTMLElement).transitionDuration).toBe("0s");

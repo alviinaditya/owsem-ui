@@ -1,7 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 import { TOL } from "../../../test/geometry.ts";
-import { settle } from "../../../test/raf-counter.ts";
 import { Popover } from "./index";
 
 type Side = "top" | "right" | "bottom" | "left";
@@ -31,7 +30,14 @@ describe("Popover geometry", () => {
           </Popover.Root>
         </div>,
       );
-      await settle();
+      // Open, then finish the open transition rather than wait for idle: WebKit in CI can keep
+      // frames coming long after it (idle cost has its own test).
+      await expect
+        .poll(() => document.querySelector(".ow-popover__popup:not([data-starting-style])"))
+        .not.toBeNull();
+      for (const animation of document.getAnimations()) {
+        if (animation instanceof CSSTransition) animation.finish();
+      }
       const trigger = rect("button");
       const popup = rect(".ow-popover__popup");
       const arrow = rect(".ow-popover__arrow");

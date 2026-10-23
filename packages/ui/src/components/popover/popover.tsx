@@ -7,11 +7,11 @@ import { withClassName } from "../../core/class-name";
 import "./popover.css";
 
 const cls = {
-  positioner: "ow-popover-positioner",
-  popup: "ow-popover-popup",
-  arrow: "ow-popover-arrow",
-  title: "ow-popover-title",
-  description: "ow-popover-description",
+  positioner: "ow-popover__positioner",
+  popup: "ow-popover__popup",
+  arrow: "ow-popover__arrow",
+  title: "ow-popover__title",
+  description: "ow-popover__description",
 } as const;
 
 // Parts without a look of their own come straight from Base UI.

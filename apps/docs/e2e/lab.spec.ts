@@ -823,7 +823,7 @@ test("the Popover Lab opens its panel from Share, then hands it between triggers
   await scene(page, "panel");
   const panel = demo(page).getByRole("dialog", { name: "Share the draft" });
   await expect(panel).toBeVisible();
-  await expect(panel.locator(".ow-popover-arrow")).toHaveCount(1);
+  await expect(panel.locator(".ow-popover__arrow")).toHaveCount(1);
   await scene(page, "detached");
   await expect(panel).toBeVisible();
   // The link takes the panel over: it moves under it.

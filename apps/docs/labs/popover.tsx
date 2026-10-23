@@ -289,7 +289,7 @@ const popoverLab = defineLab({
     },
     {
       name: "Popup",
-      selector: ".ow-popover-popup",
+      selector: ".ow-popover__popup",
       note: {
         id: "Material panel dengan bayangan popup; role=dialog, dinamai oleh Title.",
         en: "The panel material with the popup shadow; role=dialog, named by its Title.",
@@ -303,7 +303,7 @@ const popoverLab = defineLab({
     },
     {
       name: "Arrow",
-      selector: ".ow-popover-arrow",
+      selector: ".ow-popover__arrow",
       note: {
         id: "Opsional: permukaan dan bayangan panel, di tepinya, tepat di atas trigger.",
         en: "Optional: the panel's surface and shadow, on its edge, over the trigger.",
@@ -312,7 +312,7 @@ const popoverLab = defineLab({
     },
     {
       name: "Title",
-      selector: ".ow-popover-title",
+      selector: ".ow-popover__title",
       note: {
         id: "h2 yang menamai dialog untuk teknologi asistif.",
         en: "An h2 that names the dialog for assistive technology.",
@@ -320,7 +320,7 @@ const popoverLab = defineLab({
     },
     {
       name: "Description",
-      selector: ".ow-popover-description",
+      selector: ".ow-popover__description",
       note: {
         id: "Baris muted yang mendeskripsikan dialog.",
         en: "A muted line that describes the dialog.",

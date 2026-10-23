@@ -37,8 +37,8 @@ function Share({
   );
 }
 
-const popup = () => document.querySelector<HTMLElement>(".ow-popover-popup");
-const arrow = () => document.querySelector<HTMLElement>(".ow-popover-arrow") as HTMLElement;
+const popup = () => document.querySelector<HTMLElement>(".ow-popover__popup");
+const arrow = () => document.querySelector<HTMLElement>(".ow-popover__arrow") as HTMLElement;
 const trigger = () => document.querySelector<HTMLElement>("button") as HTMLElement;
 const gone = () => expect.poll(popup, { timeout: 1000 }).toBeNull();
 
@@ -60,12 +60,12 @@ describe("Popover", () => {
     const dialog = popup() as HTMLElement;
     expect(dialog.getAttribute("role")).toBe("dialog");
     expect(dialog.getAttribute("aria-labelledby")).toBe(
-      document.querySelector(".ow-popover-title")?.id,
+      document.querySelector(".ow-popover__title")?.id,
     );
     expect(dialog.getAttribute("aria-describedby")).toBe(
-      document.querySelector(".ow-popover-description")?.id,
+      document.querySelector(".ow-popover__description")?.id,
     );
-    expect(document.querySelector(".ow-popover-title")?.tagName).toBe("H2");
+    expect(document.querySelector(".ow-popover__title")?.tagName).toBe("H2");
     await expect.poll(() => dialog.contains(document.activeElement)).toBe(true);
     await userEvent.keyboard("{Escape}");
     await gone();
@@ -76,7 +76,7 @@ describe("Popover", () => {
     await userEvent.click(document.body, { position: { x: 5, y: 5 } });
     await gone();
     await userEvent.click(trigger());
-    await userEvent.click(document.querySelector(".ow-popover-popup button") as HTMLElement);
+    await userEvent.click(document.querySelector(".ow-popover__popup button") as HTMLElement);
     await gone();
   });
 
@@ -110,7 +110,7 @@ describe("Popover", () => {
     const runs: { property: string; frames: Keyframe[] }[] = [];
     const onRun = (event: TransitionEvent) => {
       const target = event.target as HTMLElement;
-      if (!target.classList.contains("ow-popover-popup")) return;
+      if (!target.classList.contains("ow-popover__popup")) return;
       const transition = target
         .getAnimations()
         .find((a) => (a as CSSTransition).transitionProperty === event.propertyName);
@@ -182,14 +182,14 @@ describe("Popover", () => {
       </Popover.Root>,
     );
     await expect.poll(() => refs.popup.current).not.toBeNull();
-    expect(refs.positioner.current?.className).toBe("ow-popover-positioner p");
+    expect(refs.positioner.current?.className).toBe("ow-popover__positioner p");
     expect(refs.positioner.current?.style.zIndex).toBe("3");
-    expect(refs.popup.current?.className).toBe("ow-popover-popup u");
+    expect(refs.popup.current?.className).toBe("ow-popover__popup u");
     expect(refs.popup.current?.tagName).toBe("SECTION");
-    expect(refs.arrow.current?.className).toBe("ow-popover-arrow a");
-    expect(refs.title.current?.className).toBe("ow-popover-title t");
+    expect(refs.arrow.current?.className).toBe("ow-popover__arrow a");
+    expect(refs.title.current?.className).toBe("ow-popover__title t");
     expect(refs.title.current?.tagName).toBe("H3");
-    expect(refs.description.current?.className).toBe("ow-popover-description d");
+    expect(refs.description.current?.className).toBe("ow-popover__description d");
   });
 
   test("sits on the panel material with the popup shadow; its arrow matches, light and dark", async () => {
@@ -206,7 +206,7 @@ describe("Popover", () => {
       expect(style.boxShadow).toBe(resolve("box-shadow", "var(--ow-popup-shadow)"));
       expect(style.color).toBe(resolve("color", "var(--ow-fg)"));
       expect(
-        getComputedStyle(document.querySelector(".ow-popover-description") as Element).color,
+        getComputedStyle(document.querySelector(".ow-popover__description") as Element).color,
       ).toBe(resolve("color", "var(--ow-muted)"));
       // The arrow wears the popup's surface and shadow, so its edges are the panel's.
       const tip = getComputedStyle(arrow(), "::before");
@@ -229,7 +229,7 @@ describe("Popover", () => {
     expect(style.boxShadow).toBe("none");
     expect(style.color).toBe("rgb(4, 5, 6)");
     expect(
-      getComputedStyle(document.querySelector(".ow-popover-description") as Element).color,
+      getComputedStyle(document.querySelector(".ow-popover__description") as Element).color,
     ).toBe("rgb(7, 8, 9)");
     const tip = getComputedStyle(arrow(), "::before");
     expect(tip.backgroundColor).toBe("rgb(1, 2, 3)");
@@ -259,7 +259,7 @@ describe("Popover", () => {
     );
     await expect.poll(popup).not.toBeNull();
     await settle();
-    expect(document.querySelector(".ow-popover-positioner")?.getAttribute("dir")).toBe("rtl");
+    expect(document.querySelector(".ow-popover__positioner")?.getAttribute("dir")).toBe("rtl");
     const box = (popup() as HTMLElement).getBoundingClientRect();
     const tip = arrow().getBoundingClientRect();
     expect(box.right).toBeLessThanOrEqual(trigger().getBoundingClientRect().left);

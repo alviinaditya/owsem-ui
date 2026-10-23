@@ -33,8 +33,8 @@ describe("Popover geometry", () => {
       );
       await settle();
       const trigger = rect("button");
-      const popup = rect(".ow-popover-popup");
-      const arrow = rect(".ow-popover-arrow");
+      const popup = rect(".ow-popover__popup");
+      const arrow = rect(".ow-popover__arrow");
       const gap = {
         top: trigger.top - popup.bottom,
         bottom: popup.top - trigger.bottom,

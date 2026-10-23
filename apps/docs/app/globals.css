@@ -2804,7 +2804,7 @@ figure[data-code-block] pre {
   block-size: 290px;
 }
 
-.demo-portal .ow-popover-popup {
+.demo-portal .ow-popover__popup {
   inline-size: 16rem;
 }
 

@@ -77,6 +77,27 @@ gives and that more than one component needs. `test/theming.test.ts` fails on an
 name, a fallback, or a literal color, radius, or font. A literal that is not theming, such as a
 color picker's hue spectrum, takes a `/* literal: <reason> */` comment right before it.
 
+## Class names and states
+
+Class names follow BEM blocks and elements; modifiers are data attributes (FR-6b).
+
+- The block is the component's folder name. The root part takes `.ow-<block>`, and every other
+  part `.ow-<block>__<element>`, also when it renders outside the root (a portal) or is drawn by a
+  script (an SVG rail). The element is the Base UI part name in kebab case where there is one
+  (`__positioner`, `__group-label`); an element inside an element joins with a hyphen
+  (`__item-label`), never a second `__`.
+- A part is found by its class, in CSS and in scripts. No `--modifier` classes and no
+  `data-part`: variants and states are data attributes, Base UI's own (`data-pressed` for a toggle
+  that is on, `data-highlighted`, `data-side`) or OwsemUI's (`data-variant`, `data-size`).
+- One meaning, one name: `data-held` while the pointer holds a control down (never
+  `data-pressed`, which Base UI uses for on), `data-visible` while an indicator shows, and
+  `data-instant` for a change without a transition.
+- The classes and the states in a Lab's parts table are public. Other data attributes are
+  private, like `--_*` properties.
+
+`test/naming.test.ts` fails on a class outside this pattern, a class in a folder that is not its
+block, CSS for a class no component renders, and `data-part`.
+
 ## Icons
 
 Icons come from [Lucide](https://lucide.dev) (ISC). Copy an icon's inner SVG elements into the

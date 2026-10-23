@@ -51,8 +51,8 @@ async function mount(ui: ReactNode) {
   return render(ui);
 }
 
-const popup = () => document.querySelector<HTMLElement>(".ow-tooltip-popup");
-const popups = () => [...document.querySelectorAll<HTMLElement>(".ow-tooltip-popup")];
+const popup = () => document.querySelector<HTMLElement>(".ow-tooltip__popup");
+const popups = () => [...document.querySelectorAll<HTMLElement>(".ow-tooltip__popup")];
 const button = (name: string) => {
   const el = document.querySelector<HTMLElement>(`[aria-label="${name}"]`);
   if (!el) throw new Error(`no ${name}`);
@@ -133,7 +133,7 @@ describe("Tooltip", () => {
     const runs: { property: string; frames: Keyframe[] }[] = [];
     const onRun = (event: TransitionEvent) => {
       const target = event.target as HTMLElement;
-      if (!target.classList.contains("ow-tooltip-popup")) return;
+      if (!target.classList.contains("ow-tooltip__popup")) return;
       const transition = target
         .getAnimations()
         .find((a) => (a as CSSTransition).transitionProperty === event.propertyName);
@@ -154,7 +154,7 @@ describe("Tooltip", () => {
       "cubic-bezier(0.23, 1, 0.32, 1), cubic-bezier(0.23, 1, 0.32, 1)",
     );
     // The scale's origin is the trigger's edge, which Base UI writes on the positioner.
-    const positioner = document.querySelector<HTMLElement>(".ow-tooltip-positioner");
+    const positioner = document.querySelector<HTMLElement>(".ow-tooltip__positioner");
     expect(style.transformOrigin).not.toBe("");
     expect(positioner?.style.getPropertyValue("--transform-origin")).toMatch(/px/);
     await settle();
@@ -195,11 +195,11 @@ describe("Tooltip", () => {
         </Tooltip.Portal>
       </Tooltip.Root>,
     );
-    expect(refs.positioner.current?.className).toBe("ow-tooltip-positioner p");
+    expect(refs.positioner.current?.className).toBe("ow-tooltip__positioner p");
     expect(refs.positioner.current?.style.zIndex).toBe("3");
-    expect(refs.popup.current?.className).toBe("ow-tooltip-popup u");
+    expect(refs.popup.current?.className).toBe("ow-tooltip__popup u");
     expect(refs.popup.current?.tagName).toBe("SECTION");
-    expect(refs.arrow.current?.className).toBe("ow-tooltip-arrow a");
+    expect(refs.arrow.current?.className).toBe("ow-tooltip__arrow a");
     expect(refs.arrow.current?.getAttribute("aria-hidden")).toBe("true");
   });
 
@@ -210,7 +210,7 @@ describe("Tooltip", () => {
     await mount(<Labelled name="Bold" shortcut="B" open />);
     await expect.poll(popup).not.toBeNull();
     const surface = popup() as HTMLElement;
-    const arrow = document.querySelector(".ow-tooltip-arrow") as HTMLElement;
+    const arrow = document.querySelector(".ow-tooltip__arrow") as HTMLElement;
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
       const style = getComputedStyle(surface);
@@ -262,7 +262,7 @@ describe("Tooltip", () => {
     expect(style.outlineStyle).toBe("solid");
     expect(style.outlineWidth).toBe("1px");
     expect(style.outlineColor).not.toBe("rgba(0, 0, 0, 0)");
-    const arrow = getComputedStyle(document.querySelector(".ow-tooltip-arrow") as HTMLElement);
+    const arrow = getComputedStyle(document.querySelector(".ow-tooltip__arrow") as HTMLElement);
     expect(arrow.backgroundColor).toBe(style.color);
   });
 
@@ -276,12 +276,12 @@ describe("Tooltip", () => {
     );
     await expect.poll(popup).not.toBeNull();
     await settle();
-    const positioner = document.querySelector(".ow-tooltip-positioner") as HTMLElement;
+    const positioner = document.querySelector(".ow-tooltip__positioner") as HTMLElement;
     expect(positioner.getAttribute("dir")).toBe("rtl");
     // Inline end is the left, and the arrow points back right, at the trigger.
     const trigger = button("Bold").getBoundingClientRect();
     const box = (popup() as HTMLElement).getBoundingClientRect();
-    const arrowEl = document.querySelector(".ow-tooltip-arrow") as HTMLElement;
+    const arrowEl = document.querySelector(".ow-tooltip__arrow") as HTMLElement;
     const arrow = arrowEl.getBoundingClientRect();
     expect(box.right).toBeLessThanOrEqual(trigger.left);
     // The triangle fills the box's half by the popup, mirrored to point right.

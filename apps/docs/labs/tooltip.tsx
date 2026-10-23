@@ -325,7 +325,7 @@ const tooltipLab = defineLab({
     },
     {
       name: "Popup",
-      selector: ".ow-tooltip-popup",
+      selector: ".ow-tooltip__popup",
       note: {
         id: "Permukaan gelap solid tanpa material, setinggi 24px untuk satu baris.",
         en: "A solid dark surface with no material, 24px tall for one line.",
@@ -334,7 +334,7 @@ const tooltipLab = defineLab({
     },
     {
       name: "Arrow",
-      selector: ".ow-tooltip-arrow",
+      selector: ".ow-tooltip__arrow",
       note: {
         id: "Segitiga ke arah trigger, dijaga Base UI tetap di tengah trigger.",
         en: "A triangle toward the trigger, kept on the trigger's center by Base UI.",
@@ -342,7 +342,7 @@ const tooltipLab = defineLab({
     },
     {
       name: "Shortcut",
-      selector: ".ow-tooltip-popup kbd",
+      selector: ".ow-tooltip__popup kbd",
       note: {
         id: "kbd di dalam popup: shortcut setelah label, sedikit lebih redup.",
         en: "A kbd inside the popup: the shortcut after the label, a little dimmer.",

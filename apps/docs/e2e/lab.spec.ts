@@ -712,7 +712,7 @@ test("the stage tools name themselves and their key in a tooltip, not a title", 
   await page.goto("/en/separator");
   const tools = stage(page).getByRole("toolbar", { name: "Stage tools" });
   await expect(tools.locator("[title]")).toHaveCount(0);
-  const tip = page.locator(".ow-tooltip-popup");
+  const tip = page.locator(".ow-tooltip__popup");
   await tools.getByRole("button", { name: "Code", exact: true }).hover();
   await expect(tip).toHaveText("CodeC");
   await expect(tip.locator("kbd")).toHaveText("C");
@@ -726,7 +726,7 @@ test("the stage tools name themselves and their key in a tooltip, not a title", 
   await stage(page).click({ position: { x: 20, y: 200 } });
   await page.keyboard.press("t");
   await tools.getByRole("button", { name: "Inspect", exact: true }).hover();
-  await expect(page.locator(".ow-tooltip-positioner")).toHaveAttribute(
+  await expect(page.locator(".ow-tooltip__positioner")).toHaveAttribute(
     "data-theme",
     (await stage(page).getAttribute("data-theme")) ?? "",
   );
@@ -739,7 +739,7 @@ test("a phone's Docs button shows its name in a tooltip only when it is an icon"
   test.skip(testInfo.project.name !== "mobile-390", "a phone's widths");
   await page.goto("/en/separator");
   const docs = page.locator(".lab-tool-docs");
-  const tip = page.locator(".ow-tooltip-popup");
+  const tip = page.locator(".ow-tooltip__popup");
   // 390 px: the label shows, so no tooltip repeats it.
   await docs.hover();
   await page.waitForTimeout(900);
@@ -759,7 +759,7 @@ test("the Tooltip Lab's first scene walks the toolbar's tooltips", async ({ page
   await page.goto("/en/tooltip");
   await scene(page, "group");
   // The one closing stays a moment, without data-open.
-  const open = demo(page).locator(".ow-tooltip-popup[data-open]");
+  const open = demo(page).locator(".ow-tooltip__popup[data-open]");
   await expect(open).toHaveText("Bold⌘B");
   await expect(open).toHaveText("Italic⌘I");
 });

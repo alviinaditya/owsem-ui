@@ -5,7 +5,7 @@
  * trigger in 125 ms; once one tooltip is open, the next one opens at once (data-instant).
  */
 @layer owsem.components {
-  .ow-tooltip-popup {
+  .ow-tooltip__popup {
     --_bg: var(--ow-tooltip-bg);
     --_fg: var(--ow-tooltip-fg);
     box-sizing: border-box;
@@ -28,23 +28,23 @@
       transform 125ms var(--ow-ease-out);
   }
 
-  .ow-tooltip-popup:is([data-starting-style], [data-ending-style]) {
+  .ow-tooltip__popup:is([data-starting-style], [data-ending-style]) {
     opacity: 0;
     transform: scale(0.97);
   }
 
   /* Leaving is quicker than arriving. */
-  .ow-tooltip-popup[data-ending-style] {
+  .ow-tooltip__popup[data-ending-style] {
     transition-duration: 100ms;
   }
 
   /* Opened by focus, or next to an open one, or shut with Escape: no animation. */
-  .ow-tooltip-popup[data-instant] {
+  .ow-tooltip__popup[data-instant] {
     transition: none;
   }
 
   /* A shortcut, such as <kbd>⌘B</kbd>, after the label; inline whatever the app's kbd style. */
-  .ow-tooltip-popup kbd {
+  .ow-tooltip__popup kbd {
     display: inline;
     margin-inline-start: 0.5em;
     padding-inline: 0.3em;
@@ -59,60 +59,60 @@
    * A 12px box; the triangle fills the half next to the popup and overlaps it by 1px, so no seam
    * shows. Base UI places the arrow with physical sides, and centers it with top or left.
    */
-  .ow-tooltip-arrow {
+  .ow-tooltip__arrow {
     inline-size: 12px;
     block-size: 12px;
     background-color: var(--_bg);
   }
 
   /* biome-ignore-start lint/nursery/useLogicalProperties: Base UI's physical sides */
-  .ow-tooltip-arrow[data-side="top"] {
+  .ow-tooltip__arrow[data-side="top"] {
     top: calc(100% - 1px);
     clip-path: polygon(0 0, 100% 0, 50% 50%);
   }
 
-  .ow-tooltip-arrow[data-side="bottom"] {
+  .ow-tooltip__arrow[data-side="bottom"] {
     bottom: calc(100% - 1px);
     clip-path: polygon(50% 50%, 100% 100%, 0 100%);
   }
 
-  .ow-tooltip-arrow[data-side="left"] {
+  .ow-tooltip__arrow[data-side="left"] {
     left: calc(100% - 1px);
     clip-path: polygon(0 0, 50% 50%, 0 100%);
   }
 
-  .ow-tooltip-arrow[data-side="right"] {
+  .ow-tooltip__arrow[data-side="right"] {
     right: calc(100% - 1px);
     clip-path: polygon(100% 0, 100% 100%, 50% 50%);
   }
   /* biome-ignore-end lint/nursery/useLogicalProperties: Base UI's physical sides */
 
   /* Logical sides: mirrored right to left. */
-  .ow-tooltip-arrow[data-side="inline-start"] {
+  .ow-tooltip__arrow[data-side="inline-start"] {
     inset-inline-start: calc(100% - 1px);
     clip-path: polygon(0 0, 50% 50%, 0 100%);
   }
 
-  .ow-tooltip-arrow[data-side="inline-end"] {
+  .ow-tooltip__arrow[data-side="inline-end"] {
     inset-inline-end: calc(100% - 1px);
     clip-path: polygon(100% 0, 100% 100%, 50% 50%);
   }
 
-  .ow-tooltip-positioner[dir="rtl"]
-    .ow-tooltip-arrow:is([data-side="inline-start"], [data-side="inline-end"]) {
+  .ow-tooltip__positioner[dir="rtl"]
+    .ow-tooltip__arrow:is([data-side="inline-start"], [data-side="inline-end"]) {
     transform: scaleX(-1);
   }
 
   /* FR-20 and the PRD: no animation at all. */
   @media (prefers-reduced-motion: reduce) {
-    .ow-tooltip-popup {
+    .ow-tooltip__popup {
       transition: none;
     }
   }
 
   /* DP-8: the surface becomes Canvas inside a CanvasText edge; the arrow stays visible. */
   @media (forced-colors: active) {
-    .ow-tooltip-arrow {
+    .ow-tooltip__arrow {
       forced-color-adjust: none;
       background-color: CanvasText;
     }

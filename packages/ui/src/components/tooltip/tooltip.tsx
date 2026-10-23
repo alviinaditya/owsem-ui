@@ -7,9 +7,9 @@ import { withClassName } from "../../core/class-name";
 import "./tooltip.css";
 
 const cls = {
-  positioner: "ow-tooltip-positioner",
-  popup: "ow-tooltip-popup",
-  arrow: "ow-tooltip-arrow",
+  positioner: "ow-tooltip__positioner",
+  popup: "ow-tooltip__popup",
+  arrow: "ow-tooltip__arrow",
 } as const;
 
 // Parts without a look of their own come straight from Base UI.

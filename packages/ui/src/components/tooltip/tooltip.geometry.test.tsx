@@ -33,8 +33,8 @@ describe("Tooltip geometry", () => {
       );
       await settle();
       const trigger = rect("[aria-label='Bold']");
-      const popup = rect(".ow-tooltip-popup");
-      const arrow = rect(".ow-tooltip-arrow");
+      const popup = rect(".ow-tooltip__popup");
+      const arrow = rect(".ow-tooltip__arrow");
       expect(popup.height).toBeCloseTo(24, 1);
       const gap = {
         top: trigger.top - popup.bottom,

@@ -134,9 +134,11 @@ Values without a token of their own come from the theme tokens: inner corners fr
 (each layer adds its padding), tints from `--ow-fg` or `--ow-accent` with `color-mix()`, and
 Glide's highlight from `--ow-hover`. Names that start with `--_` are private and may change.
 
-For anything a token does not cover, style the part itself. Every part takes `className` and
-`style`, and states are data attributes, such as `data-orientation`. Your CSS is unlayered, so it
-wins over the component's (see below):
+For anything a token does not cover, style the part itself. Each part has a class: `.ow-<component>`
+on the root and `.ow-<component>__<part>` on the others, such as `.ow-tree-rail-nav__label`. States
+and variants are data attributes, never classes, such as `data-orientation` or `data-current`.
+Every part also takes `className` and `style`. Your CSS is unlayered, so it wins over the
+component's (see below):
 
 ```css
 .settings .ow-separator[data-orientation="horizontal"] {
@@ -144,8 +146,9 @@ wins over the component's (see below):
 }
 ```
 
-Each Lab's Customization section lists the theme tokens the component reads, as for the
-[Separator](/en/separator#scene-customization).
+Each Lab's parts table lists the classes and the data attributes you can rely on; other data
+attributes are internal and may change. Its Customization section lists the theme tokens the
+component reads, as for the [Separator](/en/separator#scene-customization).
 
 ## Cascade layers
 

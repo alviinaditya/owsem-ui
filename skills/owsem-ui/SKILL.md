@@ -101,7 +101,12 @@ body { position: relative; } /* backdrops in iOS Safari 26 and later */
   neutrals such as `--ow-bg`, set them per theme too, so etched lines stay visible.
 - **One component**: set a theme token on the component, or on an element around it, to restyle
   only what is inside: `.sidebar { --ow-line-dark: #b8b8c4; }`. For what no token covers, style the
-  part with `className` and its data attributes (`data-orientation`, `data-highlighted`).
+  part with `className`, or in CSS by its class and data attributes.
+- **Class names**: the root part is `.ow-<component>` and every other part
+  `.ow-<component>__<part>` (BEM elements), such as `.ow-tree-rail-nav__label`. Variants and states
+  are data attributes, never classes: Base UI's (`data-orientation`, `data-highlighted`, and
+  `data-pressed` for a toggle that is on) and OwsemUI's (`data-variant`, `data-size`, `data-held`
+  while held down). Rely only on the classes and attributes in a Lab's parts table.
 - **Layers**: tokens live in `@layer owsem.tokens` and component CSS in `@layer owsem.components`.
   Plain, unlayered app CSS always wins, so overrides need no `!important`.
 - **Tailwind CSS v4**: the first stylesheet that names a layer fixes the order. Put this line

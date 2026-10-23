@@ -137,8 +137,10 @@ Nilai yang tidak punya token sendiri diambil dari token tema: sudut bagian dalam
 `color-mix()`, dan highlight Glide dari `--ow-hover`. Nama yang diawali `--_` bersifat privat dan
 bisa berubah.
 
-Untuk hal yang tidak dicakup token, beri style langsung ke part-nya. Setiap part menerima
-`className` dan `style`, dan state-nya berupa atribut data, seperti `data-orientation`. CSS Anda
+Untuk hal yang tidak dicakup token, beri style langsung ke part-nya. Setiap part punya class:
+`.ow-<komponen>` di root dan `.ow-<komponen>__<part>` di part lain, misalnya
+`.ow-tree-rail-nav__label`. State dan varian berupa atribut data, bukan class, misalnya
+`data-orientation` atau `data-current`. Setiap part juga menerima `className` dan `style`. CSS Anda
 tidak memakai layer, jadi menang atas CSS komponen (lihat di bawah):
 
 ```css
@@ -147,8 +149,9 @@ tidak memakai layer, jadi menang atas CSS komponen (lihat di bawah):
 }
 ```
 
-Bagian Kustomisasi di setiap Lab mendaftar token tema yang dibaca komponennya, contohnya
-[Separator](/id/separator#scene-customization).
+Tabel part di setiap Lab mendaftar class dan atribut data yang bisa Anda andalkan; atribut data
+lain bersifat internal dan bisa berubah. Bagian Kustomisasi-nya mendaftar token tema yang dibaca
+komponennya, contohnya [Separator](/id/separator#scene-customization).
 
 ## Layer CSS
 

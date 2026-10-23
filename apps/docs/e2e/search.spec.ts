@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { catalog } from "../lib/catalog.ts";
 import { stage } from "./lab.ts";
 
 const dialog = (page: Page, name = "Search docs") => page.getByRole("dialog", { name });
@@ -59,7 +60,9 @@ test("results are the pages, every component, and the Labs' scenes, matched fuzz
   const list = dialog(page).getByRole("listbox");
   // With no query: pages and components, highlighted from the top; scenes wait for a query.
   await expect(list.getByRole("group", { name: "Pages" })).toBeVisible();
-  await expect(list.getByRole("group", { name: "Components" }).getByRole("option")).toHaveCount(42);
+  await expect(list.getByRole("group", { name: "Components" }).getByRole("option")).toHaveCount(
+    catalog.length,
+  );
   await expect(list.getByRole("group", { name: "Lab scenes" })).toHaveCount(0);
 
   // Family and status show on each component; the letters of a name in order find it.
@@ -87,9 +90,10 @@ test("Enter opens a Lab, a Coming soon page, or a Lab's scene", async ({ page })
 
   await page.keyboard.press("Control+k");
   await expect(field(page)).toHaveValue("");
-  await field(page).fill("button");
+  // Planned until the owner's prototype is built.
+  await field(page).fill("lumen rail nav");
   await page.keyboard.press("Enter");
-  await expect(page).toHaveURL(/\/en\/button$/);
+  await expect(page).toHaveURL(/\/en\/lumen-rail-nav$/);
   await expect(page.getByRole("main").getByText("Coming soon", { exact: true })).toBeVisible();
 
   await page.keyboard.press("Control+k");

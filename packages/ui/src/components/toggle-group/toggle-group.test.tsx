@@ -26,7 +26,7 @@ function Views(props: Partial<ToggleGroup.Root.Props> & { children?: ReactNode }
 async function mount(ui: ReactNode) {
   const screen = await render(ui);
   const group = screen.container.querySelector<HTMLElement>(".ow-toggle-group");
-  const thumb = screen.container.querySelector<HTMLElement>(".ow-toggle-group-thumb");
+  const thumb = screen.container.querySelector<HTMLElement>(".ow-toggle-group__thumb");
   if (!group || !thumb) throw new Error("not mounted");
   const item = (name: string) => {
     const el = [...group.querySelectorAll<HTMLElement>("button")].find(
@@ -85,7 +85,9 @@ describe("Toggle Group", () => {
     await expect.poll(() => item("Day").getAttribute("aria-pressed")).toBe("true");
     expect(item("Week").getAttribute("aria-pressed")).toBe("false");
     // The thumb is decoration.
-    expect(group.querySelector(".ow-toggle-group-thumb")?.getAttribute("aria-hidden")).toBe("true");
+    expect(group.querySelector(".ow-toggle-group__thumb")?.getAttribute("aria-hidden")).toBe(
+      "true",
+    );
 
     const multiple = await mount(<Views multiple defaultValue={["day"]} />);
     expect(multiple.group.hasAttribute("data-multiple")).toBe(true);
@@ -122,10 +124,10 @@ describe("Toggle Group", () => {
     expect(group.className).toBe("ow-toggle-group mine");
     expect(group.style.marginBlock).toBe("3px");
     expect(itemRef.current).toBe(item("Left"));
-    expect(item("Left").className).toBe("ow-toggle-group-item on");
+    expect(item("Left").className).toBe("ow-toggle-group__item on");
     expect(item("Left").style.marginInline).toBe("1px");
     const span = group.querySelector('span[role="button"]');
-    expect(span?.className).toBe("ow-toggle-group-item");
+    expect(span?.className).toBe("ow-toggle-group__item");
     expect(span?.textContent).toBe("Right");
   });
 

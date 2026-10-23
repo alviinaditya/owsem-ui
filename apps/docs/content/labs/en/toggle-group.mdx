@@ -59,9 +59,9 @@ pick a name, here or on the stage, to see its tokens. The hover highlight is Gli
 
 | Part | Element | Notes |
 | --- | --- | --- |
-| <Part name="Root" /> | `div.ow-toggle-group` | Base UI's `ToggleGroup`, with `role="group"`: the track. Theme tokens set on it apply to it alone |
-| <Part name="Item" /> | `button.ow-toggle-group-item` | Base UI's `Toggle`, with `aria-pressed`. Its text is wrapped in a span, so an item with only an icon is square |
-| <Part name="Thumb" /> | `span.ow-toggle-group-thumb` | Decorative (`aria-hidden`): placed by a script, moved by CSS |
+| <Part name="Root" /> | `div.ow-toggle-group` | Base UI's `ToggleGroup`, with `role="group"`: the track. Theme tokens set on it apply to it alone. `data-orientation`, `data-multiple`, `data-disabled`; `data-size`, and `data-equal` with `equal` |
+| <Part name="Item" /> | `button.ow-toggle-group__item` | Base UI's `Toggle`, with `aria-pressed` and `data-pressed`; `data-disabled`, and `data-held` while held. Its text is wrapped in `span.ow-toggle-group__label`, so an item with only an icon is square |
+| <Part name="Thumb" /> | `span.ow-toggle-group__thumb` | Decorative (`aria-hidden`): placed by a script, moved by CSS. `data-visible` while it sits under a pressed item, `data-held` while that item is held |
 
 Items follow the control geometry: their padding comes from `--py` (FR-9), and an icon is the font
 size plus 2 px, as far from the edge as from the top. The track adds 3 px on every side, and its

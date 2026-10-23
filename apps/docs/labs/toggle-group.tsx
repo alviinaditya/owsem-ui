@@ -342,7 +342,7 @@ const toggleGroupLab = defineLab({
     },
     {
       name: "Item",
-      selector: ".ow-toggle-group-item:not([data-pressed])",
+      selector: ".ow-toggle-group__item:not([data-pressed])",
       note: {
         id: "Toggle dari Base UI: button dengan aria-pressed. Ukurannya mengikuti aturan --py.",
         en: "Base UI's Toggle: a button with aria-pressed. Sized by the --py rule.",
@@ -350,7 +350,7 @@ const toggleGroupLab = defineLab({
     },
     {
       name: "Thumb",
-      selector: ".ow-toggle-group-thumb",
+      selector: ".ow-toggle-group__thumb",
       note: {
         id: "Tombol timbul bertepi tegas di bawah item yang ditekan. Dekoratif; hanya di pilihan tunggal.",
         en: "The raised key with crisp edges, under the pressed item. Decorative; single selection only.",

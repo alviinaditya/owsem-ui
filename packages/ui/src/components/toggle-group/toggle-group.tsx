@@ -20,12 +20,12 @@ import "./toggle-group.css";
 
 const cls = {
   root: "ow-toggle-group",
-  thumb: "ow-toggle-group-thumb",
-  item: "ow-toggle-group-item",
-  label: "ow-toggle-group-label",
+  thumb: "ow-toggle-group__thumb",
+  item: "ow-toggle-group__item",
+  label: "ow-toggle-group__label",
 } as const;
 
-const ITEM = "[data-toggle-group-item]";
+const ITEM = `.${cls.item}`;
 
 // The thumb is placed before the first paint; the server has no layout, so it falls back without
 // React 18's warning (and the pressed item draws its own key until then).
@@ -108,12 +108,7 @@ export const ToggleGroupItem: ForwardRefExoticComponent<
   ref,
 ) {
   return (
-    <Toggle
-      {...props}
-      ref={ref}
-      className={withClassName(cls.item, className)}
-      data-toggle-group-item=""
-    >
+    <Toggle {...props} ref={ref} className={withClassName(cls.item, className)}>
       {Children.map(children, (child) =>
         typeof child === "string" || typeof child === "number" ? (
           <span className={cls.label}>{child}</span>

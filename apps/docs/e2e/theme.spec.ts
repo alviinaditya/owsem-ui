@@ -39,7 +39,7 @@ test("stores the chosen theme and restores it on load", async ({ page }, testInf
   await showSettings(page, testInfo);
   await expect(dark).toHaveAttribute("aria-pressed", "true");
   // The thumb is under Dark, placed there on hydration without sliding from a default.
-  const thumb = page.locator(".theme-switcher .ow-toggle-group-thumb");
+  const thumb = page.locator(".theme-switcher .ow-toggle-group__thumb");
   await expect(thumb).toHaveCSS("opacity", "1");
   expect(await thumb.evaluate((el) => el.getAnimations().length)).toBe(0);
   const [at, under] = await Promise.all([thumb.boundingBox(), dark.boundingBox()]);

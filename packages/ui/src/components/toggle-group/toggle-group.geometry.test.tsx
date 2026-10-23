@@ -15,7 +15,7 @@ async function mount(ui: ReactNode) {
   const screen = await render(ui);
   const groups = [...screen.container.querySelectorAll<HTMLElement>(".ow-toggle-group")];
   const thumbOf = (group: Element) =>
-    group.querySelector<HTMLElement>(".ow-toggle-group-thumb") as HTMLElement;
+    group.querySelector<HTMLElement>(".ow-toggle-group__thumb") as HTMLElement;
   const itemsOf = (group: Element) => [...group.querySelectorAll<HTMLElement>("button")];
   return { groups, thumbOf, itemsOf };
 }

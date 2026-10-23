@@ -62,7 +62,7 @@
     grid-auto-flow: row;
   }
 
-  .ow-toggle-group-thumb {
+  .ow-toggle-group__thumb {
     position: absolute;
     z-index: -1;
     /* biome-ignore-start lint/nursery/useLogicalProperties: the script measures physical edges */
@@ -85,12 +85,12 @@
       opacity 150ms ease;
   }
 
-  .ow-toggle-group-thumb[data-shown] {
+  .ow-toggle-group__thumb[data-visible] {
     opacity: 1;
   }
 
   /* Pressed in quickly, released with the settle spring. */
-  .ow-toggle-group-thumb[data-held] {
+  .ow-toggle-group__thumb[data-held] {
     scale: var(--_press);
     transition:
       translate var(--_travel),
@@ -99,7 +99,7 @@
       opacity 150ms ease;
   }
 
-  .ow-toggle-group-item {
+  .ow-toggle-group__item {
     --py: 0.75em;
     --_py: max(var(--py), (24px - 1lh) / 2);
     --px: calc(var(--_py) + (1lh - 1cap) / 2);
@@ -131,11 +131,11 @@
       scale var(--_settle);
   }
 
-  .ow-toggle-group[data-size="sm"] .ow-toggle-group-item {
+  .ow-toggle-group[data-size="sm"] .ow-toggle-group__item {
     --py: 0.5em;
   }
 
-  .ow-toggle-group[data-size="lg"] .ow-toggle-group-item {
+  .ow-toggle-group[data-size="lg"] .ow-toggle-group__item {
     --py: 0.875em;
   }
 
@@ -143,7 +143,7 @@
    * A pressed item as a key of its own: with multiple selection, and before the script places the
    * thumb (server-rendered HTML). It changes with the state, at once (DP-5).
    */
-  .ow-toggle-group:is(:not([data-thumb]), [data-multiple]) > .ow-toggle-group-item[data-pressed] {
+  .ow-toggle-group:is(:not([data-thumb]), [data-multiple]) > .ow-toggle-group__item[data-pressed] {
     background-color: var(--_key);
     box-shadow: var(--_thumb-shadow);
   }
@@ -152,51 +152,51 @@
    * A hovered key with multiple selection, which a click turns off: its fill moves 3% toward the
    * label color; the edge stays. The thumb is not an action, so it keeps its fill.
    */
-  .ow-toggle-group[data-multiple] > .ow-toggle-group-item[data-glide-active] {
+  .ow-toggle-group[data-multiple] > .ow-toggle-group__item[data-glide-active] {
     --_key: color-mix(in oklab, var(--_thumb), var(--_fg) 3%);
   }
 
-  .ow-toggle-group-item:is([data-pressed], [data-glide-active]) {
+  .ow-toggle-group__item:is([data-pressed], [data-glide-active]) {
     color: var(--_fg);
   }
 
-  .ow-toggle-group-item[data-held] {
+  .ow-toggle-group__item[data-held] {
     scale: var(--_press);
     transition:
       color 150ms ease,
       scale var(--_press-in);
   }
 
-  .ow-toggle-group-item:focus-visible {
+  .ow-toggle-group__item:focus-visible {
     /* Above its neighbors, so a raised one beside it never covers the ring. */
     z-index: 1;
     outline: 2px solid var(--_focus);
     outline-offset: 2px;
   }
 
-  .ow-toggle-group-item:disabled {
+  .ow-toggle-group__item:disabled {
     color: color-mix(in oklab, var(--_muted) 50%, transparent);
     cursor: not-allowed;
   }
 
   /* FR-10: the icon is the font size plus 2px, as far from the edge as from the top. */
-  .ow-toggle-group-item > svg {
+  .ow-toggle-group__item > svg {
     flex: none;
     inline-size: var(--icon);
     block-size: var(--icon);
   }
 
-  .ow-toggle-group-item > svg:first-child {
+  .ow-toggle-group__item > svg:first-child {
     margin-inline-start: calc((1cap - var(--icon)) / 2);
   }
 
   /* With both margins, an item with only an icon is square (FR-10a). */
-  .ow-toggle-group-item > svg:last-child {
+  .ow-toggle-group__item > svg:last-child {
     margin-inline-end: calc((1cap - var(--icon)) / 2);
   }
 
   /* Room for glyphs whose ink passes their advance (a monospace "m"), without changing the width. */
-  .ow-toggle-group-label {
+  .ow-toggle-group__label {
     min-inline-size: 0;
     margin-inline: -0.125em;
     padding-inline: 0.125em;
@@ -206,19 +206,19 @@
 
   /* FR-20: the thumb does not slide or press; it only fades. A held item dims instead. */
   @media (prefers-reduced-motion: reduce) {
-    .ow-toggle-group-thumb,
-    .ow-toggle-group-thumb[data-held] {
+    .ow-toggle-group__thumb,
+    .ow-toggle-group__thumb[data-held] {
       scale: none;
       transition: opacity 150ms ease;
     }
 
-    .ow-toggle-group-item,
-    .ow-toggle-group-item[data-held] {
+    .ow-toggle-group__item,
+    .ow-toggle-group__item[data-held] {
       scale: none;
       transition: color 150ms ease;
     }
 
-    .ow-toggle-group-thumb[data-held][data-shown] {
+    .ow-toggle-group__thumb[data-held][data-visible] {
       opacity: 0.8;
     }
   }
@@ -230,22 +230,23 @@
       outline-offset: -1px;
     }
 
-    .ow-toggle-group-item[data-pressed] {
+    .ow-toggle-group__item[data-pressed] {
       forced-color-adjust: none;
       color: HighlightText;
     }
 
-    .ow-toggle-group-item:focus-visible {
+    .ow-toggle-group__item:focus-visible {
       outline-color: Highlight;
     }
 
-    .ow-toggle-group-item:disabled {
+    .ow-toggle-group__item:disabled {
       color: GrayText;
     }
 
     /* The label turns as the fill arrives, so the fill does not travel. */
-    .ow-toggle-group-thumb,
-    .ow-toggle-group:is(:not([data-thumb]), [data-multiple]) > .ow-toggle-group-item[data-pressed] {
+    .ow-toggle-group__thumb,
+    .ow-toggle-group:is(:not([data-thumb]), [data-multiple])
+      > .ow-toggle-group__item[data-pressed] {
       forced-color-adjust: none;
       background-color: Highlight;
       box-shadow: none;
@@ -254,7 +255,7 @@
   }
 
   /* The thumb's first placement and every jump: nothing transitions. Last, so it wins. */
-  .ow-toggle-group-thumb[data-instant] {
+  .ow-toggle-group__thumb[data-instant] {
     transition: none;
   }
 }

@@ -86,7 +86,7 @@ export function createThumb(root: HTMLElement, thumb: HTMLElement, items: string
     if (!item || !to) {
       on = null;
       last = null;
-      thumb.removeAttribute("data-shown");
+      thumb.removeAttribute("data-visible");
       updateHeld();
       return;
     }
@@ -97,13 +97,13 @@ export function createThumb(root: HTMLElement, thumb: HTMLElement, items: string
     thumb.style.setProperty("--_w", px(to.w));
     thumb.style.setProperty("--_h", px(to.h));
     draw(to, from ?? to);
-    if (!placed) thumb.setAttribute("data-shown", "");
+    if (!placed) thumb.setAttribute("data-visible", "");
     // Commit the start before transitions come back.
     void thumb.offsetWidth;
     thumb.removeAttribute("data-instant");
     if (from) draw(to, to);
     // Shown again after none was pressed: it fades in where it is.
-    thumb.setAttribute("data-shown", "");
+    thumb.setAttribute("data-visible", "");
     placed = true;
     on = item;
     last = to;

@@ -259,7 +259,7 @@ body {
   font-size: 12.5px;
 }
 
-.docs-choice .ow-toggle-group-item {
+.docs-choice .ow-toggle-group__item {
   --py: calc((26px - 1lh) / 2);
 }
 
@@ -884,7 +884,7 @@ body {
   min-inline-size: 0;
 }
 
-.site-sidebar-switchers .ow-toggle-group-item {
+.site-sidebar-switchers .ow-toggle-group__item {
   --py: 0px;
 }
 

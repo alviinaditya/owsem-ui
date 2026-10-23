@@ -654,7 +654,7 @@ test("the Toggle Group Lab: its thumb lands on the picked view, and choices keep
   // Pressing the chosen view again keeps it.
   await board.click();
   await expect(board).toHaveAttribute("aria-pressed", "true");
-  const thumb = view.locator(".ow-toggle-group-thumb");
+  const thumb = view.locator(".ow-toggle-group__thumb");
   await expect
     .poll(async () => {
       const [at, under] = await Promise.all([thumb.boundingBox(), board.boundingBox()]);

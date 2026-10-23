@@ -62,9 +62,9 @@ hover-nya adalah Glide dari `owsem-ui/core`.
 
 | Bagian | Elemen | Catatan |
 | --- | --- | --- |
-| <Part name="Root" /> | `div.ow-toggle-group` | `ToggleGroup` dari Base UI, dengan `role="group"`: track-nya. Token tema yang dipasang di sini hanya berlaku untuknya |
-| <Part name="Item" /> | `button.ow-toggle-group-item` | `Toggle` dari Base UI, dengan `aria-pressed`. Teksnya dibungkus span, jadi item yang hanya berisi ikon tetap persegi |
-| <Part name="Thumb" /> | `span.ow-toggle-group-thumb` | Dekoratif (`aria-hidden`): ditempatkan oleh skrip, digerakkan oleh CSS |
+| <Part name="Root" /> | `div.ow-toggle-group` | `ToggleGroup` dari Base UI, dengan `role="group"`: track-nya. Token tema yang dipasang di sini hanya berlaku untuknya. `data-orientation`, `data-multiple`, `data-disabled`; `data-size`, dan `data-equal` dengan `equal` |
+| <Part name="Item" /> | `button.ow-toggle-group__item` | `Toggle` dari Base UI, dengan `aria-pressed` dan `data-pressed`; `data-disabled`, dan `data-held` selama ditahan. Teksnya dibungkus `span.ow-toggle-group__label`, jadi item yang hanya berisi ikon tetap persegi |
+| <Part name="Thumb" /> | `span.ow-toggle-group__thumb` | Dekoratif (`aria-hidden`): ditempatkan oleh skrip, digerakkan oleh CSS. `data-visible` selama berada di bawah item yang ditekan, `data-held` selama item itu ditahan |
 
 Item mengikuti geometri kontrol: padding-nya dari `--py` (FR-9), dan ikon seukuran font ditambah
 2 px, sama jauhnya dari tepi samping dan dari tepi atas. Track menambah 3 px di setiap sisi, dan

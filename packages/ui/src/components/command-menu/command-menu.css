@@ -10,7 +10,7 @@
  */
 @layer owsem.components {
   /* The trigger: a search field on the well (a flat darker fill), as tall as controls (FR-9). */
-  .ow-command-menu-trigger {
+  .ow-command-menu__trigger {
     --py: 0.75em;
     --_py: max(var(--py), (24px - 1lh) / 2);
     --px: calc(var(--_py) + (1lh - 1cap) / 2);
@@ -42,28 +42,28 @@
     transition: color 0.15s ease;
   }
 
-  .ow-command-menu-trigger[data-size="sm"] {
+  .ow-command-menu__trigger[data-size="sm"] {
     --py: 0.5em;
     font-size: 13px;
   }
 
-  .ow-command-menu-trigger[data-size="lg"] {
+  .ow-command-menu__trigger[data-size="lg"] {
     --py: 0.875em;
     font-size: 16px;
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .ow-command-menu-trigger:hover {
+    .ow-command-menu__trigger:hover {
       color: var(--ow-fg);
     }
   }
 
-  .ow-command-menu-trigger:focus-visible {
+  .ow-command-menu__trigger:focus-visible {
     outline: 2px solid var(--ow-focus);
     outline-offset: 2px;
   }
 
-  .ow-command-menu-icon {
+  .ow-command-menu__icon {
     flex: none;
     inline-size: var(--icon);
     block-size: var(--icon);
@@ -75,19 +75,19 @@
   }
 
   /* FR-10: the icon sits as far from the edge as from the top and bottom. */
-  .ow-command-menu-trigger > .ow-command-menu-icon,
-  .ow-command-menu-field > .ow-command-menu-icon {
+  .ow-command-menu__trigger > .ow-command-menu__icon,
+  .ow-command-menu__field > .ow-command-menu__icon {
     margin-inline-start: calc((1cap - var(--icon)) / 2);
   }
 
-  .ow-command-menu-backdrop {
+  .ow-command-menu__backdrop {
     position: fixed;
     inset: 0;
     background-color: var(--ow-backdrop);
   }
 
   /* The popup hangs from the upper part of the screen, so its top stays put as results change. */
-  .ow-command-menu-viewport {
+  .ow-command-menu__viewport {
     position: fixed;
     inset: 0;
     display: flex;
@@ -102,7 +102,7 @@
    * crisp edge and drop shadow. The radius is the items' plus the padding around them (FR-10b).
    * The width is a default: set inline-size on the Popup to change it.
    */
-  .ow-command-menu-popup {
+  .ow-command-menu__popup {
     /* Item --py in em, per size (FR-11); the field and labels line up with the items from it. */
     --_n: 0.75;
     --_p: 6px;
@@ -127,18 +127,18 @@
     line-height: 1.25;
   }
 
-  .ow-command-menu-popup[data-size="sm"] {
+  .ow-command-menu__popup[data-size="sm"] {
     --_n: 0.5;
     font-size: 13px;
   }
 
-  .ow-command-menu-popup[data-size="lg"] {
+  .ow-command-menu__popup[data-size="lg"] {
     --_n: 0.875;
     font-size: 16px;
   }
 
   @supports (backdrop-filter: blur(1px)) {
-    .ow-command-menu-popup {
+    .ow-command-menu__popup {
       background-color: var(--_glass);
       backdrop-filter: blur(var(--_blur)) saturate(1.6);
     }
@@ -146,7 +146,7 @@
     /* Opaque for those who ask for less transparency. */
     /* biome-ignore lint/nursery/useBaseline: progressive enhancement (NF-1) */
     @media (prefers-reduced-transparency: reduce) {
-      .ow-command-menu-popup {
+      .ow-command-menu__popup {
         background-color: var(--_solid);
         backdrop-filter: none;
       }
@@ -154,7 +154,7 @@
   }
 
   /* The search row, its icon and text in line with the items' (FR-9, FR-10). */
-  .ow-command-menu-field {
+  .ow-command-menu__field {
     --py: calc((var(--_n) + 0.25) * 1em);
     --_py: max(var(--py), (24px - 1lh) / 2);
     --icon: calc(1em + 2px);
@@ -170,12 +170,12 @@
     color: var(--ow-muted);
   }
 
-  .ow-command-menu-field:has(:focus-visible) {
+  .ow-command-menu__field:has(:focus-visible) {
     border-block-end-color: var(--ow-focus);
     box-shadow: 0 1px 0 var(--ow-focus);
   }
 
-  .ow-command-menu-input {
+  .ow-command-menu__input {
     flex: 1;
     min-inline-size: 0;
     padding: 0;
@@ -187,13 +187,13 @@
     line-height: inherit;
   }
 
-  .ow-command-menu-input::placeholder {
+  .ow-command-menu__input::placeholder {
     color: var(--ow-muted);
     opacity: 1;
   }
 
   /* Shown only while focused: the way out for touch screen readers. */
-  .ow-command-menu-close {
+  .ow-command-menu__close {
     position: absolute;
     inset-block-start: var(--_p);
     inset-inline-end: var(--_p);
@@ -208,19 +208,19 @@
     color: var(--ow-muted);
   }
 
-  .ow-command-menu-close:not(:focus-visible) {
+  .ow-command-menu__close:not(:focus-visible) {
     inline-size: 1px;
     block-size: 1px;
     overflow: hidden;
     clip-path: inset(50%);
   }
 
-  .ow-command-menu-close:focus-visible {
+  .ow-command-menu__close:focus-visible {
     outline: 2px solid var(--ow-focus);
     outline-offset: -2px;
   }
 
-  .ow-command-menu-close svg {
+  .ow-command-menu__close svg {
     inline-size: calc(1em + 2px);
     block-size: calc(1em + 2px);
     fill: none;
@@ -230,7 +230,7 @@
   }
 
   /* The results scroll inside the panel; Glide's highlight rides along (glide.ts). */
-  .ow-command-menu-list {
+  .ow-command-menu__list {
     position: relative;
     isolation: isolate;
     flex: 0 1 auto;
@@ -242,18 +242,18 @@
     outline: none;
   }
 
-  .ow-command-menu-list[data-empty] {
+  .ow-command-menu__list[data-empty] {
     display: none;
   }
 
-  .ow-command-menu-empty:not(:empty) {
+  .ow-command-menu__empty:not(:empty) {
     padding: 2.25em 1em;
     color: var(--ow-muted);
     text-align: center;
   }
 
   /* A group's name, in line with its items' icons. */
-  .ow-command-menu-group-label {
+  .ow-command-menu__group-label {
     padding-block: 0.75em 0.375em;
     padding-inline: calc((var(--_n) + 0.125) / 0.857 * 1em - 1px);
     color: var(--ow-muted);
@@ -261,11 +261,11 @@
     font-weight: 500;
   }
 
-  .ow-command-menu-group:first-child > .ow-command-menu-group-label {
+  .ow-command-menu__group:first-child > .ow-command-menu__group-label {
     padding-block-start: 0.375em;
   }
 
-  .ow-command-menu-item {
+  .ow-command-menu__item {
     --py: calc(var(--_n) * 1em);
     --_py: max(var(--py), (24px - 1lh) / 2);
     --px: calc(var(--_py) + (1lh - 1cap) / 2);
@@ -281,11 +281,11 @@
     outline: none;
   }
 
-  .ow-command-menu-item[data-disabled] {
+  .ow-command-menu__item[data-disabled] {
     color: var(--ow-muted);
   }
 
-  .ow-command-menu-item-icon {
+  .ow-command-menu__item-icon {
     display: inline-flex;
     flex: none;
     inline-size: var(--icon);
@@ -294,35 +294,35 @@
     color: var(--ow-muted);
   }
 
-  .ow-command-menu-item[data-highlighted]:not([data-disabled]) > .ow-command-menu-item-icon {
+  .ow-command-menu__item[data-highlighted]:not([data-disabled]) > .ow-command-menu__item-icon {
     color: var(--ow-fg);
   }
 
-  .ow-command-menu-item-icon > svg {
+  .ow-command-menu__item-icon > svg {
     inline-size: 100%;
     block-size: 100%;
   }
 
   /* One line each; the description takes what the label leaves, so it gives way first. */
-  .ow-command-menu-item-label,
-  .ow-command-menu-item-description {
+  .ow-command-menu__item-label,
+  .ow-command-menu__item-description {
     min-inline-size: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .ow-command-menu-item-label {
+  .ow-command-menu__item-label {
     flex: 0 1 auto;
   }
 
-  .ow-command-menu-item-description {
+  .ow-command-menu__item-description {
     flex: 1 1 0;
     color: var(--ow-muted);
   }
 
   /* Keys as small keycaps: the raised material, a flat fill with a crisp edge. */
-  .ow-command-menu-shortcut {
+  .ow-command-menu__shortcut {
     display: inline-flex;
     flex: none;
     align-items: center;
@@ -345,13 +345,13 @@
   }
 
   /* At the end of the trigger or the item. */
-  .ow-command-menu-trigger > .ow-command-menu-shortcut,
-  .ow-command-menu-item > .ow-command-menu-shortcut {
+  .ow-command-menu__trigger > .ow-command-menu__shortcut,
+  .ow-command-menu__item > .ow-command-menu__shortcut {
     margin-inline-start: auto;
   }
 
   /* Past an etched groove: a dark line, then a light one. */
-  .ow-command-menu-footer {
+  .ow-command-menu__footer {
     display: flex;
     flex: none;
     flex-wrap: wrap;
@@ -365,7 +365,7 @@
     font-size: 0.857em;
   }
 
-  .ow-command-menu-footer > * {
+  .ow-command-menu__footer > * {
     display: inline-flex;
     align-items: center;
     gap: 0.4em;
@@ -373,21 +373,21 @@
 
   /* DP-8: backgrounds and shadows drop out; outlines and system colors carry the shapes. */
   @media (forced-colors: active) {
-    .ow-command-menu-field,
-    .ow-command-menu-footer {
+    .ow-command-menu__field,
+    .ow-command-menu__footer {
       border-color: CanvasText;
     }
 
-    .ow-command-menu-field:has(:focus-visible) {
+    .ow-command-menu__field:has(:focus-visible) {
       border-block-end-color: Highlight;
     }
 
-    .ow-command-menu-item[data-disabled] {
+    .ow-command-menu__item[data-disabled] {
       color: GrayText;
     }
 
-    .ow-command-menu-trigger:focus-visible,
-    .ow-command-menu-close:focus-visible {
+    .ow-command-menu__trigger:focus-visible,
+    .ow-command-menu__close:focus-visible {
       outline-color: Highlight;
     }
   }

@@ -342,7 +342,7 @@ function States({ lang }: { lang: Lang }) {
 }
 
 // Scripts press keys by sending them to the menu, and show each press as keycaps.
-const input = (stage: ScriptStage) => stage.get(".ow-command-menu-input") as HTMLInputElement;
+const input = (stage: ScriptStage) => stage.get(".ow-command-menu__input") as HTMLInputElement;
 
 async function press(stage: ScriptStage, caps: string[], init: KeyboardEventInit, to: Element) {
   const keys = stage.get(".demo-keys");
@@ -378,7 +378,7 @@ const shortcut: SceneScript = async (stage) => {
   await stage.wait(1400);
   await press(stage, ["Esc"], { key: "Escape" }, input(stage));
   await stage.wait(500);
-  await stage.click(stage.get(".ow-command-menu-trigger"));
+  await stage.click(stage.get(".ow-command-menu__trigger"));
   await stage.wait(1000);
 };
 
@@ -451,7 +451,7 @@ const commandMenuLab = defineLab({
   parts: [
     {
       name: "Trigger",
-      selector: ".ow-command-menu-trigger",
+      selector: ".ow-command-menu__trigger",
       note: {
         id: "Tombol berupa kolom cari yang datar. Shortcut Root diumumkan lewat aria-keyshortcuts.",
         en: "A button shaped like a flat search field. Root's shortcut is announced with aria-keyshortcuts.",
@@ -459,7 +459,7 @@ const commandMenuLab = defineLab({
     },
     {
       name: "Popup",
-      selector: ".ow-command-menu-popup",
+      selector: ".ow-command-menu__popup",
       note: {
         id: "Panel kaca: Dialog Base UI di atas backdrop, berisi Autocomplete yang menyaring daftar.",
         en: "The glass panel: a Base UI Dialog over a backdrop, holding the Autocomplete that filters the list.",
@@ -472,7 +472,7 @@ const commandMenuLab = defineLab({
     },
     {
       name: "Input",
-      selector: ".ow-command-menu-field",
+      selector: ".ow-command-menu__field",
       note: {
         id: "Kolom cari, combobox dengan aria-activedescendant. Fokus tetap di sini saat panah berpindah.",
         en: "The search field, a combobox with aria-activedescendant. Focus stays here while the arrows move.",
@@ -480,7 +480,7 @@ const commandMenuLab = defineLab({
     },
     {
       name: "List",
-      selector: ".ow-command-menu-list",
+      selector: ".ow-command-menu__list",
       note: {
         id: "Listbox yang bergulir. Satu highlight Glide meluncur ke item yang disorot Base UI.",
         en: "A listbox that scrolls. One Glide highlight slides to the item Base UI highlights.",
@@ -488,7 +488,7 @@ const commandMenuLab = defineLab({
     },
     {
       name: "Group",
-      selector: ".ow-command-menu-group",
+      selector: ".ow-command-menu__group",
       note: {
         id: "Sekelompok item. Grup tanpa hasil ikut hilang saat menyaring.",
         en: "A group of items. A group with no matches goes while filtering.",
@@ -496,7 +496,7 @@ const commandMenuLab = defineLab({
     },
     {
       name: "GroupLabel",
-      selector: ".ow-command-menu-group-label",
+      selector: ".ow-command-menu__group-label",
       note: {
         id: "Nama grup, sejajar dengan ikon item, dan label grup untuk screen reader.",
         en: "The group's name, in line with the items' icons, and its label for screen readers.",
@@ -504,7 +504,7 @@ const commandMenuLab = defineLab({
     },
     {
       name: "Item",
-      selector: ".ow-command-menu-item",
+      selector: ".ow-command-menu__item",
       note: {
         id: "Satu perintah. onClick berjalan saat diklik atau Enter, lalu menu tertutup.",
         en: "One command. onClick runs on a click or Enter, then the menu closes.",
@@ -512,7 +512,7 @@ const commandMenuLab = defineLab({
     },
     {
       name: "ItemIcon",
-      selector: ".ow-command-menu-item-icon",
+      selector: ".ow-command-menu__item-icon",
       note: {
         id: "Ikon dekoratif, seukuran font ditambah 2px, sejauh tepi atas dari tepi samping.",
         en: "A decorative icon, the font size plus 2px, as far from the side as from the top.",
@@ -520,7 +520,7 @@ const commandMenuLab = defineLab({
     },
     {
       name: "ItemDescription",
-      selector: ".ow-command-menu-item-description",
+      selector: ".ow-command-menu__item-description",
       note: {
         id: "Teks redup di baris yang sama; mengalah lebih dulu saat ruang habis.",
         en: "Muted text on the same row; it gives way first when space runs out.",
@@ -528,7 +528,7 @@ const commandMenuLab = defineLab({
     },
     {
       name: "Shortcut",
-      selector: ".ow-command-menu-item .ow-command-menu-shortcut",
+      selector: ".ow-command-menu__item .ow-command-menu__shortcut",
       note: {
         id: "Tombol sebagai keycap kecil bertepi tegas, di ujung item, di Trigger, atau di Footer.",
         en: "Keys as small crisp keycaps, at an item's end, in the Trigger, or in the Footer.",
@@ -536,7 +536,7 @@ const commandMenuLab = defineLab({
     },
     {
       name: "Footer",
-      selector: ".ow-command-menu-footer",
+      selector: ".ow-command-menu__footer",
       note: {
         id: "Baris di bawah daftar, setelah garis terukir, untuk petunjuk tombol.",
         en: "A row under the list, past an etched line, for key hints.",

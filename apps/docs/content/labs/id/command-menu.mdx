@@ -57,23 +57,23 @@ stage; pilih sebuah nama, di sini atau di stage, untuk melihat tokennya.
 | Bagian | Elemen | Catatan |
 | --- | --- | --- |
 | Root | tidak ada | Dialog.Root, item dan kata kunci daftar, serta `shortcut` |
-| <Part name="Trigger" /> | `button` | Dialog.Trigger, kolom datar dengan ikon cari dan `aria-keyshortcuts` |
-| <Part name="Popup" /> | `div` | `dialog`: portal, backdrop, viewport, dan popup Dialog, dengan Autocomplete.Root di dalamnya |
-| <Part name="Input" /> | `input` | `combobox`: Autocomplete.Input, setelah ikon cari |
-| <Part name="List" /> | `div` | `listbox`: Autocomplete.List; bisa digulir, dan memuat highlight Glide |
-| <Part name="Group" /> | `div` | `group`: Autocomplete.Group; `items` mengisi Collection di dalamnya |
-| <Part name="GroupLabel" /> | `div` | Label grupnya |
+| <Part name="Trigger" /> | `button.ow-command-menu__trigger` | Dialog.Trigger, kolom datar dengan ikon cari (`svg.ow-command-menu__icon`) dan `aria-keyshortcuts`; `data-size` |
+| <Part name="Popup" /> | `div.ow-command-menu__popup` | `dialog`: Dialog.Popup, dengan Autocomplete.Root di dalamnya; `data-size`. Portalnya memuat `div.ow-command-menu__backdrop`, lalu `div.ow-command-menu__viewport` yang membungkus popup |
+| <Part name="Input" /> | `input.ow-command-menu__input` | `combobox`: Autocomplete.Input, setelah ikon cari (`svg.ow-command-menu__icon`), di baris cari `div.ow-command-menu__field` |
+| <Part name="List" /> | `div.ow-command-menu__list` | `listbox`: Autocomplete.List; bisa digulir, dan memuat highlight Glide (`span.ow-glide`); `data-empty` saat tidak ada yang cocok |
+| <Part name="Group" /> | `div.ow-command-menu__group` | `group`: Autocomplete.Group; `items` mengisi Collection di dalamnya |
+| <Part name="GroupLabel" /> | `div.ow-command-menu__group-label` | Label grupnya |
 | Collection | tidak ada | Merender item yang tersaring, satu panggilan fungsi per item |
-| <Part name="Item" /> | `div` | `option`: Autocomplete.Item, dengan `closeOnClick` |
-| <Part name="ItemIcon" /> | `span` | Dekoratif (`aria-hidden`), seukuran font ditambah 2px |
-| ItemLabel | `span` | Satu baris |
-| <Part name="ItemDescription" /> | `span` | Redup, di baris yang sama; mengalah lebih dulu |
-| <Part name="Shortcut" /> | `kbd` | Keycap bertepi tegas, di ujung item, di Trigger, atau di Footer |
-| Empty | `div` | Tampil saat tidak ada yang cocok, dan diumumkan dengan sopan |
-| <Part name="Footer" /> | `div` | Petunjuk tombol, setelah garis terukir |
+| <Part name="Item" /> | `div.ow-command-menu__item` | `option`: Autocomplete.Item, dengan `closeOnClick`; `data-highlighted`, `data-disabled` |
+| <Part name="ItemIcon" /> | `span.ow-command-menu__item-icon` | Dekoratif (`aria-hidden`), seukuran font ditambah 2px |
+| ItemLabel | `span.ow-command-menu__item-label` | Satu baris |
+| <Part name="ItemDescription" /> | `span.ow-command-menu__item-description` | Redup, di baris yang sama; mengalah lebih dulu |
+| <Part name="Shortcut" /> | `kbd.ow-command-menu__shortcut` | Keycap bertepi tegas, di ujung item, di Trigger, atau di Footer |
+| Empty | `div.ow-command-menu__empty` | Tampil saat tidak ada yang cocok, dan diumumkan dengan sopan |
+| <Part name="Footer" /> | `div.ow-command-menu__footer` | Petunjuk tombol, setelah garis terukir |
 
-Popup juga merender tombol tutup yang tersembunyi sampai menerima fokus: screen reader di layar
-sentuh tidak punya tombol Escape. `closeLabel` memberinya nama.
+Popup juga merender tombol tutup, `button.ow-command-menu__close`, yang tersembunyi sampai menerima
+fokus: screen reader di layar sentuh tidak punya tombol Escape. `closeLabel` memberinya nama.
 
 ## State dan varian [#states]
 

@@ -54,23 +54,23 @@ stage; pick a name, here or on the stage, to see its tokens.
 | Part | Element | Notes |
 | --- | --- | --- |
 | Root | none | Dialog.Root, the list's items and query, and the `shortcut` |
-| <Part name="Trigger" /> | `button` | Dialog.Trigger, a flat field with a search icon and `aria-keyshortcuts` |
-| <Part name="Popup" /> | `div` | A `dialog`: Dialog's portal, backdrop, viewport, and popup, with Autocomplete.Root inside |
-| <Part name="Input" /> | `input` | A `combobox`: Autocomplete.Input, after a search icon |
-| <Part name="List" /> | `div` | A `listbox`: Autocomplete.List; it scrolls, and holds the Glide highlight |
-| <Part name="Group" /> | `div` | A `group`: Autocomplete.Group; `items` feeds the Collection inside it |
-| <Part name="GroupLabel" /> | `div` | Labels its group |
+| <Part name="Trigger" /> | `button.ow-command-menu__trigger` | Dialog.Trigger, a flat field with a search icon (`svg.ow-command-menu__icon`) and `aria-keyshortcuts`; `data-size` |
+| <Part name="Popup" /> | `div.ow-command-menu__popup` | A `dialog`: Dialog.Popup, with Autocomplete.Root inside; `data-size`. Its portal holds `div.ow-command-menu__backdrop`, then `div.ow-command-menu__viewport` around the popup |
+| <Part name="Input" /> | `input.ow-command-menu__input` | A `combobox`: Autocomplete.Input, after a search icon (`svg.ow-command-menu__icon`), in the search row `div.ow-command-menu__field` |
+| <Part name="List" /> | `div.ow-command-menu__list` | A `listbox`: Autocomplete.List; it scrolls, and holds the Glide highlight (`span.ow-glide`); `data-empty` when nothing matches |
+| <Part name="Group" /> | `div.ow-command-menu__group` | A `group`: Autocomplete.Group; `items` feeds the Collection inside it |
+| <Part name="GroupLabel" /> | `div.ow-command-menu__group-label` | Labels its group |
 | Collection | none | Renders the filtered items, one function call each |
-| <Part name="Item" /> | `div` | An `option`: Autocomplete.Item, with `closeOnClick` |
-| <Part name="ItemIcon" /> | `span` | Decorative (`aria-hidden`), the font size plus 2px |
-| ItemLabel | `span` | One line |
-| <Part name="ItemDescription" /> | `span` | Muted, on the same line; gives way first |
-| <Part name="Shortcut" /> | `kbd` | Keycaps with a crisp edge, at an item's end, in the Trigger, or in the Footer |
-| Empty | `div` | Shown when nothing matches, and announced politely |
-| <Part name="Footer" /> | `div` | Key hints, past an etched line |
+| <Part name="Item" /> | `div.ow-command-menu__item` | An `option`: Autocomplete.Item, with `closeOnClick`; `data-highlighted`, `data-disabled` |
+| <Part name="ItemIcon" /> | `span.ow-command-menu__item-icon` | Decorative (`aria-hidden`), the font size plus 2px |
+| ItemLabel | `span.ow-command-menu__item-label` | One line |
+| <Part name="ItemDescription" /> | `span.ow-command-menu__item-description` | Muted, on the same line; gives way first |
+| <Part name="Shortcut" /> | `kbd.ow-command-menu__shortcut` | Keycaps with a crisp edge, at an item's end, in the Trigger, or in the Footer |
+| Empty | `div.ow-command-menu__empty` | Shown when nothing matches, and announced politely |
+| <Part name="Footer" /> | `div.ow-command-menu__footer` | Key hints, past an etched line |
 
-Popup also renders a close button, hidden until it has focus: touch screen readers have no Escape
-key. `closeLabel` names it.
+Popup also renders a close button, `button.ow-command-menu__close`, hidden until it has focus: touch
+screen readers have no Escape key. `closeLabel` names it.
 
 ## States and variants [#states]
 

@@ -94,8 +94,8 @@ function Menu({
   );
 }
 
-const popup = () => document.querySelector<HTMLElement>(".ow-command-menu-popup");
-const input = () => document.querySelector<HTMLInputElement>(".ow-command-menu-input");
+const popup = () => document.querySelector<HTMLElement>(".ow-command-menu__popup");
+const input = () => document.querySelector<HTMLInputElement>(".ow-command-menu__input");
 const options = () => [...document.querySelectorAll<HTMLElement>('[role="option"]')];
 const option = (name: string) => {
   const el = options().find((o) => o.textContent?.includes(name));
@@ -103,10 +103,10 @@ const option = (name: string) => {
   return el;
 };
 const highlighted = () => document.querySelector<HTMLElement>("[data-highlighted]");
-const glide = () => document.querySelector<HTMLElement>(".ow-command-menu-list > .ow-glide");
+const glide = () => document.querySelector<HTMLElement>(".ow-command-menu__list > .ow-glide");
 
 async function open() {
-  const trigger = document.querySelector<HTMLElement>(".ow-command-menu-trigger");
+  const trigger = document.querySelector<HTMLElement>(".ow-command-menu__trigger");
   trigger?.click();
   await expect.poll(() => input() !== null && document.activeElement === input()).toBe(true);
 }
@@ -169,26 +169,26 @@ describe("Command Menu", () => {
     expect(dialog?.getAttribute("aria-label")).toBe("Commands");
     expect(input()?.getAttribute("role")).toBe("combobox");
     const listbox = document.querySelector('[role="listbox"]');
-    expect(listbox?.classList.contains("ow-command-menu-list")).toBe(true);
+    expect(listbox?.classList.contains("ow-command-menu__list")).toBe(true);
     expect(input()?.getAttribute("aria-controls")).toBe(listbox?.id);
     const groups = listGroups();
     expect(groups.length).toBe(2);
     const label = document.getElementById(groups[0]?.getAttribute("aria-labelledby") ?? "");
     expect(label?.textContent).toBe("Pages");
     expect(
-      options().map((o) => o.querySelector(".ow-command-menu-item-label")?.textContent),
+      options().map((o) => o.querySelector(".ow-command-menu__item-label")?.textContent),
     ).toEqual(["Home", "Settings", "New file", "Toggle dark mode", "Archive"]);
     expect(option("Archive").getAttribute("aria-disabled")).toBe("true");
     // Decorative parts stay out of the accessibility tree.
     expect(glide()?.getAttribute("aria-hidden")).toBe("true");
-    expect(document.querySelector(".ow-command-menu-item-icon")?.getAttribute("aria-hidden")).toBe(
+    expect(document.querySelector(".ow-command-menu__item-icon")?.getAttribute("aria-hidden")).toBe(
       "true",
     );
   });
 
   test("⌘K and Ctrl K open and close it; a key handled elsewhere does not", async () => {
     await render(<Menu />);
-    const trigger = document.querySelector(".ow-command-menu-trigger");
+    const trigger = document.querySelector(".ow-command-menu__trigger");
     expect(trigger?.getAttribute("aria-keyshortcuts")).toBe("Meta+K Control+K");
     await userEvent.keyboard("{Meta>}k{/Meta}");
     await expect.poll(popup).not.toBeNull();
@@ -218,7 +218,7 @@ describe("Command Menu", () => {
     await expect.poll(popup).toBeNull();
 
     screen.rerender(<Menu shortcut={false} />);
-    const trigger = document.querySelector(".ow-command-menu-trigger");
+    const trigger = document.querySelector(".ow-command-menu__trigger");
     await expect.poll(() => trigger?.hasAttribute("aria-keyshortcuts")).toBe(false);
     await userEvent.keyboard("{Control>}j{/Control}");
     await new Promise((resolve) => setTimeout(resolve, 50));
@@ -270,7 +270,7 @@ describe("Command Menu", () => {
     await expect.poll(highlighted).toBe(option("New file"));
     await expect.poll(() => option("New file").hasAttribute("data-glide-active")).toBe(true);
     // The highlight travels by transform, inside the list, to the item's offset in it.
-    const list = document.querySelector<HTMLElement>(".ow-command-menu-list");
+    const list = document.querySelector<HTMLElement>(".ow-command-menu__list");
     expect(list?.contains(highlight ?? null)).toBe(true);
     const y = Number.parseFloat(highlight?.style.getPropertyValue("--_y") ?? "");
     expect(y).toBeCloseTo(option("New file").offsetTop, 0);
@@ -295,7 +295,7 @@ describe("Command Menu", () => {
     await userEvent.hover(settings);
     await expect.poll(highlighted).toBe(settings);
     await expect.poll(() => settings.hasAttribute("data-glide-active")).toBe(true);
-    await userEvent.hover(document.querySelector(".ow-command-menu-field") as Element);
+    await userEvent.hover(document.querySelector(".ow-command-menu__field") as Element);
     await new Promise((resolve) => setTimeout(resolve, 150));
     expect(highlighted()).toBe(settings);
     expect(glide()?.hasAttribute("data-visible")).toBe(true);
@@ -345,20 +345,22 @@ describe("Command Menu", () => {
     await open();
     await type("dark");
     await expect
-      .poll(() => options().map((o) => o.querySelector(".ow-command-menu-item-label")?.textContent))
+      .poll(() =>
+        options().map((o) => o.querySelector(".ow-command-menu__item-label")?.textContent),
+      )
       .toEqual(["Toggle dark mode"]);
     expect(listGroups().length).toBe(1);
     await expect.poll(highlighted).toBe(option("Toggle dark mode"));
     await expect
       .poll(() => option("Toggle dark mode").hasAttribute("data-glide-active"))
       .toBe(true);
-    const empty = document.querySelector(".ow-command-menu-empty");
+    const empty = document.querySelector(".ow-command-menu__empty");
     expect(empty?.textContent).toBe("");
 
     await type("zzz");
     await expect.poll(() => empty?.textContent).toBe("No results");
     expect(options()).toEqual([]);
-    const list = document.querySelector<HTMLElement>(".ow-command-menu-list");
+    const list = document.querySelector<HTMLElement>(".ow-command-menu__list");
     expect(list?.hasAttribute("data-empty")).toBe(true);
     expect(getComputedStyle(list as Element).display).toBe("none");
     await expect.poll(() => glide()?.hasAttribute("data-visible")).toBe(false);
@@ -385,7 +387,7 @@ describe("Command Menu", () => {
         </button>
       </Menu>,
     );
-    const trigger = document.querySelector<HTMLElement>(".ow-command-menu-trigger");
+    const trigger = document.querySelector<HTMLElement>(".ow-command-menu__trigger");
     await userEvent.click(trigger as HTMLElement);
     await expect.poll(() => document.activeElement === input()).toBe(true);
     await userEvent.keyboard("{Escape}");
@@ -403,7 +405,7 @@ describe("Command Menu", () => {
     await render(<Menu />);
     await userEvent.keyboard("{Meta>}k{/Meta}");
     await expect.poll(popup).not.toBeNull();
-    const backdrop = document.querySelector(".ow-command-menu-backdrop");
+    const backdrop = document.querySelector(".ow-command-menu__backdrop");
     for (const el of [popup(), backdrop]) {
       expect(el && getComputedStyle(el).transitionDuration).toBe("0s");
       expect(el?.getAnimations()).toEqual([]);
@@ -418,7 +420,7 @@ describe("Command Menu", () => {
   test("a hidden close button shows when focused, with a label to translate (FR-17)", async () => {
     const screen = await render(<Menu defaultOpen />);
     await expect.poll(popup).not.toBeNull();
-    const close = () => document.querySelector<HTMLElement>(".ow-command-menu-close");
+    const close = () => document.querySelector<HTMLElement>(".ow-command-menu__close");
     expect(close()?.getAttribute("aria-label")).toBe("Close");
     expect(close()?.getBoundingClientRect().width).toBeLessThanOrEqual(1);
     await userEvent.keyboard("{Tab}");
@@ -477,13 +479,13 @@ describe("Command Menu", () => {
       </CommandMenu.Root>,
     );
     await expect.poll(() => refs.item.current).not.toBeNull();
-    expect(refs.trigger.current?.className).toBe("ow-command-menu-trigger mine");
+    expect(refs.trigger.current?.className).toBe("ow-command-menu__trigger mine");
     expect(refs.trigger.current?.style.marginBlock).toBe("3px");
-    expect(refs.popup.current?.className).toBe("ow-command-menu-popup is-open");
-    expect(refs.input.current?.className).toBe("ow-command-menu-input field-mine");
-    expect(refs.list.current?.className).toBe("ow-command-menu-list list-mine");
+    expect(refs.popup.current?.className).toBe("ow-command-menu__popup is-open");
+    expect(refs.input.current?.className).toBe("ow-command-menu__input field-mine");
+    expect(refs.list.current?.className).toBe("ow-command-menu__list list-mine");
     expect(refs.item.current?.tagName).toBe("A");
-    await expect.poll(() => refs.item.current?.className).toBe("ow-command-menu-item lit");
+    await expect.poll(() => refs.item.current?.className).toBe("ow-command-menu__item lit");
     expect(refs.shortcut.current?.tagName).toBe("KBD");
   });
 
@@ -494,8 +496,8 @@ describe("Command Menu", () => {
     await render(<Menu defaultOpen />);
     await expect.poll(popup).not.toBeNull();
     const panel = popup() as HTMLElement;
-    const trigger = document.querySelector(".ow-command-menu-trigger") as HTMLElement;
-    const key = panel.querySelector(".ow-command-menu-shortcut") as HTMLElement;
+    const trigger = document.querySelector(".ow-command-menu__trigger") as HTMLElement;
+    const key = panel.querySelector(".ow-command-menu__shortcut") as HTMLElement;
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
       const style = getComputedStyle(panel);
@@ -553,7 +555,7 @@ describe("Command Menu", () => {
     // The width is the Popup's own inline-size.
     expect((popup() as HTMLElement).getBoundingClientRect().width).toBe(400);
     // The Trigger, outside the Popup, keeps the theme's.
-    const trigger = document.querySelector(".ow-command-menu-trigger") as Element;
+    const trigger = document.querySelector(".ow-command-menu__trigger") as Element;
     expect(getComputedStyle(trigger).borderTopLeftRadius).toBe("8px");
   });
 
@@ -563,8 +565,8 @@ describe("Command Menu", () => {
     });
     await render(<Menu defaultOpen />);
     await expect.poll(popup).not.toBeNull();
-    const backdrop = document.querySelector(".ow-command-menu-backdrop") as Element;
-    const key = popup()?.querySelector(".ow-command-menu-shortcut") as Element;
+    const backdrop = document.querySelector(".ow-command-menu__backdrop") as Element;
+    const key = popup()?.querySelector(".ow-command-menu__shortcut") as Element;
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
       expect(getComputedStyle(backdrop).backgroundColor).toBe(resolveColor("var(--ow-backdrop)"));
@@ -579,9 +581,9 @@ describe("Command Menu", () => {
     await commands.setForcedColors("active");
     const canvasText = resolveColor("CanvasText");
     for (const selector of [
-      ".ow-command-menu-popup",
-      ".ow-command-menu-trigger",
-      ".ow-command-menu-shortcut",
+      ".ow-command-menu__popup",
+      ".ow-command-menu__trigger",
+      ".ow-command-menu__shortcut",
     ]) {
       const style = getComputedStyle(document.querySelector(selector) as Element);
       expect(style.outlineStyle, selector).toBe("solid");
@@ -602,11 +604,11 @@ describe("Command Menu", () => {
       </DirectionProvider>,
     );
     await expect.poll(popup).not.toBeNull();
-    expect(document.querySelector(".ow-command-menu-viewport")?.getAttribute("dir")).toBe("rtl");
+    expect(document.querySelector(".ow-command-menu__viewport")?.getAttribute("dir")).toBe("rtl");
     const item = option("New file");
-    const label = item.querySelector(".ow-command-menu-item-label")?.getBoundingClientRect();
-    const icon = item.querySelector(".ow-command-menu-item-icon")?.getBoundingClientRect();
-    const keys = item.querySelector(".ow-command-menu-shortcut")?.getBoundingClientRect();
+    const label = item.querySelector(".ow-command-menu__item-label")?.getBoundingClientRect();
+    const icon = item.querySelector(".ow-command-menu__item-icon")?.getBoundingClientRect();
+    const keys = item.querySelector(".ow-command-menu__shortcut")?.getBoundingClientRect();
     if (!label || !icon || !keys) throw new Error("no parts");
     expect(icon.left).toBeGreaterThan(label.right);
     expect(keys.right).toBeLessThan(label.left);
@@ -629,7 +631,7 @@ describe("Command Menu", () => {
       // axe cannot see through the glass, so check its text here, over the page and the scrim.
       const page = getComputedStyle(document.body).backgroundColor;
       const scrim = getComputedStyle(
-        document.querySelector(".ow-command-menu-backdrop") as Element,
+        document.querySelector(".ow-command-menu__backdrop") as Element,
       ).backgroundColor;
       const glass = getComputedStyle(popup() as Element).backgroundColor;
       const surface = composite(page, scrim, glass);
@@ -644,7 +646,7 @@ describe("Command Menu", () => {
         page,
         scrim,
         glass,
-        getComputedStyle(document.querySelector(".ow-command-menu-group-label") as Element).color,
+        getComputedStyle(document.querySelector(".ow-command-menu__group-label") as Element).color,
       );
       expect(contrast(fg, surface)).toBeGreaterThanOrEqual(4.5);
       expect(contrast(fg, lit)).toBeGreaterThanOrEqual(4.5);
@@ -656,7 +658,7 @@ describe("Command Menu", () => {
       for (const target of report.contrastUnknown) {
         expect(
           popup()?.querySelector(target) ??
-            document.querySelector(target)?.closest(".ow-command-menu-popup"),
+            document.querySelector(target)?.closest(".ow-command-menu__popup"),
         ).toBeTruthy();
       }
     }

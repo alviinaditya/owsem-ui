@@ -45,7 +45,7 @@ async function mount(size: CommandMenuSize) {
     if (!el) throw new Error(`no ${selector}`);
     return el;
   };
-  await expect.poll(() => document.querySelector(".ow-command-menu-item")).not.toBeNull();
+  await expect.poll(() => document.querySelector(".ow-command-menu__item")).not.toBeNull();
   return { screen, get };
 }
 
@@ -60,8 +60,8 @@ describe.each(Object.keys(SIZES) as CommandMenuSize[])("Command Menu geometry, %
 
   test("items follow the --py rule, with the icon as far from every edge (FR-9, FR-10)", async () => {
     const { get } = await mount(size);
-    const item = get(".ow-command-menu-item");
-    const svg = get(".ow-command-menu-item-icon");
+    const item = get(".ow-command-menu__item");
+    const svg = get(".ow-command-menu__item-icon");
     expect(item.getBoundingClientRect().height).toBeCloseTo(expected.height, 1);
     expect(svg.getBoundingClientRect().width).toBeCloseTo(expected.icon, 1);
     for (const edge of iconEdges(item, svg)) expect(edge).toBeCloseTo(expected.edge, 0);
@@ -69,8 +69,8 @@ describe.each(Object.keys(SIZES) as CommandMenuSize[])("Command Menu geometry, %
 
   test("the trigger is as tall as other controls, its icon placed the same way", async () => {
     const { get } = await mount(size);
-    const trigger = get(".ow-command-menu-trigger");
-    const svg = get(".ow-command-menu-trigger > .ow-command-menu-icon");
+    const trigger = get(".ow-command-menu__trigger");
+    const svg = get(".ow-command-menu__trigger > .ow-command-menu__icon");
     expect(trigger.getBoundingClientRect().height).toBeCloseTo(expected.height, 1);
     expect(svg.getBoundingClientRect().width).toBeCloseTo(expected.icon, 1);
     for (const edge of iconEdges(trigger, svg)) expect(edge).toBeCloseTo(expected.edge, 0);
@@ -78,9 +78,9 @@ describe.each(Object.keys(SIZES) as CommandMenuSize[])("Command Menu geometry, %
 
   test("the panel's radius is the item's plus the padding between them (FR-10b)", async () => {
     const { get } = await mount(size);
-    const popup = get(".ow-command-menu-popup");
-    const list = get(".ow-command-menu-list");
-    const item = get(".ow-command-menu-item");
+    const popup = get(".ow-command-menu__popup");
+    const list = get(".ow-command-menu__list");
+    const item = get(".ow-command-menu__item");
     const pad = insets(list, item).left;
     expect(insets(popup, item).left).toBeCloseTo(pad, 1);
     expect(Math.abs(usedRadius(popup) - (usedRadius(item) + pad))).toBeLessThanOrEqual(TOL);
@@ -88,15 +88,17 @@ describe.each(Object.keys(SIZES) as CommandMenuSize[])("Command Menu geometry, %
 
   test("the search row and the group labels line up with the items", async () => {
     const { get } = await mount(size);
-    const itemIcon = get(".ow-command-menu-item-icon").getBoundingClientRect();
-    const fieldIcon = get(".ow-command-menu-field > .ow-command-menu-icon").getBoundingClientRect();
-    const label = get(".ow-command-menu-item-label").getBoundingClientRect();
-    const input = get(".ow-command-menu-input").getBoundingClientRect();
+    const itemIcon = get(".ow-command-menu__item-icon").getBoundingClientRect();
+    const fieldIcon = get(
+      ".ow-command-menu__field > .ow-command-menu__icon",
+    ).getBoundingClientRect();
+    const label = get(".ow-command-menu__item-label").getBoundingClientRect();
+    const input = get(".ow-command-menu__input").getBoundingClientRect();
     expect(fieldIcon.left).toBeCloseTo(itemIcon.left, 0);
     expect(fieldIcon.width).toBeCloseTo(itemIcon.width, 1);
     expect(input.left).toBeCloseTo(label.left, 0);
     // The group's name starts where its items' icons do.
-    const group = get(".ow-command-menu-group-label");
+    const group = get(".ow-command-menu__group-label");
     const range = document.createRange();
     range.selectNodeContents(group);
     expect(range.getBoundingClientRect().left).toBeCloseTo(itemIcon.left, 0);

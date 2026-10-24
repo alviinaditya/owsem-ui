@@ -75,8 +75,10 @@ UI, dengan `data-size` dan `data-variant`), yang menampilkan `span.ow-color-pick
 
 Stage menampilkan trigger popover dalam tema terang dan gelap: tiga ukuran, masing-masing sebagai
 kolom (`variant="field"`: warna dan nilainya) dan sebagai kotak warna (`variant="swatch"`), lalu
-versi transparan dan nonaktif. Pointer membuka satu popover di setiap tema. Popup membesar dari
-trigger-nya dalam 180 ms dan kembali dalam 140 ms; bila dibuka dari keyboard, popup langsung tampil.
+versi transparan dan nonaktif. Pointer membuka satu popover di setiap tema. Popup muncul memudar di
+tempatnya dalam 150 ms dan hilang dalam 100 ms, tanpa membesar: popup-nya besar, sehingga skala
+menggeser tepi jauhnya cukup jauh hingga terlihat bergeser. Bila dibuka dari keyboard, popup
+langsung tampil.
 
 | State | Yang menandainya |
 | --- | --- |
@@ -112,7 +114,7 @@ Kecerahan 72%". Rona dan opasitas adalah slider Base UI, dengan input range di s
 kata yang ditampilkan atau dibacakan ada di `labels` (FR-17); halaman ini memakai label bahasa
 Indonesia. Huruf format dan kanal (HEX, R, G, B, H, S, L, A) adalah notasi dan tidak diterjemahkan.
 
-Dengan `prefers-reduced-motion`, popover hanya memudar tanpa membesar, dan thumb, tombol, serta
+Dengan `prefers-reduced-motion`, popover tetap memudar, dan thumb, tombol, serta
 contoh warna tidak mengecil. Di forced colors (Windows High Contrast), area, track, dan contoh warna
 tetap memakai warnanya sendiri di dalam outline warna sistem, fokus memakai `Highlight`, dan contoh
 warna aktif diberi outline `Highlight`. Dari kanan ke kiri, saturasi, rona, dan opasitas naik ke

@@ -676,24 +676,19 @@ describe("ColorPickerPopover", () => {
     expect(custom.textContent).toBe("Aa");
   });
 
-  test("the popup scales out of the trigger, and only fades under reduced motion", async () => {
+  test("the popup fades in place: nothing in it moves as it opens", async () => {
     const { q, screen } = await mount(<ColorPickerPopover />);
     await userEvent.click(q(".ow-color-picker__trigger", screen.container));
     await expect.poll(popup).toBeTruthy();
-    const style = () => getComputedStyle(popup() as HTMLElement);
-    expect(style().transformOrigin).not.toBe("");
-    // Base UI puts the trigger's side on the positioner, and the popup inherits it.
-    expect(style().getPropertyValue("--transform-origin")).not.toBe("");
-    expect(style().transitionProperty).toBe("opacity, transform");
-    expect(style().transitionDuration).toBe("0.18s, 0.18s");
-    await userEvent.keyboard("{Escape}");
-    await expect.poll(popup).toBeNull();
-
-    onTestFinished(() => commands.setReducedMotion("no-preference"));
-    await commands.setReducedMotion("reduce");
-    await userEvent.click(q(".ow-color-picker__trigger", screen.container));
-    await expect.poll(popup).toBeTruthy();
+    const box = popup() as HTMLElement;
+    const style = () => getComputedStyle(box);
     expect(style().transitionProperty).toBe("opacity");
+    expect(style().transitionDuration).toBe("0.15s");
+    // Its edges stay where they land from the first frame (a scale moved them up to 14px).
+    const first = box.getBoundingClientRect();
+    expect(style().transform).toBe("none");
+    await settle();
+    expect(box.getBoundingClientRect().toJSON()).toEqual(first.toJSON());
   });
 
   test("the portaled popup keeps the trigger's theme and direction", async () => {
@@ -705,9 +700,11 @@ describe("ColorPickerPopover", () => {
       </DirectionProvider>,
     );
     // The trigger paints the token itself, so it follows the theme around it.
+    const dark = q('[data-theme="dark"]', screen.container);
     expect(getComputedStyle(q(".ow-color-picker__chip")).backgroundColor).toBe(
-      "rgb(212, 203, 229)",
+      resolveColor("var(--ow-accent)", dark),
     );
+    expect(resolveColor("var(--ow-accent)", dark)).not.toBe(resolveColor("var(--ow-accent)"));
     await userEvent.click(q(".ow-color-picker__trigger", screen.container));
     await expect.poll(popup).toBeTruthy();
     const positioner = popup()?.parentElement;
@@ -717,7 +714,10 @@ describe("ColorPickerPopover", () => {
       resolveColor("var(--ow-panel)", q('[data-theme="dark"]')),
     );
     // The picker opens on the token's color, read beside the trigger.
-    expect(q<HTMLInputElement>('[role="dialog"] input[aria-label="Hex"]').value).toBe("D4CBE5");
+    const accent = getComputedStyle(dark).getPropertyValue("--ow-accent").trim();
+    expect(q<HTMLInputElement>('[role="dialog"] input[aria-label="Hex"]').value).toBe(
+      accent.slice(1).toUpperCase(),
+    );
   });
 
   test("is controlled by value and open", async () => {

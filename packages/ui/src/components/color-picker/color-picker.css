@@ -488,22 +488,20 @@
   }
 
   /* Scales out of the trigger (Base UI's --transform-origin), and back into it. */
+  /*
+   * The popup fades in place. It is large, so even a 0.96 scale moved its far edges 10 to 14px,
+   * which read as the panel shifting as it opened.
+   */
   .ow-color-picker__popup {
-    transform-origin: var(--transform-origin);
-    /* Its own layer, so it lands without a pixel jump (NF-8). */
-    will-change: transform;
-    transition:
-      opacity 180ms var(--ow-ease-out),
-      transform 180ms var(--ow-ease-out);
+    transition: opacity 150ms var(--ow-ease-out);
   }
 
   .ow-color-picker__popup:is([data-starting-style], [data-ending-style]) {
     opacity: 0;
-    transform: scale(0.96);
   }
 
   .ow-color-picker__popup[data-ending-style] {
-    transition-duration: 140ms;
+    transition-duration: 100ms;
   }
 
   /* Opened from the keyboard, or dismissed: no motion (Base UI's data-instant). */
@@ -515,16 +513,8 @@
     box-shadow: var(--ow-popup-shadow);
   }
 
-  /* FR-20: no scaling and no compacting; the popover still fades. */
+  /* FR-20: no compacting; the popover still fades. */
   @media (prefers-reduced-motion: reduce) {
-    .ow-color-picker__popup:is([data-starting-style], [data-ending-style]) {
-      transform: none;
-    }
-
-    .ow-color-picker__popup {
-      transition: opacity 180ms ease;
-    }
-
     :is(
         .ow-color-picker__area[data-dragging] > .ow-color-picker__thumb,
         .ow-color-picker__thumb[data-dragging]

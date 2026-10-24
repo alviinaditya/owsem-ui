@@ -71,8 +71,9 @@ translucent) and `span.ow-color-picker__value`, and a popup, `div.ow-color-picke
 
 The stage shows the popover's trigger in light and dark: three sizes, each as a field
 (`variant="field"`: the color and its value) and as a swatch (`variant="swatch"`: a square of the
-color), then translucent and disabled. The pointer opens one in each theme. The popup scales out
-of its trigger in 180 ms and back in 140 ms; opened from the keyboard, it appears at once.
+color), then translucent and disabled. The pointer opens one in each theme. The popup fades in
+place in 150 ms and out in 100 ms, without scaling: it is large, so a scale moved its far edges
+enough to read as a shift. Opened from the keyboard, it appears at once.
 
 | State | What shows it |
 | --- | --- |
@@ -109,7 +110,7 @@ Brightness 72%". Hue and opacity are Base UI sliders, with a range input in each
 the picker shows or announces is in `labels` (FR-17); the Indonesian version of this page passes
 Indonesian ones. The format and channel letters (HEX, R, G, B, H, S, L, A) are notation and stay.
 
-With `prefers-reduced-motion`, the popover fades without scaling, and thumbs, buttons, and swatches
+With `prefers-reduced-motion`, the popover still fades, and thumbs, buttons, and swatches
 keep their size. In forced colors (Windows High Contrast), the area, the tracks, and the swatches
 keep their own colors inside a system-color outline, focus uses `Highlight`, and the current swatch
 gets a `Highlight` outline. Right to left, saturation, hue, and opacity grow toward the left.

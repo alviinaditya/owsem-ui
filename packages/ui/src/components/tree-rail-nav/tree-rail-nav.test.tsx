@@ -155,6 +155,17 @@ describe("Tree Rail Nav", () => {
     expect(getComputedStyle(panel, "::before").maskImage).toContain("svg");
   });
 
+  test("never shows a dot for a row in a closed group, not even fading out", async () => {
+    const { tree } = await mount(<Nav current="none" open={false} />);
+    await expect.poll(() => tree.hasAttribute("data-rail")).toBe(true);
+    const hidden = [...tree.querySelectorAll(".ow-tree-rail-nav__rail-node[data-hidden] circle")];
+    expect(hidden.length).toBeGreaterThan(0);
+    for (const dot of hidden) {
+      expect(dot.getAnimations()).toEqual([]);
+      expect(getComputedStyle(dot).opacity).toBe("0");
+    }
+  });
+
   test("draws the trail to the current row inside a scaled ancestor", async () => {
     const scaled = (current = "dark") => (
       <div style={{ transform: "scale(0.5)", transformOrigin: "0 0" }}>

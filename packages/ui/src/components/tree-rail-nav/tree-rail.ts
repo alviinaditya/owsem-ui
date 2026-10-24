@@ -404,17 +404,21 @@ export function createTreeRail(tree: HTMLElement, svg: SVGSVGElement): TreeRail 
     }
     lit = [];
     for (const row of rows) {
-      let c = nodeDots.get(row);
-      if (!c) {
-        c = nodeLayer.appendChild(svgEl("g", { class: cls.railNode }));
-        c.append(svgEl("circle", { r: "3.25" }));
-        nodeDots.set(row, c);
-      }
-      c.toggleAttribute("data-disabled", disabled(row));
       const r = span(row);
       const x = railX(depthOf(row) - 1);
       const y = r.top + r.height / 2;
       const shown = r.height > 0 && y <= clipOf(row) - r.height / 2 + 0.5;
+      let c = nodeDots.get(row);
+      if (!c) {
+        // Made as it is drawn: a dot made shown and then hidden faded out at the rail's corner.
+        const attrs: Record<string, string> = { class: cls.railNode };
+        if (!shown) attrs["data-hidden"] = "";
+        if (disabled(row)) attrs["data-disabled"] = "";
+        c = nodeLayer.appendChild(svgEl("g", attrs));
+        c.append(svgEl("circle", { r: "3.25" }));
+        nodeDots.set(row, c);
+      }
+      c.toggleAttribute("data-disabled", disabled(row));
       c.toggleAttribute("data-hidden", !shown);
       c.toggleAttribute("data-hot", shown && row.hasAttribute("data-glide-active"));
       if (shown) {

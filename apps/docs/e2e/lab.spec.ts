@@ -188,8 +188,9 @@ test("stage shortcuts work only with focus on the stage (WCAG 2.1.4)", async ({ 
   await page.keyboard.press("c");
   await expect(stageBody(page)).toHaveAttribute("data-code", "");
 
-  // A click on an empty part of the stage is enough to put focus there.
-  await page.locator("body").click({ position: { x: 1, y: 1 } });
+  // A click on an empty part of the stage is enough to put focus there. (A narrow Lab is all
+  // fixed layers, so the body has no box to click away on.)
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
   await stageBody(page).click({ position: { x: 8, y: 8 } });
   await page.keyboard.press("c");
   await expect(stageBody(page)).not.toHaveAttribute("data-code");
@@ -325,7 +326,7 @@ test("the docs sheet and the stage's panels take turns under the demo", async ({
 test("a narrow Lab has the menu at the top left, the toolbar at the top right", async ({
   page,
 }, testInfo) => {
-  test.skip(testInfo.project.name !== "mobile-390", "the dock is at the bottom elsewhere");
+  test.skip(testInfo.project.name !== "mobile-390", "a narrow Lab's layout");
   await page.goto("/en/separator");
   await expect(page.getByRole("button", { name: "Menu", exact: true })).toBeVisible();
   // The menu button's well and the toolbar's share a row.

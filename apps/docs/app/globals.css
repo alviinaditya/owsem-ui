@@ -930,45 +930,64 @@ body {
   }
 }
 
-/* Below 1100 px: the dock at the bottom opens the sidebar. The page leaves room for it. */
+/*
+ * Below 1100 px: the dock at the top left opens the sidebar on every page, a well of icon buttons
+ * like a narrow Lab's stage toolbar. Pages leave room for it above their text.
+ */
 .dock {
   position: fixed;
-  inset-block-end: 16px;
-  inset-inline-start: 50%;
+  inset: 12px auto auto 12px;
   z-index: 50;
   display: flex;
-  padding: 4px;
-  border-radius: 999px;
-  background-color: var(--docs-surface);
-  box-shadow:
-    inset 0 0 0 1px var(--docs-line-strong),
-    0 12px 32px -12px rgb(0 0 0 / 0.6);
-  translate: -50% 0;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--docs-radius);
+  background-color: var(--docs-well);
+  box-shadow: var(--docs-well-shadow);
 }
 
+/* The stage toolbar's size: 24 px in a 30 px track, with a taller target for a finger. */
 .dock-button {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  block-size: 40px;
-  padding-inline: 14px 18px;
+  justify-content: center;
+  min-inline-size: 30px;
+  block-size: 24px;
+  padding: 0;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--docs-radius-inner);
   background: none;
-  color: var(--docs-fg);
-  font-size: 14px;
-  font-weight: 500;
+  color: var(--docs-muted);
+}
+
+.dock-button::after {
+  content: "";
+  position: absolute;
+  inset: -5px -2px;
+}
+
+.dock-button svg {
+  inline-size: 16px;
+  block-size: 16px;
 }
 
 .dock-button:hover {
   background-color: var(--docs-hover);
+  color: var(--docs-fg);
+}
+
+/* Icons only; the label names the button. */
+.dock-label {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 @media (width < 1100px) {
-  .site-main {
-    padding-block-end: 72px;
-  }
-
   /* Open, the panel has its own close button; the dock steps aside under the scrim. */
   .dock {
     transition:
@@ -1134,6 +1153,14 @@ body {
 @media (width >= 900px) {
   .site-content {
     padding-inline: 40px;
+  }
+}
+
+/* Room above the text for the dock, until the sidebar shows. */
+@media (width < 1100px) {
+  .site-content,
+  .page {
+    padding-block-start: 64px;
   }
 }
 
@@ -1354,6 +1381,13 @@ figure[data-code-block] pre {
   .lab-stage-frame,
   .lab-stage-frame > .lab-stage {
     block-size: 100%;
+  }
+}
+
+/* Until the sidebar shows, the dock sits above the narrative. */
+@media (960px <= width < 1100px) {
+  .lab-narrative {
+    padding-block-start: 64px;
   }
 }
 
@@ -1879,9 +1913,8 @@ figure[data-code-block] pre {
     display: none;
   }
 
-  /* The switchers' size (24 px in a 30 px track), with a taller target for a finger. */
-  .lab-stage-bar .lab-tool,
-  :root:has(.lab-main) .dock-button {
+  /* The switchers' size (24 px in a 30 px track), with a taller target for a finger; the dock's. */
+  .lab-stage-bar .lab-tool {
     position: relative;
     justify-content: center;
     min-inline-size: 30px;
@@ -1890,8 +1923,7 @@ figure[data-code-block] pre {
     border-radius: var(--docs-radius-inner);
   }
 
-  .lab-stage-bar .lab-tool::after,
-  :root:has(.lab-main) .dock-button::after {
+  .lab-stage-bar .lab-tool::after {
     content: "";
     position: absolute;
     inset: -5px -2px;
@@ -1900,38 +1932,6 @@ figure[data-code-block] pre {
   /* Under the full sheet, only the toolbar shows: the way back to the stage. */
   .lab[data-sheet="full"] .lab-stage-body {
     visibility: hidden;
-  }
-
-  :root:has(.lab-main) .dock {
-    inset: 12px auto auto 12px;
-    padding: 3px;
-    border-radius: var(--docs-radius);
-    background-color: var(--docs-well);
-    box-shadow: var(--docs-well-shadow);
-    translate: none;
-  }
-
-  :root:has(.lab-main) .dock-button {
-    padding: 0;
-    color: var(--docs-muted);
-  }
-
-  :root:has(.lab-main) .dock-button svg {
-    inline-size: 16px;
-    block-size: 16px;
-  }
-
-  :root:has(.lab-main) .dock-button:hover {
-    color: var(--docs-fg);
-  }
-
-  :root:has(.lab-main) .dock-label {
-    position: absolute;
-    inline-size: 1px;
-    block-size: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
   }
 }
 

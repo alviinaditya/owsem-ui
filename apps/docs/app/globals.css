@@ -1035,19 +1035,17 @@ body {
   font-size: 14px;
 }
 
-/*
- * The search at the rail's origin (DS-5): the library's flat trigger, as wide as a first-level
- * row, its icon and text in line with the rows' (16px icon 10px in, an 8px gap).
- */
-.sidebar-nav .sidebar-origin {
-  margin-block-end: 10px;
-  padding-inline: 0;
-}
-
+/* The search above the sidebar's nav (DS-5): the library's flat trigger at full width. */
 .sidebar-search {
   --py: 9.25px;
-  flex: 1;
+  inline-size: 100%;
+  margin-block-end: 10px;
   gap: 8px;
+}
+
+/* Until hydration says which keys to show, the hint keeps the field's height unseen. */
+.sidebar-search .ow-command-menu__shortcut[data-pending] {
+  visibility: hidden;
 }
 
 .sidebar-search-label {

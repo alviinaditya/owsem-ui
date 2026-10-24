@@ -34,8 +34,6 @@ export const cls = {
   labelText: "ow-tree-rail-nav__label-text",
   rail: "ow-tree-rail-nav__rail",
   railBase: "ow-tree-rail-nav__rail-base",
-  railOrigin: "ow-tree-rail-nav__rail-origin",
-  railRing: "ow-tree-rail-nav__rail-ring",
   railActive: "ow-tree-rail-nav__rail-active",
   railTrail: "ow-tree-rail-nav__rail-trail",
   railNodes: "ow-tree-rail-nav__rail-nodes",
@@ -179,8 +177,6 @@ export function createTreeRail(tree: HTMLElement, svg: SVGSVGElement): TreeRail 
   svg.replaceChildren();
   const base = svg.appendChild(svgEl("g", { class: cls.railBase }));
   const rootRail = base.appendChild(svgEl("path", {}));
-  const origin = svg.appendChild(svgEl("g", { class: cls.railOrigin }));
-  origin.append(svgEl("circle", { class: cls.railRing, r: "5" }), svgEl("circle", { r: "2.5" }));
   const active = svg.appendChild(svgEl("g", { class: cls.railActive }));
   const trail = active.appendChild(svgEl("path", { class: cls.railTrail }));
   const nodeLayer = svg.appendChild(svgEl("g", { class: cls.railNodes }));
@@ -238,10 +234,11 @@ export function createTreeRail(tree: HTMLElement, svg: SVGSVGElement): TreeRail 
     );
     // An Origin label puts the origin at its middle; otherwise the CSS says where it is.
     const label = tree.querySelector<HTMLElement>(`:scope > .${cls.origin}`);
-    originY = label
-      ? label.offsetTop + label.offsetHeight / 2
+    if (label) locate();
+    const at = label && span(label);
+    originY = at
+      ? at.top + at.height / 2
       : Number.parseFloat(style.getPropertyValue("--_origin-y")) || originY;
-    origin.setAttribute("transform", `translate(${rails[0]} ${originY})`);
   }
 
   /** A panel's box; a closed (hidden) one collapses to the bottom of its row. */
@@ -633,6 +630,8 @@ export function createTreeRail(tree: HTMLElement, svg: SVGSVGElement): TreeRail 
   measure();
   observe();
   goTo(findTarget());
+  // The script's rail replaces the resting one CSS draws until now (tree-rail-nav.css).
+  tree.setAttribute("data-rail", "");
 
   return {
     refresh() {
@@ -654,6 +653,7 @@ export function createTreeRail(tree: HTMLElement, svg: SVGSVGElement): TreeRail 
         row.removeAttribute("data-leaving");
       }
       for (const panel of tree.querySelectorAll(PANEL)) panel.removeAttribute("data-clip");
+      tree.removeAttribute("data-rail");
     },
   };
 }

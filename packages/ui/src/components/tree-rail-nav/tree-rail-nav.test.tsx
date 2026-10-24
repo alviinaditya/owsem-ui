@@ -3,6 +3,7 @@ import { describe, expect, onTestFinished, test } from "vitest";
 import { commands } from "vitest/browser";
 import { render } from "vitest-browser-react";
 import { axeReport } from "../../../test/a11y.ts";
+import { rect } from "../../../test/geometry.ts";
 import { measureIdle, settle } from "../../../test/raf-counter.ts";
 import { TreeRailNav } from "./index";
 
@@ -84,6 +85,11 @@ const markerY = (tree: HTMLElement) => {
   const t = tree.querySelector(".ow-tree-rail-nav__rail-marker")?.getAttribute("transform") ?? "";
   return Number(/translate\([\d.-]+ ([\d.-]+)\)/.exec(t)?.[1] ?? Number.NaN);
 };
+/** Where the trail starts: the y of its path's first point, in the tree. */
+const trailStart = (tree: HTMLElement) => {
+  const d = tree.querySelector(".ow-tree-rail-nav__rail-trail")?.getAttribute("d") ?? "";
+  return Number(/^M[\d.-]+ ([\d.-]+)/.exec(d)?.[1] ?? Number.NaN);
+};
 const middle = (tree: HTMLElement, row: HTMLElement) => {
   const r = row.getBoundingClientRect();
   return r.top + r.height / 2 - tree.getBoundingClientRect().top;
@@ -122,6 +128,31 @@ describe("Tree Rail Nav", () => {
       .map((a) => a.transitionProperty);
     expect(fading).toEqual([]);
     expect(getComputedStyle(current, "::before").opacity).toBe("1");
+  });
+
+  test("until the script has drawn the rail, CSS draws its resting shape in the same place", async () => {
+    const { tree, row } = await mount(<Nav />);
+    await expect.poll(() => tree.hasAttribute("data-rail")).toBe(true);
+    expect(getComputedStyle(row("Home"), "::after").content).toBe("none");
+    // As before hydration, when only the server's HTML and the CSS are there.
+    tree.removeAttribute("data-rail");
+    const box = tree.getBoundingClientRect();
+    const nodes = [...tree.querySelectorAll(".ow-tree-rail-nav__rail-node")];
+    const rows = [...tree.querySelectorAll<HTMLElement>(".ow-tree-rail-nav__item")];
+    expect(nodes.length).toBe(rows.length);
+    for (const [i, el] of rows.entries()) {
+      if (!el.getClientRects().length) continue;
+      const at = /translate\(([\d.-]+) ([\d.-]+)\)/.exec(nodes[i]?.getAttribute("transform") ?? "");
+      const dot = rect({ el, pseudo: "::after" });
+      const name = el.textContent ?? "";
+      expect(dot.left + dot.width / 2 - box.left, name).toBeCloseTo(Number(at?.[1]), 1);
+      expect(dot.top + dot.height / 2 - box.top, name).toBeCloseTo(Number(at?.[2]), 1);
+    }
+    // A rail runs from each row to the next, and a branch leads into each open group.
+    const home = row("Home").parentElement as HTMLElement;
+    expect(getComputedStyle(home, "::before").content).not.toBe("none");
+    const panel = tree.querySelector(".ow-tree-rail-nav__panel:not([hidden])") as HTMLElement;
+    expect(getComputedStyle(panel, "::before").maskImage).toContain("svg");
   });
 
   test("draws the trail to the current row inside a scaled ancestor", async () => {
@@ -271,12 +302,13 @@ describe("Tree Rail Nav", () => {
     const tree = screen.container.querySelector<HTMLElement>(".ow-tree-rail-nav__tree");
     const label = screen.container.querySelector<HTMLElement>(".ow-tree-rail-nav__origin");
     if (!tree || !label) throw new Error("not mounted");
-    const originY = () => {
-      const t =
-        tree.querySelector(".ow-tree-rail-nav__rail-origin")?.getAttribute("transform") ?? "";
-      return Number(/translate\([\d.-]+ ([\d.-]+)\)/.exec(t)?.[1] ?? Number.NaN);
-    };
-    await expect.poll(originY).toBeCloseTo(label.offsetTop + label.offsetHeight / 2, 0);
+    // The origin (drawn by CSS) and the trail's start (the script's) both sit at its middle.
+    const box = label.getBoundingClientRect();
+    const middle = box.top + box.height / 2;
+    const origin = rect({ el: label, pseudo: "::before" });
+    expect(origin.top + origin.height / 2).toBeCloseTo(middle, 1);
+    const top = tree.getBoundingClientRect().top;
+    await expect.poll(() => trailStart(tree) + top).toBeCloseTo(middle, 0);
   });
 
   test("a Label too long for its row fades, and runs only while the row is hovered", async () => {

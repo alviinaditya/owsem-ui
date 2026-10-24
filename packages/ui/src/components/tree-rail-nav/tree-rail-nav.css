@@ -24,32 +24,62 @@
     --_r0: 9px;
     --_r1: 34px;
     --_r2: 59px;
+    /* A row's middle: rows are 32px. The CSS rail below draws from it. */
+    --_row-mid: 16px;
     font-size: 13.5px;
     line-height: 1.4;
   }
 
   .ow-tree-rail-nav__tree {
     --_origin-y: 5px;
+    --_pad: 16px;
     position: relative;
     isolation: isolate;
-    padding-block: 16px 10px;
+    padding-block: var(--_pad) 10px;
   }
 
   /* A label at the top, the trail's starting point, indented like a first-level row. */
   .ow-tree-rail-nav__origin {
+    --_x: calc(var(--_r0) + 11px);
+    position: relative;
     display: flex;
     align-items: center;
     gap: 8px;
     min-block-size: 24px;
     margin-block-end: 6px;
-    margin-inline-start: calc(var(--_r0) + 11px);
+    margin-inline-start: var(--_x);
     padding-inline: 10px;
     color: var(--_muted);
     font-size: 12.5px;
   }
 
   .ow-tree-rail-nav__tree:has(> .ow-tree-rail-nav__origin) {
-    padding-block-start: 4px;
+    --_pad: 4px;
+  }
+
+  /* The trail's starting point, at the Origin label's middle or at --_origin-y. */
+  .ow-tree-rail-nav__tree:not(:has(> .ow-tree-rail-nav__origin))::before,
+  .ow-tree-rail-nav__tree > .ow-tree-rail-nav__origin::before {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    inline-size: 12px;
+    block-size: 12px;
+    background-color: var(--_trail);
+    /* A 2.5px dot in a 5px ring at 35%; an image, so it is round at any zoom. */
+    mask:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-6 -6 12 12'%3E%3Ccircle r='5' fill='none' stroke='%23000' stroke-opacity='.35' stroke-width='1.25'/%3E%3Ccircle r='2.5'/%3E%3C/svg%3E")
+      0 0 / 100% 100% no-repeat;
+  }
+
+  .ow-tree-rail-nav__tree:not(:has(> .ow-tree-rail-nav__origin))::before {
+    inset-block-start: calc(var(--_origin-y) - 6px);
+    inset-inline-start: calc(var(--_r0) - 6px);
+  }
+
+  .ow-tree-rail-nav__tree > .ow-tree-rail-nav__origin::before {
+    inset-block-start: calc(50% - 6px);
+    inset-inline-start: calc(var(--_r0) - var(--_x) - 6px);
   }
 
   .ow-tree-rail-nav__rail {
@@ -82,17 +112,6 @@
   .ow-tree-rail-nav__rail .ow-tree-rail-nav__rail-trail {
     stroke: var(--_trail);
     stroke-width: 1.75;
-  }
-
-  .ow-tree-rail-nav__rail .ow-tree-rail-nav__rail-origin circle {
-    fill: var(--_trail);
-  }
-
-  .ow-tree-rail-nav__rail .ow-tree-rail-nav__rail-origin .ow-tree-rail-nav__rail-ring {
-    fill: none;
-    stroke: var(--_trail);
-    stroke-width: 1.25;
-    opacity: 0.35;
   }
 
   .ow-tree-rail-nav__rail .ow-tree-rail-nav__rail-active {
@@ -149,33 +168,40 @@
     opacity: 0;
   }
 
+  /* Each list's rail and the gap between its rows; the CSS rail below draws from both. */
   .ow-tree-rail-nav__list {
+    --_rail-x: var(--_r0);
+    --_gap: 6px;
+    position: relative;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .ow-tree-rail-nav__tree
-    > .ow-tree-rail-nav__list
-    > .ow-tree-rail-nav__node
-    + .ow-tree-rail-nav__node {
-    margin-block-start: 6px;
+  .ow-tree-rail-nav__node {
+    position: relative;
+  }
+
+  .ow-tree-rail-nav__list > .ow-tree-rail-nav__node + .ow-tree-rail-nav__node {
+    margin-block-start: var(--_gap);
   }
 
   .ow-tree-rail-nav__panel > .ow-tree-rail-nav__list {
+    --_rail-x: var(--_branch-x);
+    --_gap: 2px;
     padding-block: 2px 6px;
   }
 
-  .ow-tree-rail-nav__panel
-    > .ow-tree-rail-nav__list
-    > .ow-tree-rail-nav__node
-    + .ow-tree-rail-nav__node {
-    margin-block-start: 2px;
-  }
-
   .ow-tree-rail-nav__panel {
+    /* The rail its rows hang from, one level in. */
+    --_branch-x: var(--_r1);
+    position: relative;
     block-size: var(--collapsible-panel-height);
     transition: block-size 0.34s var(--_ease);
+  }
+
+  .ow-tree-rail-nav__panel .ow-tree-rail-nav__panel {
+    --_branch-x: var(--_r2);
   }
 
   .ow-tree-rail-nav__panel[data-starting-style],
@@ -402,6 +428,114 @@
   }
 
   /*
+   * Until the script has drawn the rail (it marks the tree with data-rail), CSS draws its resting
+   * shape from the same variables: each list's rail, the branch into each open group, a dot per
+   * row, and the current row's tint. So the rail is there on the first paint, before
+   * hydration; the trail to the current row follows when the script runs.
+   */
+  .ow-tree-rail-nav__tree:not([data-rail]) {
+    /* A rail is 1.25px wide, centred on its x. */
+    --_line: 1.25px;
+  }
+
+  /* Rails: each row's from its middle to the next row's, and on into its own open group. */
+  .ow-tree-rail-nav__tree:not([data-rail]) > .ow-tree-rail-nav__list::before,
+  .ow-tree-rail-nav__tree:not([data-rail]) > .ow-tree-rail-nav__origin::after,
+  .ow-tree-rail-nav__tree:not([data-rail])
+    .ow-tree-rail-nav__list
+    > .ow-tree-rail-nav__node:is(
+      :not(:last-child),
+      :has(> .ow-tree-rail-nav__panel:not([hidden]))
+    )::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: calc(var(--_rail-x, var(--_r0)) - var(--_line) / 2);
+    inline-size: var(--_line);
+    background-color: var(--_rail);
+  }
+
+  .ow-tree-rail-nav__tree:not([data-rail])
+    .ow-tree-rail-nav__list
+    > .ow-tree-rail-nav__node:not(:last-child)::before {
+    inset-block: var(--_row-mid) calc(-1 * (var(--_gap) + var(--_row-mid)));
+  }
+
+  .ow-tree-rail-nav__tree:not([data-rail])
+    .ow-tree-rail-nav__list
+    > .ow-tree-rail-nav__node:last-child::before {
+    inset-block-start: var(--_row-mid);
+    block-size: var(--_row-mid);
+  }
+
+  /* From the origin down to the first row: from the Origin label's middle, or --_origin-y. */
+  .ow-tree-rail-nav__tree:not([data-rail]) > .ow-tree-rail-nav__list::before {
+    inset-block: calc(var(--_origin-y) - var(--_pad)) auto;
+    block-size: calc(var(--_pad) - var(--_origin-y) + var(--_row-mid));
+  }
+
+  .ow-tree-rail-nav__tree:not([data-rail])
+    > .ow-tree-rail-nav__origin
+    + .ow-tree-rail-nav__list::before {
+    inset-block-start: 0;
+    block-size: var(--_row-mid);
+  }
+
+  .ow-tree-rail-nav__tree:not([data-rail]) > .ow-tree-rail-nav__origin::after {
+    inset-block: 50% -6px;
+    inset-inline-start: calc(var(--_r0) - var(--_x) - var(--_line) / 2);
+  }
+
+  /*
+   * The branch into an open group: the script's S-curve from the parent's rail to the group's,
+   * down to its first row's middle (the list's 2px padding and half a row).
+   */
+  .ow-tree-rail-nav__tree:not([data-rail]) .ow-tree-rail-nav__panel:not([hidden])::before {
+    content: "";
+    position: absolute;
+    inset-block-start: calc(var(--_line) / -2);
+    inset-inline-start: calc(var(--_rail-x) - var(--_line) / 2);
+    inline-size: calc(var(--_branch-x) - var(--_rail-x) + var(--_line));
+    block-size: calc(2px + var(--_row-mid) + var(--_line));
+    background-color: var(--_rail);
+    mask:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26.25 19.25' preserveAspectRatio='none'%3E%3Cpath d='M.625.625C.625 9.625 25.625 9.625 25.625 18.625' fill='none' stroke='%23000' stroke-width='1.25' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E")
+      0 0 / 100% 100% no-repeat;
+  }
+
+  .ow-tree-rail-nav__tree:not([data-rail]) .ow-tree-rail-nav__panel:not([hidden]):dir(rtl)::before {
+    scale: -1 1;
+  }
+
+  /* A dot per row on its rail, cut out of the rail with the page color, as the script draws it. */
+  .ow-tree-rail-nav__tree:not([data-rail]) .ow-tree-rail-nav__item::after {
+    content: "";
+    position: absolute;
+    inset-block-start: calc(50% - 2.5px);
+    inset-inline-start: calc(var(--_rail-x) - var(--_x) - 2.5px);
+    inline-size: 5px;
+    block-size: 5px;
+    border-radius: 50%;
+    background-color: var(--_node);
+    box-shadow: 0 0 0 1.5px var(--_surface);
+  }
+
+  .ow-tree-rail-nav__tree:not([data-rail])
+    .ow-tree-rail-nav__item:is(:disabled, [aria-disabled="true"], [data-disabled])::after {
+    opacity: 0.45;
+  }
+
+  /* The current row's tint, at rest; the deepest current row only, as the script picks. */
+  .ow-tree-rail-nav__tree:not([data-rail])
+    .ow-tree-rail-nav__node:not(
+      :has(.ow-tree-rail-nav__panel .ow-tree-rail-nav__item[data-current])
+    )
+    > .ow-tree-rail-nav__item[data-current]::before {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  /*
    * The first draw (tree-rail.ts sets data-instant on the tree for it): nothing transitions in.
    * The attribute is doubled to outrank every transition above.
    */
@@ -474,14 +608,31 @@
       stroke: GrayText;
     }
 
-    .ow-tree-rail-nav__rail .ow-tree-rail-nav__rail-trail,
-    .ow-tree-rail-nav__rail .ow-tree-rail-nav__rail-ring {
+    .ow-tree-rail-nav__rail .ow-tree-rail-nav__rail-trail {
       stroke: Highlight;
     }
 
-    .ow-tree-rail-nav__rail
-      :is(.ow-tree-rail-nav__rail-dot, [data-lit] circle, .ow-tree-rail-nav__rail-origin circle) {
+    .ow-tree-rail-nav__rail :is(.ow-tree-rail-nav__rail-dot, [data-lit] circle) {
       fill: Highlight;
+    }
+
+    .ow-tree-rail-nav__tree:not(:has(> .ow-tree-rail-nav__origin))::before,
+    .ow-tree-rail-nav__tree > .ow-tree-rail-nav__origin::before {
+      forced-color-adjust: none;
+      background-color: Highlight;
+    }
+
+    /* The resting rail before the script draws it. */
+    .ow-tree-rail-nav__tree:not([data-rail])
+      :is(
+        .ow-tree-rail-nav__list::before,
+        .ow-tree-rail-nav__origin::after,
+        .ow-tree-rail-nav__node::before,
+        .ow-tree-rail-nav__panel::before,
+        .ow-tree-rail-nav__item::after
+      ) {
+      forced-color-adjust: none;
+      background-color: GrayText;
     }
   }
 }

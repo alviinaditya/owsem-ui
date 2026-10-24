@@ -160,5 +160,6 @@ export const en = {
     "command-menu": "A searchable command palette built from Dialog and Combobox.",
     "number-ticker": "A number whose digits roll when its value changes.",
     "spotlight-card": "A card whose border and light follow the cursor.",
+    kbd: "A key on the keyboard, drawn as a small raised keycap.",
   },
 } satisfies Dictionary;

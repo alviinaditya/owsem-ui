@@ -1,0 +1,67 @@
+---
+title: Kbd
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Kbd shows a key on the keyboard as a small raised keycap, with the same crisp edge as a button. It
+takes its size from the text around it, so one Kbd fits a sentence, a search field, or the end of a
+list row. Scroll to start the tour; the stage follows each part.
+
+## Anatomy [#anatomy]
+
+A single part: a `<kbd>` with the `ow-kbd` class. Put a whole shortcut in one Kbd (`⌘K`,
+`Ctrl K`), or one key per Kbd side by side. Inspect (I) outlines it on the stage, with its tokens.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `kbd.ow-kbd` | The keycap; 0.75 of the surrounding text size, half the control radius |
+
+## States and variants [#states]
+
+Kbd has no states. The stage shows it at 13, 14, and 16 px in both themes: the keycap keeps its
+proportions at every size, since everything in it is measured in `em`.
+
+## Keyboard and accessibility [#keyboard]
+
+Kbd is not focusable. Screen readers read its text, so write keys as people say them, or hide a
+purely visual hint with `aria-hidden` when the control already names its shortcut with
+`aria-keyshortcuts`, as the docs' search does. In forced colors (Windows High Contrast), the
+keycap's edge is drawn in the system color.
+
+## Customization [#customization]
+
+The stage controls are open; once you change the keycap color, its CSS is in the `settings.css`
+tab.
+
+Kbd reads these theme tokens. Set one on an element to change the keys inside it.
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-raised-bg` | The keycap's fill |
+| `--ow-raised-shadow` | Its crisp edge |
+| `--ow-muted` | The key's text |
+| `--ow-radius` | Halved, the keycap's corners |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Kbd's root, so set yours on the Kbd itself, as
+`settings.css` does with `.settings .ow-kbd`.
+
+</ForMode>
+
+<TokenChip lang="en" />
+
+## Ship it [#ship]
+
+The code drawer writes the component exactly as the stage is set up. Change anything and the lines
+that moved light up.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `className` | `string` | |
+| `style` | `CSSProperties` | |
+| `render` | `ReactElement \| (props) => ReactElement` | |
+
+The ref goes to the `kbd`, and other props pass through to it as they are.

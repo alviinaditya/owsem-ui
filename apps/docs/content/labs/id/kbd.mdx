@@ -1,0 +1,68 @@
+---
+title: Kbd
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Kbd menampilkan tombol keyboard sebagai tuts kecil yang timbul, dengan tepi tegas yang sama seperti
+tombol. Ukurannya mengikuti teks di sekitarnya, jadi satu Kbd pas di dalam kalimat, field pencarian,
+atau di ujung baris daftar. Gulir untuk mulai tur; stage mengikuti setiap bagian.
+
+## Anatomi [#anatomy]
+
+Satu bagian saja: `<kbd>` dengan class `ow-kbd`. Tulis satu shortcut utuh dalam satu Kbd (`⌘K`,
+`Ctrl K`), atau satu tombol per Kbd yang berdampingan. Inspeksi (I) menandainya di stage, beserta
+tokennya.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `kbd.ow-kbd` | Tutsnya; 0,75 dari ukuran teks di sekitarnya, separuh radius kontrol |
+
+## State dan varian [#states]
+
+Kbd tidak punya state. Stage menampilkannya pada 13, 14, dan 16 px di kedua tema: proporsi tutsnya
+tetap di setiap ukuran, karena semua ukurannya dalam `em`.
+
+## Keyboard dan aksesibilitas [#keyboard]
+
+Kbd tidak bisa difokus. Screen reader membaca teksnya, jadi tulis tombol seperti orang
+menyebutnya, atau sembunyikan petunjuk yang hanya visual dengan `aria-hidden` bila kontrolnya sudah
+menyebut shortcut-nya lewat `aria-keyshortcuts`, seperti pencarian di docs. Dalam forced colors
+(Windows High Contrast), tepi tuts digambar dengan warna sistem.
+
+## Kustomisasi [#customization]
+
+Kontrol stage terbuka; begitu warna tuts diubah, CSS-nya ada di tab `settings.css`.
+
+Kbd membaca token tema berikut. Pasang salah satunya di sebuah elemen untuk mengubah tombol di
+dalamnya.
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-raised-bg` | Isian tuts |
+| `--ow-raised-shadow` | Tepi tegasnya |
+| `--ow-muted` | Teks tombol |
+| `--ow-radius` | Dibagi dua, sudut tuts |
+
+<ForMode mode="isolated">
+
+Dalam mode isolated, nilainya dipasang di root setiap Kbd, jadi pasang nilai Anda di Kbd itu
+sendiri, seperti `settings.css` dengan `.settings .ow-kbd`.
+
+</ForMode>
+
+<TokenChip lang="id" />
+
+## Ship it [#ship]
+
+Drawer kode menulis komponen persis seperti yang diatur di stage. Ubah apa pun, dan baris yang
+berubah akan menyala.
+
+| Prop | Tipe | Bawaan |
+| --- | --- | --- |
+| `className` | `string` | |
+| `style` | `CSSProperties` | |
+| `render` | `ReactElement \| (props) => ReactElement` | |
+
+Ref diteruskan ke elemen `kbd`, dan props lain diteruskan ke elemen itu apa adanya.

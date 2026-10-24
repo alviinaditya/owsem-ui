@@ -31,6 +31,8 @@
     font-size: 0.875rem;
     line-height: 1.25;
     transform-origin: var(--transform-origin);
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: transform;
     transition:
       opacity 180ms var(--ow-ease-out),
       transform 180ms var(--ow-ease-out);

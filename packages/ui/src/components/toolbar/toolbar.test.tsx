@@ -131,11 +131,13 @@ describe("Toolbar", () => {
     // Clicked, it is still under the pointer: the raised key, tinted, never the item's hover tint.
     const style = getComputedStyle(bold);
     expect(style.backgroundColor).toBe(
-      resolve("color", "color-mix(in oklab, var(--ow-raised-bg), var(--ow-fg) 4%)"),
+      resolve("color", "color-mix(in oklab, var(--ow-raised-bg), var(--ow-fg) 12%)"),
     );
     expect(style.boxShadow).toBe(resolve("box-shadow", "var(--ow-raised-shadow)"));
     await pointerAway();
-    expect(getComputedStyle(bold).backgroundColor).toBe(resolve("color", "var(--ow-raised-bg)"));
+    expect(getComputedStyle(bold).backgroundColor).toBe(
+      resolve("color", "color-mix(in oklab, var(--ow-raised-bg), var(--ow-fg) 8%)"),
+    );
   });
 
   test("items take the toolbar's size unless they set their own (FR-3)", async () => {

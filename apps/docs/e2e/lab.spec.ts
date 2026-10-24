@@ -1,6 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 import { SIDE_PANEL_WIDTH } from "../components/lab/layout.ts";
-import { openSheet, stage, stageTool } from "./lab.ts";
+import { openSheet, pickColor, stage, stageTool } from "./lab.ts";
 
 const stageBody = (page: Page) => page.locator(".lab-stage-body");
 const lab = (page: Page) => page.locator(".lab");
@@ -96,7 +96,7 @@ test("controls rewrite the code", async ({ page }) => {
   await page.goto("/en/separator");
   await stage(page).getByRole("button", { name: "Controls" }).click();
   await stage(page).getByLabel("Vertical").check();
-  await stage(page).getByLabel("Dark line", { exact: true }).fill("#ff0000");
+  await pickColor(page, "Dark line", "#ff0000");
   await expect(stage(page).getByRole("separator").first()).toHaveCSS(
     "border-inline-start-color",
     "rgb(255, 0, 0)",
@@ -110,40 +110,41 @@ test("controls rewrite the code", async ({ page }) => {
   await expect(code).toContainText("--ow-line-dark: #ff0000;");
 });
 
-test("a color takes short hex, picks from Color Picker, and goes back to the theme's own", async ({
-  page,
-}) => {
+test("a color is picked in Color Picker, and goes back to the theme's own", async ({ page }) => {
   await page.goto("/en/separator");
   await stage(page).getByRole("button", { name: "Controls" }).click();
-  const hex = stage(page).getByLabel("Dark line", { exact: true });
-  const swatch = stage(page).getByRole("button", { name: "Dark line (color picker)" });
+  // One button, named by its label and its value.
+  const control = stage(page).getByRole("button", { name: /^Dark line / });
   const picker = page.getByRole("dialog", { name: "Dark line" });
-  await hex.fill("f00");
-  await expect(swatch.locator(".ow-color-picker__chip")).toHaveCSS(
+  const area = picker.getByRole("slider", { name: "Saturation and brightness" });
+  await expect(control).toHaveAccessibleName("Dark line Theme default");
+
+  // It opens the picker with focus on the area; the Hex field takes a typed color.
+  await control.click();
+  await expect(area).toBeFocused();
+  const hex = picker.getByRole("textbox", { name: "Hex" });
+  await hex.fill("FF0000");
+  await hex.press("Enter");
+  await expect(control).toHaveAccessibleName("Dark line #ff0000");
+  await expect(control.locator(".ow-color-picker__chip")).toHaveCSS(
     "background-color",
     "rgb(255, 0, 0)",
   );
-  await hex.blur();
-  await expect(hex).toHaveValue("#ff0000");
-
-  // The swatch opens the picker on the color, with focus on its area.
-  await swatch.click();
-  await expect(picker.getByRole("textbox", { name: "Hex" })).toHaveValue("FF0000");
-  await expect(picker.getByRole("slider", { name: "Saturation and brightness" })).toBeFocused();
+  await area.focus();
   await page.keyboard.press("ArrowDown");
-  await expect(hex).toHaveValue("#fc0000");
+  await expect(control).toHaveAccessibleName("Dark line #fc0000");
   await page.keyboard.press("Escape");
   await expect(picker).toBeHidden();
-  await expect(swatch).toBeFocused();
+  await expect(control).toBeFocused();
 
   await stage(page).getByRole("button", { name: "Dark line: Use the theme default" }).click();
-  await expect(hex).toHaveValue("");
-  await expect(hex).toBeFocused();
-  // Empty, the swatch paints the theme's token, and the picker opens on it.
+  await expect(control).toHaveAccessibleName("Dark line Theme default");
+  await expect(control).toBeFocused();
+  // Empty, the chip paints the theme's token, and the picker opens on it.
   const token = await stageBody(page).evaluate((el) =>
     getComputedStyle(el).getPropertyValue("--ow-line-dark").trim(),
   );
-  await swatch.click();
+  await control.click();
   await expect(picker.getByRole("textbox", { name: "Hex" })).toHaveValue(
     token.slice(1).toUpperCase(),
   );

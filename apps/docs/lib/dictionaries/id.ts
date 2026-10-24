@@ -79,7 +79,6 @@ export const id = {
     close: "Tutup",
     reset: "Atur ulang",
     themeDefault: "Bawaan tema",
-    colorPicker: "pemilih warna",
     useDefault: "Pakai bawaan tema",
     picker: {
       picker: "Pemilih warna",

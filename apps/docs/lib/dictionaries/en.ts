@@ -77,7 +77,6 @@ export const en = {
     close: "Close",
     reset: "Reset",
     themeDefault: "Theme default",
-    colorPicker: "color picker",
     useDefault: "Use the theme default",
     picker: {
       picker: "Color picker",

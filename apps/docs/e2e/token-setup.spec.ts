@@ -1,5 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import { openSheet, stage, stageTool } from "./lab.ts";
+import { openSheet, pickColor, stage, stageTool } from "./lab.ts";
 
 const narrative = (page: Page) => page.locator(".lab-narrative");
 
@@ -43,7 +43,7 @@ test("the token setup rewrites a Lab's code and install steps (DS-4)", async ({ 
     "In isolated mode the values sit on each Separator's root",
   );
   await stage(page).getByRole("button", { name: "Controls" }).click();
-  await stage(page).getByLabel("Dark line", { exact: true }).fill("#ff0000");
+  await pickColor(page, "Dark line", "#ff0000");
   await stage(page).getByRole("button", { name: "Code" }).click();
   const code = stage(page).getByRole("tabpanel");
   await expect(code).toContainText('import { Separator } from "@/components/owsem/separator";');

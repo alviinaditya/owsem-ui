@@ -2490,6 +2490,7 @@ figure[data-code-block] pre {
   font-size: 13px;
 }
 
+.lab-field-label,
 .lab-field legend,
 .lab-field > label {
   margin-block-end: 6px;
@@ -2498,62 +2499,58 @@ figure[data-code-block] pre {
   font-size: 12px;
 }
 
-/* Color controls (components/lab/color-field.tsx): a flat well, like the segmented track. */
+/* Color controls (components/lab/color-field.tsx): a flat well, like the segmented track. The
+ * control is a button named by its value, so it has no field edge (DP-6). */
 .color-field {
   display: flex;
   align-items: center;
   gap: 2px;
   box-sizing: border-box;
-  inline-size: 100%;
-  max-inline-size: 220px;
+  /* A set width, so it keeps its size whatever the value. */
+  inline-size: 220px;
+  max-inline-size: 100%;
   padding: 3px;
   border-radius: var(--docs-radius);
   background-color: var(--docs-well);
-  /* A text field's edge needs 3:1 against the panel (DP-6). */
-  box-shadow:
-    inset 0 0 0 1px var(--docs-control),
-    var(--docs-well-shadow);
+  box-shadow: var(--docs-well-shadow);
 }
 
-/* Color Picker's swatch trigger, sized to the field; the color brings its own edge. */
-.color-swatch {
-  inline-size: 26px;
-  block-size: 26px;
-  border-radius: var(--docs-radius-inner);
-}
-
-.color-hex {
+/* Color Picker's trigger, flat inside the well: the color as a square, then its value. */
+.color-trigger {
   flex: 1;
+  justify-content: flex-start;
+  gap: 8px;
   min-inline-size: 0;
   block-size: 26px;
-  padding-inline: 8px;
-  border: 0;
+  padding: 0 8px 0 0;
   border-radius: var(--docs-radius-inner);
   background: none;
-  font-family: var(--font-mono), ui-monospace, monospace;
+  box-shadow: none;
   font-size: 12px;
-  text-transform: lowercase;
 }
 
-.color-hex::placeholder {
+.color-trigger:hover {
+  background-color: var(--docs-hover);
+}
+
+.color-trigger .ow-color-picker__chip {
+  flex: none;
+  inline-size: 26px;
+  block-size: 26px;
+  margin: 0;
+  border-radius: var(--docs-radius-inner);
+}
+
+.color-value {
+  overflow: hidden;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.color-value[data-empty] {
   color: var(--docs-muted);
   font-family: var(--font-sans), system-ui, sans-serif;
-  text-transform: none;
-}
-
-/* A field takes the focus ring as a whole. */
-.color-hex:focus-visible {
-  outline: none;
-}
-
-.color-field:has(.color-hex:focus-visible) {
-  outline: 2px solid var(--docs-accent);
-  outline-offset: 2px;
-}
-
-.color-hex[aria-invalid="true"] {
-  text-decoration: wavy underline var(--docs-critical);
-  text-underline-offset: 4px;
 }
 
 .color-clear {

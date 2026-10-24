@@ -419,7 +419,8 @@ describe("Command Menu", () => {
 
   test("a hidden close button shows when focused, with a label to translate (FR-17)", async () => {
     const screen = await render(<Menu defaultOpen />);
-    await expect.poll(popup).not.toBeNull();
+    // Tab once the dialog has focused the field; earlier, its initial focus could land after the Tab.
+    await expect.poll(() => input() !== null && document.activeElement === input()).toBe(true);
     const close = () => document.querySelector<HTMLElement>(".ow-command-menu__close");
     expect(close()?.getAttribute("aria-label")).toBe("Close");
     expect(close()?.getBoundingClientRect().width).toBeLessThanOrEqual(1);

@@ -26,6 +26,8 @@
     --color-ow-good: var(--ow-good);
     --color-ow-warning: var(--ow-warning);
     --color-ow-critical: var(--ow-critical);
+    --color-ow-critical-solid: var(--ow-critical-solid);
+    --color-ow-on-critical: var(--ow-on-critical);
     --color-ow-panel: var(--ow-panel);
     --color-ow-raised: var(--ow-raised-bg);
     --color-ow-well: var(--ow-well-bg);

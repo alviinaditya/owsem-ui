@@ -40,6 +40,8 @@
     white-space: nowrap;
     cursor: pointer;
     touch-action: manipulation;
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: transform;
     /* A press lets go on the settle spring (FR-21). */
     transition: transform var(--ow-spring-settle-duration) var(--ow-spring-settle);
   }

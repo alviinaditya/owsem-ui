@@ -37,6 +37,9 @@
     box-shadow: var(--_track-shadow);
     font-size: 14px;
     vertical-align: middle;
+    /* A layer like the thumb's (NF-8), so both snap to device pixels alike and the thumb's gaps to
+     * the track stay even at a fractional zoom. */
+    will-change: transform;
   }
 
   .ow-toggle-group[data-size="sm"] {

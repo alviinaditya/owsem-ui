@@ -229,9 +229,25 @@ describe("Tooltip", () => {
   test("its corners and the shortcut's come from the control radius (FR-10b)", async () => {
     await mount(<Labelled name="Bold" shortcut="B" open />);
     await expect.poll(popup).not.toBeNull();
+    await settle();
     const surface = popup() as HTMLElement;
+    const key = surface.querySelector("kbd") as HTMLElement;
     expect(getComputedStyle(surface).borderRadius).toBe("6px");
-    expect(getComputedStyle(surface.querySelector("kbd") as Element).borderRadius).toBe("4px");
+    // Concentric: the popup's radius less the shortcut's gap to its edge.
+    const gap = key.getBoundingClientRect().top - surface.getBoundingClientRect().top;
+    expect(Number.parseFloat(getComputedStyle(key).borderRadius)).toBeCloseTo(6 - gap, 1);
+  });
+
+  test("a shortcut at the end sits as far from the end as from the top and bottom (FR-10)", async () => {
+    await mount(<Labelled name="Italic" shortcut="⌘I" open />);
+    await expect.poll(popup).not.toBeNull();
+    await settle();
+    const box = popup() as HTMLElement;
+    const surface = box.getBoundingClientRect();
+    const key = (box.querySelector("kbd") as HTMLElement).getBoundingClientRect();
+    const top = key.top - surface.top;
+    expect(surface.bottom - key.bottom).toBeCloseTo(top, 1);
+    expect(surface.right - key.right).toBeCloseTo(top, 1);
   });
 
   test("its tokens restyle it, set on the page or on a part", async () => {

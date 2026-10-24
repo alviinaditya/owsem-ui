@@ -8,11 +8,14 @@
   .ow-tooltip__popup {
     --_bg: var(--ow-tooltip-bg);
     --_fg: var(--ow-tooltip-fg);
+    /* One line is 24px tall. */
+    --_py: calc((24px - 1lh) / 2);
+    --_px: 8px;
+    --_radius: calc(var(--ow-radius) - 2px);
     box-sizing: border-box;
     max-inline-size: min(20rem, var(--available-width, 20rem));
-    /* One line is 24px tall. */
-    padding: calc((24px - 1lh) / 2) 8px;
-    border-radius: calc(var(--ow-radius) - 2px);
+    padding: var(--_py) var(--_px);
+    border-radius: var(--_radius);
     /* Invisible until forced colors draw it as the edge (DP-8). */
     outline: 1px solid transparent;
     outline-offset: -1px;
@@ -45,16 +48,25 @@
     transition: none;
   }
 
-  /* A shortcut, such as <kbd>⌘B</kbd>, after the label; inline whatever the app's kbd style. */
+  /*
+   * A shortcut, such as <kbd>⌘B</kbd>, after the label, whatever the app's kbd style. Its chip is a
+   * line tall, so at the end it sits as far from the edge as from the top and bottom (FR-10), with
+   * corners concentric with the popup's (FR-10b).
+   */
   .ow-tooltip__popup kbd {
-    display: inline;
+    display: inline-block;
+    vertical-align: top;
     margin-inline-start: 0.5em;
     padding-inline: 0.3em;
     border: 0;
-    border-radius: calc(var(--ow-radius) / 2);
+    border-radius: max(2px, var(--_radius) - var(--_py));
     background-color: color-mix(in oklab, var(--_fg) 14%, transparent);
     color: color-mix(in oklab, var(--_fg) 80%, transparent);
     font: inherit;
+  }
+
+  .ow-tooltip__popup kbd:last-child {
+    margin-inline-end: calc(var(--_py) - var(--_px));
   }
 
   /*

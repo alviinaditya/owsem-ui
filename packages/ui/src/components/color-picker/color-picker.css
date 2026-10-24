@@ -16,6 +16,7 @@
     --_edge: var(--ow-edge);
     --_radius: var(--ow-radius);
     --_well: var(--ow-well-bg);
+    --_well-shadow: var(--ow-well-shadow);
     --_bg: var(--ow-panel);
     /* literal: a color's own 1px edge, darker than the color under it in any theme */
     --_color-edge: inset 0 0 0 1px rgb(0 0 0 / 0.2);
@@ -402,7 +403,8 @@
     visibility: hidden;
   }
 
-  /* The trigger: a flat field that shows the color and its value, or a square of the color. */
+  /* The trigger: a flat well that shows the color and its value, or a square of the color. A
+   * button named by its text needs no 3:1 edge, unlike a field you type in (DP-6). */
   .ow-color-picker__trigger {
     --py: 0.75em;
     --_py: max(var(--py), (24px - 1lh) / 2);
@@ -417,7 +419,7 @@
     border: 0;
     border-radius: var(--_radius);
     background-color: var(--_well);
-    box-shadow: inset 0 0 0 1px var(--_edge);
+    box-shadow: var(--_well-shadow);
     color: var(--_fg);
     font: inherit;
     font-size: 14px;

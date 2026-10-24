@@ -1,4 +1,5 @@
 import { expect, type TestInfo, test } from "@playwright/test";
+import { thumbKey } from "./lab.ts";
 
 type Page = import("@playwright/test").Page;
 const html = (page: Page) => page.locator("html");
@@ -42,9 +43,9 @@ test("stores the chosen theme and restores it on load", async ({ page }, testInf
   const thumb = page.locator(".theme-switcher .ow-toggle-group__thumb");
   await expect(thumb).toHaveCSS("opacity", "1");
   expect(await thumb.evaluate((el) => el.getAnimations().length)).toBe(0);
-  const [at, under] = await Promise.all([thumb.boundingBox(), dark.boundingBox()]);
-  expect(Math.abs((at?.x ?? 0) - (under?.x ?? 1))).toBeLessThanOrEqual(0.5);
-  expect(Math.abs((at?.width ?? 0) - (under?.width ?? 1))).toBeLessThanOrEqual(0.5);
+  const [at, under] = await Promise.all([thumbKey(thumb), dark.boundingBox()]);
+  expect(Math.abs(at.x - (under?.x ?? 1))).toBeLessThanOrEqual(0.5);
+  expect(Math.abs(at.width - (under?.width ?? 1))).toBeLessThanOrEqual(0.5);
   await themes(page, "Theme").getByRole("button", { name: "System" }).click();
   await expect(html(page)).not.toHaveAttribute("data-theme");
   expect(await page.evaluate(() => localStorage.getItem("owsem-theme"))).toBeNull();

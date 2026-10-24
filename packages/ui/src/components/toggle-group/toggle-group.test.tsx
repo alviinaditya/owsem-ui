@@ -38,13 +38,20 @@ async function mount(ui: ReactNode) {
   return { screen, group, thumb, item };
 }
 
-/** Whether the thumb covers the element exactly (within 0.5 px), as drawn now. */
+/**
+ * Whether the thumb's key (inside the clear border that keeps the track's padding) covers the
+ * element exactly (within 0.5 px), as drawn now.
+ */
 function over(thumb: Element, el: Element): boolean {
   const a = thumb.getBoundingClientRect();
   const b = el.getBoundingClientRect();
-  return [a.left - b.left, a.top - b.top, a.width - b.width, a.height - b.height].every(
-    (d) => Math.abs(d) <= 0.5,
-  );
+  const border = Number.parseFloat(getComputedStyle(thumb).borderTopWidth);
+  return [
+    a.left + border - b.left,
+    a.top + border - b.top,
+    b.right - (a.right - border),
+    b.bottom - (a.bottom - border),
+  ].every((d) => Math.abs(d) <= 0.5);
 }
 
 const transitions = (el: Element) =>
@@ -207,29 +214,23 @@ describe("Toggle Group", () => {
     expect(transitions(thumb)).toEqual([]);
   });
 
-  test("rests where layout puts its item, untransformed, so both are painted on the same pixels", async () => {
-    // Between pixels, as a line of text above a group often leaves it.
-    const { thumb, item } = await mount(
-      <div style={{ paddingBlockStart: 0.3, paddingInlineStart: 0.6 }}>
+  test("rests as far from the track above as below at any zoom, untransformed", async () => {
+    // The thumb spans the track's height and keeps its padding as a clear border: its edges round
+    // to the track's pixels and both borders round alike. Between pixels, as text above leaves it.
+    const { group, thumb } = await mount(
+      <div style={{ paddingBlockStart: 0.3 }}>
         <Views />
       </div>,
     );
-    for (const target of ["Month", "Day"]) {
-      item(target).click();
-      await settle();
-      const a = thumb.getBoundingClientRect();
-      const b = item(target).getBoundingClientRect();
-      const gaps = [a.left - b.left, a.top - b.top, a.right - b.right, a.bottom - b.bottom];
-      expect(
-        gaps.every((d) => Math.abs(d) < 0.02),
-        `${target}: ${gaps}`,
-      ).toBe(true);
-      const style = getComputedStyle(thumb);
-      expect([style.translate, style.transform], target).toEqual([
-        "0px",
-        "matrix(1, 0, 0, 1, 0, 0)",
-      ]);
-    }
+    const track = group.getBoundingClientRect();
+    const box = thumb.getBoundingClientRect();
+    expect(box.top).toBeCloseTo(track.top, 1);
+    expect(box.bottom).toBeCloseTo(track.bottom, 1);
+    const style = getComputedStyle(thumb);
+    expect(style.borderTopWidth).toBe(getComputedStyle(group).paddingTop);
+    expect(style.borderBottomWidth).toBe(style.borderTopWidth);
+    expect(style.backgroundClip).toBe("padding-box");
+    expect([style.translate, style.transform]).toEqual(["0px", "matrix(1, 0, 0, 1, 0, 0)"]);
   });
 
   test("presses in while held, the thumb with its item", async () => {

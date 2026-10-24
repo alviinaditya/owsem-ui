@@ -1,6 +1,14 @@
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 export const stage = (page: Page) => page.getByRole("region", { name: "Stage" });
+
+/** A Toggle Group thumb's key: its box inside the clear border that keeps the track's padding. */
+export const thumbKey = (thumb: Locator) =>
+  thumb.evaluate((el) => {
+    const box = el.getBoundingClientRect();
+    const border = Number.parseFloat(getComputedStyle(el).borderTopWidth);
+    return { x: box.x + border, width: box.width - 2 * border };
+  });
 
 /** Below 960 px the narrative is a sheet over the stage, opened from the stage's toolbar. */
 export async function openSheet(page: Page): Promise<void> {

@@ -56,9 +56,12 @@ export function createThumb(root: HTMLElement, thumb: HTMLElement, items: string
     // offset sizes are whole px: anything under 1px apart is rounding, not a scale.
     const sx = Math.abs(box.width - root.offsetWidth) < 1 ? 1 : box.width / root.offsetWidth;
     const sy = Math.abs(box.height - root.offsetHeight) < 1 ? 1 : box.height / root.offsetHeight;
-    const press = Number.parseFloat(getComputedStyle(el).scale) || 1;
-    const w = rect.width / sx / press;
-    const h = rect.height / sy / press;
+    const style = getComputedStyle(el);
+    const press = Number.parseFloat(style.scale) || 1;
+    // The thumb's clear border is the track's padding; the key is what is inside it.
+    const inset = el === thumb ? 2 * Number.parseFloat(style.borderTopWidth) : 0;
+    const w = rect.width / sx / press - inset;
+    const h = rect.height / sy / press - inset;
     return {
       x: (rect.left + rect.width / 2 - box.left) / sx - w / 2 - root.clientLeft,
       y: (rect.top + rect.height / 2 - box.top) / sy - h / 2 - root.clientTop,

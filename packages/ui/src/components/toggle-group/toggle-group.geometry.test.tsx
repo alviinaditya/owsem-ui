@@ -22,6 +22,13 @@ async function mount(ui: ReactNode) {
 const close = (actual: number, expected: number) =>
   expect(Math.abs(actual - expected)).toBeLessThanOrEqual(TOL);
 
+/** Gaps from an item to the thumb's key, inside the clear border that keeps the track's padding. */
+function keyGaps(item: Element, thumb: Element): number[] {
+  const gap = insets(item, thumb);
+  const border = Number.parseFloat(getComputedStyle(thumb).borderTopWidth);
+  return [gap.top, gap.right, gap.bottom, gap.left].map((side) => side + border);
+}
+
 function Group({
   pressed = "b",
   ...props
@@ -64,17 +71,17 @@ describe("Toggle Group geometry", () => {
     for (const [i, group] of groups.entries()) {
       const thumb = thumbOf(group);
       const pressed = itemsOf(group)[i] as HTMLElement;
-      const gap = insets(pressed, thumb);
-      for (const side of [gap.top, gap.right, gap.bottom, gap.left]) close(side, 0);
-      // The first item's thumb touches the track's start corner: 3px in, radius + 3px out.
+      for (const side of keyGaps(pressed, thumb)) close(side, 0);
+      // The first item's thumb reaches the track's start corner with the track's radius; inside
+      // its 3px clear border the key has the items' radius.
       if (i === 0) {
         const r = concentric(group, thumb);
         expect(r.delta).toBeLessThanOrEqual(TOL);
         expect(r.insetDelta).toBeLessThanOrEqual(TOL);
       }
-      expect(getComputedStyle(thumb).borderTopLeftRadius).toBe(
-        getComputedStyle(pressed).borderTopLeftRadius,
-      );
+      const radius = (el: Element) => Number.parseFloat(getComputedStyle(el).borderTopLeftRadius);
+      const border = Number.parseFloat(getComputedStyle(thumb).borderTopWidth);
+      close(radius(thumb) - border, radius(pressed));
     }
   });
 
@@ -88,8 +95,7 @@ describe("Toggle Group geometry", () => {
     const thumb = thumbOf(group);
     await expect.poll(() => thumb.getAnimations().length).toBeGreaterThan(0);
     for (const animation of thumb.getAnimations()) animation.finish();
-    const gap = insets(last, thumb);
-    for (const side of [gap.top, gap.right, gap.bottom, gap.left]) close(side, 0);
+    for (const side of keyGaps(last, thumb)) close(side, 0);
   });
 
   test("an icon sits as far from the edges as from the top; alone, its item is square (FR-10)", async () => {
@@ -140,7 +146,6 @@ describe("Toggle Group geometry", () => {
     const group = groups[0] as HTMLElement;
     const first = itemsOf(group)[0] as HTMLElement;
     close(insets(group, first).right, 3);
-    const gap = insets(first, thumbOf(group));
-    for (const side of [gap.top, gap.right, gap.bottom, gap.left]) close(side, 0);
+    for (const side of keyGaps(first, thumbOf(group))) close(side, 0);
   });
 });

@@ -63,16 +63,24 @@
     grid-auto-flow: row;
   }
 
+  /*
+   * The thumb reaches out to the track's edges and keeps the track's padding as a clear border.
+   * Its edges then round to the same pixels as the track's, and both border widths round alike,
+   * so it sits as far from the track above as below at any zoom.
+   */
   .ow-toggle-group__thumb {
     position: absolute;
     z-index: -1;
+    box-sizing: border-box;
     /* biome-ignore-start lint/nursery/useLogicalProperties: the script measures physical edges */
-    top: var(--_y, 0);
-    left: var(--_x, 0);
-    width: var(--_w, 0);
-    height: var(--_h, 0);
+    top: calc(var(--_y, 0px) - var(--_inset));
+    left: calc(var(--_x, 0px) - var(--_inset));
+    width: calc(var(--_w, 0px) + 2 * var(--_inset));
+    height: calc(var(--_h, 0px) + 2 * var(--_inset));
     /* biome-ignore-end lint/nursery/useLogicalProperties: the script measures physical edges */
-    border-radius: var(--_radius);
+    border: var(--_inset) solid transparent;
+    border-radius: calc(var(--_radius) + var(--_inset));
+    background-clip: padding-box;
     background-color: var(--_thumb);
     box-shadow: var(--_thumb-shadow);
     opacity: 0;

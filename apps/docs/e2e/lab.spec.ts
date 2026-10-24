@@ -1,6 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 import { SIDE_PANEL_WIDTH } from "../components/lab/layout.ts";
-import { openSheet, stage, stageTool } from "./lab.ts";
+import { openSheet, stage, stageTool, thumbKey } from "./lab.ts";
 
 const stageBody = (page: Page) => page.locator(".lab-stage-body");
 const lab = (page: Page) => page.locator(".lab");
@@ -657,8 +657,8 @@ test("the Toggle Group Lab: its thumb lands on the picked view, and choices keep
   const thumb = view.locator(".ow-toggle-group__thumb");
   await expect
     .poll(async () => {
-      const [at, under] = await Promise.all([thumb.boundingBox(), board.boundingBox()]);
-      return Math.abs((at?.x ?? 0) - (under?.x ?? 99));
+      const [at, under] = await Promise.all([thumbKey(thumb), board.boundingBox()]);
+      return Math.abs(at.x - (under?.x ?? 99));
     })
     .toBeLessThanOrEqual(0.5);
 

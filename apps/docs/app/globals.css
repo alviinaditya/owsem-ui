@@ -2075,8 +2075,8 @@ figure[data-code-block] pre {
 }
 
 /*
- * Inspect (DS-3): dashed outlines on the parts, the selected one solid; leader lines run from a
- * dot on each part to its name. Positions come from components/lab/inspect.tsx.
+ * Inspect (DS-3): dashed outlines on the parts, the selected one solid, with no glow; leader lines
+ * run from a dot on each part to its name. Positions come from components/lab/inspect.tsx.
  */
 .lab-inspect {
   position: absolute;
@@ -2124,7 +2124,6 @@ figure[data-code-block] pre {
   border-style: solid;
   border-color: var(--docs-accent);
   background-color: color-mix(in srgb, var(--docs-accent) 7%, transparent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--docs-accent) 9%, transparent);
 }
 
 .lab-ichips {
@@ -2151,8 +2150,7 @@ figure[data-code-block] pre {
   pointer-events: auto;
   transition:
     color 0.15s ease,
-    background-color 0.15s ease,
-    box-shadow 0.15s ease;
+    background-color 0.15s ease;
 }
 
 .lab-ichip:hover {
@@ -2162,7 +2160,6 @@ figure[data-code-block] pre {
 .lab-ichip[aria-pressed="true"] {
   border-color: transparent;
   background-color: var(--docs-accent);
-  box-shadow: 0 0 14px color-mix(in srgb, var(--docs-accent) 45%, transparent);
   color: var(--docs-on-accent);
 }
 

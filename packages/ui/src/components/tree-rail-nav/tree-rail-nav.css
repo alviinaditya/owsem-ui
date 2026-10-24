@@ -31,11 +31,9 @@
   }
 
   .ow-tree-rail-nav__tree {
-    --_origin-y: 5px;
-    --_pad: 16px;
     position: relative;
     isolation: isolate;
-    padding-block: var(--_pad) 10px;
+    padding-block: 4px 10px;
   }
 
   /* A label at the top, the trail's starting point, indented like a first-level row. */
@@ -53,12 +51,7 @@
     font-size: 12.5px;
   }
 
-  .ow-tree-rail-nav__tree:has(> .ow-tree-rail-nav__origin) {
-    --_pad: 4px;
-  }
-
-  /* The trail's starting point, at the Origin label's middle or at --_origin-y. */
-  .ow-tree-rail-nav__tree:not(:has(> .ow-tree-rail-nav__origin))::before,
+  /* The trail's starting point, at the Origin label's middle. Without one, the first row's dot. */
   .ow-tree-rail-nav__tree > .ow-tree-rail-nav__origin::before {
     content: "";
     position: absolute;
@@ -70,14 +63,6 @@
     mask:
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-6 -6 12 12'%3E%3Ccircle r='5' fill='none' stroke='%23000' stroke-opacity='.35' stroke-width='1.25'/%3E%3Ccircle r='2.5'/%3E%3C/svg%3E")
       0 0 / 100% 100% no-repeat;
-  }
-
-  .ow-tree-rail-nav__tree:not(:has(> .ow-tree-rail-nav__origin))::before {
-    inset-block-start: calc(var(--_origin-y) - 6px);
-    inset-inline-start: calc(var(--_r0) - 6px);
-  }
-
-  .ow-tree-rail-nav__tree > .ow-tree-rail-nav__origin::before {
     inset-block-start: calc(50% - 6px);
     inset-inline-start: calc(var(--_r0) - var(--_x) - 6px);
   }
@@ -439,7 +424,9 @@
   }
 
   /* Rails: each row's from its middle to the next row's, and on into its own open group. */
-  .ow-tree-rail-nav__tree:not([data-rail]) > .ow-tree-rail-nav__list::before,
+  .ow-tree-rail-nav__tree:not([data-rail])
+    > .ow-tree-rail-nav__origin
+    + .ow-tree-rail-nav__list::before,
   .ow-tree-rail-nav__tree:not([data-rail]) > .ow-tree-rail-nav__origin::after,
   .ow-tree-rail-nav__tree:not([data-rail])
     .ow-tree-rail-nav__list
@@ -467,12 +454,7 @@
     block-size: var(--_row-mid);
   }
 
-  /* From the origin down to the first row: from the Origin label's middle, or --_origin-y. */
-  .ow-tree-rail-nav__tree:not([data-rail]) > .ow-tree-rail-nav__list::before {
-    inset-block: calc(var(--_origin-y) - var(--_pad)) auto;
-    block-size: calc(var(--_pad) - var(--_origin-y) + var(--_row-mid));
-  }
-
+  /* From the Origin label's middle down to the first row. */
   .ow-tree-rail-nav__tree:not([data-rail])
     > .ow-tree-rail-nav__origin
     + .ow-tree-rail-nav__list::before {
@@ -616,7 +598,6 @@
       fill: Highlight;
     }
 
-    .ow-tree-rail-nav__tree:not(:has(> .ow-tree-rail-nav__origin))::before,
     .ow-tree-rail-nav__tree > .ow-tree-rail-nav__origin::before {
       forced-color-adjust: none;
       background-color: Highlight;

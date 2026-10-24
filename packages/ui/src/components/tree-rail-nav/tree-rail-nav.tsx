@@ -350,7 +350,10 @@ export const TreeRailNavLabel: ForwardRefExoticComponent<
 
 export type TreeRailNavOriginProps = ComponentPropsWithoutRef<"div">;
 
-/** A label beside the rail's origin, before the first `List`: the trail starts from it. */
+/**
+ * A label beside the rail's origin, before the first `List`: the trail starts from it. Without one,
+ * the rail and the trail start at the first row.
+ */
 export const TreeRailNavOrigin: ForwardRefExoticComponent<
   TreeRailNavOriginProps & RefAttributes<HTMLDivElement>
 > = forwardRef<HTMLDivElement, TreeRailNavOriginProps>(function TreeRailNavOrigin(

@@ -286,6 +286,14 @@ describe("Tree Rail Nav", () => {
     expect(clicks).toBe(0);
   });
 
+  test("without an Origin label, the rail and the trail start at the first row", async () => {
+    const { tree, row } = await mount(<Nav />);
+    await expect.poll(() => trailStart(tree)).toBeCloseTo(middle(tree, row("Home")), 0);
+    const root = tree.querySelector(".ow-tree-rail-nav__rail-base path")?.getAttribute("d") ?? "";
+    expect(Number(/^M[\d.-]+ ([\d.-]+)/.exec(root)?.[1])).toBeCloseTo(middle(tree, row("Home")), 0);
+    expect(getComputedStyle(tree, "::before").content).toBe("none");
+  });
+
   test("an Origin label sets where the trail starts", async () => {
     const screen = await render(
       <TreeRailNav.Root aria-label="Docs" style={{ inlineSize: 280 }}>

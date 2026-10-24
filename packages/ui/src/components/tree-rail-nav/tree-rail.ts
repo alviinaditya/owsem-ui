@@ -1,6 +1,6 @@
 /**
- * The rail of Tree Rail Nav: a base line per level, and a trail from the origin at the top down
- * through each parent to the current item. Framework-free; the React parts render the markup.
+ * The rail of Tree Rail Nav: a base line per level, and a trail from the origin (an Origin label,
+ * or else the first row) down through each parent to the current item. Framework-free; the React parts render the markup.
  *
  * Geometry is read from the DOM: x positions from the root's --_r0 … --_r2 (one rail per level),
  * y positions from the rows and from the Origin label, when there is one. Redraws run from a
@@ -232,13 +232,15 @@ export function createTreeRail(tree: HTMLElement, svg: SVGSVGElement): TreeRail 
     rails = [0, 1, 2].map(
       (i) => Number.parseFloat(style.getPropertyValue(`--_r${i}`)) || (rails[i] ?? 0),
     );
-    // An Origin label puts the origin at its middle; otherwise the CSS says where it is.
-    const label = tree.querySelector<HTMLElement>(`:scope > .${cls.origin}`);
-    if (label) locate();
-    const at = label && span(label);
-    originY = at
-      ? at.top + at.height / 2
-      : Number.parseFloat(style.getPropertyValue("--_origin-y")) || originY;
+    // An Origin label puts the origin at its middle; without one the rail starts at the first row.
+    const start =
+      tree.querySelector<HTMLElement>(`:scope > .${cls.origin}`) ??
+      tree.querySelector<HTMLElement>(`:scope > .${cls.list} > li > ${ROW}`);
+    if (start) {
+      locate();
+      const at = span(start);
+      originY = at.top + at.height / 2;
+    }
   }
 
   /** A panel's box; a closed (hidden) one collapses to the bottom of its row. */

@@ -246,6 +246,8 @@
     opacity: 0;
     transform: scaleX(0.04);
     transform-origin: left center;
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: transform;
     transition:
       transform 0.5s var(--_ease),
       opacity 0.22s ease;
@@ -386,6 +388,8 @@
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: rotate;
     transition: rotate 0.34s var(--_ease);
   }
 

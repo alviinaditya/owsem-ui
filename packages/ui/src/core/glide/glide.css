@@ -30,6 +30,8 @@
     pointer-events: none;
     transform: translate(var(--_x, 0), var(--_y, 0)) scale(var(--_sx, 1), var(--_sy, 1));
     transform-origin: 0 0;
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: transform;
     transition:
       transform var(--ow-spring-glide-duration) var(--ow-spring-glide),
       opacity 160ms ease;

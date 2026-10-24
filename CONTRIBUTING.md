@@ -205,6 +205,10 @@ Motion explains a state change (principle 4), with these rules:
   a day (a command palette, shortcuts) changes instantly.
 - Animate `transform` and `opacity` only (FR-18). Enter and exit with `data-starting-style` and
   `data-ending-style` and CSS transitions (FR-7); never from `scale(0)`, start at 0.95 or more.
+- An element that transitions `transform`, `scale`, `translate`, or `rotate` declares `will-change`
+  for it (NF-8). Otherwise Chrome draws it on a GPU layer only while it moves, and at a fractional
+  zoom (110%) its content lands a device pixel away when the motion ends. `test/layers.test.ts`
+  checks every stylesheet.
 - Popups scale from their trigger (`transform-origin: var(--transform-origin)`); dialogs stay
   centered.
 - Ease with `--ow-ease-out` for entering and leaving, `--ow-ease-in-out` for moving on screen, and

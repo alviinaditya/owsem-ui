@@ -71,6 +71,8 @@
     cursor: pointer;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: transform;
     /* Releasing settles with the Core spring. */
     transition: transform var(--ow-spring-settle-duration) var(--ow-spring-settle);
   }
@@ -208,11 +210,17 @@
     cursor: progress;
   }
 
-  /* The parts that fade while loading. */
+  /* The parts that fade while loading; the glyph and the spinner also scale. */
   .ow-button__glyph,
   .ow-button__label,
   .ow-button__icon,
   .ow-button__spinner {
+    transition: opacity 150ms var(--ow-ease-out);
+  }
+
+  .ow-button__glyph,
+  .ow-button__spinner {
+    will-change: transform;
     transition:
       opacity 150ms var(--ow-ease-out),
       transform 200ms var(--ow-ease-out);
@@ -285,6 +293,7 @@
     background-color: var(--_ripple);
     opacity: 0;
     transform: scale(0.2);
+    will-change: transform;
   }
 
   .ow-button__ripple[data-state] {

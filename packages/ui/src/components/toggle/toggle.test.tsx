@@ -209,7 +209,7 @@ describe("Toggle", () => {
     expect(toggle.getAttribute("aria-pressed")).toBe("true");
     expect(getComputedStyle(toggle).backgroundColor).toBe(resolve("color", "var(--ow-raised-bg)"));
     // The release rides the settle spring.
-    expect(getComputedStyle(toggle).transitionDuration).toBe("1.03s");
+    expect(getComputedStyle(toggle).transitionDuration).toBe("0.573s");
     await settle();
     expect(getComputedStyle(toggle).transform).toBe("none");
   });

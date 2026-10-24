@@ -16,8 +16,9 @@
     --ow-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
     --ow-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
     --ow-ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
-    /* Core springs (FR-21) as easings, for CSS transitions: travel 170/25, settle 260/13 (press
-     * release), glide 520/44. Each pairs with its duration. */
+    /* Core springs (FR-21) as easings, for CSS transitions: travel 170/25, settle 260/32 (press
+     * release), glide 520/44. Each pairs with its duration. Settle is critically damped: a press
+     * is too shallow for a bounce to show, so an overshoot only flickered a control's edges. */
     --ow-spring-travel: linear(
       0,
       0.031,
@@ -56,40 +57,32 @@
     --ow-spring-travel-duration: 650ms;
     --ow-spring-settle: linear(
       0,
-      0.116,
-      0.386,
-      0.693,
-      0.964,
-      1.147,
-      1.237,
-      1.245,
-      1.197,
-      1.123,
-      1.048,
-      0.988,
-      0.951,
-      0.938,
-      0.942,
-      0.958,
-      0.977,
-      0.995,
-      1.007,
-      1.014,
-      1.016,
-      1.013,
-      1.009,
-      1.004,
-      1,
-      0.997,
-      0.996,
+      0.058,
+      0.18,
+      0.321,
+      0.455,
+      0.573,
+      0.671,
+      0.75,
+      0.812,
+      0.86,
+      0.897,
+      0.924,
+      0.945,
+      0.96,
+      0.971,
+      0.979,
+      0.985,
+      0.989,
+      0.992,
+      0.994,
       0.996,
       0.997,
       0.998,
       0.999,
-      1,
       1
     );
-    --ow-spring-settle-duration: 1030ms;
+    --ow-spring-settle-duration: 573ms;
     --ow-spring-glide: linear(
       0,
       0.035,

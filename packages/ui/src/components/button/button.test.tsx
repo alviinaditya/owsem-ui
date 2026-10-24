@@ -328,7 +328,7 @@ describe("Button", () => {
     expect(button.hasAttribute("data-held")).toBe(false);
     // Released with the settle spring and its duration.
     const style = getComputedStyle(button);
-    expect(style.transitionDuration).toBe("1.03s");
+    expect(style.transitionDuration).toBe("0.573s");
     expect(style.transitionTimingFunction).toContain("linear(");
   });
 

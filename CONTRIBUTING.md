@@ -148,7 +148,8 @@ To build one, use Separator as the reference:
    | `index.ts` | Public exports |
 
 2. Export it from `src/base.ts` or `src/owsem.ts`, import its CSS in `src/styles.css`, and add a
-   size budget to `.size-limit.mjs` (Base 3 kB, Owsem 8 kB).
+   size budget to `.size-limit.mjs` (Base 3 kB, Owsem 8 kB; the Core it uses counts once, in the
+   core entry).
 3. Build its Lab (see below), then set its `status` in the catalog to `prototype` and add a
    changeset.
 4. Add it to "Components available now" in `skills/owsem-ui/SKILL.md`, the agent skill users

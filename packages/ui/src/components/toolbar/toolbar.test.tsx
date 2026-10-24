@@ -233,7 +233,7 @@ describe("Toolbar", () => {
       resolve("box-shadow", "var(--ow-pressed-shadow)"),
     );
     await commands.mouse("up");
-    expect(getComputedStyle(share).transitionDuration).toBe("1.03s");
+    expect(getComputedStyle(share).transitionDuration).toBe("0.573s");
     await settle();
     expect(getComputedStyle(share).transform).toBe("none");
   });

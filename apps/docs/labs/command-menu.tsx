@@ -530,8 +530,8 @@ const commandMenuLab = defineLab({
       name: "Shortcut",
       selector: ".ow-command-menu__item .ow-command-menu__shortcut",
       note: {
-        id: "Tombol sebagai keycap kecil bertepi tegas, di ujung item, di Trigger, atau di Footer.",
-        en: "Keys as small crisp keycaps, at an item's end, in the Trigger, or in the Footer.",
+        id: "Tuts Kbd, di ujung item, di Trigger, atau di Footer.",
+        en: "A Kbd keycap, at an item's end, in the Trigger, or in the Footer.",
       },
     },
     {

@@ -20,6 +20,7 @@ import {
 import { withClassName } from "../../core/class-name";
 import { createGlide } from "../../core/glide/glide";
 import { GlideHighlight } from "../../core/glide/use-glide";
+import { Kbd } from "../kbd/kbd";
 import "./command-menu.css";
 
 const cls = {
@@ -447,16 +448,16 @@ export const CommandMenuItemDescription: ForwardRefExoticComponent<
   },
 );
 
-export type CommandMenuShortcutProps = ComponentPropsWithoutRef<"kbd">;
+export type CommandMenuShortcutProps = Omit<Kbd.Props, "ref">;
 
-/** Small keycaps: an item's shortcut (at its end), the Trigger's, or a hint in the Footer. */
+/** A Kbd keycap: an item's shortcut (at its end), the Trigger's, or a hint in the Footer. */
 export const CommandMenuShortcut: ForwardRefExoticComponent<
   CommandMenuShortcutProps & RefAttributes<HTMLElement>
 > = forwardRef<HTMLElement, CommandMenuShortcutProps>(function CommandMenuShortcut(
   { className, ...props },
   ref,
 ) {
-  return <kbd ref={ref} className={join(cls.shortcut, className)} {...props} />;
+  return <Kbd ref={ref} className={join(cls.shortcut, className)} {...props} />;
 });
 
 export type CommandMenuFooterProps = ComponentPropsWithoutRef<"div">;

@@ -2913,6 +2913,8 @@ figure[data-code-block] pre {
 }
 
 .demo-keys kbd {
+  display: inline-grid;
+  place-items: center;
   min-inline-size: 34px;
   block-size: 34px;
   padding-inline: 9px;
@@ -2923,6 +2925,7 @@ figure[data-code-block] pre {
   color: var(--ow-fg);
   font-family: var(--font-sans), system-ui, sans-serif;
   font-size: 15px;
+  line-height: 1;
 }
 
 /* Token setup panel (components/token-setup.tsx): bottom left, or under a Lab's toolbar (below). */

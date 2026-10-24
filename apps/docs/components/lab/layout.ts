@@ -29,3 +29,6 @@ export const INSPECT_CARD_MIN = 680;
 
 /** Space between the demo and the part card under it. */
 export const INSPECT_CARD_GAP = 28;
+
+/** How long Inspect stays after it is turned off: its fade and its dock's slide (globals.css). */
+export const INSPECT_LEAVE_MS = 260;

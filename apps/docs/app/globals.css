@@ -2085,6 +2085,19 @@ figure[data-code-block] pre {
   inset: 0;
   z-index: 3;
   pointer-events: none;
+  /* It fades in while the demo makes room for it, and out before it leaves (stage.tsx). */
+  transition: opacity 0.2s var(--ease);
+}
+
+@starting-style {
+  .lab-inspect {
+    opacity: 0;
+  }
+}
+
+.lab-inspect[data-leaving] {
+  opacity: 0;
+  transition-duration: 0.15s;
 }
 
 .lab-inspect-lines {
@@ -2279,6 +2292,12 @@ figure[data-code-block] pre {
   .lab-inspect-dock {
     translate: 0 100%;
   }
+}
+
+.lab-inspect[data-leaving] .lab-inspect-dock {
+  translate: 0 100%;
+  transition-duration: 0.25s;
+  transition-delay: 0s;
 }
 
 .lab-stage-body:is([data-code], [data-controls]) .lab-inspect-dock {

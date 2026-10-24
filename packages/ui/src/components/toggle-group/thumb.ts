@@ -1,8 +1,10 @@
 /**
  * The segmented thumb: the raised key under the pressed item of a single-selection group.
  *
- * - It moves by `translate` and `transform` through CSS transitions (toggle-group.css), so it
- *   costs no frames once it lands.
+ * - It rests where layout puts the pressed item's box, untransformed, so it is painted on the
+ *   same pixels as the item; a thumb placed by translate fell between pixels at a fractional
+ *   zoom. It slides there by `translate` and `transform` through CSS transitions
+ *   (toggle-group.css), which end at none, so it costs no frames once it lands.
  * - Its first placement after mount is instant: nothing sweeps in on load or hydration. After
  *   that, a new pressed item slides it there (FLIP); a resize snaps it.
  * - While the pointer holds an item, the item presses in, and the thumb with it when the item is
@@ -65,11 +67,11 @@ export function createThumb(root: HTMLElement, thumb: HTMLElement, items: string
     };
   }
 
-  /** Draws the thumb at `box`, scaled about its centre to look like `look`. */
+  /** Transforms the thumb, laid out at `box`, about its centre to look like `look`. */
   function draw(box: Box, look: Box): void {
     const style = thumb.style;
-    style.setProperty("--_x", px(look.x + (look.w - box.w) / 2));
-    style.setProperty("--_y", px(look.y + (look.h - box.h) / 2));
+    style.setProperty("--_dx", px(look.x + (look.w - box.w) / 2 - box.x));
+    style.setProperty("--_dy", px(look.y + (look.h - box.h) / 2 - box.y));
     style.setProperty("--_sx", String(look.w / box.w));
     style.setProperty("--_sy", String(look.h / box.h));
   }
@@ -94,6 +96,8 @@ export function createThumb(root: HTMLElement, thumb: HTMLElement, items: string
     // From one item to another, it slides from wherever it is now, mid-flight included.
     const from = item !== on && on !== null ? measure(thumb) : null;
     thumb.setAttribute("data-instant", "");
+    thumb.style.setProperty("--_x", px(to.x));
+    thumb.style.setProperty("--_y", px(to.y));
     thumb.style.setProperty("--_w", px(to.w));
     thumb.style.setProperty("--_h", px(to.h));
     draw(to, from ?? to);

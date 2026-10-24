@@ -207,6 +207,31 @@ describe("Toggle Group", () => {
     expect(transitions(thumb)).toEqual([]);
   });
 
+  test("rests where layout puts its item, untransformed, so both are painted on the same pixels", async () => {
+    // Between pixels, as a line of text above a group often leaves it.
+    const { thumb, item } = await mount(
+      <div style={{ paddingBlockStart: 0.3, paddingInlineStart: 0.6 }}>
+        <Views />
+      </div>,
+    );
+    for (const target of ["Month", "Day"]) {
+      item(target).click();
+      await settle();
+      const a = thumb.getBoundingClientRect();
+      const b = item(target).getBoundingClientRect();
+      const gaps = [a.left - b.left, a.top - b.top, a.right - b.right, a.bottom - b.bottom];
+      expect(
+        gaps.every((d) => Math.abs(d) < 0.02),
+        `${target}: ${gaps}`,
+      ).toBe(true);
+      const style = getComputedStyle(thumb);
+      expect([style.translate, style.transform], target).toEqual([
+        "0px",
+        "matrix(1, 0, 0, 1, 0, 0)",
+      ]);
+    }
+  });
+
   test("presses in while held, the thumb with its item", async () => {
     const { thumb, item } = await mount(<Views />);
     const week = item("Week");

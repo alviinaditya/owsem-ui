@@ -206,6 +206,7 @@ export function createTreeRail(tree: HTMLElement, svg: SVGSVGElement): TreeRail 
     duration: number;
   } | null = null;
   let drawn = 0;
+  let placed = false;
   let wasHidden: boolean | null = null;
   let frame = 0;
 
@@ -527,8 +528,10 @@ export function createTreeRail(tree: HTMLElement, svg: SVGSVGElement): TreeRail 
 
   function goTo(row: HTMLElement | null): void {
     // The first draw is simply there: the trail, its dots, the rows on it, and the tint. A nav
-    // mounted on the client would otherwise fade all of them in.
-    const first = !current.row;
+    // mounted on the client would otherwise fade all of them in. A current row that arrives
+    // later, as from a page outside the nav, travels from the top.
+    const first = !placed;
+    placed = true;
     if (first) tree.setAttribute("data-instant", "");
     try {
       place(row, first);

@@ -163,6 +163,17 @@ describe("Tree Rail Nav", () => {
     expect(getComputedStyle(old, "::before").content).toBe("none");
   });
 
+  test("travels from the top to a current row that arrives after mount", async () => {
+    // As when a page outside the nav (the home page) links to one in it.
+    const { screen, tree, row } = await mount(<Nav current="none" />);
+    screen.rerender(<Nav />);
+    const to = middle(tree, row("Dark mode"));
+    await new Promise((resolve) => setTimeout(resolve, 120));
+    expect(markerY(tree)).not.toBeCloseTo(to, 0);
+    await expect.poll(() => markerY(tree), { timeout: 2000 }).toBeCloseTo(to, 0);
+    await expect.poll(() => row("Dark mode").hasAttribute("data-arrived")).toBe(true);
+  });
+
   test("ends at the group's row while the current row is closed inside it", async () => {
     const { tree, row } = await mount(<Nav />);
     const settings = row("Settings");

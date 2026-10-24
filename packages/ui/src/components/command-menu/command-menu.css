@@ -143,36 +143,48 @@
       backdrop-filter: blur(var(--_blur)) saturate(1.6);
     }
 
-    /* Opaque for those who ask for less transparency. */
+    /* backdrop="blur": the page also blurs under the scrim. */
+    .ow-command-menu__backdrop[data-blur] {
+      backdrop-filter: blur(8px);
+    }
+
+    /* Opaque for those who ask for less transparency, and the page left sharp. */
     /* biome-ignore lint/nursery/useBaseline: progressive enhancement (NF-1) */
     @media (prefers-reduced-transparency: reduce) {
       .ow-command-menu__popup {
         background-color: var(--_solid);
         backdrop-filter: none;
       }
+
+      .ow-command-menu__backdrop[data-blur] {
+        backdrop-filter: none;
+      }
     }
   }
 
-  /* The search row, its icon and text in line with the items' (FR-9, FR-10). */
-  .ow-command-menu__field {
+  /* The search row and the footer stand as tall as each other (FR-9). */
+  .ow-command-menu__field,
+  .ow-command-menu__footer {
     --py: calc((var(--_n) + 0.25) * 1em);
     --_py: max(var(--py), (24px - 1lh) / 2);
-    --icon: calc(1em + 2px);
     display: flex;
     flex: none;
     align-items: center;
-    gap: 0.5em;
+    min-block-size: 1lh;
     padding-block: var(--_py);
-    padding-inline: calc(var(--_p) + max(var(--_n) * 1em, (24px - 1lh) / 2) + (1lh - 1cap) / 2);
-    /* An etched line under it, which turns the focus color while the input has focus (FR-13). */
-    border-block-end: 1px solid var(--ow-line-dark);
-    box-shadow: 0 1px 0 var(--ow-line-light);
     color: var(--ow-muted);
   }
 
-  .ow-command-menu__field:has(:focus-visible) {
-    border-block-end-color: var(--ow-focus);
-    box-shadow: 0 1px 0 var(--ow-focus);
+  /*
+   * The search row, its icon and text in line with the items' (FR-10). An etched line under it, as
+   * over the footer; the input always has focus while the menu is open, so its caret shows it.
+   */
+  .ow-command-menu__field {
+    --icon: calc(1em + 2px);
+    gap: 0.5em;
+    padding-inline: calc(var(--_p) + max(var(--_n) * 1em, (24px - 1lh) / 2) + (1lh - 1cap) / 2);
+    border-block-end: 1px solid var(--ow-line-dark);
+    box-shadow: 0 1px 0 var(--ow-line-light);
   }
 
   .ow-command-menu__input {
@@ -229,9 +241,15 @@
     stroke-linecap: round;
   }
 
-  /* The results scroll inside the panel; Glide's highlight rides along (glide.ts). */
+  /*
+   * The results scroll inside the panel; Glide's highlight rides along (glide.ts). An edge fades
+   * while there is more to scroll that way, by as much as has scrolled, up to 2em: List sets
+   * --_above and --_below as it scrolls.
+   */
   .ow-command-menu__list {
     --_thumb: color-mix(in oklab, var(--ow-muted) 40%, transparent);
+    --_above: 0px;
+    --_below: 0px;
     position: relative;
     isolation: isolate;
     flex: 0 1 auto;
@@ -241,6 +259,12 @@
     overscroll-behavior: contain;
     scroll-padding-block: var(--_p);
     outline: none;
+    mask-image: linear-gradient(
+      transparent,
+      #000 min(var(--_above), 2em),
+      #000 calc(100% - min(var(--_below), 2em)),
+      transparent
+    );
     /* A thin, quiet scrollbar without arrows: the standard properties here (Firefox)… */
     /* biome-ignore lint/nursery/useBaseline: progressive enhancement (NF-1) */
     scrollbar-width: thin;
@@ -357,25 +381,20 @@
     margin-inline-start: auto;
   }
 
-  /* Past an etched groove: a dark line, then a light one. */
+  /* Past an etched groove: a dark line, then a light one. Its hints start where group names do. */
   .ow-command-menu__footer {
-    display: flex;
-    flex: none;
     flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5em 1.25em;
-    padding-block: 0.625em;
-    padding-inline: calc((var(--_n) + 0.125) / 0.857 * 1em - 1px + var(--_p));
+    gap: 0.5em 1em;
+    padding-inline: calc(var(--_p) + (var(--_n) + 0.125) * 1em - 1px);
     border-block-start: 1px solid var(--ow-line-dark);
     box-shadow: inset 0 1px 0 var(--ow-line-light);
-    color: var(--ow-muted);
-    font-size: 0.857em;
   }
 
   .ow-command-menu__footer > * {
     display: inline-flex;
     align-items: center;
     gap: 0.4em;
+    font-size: 0.857em;
   }
 
   /* DP-8: backgrounds and shadows drop out; outlines and system colors carry the shapes. */
@@ -383,10 +402,6 @@
     .ow-command-menu__field,
     .ow-command-menu__footer {
       border-color: CanvasText;
-    }
-
-    .ow-command-menu__field:has(:focus-visible) {
-      border-block-end-color: Highlight;
     }
 
     .ow-command-menu__item[data-disabled] {

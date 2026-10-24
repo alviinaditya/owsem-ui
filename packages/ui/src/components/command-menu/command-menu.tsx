@@ -14,6 +14,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -46,6 +47,10 @@ const cls = {
 
 const join = (base: string, className: string | undefined) =>
   className ? `${base} ${className}` : base;
+
+// Before the first paint, so the list never shows a frame unfaded; the server has no layout, so
+// it falls back without React 18's warning.
+const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 export type CommandMenuSize = "sm" | "md" | "lg";
 
@@ -204,6 +209,8 @@ export const CommandMenuTrigger: ForwardRefExoticComponent<
 export interface CommandMenuPopupProps extends Omit<Dialog.Popup.Props, "ref"> {
   /** Default `"md"`. */
   size?: CommandMenuSize | undefined;
+  /** The scrim over the page: `"dim"`, or `"blur"` to blur the page under it too. Default `"dim"`. */
+  backdrop?: "dim" | "blur" | undefined;
   /** Where the popup is rendered. Default: `document.body`. */
   container?: Dialog.Portal.Props["container"];
   /** The name of the close button, for screen readers on touch screens (FR-17). Default `"Close"`. */
@@ -218,7 +225,7 @@ export interface CommandMenuPopupProps extends Omit<Dialog.Popup.Props, "ref"> {
 export const CommandMenuPopup: ForwardRefExoticComponent<
   CommandMenuPopupProps & RefAttributes<HTMLDivElement>
 > = forwardRef<HTMLDivElement, CommandMenuPopupProps>(function CommandMenuPopup(
-  { className, size = "md", container, closeLabel = "Close", children, ...props },
+  { className, size = "md", backdrop = "dim", container, closeLabel = "Close", children, ...props },
   ref,
 ) {
   const { list } = useRootContext("Popup");
@@ -226,7 +233,7 @@ export const CommandMenuPopup: ForwardRefExoticComponent<
   const direction = useDirection();
   return (
     <Dialog.Portal container={container}>
-      <Dialog.Backdrop className={cls.backdrop} />
+      <Dialog.Backdrop className={cls.backdrop} data-blur={backdrop === "blur" ? "" : undefined} />
       <Dialog.Viewport className={cls.viewport} dir={direction}>
         <Dialog.Popup
           ref={ref}
@@ -280,8 +287,9 @@ const GLIDE = {
 export type CommandMenuListProps = Omit<Autocomplete.List.Props, "ref">;
 
 /**
- * The results, a listbox that scrolls. One highlight glides to the item Base UI highlights, from
- * the keyboard, the pointer, or the query (Glide, Kinetic). A function child renders each item.
+ * The results, a listbox that scrolls, its edges fading while there is more that way. One
+ * highlight glides to the item Base UI highlights, from the keyboard, the pointer, or the query
+ * (Glide, Kinetic). A function child renders each item.
  */
 export const CommandMenuList: ForwardRefExoticComponent<
   CommandMenuListProps & RefAttributes<HTMLDivElement>
@@ -292,12 +300,21 @@ export const CommandMenuList: ForwardRefExoticComponent<
   const list = useRef<HTMLDivElement | null>(null);
   const highlightRef = useRef<HTMLSpanElement | null>(null);
 
-  useEffect(() => {
+  useBeforePaint(() => {
     const el = list.current;
     const highlight = highlightRef.current;
     if (!el || !highlight) return;
     const glide = createGlide(el, highlight, GLIDE);
-    const sync = () => glide.setActive(el.querySelector<HTMLElement>(HIGHLIGHTED));
+    // How far the list runs past each edge, for its fades (command-menu.css).
+    const fade = () => {
+      const below = el.scrollHeight - el.clientHeight - el.scrollTop;
+      el.style.setProperty("--_above", `${el.scrollTop}px`);
+      el.style.setProperty("--_below", `${Math.max(0, below)}px`);
+    };
+    const sync = () => {
+      glide.setActive(el.querySelector<HTMLElement>(HIGHLIGHTED));
+      fade();
+    };
     // Base UI moves data-highlighted; items come and go as the query changes.
     const changes = new MutationObserver(sync);
     changes.observe(el, {
@@ -306,8 +323,14 @@ export const CommandMenuList: ForwardRefExoticComponent<
       attributes: true,
       attributeFilter: ["data-highlighted"],
     });
+    // The list grows and shrinks with the window.
+    const sizes = new ResizeObserver(fade);
+    sizes.observe(el);
+    el.addEventListener("scroll", fade, { passive: true });
     sync();
     return () => {
+      el.removeEventListener("scroll", fade);
+      sizes.disconnect();
       changes.disconnect();
       glide.destroy();
     };

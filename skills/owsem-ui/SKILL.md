@@ -251,9 +251,10 @@ import { CommandMenu } from "owsem-ui/owsem"; // or "@/components/owsem/command-
 - `Item`: `onClick` runs on click and on Enter, then the menu closes (`closeOnClick={false}` keeps
   it open). Lay it out with `ItemIcon`, `ItemLabel`, `ItemDescription`, and `Shortcut` (a `kbd`).
   `Footer` holds key hints. Glide lights the highlighted item; do not style `[data-highlighted]`.
-- `Popup`: `size` (`"sm"`, `"md"`, `"lg"`), `container` (default `document.body`), and
-  `closeLabel` for the hidden close button (translate it). `Trigger` also takes `size`; outside
-  Root, give it the Root's `handle` from `CommandMenu.createHandle()`.
+- `Popup`: `size` (`"sm"`, `"md"`, `"lg"`), `backdrop` (`"dim"`, or `"blur"` to blur the page
+  too), `container` (default `document.body`), and `closeLabel` for the hidden close button
+  (translate it). `Trigger` also takes `size`; outside Root, give it the Root's `handle` from
+  `CommandMenu.createHandle()`.
 - No open or close animation, by design: do not add one.
 - Reads `--ow-panel` (the glass, at 80%), `--ow-popup-shadow`, `--ow-backdrop` (the scrim),
   `--ow-fg`, `--ow-muted`, `--ow-focus`, `--ow-hover` (the highlight), `--ow-radius`,

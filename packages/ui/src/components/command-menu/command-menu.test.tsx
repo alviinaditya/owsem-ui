@@ -39,11 +39,13 @@ function Menu({
   ran = [],
   children,
   popupStyle,
+  backdrop,
   ...props
 }: Partial<CommandMenuRootProps<Command>> & {
   ran?: string[];
   children?: ReactNode;
   popupStyle?: CSSProperties;
+  backdrop?: "dim" | "blur";
 }) {
   return (
     <CommandMenu.Root items={GROUPS} {...props}>
@@ -51,7 +53,7 @@ function Menu({
         Search…<CommandMenu.Shortcut aria-hidden="true">⌘K</CommandMenu.Shortcut>
       </CommandMenu.Trigger>
       {children}
-      <CommandMenu.Popup aria-label="Commands" style={popupStyle}>
+      <CommandMenu.Popup aria-label="Commands" style={popupStyle} backdrop={backdrop}>
         <CommandMenu.Input aria-label="Search commands" placeholder="Search…" />
         <CommandMenu.Empty>No results</CommandMenu.Empty>
         <CommandMenu.List>
@@ -573,6 +575,62 @@ describe("Command Menu", () => {
       expect(getComputedStyle(backdrop).backgroundColor).toBe(resolveColor("var(--ow-backdrop)"));
       expect(getComputedStyle(key).borderTopLeftRadius).toBe("4px");
     }
+  });
+
+  test("backdrop blur blurs the page under the scrim, unless less transparency is asked", async () => {
+    onTestFinished(() => commands.setReducedTransparency("no-preference"));
+    const screen = await render(<Menu defaultOpen />);
+    await expect.poll(popup).not.toBeNull();
+    const scrim = () => document.querySelector(".ow-command-menu__backdrop") as Element;
+    expect(getComputedStyle(scrim()).backdropFilter).toBe("none");
+    await screen.rerender(<Menu defaultOpen backdrop="blur" />);
+    expect(getComputedStyle(scrim()).backdropFilter).toBe("blur(8px)");
+    expect(getComputedStyle(scrim()).backgroundColor).toBe(resolveColor("var(--ow-backdrop)"));
+    await commands.setReducedTransparency("reduce");
+    expect(getComputedStyle(scrim()).backdropFilter).toBe("none");
+  });
+
+  test("the search row's line is the footer's etched line, while the input has focus too", async () => {
+    await render(<Menu />);
+    await open();
+    const field = getComputedStyle(document.querySelector(".ow-command-menu__field") as Element);
+    const footer = getComputedStyle(document.querySelector(".ow-command-menu__footer") as Element);
+    expect(field.borderBottomColor).toBe(resolveColor("var(--ow-line-dark)"));
+    expect(field.borderBottomColor).toBe(footer.borderTopColor);
+    expect(field.boxShadow).toBe(resolveShadow("0 1px 0 var(--ow-line-light)"));
+  });
+
+  test("an edge of the list fades while there is more that way, as far as it has scrolled", async () => {
+    // A short panel, so the list scrolls.
+    await render(<Menu defaultOpen popupStyle={{ maxBlockSize: "200px" }} />);
+    await expect.poll(popup).not.toBeNull();
+    const list = document.querySelector(".ow-command-menu__list") as HTMLElement;
+    // The fades' lengths at the top and the bottom; a 0px one computes to plain 100%.
+    const fades = () => {
+      const mask = getComputedStyle(list).maskImage;
+      const top = /rgb\(0, 0, 0\) ([\d.]+)px/.exec(mask)?.[1];
+      const bottom = /calc\(100% - ([\d.]+)px\)/.exec(mask)?.[1] ?? "0";
+      return [Number(top), Number(bottom)];
+    };
+    const scroll = async (top: number) => {
+      list.scrollTop = top;
+      await expect.poll(() => list.style.getPropertyValue("--_above")).toBe(`${list.scrollTop}px`);
+    };
+    // 2em at 14px, the font size.
+    expect(fades()).toEqual([0, 28]);
+    await scroll(10);
+    expect(fades()).toEqual([10, 28]);
+    await scroll(list.scrollHeight);
+    expect(fades()).toEqual([28, 0]);
+  });
+
+  test("a list that fits does not fade", async () => {
+    await render(<Menu defaultOpen />);
+    await expect.poll(popup).not.toBeNull();
+    const list = document.querySelector(".ow-command-menu__list") as HTMLElement;
+    expect(list.scrollHeight).toBe(list.clientHeight);
+    expect(list.style.getPropertyValue("--_above")).toBe("0px");
+    expect(list.style.getPropertyValue("--_below")).toBe("0px");
   });
 
   test("keeps its shapes in forced colors (DP-8)", async () => {

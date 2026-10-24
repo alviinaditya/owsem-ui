@@ -37,6 +37,11 @@ async function mount(size: CommandMenuSize) {
             </CommandMenu.Group>
           )}
         </CommandMenu.List>
+        <CommandMenu.Footer>
+          <span>
+            <CommandMenu.Shortcut>↵</CommandMenu.Shortcut> Open
+          </span>
+        </CommandMenu.Footer>
       </CommandMenu.Popup>
     </CommandMenu.Root>,
   );
@@ -84,6 +89,13 @@ describe.each(Object.keys(SIZES) as CommandMenuSize[])("Command Menu geometry, %
     const pad = insets(list, item).left;
     expect(insets(popup, item).left).toBeCloseTo(pad, 1);
     expect(Math.abs(usedRadius(popup) - (usedRadius(item) + pad))).toBeLessThanOrEqual(TOL);
+  });
+
+  test("the footer stands as tall as the search row", async () => {
+    const { get } = await mount(size);
+    const field = get(".ow-command-menu__field").getBoundingClientRect();
+    const footer = get(".ow-command-menu__footer").getBoundingClientRect();
+    expect(footer.height).toBeCloseTo(field.height, 1);
   });
 
   test("the search row and the group labels line up with the items", async () => {

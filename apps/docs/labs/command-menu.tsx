@@ -1,6 +1,6 @@
 "use client";
 
-import { CommandMenu, type CommandMenuSize } from "owsem-ui/owsem";
+import { CommandMenu, type CommandMenuPopupProps, type CommandMenuSize } from "owsem-ui/owsem";
 import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { Icon, type IconName } from "@/components/icons/icon";
 import { type LabProps, LabShell } from "@/components/lab/lab-shell";
@@ -133,6 +133,8 @@ type Text = (typeof TEXT)[Lang];
 // The bars of the app's chart, behind the glass (each height once: it is the key).
 const BARS = [38, 52, 44, 70, 58, 84, 66, 92, 74, 60, 80, 96];
 
+type Backdrop = NonNullable<CommandMenuPopupProps["backdrop"]>;
+
 // An opaque panel: no token covers it, so the Popup is styled itself.
 const solidStyle: CSSProperties = { backgroundColor: "var(--ow-panel)", backdropFilter: "none" };
 
@@ -141,6 +143,7 @@ function Palette({
   t,
   size,
   solid,
+  backdrop = "dim",
   container,
   focus,
   footer = true,
@@ -148,6 +151,7 @@ function Palette({
   t: Text;
   size: CommandMenuSize;
   solid: boolean;
+  backdrop?: Backdrop;
   /** The window it opens in; it renders once the window is in the page. */
   container: HTMLDivElement | null;
   /** Whether opening and closing move focus: only when the visitor opened it, not a script. */
@@ -160,6 +164,7 @@ function Palette({
       aria-label={t.dialog}
       closeLabel={t.close}
       size={size}
+      backdrop={backdrop}
       container={container}
       style={solid ? solidStyle : undefined}
       initialFocus={focus}
@@ -220,7 +225,17 @@ function Palette({
  * An app window; the menu opens inside it, not over the docs. ⌘K opens it while focus is on the
  * stage (elsewhere it opens the docs search). Scripts open and close it without taking focus.
  */
-function Demo({ lang, size, solid }: { lang: Lang; size: CommandMenuSize; solid: boolean }) {
+function Demo({
+  lang,
+  size,
+  solid,
+  backdrop,
+}: {
+  lang: Lang;
+  size: CommandMenuSize;
+  solid: boolean;
+  backdrop: Backdrop;
+}) {
   const t = TEXT[lang];
   const [frame, setFrame] = useState<HTMLDivElement | null>(null);
   const [open, setOpen] = useState(true);
@@ -289,7 +304,14 @@ function Demo({ lang, size, solid }: { lang: Lang; size: CommandMenuSize; solid:
             ))}
           </div>
         </div>
-        <Palette t={t} size={size} solid={solid} container={frame} focus={() => visitor.current} />
+        <Palette
+          t={t}
+          size={size}
+          solid={solid}
+          backdrop={backdrop}
+          container={frame}
+          focus={() => visitor.current}
+        />
       </CommandMenu.Root>
       {/* The keys a scene script presses, as keycaps. */}
       <div className="demo-keys" aria-hidden="true" />
@@ -422,7 +444,7 @@ const groups: SceneScript = async (stage) => {
   await stage.wait(500);
 };
 
-const initial = { size: "md", surface: "glass" };
+const initial = { size: "md", surface: "glass", backdrop: "dim" };
 
 const commandMenuLab = defineLab({
   initial,
@@ -444,6 +466,15 @@ const commandMenuLab = defineLab({
       options: [
         { value: "glass", label: { id: "Kaca", en: "Glass" } },
         { value: "solid", label: { id: "Padat", en: "Solid" } },
+      ],
+    },
+    {
+      key: "backdrop",
+      type: "choice",
+      label: { id: "Latar", en: "Backdrop" },
+      options: [
+        { value: "dim", label: { id: "Redup", en: "Dim" } },
+        { value: "blur", label: { id: "Blur", en: "Blur" } },
       ],
     },
   ],
@@ -545,7 +576,14 @@ const commandMenuLab = defineLab({
   ],
 
   demo(cfg, lang) {
-    return <Demo lang={lang} size={cfg.size as CommandMenuSize} solid={cfg.surface === "solid"} />;
+    return (
+      <Demo
+        lang={lang}
+        size={cfg.size as CommandMenuSize}
+        solid={cfg.surface === "solid"}
+        backdrop={cfg.backdrop as Backdrop}
+      />
+    );
   },
 
   code(cfg, setup) {
@@ -555,6 +593,7 @@ const commandMenuLab = defineLab({
     const popup = [
       'aria-label="Commands"',
       ...(cfg.size === "md" ? [] : [`size="${cfg.size}"`]),
+      ...(cfg.backdrop === "blur" ? ['backdrop="blur"'] : []),
       ...(solid ? ['className="commands"'] : []),
     ].join(" ");
     const usage = [

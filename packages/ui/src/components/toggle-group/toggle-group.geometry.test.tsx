@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 import { concentric, insets, rect, TOL } from "../../../test/geometry.ts";
-import { settle } from "../../../test/raf-counter.ts";
 import { ToggleGroup } from "./index";
 
 const ICON = (
@@ -84,8 +83,12 @@ describe("Toggle Group geometry", () => {
     const group = groups[0] as HTMLElement;
     const last = itemsOf(group)[2] as HTMLElement;
     last.click();
-    await settle();
-    const gap = insets(last, thumbOf(group));
+    // Finish the slide rather than wait for idle: WebKit in CI can keep frames coming long after
+    // it (idle cost has its own test).
+    const thumb = thumbOf(group);
+    await expect.poll(() => thumb.getAnimations().length).toBeGreaterThan(0);
+    for (const animation of thumb.getAnimations()) animation.finish();
+    const gap = insets(last, thumb);
     for (const side of [gap.top, gap.right, gap.bottom, gap.left]) close(side, 0);
   });
 

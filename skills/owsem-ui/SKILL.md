@@ -183,6 +183,8 @@ const [view, setView] = useState("list");
   (every item as wide as the widest; equal shares when the group is stretched).
 - `Item` is Base UI's Toggle with a `value`. Give an item with only an icon an `aria-label`; it is
   square. Icons are any `svg`, sized to the font plus 2px.
+- Never give an item an empty `value` (`""`): Base UI replaces it with a generated id, so that item
+  never matches the group's value. Use a word such as `"off"` or `"none"`.
 - A value read from storage: render `value={[]}` on the server and the stored one after
   hydration, so the thumb appears in place instead of sliding from a default.
 - Name the group with `aria-label` or `aria-labelledby`. Arrows, Home, and End move focus, Space

@@ -513,6 +513,10 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
   );
 }
 
+// Base UI gives an item with an empty value a generated one, so an empty option ("Off", "None")
+// goes through this stand-in.
+const EMPTY = "(empty)";
+
 function ControlsPanel({
   lab,
   lang,
@@ -531,11 +535,13 @@ function ControlsPanel({
             <ToggleGroup.Root
               aria-labelledby={`${id}-${control.key}`}
               className="docs-choice"
-              value={[state.cfg[control.key] ?? ""]}
-              onValueChange={([next]) => next && state.setValue(control.key, next)}
+              value={[state.cfg[control.key] || EMPTY]}
+              onValueChange={([next]) =>
+                next && state.setValue(control.key, next === EMPTY ? "" : next)
+              }
             >
               {control.options.map((option) => (
-                <ToggleGroup.Item key={option.value} value={option.value}>
+                <ToggleGroup.Item key={option.value} value={option.value || EMPTY}>
                   {option.label[lang]}
                 </ToggleGroup.Item>
               ))}

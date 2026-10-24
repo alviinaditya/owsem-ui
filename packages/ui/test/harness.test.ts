@@ -113,8 +113,9 @@ describe("light, dark, and system themes (TK-5)", () => {
       ["--ow-warning", "--ow-bg", 4.5],
       ["--ow-critical", "--ow-bg", 4.5],
       ["--ow-on-accent", "--ow-accent", 4.5],
-      // A destructive button's text is the page background on the critical tone.
-      ["--ow-bg", "--ow-critical", 4.5],
+      // A destructive button: its text on the solid critical fill, which stands out from the page.
+      ["--ow-on-critical", "--ow-critical-solid", 4.5],
+      ["--ow-critical-solid", "--ow-bg", 3],
       ["--ow-tooltip-fg", "--ow-tooltip-bg", 4.5],
       ["--ow-focus", "--ow-bg", 3],
       ["--ow-edge", "--ow-bg", 3],

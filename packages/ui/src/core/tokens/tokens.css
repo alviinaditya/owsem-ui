@@ -138,6 +138,9 @@
     --ow-good: #1f7a4d;
     --ow-warning: #8a5a00;
     --ow-critical: #b03f2a;
+    /* A solid critical fill (the destructive button) and its text; --ow-critical is the text tone. */
+    --ow-critical-solid: #b03f2a;
+    --ow-on-critical: #ffffff;
     /* Materials (DP-3): a 1px edge darker than the fill; solid fills add a thin light line inside
      * their top edge. */
     --ow-panel: #ffffff;
@@ -151,7 +154,7 @@
     --ow-well-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.04);
     --ow-pressed-bg: #f4f4f5;
     --ow-pressed-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.16);
-    /* The edge of a solid fill: the accent (primary) or the critical tone (destructive). */
+    /* The edge of a solid fill: the accent (primary) or the solid critical fill (destructive). */
     --ow-primary-shadow:
       inset 0 0 0 1px rgb(0 0 0 / 0.28), inset 0 1.5px 0.75px rgb(255 255 255 / 0.3);
     --ow-line-dark: #e2e2e6;
@@ -168,8 +171,8 @@
       --ow-bg: #19191b;
       --ow-fg: #ededef;
       --ow-muted: #a1a1a8;
-      --ow-accent: #d4cbe5;
-      --ow-on-accent: #18181a;
+      --ow-accent: #7a66c4;
+      --ow-on-accent: #ffffff;
       --ow-focus: #d4cbe5;
       --ow-line: #2e2e32;
       --ow-edge: #6e6e76;
@@ -177,6 +180,8 @@
       --ow-good: #8fd9b6;
       --ow-warning: #e8c27a;
       --ow-critical: #f2ab96;
+      --ow-critical-solid: #c4473a;
+      --ow-on-critical: #ffffff;
       --ow-panel: #222224;
       --ow-panel-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07), 0 1px 2px rgb(0 0 0 / 0.3);
       --ow-popup-shadow:
@@ -206,8 +211,8 @@
     --ow-bg: #19191b;
     --ow-fg: #ededef;
     --ow-muted: #a1a1a8;
-    --ow-accent: #d4cbe5;
-    --ow-on-accent: #18181a;
+    --ow-accent: #7a66c4;
+    --ow-on-accent: #ffffff;
     --ow-focus: #d4cbe5;
     --ow-line: #2e2e32;
     --ow-edge: #6e6e76;
@@ -215,6 +220,8 @@
     --ow-good: #8fd9b6;
     --ow-warning: #e8c27a;
     --ow-critical: #f2ab96;
+    --ow-critical-solid: #c4473a;
+    --ow-on-critical: #ffffff;
     --ow-panel: #222224;
     --ow-panel-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07), 0 1px 2px rgb(0 0 0 / 0.3);
     --ow-popup-shadow:

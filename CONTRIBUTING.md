@@ -193,8 +193,9 @@ that leave the folder: Core to `@/lib/owsem/...` and other components to
 
 Surfaces come from the materials in `tokens.css` (TK-7): `--ow-panel` and `--ow-popup-shadow` for
 panels and popups, `--ow-raised-*` for buttons, thumbs, and on states, `--ow-well-*` for tracks and
-fields, `--ow-pressed-*` while a control is held down, and `--ow-accent` with `--ow-on-accent` and
-`--ow-primary-shadow` for the primary button.
+fields, `--ow-pressed-*` while a control is held down, `--ow-accent` with `--ow-on-accent` and
+`--ow-primary-shadow` for the primary button, and `--ow-critical-solid` with `--ow-on-critical`
+for the destructive one (`--ow-critical` is the critical text tone).
 Depth comes from flat fills and crisp 1px edges, drawn as inset shadows so they add no size; never
 use soft, blurred, or sunken (inset blur) shadows, which read as neumorphism. Separators and layout
 lines stay etched grooves (`--ow-line-dark` over `--ow-line-light`). Base never glows (DP-1).

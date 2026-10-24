@@ -87,6 +87,8 @@
     pointer-events: none;
     translate: var(--_dx, 0) var(--_dy, 0);
     transform: scale(var(--_sx, 1), var(--_sy, 1));
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: translate, transform, scale;
     transition:
       translate var(--_travel),
       transform var(--_travel),
@@ -135,6 +137,7 @@
     white-space: nowrap;
     cursor: pointer;
     touch-action: manipulation;
+    will-change: scale;
     transition:
       color 150ms ease,
       scale var(--_settle);

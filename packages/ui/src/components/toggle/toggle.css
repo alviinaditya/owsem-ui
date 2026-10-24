@@ -87,9 +87,12 @@
     margin: 0;
   }
 
-  /* On: the raised key, a flat fill with crisp edges. */
+  /*
+   * On: the raised key, a flat fill with crisp edges, tinted toward its text. The tint keeps it
+   * apart from a surface of the key's own color, such as a white panel in the light theme.
+   */
   .ow-toggle[data-pressed] {
-    background-color: var(--_raised-bg);
+    background-color: color-mix(in oklab, var(--_raised-bg), var(--_fg) 8%);
     box-shadow: var(--_raised-shadow);
     color: var(--_fg);
   }
@@ -100,9 +103,9 @@
       color: var(--_fg);
     }
 
-    /* The key tints a few percent toward its text; its edges stay. */
+    /* The key tints a few percent further toward its text; its edges stay. */
     .ow-toggle[data-pressed]:hover:not(:active, [data-disabled]) {
-      background-color: color-mix(in oklab, var(--_raised-bg), var(--_fg) 4%);
+      background-color: color-mix(in oklab, var(--_raised-bg), var(--_fg) 12%);
     }
   }
 

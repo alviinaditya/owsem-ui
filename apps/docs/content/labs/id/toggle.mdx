@@ -13,8 +13,9 @@ sama dengan Button. Gulir untuk mulai tur; stage mengikuti setiap bagian.
 
 Menyala adalah material, bukan warna. Toggle yang menyala memakai tombol timbul: isian datar dengan
 tepi 1px yang lebih gelap dari isiannya dan garis terang di dalamnya, seperti segmen yang dipilih.
-Saat mati, ia datar seperti tombol ghost: teksnya muted, dan sedikit berwarna di bawah pointer.
-Teksnya berubah dari muted ke kontras penuh.
+Isiannya condong 8% ke warna teks, sehingga tetap terlihat di atas permukaan yang warnanya sama
+dengan tombol, seperti panel putih di tema terang. Saat mati, ia datar seperti tombol ghost:
+teksnya muted, dan sedikit berwarna di bawah pointer. Teksnya berubah dari muted ke kontras penuh.
 
 Setiap tekanan masuk lebih dulu. Selama ditahan, toggle mengecil ke 0,97 dan berpindah ke material
 ditekan dalam 90 ms, lalu dilepas dengan spring settle yang sedikit melewati batas, dan kembali
@@ -65,7 +66,7 @@ Pointer singgah di toggle yang mati di setiap tema, lalu menyalakan dan mematika
 | Mati | Datar, dengan teks muted |
 | Hover, saat mati | Warna `--ow-hover`, dan teks dengan kontras penuh |
 | Sedang ditekan | Mengecil ke 0,97 dalam 90 ms, dengan material ditekan: `--ow-pressed-bg` dan `--ow-pressed-shadow` |
-| Menyala | Tombol timbul: `--ow-raised-bg` dan `--ow-raised-shadow`, dengan teks `--ow-fg` |
+| Menyala | Tombol timbul: `--ow-raised-bg` condong 8% ke `--ow-fg`, `--ow-raised-shadow`, teks `--ow-fg` |
 | Hover, saat menyala | Isiannya bergeser 4% ke warna teks; tepinya tetap |
 | Fokus keyboard | Ring 2px dengan jarak 2px, warna `--ow-focus` |
 | Disabled | Opacity 45%, dan tekanan tidak berpengaruh |

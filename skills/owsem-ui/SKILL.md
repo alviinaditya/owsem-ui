@@ -178,8 +178,9 @@ import { Kbd } from "owsem-ui/base"; // or "@/components/owsem/kbd"
 
 ### Toggle
 
-A two-state button: flat with muted text while off, the raised key while on, and the pressed
-material only while held down. Registry item: `toggle`.
+A two-state button: flat with muted text while off, the raised key tinted 8% toward its text while
+on (so it shows on a white panel too), and the pressed material only while held down. Registry
+item: `toggle`.
 
 ```tsx
 import { Toggle } from "owsem-ui/base"; // or "@/components/owsem/toggle"

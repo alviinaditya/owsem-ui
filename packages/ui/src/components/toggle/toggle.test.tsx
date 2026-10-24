@@ -8,6 +8,9 @@ import { Toggle } from "./index";
 
 const root = document.documentElement;
 
+// An on toggle's fill: the raised key, tinted toward its text.
+const ON = "color-mix(in oklab, var(--ow-raised-bg), var(--ow-fg) 8%)";
+
 const Star = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true">
     <path d="M12 2l3 7h7l-6 4 2 8-6-5-6 5 2-8-6-4h7z" />
@@ -169,7 +172,9 @@ describe("Toggle", () => {
       expect(offStyle.boxShadow).toBe("none");
       expect(offStyle.color).toBe(resolve("color", "var(--ow-muted)"));
       const onStyle = getComputedStyle(on);
-      expect(onStyle.backgroundColor).toBe(resolve("color", "var(--ow-raised-bg)"));
+      expect(onStyle.backgroundColor).toBe(resolve("color", ON));
+      // Apart from a surface of the key's own color, such as a white panel in light.
+      expect(onStyle.backgroundColor).not.toBe(resolve("color", "var(--ow-raised-bg)"));
       expect(onStyle.boxShadow).toBe(resolve("box-shadow", "var(--ow-raised-shadow)"));
       expect(onStyle.color).toBe(resolve("color", "var(--ow-fg)"));
     }
@@ -187,9 +192,9 @@ describe("Toggle", () => {
     expect(getComputedStyle(off).backgroundColor).toBe(resolve("color", "var(--ow-hover)"));
     expect(getComputedStyle(off).color).toBe(resolve("color", "var(--ow-fg)"));
     await userEvent.hover(on);
-    // A raised key tints a few percent toward its text under the pointer; its edges stay.
+    // The key tints a few percent further toward its text under the pointer; its edges stay.
     expect(getComputedStyle(on).backgroundColor).toBe(
-      resolve("color", "color-mix(in oklab, var(--ow-raised-bg), var(--ow-fg) 4%)"),
+      resolve("color", "color-mix(in oklab, var(--ow-raised-bg), var(--ow-fg) 12%)"),
     );
     expect(getComputedStyle(on).boxShadow).toBe(resolve("box-shadow", "var(--ow-raised-shadow)"));
   });
@@ -207,7 +212,7 @@ describe("Toggle", () => {
     expect(held.transitionDuration).toBe("0.09s");
     await userEvent.keyboard("{/Space}");
     expect(toggle.getAttribute("aria-pressed")).toBe("true");
-    expect(getComputedStyle(toggle).backgroundColor).toBe(resolve("color", "var(--ow-raised-bg)"));
+    expect(getComputedStyle(toggle).backgroundColor).toBe(resolve("color", ON));
     // The release rides the settle spring.
     expect(getComputedStyle(toggle).transitionDuration).toBe("0.573s");
     await settle();
@@ -257,10 +262,12 @@ describe("Toggle", () => {
     if (!off || !on || !other) throw new Error("no toggles");
     await pointerAway();
     expect(getComputedStyle(off).color).toBe("rgb(1, 2, 3)");
-    expect(getComputedStyle(on).backgroundColor).toBe("rgb(255, 0, 0)");
+    expect(getComputedStyle(on).backgroundColor).toBe(
+      resolve("color", "color-mix(in oklab, rgb(255, 0, 0), rgb(0, 0, 255) 8%)"),
+    );
     expect(getComputedStyle(on).boxShadow).toBe("none");
     expect(getComputedStyle(on).color).toBe("rgb(0, 0, 255)");
-    expect(getComputedStyle(other).backgroundColor).toBe(resolve("color", "var(--ow-raised-bg)"));
+    expect(getComputedStyle(other).backgroundColor).toBe(resolve("color", ON));
     off.focus();
     await userEvent.keyboard("{Space>}");
     expect(getComputedStyle(off).backgroundColor).toBe("rgb(0, 128, 0)");

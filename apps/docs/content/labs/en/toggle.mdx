@@ -12,8 +12,10 @@ the stage follows each part.
 ## A key that stays up [#pressing]
 
 On is a material, not a color. An on toggle is the raised key: a flat fill with a 1px edge darker
-than the fill and a light line inside it, like a selected segment. Off, it is flat like a ghost
-button: muted text, and a faint tint under the pointer. Text turns from muted to full strength.
+than the fill and a light line inside it, like a selected segment. Its fill leans 8% toward the
+text, so it stands apart from a surface of the key's own color, such as a white panel in the light
+theme. Off, it is flat like a ghost button: muted text, and a faint tint under the pointer. Text
+turns from muted to full strength.
 
 Every press goes in first. While held, the toggle shrinks to 0.97 and takes the pressed material
 within 90 ms, then lets go on the settle spring, with a small overshoot, and comes up raised or
@@ -63,7 +65,7 @@ rests on the off toggle in each theme, then turns it on and off.
 | Off | Flat, with muted text |
 | Hover, while off | The `--ow-hover` tint, and text at full strength |
 | Pressing | Scaled to 0.97 within 90 ms, in the pressed material: `--ow-pressed-bg` and `--ow-pressed-shadow` |
-| On | The raised key: `--ow-raised-bg` and `--ow-raised-shadow`, with text in `--ow-fg` |
+| On | The raised key: `--ow-raised-bg` 8% toward `--ow-fg`, `--ow-raised-shadow`, text in `--ow-fg` |
 | Hover, while on | The fill tints 4% toward the text; the edges stay |
 | Keyboard focus | A 2px ring 2px out, in `--ow-focus` |
 | Disabled | 45% opacity, and presses do nothing |

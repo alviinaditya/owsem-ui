@@ -168,18 +168,20 @@ import { Button, ButtonIcon, buttonStyles, IconButton } from "owsem-ui/base"; //
   load, so the spinner fades in.
 - `IconButton`: `icon` and a required `aria-label`; square; `ghost` by default.
 - Look: flat fills with crisp 1px edges drawn as inset shadows, so every variant of a size is the
-  same height. `secondary` is the raised key, `primary` and `destructive` are solid fills with an
-  edge darker than the fill, `outline` is a 1px `--ow-edge` line, and `ghost` is flat until hovered.
-  There is no drop shadow and no socket; do not add a `box-shadow` around a button.
+  same height. `primary`, `secondary` (a neutral: grey in light, silver in dark), and
+  `destructive` are solid fills with an edge darker than the fill, `outline` is a quiet 1px line
+  from the text color, `ghost` is flat until hovered, and `soft` is a tint with no edge. There is
+  no drop shadow and no socket; do not add a `box-shadow` around a button.
 - Links: never render a link through Button. Spread `buttonStyles({ variant, size, soft,
   className })` on the `<a>` or router `Link`, and wrap icons in `ButtonIcon` (`side`). Pass icons
   as elements; their size is the font size plus 2px, so do not size them.
 - Size: `--py` (padding above and below the text) sets any custom size, through `style` on the
   button itself: `style={{ "--py": "0.6em" }}`. Do not set `height` or `padding`.
 - Reads `--ow-accent` with `--ow-on-accent` (primary; the link mixes the accent toward `--ow-fg`),
-  `--ow-critical` with `--ow-bg` as its text (destructive), `--ow-primary-shadow` (both fills'
-  edges), `--ow-raised-*` (secondary), `--ow-pressed-*` (held down), `--ow-edge` (outline),
-  `--ow-fg`, `--ow-hover`, `--ow-focus`, `--ow-radius`, and `--ow-motion-scale`.
+  `--ow-critical-solid` with `--ow-on-critical` (destructive; soft uses `--ow-critical`),
+  `--ow-fg` and `--ow-bg` (secondary's fill and text, outline's line), `--ow-primary-shadow` (the
+  solid fills' edges), `--ow-pressed-*` (held down), `--ow-hover`, `--ow-focus`, `--ow-radius`,
+  and `--ow-motion-scale`.
 
 ### Separator
 

@@ -250,17 +250,23 @@ function Anatomy({ lang }: { lang: Lang }) {
 
 const THEMES = ["light", "dark"] as const;
 
-/**
- * Each variant in each theme: the three sizes, then disabled and loading. Soft follows the
- * controls.
- */
-function States({ cfg, lang }: { cfg: Cfg; lang: Lang }) {
+// Every variant, each toned one followed by its soft version.
+const STATE_ROWS = VARIANTS.flatMap((variant) =>
+  TONED.includes(variant)
+    ? [
+        { variant, soft: false },
+        { variant, soft: true },
+      ]
+    : [{ variant, soft: false }],
+);
+
+/** Each variant in each theme, soft ones too: the three sizes, then disabled and loading. */
+function States({ lang }: { lang: Lang }) {
   const t = TEXT[lang];
   return (
     <Matrix
       columns={THEMES.map((theme) => t[theme])}
-      rows={VARIANTS.map((variant) => {
-        const soft = Boolean(cfg.soft) && TONED.includes(variant);
+      rows={STATE_ROWS.map(({ variant, soft }) => {
         return {
           label: soft ? `${variant} soft` : variant,
           cells: THEMES.map((theme) => (
@@ -371,13 +377,12 @@ const buttonLab = defineLab({
       tokens: {
         "--ow-radius": "--_radius",
         "--ow-fg": "--_ink",
-        "--ow-raised-bg": "--_raised-bg",
+        "--ow-bg": "--_page",
         "--ow-pressed-bg": "--_pressed-bg",
         "--ow-accent": "--_primary-bg",
         "--ow-on-accent": "--_on-primary",
-        "--ow-critical": "--_critical",
-        "--ow-bg": "--_on-critical",
-        "--ow-edge": "--_edge",
+        "--ow-critical-solid": "--_critical",
+        "--ow-on-critical": "--_on-critical",
         "--ow-hover": "--_hover",
         "--ow-focus": "--_focus",
       },
@@ -490,7 +495,7 @@ const buttonLab = defineLab({
     },
     geometry: { demo: (_cfg, lang) => <Geometry lang={lang} /> },
     anatomy: { inspect: true, demo: (_cfg, lang) => <Anatomy lang={lang} /> },
-    states: { demo: (cfg, lang) => <States cfg={cfg} lang={lang} /> },
+    states: { demo: (_cfg, lang) => <States lang={lang} /> },
     customization: { controls: true },
     ship: { code: true },
   },

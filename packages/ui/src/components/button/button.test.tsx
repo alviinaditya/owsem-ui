@@ -9,6 +9,10 @@ import { Button, ButtonIcon, buttonStyles, IconButton } from "./index";
 
 const root = document.documentElement;
 
+// Secondary's fill, and outline's line: both from the text color.
+const NEUTRAL = "color-mix(in oklab, var(--ow-fg) 75%, var(--ow-bg))";
+const OUTLINE = "inset 0 0 0 1px color-mix(in oklab, var(--ow-fg) 16%, transparent)";
+
 const Plus = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
     <path d="M5 12h14M12 5v14" />
@@ -249,17 +253,21 @@ describe("Button", () => {
     }
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
-      expect(face(secondary).backgroundColor).toBe(resolveColor("var(--ow-raised-bg)"));
-      expect(face(secondary).boxShadow).toBe(resolveShadow("var(--ow-raised-shadow)"));
+      // A neutral solid: the text color a little toward the page, with the page's color as text.
+      expect(face(secondary).backgroundColor).toBe(resolveColor(NEUTRAL));
+      expect(face(secondary).boxShadow).toBe(resolveShadow("var(--ow-primary-shadow)"));
+      expect(getComputedStyle(secondary).color).toBe(resolveColor("var(--ow-bg)"));
       expect(face(primary).backgroundColor).toBe(resolveColor("var(--ow-accent)"));
       expect(face(primary).boxShadow).toBe(resolveShadow("var(--ow-primary-shadow)"));
       expect(getComputedStyle(primary).color).toBe(resolveColor("var(--ow-on-accent)"));
-      // The critical fill with the primary's crisp edges, and the page background as its text.
-      expect(face(destructive).backgroundColor).toBe(resolveColor("var(--ow-critical)"));
+      // The critical solid with the primary's crisp edges, and its own text color.
+      expect(face(destructive).backgroundColor).toBe(resolveColor("var(--ow-critical-solid)"));
       expect(face(destructive).boxShadow).toBe(resolveShadow("var(--ow-primary-shadow)"));
-      expect(getComputedStyle(destructive).color).toBe(resolveColor("var(--ow-bg)"));
+      expect(getComputedStyle(destructive).color).toBe(resolveColor("var(--ow-on-critical)"));
       expect(face(outline).backgroundColor).toBe("rgba(0, 0, 0, 0)");
-      expect(face(outline).boxShadow).toBe(resolveShadow("inset 0 0 0 1px var(--ow-edge)"));
+      expect(face(outline).boxShadow).toBe(resolveShadow(OUTLINE));
+      // Soft is a tint with no edge.
+      expect(face(soft).boxShadow).toBe("none");
       expect(face(ghost).backgroundColor).toBe("rgba(0, 0, 0, 0)");
       expect(face(ghost).boxShadow).toBe("none");
       expect(getComputedStyle(ghost).color).toBe(resolveColor("var(--ow-fg)"));
@@ -310,12 +318,12 @@ describe("Button", () => {
     expect(face(button).backgroundImage).toContain("rgba(0, 0, 0, 0)");
     await userEvent.hover(button);
     expect(face(button).backgroundImage).toContain(resolveColor("var(--ow-hover)"));
-    expect(face(button).boxShadow).toBe(resolveShadow("var(--ow-raised-shadow)"));
+    expect(face(button).boxShadow).toBe(resolveShadow("var(--ow-primary-shadow)"));
     await userEvent.unhover(button);
   });
 
   test("a press scales the button into the pressed material (DP-4)", async () => {
-    const button = await one(<Button variant="secondary">Press</Button>);
+    const button = await one(<Button variant="ghost">Press</Button>);
     const box = button.getBoundingClientRect();
     pointer("pointerdown", button, box.left + 10, box.top + 10);
     expect(button.hasAttribute("data-held")).toBe(true);
@@ -333,16 +341,17 @@ describe("Button", () => {
   });
 
   test("held down, ghost takes the pressed pair, and solid fills keep their edges", async () => {
-    const [ghost, outline, primary, destructive] = await mount(
+    const [ghost, outline, primary, secondary, destructive] = await mount(
       <>
         <Button variant="ghost">Ghost</Button>
         <Button variant="outline">Outline</Button>
         <Button variant="primary">Primary</Button>
+        <Button variant="secondary">Secondary</Button>
         <Button variant="destructive">Delete</Button>
       </>,
     );
-    if (!ghost || !outline || !primary || !destructive) throw new Error("no buttons");
-    for (const button of [ghost, outline, primary, destructive]) {
+    if (!ghost || !outline || !primary || !secondary || !destructive) throw new Error("no buttons");
+    for (const button of [ghost, outline, primary, secondary, destructive]) {
       const box = button.getBoundingClientRect();
       pointer("pointerdown", button, box.left + 5, box.top + 5);
     }
@@ -350,14 +359,15 @@ describe("Button", () => {
     expect(face(ghost).boxShadow).toBe(resolveShadow("var(--ow-pressed-shadow)"));
     // Outline keeps its line over the pressed fill.
     expect(face(outline).backgroundColor).toBe(resolveColor("var(--ow-pressed-bg)"));
-    expect(face(outline).boxShadow).toBe(resolveShadow("inset 0 0 0 1px var(--ow-edge)"));
+    expect(face(outline).boxShadow).toBe(resolveShadow(OUTLINE));
     // Solid fills darken a little.
     const darker = (fill: string) => resolveColor(`color-mix(in oklab, ${fill}, black 10%)`);
     expect(face(primary).backgroundColor).toBe(darker("var(--ow-accent)"));
     expect(face(primary).boxShadow).toBe(resolveShadow("var(--ow-primary-shadow)"));
-    expect(face(destructive).backgroundColor).toBe(darker("var(--ow-critical)"));
+    expect(face(secondary).backgroundColor).toBe(darker(NEUTRAL));
+    expect(face(destructive).backgroundColor).toBe(darker("var(--ow-critical-solid)"));
     expect(face(destructive).boxShadow).toBe(resolveShadow("var(--ow-primary-shadow)"));
-    for (const button of [ghost, outline, primary, destructive]) {
+    for (const button of [ghost, outline, primary, secondary, destructive]) {
       const box = button.getBoundingClientRect();
       pointer("pointerup", button, box.left + 5, box.top + 5);
     }
@@ -434,7 +444,7 @@ describe("Button", () => {
     );
     const spinner = button.querySelector(".ow-button__spinner svg");
     expect(spinner && getComputedStyle(spinner).animationName).toBe("ow-button-pulse");
-    const still = await one(<Button variant="secondary">Press</Button>);
+    const still = await one(<Button variant="ghost">Press</Button>);
     const box = still.getBoundingClientRect();
     pointer("pointerdown", still, box.left + 5, box.top + 5);
     expect(face(still).backgroundColor).toBe(resolveColor("var(--ow-pressed-bg)"));

@@ -67,20 +67,20 @@ Inspect (I) outlines each part on the stage, with its tokens.
 
 ## States and variants [#states]
 
-The stage shows every variant in both themes: the three sizes, then disabled and loading. Open the
-controls (P) and turn on Soft to see the soft variants here too.
+The stage shows every variant in both themes, each soft version after its solid one: the three
+sizes, then disabled and loading.
 
 | Variant | Material |
 | --- | --- |
 | `primary` (default) | The primary fill: a 1px edge darker than the fill, and a thin light line inside its top |
-| `secondary` | The raised key: a flat fill with a crisp edge |
-| `outline` | Transparent, with a 1px `--ow-edge` line |
+| `secondary` | A neutral solid, grey in light and silver in dark, with the primary's edges |
+| `outline` | Transparent, with a quiet 1px line from the text color, firmer on hover |
 | `ghost` | Flat; tinted only on hover |
 | `link` | Text; underlined on hover |
-| `destructive` | The critical tone, with the primary's edges |
+| `destructive` | The critical solid, with the primary's edges |
 
 `soft` turns `primary`, `secondary`, and `destructive` into a flat tint of their tone, with text in
-that tone. Nothing casts a shadow and Base never glows: fills and edges set the hierarchy, and every
+that tone and no edge. Nothing casts a shadow and Base never glows: fills and edges set the hierarchy, and every
 variant of a size is the same height.
 
 | State | What marks it |
@@ -124,14 +124,14 @@ Button reads these theme tokens. Set one on an element to change the buttons ins
 | `--ow-radius` | Corner radius |
 | `--ow-accent` | Primary fill; the link's text, mixed toward `--ow-fg` for 4.5:1 |
 | `--ow-on-accent` | Text on the primary fill |
-| `--ow-critical` | Destructive fill |
-| `--ow-bg` | Text on the destructive fill |
-| `--ow-primary-shadow` | Primary and destructive edges |
-| `--ow-raised-bg`, `--ow-raised-shadow` | Secondary face |
+| `--ow-critical-solid` | Destructive fill |
+| `--ow-on-critical` | Text on the destructive fill |
+| `--ow-critical` | Soft destructive's tint and text |
+| `--ow-primary-shadow` | Primary, secondary, and destructive edges |
+| `--ow-fg`, `--ow-bg` | Secondary's fill (the text color 75% toward the page) and its text |
 | `--ow-pressed-bg`, `--ow-pressed-shadow` | Pressed face |
-| `--ow-edge` | Outline's line |
 | `--ow-hover` | Hover tint |
-| `--ow-fg` | Text on secondary, outline, and ghost |
+| `--ow-fg` | Text on outline and ghost, and outline's line (16%, 28% on hover) |
 | `--ow-focus` | Focus ring |
 
 <ForMode mode="isolated">

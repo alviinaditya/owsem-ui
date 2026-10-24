@@ -69,20 +69,20 @@ menambah ukuran. Inspeksi (I) menandai setiap bagian di stage, beserta tokennya.
 
 ## State dan varian [#states]
 
-Stage menampilkan setiap varian di kedua tema: tiga ukuran, lalu disabled dan loading. Buka panel
-kontrol (P) dan nyalakan Soft untuk melihat varian soft di sini juga.
+Stage menampilkan setiap varian di kedua tema, versi soft tepat setelah versi solidnya: tiga
+ukuran, lalu disabled dan loading.
 
 | Varian | Material |
 | --- | --- |
 | `primary` (bawaan) | Isi primary: tepi 1px yang lebih gelap dari isinya, dan garis terang tipis di dalam tepi atasnya |
-| `secondary` | Tombol timbul: isi datar dengan tepi yang tegas |
-| `outline` | Transparan, dengan garis `--ow-edge` 1px |
+| `secondary` | Isi netral solid, abu-abu di tema terang dan perak di tema gelap, dengan tepi seperti primary |
+| `outline` | Transparan, dengan garis 1px yang halus dari warna teks, lebih tegas saat hover |
 | `ghost` | Datar; berwarna hanya saat hover |
 | `link` | Teks; bergaris bawah saat hover |
-| `destructive` | Nada critical, dengan tepi seperti primary |
+| `destructive` | Isi critical solid, dengan tepi seperti primary |
 
 `soft` mengubah `primary`, `secondary`, dan `destructive` menjadi warna tipis dari nadanya yang
-datar, dengan teks bernada sama. Tidak ada yang memberi bayangan dan Base tidak pernah bercahaya:
+datar, dengan teks bernada sama dan tanpa tepi. Tidak ada yang memberi bayangan dan Base tidak pernah bercahaya:
 hierarki dibangun dari isi dan tepi, dan semua varian dalam satu ukuran sama tingginya.
 
 | State | Yang menandainya |
@@ -127,14 +127,14 @@ misalnya `.actions`.
 | `--ow-radius` | Radius sudut |
 | `--ow-accent` | Isi primary; teks link, dicampur ke arah `--ow-fg` agar minimal 4,5:1 |
 | `--ow-on-accent` | Teks di atas isi primary |
-| `--ow-critical` | Isi destructive |
-| `--ow-bg` | Teks di atas isi destructive |
-| `--ow-primary-shadow` | Tepi primary dan destructive |
-| `--ow-raised-bg`, `--ow-raised-shadow` | Permukaan secondary |
+| `--ow-critical-solid` | Isi destructive |
+| `--ow-on-critical` | Teks di atas isi destructive |
+| `--ow-critical` | Warna tipis dan teks destructive soft |
+| `--ow-primary-shadow` | Tepi primary, secondary, dan destructive |
+| `--ow-fg`, `--ow-bg` | Isi secondary (warna teks 75% ke arah latar halaman) dan teksnya |
 | `--ow-pressed-bg`, `--ow-pressed-shadow` | Permukaan saat ditekan |
-| `--ow-edge` | Garis outline |
 | `--ow-hover` | Warna hover |
-| `--ow-fg` | Teks secondary, outline, dan ghost |
+| `--ow-fg` | Teks outline dan ghost, serta garis outline (16%, 28% saat hover) |
 | `--ow-focus` | Ring fokus |
 
 <ForMode mode="isolated">

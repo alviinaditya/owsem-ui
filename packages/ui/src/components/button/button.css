@@ -1,11 +1,11 @@
 @layer owsem.tokens, owsem.components;
 
 /*
- * Button. Geometry comes from one number, --py (FR-9 to FR-11). Materials (DP-7): secondary is
- * the raised key, primary the primary material, and destructive a critical fill with the same
- * edges; outline has an edge line, ghost is flat until hovered, and link is text. Edges are inset
- * shadows, so they add no size. Only transform and opacity move: the press (DP-4), the ripple
- * (Tactile), and the loading swap.
+ * Button. Geometry comes from one number, --py (FR-9 to FR-11). Materials (DP-7): primary, secondary,
+ * and destructive are solid fills with the primary material's edges (the accent, a neutral, and the
+ * critical solid); outline has a quiet line, ghost is flat until hovered, and link is text. Edges
+ * are inset shadows, so they add no size. Only transform and opacity move: the press (DP-4), the
+ * ripple (Tactile), and the loading swap.
  */
 @layer owsem.components {
   .ow-button {
@@ -21,9 +21,7 @@
     --_ink: var(--ow-fg);
     --_hover: var(--ow-hover);
     --_focus: var(--ow-focus);
-    --_edge: var(--ow-edge);
-    --_raised-bg: var(--ow-raised-bg);
-    --_raised-shadow: var(--ow-raised-shadow);
+    --_page: var(--ow-bg);
     --_pressed-bg: var(--ow-pressed-bg);
     --_pressed-shadow: var(--ow-pressed-shadow);
     --_primary-bg: var(--ow-accent);
@@ -31,9 +29,12 @@
      * would make the button look taller than its neighbors. */
     --_primary-shadow: var(--ow-primary-shadow);
     --_on-primary: var(--ow-on-accent);
-    --_critical: var(--ow-critical);
-    /* The page background reads on the critical tone in both themes. */
-    --_on-critical: var(--ow-bg);
+    --_critical: var(--ow-critical-solid);
+    --_on-critical: var(--ow-on-critical);
+    /* Secondary: the text color a little toward the page, grey in light and silver in dark, with
+     * the page's color as its text. */
+    --_neutral: color-mix(in oklab, var(--_ink) 75%, var(--_page));
+    --_on-neutral: var(--_page);
     /* Text needs 4.5:1, more than the accent's 3:1, so the link leans toward the text color. */
     --_link: color-mix(in oklab, var(--ow-accent) 70%, var(--_ink));
     --_ripple: currentColor;
@@ -99,14 +100,12 @@
     pointer-events: none;
   }
 
-  /* The raised key. */
-  .ow-button[data-variant="secondary"] {
-    --_bg: var(--_raised-bg);
-    --_shadow: var(--_raised-shadow);
-  }
-
   /* Solid fills keep their edges while held, and the fill darkens a little in both themes. */
-  .ow-button:is([data-variant="primary"], [data-variant="destructive"]) {
+  .ow-button:is(
+    [data-variant="primary"],
+    [data-variant="secondary"],
+    [data-variant="destructive"]
+  ) {
     --_bg: var(--_primary-bg);
     --_shadow: var(--_primary-shadow);
     /* literal: black darkens any fill */
@@ -118,18 +117,24 @@
     --_fg: var(--_on-primary);
   }
 
+  .ow-button[data-variant="secondary"] {
+    --_fg: var(--_on-neutral);
+    --_bg: var(--_neutral);
+  }
+
   .ow-button[data-variant="destructive"] {
     --_fg: var(--_on-critical);
     --_bg: var(--_critical);
   }
 
-  /* Held down, it takes the pressed fill and keeps its line. */
+  /* A quiet line from the text color, firmer on hover; held down, the pressed fill keeps it. */
   .ow-button[data-variant="outline"] {
-    --_shadow: inset 0 0 0 1px var(--_edge);
+    --_line: color-mix(in oklab, var(--_ink) 16%, transparent);
+    --_shadow: inset 0 0 0 1px var(--_line);
     --_shadow-pressed: var(--_shadow);
   }
 
-  /* Soft: a flat tint of the variant's tone, with text in that tone. */
+  /* Soft: a flat tint of the variant's tone with text in that tone, and no edge. */
   .ow-button[data-soft]:is(
     [data-variant="primary"],
     [data-variant="secondary"],
@@ -137,9 +142,9 @@
   ) {
     --_fg: color-mix(in oklab, var(--_tone) 75%, var(--_ink));
     --_bg: color-mix(in oklab, var(--_tone) 12%, transparent);
-    --_shadow: inset 0 0 0 1px color-mix(in oklab, var(--_tone) 18%, transparent);
+    --_shadow: none;
     --_bg-pressed: color-mix(in oklab, var(--_tone) 18%, transparent);
-    --_shadow-pressed: var(--_shadow);
+    --_shadow-pressed: none;
   }
 
   .ow-button[data-soft][data-variant="primary"] {
@@ -150,8 +155,9 @@
     --_tone: var(--_ink);
   }
 
+  /* The critical text tone, so the text reads on the tint in both themes. */
   .ow-button[data-soft][data-variant="destructive"] {
-    --_tone: var(--_critical);
+    --_tone: var(--ow-critical);
   }
 
   /* Link: text only, underlined on hover; a press dims it instead of scaling it. */
@@ -172,6 +178,10 @@
   @media (hover: hover) and (pointer: fine) {
     .ow-button:hover:not([data-disabled]) {
       --_tint: var(--_hover);
+    }
+
+    .ow-button[data-variant="outline"]:hover:not([data-disabled]) {
+      --_line: color-mix(in oklab, var(--_ink) 28%, transparent);
     }
 
     .ow-button[data-variant="link"]:hover:not([data-disabled]) {

@@ -427,8 +427,10 @@ body {
   white-space: nowrap;
 }
 
+/* The box draws the fill: the command's own covered the box's rounded border at the corners. */
 .install .command {
   border: 0;
+  background: none;
   box-shadow: none;
 }
 

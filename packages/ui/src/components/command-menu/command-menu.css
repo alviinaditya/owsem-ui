@@ -231,6 +231,7 @@
 
   /* The results scroll inside the panel; Glide's highlight rides along (glide.ts). */
   .ow-command-menu__list {
+    --_thumb: color-mix(in oklab, var(--ow-muted) 40%, transparent);
     position: relative;
     isolation: isolate;
     flex: 0 1 auto;
@@ -240,6 +241,34 @@
     overscroll-behavior: contain;
     scroll-padding-block: var(--_p);
     outline: none;
+    /* A thin, quiet scrollbar without arrows: the standard properties here (Firefox)… */
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement (NF-1) */
+    scrollbar-width: thin;
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement (NF-1) */
+    scrollbar-color: var(--_thumb) transparent;
+  }
+
+  /* …and WebKit's pseudo-elements where the browser has them, which the standard ones would turn off. */
+  @supports selector(::-webkit-scrollbar) {
+    .ow-command-menu__list {
+      scrollbar-width: auto;
+      scrollbar-color: auto;
+    }
+
+    .ow-command-menu__list::-webkit-scrollbar {
+      inline-size: 10px;
+    }
+
+    .ow-command-menu__list::-webkit-scrollbar-track {
+      background: none;
+    }
+
+    .ow-command-menu__list::-webkit-scrollbar-thumb {
+      border: 3px solid transparent;
+      /* literal: a pill, whatever the theme's radius */
+      border-radius: 999px;
+      background: var(--_thumb) padding-box;
+    }
   }
 
   .ow-command-menu__list[data-empty] {

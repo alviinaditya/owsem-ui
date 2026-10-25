@@ -1,8 +1,8 @@
 import type { CSSProperties } from "react";
-import { describe, expect, test } from "vitest";
+import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { commands } from "vitest/browser";
 import { render } from "vitest-browser-react";
 import { TOL } from "../../../test/geometry.ts";
-import { settle } from "../../../test/raf-counter.ts";
 import { TableOfContents } from "./index";
 
 const block = (height: number) => ({ blockSize: height, margin: 0 }) satisfies CSSProperties;
@@ -46,6 +46,11 @@ async function mount(dir: "ltr" | "rtl") {
 }
 
 describe.each(["ltr", "rtl"] as const)("Table of Contents geometry, %s", (dir) => {
+  // Where the marker lands, not how it slides: without motion it rests on the link at once, so
+  // the test never waits on frames WebKit may hold back in a throttled test frame.
+  beforeAll(() => commands.setReducedMotion("reduce"));
+  afterAll(() => commands.setReducedMotion("no-preference"));
+
   test("the marker covers the rail and is as tall as the current link, wrapped or not", async () => {
     const { get, links } = await mount(dir);
     const [install, recolor] = links;
@@ -65,7 +70,6 @@ describe.each(["ltr", "rtl"] as const)("Table of Contents geometry, %s", (dir) =
       // where the marker lands, so the event is sent here.
       article.dispatchEvent(new Event("scroll"));
       await expect.poll(() => link.hasAttribute("data-current")).toBe(true);
-      await settle({ maxMs: 3000 });
       const m = marker.getBoundingClientRect();
       const l = link.getBoundingClientRect();
       expect(Math.abs(m.top - l.top)).toBeLessThanOrEqual(TOL);

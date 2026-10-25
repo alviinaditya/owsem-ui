@@ -1,0 +1,146 @@
+---
+title: Toolbar
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Toolbar menampung tombol, toggle, link, dan sebuah field dalam satu baris, di atas material panel,
+dengan alur terukir di antara grupnya. Toolbar hanya satu perhentian Tab, dan tombol panah
+berpindah di dalamnya. Gulir untuk mulai tur; stage mengikuti setiap bagian.
+
+## Tombol dan toggle bersama [#together]
+
+Satu toolbar memuat beberapa jenis item. Tombol bekerja sekali; toggle tetap menyala. Keduanya
+tenang: datar dan muted sampai pointer berada di atasnya, dengan ukuran dan spacing Button. Toggle
+yang menyala menjadi tombol timbul, isian datar dengan tepi tegas. Selama ditahan, keduanya memakai
+material ditekan dan masuk ke 0,97, lalu dilepas dengan spring settle.
+
+Toggle di toolbar adalah `Toolbar.Button` yang merender Toggle: `render={<Toggle />}`. Toolbar
+memberinya tempat dalam urutan tombol panah, Toggle memberinya state menyala, dan tampilan Toggle
+yang menang, karena style item toolbar tidak punya specificity.
+
+Stage memutarnya: pointer menyalakan Miring dan Garis bawah, menekan Urungkan, lalu mematikan
+keduanya lagi, dan baris di bawah toolbar mengikutinya. Putar scene memutarnya lagi.
+
+## Satu perhentian Tab [#roving]
+
+Sebanyak apa pun itemnya, toolbar hanya satu perhentian dalam urutan Tab, jadi pengguna keyboard
+cukup sekali Tab untuk melewatinya. Di dalamnya, tombol panah berpindah antar item dan berputar
+di kedua ujung. Tab keluar dari toolbar, dan saat kembali, fokus mendarat di item yang terakhir
+dipakai; baris di bawah toolbar menyebut namanya.
+
+Coba sendiri: klik stage, tekan Tab sampai toolbar menerima fokus, lalu pakai tombol panah. Tombol
+disabled seperti Ulangi tetap bisa difokus, jadi tetap bisa ditemukan dan diumumkan sebagai tidak
+tersedia. Di dalam field, panah menggeser caret dan baru berpindah item di ujungnya, jadi pakai
+paling banyak satu field, dan letakkan di akhir.
+
+## Anatomi [#anatomy]
+
+Delapan bagian. Base UI merender role dan fokus berpindah (roving focus); OwsemUI menambahkan class
+`ow-toolbar` dan `ow-toolbar__*`, ukuran, dan ikon. Inspeksi (I) menandai setiap bagian di stage;
+pilih sebuah nama, di sini atau di stage, untuk melihat tokennya.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-toolbar` | `role="toolbar"`, `aria-orientation`, `data-orientation`, dan `data-size`; panelnya |
+| <Part name="Group" /> | `div.ow-toolbar__group` | `role="group"`; beri nama dengan `aria-label` |
+| <Part name="Toggle" /> | `button.ow-toggle.ow-toolbar__button` | Button dengan `render={<Toggle />}`, jadi punya `aria-pressed`, dan `data-pressed` selama menyala |
+| <Part name="Button" /> | `button.ow-toolbar__button` | `data-size`, dan `data-icon-only` bila tanpa label |
+| <Part name="Icon" /> | `span.ow-toolbar__icon` | Dekoratif (`aria-hidden`): `startIcon` atau `endIcon`, ukuran font ditambah 2px; `data-side="start"` atau `"end"` |
+| <Part name="Separator" /> | `div.ow-toolbar__separator` | `role="separator"` dan `data-orientation`, melintang arah toolbar |
+| <Part name="Link" /> | `a.ow-toolbar__link` | Tampil seperti tombol; `render` menggantinya dengan link router |
+| <Part name="Input" /> | `input.ow-toolbar__input` | Well datar dengan tepi 3:1, setinggi tombol |
+
+## State dan varian [#states]
+
+Stage menampilkan setiap ukuran di kedua tema, masing-masing toolbar dengan toggle yang menyala,
+toggle yang mati, sebuah alur, sebuah tombol, dan tombol yang disabled. Pointer menyalakan dan
+mematikan Miring di setiap tema.
+
+| State | Tandanya |
+| --- | --- |
+| Diam | Datar, dengan teks muted |
+| Hover | Warna `--ow-hover`, dan teks dengan kontras penuh |
+| Sedang ditekan | Mengecil ke 0,97 dalam 90 ms, dengan material ditekan |
+| Menyala, untuk toggle | Tombol timbul, sama seperti Toggle sendiri |
+| Fokus keyboard | Ring 2px dengan jarak 2px, warna `--ow-focus` |
+| Disabled | Opacity 45%, tetap bisa difokus |
+
+`orientation="vertical"` menyusun item ke bawah, panah atas dan bawah berpindah antar item, dan
+alurnya berbalik melintang. Pilih di kontrol.
+
+## Keyboard dan aksesibilitas [#keyboard]
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab, Shift+Tab | Masuk dan keluar toolbar, di item yang terakhir dipakai |
+| Panah kanan, panah kiri | Item berikutnya atau sebelumnya, berputar di ujung (panah bawah dan atas bila vertikal) |
+| Space, Enter | Menekan tombol, atau menyalakan dan mematikan toggle |
+
+Dari kanan ke kiri, panah kiri yang maju. Screen reader mengumumkan toolbar dengan namanya, setiap
+grup dengan namanya sendiri, toggle beserta state-nya, dan alur sebagai pemisah.
+`loopFocus={false}` menghentikan perputaran di ujung.
+
+Dengan `prefers-reduced-motion`, tekanan mengganti material tanpa mengecil. Di mode forced colors
+(Windows High Contrast), toolbar, item, dan field-nya tetap punya tepi 1px berwarna sistem, alurnya
+tetap terlihat, dan ring fokusnya `Highlight`.
+
+## Kustomisasi [#customization]
+
+Kontrol di stage terbuka: pilih warna permukaan atau garis gelap alur, dan kodenya mengikuti.
+
+Toolbar membaca token tema berikut. Pasang di toolbar itu sendiri, seperti `editor.css` dengan
+`.editor`, atau di elemen di sekitarnya, untuk mengubah toolbar di dalamnya.
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-panel` | Permukaan |
+| `--ow-panel-shadow` | Tepi dan bayangan |
+| `--ow-muted` | Teks tombol dan link, serta placeholder field |
+| `--ow-hover` | Warna di bawah pointer |
+| `--ow-fg` | Teks di bawah pointer atau saat ditahan, serta teks field |
+| `--ow-pressed-bg` | Isian saat ditahan |
+| `--ow-pressed-shadow` | Tepi saat ditahan |
+| `--ow-well-bg` | Isian field |
+| `--ow-well-shadow` | Garis dalam field, di bawah tepinya |
+| `--ow-edge` | Tepi field, dengan kontras 3:1 |
+| `--ow-line-dark` | Garis gelap alur |
+| `--ow-line-light` | Garis terang alur |
+| `--ow-radius` | Sudut item; sudut toolbar menambahkan padding 4px-nya, sehingga tetap konsentris |
+| `--ow-focus` | Ring fokus |
+
+<ForMode mode="isolated">
+
+Di mode isolated, nilainya ada di root setiap Toolbar, jadi atur di toolbar itu sendiri, seperti
+`editor.css`. Toggle di dalamnya punya root sendiri: atur nilainya di `.editor .ow-toggle`.
+
+</ForMode>
+
+Toggle di dalam toolbar tetap tampil seperti Toggle, dari token tema yang sama.
+
+<TokenChip lang="id" />
+
+## Ship it [#ship]
+
+Drawer kode menulis toolbar persis seperti yang diatur di stage. Ganti ukuran, orientasi, atau
+warna, dan baris yang berubah akan menyala.
+
+| Bagian | Prop | Tipe | Bawaan |
+| --- | --- | --- | --- |
+| Root | `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| Root | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` |
+| Root | `loopFocus` | `boolean` | `true` |
+| Root, Group | `disabled` | `boolean` | `false` |
+| Button, Link, Input | `size` | `"sm" \| "md" \| "lg"` | Milik toolbar |
+| Button, Link | `startIcon`, `endIcon` | `ReactNode` | |
+| Button, Input | `disabled` | `boolean` | `false` |
+| Button, Input | `focusableWhenDisabled` | `boolean` | `true` |
+| Semua bagian | `className`, `style`, `render` | | |
+
+`orientation`, `loopFocus`, `disabled`, dan `focusableWhenDisabled` berasal dari Base UI. `size`
+pada Input adalah skala teksnya, bukan lebar dalam jumlah karakter: atur `inline-size` sebagai
+gantinya. Ref diteruskan ke elemen setiap bagian, dan props lain diteruskan ke Base UI apa adanya.
+
+Impor dari `owsem-ui/base`. Di registry, namanya item `toolbar`; toggle di dalamnya juga perlu
+item `toggle`.

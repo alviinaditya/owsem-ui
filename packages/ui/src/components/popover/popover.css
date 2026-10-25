@@ -1,0 +1,173 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * A floating panel on the panel material with the popup shadow, and an optional arrow with the
+ * same surface and edge. It grows out of its trigger in 180 ms.
+ */
+@layer owsem.components {
+  .ow-popover__popup {
+    --_bg: var(--ow-panel);
+    --_shadow: var(--ow-popup-shadow);
+    --_fg: var(--ow-fg);
+    --_muted: var(--ow-muted);
+    box-sizing: border-box;
+    max-inline-size: var(--available-width);
+    padding: 16px;
+    border-radius: calc(var(--ow-radius) + 4px);
+    /* Invisible until forced colors draw it as the edge (DP-8). */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--_bg);
+    box-shadow: var(--_shadow);
+    color: var(--_fg);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    transform-origin: var(--transform-origin);
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: transform;
+    transition:
+      opacity 180ms var(--ow-ease-out),
+      transform 180ms var(--ow-ease-out);
+  }
+
+  .ow-popover__popup:is([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  /* Leaving is quicker than arriving. */
+  .ow-popover__popup[data-ending-style] {
+    transition-duration: 120ms;
+  }
+
+  /* Opened from the keyboard, or shut with Escape: no animation. */
+  .ow-popover__popup[data-instant] {
+    transition: none;
+  }
+
+  .ow-popover__title {
+    margin: 0;
+    font-size: 1em;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .ow-popover__description {
+    margin: 0;
+    color: var(--_muted);
+  }
+
+  .ow-popover__title + .ow-popover__description {
+    margin-block-start: 4px;
+  }
+
+  /*
+   * A 14px box centered on the popup's edge; its outer half shows a square turned 45 degrees with
+   * the popup's surface and shadow, so its edges are the panel's (in dark, a light line inside a
+   * dark ring). The visible half reaches 1px into the popup at the middle, over the panel's inner
+   * line, so the arrow opens into the panel. Base UI centers it on the trigger with top or left.
+   */
+  .ow-popover__arrow {
+    /* The half that shows when the arrow points right or left. */
+    --_right-half: polygon(
+      50% 0,
+      100% 0,
+      100% 100%,
+      50% 100%,
+      50% 11px,
+      calc(50% - 1px) 11px,
+      calc(50% - 1px) 3px,
+      50% 3px
+    );
+    --_left-half: polygon(
+      0 0,
+      50% 0,
+      50% 3px,
+      calc(50% + 1px) 3px,
+      calc(50% + 1px) 11px,
+      50% 11px,
+      50% 100%,
+      0 100%
+    );
+    inline-size: 14px;
+    block-size: 14px;
+  }
+
+  /* With the 1px ring outside it, the square's diagonal is the box: (7.9 + 2) × √2 = 14. */
+  .ow-popover__arrow::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    inline-size: 7.9px;
+    block-size: 7.9px;
+    margin: auto;
+    /* Invisible until forced colors draw it as the edge (DP-8). */
+    outline: 1px solid transparent;
+    background-color: var(--_bg);
+    box-shadow: var(--_shadow);
+    transform: rotate(45deg);
+  }
+
+  /* biome-ignore-start lint/nursery/useLogicalProperties: Base UI's physical sides */
+  .ow-popover__arrow[data-side="top"] {
+    top: calc(100% - 7px);
+    clip-path: polygon(
+      0 50%,
+      3px 50%,
+      3px calc(50% - 1px),
+      11px calc(50% - 1px),
+      11px 50%,
+      100% 50%,
+      100% 100%,
+      0 100%
+    );
+  }
+
+  .ow-popover__arrow[data-side="bottom"] {
+    bottom: calc(100% - 7px);
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% 50%,
+      11px 50%,
+      11px calc(50% + 1px),
+      3px calc(50% + 1px),
+      3px 50%,
+      0 50%
+    );
+  }
+
+  .ow-popover__arrow[data-side="left"] {
+    left: calc(100% - 7px);
+    clip-path: var(--_right-half);
+  }
+
+  .ow-popover__arrow[data-side="right"] {
+    right: calc(100% - 7px);
+    clip-path: var(--_left-half);
+  }
+  /* biome-ignore-end lint/nursery/useLogicalProperties: Base UI's physical sides */
+
+  /* Logical sides: mirrored right to left. */
+  .ow-popover__arrow[data-side="inline-start"] {
+    inset-inline-start: calc(100% - 7px);
+    clip-path: var(--_right-half);
+  }
+
+  .ow-popover__arrow[data-side="inline-end"] {
+    inset-inline-end: calc(100% - 7px);
+    clip-path: var(--_left-half);
+  }
+
+  .ow-popover__positioner[dir="rtl"]
+    .ow-popover__arrow:is([data-side="inline-start"], [data-side="inline-end"]) {
+    transform: scaleX(-1);
+  }
+
+  /* FR-20: it fades, without growing. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-popover__popup:is([data-starting-style], [data-ending-style]) {
+      transform: none;
+    }
+  }
+}

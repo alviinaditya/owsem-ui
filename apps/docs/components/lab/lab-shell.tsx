@@ -1,5 +1,6 @@
 "use client";
 
+import { Kbd } from "owsem-ui/base";
 import {
   type CSSProperties,
   createContext,
@@ -17,8 +18,10 @@ import {
 } from "react";
 import { type Dictionary, format } from "@/lib/dictionaries";
 import type { Lang } from "@/lib/i18n";
+import { siteScheme } from "@/lib/theme";
 import { Icon } from "../icons/icon";
 import { ScrollFade } from "../scroll-fade";
+import { Tip } from "../tip";
 import { useTokenNames } from "../token-setup";
 import { SHEET_FULL_GAP, SHEET_HALF, SIDE_BY_SIDE } from "./layout";
 import { setActiveScene } from "./scene-store";
@@ -89,13 +92,6 @@ const useSideBySide = (): boolean =>
     () => matchMedia(SIDE_BY_SIDE).matches,
     () => true,
   );
-
-/** The site's color scheme at this moment: <html data-theme>, else the system preference. */
-function siteScheme(): "light" | "dark" {
-  const theme = document.documentElement.dataset.theme;
-  if (theme === "light" || theme === "dark") return theme;
-  return matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-}
 
 export interface LabShellProps {
   lab: LabDefinition<Config>;
@@ -587,14 +583,19 @@ export function LabShell({
             <p ref={sheetTitle} className="lab-sheet-title" tabIndex={-1}>
               {format(labels.sheetTitle, { name: componentTitle })}
             </p>
-            <button
-              type="button"
-              className="lab-sheet-close"
-              aria-label={labels.close}
-              onClick={closeSheet}
-            >
-              <Icon name="x" size={16} />
-            </button>
+            <Tip
+              trigger={
+                <button
+                  type="button"
+                  className="lab-sheet-close"
+                  aria-label={labels.close}
+                  onClick={closeSheet}
+                >
+                  <Icon name="x" size={16} />
+                </button>
+              }
+              label={labels.close}
+            />
           </div>
           {/* Outside the text's scroller, so its scrollbar runs beside the text alone. */}
           <nav ref={sceneNav} className="lab-scene-nav" aria-label={labels.scenes}>
@@ -685,7 +686,7 @@ export function StageShortcuts() {
       <span className="lab-hint-lead">{labels.shortcuts}</span>
       {keys.map(([key, name]) => (
         <span key={key} className="lab-hint-key">
-          <kbd>{key}</kbd> {name}
+          <Kbd>{key}</Kbd> {name}
         </span>
       ))}
     </p>

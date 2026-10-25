@@ -59,6 +59,8 @@ export const id = {
     stage: "Stage",
     tools: "Alat stage",
     theme: "Tema stage",
+    light: "Terang",
+    dark: "Gelap",
     controls: "Kontrol",
     code: "Kode",
     inspect: "Inspeksi",
@@ -135,7 +137,7 @@ export const id = {
     menu: "Daftar aksi dalam popup, dengan submenu dan shortcut.",
     tabs: "Panel yang berpindah lewat tab, dengan indikator yang mengikuti pilihan.",
     "scroll-area": "Area gulir dengan scrollbar tipis yang muncul saat hover.",
-    toggle: "Tombol dua state yang tetap tertekan saat aktif.",
+    toggle: "Tombol dua state yang tetap timbul saat aktif.",
     "toggle-group": "Sekumpulan toggle yang bekerja bersama, seperti segmented control.",
     toolbar: "Grup tombol dan toggle dengan navigasi keyboard.",
     "checkbox-group": "Sekumpulan checkbox dengan opsi pilih semua.",
@@ -162,6 +164,7 @@ export const id = {
     "command-menu": "Palet perintah dengan pencarian, dibangun dari Dialog dan Combobox.",
     "number-ticker": "Angka yang digitnya bergulir saat nilainya berubah.",
     "spotlight-card": "Kartu dengan border dan cahaya yang mengikuti kursor.",
+    kbd: "Tombol keyboard, digambar sebagai tuts kecil yang timbul.",
   } satisfies Record<ComponentName, string>,
 };
 

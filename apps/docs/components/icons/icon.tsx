@@ -31,6 +31,7 @@ const ICONS = {
       <path d="M3 10h18" />
     </>
   ),
+  check: <path d="M20 6 9 17l-5-5" />,
   "chevron-down": <path d="m6 9 6 6 6-6" />,
   "circle-help": (
     <>
@@ -93,6 +94,9 @@ const ICONS = {
       <line x1="10" x2="8" y1="3" y2="21" />
       <line x1="16" x2="14" y1="3" y2="21" />
     </>
+  ),
+  heart: (
+    <path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5" />
   ),
   italic: (
     <>
@@ -189,6 +193,12 @@ const ICONS = {
       <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" />
       <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" />
       <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" />
+    </>
+  ),
+  pause: (
+    <>
+      <rect x="14" y="3" width="5" height="18" rx="1" />
+      <rect x="5" y="3" width="5" height="18" rx="1" />
     </>
   ),
   pin: (
@@ -332,14 +342,22 @@ const ICONS = {
 
 export type IconName = keyof typeof ICONS;
 
-/** Decorative only: whatever shows an icon also has a text name. */
-export function Icon({ name, size = 16 }: { name: IconName; size?: number }) {
+/** Decorative only: whatever shows an icon also has a text name. `filled` fills its shape too. */
+export function Icon({
+  name,
+  size = 16,
+  filled = false,
+}: {
+  name: IconName;
+  size?: number;
+  filled?: boolean;
+}) {
   return (
     <svg
       viewBox="0 0 24 24"
       width={size}
       height={size}
-      fill="none"
+      fill={filled ? "currentColor" : "none"}
       stroke="currentColor"
       strokeWidth="1.8"
       strokeLinecap="round"

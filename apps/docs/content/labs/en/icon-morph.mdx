@@ -1,0 +1,110 @@
+---
+title: Icon Morph
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Icon Morph swaps one icon for another in place: the old icon shrinks, blurs, and fades out while the
+new one grows in, both in one cell, so nothing around them moves. Use it where an icon shows a
+state, such as Copy turning into a check, Play into Pause, or an empty heart into a full one. Scroll
+to start the tour; the stage follows each part.
+
+## Swapping on a key [#swap]
+
+Icon Morph holds one icon element. Give each icon its own `key`, and change the icon to swap it:
+`{copied ? <Check key="check" /> : <Copy key="copy" />}`. A new key starts a swap; the same key
+updates the icon in place, with no animation. Nothing animates on the first render either, so a page
+that loads with a full heart shows it at once, on the server too. Without an icon (`null`), the old
+one leaves and the cell stays empty.
+
+The stage plays it: Play turns into Pause, the heart fills, and Copy link turns into a check, which
+goes back on its own after 1.6 seconds. Then Pause and the heart go back. Press them yourself to
+take over.
+
+## Changing mid-swap [#interrupt]
+
+A swap is two CSS transitions, so a change mid-swap turns both icons around where they are, without
+a jump: the icon coming back grows from its current size instead of starting from nothing. At most
+one icon leaves at a time; an older one that is still leaving goes at once. Icons never move in the
+DOM, which would restart them.
+
+The stage slows the spring down four times and presses Play four times in a row, quicker than a swap
+takes. Each press turns the icons around mid-way, and the last one lands where the card started.
+
+## Anatomy [#anatomy]
+
+Two parts: the Root cell and an Item around each icon. While a swap runs there are two Items, the
+leaving one first or last in the DOM, and each is laid over the other in the cell, which is as large
+as the larger icon. Inspect (I) outlines each part on the stage; pick a name, here or on the stage,
+to see its tokens.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `span.ow-icon-morph` | An inline grid of one cell. In the icon slot of a Button, Toggle, or Toolbar item, it and its icons fill the slot, as one icon does |
+| <Part name="Item" /> | `span.ow-icon-morph__item` | One icon. `data-starting-style` while it enters, `data-ending-style` and `aria-hidden` while it leaves |
+
+## States and variants [#states]
+
+The stage holds one swap, Copy to Check, at moments along the spring, at three motion scales. At
+motion scale 1 a leaving icon goes down to half its size with a 3px blur; at 0.5 to three quarters
+with 1.5px; at 0 it only fades.
+
+| State | What shows it |
+| --- | --- |
+| At rest | One Item, no state attributes, and nothing running |
+| Entering | The new Item grows from half size, blurred and transparent, to rest |
+| Leaving | The old Item shrinks, blurs, and fades out over the new one, then goes |
+
+Icon Morph is an Owsem component (Kinetic): it moves on the settle spring, the critically damped
+Core spring, so an icon lands without bouncing. It has no glow, and no animation runs once a swap
+ends.
+
+## Keyboard and accessibility [#keyboard]
+
+Icon Morph is not focusable and adds no role: the control it sits in carries the name and the state.
+Name that control after what it does now (`aria-label` from Play to Pause), or keep one name and
+show the state with `aria-pressed`, as Like does with a Toggle. When the change matters to someone
+who cannot see it, such as a copy, announce it in a status region. The leaving icon is
+`aria-hidden`, so it is never read twice.
+
+With `prefers-reduced-motion`, icons only crossfade, in 150 ms, without shrinking or blurring. The
+icons draw in `currentColor`, so forced colors (Windows High Contrast) paint them in the control's
+text color.
+
+## Customization [#customization]
+
+The stage controls are open: change the motion scale or slow the spring down, and the code follows.
+Icon Morph reads these theme tokens; set them on the icon itself, as `like.css` does, since the
+settle spring also times a button's press.
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-motion-scale` | How far an icon shrinks and blurs: half its size and 3px at 1, nothing at 0 |
+| `--ow-spring-settle` | The easing of each swap |
+| `--ow-spring-settle-duration` | How long a swap takes |
+| `--ow-ease-out` | The crossfade under reduced motion |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each component's root, so `.like .ow-icon-morph` keeps working
+as it is.
+
+</ForMode>
+
+<TokenChip lang="en" />
+
+## Ship it [#ship]
+
+The code drawer writes a Like toggle with the motion as the stage is set up. Change a control and
+the lines that moved light up.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `children` | `ReactElement \| null \| false` | |
+
+`children` is one icon element with a `key`. Root is a `span`; `className`, `style`, other props,
+and the ref pass through to it. Icons keep their own size on their own, so size them as you would
+anywhere; in an icon slot the slot sizes them.
+
+Import it from `owsem-ui/owsem`. In the registry, it is the `icon-morph` item.

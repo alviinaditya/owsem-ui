@@ -1,4 +1,4 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 import { SIDE_PANEL_WIDTH } from "../components/lab/layout.ts";
 import { demo, openSheet, pickColor, stage, stageTool, thumbKey } from "./lab.ts";
 
@@ -713,6 +713,24 @@ test("the Table of Contents Lab follows its article, and a picked link holds", a
   await expect(current).toHaveText("Components");
   // The demo's links scroll the article, not the page.
   expect(new URL(page.url()).hash).toBe("");
+});
+
+test("the Icon Morph Lab swaps an icon in place, the old one leaving unread", async ({ page }) => {
+  await page.goto("/en/icon-morph");
+  const size = (button: Locator) =>
+    button.evaluate((el: HTMLElement) => [el.offsetWidth, el.offsetHeight]);
+  const play = demo(page).getByRole("button", { name: "Play" });
+  const before = await size(play);
+  await play.click();
+  const pause = demo(page).getByRole("button", { name: "Pause" });
+  const items = pause.locator(".ow-icon-morph__item");
+  await expect(items).toHaveCount(2);
+  await expect(items.first()).toHaveAttribute("data-ending-style", "");
+  await expect(items.first()).toHaveAttribute("aria-hidden", "true");
+  expect(await size(pause)).toEqual(before);
+  // Once the swap ends, only the new icon is left.
+  await expect(items).toHaveCount(1);
+  await expect(items).not.toHaveAttribute("data-ending-style");
 });
 
 test("a Lab without animations has no Play scene or Replay", async ({ page }) => {

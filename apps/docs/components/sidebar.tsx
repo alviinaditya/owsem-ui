@@ -6,11 +6,12 @@ import { getDictionary } from "@/lib/dictionaries";
 import type { Lang } from "@/lib/i18n";
 import { labPageScenes } from "@/lib/lab-template";
 import { source } from "@/lib/source";
+import { SearchTrigger } from "./docs-search";
 import { Icon, type IconName } from "./icons/icon";
 import { NavLink } from "./nav-link";
 import { SidebarLabNode } from "./sidebar-lab-node";
 
-const CATEGORY_ICONS: Record<Category, IconName> = {
+export const CATEGORY_ICONS: Record<Category, IconName> = {
   action: "mouse-pointer-click",
   form: "text-cursor-input",
   overlay: "layers",
@@ -36,74 +37,79 @@ function Group({ label, icon, children }: { label: string; icon: IconName; child
   );
 }
 
-const pages = (nodes: Node[]): Extract<Node, { type: "page" }>[] =>
+/** The docs pages in sidebar order (content/docs/<lang>/meta.json). */
+export const treePages = (nodes: Node[]): Extract<Node, { type: "page" }>[] =>
   nodes.flatMap((node) =>
-    node.type === "page" ? [node] : node.type === "folder" ? pages(node.children) : [],
+    node.type === "page" ? [node] : node.type === "folder" ? treePages(node.children) : [],
   );
 
 /**
  * Every page on a Tree Rail Nav (DS-14), in the root layout: the docs pages (ordered by
  * content/docs/<lang>/meta.json), then the catalog by category. A component with a Lab carries its
- * scenes, shown while its page is open, so the trail runs on to the scene being read.
+ * scenes, shown while its page is open, so the trail runs on to the scene being read. The search
+ * sits above it at full width (DS-5), and the rail starts at the first group.
  */
 export function Sidebar({ lang }: { lang: Lang }) {
   const dict = getDictionary(lang);
   return (
-    <TreeRailNav.Root aria-label={dict.nav.sidebar} className="sidebar-nav">
-      <TreeRailNav.List>
-        <Group label={dict.nav.docs} icon="book-open">
-          {pages(source.getPageTree(lang).children).map((page) => (
-            <TreeRailNav.Node key={page.url}>
-              <NavLink href={page.url}>
-                <TreeRailNav.Label>{page.name}</TreeRailNav.Label>
-              </NavLink>
-            </TreeRailNav.Node>
-          ))}
-        </Group>
-        {CATEGORIES.map((category) => (
-          <Group
-            key={category}
-            label={dict.catalog.categories[category]}
-            icon={CATEGORY_ICONS[category]}
-          >
-            {catalog
-              .filter((entry) => entry.category === category)
-              .map((entry) => {
-                const href = `/${lang}/${entry.name}`;
-                const link = (
-                  <NavLink key={href} href={href}>
-                    <TreeRailNav.Label>{entry.title}</TreeRailNav.Label>
-                    {/* The space keeps "Button Soon" two words for screen readers. */}
-                    {isAvailable(entry) ? null : (
-                      <>
-                        {" "}
-                        <span className="soon">{dict.catalog.soon}</span>
-                      </>
-                    )}
-                  </NavLink>
-                );
-                const scenes = labPageScenes(entry.name, lang, dict.lab.overview);
-                return scenes ? (
-                  <SidebarLabNode
-                    key={entry.name}
-                    href={href}
-                    scenes={scenes}
-                    label={dict.lab.scenes}
-                  >
-                    {link}
-                  </SidebarLabNode>
-                ) : (
-                  <TreeRailNav.Node
-                    key={entry.name}
-                    data-planned={isAvailable(entry) ? undefined : ""}
-                  >
-                    {link}
-                  </TreeRailNav.Node>
-                );
-              })}
+    <>
+      <SearchTrigger label={dict.search.trigger} />
+      <TreeRailNav.Root aria-label={dict.nav.sidebar} className="sidebar-nav">
+        <TreeRailNav.List>
+          <Group label={dict.nav.docs} icon="book-open">
+            {treePages(source.getPageTree(lang).children).map((page) => (
+              <TreeRailNav.Node key={page.url}>
+                <NavLink href={page.url}>
+                  <TreeRailNav.Label>{page.name}</TreeRailNav.Label>
+                </NavLink>
+              </TreeRailNav.Node>
+            ))}
           </Group>
-        ))}
-      </TreeRailNav.List>
-    </TreeRailNav.Root>
+          {CATEGORIES.map((category) => (
+            <Group
+              key={category}
+              label={dict.catalog.categories[category]}
+              icon={CATEGORY_ICONS[category]}
+            >
+              {catalog
+                .filter((entry) => entry.category === category)
+                .map((entry) => {
+                  const href = `/${lang}/${entry.name}`;
+                  const link = (
+                    <NavLink key={href} href={href}>
+                      <TreeRailNav.Label>{entry.title}</TreeRailNav.Label>
+                      {/* The space keeps "Button Soon" two words for screen readers. */}
+                      {isAvailable(entry) ? null : (
+                        <>
+                          {" "}
+                          <span className="soon">{dict.catalog.soon}</span>
+                        </>
+                      )}
+                    </NavLink>
+                  );
+                  const scenes = labPageScenes(entry.name, lang, dict.lab.overview);
+                  return scenes ? (
+                    <SidebarLabNode
+                      key={entry.name}
+                      href={href}
+                      scenes={scenes}
+                      label={dict.lab.scenes}
+                    >
+                      {link}
+                    </SidebarLabNode>
+                  ) : (
+                    <TreeRailNav.Node
+                      key={entry.name}
+                      data-planned={isAvailable(entry) ? undefined : ""}
+                    >
+                      {link}
+                    </TreeRailNav.Node>
+                  );
+                })}
+            </Group>
+          ))}
+        </TreeRailNav.List>
+      </TreeRailNav.Root>
+    </>
   );
 }

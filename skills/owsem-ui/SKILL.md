@@ -153,9 +153,10 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
 **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toggle Group**, **Toolbar**, and
-**Tooltip** (Base, from `owsem-ui/base`) and **Tree Rail Nav** (Owsem, from `owsem-ui/owsem`) are
-built. Base components are Base UI components with OwsemUI's styling, and small primitives without
-a Base UI part, such as Kbd; Owsem components are OwsemUI's own. No component has a `flavor` prop.
+**Tooltip** (Base, from `owsem-ui/base`) and **Command Menu** and **Tree Rail Nav** (Owsem, from
+`owsem-ui/owsem`) are built. Base components are Base UI components with OwsemUI's styling, and
+small primitives without a Base UI part, such as Kbd; Owsem components are OwsemUI's own. No
+component has a `flavor` prop.
 
 ### Menu
 
@@ -450,6 +451,59 @@ import { TreeRailNav } from "owsem-ui/owsem"; // or "@/components/owsem/tree-rai
 - `Root`: arrow keys, Home, and End move between rows; do not add your own.
 - Reads `--ow-accent` (the trail), `--ow-line` (rails), `--ow-fg`, `--ow-muted`, `--ow-bg` (behind
   the dots; match the nav's background), `--ow-hover`, and `--ow-radius`.
+
+### Command Menu
+
+A command palette: a Base UI Dialog holding an Autocomplete. ⌘K or Ctrl K opens it; typing
+filters grouped items; Enter runs the highlighted one. Registry item: `command-menu`.
+
+```tsx
+import { CommandMenu } from "owsem-ui/owsem"; // or "@/components/owsem/command-menu"
+<CommandMenu.Root items={groups}>
+  <CommandMenu.Trigger>
+    Search…<CommandMenu.Shortcut aria-hidden>⌘K</CommandMenu.Shortcut>
+  </CommandMenu.Trigger>
+  <CommandMenu.Popup aria-label="Commands">
+    <CommandMenu.Input aria-label="Search commands" placeholder="Search…" />
+    <CommandMenu.Empty>No results</CommandMenu.Empty>
+    <CommandMenu.List>
+      {(group) => (
+        <CommandMenu.Group key={group.value} items={group.items}>
+          <CommandMenu.GroupLabel>{group.value}</CommandMenu.GroupLabel>
+          <CommandMenu.Collection>
+            {(item) => (
+              <CommandMenu.Item key={item.value} value={item} onClick={item.run}>
+                <CommandMenu.ItemLabel>{item.label}</CommandMenu.ItemLabel>
+              </CommandMenu.Item>
+            )}
+          </CommandMenu.Collection>
+        </CommandMenu.Group>
+      )}
+    </CommandMenu.List>
+  </CommandMenu.Popup>
+</CommandMenu.Root>
+```
+
+- Items are `{ value, label }` objects (Base UI matches the label), in groups of
+  `{ value, items }` or a flat array. `filteredItems` takes your own ranking; `value` and
+  `onValueChange` hold the query. Root also takes Dialog's `open`, `onOpenChange`, and `modal`.
+- `shortcut`: the ⌘/Ctrl key, `"k"` by default; `false` for a second menu on the page. It skips
+  keys something else already handled (`preventDefault`).
+- `Item`: `onClick` runs on click and on Enter, then the menu closes (`closeOnClick={false}` keeps
+  it open). Lay it out with `ItemIcon`, `ItemLabel`, `ItemDescription`, and `Shortcut` (a `kbd`).
+  `Footer` holds key hints. Glide lights the highlighted item; do not style `[data-highlighted]`.
+- `Popup`: `size` (`"sm"`, `"md"`, `"lg"`), `backdrop` (`"dim"`, or `"blur"` to blur the page
+  too), `container` (default `document.body`), and `closeLabel` for the hidden close button
+  (translate it). `Trigger` also takes `size`; outside Root, give it the Root's `handle` from
+  `CommandMenu.createHandle()`.
+- No open or close animation, by design: do not add one.
+- Reads `--ow-panel` (the glass, at 80%), `--ow-popup-shadow`, `--ow-backdrop` (the scrim),
+  `--ow-fg`, `--ow-muted`, `--ow-focus`, `--ow-hover` (the highlight), `--ow-radius`,
+  `--ow-well-bg`, `--ow-well-shadow`, and `--ow-edge` (the Trigger), `--ow-raised-bg` and
+  `--ow-raised-shadow` (keys), and `--ow-line-dark` with `--ow-line-light`. The Popup renders in
+  the body: set them on `:root` or on the Popup. Its width is `min(100%, 560px)`; set
+  `inline-size` on the Popup to change it. The panel is glass with the popup's crisp edge, the
+  Trigger a flat well, the shortcuts crisp keys; do not add soft shadows, inset blurs, or glow.
 
 ## Rules
 

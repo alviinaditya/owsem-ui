@@ -12,4 +12,5 @@
 @import "./components/toggle-group/toggle-group.css";
 @import "./components/toolbar/toolbar.css";
 @import "./components/tooltip/tooltip.css";
+@import "./components/command-menu/command-menu.css";
 @import "./components/tree-rail-nav/tree-rail-nav.css";

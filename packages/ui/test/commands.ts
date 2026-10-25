@@ -1,4 +1,5 @@
 import { compile } from "@tailwindcss/node";
+import type { CDPSession } from "playwright";
 import type { BrowserCommand } from "vitest/node";
 
 // Run in Node; called as `commands.<name>(...)` from "vitest/browser".
@@ -31,6 +32,26 @@ export const mouse: BrowserCommand<[action: "down" | "up"]> = async (ctx, action
   await ctx.page.mouse[action]();
 };
 
+// Surface's opaque version. Playwright has no option for it, so Chromium emulates it over CDP;
+// "no-preference" lets Playwright send its own media state again, which leaves it out.
+let transparency: CDPSession | undefined;
+export const setReducedTransparency: BrowserCommand<[mode: "reduce" | "no-preference"]> = async (
+  ctx,
+  mode,
+) => {
+  if (ctx.provider.name !== "playwright") throw new Error("requires the playwright provider");
+  if (mode === "reduce") {
+    transparency ??= await ctx.page.context().newCDPSession(ctx.page);
+    await transparency.send("Emulation.setEmulatedMedia", {
+      features: [{ name: "prefers-reduced-transparency", value: "reduce" }],
+    });
+    return;
+  }
+  await transparency?.detach();
+  transparency = undefined;
+  await ctx.page.emulateMedia({});
+};
+
 // Compiles `css` with Tailwind CSS v4 for the given class names; imports resolve from packages/ui.
 export const compileTailwind: BrowserCommand<[css: string, candidates: string[]]> = async (
   ctx,
@@ -47,6 +68,7 @@ declare module "vitest/browser" {
     setForcedColors: (mode: "active" | "none") => Promise<void>;
     setReducedMotion: (mode: "reduce" | "no-preference") => Promise<void>;
     mouse: (action: "down" | "up") => Promise<void>;
+    setReducedTransparency: (mode: "reduce" | "no-preference") => Promise<void>;
     compileTailwind: (css: string, candidates: string[]) => Promise<string>;
   }
 }

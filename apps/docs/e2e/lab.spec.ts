@@ -323,6 +323,8 @@ test("a narrow Lab has the menu at the top left, the toolbar at the top right", 
   test.skip(testInfo.project.name !== "mobile-390", "a narrow Lab's layout");
   await page.goto("/en/separator");
   await expect(page.getByRole("button", { name: "Menu", exact: true })).toBeVisible();
+  // Search sits beside Menu in the same well (DS-5).
+  await expect(page.locator(".dock").getByRole("button", { name: "Search" })).toBeVisible();
   // The menu button's well and the toolbar's share a row.
   const menu = await page.locator(".dock").boundingBox();
   const bar = await page.locator(".lab-stage-bar").boundingBox();
@@ -362,7 +364,8 @@ test("the toolbar fits a 320 px screen, stage theme and tokens in its More menu"
 }, testInfo) => {
   test.skip(testInfo.project.name !== "mobile-390", "a phone's widths");
   await page.setViewportSize({ width: 320, height: 640 });
-  for (const path of ["/id/separator", "/en/tree-rail-nav#scene-trail"]) {
+  // The dock holds Menu and Search; the widest toolbar has Replay.
+  for (const path of ["/id/separator", "/en/tree-rail-nav#scene-trail", "/id/command-menu"]) {
     await page.goto(path);
     const bar = await page.locator(".lab-stage-bar").boundingBox();
     const menu = await page.locator(".dock").boundingBox();

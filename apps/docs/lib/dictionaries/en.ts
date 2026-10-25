@@ -16,6 +16,24 @@ export const en = {
   language: {
     label: "Language",
   },
+  search: {
+    trigger: "Search docs…",
+    button: "Search",
+    dialog: "Search docs",
+    input: "Search components, pages, and scenes",
+    placeholder: "Search components, pages, scenes…",
+    empty: "Nothing matches “{query}”.",
+    close: "Close search",
+    move: "Move",
+    open: "Open",
+    dismiss: "Close",
+    scene: "{component} · Scene {n}",
+    groups: {
+      pages: "Pages",
+      components: "Components",
+      scenes: "Lab scenes",
+    },
+  },
   theme: {
     label: "Theme",
     light: "Light",
@@ -159,7 +177,7 @@ export const en = {
     "lumen-rail-nav": "Sidebar navigation with light that travels along a rail.",
     "tree-rail-nav":
       "Sidebar navigation in three levels, with a trail along the rail to the current page.",
-    "command-menu": "A searchable command palette built from Dialog and Combobox.",
+    "command-menu": "A command palette opened with ⌘K: a glass panel that filters as you type.",
     "number-ticker": "A number whose digits roll when its value changes.",
     "spotlight-card": "A card whose border and light follow the cursor.",
     kbd: "A key on the keyboard, drawn as a small raised keycap.",

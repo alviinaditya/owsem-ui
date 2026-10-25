@@ -1,0 +1,34 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * A keycap: the raised material with its crisp edge (TK-7), sized from the text around it, so it
+ * fits a control, a list row, or a sentence alike. Half the control radius, as a small key inside a
+ * control (FR-10b).
+ */
+@layer owsem.components {
+  .ow-kbd {
+    --_bg: var(--ow-raised-bg);
+    --_edge: var(--ow-raised-shadow);
+    --_fg: var(--ow-muted);
+    --_radius: calc(var(--ow-radius) / 2);
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25em;
+    box-sizing: border-box;
+    min-inline-size: 1.75em;
+    padding: 0.125em 0.4em;
+    border-radius: var(--_radius);
+    /* Invisible until forced colors draw it as the edge (DP-8). */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--_bg);
+    box-shadow: var(--_edge);
+    color: var(--_fg);
+    font: inherit;
+    font-size: 0.75em;
+    line-height: 1.25;
+    white-space: nowrap;
+  }
+}

@@ -162,6 +162,7 @@ export const id = {
     "command-menu": "Palet perintah dengan pencarian, dibangun dari Dialog dan Combobox.",
     "number-ticker": "Angka yang digitnya bergulir saat nilainya berubah.",
     "spotlight-card": "Kartu dengan border dan cahaya yang mengikuti kursor.",
+    kbd: "Tombol keyboard, digambar sebagai tuts kecil yang timbul.",
   } satisfies Record<ComponentName, string>,
 };
 

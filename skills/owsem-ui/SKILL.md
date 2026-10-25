@@ -139,9 +139,10 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Separator** (Base, from `owsem-ui/base`) and **Tree Rail Nav** (Owsem, from `owsem-ui/owsem`)
-are built. Base components are Base UI components with OwsemUI's styling; Owsem components are
-OwsemUI's own. No component has a `flavor` prop.
+**Kbd** and **Separator** (Base, from `owsem-ui/base`) and **Tree Rail Nav** (Owsem, from
+`owsem-ui/owsem`) are built. Base components are Base UI components with OwsemUI's styling, and
+small primitives without a Base UI part, such as Kbd; Owsem components are OwsemUI's own. No
+component has a `flavor` prop.
 
 ### Separator
 
@@ -158,6 +159,22 @@ import { Separator } from "owsem-ui/base"; // or "@/components/owsem/separator"
   `(state) => string`), `style`, and `render`. Other props pass through to Base UI. The ref goes
   to the `div`.
 - Reads `--ow-line-dark` and `--ow-line-light`.
+
+### Kbd
+
+```tsx
+import { Kbd } from "owsem-ui/base"; // or "@/components/owsem/kbd"
+<p>Press <Kbd>⌘K</Kbd> to search.</p>
+```
+
+- Renders `<kbd class="ow-kbd">`: a small raised keycap with a crisp edge, 0.75 of the
+  surrounding text size, so it fits a sentence, a field, or the end of a list row. Not focusable.
+  Use it for any key or shortcut shown to people, instead of a styled `<kbd>`.
+- Props: `className`, `style`, and `render`; other props pass through to the `kbd`, which gets the
+  ref.
+- Hide a purely visual hint with `aria-hidden` when the control names its shortcut with
+  `aria-keyshortcuts`.
+- Reads `--ow-raised-bg`, `--ow-raised-shadow`, `--ow-muted`, and `--ow-radius`.
 
 ### Tree Rail Nav
 

@@ -36,6 +36,7 @@ export const CATEGORIES: readonly Category[] = [
 export const catalog = [
   { name: "button", title: "Button", family: "base", category: "action", phase: 1, expressions: ["tactile"], status: "planned" },
   { name: "separator", title: "Separator", family: "base", category: "display", phase: 1, status: "prototype" },
+  { name: "kbd", title: "Kbd", family: "base", category: "display", phase: 1, status: "prototype" },
   { name: "field", title: "Field", family: "base", category: "form", phase: 1, status: "planned" },
   { name: "fieldset", title: "Fieldset", family: "base", category: "form", phase: 1, status: "planned" },
   { name: "form", title: "Form", family: "base", category: "form", phase: 1, status: "planned" },

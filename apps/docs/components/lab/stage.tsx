@@ -1,5 +1,6 @@
 "use client";
 
+import { Kbd } from "owsem-ui/base";
 import {
   Fragment,
   type KeyboardEvent,
@@ -423,7 +424,7 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
           >
             <Icon name="contrast" size={15} />
             {labels.theme}
-            <kbd>T</kbd>
+            <Kbd>T</Kbd>
           </button>
           <button
             type="button"

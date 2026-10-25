@@ -144,26 +144,12 @@ body {
   }
 
   code,
-  kbd,
   pre {
     font-family: var(--font-mono), ui-monospace, monospace;
   }
 
   code {
     font-size: 0.88em;
-  }
-
-  kbd {
-    display: inline-grid;
-    place-items: center;
-    min-inline-size: 20px;
-    block-size: 20px;
-    padding-inline: 5px;
-    border: 1px solid var(--docs-line-strong);
-    border-radius: 5px;
-    background-color: var(--docs-hover);
-    font-size: 11px;
-    line-height: 1;
   }
 }
 
@@ -1871,13 +1857,11 @@ figure[data-code-block] pre {
   color: var(--docs-fg);
 }
 
-.lab-more-item kbd {
+.lab-more-item .ow-kbd {
   margin-inline-start: auto;
-  color: var(--docs-muted);
-  font-size: 11px;
 }
 
-.lab-more-item > :is(svg, kbd) {
+.lab-more-item > :is(svg, .ow-kbd) {
   flex: none;
 }
 
@@ -3102,4 +3086,32 @@ figure[data-code-block] pre {
     /* biome-ignore lint/complexity/noImportantStyles: must beat the rule above */
     animation-duration: 1.4s !important;
   }
+}
+
+/* Kbd Lab: a key in a field and at the end of a list row. */
+.demo-kbd-field,
+.demo-kbd-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.demo-kbd-field {
+  padding: 0.5em 0.5em 0.5em 0.75em;
+  border-radius: var(--ow-radius);
+  background-color: var(--ow-well-bg);
+  box-shadow: var(--ow-well-shadow);
+  color: var(--ow-muted);
+}
+
+/* A states matrix cell: a small card in its own theme. */
+.demo-kbd-cell {
+  padding: 10px 14px;
+  border: 1px solid var(--ow-line);
+  border-radius: 10px;
+  background-color: var(--ow-bg);
+  color: var(--ow-fg);
+  line-height: 1.5;
+  white-space: nowrap;
 }

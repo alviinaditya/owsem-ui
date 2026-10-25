@@ -221,8 +221,9 @@ Motion explains a state change (principle 4), with these rules:
   reduced-motion version without movement (FR-20).
 
 A component has one type. **Base** is a Base UI component with OwsemUI's styling and small
-improvements, exported from `src/base.ts` (`owsem-ui/base`). **Owsem** is OwsemUI's own component,
-beyond Base UI, exported from `src/owsem.ts` (`owsem-ui/owsem`); Tree Rail Nav is the reference.
+improvements, or a small primitive Base UI has no part for, such as Kbd, exported from
+`src/base.ts` (`owsem-ui/base`). **Owsem** is OwsemUI's own component, beyond Base UI, exported
+from `src/owsem.ts` (`owsem-ui/owsem`); Tree Rail Nav is the reference.
 There is no `flavor` prop, and glow (Lumen) is for Owsem only.
 
 ## Labs

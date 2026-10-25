@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import type { LabProps } from "@/components/lab/lab-shell";
 import type { ComponentName } from "@/lib/catalog";
+import KbdLab from "./kbd";
 import SeparatorLab from "./separator";
 import TreeRailNavLab from "./tree-rail-nav";
 
@@ -9,6 +10,7 @@ import TreeRailNavLab from "./tree-rail-nav";
  * build fails if an available component has none (see the component page).
  */
 export const labs: Partial<Record<ComponentName, ComponentType<LabProps>>> = {
+  kbd: KbdLab,
   separator: SeparatorLab,
   "tree-rail-nav": TreeRailNavLab,
 };

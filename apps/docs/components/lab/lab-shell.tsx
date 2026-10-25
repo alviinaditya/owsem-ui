@@ -1,5 +1,6 @@
 "use client";
 
+import { Kbd } from "owsem-ui/base";
 import {
   type CSSProperties,
   createContext,
@@ -685,7 +686,7 @@ export function StageShortcuts() {
       <span className="lab-hint-lead">{labels.shortcuts}</span>
       {keys.map(([key, name]) => (
         <span key={key} className="lab-hint-key">
-          <kbd>{key}</kbd> {name}
+          <Kbd>{key}</Kbd> {name}
         </span>
       ))}
     </p>

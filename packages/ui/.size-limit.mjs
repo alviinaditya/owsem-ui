@@ -25,6 +25,7 @@ const entry = (name, path, limit) => ({
 // One entry per component: Base 3 kB, Owsem 8 kB.
 export default [
   entry("core", "dist/core/index.js", "6 kB"),
+  entry("button", "dist/components/button/index.js", "3 kB"),
   entry("kbd", "dist/components/kbd/index.js", "3 kB"),
   entry("menu", "dist/components/menu/index.js", "3 kB"),
   entry("popover", "dist/components/popover/index.js", "3 kB"),

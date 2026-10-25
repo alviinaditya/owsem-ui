@@ -451,21 +451,13 @@ body {
   line-height: 1.5;
 }
 
-.ghost-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  block-size: 30px;
-  padding-inline: 10px;
-  border: 1px solid var(--docs-control);
-  border-radius: var(--docs-radius);
-  background: none;
-  font-size: 12.5px;
-  white-space: nowrap;
+/* Copy (components/lab/copy-button.tsx): both words share one cell, so the width holds. */
+.copy-label {
+  display: inline-grid;
 }
 
-.ghost-button:hover {
-  background-color: var(--docs-hover);
+.copy-label > span {
+  grid-area: 1 / 1;
 }
 
 /* Badges: the dot shape shows the family (DS-1). */
@@ -662,38 +654,23 @@ body {
   margin: 0;
 }
 
-/* Previous and next: one compact line each, the arrow pointing the way. */
+/*
+ * Previous and next: links styled as outline Buttons (owsem-ui), one compact line each, the arrow
+ * pointing the way. A quieter edge than the default, as befits the end of a page.
+ */
 .neighbors {
+  --ow-edge: var(--docs-line-strong);
   display: flex;
   gap: 12px;
   margin-block: 40px 16px;
 }
 
 .neighbors a {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
   min-inline-size: 0;
-  box-sizing: border-box;
-  block-size: 36px;
-  padding-inline: 10px 14px;
-  border: 1px solid var(--ow-line-dark);
-  border-radius: var(--docs-radius);
-  box-shadow: inset 0 1px 0 var(--ow-line-light);
-  color: var(--docs-fg);
-  font-size: 14px;
-  font-weight: 500;
-  text-decoration: none;
-}
-
-.neighbors a:hover {
-  border-color: var(--docs-control);
 }
 
 .neighbors a[data-rel="next"] {
-  flex-direction: row-reverse;
   margin-inline-start: auto;
-  padding-inline: 14px 10px;
 }
 
 .neighbors a[data-rel="prev"]:hover {
@@ -706,7 +683,6 @@ body {
 
 /* The arrow nudges toward where the link goes. */
 .neighbors svg {
-  flex: none;
   color: var(--docs-muted);
   translate: var(--nudge, 0) 0;
   transition: translate 0.2s var(--ease);
@@ -2717,6 +2693,107 @@ figure[data-code-block] pre {
   gap: 14px;
   block-size: 24px;
   padding-inline-end: 14px;
+}
+
+/* The Button Lab's demos: every variant in a grid, and wrapping rows of buttons. */
+.demo-board {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  place-items: center;
+  gap: 18px 16px;
+}
+
+.demo-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  max-inline-size: 560px;
+}
+
+/* One theme's backdrop in the states matrix. */
+.demo-button-surface {
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  max-inline-size: none;
+  padding: 16px;
+  border: 1px solid var(--ow-line);
+  border-radius: 14px;
+  background-color: var(--ow-bg);
+}
+
+.demo-loaders {
+  gap: 32px;
+}
+
+/* A bracket as wide as the button, and its width in px. */
+.demo-button-measure {
+  display: inline-grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.demo-button-measure-rule {
+  block-size: 5px;
+  border: 1px solid var(--docs-muted);
+  border-block-start: 0;
+}
+
+.demo-button-measure figcaption {
+  justify-self: center;
+  min-block-size: 1lh;
+  color: var(--docs-muted);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Dashed lines from each icon to the button's edges (labs/button.tsx measures them). */
+.demo-geometry {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 32px;
+}
+
+.demo-guide {
+  position: absolute;
+  top: var(--y);
+  left: var(--x);
+  pointer-events: none;
+}
+
+.demo-guide[data-axis="y"] {
+  block-size: var(--length);
+  margin-inline-start: -0.5px;
+  border-inline-start: 1px dashed var(--docs-accent);
+}
+
+.demo-guide[data-axis="x"] {
+  inline-size: var(--length);
+  margin-block-start: -0.5px;
+  border-block-start: 1px dashed var(--docs-accent);
+}
+
+.demo-guide-label {
+  position: absolute;
+  color: var(--docs-accent);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.demo-guide[data-axis="y"] .demo-guide-label {
+  top: 50%;
+  left: 4px;
+  translate: 0 -50%;
+}
+
+.demo-guide[data-axis="x"] .demo-guide-label {
+  bottom: 3px;
+  left: 50%;
+  translate: -50% 0;
 }
 
 /*

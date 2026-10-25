@@ -4,6 +4,7 @@
 /* Plain @import without layer(): each file wraps itself in @layer. */
 @import "./core/tokens/tokens.css";
 @import "./core/glide/glide.css";
+@import "./components/button/button.css";
 @import "./components/kbd/kbd.css";
 @import "./components/menu/menu.css";
 @import "./components/popover/popover.css";

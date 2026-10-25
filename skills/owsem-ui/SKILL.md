@@ -152,10 +152,51 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toolbar**, and **Tooltip** (Base, from
-`owsem-ui/base`) and **Command Menu** and **Tree Rail Nav** (Owsem, from `owsem-ui/owsem`) are
-built. Base components are Base UI components with OwsemUI's styling, and small primitives without
-a Base UI part, such as Kbd; Owsem components are OwsemUI's own. No component has a `flavor` prop.
+**Button**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toolbar**, and **Tooltip**
+(Base, from `owsem-ui/base`) and **Command Menu** and **Tree Rail Nav** (Owsem, from
+`owsem-ui/owsem`) are built. Base components are Base UI components with OwsemUI's styling, and
+small primitives without a Base UI part, such as Kbd; Owsem components are OwsemUI's own. No
+component has a `flavor` prop.
+
+### Button
+
+```tsx
+import { Button, ButtonIcon, buttonStyles, IconButton } from "owsem-ui/base"; // or "@/components/owsem/button"
+<Button onClick={save}>Save</Button>
+<Button variant="secondary" size="sm" startIcon={<Plus />}>Add</Button>
+<Button loading={saving}>Save</Button>
+<IconButton icon={<Trash />} aria-label="Delete" variant="destructive" />
+<a href="/docs" {...buttonStyles({ variant: "outline" })}>
+  Docs
+  <ButtonIcon side="end"><ArrowRight /></ButtonIcon>
+</a>
+```
+
+- Base UI's Button: a native `<button type="button">` with the `ow-button` class. Props:
+  `variant` (`"primary"`, the default, `"secondary"`, `"outline"`, `"ghost"`, `"link"`,
+  `"destructive"`), `size` (`"sm"`, `"md"`, the default, `"lg"`), `soft` (a flat tint, for
+  primary, secondary, and destructive), `loading`, `startIcon`, `endIcon`, and Base UI's
+  `disabled`, `focusableWhenDisabled`, `nativeButton`, `className`, `style`, `render`. The ref
+  goes to the button.
+- `loading` keeps the width and focus, ignores presses, and sets `aria-busy` and `aria-disabled`.
+  Keep the label the same while loading. Use a boolean (`loading={saving}`) on buttons that can
+  load, so the spinner fades in.
+- `IconButton`: `icon` and a required `aria-label`; square; `ghost` by default.
+- Look: flat fills with crisp 1px edges drawn as inset shadows, so every variant of a size is the
+  same height. `primary`, `secondary` (a neutral: grey in light, silver in dark), and
+  `destructive` are solid fills with an edge darker than the fill, `outline` is a quiet 1px line
+  from the text color, `ghost` is flat until hovered, and `soft` is a tint with no edge. There is
+  no drop shadow and no socket; do not add a `box-shadow` around a button.
+- Links: never render a link through Button. Spread `buttonStyles({ variant, size, soft,
+  className })` on the `<a>` or router `Link`, and wrap icons in `ButtonIcon` (`side`). Pass icons
+  as elements; their size is the font size plus 2px, so do not size them.
+- Size: `--py` (padding above and below the text) sets any custom size, through `style` on the
+  button itself: `style={{ "--py": "0.6em" }}`. Do not set `height` or `padding`.
+- Reads `--ow-accent` with `--ow-on-accent` (primary; the link mixes the accent toward `--ow-fg`),
+  `--ow-critical-solid` with `--ow-on-critical` (destructive; soft uses `--ow-critical`),
+  `--ow-fg` and `--ow-bg` (secondary's fill and text, outline's line), `--ow-primary-shadow` (the
+  solid fills' edges), `--ow-pressed-*` (held down), `--ow-hover`, `--ow-focus`, `--ow-radius`,
+  and `--ow-motion-scale`.
 
 ### Menu
 

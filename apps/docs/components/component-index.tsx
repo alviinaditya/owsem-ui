@@ -2,7 +2,8 @@
 
 import type { Route } from "next";
 import Link from "next/link";
-import { type ReactNode, useState } from "react";
+import { ToggleGroup } from "owsem-ui/base";
+import { type ReactNode, useId, useState } from "react";
 import type { Family } from "@/lib/catalog";
 
 const FILTERS = ["all", "base", "owsem"] as const;
@@ -30,24 +31,26 @@ export function ComponentIndex({
   labels: Record<Filter, string> & { legend: string };
 }) {
   const [filter, setFilter] = useState<Filter>("all");
+  const legend = useId();
   const shown = (family: Family) => filter === "all" || family === filter;
   return (
     <>
-      <fieldset className="seg filter">
-        <legend>{labels.legend}</legend>
+      {/* The group's name sits inside its track, before the choices. */}
+      <ToggleGroup.Root
+        aria-labelledby={legend}
+        className="docs-choice filter"
+        value={[filter]}
+        onValueChange={([next]) => next && setFilter(next)}
+      >
+        <span id={legend} className="filter-legend">
+          {labels.legend}
+        </span>
         {FILTERS.map((value) => (
-          <label key={value} className="seg-item" data-selected={filter === value ? "" : undefined}>
-            <input
-              type="radio"
-              name="family"
-              value={value}
-              checked={filter === value}
-              onChange={() => setFilter(value)}
-            />
+          <ToggleGroup.Item key={value} value={value}>
             {labels[value]}
-          </label>
+          </ToggleGroup.Item>
         ))}
-      </fieldset>
+      </ToggleGroup.Root>
       {groups.map((group) => {
         const items = group.items.filter((item) => shown(item.family));
         return items.length === 0 ? null : (

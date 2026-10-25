@@ -157,7 +157,8 @@ export const id = {
     tabs: "Panel yang berpindah lewat tab, dengan indikator yang mengikuti pilihan.",
     "scroll-area": "Area gulir dengan scrollbar tipis yang muncul saat hover.",
     toggle: "Tombol dua state yang tetap timbul saat aktif.",
-    "toggle-group": "Sekumpulan toggle yang bekerja bersama, seperti segmented control.",
+    "toggle-group":
+      "Sekumpulan toggle yang bekerja bersama, seperti segmented control dengan thumb yang bergeser.",
     toolbar: "Grup tombol dan toggle dengan navigasi keyboard.",
     "checkbox-group": "Sekumpulan checkbox dengan opsi pilih semua.",
     "number-field": "Input angka dengan tombol tambah dan kurang, serta scrub dengan drag.",

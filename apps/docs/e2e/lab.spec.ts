@@ -1,6 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 import { SIDE_PANEL_WIDTH } from "../components/lab/layout.ts";
-import { demo, openSheet, stage, stageTool } from "./lab.ts";
+import { demo, openSheet, stage, stageTool, thumbKey } from "./lab.ts";
 
 const stageBody = (page: Page) => page.locator(".lab-stage-body");
 const lab = (page: Page) => page.locator(".lab");
@@ -89,7 +89,7 @@ test("on a tall window the page's start and end pick the first and last scene", 
 test("controls rewrite the code", async ({ page }) => {
   await page.goto("/en/separator");
   await stage(page).getByRole("button", { name: "Controls" }).click();
-  await stage(page).getByLabel("Vertical").check();
+  await stage(page).getByRole("button", { name: "Vertical" }).click();
   await stage(page).getByLabel("Dark line", { exact: true }).fill("#ff0000");
   await expect(demo(page).getByRole("separator").first()).toHaveCSS(
     "border-inline-start-color",
@@ -142,7 +142,7 @@ test("the install tab follows the chosen package manager, the header too", async
   const pane = stage(page).getByRole("tabpanel");
   await expect(pane).toContainText("pnpm dlx shadcn add @owsem/separator");
 
-  await pane.getByRole("radio", { name: "npm", exact: true }).check();
+  await pane.getByRole("button", { name: "npm", exact: true }).click();
   await expect(pane).toContainText("npm install owsem-ui");
   await expect(pane).toContainText("npx shadcn add @owsem/separator");
   const header = page.locator(".install");
@@ -739,6 +739,33 @@ test("the scene being read stands out; the others recede (DS-2)", async ({ page 
   // Play scene sits beside the scene's number.
   const head = page.locator("#scene-groups .lab-scene-head");
   await expect(head.getByRole("button", { name: /^(Play scene|Stop)$/ })).toBeVisible();
+});
+
+test("the Toggle Group Lab: its thumb lands on the picked view, and choices keep one pressed", async ({
+  page,
+}) => {
+  await page.goto("/en/toggle-group");
+  const view = stage(page).getByRole("group", { name: "View" });
+  const board = view.getByRole("button", { name: "Board" });
+  await board.click();
+  await expect(board).toHaveAttribute("aria-pressed", "true");
+  await expect(stage(page)).toContainText("12 tasks, on a board");
+  // Pressing the chosen view again keeps it.
+  await board.click();
+  await expect(board).toHaveAttribute("aria-pressed", "true");
+  const thumb = view.locator(".ow-toggle-group__thumb");
+  await expect
+    .poll(async () => {
+      const [at, under] = await Promise.all([thumbKey(thumb), board.boundingBox()]);
+      return Math.abs(at.x - (under?.x ?? 99));
+    })
+    .toBeLessThanOrEqual(0.5);
+
+  // The stage's own choices are Toggle Groups too.
+  await stage(page).getByRole("button", { name: "Controls" }).click();
+  const selection = stage(page).getByRole("group", { name: "Selection" });
+  await selection.getByRole("button", { name: "Multiple" }).click();
+  await expect(stage(page).getByRole("group", { name: "Formatting" })).toBeVisible();
 });
 
 test("the stage tools name themselves and their key in a tooltip, not a title", async ({

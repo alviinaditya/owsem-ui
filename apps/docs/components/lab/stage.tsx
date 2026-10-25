@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Kbd, Menu, Popover, Toggle, Toolbar, Tooltip } from "owsem-ui/base";
+import { Button, Kbd, Menu, Popover, Toggle, ToggleGroup, Toolbar, Tooltip } from "owsem-ui/base";
 import {
   Fragment,
   type KeyboardEvent,
@@ -563,6 +563,10 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
   );
 }
 
+// Base UI gives an item with an empty value a generated one, so an empty option ("Off", "None")
+// goes through this stand-in.
+const EMPTY = "(empty)";
+
 /** The stage theme as a choice of the two, read from the page once the menu shows it. */
 function ThemeChoice({
   labels,
@@ -597,31 +601,30 @@ function ControlsPanel({
   labels,
   state,
 }: Pick<StageProps, "lab" | "lang" | "labels" | "state">) {
+  const id = useId();
   return (
     <div className="lab-controls-inner">
       {lab.controls.map((control) =>
         control.type === "choice" ? (
-          <fieldset key={control.key} className="lab-field">
-            <legend>{control.label[lang]}</legend>
-            <div className="seg">
+          <div key={control.key} className="lab-field">
+            <span id={`${id}-${control.key}`} className="lab-field-label">
+              {control.label[lang]}
+            </span>
+            <ToggleGroup.Root
+              aria-labelledby={`${id}-${control.key}`}
+              className="docs-choice"
+              value={[state.cfg[control.key] || EMPTY]}
+              onValueChange={([next]) =>
+                next && state.setValue(control.key, next === EMPTY ? "" : next)
+              }
+            >
               {control.options.map((option) => (
-                <label
-                  key={option.value}
-                  className="seg-item"
-                  data-selected={state.cfg[control.key] === option.value ? "" : undefined}
-                >
-                  <input
-                    type="radio"
-                    name={control.key}
-                    value={option.value}
-                    checked={state.cfg[control.key] === option.value}
-                    onChange={() => state.setValue(control.key, option.value)}
-                  />
+                <ToggleGroup.Item key={option.value} value={option.value || EMPTY}>
                   {option.label[lang]}
-                </label>
+                </ToggleGroup.Item>
               ))}
-            </div>
-          </fieldset>
+            </ToggleGroup.Root>
+          </div>
         ) : (
           <ColorField
             key={control.key}

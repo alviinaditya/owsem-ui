@@ -152,8 +152,8 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Button**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toolbar**, and **Tooltip**
-(Base, from `owsem-ui/base`) and **Command Menu** and **Tree Rail Nav** (Owsem, from
+**Button**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toggle Group**, **Toolbar**,
+and **Tooltip** (Base, from `owsem-ui/base`) and **Command Menu** and **Tree Rail Nav** (Owsem, from
 `owsem-ui/owsem`) are built. Base components are Base UI components with OwsemUI's styling, and
 small primitives without a Base UI part, such as Kbd; Owsem components are OwsemUI's own. No
 component has a `flavor` prop.
@@ -350,6 +350,40 @@ import { Toggle } from "owsem-ui/base"; // or "@/components/owsem/toggle"
 - Reads `--ow-muted` (text while off), `--ow-hover`, `--ow-fg`, `--ow-raised-bg` and
   `--ow-raised-shadow` (on), `--ow-pressed-bg` and `--ow-pressed-shadow` (held down),
   `--ow-radius`, and `--ow-focus`.
+
+### Toggle Group
+
+Toggle buttons that work as one, and the segmented control: a flat track, with a thumb (the raised
+key: a flat fill with crisp edges) that slides to the pressed item. Registry item: `toggle-group`.
+
+```tsx
+import { ToggleGroup } from "owsem-ui/base"; // or "@/components/owsem/toggle-group"
+const [view, setView] = useState("list");
+<ToggleGroup.Root
+  aria-label="View"
+  value={[view]}
+  onValueChange={([next]) => next && setView(next)} // a segmented control keeps one choice
+>
+  <ToggleGroup.Item value="list">List</ToggleGroup.Item>
+  <ToggleGroup.Item value="board" aria-label="Board"><BoardIcon /></ToggleGroup.Item>
+</ToggleGroup.Root>
+```
+
+- `Root` is Base UI's ToggleGroup: `value` and `defaultValue` are arrays, `multiple` lets several
+  items be pressed (each is a key of its own, with no thumb), plus `orientation`, `disabled`,
+  and `loopFocus`. OwsemUI adds `size` (`"sm"`, `"md"`, the default, or `"lg"`) and `equal`
+  (every item as wide as the widest; equal shares when the group is stretched).
+- `Item` is Base UI's Toggle with a `value`. Give an item with only an icon an `aria-label`; it is
+  square. Icons are any `svg`, sized to the font plus 2px.
+- Never give an item an empty `value` (`""`): Base UI replaces it with a generated id, so that item
+  never matches the group's value. Use a word such as `"off"` or `"none"`.
+- A value read from storage: render `value={[]}` on the server and the stored one after
+  hydration, so the thumb appears in place instead of sliding from a default.
+- Name the group with `aria-label` or `aria-labelledby`. Arrows, Home, and End move focus, Space
+  and Enter press; do not add your own.
+- Reads `--ow-well-bg` and `--ow-well-shadow` (the track), `--ow-raised-bg` and
+  `--ow-raised-shadow` (the thumb, and pressed items with `multiple`), `--ow-fg`, `--ow-muted`,
+  `--ow-focus`, `--ow-hover` (Glide), and `--ow-radius`. An item's height is its own `--py`.
 
 ### Toolbar
 

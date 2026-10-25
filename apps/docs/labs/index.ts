@@ -3,6 +3,7 @@ import type { LabProps } from "@/components/lab/lab-shell";
 import type { ComponentName } from "@/lib/catalog";
 import KbdLab from "./kbd";
 import SeparatorLab from "./separator";
+import ToggleLab from "./toggle";
 import TreeRailNavLab from "./tree-rail-nav";
 
 /**
@@ -12,5 +13,6 @@ import TreeRailNavLab from "./tree-rail-nav";
 export const labs: Partial<Record<ComponentName, ComponentType<LabProps>>> = {
   kbd: KbdLab,
   separator: SeparatorLab,
+  toggle: ToggleLab,
   "tree-rail-nav": TreeRailNavLab,
 };

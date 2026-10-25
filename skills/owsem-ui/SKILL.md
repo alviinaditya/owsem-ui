@@ -139,8 +139,8 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Kbd** and **Separator** (Base, from `owsem-ui/base`) and **Tree Rail Nav** (Owsem, from
-`owsem-ui/owsem`) are built. Base components are Base UI components with OwsemUI's styling, and
+**Kbd**, **Separator**, and **Toggle** (Base, from `owsem-ui/base`) and **Tree Rail Nav** (Owsem,
+from `owsem-ui/owsem`) are built. Base components are Base UI components with OwsemUI's styling, and
 small primitives without a Base UI part, such as Kbd; Owsem components are OwsemUI's own. No
 component has a `flavor` prop.
 
@@ -175,6 +175,31 @@ import { Kbd } from "owsem-ui/base"; // or "@/components/owsem/kbd"
 - Hide a purely visual hint with `aria-hidden` when the control names its shortcut with
   `aria-keyshortcuts`.
 - Reads `--ow-raised-bg`, `--ow-raised-shadow`, `--ow-muted`, and `--ow-radius`.
+
+### Toggle
+
+A two-state button: flat with muted text while off, the raised key tinted 8% toward its text while
+on (so it shows on a white panel too), and the pressed material only while held down. Registry
+item: `toggle`.
+
+```tsx
+import { Toggle } from "owsem-ui/base"; // or "@/components/owsem/toggle"
+<Toggle aria-label="Bold" startIcon={<BoldIcon />} />
+<Toggle defaultPressed startIcon={<PinIcon />}>Pin</Toggle>
+<Toggle pressed={wrap} onPressedChange={setWrap}>Wrap lines</Toggle>
+```
+
+- Renders a `<button>` with `aria-pressed`, `data-pressed` while on, and `data-disabled`.
+  Controlled with `pressed` and `onPressedChange(pressed, eventDetails)`, or uncontrolled with
+  `defaultPressed`. Keep its name the same in both states; the state is what changes.
+- Props: `size` (`"sm"`, `"md"` default, `"lg"`: Button's heights), `startIcon` and `endIcon`
+  (any icon; sized to the font plus 2px, no size props needed), plus Base UI's `disabled`,
+  `value`, `className`, `style`, and `render`. Without children it is a square icon button: give
+  it an `aria-label`. The ref goes to the `button`.
+- Height comes from `--py` (set it in `style` on the toggle, never under a 24 px target).
+- Reads `--ow-muted` (text while off), `--ow-hover`, `--ow-fg`, `--ow-raised-bg` and
+  `--ow-raised-shadow` (on), `--ow-pressed-bg` and `--ow-pressed-shadow` (held down),
+  `--ow-radius`, and `--ow-focus`.
 
 ### Tree Rail Nav
 

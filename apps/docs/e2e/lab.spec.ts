@@ -571,6 +571,31 @@ test("under reduced motion a scene plays only when asked", async ({ page }) => {
   await expect(current(page)).toHaveText("Dark mode");
 });
 
+test("the stage's Inspect, Controls, and Code are Toggles", async ({ page }) => {
+  await page.goto("/en/separator");
+  for (const name of ["Inspect", "Controls", "Code"]) {
+    await expect(stage(page).getByRole("button", { name, exact: true })).toHaveClass(/ow-toggle/);
+  }
+  const code = stage(page).getByRole("button", { name: "Code", exact: true });
+  await code.click();
+  await expect(code).toHaveAttribute("aria-pressed", "true");
+  await expect(code).toHaveAttribute("data-pressed", "");
+  await expect(stageBody(page)).toHaveAttribute("data-code", "");
+});
+
+test("the Toggle Lab's note follows its toggles, and the first scene plays them", async ({
+  page,
+}) => {
+  await page.goto("/en/toggle");
+  const italic = stage(page).getByRole("button", { name: "Italic" });
+  const note = stage(page).getByText("Launch moves to Friday");
+  await expect(italic).toHaveAttribute("aria-pressed", "false");
+  await expect(note).toHaveCSS("font-weight", "600");
+  await scene(page, "pressing");
+  await expect(italic).toHaveAttribute("aria-pressed", "true");
+  await expect(note).toHaveCSS("font-style", "italic");
+});
+
 test("a Lab without animations has no Play scene or Replay", async ({ page }) => {
   await page.goto("/en/separator");
   for (const id of ["anatomy", "states", "ship"]) {

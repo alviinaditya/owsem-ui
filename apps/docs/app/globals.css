@@ -638,8 +638,17 @@ body {
   background-color: var(--docs-surface);
 }
 
-.component-card:hover {
-  border-color: var(--docs-control);
+/*
+ * Glide lights the card nearest the pointer with the hover tint, as in the sidebar and menus.
+ * Cards are opaque, so in the grid the tint lies over the card; in the list it is under the row.
+ */
+.component-index-glide {
+  --ow-hover: var(--docs-hover);
+}
+
+:root:not([data-index-view]) .component-index-glide > .ow-glide {
+  --_radius: var(--docs-radius-box);
+  z-index: 2;
 }
 
 .component-card:has(a:focus-visible) {
@@ -853,8 +862,8 @@ body {
   background: none;
 }
 
-:root[data-index-view="list"] .component-card:hover {
-  background-color: var(--docs-hover);
+:root[data-index-view="list"] .component-index-glide > .ow-glide {
+  --_radius: var(--docs-radius);
 }
 
 :root[data-index-view="list"] .component-preview {

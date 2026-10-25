@@ -3,6 +3,7 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { ToggleGroup } from "owsem-ui/base";
+import { GlideHighlight, useGlide } from "owsem-ui/core";
 import { type ReactNode, useId, useState, useSyncExternalStore } from "react";
 import type { ComponentName, Family } from "@/lib/catalog";
 import type { Lang } from "@/lib/i18n";
@@ -43,14 +44,55 @@ function subscribe(listener: () => void): () => void {
 export interface IndexGroup {
   id: string;
   label: string;
-  items: {
-    name: ComponentName;
-    href: string;
-    title: string;
-    description: string;
-    family: Family;
-    badges: ReactNode;
-  }[];
+  items: IndexItem[];
+}
+
+interface IndexItem {
+  name: ComponentName;
+  href: string;
+  title: string;
+  description: string;
+  family: Family;
+  badges: ReactNode;
+}
+
+/**
+ * One category's cards, lit by Glide: the nearest card in the grid, the nearest row in the list.
+ * The whole card is the link, so a click in a gap stays a gap.
+ */
+function Cards({
+  items,
+  lang,
+  soon,
+  view,
+}: {
+  items: IndexItem[];
+  lang: Lang;
+  soon: string;
+  view: View | null;
+}) {
+  const glide = useGlide<HTMLDivElement>({
+    items: ".component-card",
+    axis: view === "list" ? "y" : "xy",
+    gapClick: false,
+  });
+  return (
+    <div ref={glide.ref} className="component-index-glide">
+      <GlideHighlight glide={glide} />
+      <ul className="component-index">
+        {items.map((item) => (
+          <li key={item.name} className="component-card">
+            <ComponentPreview name={item.name} lang={lang} soon={soon} />
+            <div className="component-card-text">
+              <Link href={item.href as Route}>{item.title}</Link>
+              <p>{item.description}</p>
+            </div>
+            {item.badges}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 
 /**
@@ -113,18 +155,7 @@ export function ComponentIndex({
         return items.length === 0 ? null : (
           <section key={group.id} aria-labelledby={`group-${group.id}`}>
             <h2 id={`group-${group.id}`}>{group.label}</h2>
-            <ul className="component-index">
-              {items.map((item) => (
-                <li key={item.name} className="component-card">
-                  <ComponentPreview name={item.name} lang={lang} soon={labels.soon} />
-                  <div className="component-card-text">
-                    <Link href={item.href as Route}>{item.title}</Link>
-                    <p>{item.description}</p>
-                  </div>
-                  {item.badges}
-                </li>
-              ))}
-            </ul>
+            <Cards items={items} lang={lang} soon={labels.soon} view={view} />
           </section>
         );
       })}

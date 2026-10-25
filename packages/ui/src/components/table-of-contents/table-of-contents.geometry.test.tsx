@@ -61,6 +61,9 @@ describe.each(["ltr", "rtl"] as const)("Table of Contents geometry, %s", (dir) =
       [450, recolor],
     ] as const) {
       article.scrollTop = top;
+      // WebKit can hold back the scroll event of a test frame it throttles; this test is about
+      // where the marker lands, so the event is sent here.
+      article.dispatchEvent(new Event("scroll"));
       await expect.poll(() => link.hasAttribute("data-current")).toBe(true);
       await settle({ maxMs: 3000 });
       const m = marker.getBoundingClientRect();

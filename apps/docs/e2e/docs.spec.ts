@@ -56,7 +56,9 @@ test("On this page marks the section being read, and the link picked", async ({
     "Token modes and prefix",
   ]);
   await expect(current).toHaveCount(0);
-  await page.evaluate(() => document.getElementById("recoloring")?.scrollIntoView());
+  await page.evaluate(() =>
+    document.getElementById("recoloring")?.scrollIntoView({ behavior: "instant" }),
+  );
   await expect(current).toHaveText("Recoloring");
   await expect(toc.locator(".ow-table-of-contents__marker")).toHaveAttribute("data-visible", "");
   // The page glides to the section; the wheel below waits until it lands.

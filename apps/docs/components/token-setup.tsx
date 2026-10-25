@@ -1,5 +1,6 @@
 "use client";
 
+import { Popover } from "owsem-ui/base";
 import {
   type ReactNode,
   type RefObject,
@@ -26,16 +27,16 @@ import {
 
 type Labels = Dictionary["tokens"];
 
-/** The panel's id: any button with popoverTarget set to it opens the panel. */
-export const TOKEN_SETUP_ID = "token-setup";
-
-/** Where the panel opens: under a Lab stage's toolbar, or (by default) at the bottom left. */
-export function placeTokenSetup(place?: "stage"): void {
-  const panel = document.getElementById(TOKEN_SETUP_ID);
-  if (!panel) return;
-  if (place) panel.dataset.place = place;
-  else delete panel.dataset.place;
+/** Where a trigger wants the panel; triggers without a place get it under themselves. */
+export interface TokenSetupPlace {
+  /** The panel opens under this element, at its end: a Lab stage's toolbar. */
+  anchor: RefObject<HTMLElement | null>;
+  /** Where focus goes back once it shuts: `true` for the trigger itself. */
+  finalFocus: () => HTMLElement | true | null;
 }
+
+/** Opens the panel from any `Popover.Trigger` given this handle, or from code. */
+export const tokenSetupHandle = Popover.createHandle<TokenSetupPlace>();
 
 // Stored as JSON, kept across visits and shared by every tab. The raw string is the snapshot, so
 // it stays the same value until the setup changes.
@@ -179,78 +180,87 @@ function PrefixField({ setup, labels }: { setup: TokenSetup; labels: Labels }) {
 }
 
 /**
- * The panel a Lab stage's Token button and every Token chip open (a popover: Escape and a click
- * outside close it). Rendered once in the site shell, so every page shares it.
+ * The panel a Lab stage's Token button and every Token chip open (a Popover: Escape and a click
+ * outside close it, and focus goes back). Rendered once in the site shell, so every page shares it.
  */
 export function TokenSetupPanel({ labels }: { labels: Labels }) {
   const setup = useTokenSetup();
-  const titleId = useId();
   const modes = useId();
-  const panel = useRef<HTMLDivElement>(null);
-  // Remounted on each open, so a half-typed prefix does not outlive the panel.
-  const [opened, setOpened] = useState(0);
+  const popup = useRef<HTMLDivElement>(null);
   const names = ["accent", "bg", "line-dark"];
   return (
-    <div
-      ref={panel}
-      id={TOKEN_SETUP_ID}
-      popover="auto"
-      role="dialog"
-      aria-labelledby={titleId}
-      className="token-setup"
-      onToggle={(event) => {
-        if (event.newState !== "open") return;
-        setOpened((n) => n + 1);
-        panel.current?.querySelector<HTMLInputElement>("input:checked")?.focus();
-      }}
-    >
-      <div className="token-setup-head">
-        <h2 id={titleId}>{labels.title}</h2>
-        <p>{labels.scope}</p>
-      </div>
-      <fieldset className="seg">
-        <legend className="visually-hidden">{labels.mode}</legend>
-        {TOKEN_MODES.map((mode) => (
-          <label
-            key={mode}
-            className="seg-item"
-            data-selected={setup.mode === mode ? "" : undefined}
+    <Popover.Root handle={tokenSetupHandle}>
+      {({ payload }) => (
+        <Popover.Portal>
+          <Popover.Positioner
+            anchor={payload?.anchor}
+            align={payload ? "end" : "start"}
+            sideOffset={8}
+            collisionPadding={8}
+            // Above or below only, scrolling when short of room; slid back on screen rather than
+            // flipped to the other end.
+            collisionAvoidance={{ align: "shift", fallbackAxisSide: "none" }}
           >
-            <input
-              type="radio"
-              name={modes}
-              value={mode}
-              checked={setup.mode === mode}
-              onChange={() => setTokenSetup({ ...setup, mode })}
-            />
-            {labels[mode]}
-          </label>
-        ))}
-      </fieldset>
-      <p className="token-setup-note">
-        {setup.mode === "theme" ? labels.themeNote : labels.isolatedNote}
-      </p>
-      <PrefixField key={opened} setup={setup} labels={labels} />
-      <OwsemJson setup={setup} />
-      <h3 className="token-setup-names">{labels.names}</h3>
-      <ul className="token-names">
-        {names.map((name) => (
-          <li key={name}>
-            <code>
-              --{setup.prefix}-{name}
-            </code>
-          </li>
-        ))}
-      </ul>
-      {isDefaultSetup(setup) ? null : <p className="token-setup-note">{labels.cli}</p>}
-      <button
-        type="button"
-        className="text-button"
-        onClick={() => setTokenSetup(DEFAULT_TOKEN_SETUP)}
-      >
-        {labels.reset}
-      </button>
-    </div>
+            {/* Content mounts on each open, so a half-typed prefix does not outlive the panel. */}
+            <Popover.Popup
+              ref={popup}
+              className="token-setup"
+              initialFocus={() =>
+                popup.current?.querySelector<HTMLElement>("input:checked") ?? true
+              }
+              finalFocus={payload?.finalFocus ?? true}
+            >
+              <div className="token-setup-head">
+                <Popover.Title>{labels.title}</Popover.Title>
+                <Popover.Description>{labels.scope}</Popover.Description>
+              </div>
+              <fieldset className="seg">
+                <legend className="visually-hidden">{labels.mode}</legend>
+                {TOKEN_MODES.map((mode) => (
+                  <label
+                    key={mode}
+                    className="seg-item"
+                    data-selected={setup.mode === mode ? "" : undefined}
+                  >
+                    <input
+                      type="radio"
+                      name={modes}
+                      value={mode}
+                      checked={setup.mode === mode}
+                      onChange={() => setTokenSetup({ ...setup, mode })}
+                    />
+                    {labels[mode]}
+                  </label>
+                ))}
+              </fieldset>
+              <p className="token-setup-note">
+                {setup.mode === "theme" ? labels.themeNote : labels.isolatedNote}
+              </p>
+              <PrefixField setup={setup} labels={labels} />
+              <OwsemJson setup={setup} />
+              <h3 className="token-setup-names">{labels.names}</h3>
+              <ul className="token-names">
+                {names.map((name) => (
+                  <li key={name}>
+                    <code>
+                      --{setup.prefix}-{name}
+                    </code>
+                  </li>
+                ))}
+              </ul>
+              {isDefaultSetup(setup) ? null : <p className="token-setup-note">{labels.cli}</p>}
+              <button
+                type="button"
+                className="text-button"
+                onClick={() => setTokenSetup(DEFAULT_TOKEN_SETUP)}
+              >
+                {labels.reset}
+              </button>
+            </Popover.Popup>
+          </Popover.Positioner>
+        </Popover.Portal>
+      )}
+    </Popover.Root>
   );
 }
 
@@ -262,15 +272,10 @@ export function TokenChip({ lang }: { lang: Lang }) {
   return (
     <p className="token-chip">
       {labels[setup.mode]} · <code data-token-literal="">{names}</code>
-      <button
-        type="button"
-        className="text-button"
-        popoverTarget={TOKEN_SETUP_ID}
-        onClick={() => placeTokenSetup()}
-      >
+      <Popover.Trigger handle={tokenSetupHandle} className="text-button">
         {labels.change}
         <span className="visually-hidden"> {labels.title}</span>
-      </button>
+      </Popover.Trigger>
     </p>
   );
 }

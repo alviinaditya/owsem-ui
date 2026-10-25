@@ -3,6 +3,16 @@ import type { ScriptStage } from "./types";
 
 const REDUCED = "(prefers-reduced-motion: reduce)";
 
+const MOUSE: Partial<Record<string, string>> = {
+  pointerover: "mouseover",
+  pointerenter: "mouseenter",
+  pointermove: "mousemove",
+  pointerdown: "mousedown",
+  pointerup: "mouseup",
+  pointerout: "mouseout",
+  pointerleave: "mouseleave",
+};
+
 interface Spot {
   x: number;
   y: number;
@@ -16,8 +26,9 @@ const aim = (rect: DOMRect): Spot => ({
 
 /**
  * The tools for one run of a scene script. The pointer is drawn by `ghost` and sends real pointer
- * events (untrusted), so hover effects such as Glide react as they would to a person; it clicks
- * with `click()`, which leaves focus alone. Every step rejects once `signal` aborts.
+ * and mouse events (untrusted), so hover effects such as Glide and tooltips react as they would to
+ * a person; it clicks with `click()`, which leaves focus alone. Every step rejects once `signal`
+ * aborts.
  */
 export function createScriptStage(
   body: HTMLElement,
@@ -28,22 +39,24 @@ export function createScriptStage(
   let at: Spot | null = null;
   let over: Element | null = null;
 
-  // `pressed` undefined is a move, true a press, false a release.
-  const fire = (type: string, target: Element, spot: Spot, pressed?: boolean) =>
+  // `pressed` undefined is a move, true a press, false a release. Each also sends the mouse event
+  // a browser sends after it: tooltips listen to those, and menus open on mousedown.
+  const fire = (type: string, target: Element, spot: Spot, pressed?: boolean) => {
+    const init = {
+      bubbles: type !== "pointerenter" && type !== "pointerleave",
+      cancelable: true,
+      composed: true,
+      clientX: spot.x,
+      clientY: spot.y,
+      button: pressed === undefined ? -1 : 0,
+      buttons: pressed ? 1 : 0,
+    };
     target.dispatchEvent(
-      new PointerEvent(type, {
-        bubbles: type !== "pointerenter" && type !== "pointerleave",
-        cancelable: true,
-        composed: true,
-        clientX: spot.x,
-        clientY: spot.y,
-        pointerId: 1,
-        pointerType: "mouse",
-        isPrimary: true,
-        button: pressed === undefined ? -1 : 0,
-        buttons: pressed ? 1 : 0,
-      }),
+      new PointerEvent(type, { ...init, pointerId: 1, pointerType: "mouse", isPrimary: true }),
     );
+    const mouse = MOUSE[type];
+    if (mouse) target.dispatchEvent(new MouseEvent(mouse, { ...init, button: 0 }));
+  };
 
   // An element and its ancestors inside the demo, innermost first.
   const chain = (el: Element | null) => {

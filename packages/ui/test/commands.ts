@@ -24,6 +24,13 @@ export const setReducedMotion: BrowserCommand<[mode: "reduce" | "no-preference"]
   await ctx.page.emulateMedia({ reducedMotion: mode });
 };
 
+// A held press, for :active (DP-4): composite items act on Space's keydown, so only a pointer
+// holds them in. Move the pointer onto the element first, e.g. with userEvent.hover().
+export const mouse: BrowserCommand<[action: "down" | "up"]> = async (ctx, action) => {
+  if (ctx.provider.name !== "playwright") throw new Error("requires the playwright provider");
+  await ctx.page.mouse[action]();
+};
+
 // Surface's opaque version. Playwright has no option for it, so Chromium emulates it over CDP;
 // "no-preference" lets Playwright send its own media state again, which leaves it out.
 let transparency: CDPSession | undefined;
@@ -49,6 +56,7 @@ declare module "vitest/browser" {
     setColorScheme: (scheme: "light" | "dark") => Promise<void>;
     setForcedColors: (mode: "active" | "none") => Promise<void>;
     setReducedMotion: (mode: "reduce" | "no-preference") => Promise<void>;
+    mouse: (action: "down" | "up") => Promise<void>;
     setReducedTransparency: (mode: "reduce" | "no-preference") => Promise<void>;
   }
 }

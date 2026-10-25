@@ -139,10 +139,106 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Kbd** and **Separator** (Base, from `owsem-ui/base`) and **Command Menu** and **Tree Rail Nav**
-(Owsem, from `owsem-ui/owsem`) are built. Base components are Base UI components with OwsemUI's
-styling, and small primitives without a Base UI part, such as Kbd; Owsem components are OwsemUI's
-own. No component has a `flavor` prop.
+**Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toolbar**, and **Tooltip** (Base, from
+`owsem-ui/base`) and **Command Menu** and **Tree Rail Nav** (Owsem, from `owsem-ui/owsem`) are
+built. Base components are Base UI components with OwsemUI's styling, and small primitives without
+a Base UI part, such as Kbd; Owsem components are OwsemUI's own. No component has a `flavor` prop.
+
+### Menu
+
+A dropdown list of actions from a button, with checks, choices, and submenus. Registry item: `menu`.
+
+```tsx
+import { Menu } from "owsem-ui/base"; // or "@/components/owsem/menu"
+<Menu.Root>
+  <Menu.Trigger render={<button type="button" />}>Edit</Menu.Trigger>
+  <Menu.Portal>
+    <Menu.Positioner>
+      <Menu.Popup>
+        <Menu.Item onClick={copy}>
+          <CopyIcon />
+          Copy
+          <kbd>⌘C</kbd>
+        </Menu.Item>
+        <Menu.Separator />
+        <Menu.CheckboxItem checked={wrap} onCheckedChange={setWrap}>
+          <Menu.CheckboxItemIndicator />
+          Word wrap
+        </Menu.CheckboxItem>
+        <Menu.Group>
+          <Menu.GroupLabel>Theme</Menu.GroupLabel>
+          <Menu.RadioGroup value={theme} onValueChange={setTheme}>
+            <Menu.RadioItem value="light">
+              <Menu.RadioItemIndicator />
+              Light
+            </Menu.RadioItem>
+          </Menu.RadioGroup>
+        </Menu.Group>
+        <Menu.SubmenuRoot>
+          <Menu.SubmenuTrigger>Share</Menu.SubmenuTrigger>
+          <Menu.Portal>
+            <Menu.Positioner>
+              <Menu.Popup>{/* items */}</Menu.Popup>
+            </Menu.Positioner>
+          </Menu.Portal>
+        </Menu.SubmenuRoot>
+      </Menu.Popup>
+    </Menu.Positioner>
+  </Menu.Portal>
+</Menu.Root>
+```
+
+- Keyboard, focus, typeahead, and ARIA come from Base UI; do not add handlers. Inside a Toolbar,
+  open it from an item: `<Toolbar.Button render={<Menu.Trigger />}>Edit</Toolbar.Button>`.
+- Do not style item hover or `data-highlighted`: Glide lights items (recolor it with
+  `--ow-hover`). An `svg` first in an item is its icon; a `kbd` last is its shortcut (the menu
+  shows it, the app handles the keys).
+- `Menu.CheckboxItemIndicator` and `Menu.RadioItemIndicator` draw a check and a dot by default and
+  keep their room while off (`keepMounted`); put them first. Checkbox and radio items keep the menu
+  open unless `closeOnClick`.
+- `Popup` takes `size` (`"sm"`, `"md"` default, `"lg"`), also on a submenu's Popup. `Positioner`
+  sits 6px from the trigger (`side`, `align`, `sideOffset`); a submenu lines its first item up with
+  its trigger. The menu renders in a portal: set tokens on the Popup's class or on `:root`, and
+  `data-theme` on the Positioner when the trigger sits in a themed subtree.
+- Reads `--ow-panel`, `--ow-popup-shadow`, `--ow-fg`, `--ow-muted`, `--ow-hover` (Glide),
+  `--ow-line-dark` and `--ow-line-light` (grooves), `--ow-radius`, and `--ow-focus`.
+
+### Popover
+
+A panel of content and controls opened from a button: a dialog, usable with touch and screen
+readers. Registry item: `popover`.
+
+```tsx
+import { Popover } from "owsem-ui/base"; // or "@/components/owsem/popover"
+<Popover.Root>
+  <Popover.Trigger render={<button type="button" />}>Share</Popover.Trigger>
+  <Popover.Portal>
+    <Popover.Positioner>
+      <Popover.Popup>
+        <Popover.Arrow />
+        <Popover.Title>Share the draft</Popover.Title>
+        <Popover.Description>Anyone with the link can read it.</Popover.Description>
+        {/* controls */}
+        <Popover.Close render={<button type="button" />}>Done</Popover.Close>
+      </Popover.Popup>
+    </Popover.Positioner>
+  </Popover.Portal>
+</Popover.Root>
+```
+
+- Focus, Escape, outside clicks, and ARIA come from Base UI; always give the popup a
+  `Popover.Title`. Use a Popover, not a Tooltip, for anything people must read or act on.
+- `Positioner`: `side` (`"bottom"` default), `align`, `sideOffset` (10 by default, room for the
+  arrow); `Arrow` is optional. `Popup`: `initialFocus` and `finalFocus`; `Root`: `modal` (`false`
+  default), `open`, `onOpenChange`.
+- One panel for several triggers: `const handle = Popover.createHandle()`, then
+  `<Popover.Root handle={handle}>` and `<Popover.Trigger handle={handle} payload={...}>` anywhere;
+  `handle.open(triggerId)` and `handle.close()` work from code.
+- The panel renders in a portal: set tokens on the Popup's class or on `:root`, and `data-theme` on
+  the Positioner when the trigger sits in a themed subtree. Long content scrolls in a container
+  inside the popup (the popup itself has no overflow, so the arrow shows).
+- Reads `--ow-panel` and `--ow-popup-shadow` (the arrow takes both), `--ow-fg`, `--ow-muted`, and
+  `--ow-radius`.
 
 ### Separator
 
@@ -175,6 +271,103 @@ import { Kbd } from "owsem-ui/base"; // or "@/components/owsem/kbd"
 - Hide a purely visual hint with `aria-hidden` when the control names its shortcut with
   `aria-keyshortcuts`.
 - Reads `--ow-raised-bg`, `--ow-raised-shadow`, `--ow-muted`, and `--ow-radius`.
+
+### Toggle
+
+A two-state button: flat with muted text while off, the raised key tinted 8% toward its text while
+on (so it shows on a white panel too), and the pressed material only while held down. Registry
+item: `toggle`.
+
+```tsx
+import { Toggle } from "owsem-ui/base"; // or "@/components/owsem/toggle"
+<Toggle aria-label="Bold" startIcon={<BoldIcon />} />
+<Toggle defaultPressed startIcon={<PinIcon />}>Pin</Toggle>
+<Toggle pressed={wrap} onPressedChange={setWrap}>Wrap lines</Toggle>
+```
+
+- Renders a `<button>` with `aria-pressed`, `data-pressed` while on, and `data-disabled`.
+  Controlled with `pressed` and `onPressedChange(pressed, eventDetails)`, or uncontrolled with
+  `defaultPressed`. Keep its name the same in both states; the state is what changes.
+- Props: `size` (`"sm"`, `"md"` default, `"lg"`: Button's heights), `startIcon` and `endIcon`
+  (any icon; sized to the font plus 2px, no size props needed), plus Base UI's `disabled`,
+  `value`, `className`, `style`, and `render`. Without children it is a square icon button: give
+  it an `aria-label`. The ref goes to the `button`.
+- Height comes from `--py` (set it in `style` on the toggle, never under a 24 px target).
+- Reads `--ow-muted` (text while off), `--ow-hover`, `--ow-fg`, `--ow-raised-bg` and
+  `--ow-raised-shadow` (on), `--ow-pressed-bg` and `--ow-pressed-shadow` (held down),
+  `--ow-radius`, and `--ow-focus`.
+
+### Toolbar
+
+A row of buttons, toggles, links, and one field, with arrow-key navigation from Base UI. Registry
+item: `toolbar`.
+
+```tsx
+import { Toggle, Toolbar } from "owsem-ui/base"; // or "@/components/owsem/toolbar" and ".../toggle"
+<Toolbar.Root aria-label="Formatting">
+  <Toolbar.Group aria-label="Text">
+    <Toolbar.Button render={<Toggle defaultPressed />} aria-label="Bold" startIcon={<BoldIcon />} />
+    <Toolbar.Button render={<Toggle />} aria-label="Italic" startIcon={<ItalicIcon />} />
+  </Toolbar.Group>
+  <Toolbar.Separator />
+  <Toolbar.Button startIcon={<ShareIcon />}>Share</Toolbar.Button>
+  <Toolbar.Link href="/help">Help</Toolbar.Link>
+  <Toolbar.Input aria-label="Find" placeholder="Find" />
+</Toolbar.Root>
+```
+
+- `Root` renders `role="toolbar"`: one Tab stop, then Left and Right (Up and Down when
+  `orientation="vertical"`) move between items and wrap. Do not add key handlers or `tabIndex`.
+  Give it an `aria-label`. `size` (`"sm"`, `"md"` default, `"lg"`) sets every item's size.
+- `Button` and `Link` are quiet ghost buttons with `size`, `startIcon`, and `endIcon`; without a
+  label they are square and need an `aria-label`. A disabled `Button` stays focusable. A Toggle
+  passed to `render` keeps its own look: the raised key while on.
+- On/off items: pass a Toggle to `render` (`render={<Toggle pressed={on} onPressedChange={setOn} />}`)
+  and keep the item's other props on `Toolbar.Button`. A Base UI popup trigger goes the same way
+  (`render={<Menu.Trigger />}`).
+- `Input` is a flat well with a 3:1 edge, as tall as the buttons; put at most one, last, since
+  arrows move its caret. Its `size` is the type scale, not a width: set `inline-size` in CSS.
+- `Separator` is an etched groove across the toolbar's direction; `Group` takes an `aria-label`.
+- Reads `--ow-panel` and `--ow-panel-shadow` (the bar), `--ow-muted`, `--ow-fg`, `--ow-hover`,
+  `--ow-pressed-bg`, and `--ow-pressed-shadow` (buttons and links), `--ow-well-bg`,
+  `--ow-well-shadow`, and `--ow-edge` (the field), `--ow-line-dark` and `--ow-line-light` (grooves),
+  `--ow-radius`, and `--ow-focus`.
+
+### Tooltip
+
+A short visual label for a button, on hover or keyboard focus (touch shows none). Registry item:
+`tooltip`.
+
+```tsx
+import { Toggle, Toolbar, Tooltip } from "owsem-ui/base"; // or "@/components/owsem/tooltip"
+<Tooltip.Provider>
+  <Tooltip.Root>
+    <Tooltip.Trigger render={<Toolbar.Button render={<Toggle />} aria-label="Bold" startIcon={<BoldIcon />} />} />
+    <Tooltip.Portal>
+      <Tooltip.Positioner side="bottom">
+        <Tooltip.Popup>
+          <Tooltip.Arrow />
+          Bold<kbd>⌘B</kbd>
+        </Tooltip.Popup>
+      </Tooltip.Positioner>
+    </Tooltip.Portal>
+  </Tooltip.Root>
+</Tooltip.Provider>
+```
+
+- The trigger keeps its own accessible name (`aria-label` on an icon button); the tooltip only
+  repeats it. Never put information a touch or screen reader user needs only in a tooltip.
+- Pass the button to `Tooltip.Trigger`'s `render`; it can itself render a Toggle or a toolbar item.
+- `Tooltip.Provider` around a group shares one `delay` (600 ms default): after the first, the next
+  tooltips open at once. `Trigger` takes `delay`, `closeDelay`, and `closeOnClick`; `Root` takes
+  `open`, `defaultOpen`, `onOpenChange`, and `disabled`.
+- `Positioner`: `side` (`"top"` default, also `"inline-start"` and `"inline-end"`), `align`, and
+  `sideOffset` (8 by default). `Arrow` is optional. A `kbd` inside the popup is styled as the
+  shortcut.
+- The popup renders in a portal on `body`: a `data-theme` or token set around the trigger does not
+  reach it. Set tokens on `:root` or on the Popup's class, and pass `data-theme` to the Positioner
+  when the trigger sits in a themed subtree. Wrap the app in `DirectionProvider` for right to left.
+- Reads `--ow-tooltip-bg`, `--ow-tooltip-fg`, and `--ow-radius`.
 
 ### Tree Rail Nav
 

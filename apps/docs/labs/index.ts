@@ -3,7 +3,12 @@ import type { LabProps } from "@/components/lab/lab-shell";
 import type { ComponentName } from "@/lib/catalog";
 import CommandMenuLab from "./command-menu";
 import KbdLab from "./kbd";
+import MenuLab from "./menu";
+import PopoverLab from "./popover";
 import SeparatorLab from "./separator";
+import ToggleLab from "./toggle";
+import ToolbarLab from "./toolbar";
+import TooltipLab from "./tooltip";
 import TreeRailNavLab from "./tree-rail-nav";
 
 /**
@@ -13,6 +18,11 @@ import TreeRailNavLab from "./tree-rail-nav";
 export const labs: Partial<Record<ComponentName, ComponentType<LabProps>>> = {
   "command-menu": CommandMenuLab,
   kbd: KbdLab,
+  menu: MenuLab,
+  popover: PopoverLab,
   separator: SeparatorLab,
+  toggle: ToggleLab,
+  toolbar: ToolbarLab,
+  tooltip: TooltipLab,
   "tree-rail-nav": TreeRailNavLab,
 };

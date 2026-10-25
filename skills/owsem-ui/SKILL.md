@@ -154,7 +154,8 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
 **Button**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toggle Group**,
 **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`) and **Color Picker**, **Command Menu**,
-**Table of Contents**, and **Tree Rail Nav** (Owsem, from `owsem-ui/owsem`) are built. Base
+**Icon Morph**, **Table of Contents**, and **Tree Rail Nav** (Owsem, from `owsem-ui/owsem`) are
+built. Base
 components are Base UI components with OwsemUI's styling, and small primitives without a Base UI
 part, such as Kbd; Owsem components are OwsemUI's own. No component has a `flavor` prop.
 
@@ -620,6 +621,35 @@ import { TableOfContents } from "owsem-ui/owsem"; // or "@/components/owsem/tabl
   a sticky header, set `scroll-padding-top`. Do not handle the clicks instead.
 - Reads `--ow-accent` (the marker), `--ow-line` (the rail), `--ow-fg` (current and hovered links),
   `--ow-muted` (other links), `--ow-focus`, and `--ow-radius`.
+
+### Icon Morph
+
+Swaps one icon for another in place: the old icon shrinks, blurs, and fades out as the new one grows
+in, both in one grid cell. Registry item: `icon-morph`.
+
+```tsx
+import { IconMorph } from "owsem-ui/owsem"; // or "@/components/owsem/icon-morph"
+<Button
+  variant="outline"
+  startIcon={<IconMorph>{copied ? <Check key="check" /> : <Copy key="copy" />}</IconMorph>}
+>
+  Copy
+</Button>
+```
+
+- One child, an icon element with a `key`. A new key swaps it; the same key updates the icon in
+  place; `null` shows none. Nothing animates on the first render. Do not wrap the icons in
+  `AnimatePresence` or add transitions: CSS transitions are built in, a change mid-swap turns
+  around, and nothing runs at rest.
+- Root is a `span` (`className`, `style`, ref, and other props pass through). In the icon slot of a
+  Button, Toggle, or Toolbar item it fills the slot, so do not size the icons there; elsewhere each
+  icon keeps its own size.
+- It adds no role or name. Name the control after what it does now, or keep one name with
+  `aria-pressed`; the leaving icon is `aria-hidden`. Announce a change such as a copy in a status
+  region.
+- Reads `--ow-motion-scale` (how far icons shrink and blur; 0 only fades), `--ow-spring-settle`
+  and `--ow-spring-settle-duration` (the swap), and `--ow-ease-out` (the crossfade under reduced
+  motion). Set them on `.ow-icon-morph` itself: the settle spring also times button presses.
 
 ## Rules
 

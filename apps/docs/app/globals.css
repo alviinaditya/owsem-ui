@@ -845,6 +845,16 @@ body {
   font-size: 26px;
 }
 
+.component-preview-morph {
+  display: grid;
+  place-items: center;
+  inline-size: 44px;
+  block-size: 44px;
+  border-radius: var(--docs-radius);
+  background-color: var(--docs-well);
+  box-shadow: var(--docs-well-shadow);
+}
+
 .component-preview-tree {
   inline-size: 190px;
   font-size: 13px;
@@ -4064,4 +4074,26 @@ figure[data-code-block] pre {
   color: var(--ow-fg);
   line-height: 1.5;
   white-space: nowrap;
+}
+
+/* Icon Morph Lab: an episode card with its controls, and a filmstrip of one swap. */
+.demo-morph {
+  inline-size: 320px;
+}
+
+.demo-morph-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.demo-morph-frame {
+  display: grid;
+  place-items: center;
+  inline-size: 56px;
+  block-size: 56px;
+  border-radius: 12px;
+  background-color: var(--ow-well-bg);
+  box-shadow: var(--ow-well-shadow);
+  color: var(--ow-fg);
 }

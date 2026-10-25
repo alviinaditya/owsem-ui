@@ -572,15 +572,6 @@ body {
   line-height: 1.5;
 }
 
-/* Copy (components/lab/copy-button.tsx): both words share one cell, so the width holds. */
-.copy-label {
-  display: inline-grid;
-}
-
-.copy-label > span {
-  grid-area: 1 / 1;
-}
-
 /* Badges: the dot shape shows the family (DS-1). */
 
 .badges {
@@ -843,6 +834,17 @@ body {
   display: flex;
   gap: 6px;
   font-size: 26px;
+}
+
+.component-preview-copy {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 4px 4px 12px;
+  border-radius: calc(var(--docs-radius) + 2px);
+  background-color: var(--docs-well);
+  box-shadow: var(--docs-well-shadow);
+  font-size: 12.5px;
 }
 
 .component-preview-morph {
@@ -4096,4 +4098,31 @@ figure[data-code-block] pre {
   background-color: var(--ow-well-bg);
   box-shadow: var(--ow-well-shadow);
   color: var(--ow-fg);
+}
+
+/* Copy Button Lab: an invite link in a field, with its Copy Button at the end. */
+/* minmax(0, 1fr): a long link gives way to the button instead of widening the card. */
+.demo-copy {
+  grid-template-columns: minmax(0, 1fr);
+  inline-size: 360px;
+}
+
+.demo-copy-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 4px 4px 12px;
+  border-radius: calc(var(--ow-radius) + 4px);
+  background-color: var(--ow-well-bg);
+  box-shadow: var(--ow-well-shadow);
+}
+
+.demo-copy-field code {
+  flex: 1;
+  min-inline-size: 0;
+  overflow: hidden;
+  color: var(--ow-fg);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

@@ -154,8 +154,8 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
 **Button**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toggle Group**,
 **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`) and **Color Picker**, **Command Menu**,
-**Icon Morph**, **Table of Contents**, and **Tree Rail Nav** (Owsem, from `owsem-ui/owsem`) are
-built. Base
+**Copy Button**, **Icon Morph**, **Table of Contents**, and **Tree Rail Nav** (Owsem, from
+`owsem-ui/owsem`) are built. Base
 components are Base UI components with OwsemUI's styling, and small primitives without a Base UI
 part, such as Kbd; Owsem components are OwsemUI's own. No component has a `flavor` prop.
 
@@ -621,6 +621,32 @@ import { TableOfContents } from "owsem-ui/owsem"; // or "@/components/owsem/tabl
   a sticky header, set `scroll-padding-top`. Do not handle the clicks instead.
 - Reads `--ow-accent` (the marker), `--ow-line` (the rail), `--ow-fg` (current and hovered links),
   `--ow-muted` (other links), `--ow-focus`, and `--ow-radius`.
+
+### Copy Button
+
+A Button that copies text: its copy icon morphs into a check that draws itself in, then back.
+Registry item: `copy-button` (installs Button and Icon Morph too).
+
+```tsx
+import { CopyButton } from "owsem-ui/owsem"; // or "@/components/owsem/copy-button"
+<CopyButton value={url} />
+<CopyButton value={() => editor.getValue()} showLabel variant="outline" size="sm" />
+<CopyButton value={token} labels={{ copy: "Salin", copied: "Tersalin" }} onError={showFallback} />
+```
+
+- `value` (a string, or a function read at the moment of the press), `timeout` (ms the check
+  shows, 1600), `labels` (`copy`, `copied`; translate them), `showLabel` (the word beside the
+  icon; both words hold the width), `onCopy(text)`, `onError(error)`. Every Button prop passes
+  through except `startIcon`, `endIcon`, `children`, and `loading`; `variant` defaults to
+  `"ghost"`.
+- Icon only by default, named by `labels.copy` through `aria-label`. A visually hidden
+  `role="status"` after the button announces `labels.copied`; do not add a toast or change the
+  name yourself. It sets `data-copied` while it shows the check.
+- It writes with `navigator.clipboard.writeText` and shows the check only once that succeeds. A
+  refusal, or no Clipboard API (not a secure context), calls `onError` and shows nothing; there is
+  no `execCommand` fallback. `preventDefault()` in `onClick` skips the copy.
+- Reads the Button's tokens, plus `--ow-spring-settle` and its duration (the swap and the check
+  drawing in) and `--ow-motion-scale`.
 
 ### Icon Morph
 

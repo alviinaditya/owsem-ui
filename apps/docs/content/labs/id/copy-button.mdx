@@ -1,0 +1,113 @@
+---
+title: Copy Button
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Copy Button menyalin sepotong teks, misalnya link, perintah, atau kunci. Ia sebuah Button yang ikon
+salinnya berubah jadi centang yang tergambar sendiri, lalu kembali sesaat kemudian; sebuah region
+status memberi tahu pembaca layar bahwa teksnya tersalin. Docs ini memakainya untuk setiap Salin.
+Gulir untuk mulai tur; stage mengikuti setiap bagian.
+
+## Menyalin [#copying]
+
+Berikan teksnya sebagai `value`, atau fungsi yang mengembalikannya, yang dibaca saat tombol
+ditekan: `value={() => editor.getValue()}`. Tekanan menulisnya dengan Clipboard API; begitu browser
+mengonfirmasi, ikon salin berubah jadi centang (Icon Morph), centangnya menggambar garisnya, dan
+`onCopy` menerima teksnya. Setelah `timeout` (1600 ms) ia kembali. Tekanan berikutnya memulai
+waktunya dari awal.
+
+Kalau browser menolak, atau tidak punya Clipboard API (di luar secure context, misalnya `http`
+biasa), tombolnya tidak menampilkan apa pun dan `onError` menerima alasannya, jadi Anda bisa
+menampilkan teksnya untuk dipilih. `onClick` Anda sendiri berjalan lebih dulu; `preventDefault()`
+di dalamnya melewatkan penyalinan.
+
+Stage menyalin link undangan: lihat centangnya menggambar diri, lalu kembali jadi ikon salin.
+Tekanan dari scene menggantikan clipboard, jadi clipboard Anda tetap seperti semula; tekan sendiri
+untuk menyalin link-nya.
+
+## Ikon atau label [#label]
+
+Sendirian ia berupa ikon, dinamai oleh labelnya (`aria-label="Copy"`), sepersegi IconButton.
+`showLabel` menaruh katanya di samping ikon: Salin, lalu Tersalin. Kedua kata berbagi satu sel, jadi
+lebar tombolnya tetap dan tidak ada yang bergeser di sekitarnya; kata yang tersembunyi tidak dibaca.
+`labels` menerjemahkan keduanya, seperti yang dilakukan docs ini dalam bahasa Indonesia.
+
+Stage menampilkan labelnya, di tombol outline, lalu menyalin lagi.
+
+## Anatomi [#anatomy]
+
+Button dan bagian-bagiannya, dengan ikon di Icon Morph, dan sebuah region status di samping tombol.
+Inspect (I) menandai setiap bagian di stage; pilih namanya, di sini atau di stage, untuk melihat
+token-nya.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `button.ow-button.ow-copy-button` | Sebuah Button: `data-variant`, `data-size`, `data-icon-only` tanpa label, dan `data-copied` selama menampilkan Tersalin. Ref diteruskan ke sini |
+| <Part name="Icon" /> | `svg.ow-copy-button__icon` | Salin, atau centang (`.ow-copy-button__check`), di slot ikon Button, ditukar oleh Icon Morph |
+| <Part name="Label" /> | `span.ow-copy-button__label` | Dengan `showLabel`: kedua kata (`__label-text`), yang tampil dengan `data-visible` |
+| Status | `span.ow-copy-button__status` | `role="status"` setelah tombol, tersembunyi secara visual: berisi Tersalin selama tampil |
+
+## State dan varian [#states]
+
+Stage memasang tema terang dan gelap berdampingan: ikon saja di tombol ghost, dan dengan label di
+tombol outline, masing-masing siap dan tersalin.
+
+| State | Yang menandainya |
+| --- | --- |
+| Siap | Ikon salin, dan Salin kalau labelnya tampil |
+| Tersalin | Centang, Tersalin, `data-copied`, dan teks region status, selama `timeout` |
+| Ditolak | Tidak ada yang berubah; `onError` menerima alasannya |
+
+Copy Button adalah komponen Owsem (Kinetic): ikonnya bertukar dengan spring settle, dan centangnya
+juga tergambar dengannya. Tanpa glow, dan tidak ada yang berjalan di antara dua salinan.
+
+## Keyboard dan aksesibilitas [#keyboard]
+
+Ia `button` native: Tab mencapainya, dan Enter atau Spasi menyalin. Namanya tetap sama selama
+menampilkan Tersalin; region status yang mengumumkan salinannya, jadi pembaca layar mendengarnya
+sekali. Dengan label, namanya adalah kata yang tampil. Ikon-ikonnya `aria-hidden`.
+
+Dengan `prefers-reduced-motion`, ikonnya hanya crossfade dan centangnya langsung ada. Di forced
+colors (Windows High Contrast), Button menggambar tepinya dan ikonnya memakai warna teksnya.
+
+## Kustomisasi [#customization]
+
+Kontrol stage terbuka: tampilkan labelnya, atau ubah varian atau ukurannya, dan kodenya mengikuti.
+Copy Button menerima semua prop Button kecuali ikon dan children, dan membaca token tema Button
+(lihat Button), ditambah ini:
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-spring-settle`, `--ow-spring-settle-duration` | Pertukaran ikon dan centang yang tergambar |
+| `--ow-motion-scale` | Seberapa jauh ikon mengecil dan memburam saat bertukar |
+| `--ow-ease-out` | Crossfade saat reduced motion |
+
+<ForMode mode="isolated">
+
+Di mode isolated nilainya ada di root setiap komponen, jadi pasang nilai Anda di tombolnya
+sendiri, seperti `.invite-link .ow-copy-button`.
+
+</ForMode>
+
+<TokenChip lang="id" />
+
+## Ship it [#ship]
+
+Drawer kode menulis komponen persis seperti yang diatur di stage. Ubah apa pun, dan baris yang
+berubah akan menyala.
+
+| Prop | Tipe | Bawaan |
+| --- | --- | --- |
+| `value` | `string \| () => string` | |
+| `timeout` | `number`, dalam ms | `1600` |
+| `labels` | `{ copy?: string; copied?: string }` | `{ copy: "Copy", copied: "Copied" }` |
+| `showLabel` | `boolean` | `false` |
+| `onCopy` | `(text: string) => void` | |
+| `onError` | `(error: unknown) => void` | |
+| `variant` | seperti Button | `"ghost"` |
+
+`size`, `disabled`, `className`, `style`, `onClick`, dan prop Button lainnya diteruskan, begitu juga
+ref. Impor dari `owsem-ui/owsem`. Di registry, item-nya bernama `copy-button`, yang ikut memasang
+Button dan Icon Morph.

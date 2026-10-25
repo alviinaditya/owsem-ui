@@ -36,6 +36,8 @@ export default [
   entry("toolbar", "dist/components/toolbar/index.js", "3 kB"),
   entry("tooltip", "dist/components/tooltip/index.js", "3 kB"),
   entry("command-menu", "dist/components/command-menu/index.js", "8 kB"),
+  // Copy Button builds on Button and Icon Morph, which count here too.
+  entry("copy-button", "dist/components/copy-button/index.js", "8 kB"),
   entry("icon-morph", "dist/components/icon-morph/index.js", "8 kB"),
   entry("table-of-contents", "dist/components/table-of-contents/index.js", "8 kB"),
   // Base + Owsem: both flavors in one entry; 3 kB or 8 kB is open in the PRD.

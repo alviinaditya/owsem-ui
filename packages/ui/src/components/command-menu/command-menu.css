@@ -187,9 +187,11 @@
     box-shadow: 0 1px 0 var(--ow-line-light);
   }
 
+  /* One line tall: Firefox can make a text field taller, from the font's rounded metrics. */
   .ow-command-menu__input {
     flex: 1;
     min-inline-size: 0;
+    block-size: 1lh;
     padding: 0;
     border: 0;
     outline: none;

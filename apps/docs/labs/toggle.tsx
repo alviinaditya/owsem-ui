@@ -134,7 +134,7 @@ function Measured({ children, square }: { children: ReactNode; square?: boolean 
   return (
     <span ref={ref} className="demo-measured">
       {children}
-      <span className="demo-measure">{size}</span>
+      <span className="demo-caption">{size}</span>
     </span>
   );
 }

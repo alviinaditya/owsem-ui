@@ -53,7 +53,7 @@ export const catalog = [
   { name: "scroll-area", title: "Scroll Area", family: "base", category: "display", phase: 1, status: "planned" },
   { name: "toggle", title: "Toggle", family: "base", category: "action", phase: 2, status: "prototype" },
   { name: "toggle-group", title: "Toggle Group", family: "base", category: "action", phase: 2, expressions: ["tactile", "kinetic"], status: "planned" },
-  { name: "toolbar", title: "Toolbar", family: "base", category: "action", phase: 2, status: "planned" },
+  { name: "toolbar", title: "Toolbar", family: "base", category: "action", phase: 2, status: "prototype" },
   { name: "checkbox-group", title: "Checkbox Group", family: "base", category: "form", phase: 2, status: "planned" },
   { name: "number-field", title: "Number Field", family: "base", category: "form", phase: 2, status: "planned" },
   { name: "slider", title: "Slider", family: "base", category: "form", phase: 2, expressions: ["tactile", "kinetic"], status: "planned" },

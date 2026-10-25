@@ -139,10 +139,10 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Kbd**, **Separator**, and **Toggle** (Base, from `owsem-ui/base`) and **Tree Rail Nav** (Owsem,
-from `owsem-ui/owsem`) are built. Base components are Base UI components with OwsemUI's styling, and
-small primitives without a Base UI part, such as Kbd; Owsem components are OwsemUI's own. No
-component has a `flavor` prop.
+**Kbd**, **Separator**, **Toggle**, and **Toolbar** (Base, from `owsem-ui/base`) and **Tree Rail
+Nav** (Owsem, from `owsem-ui/owsem`) are built. Base components are Base UI components with
+OwsemUI's styling, and small primitives without a Base UI part, such as Kbd; Owsem components are
+OwsemUI's own. No component has a `flavor` prop.
 
 ### Separator
 
@@ -199,6 +199,42 @@ import { Toggle } from "owsem-ui/base"; // or "@/components/owsem/toggle"
 - Height comes from `--py` (set it in `style` on the toggle, never under a 24 px target).
 - Reads `--ow-muted` (text while off), `--ow-hover`, `--ow-fg`, `--ow-raised-bg` and
   `--ow-raised-shadow` (on), `--ow-pressed-bg` and `--ow-pressed-shadow` (held down),
+  `--ow-radius`, and `--ow-focus`.
+
+### Toolbar
+
+A row of buttons, toggles, links, and one field, with arrow-key navigation from Base UI. Registry
+item: `toolbar`.
+
+```tsx
+import { Toggle, Toolbar } from "owsem-ui/base"; // or "@/components/owsem/toolbar" and ".../toggle"
+<Toolbar.Root aria-label="Formatting">
+  <Toolbar.Group aria-label="Text">
+    <Toolbar.Button render={<Toggle defaultPressed />} aria-label="Bold" startIcon={<BoldIcon />} />
+    <Toolbar.Button render={<Toggle />} aria-label="Italic" startIcon={<ItalicIcon />} />
+  </Toolbar.Group>
+  <Toolbar.Separator />
+  <Toolbar.Button startIcon={<ShareIcon />}>Share</Toolbar.Button>
+  <Toolbar.Link href="/help">Help</Toolbar.Link>
+  <Toolbar.Input aria-label="Find" placeholder="Find" />
+</Toolbar.Root>
+```
+
+- `Root` renders `role="toolbar"`: one Tab stop, then Left and Right (Up and Down when
+  `orientation="vertical"`) move between items and wrap. Do not add key handlers or `tabIndex`.
+  Give it an `aria-label`. `size` (`"sm"`, `"md"` default, `"lg"`) sets every item's size.
+- `Button` and `Link` are quiet ghost buttons with `size`, `startIcon`, and `endIcon`; without a
+  label they are square and need an `aria-label`. A disabled `Button` stays focusable. A Toggle
+  passed to `render` keeps its own look: the raised key while on.
+- On/off items: pass a Toggle to `render` (`render={<Toggle pressed={on} onPressedChange={setOn} />}`)
+  and keep the item's other props on `Toolbar.Button`. A Base UI popup trigger goes the same way
+  (`render={<Menu.Trigger />}`).
+- `Input` is a flat well with a 3:1 edge, as tall as the buttons; put at most one, last, since
+  arrows move its caret. Its `size` is the type scale, not a width: set `inline-size` in CSS.
+- `Separator` is an etched groove across the toolbar's direction; `Group` takes an `aria-label`.
+- Reads `--ow-panel` and `--ow-panel-shadow` (the bar), `--ow-muted`, `--ow-fg`, `--ow-hover`,
+  `--ow-pressed-bg`, and `--ow-pressed-shadow` (buttons and links), `--ow-well-bg`,
+  `--ow-well-shadow`, and `--ow-edge` (the field), `--ow-line-dark` and `--ow-line-light` (grooves),
   `--ow-radius`, and `--ow-focus`.
 
 ### Tree Rail Nav

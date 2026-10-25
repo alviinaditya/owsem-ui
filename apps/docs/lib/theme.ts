@@ -4,10 +4,12 @@ export type Theme = (typeof THEMES)[number];
 export const THEME_STORAGE_KEY = "owsem-theme";
 export const PACKAGE_MANAGER_STORAGE_KEY = "owsem-package-manager";
 export const TOKEN_SETUP_STORAGE_KEY = "owsem-token-setup";
+export const INDEX_VIEW_STORAGE_KEY = "owsem-index-view";
 
 // Runs in <head> before first paint, so a stored theme never flashes. "system" means no
-// data-theme attribute: owsem-ui tokens then follow prefers-color-scheme (TK-5).
-export const themeScript = `try{var t=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)});if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}`;
+// data-theme attribute: owsem-ui tokens then follow prefers-color-scheme (TK-5). The index's
+// list view is stored the same way (<html data-index-view="list">); grid is no attribute.
+export const themeScript = `try{var s=localStorage,r=document.documentElement,t=s.getItem(${JSON.stringify(THEME_STORAGE_KEY)});if(t==="light"||t==="dark")r.dataset.theme=t;if(s.getItem(${JSON.stringify(INDEX_VIEW_STORAGE_KEY)})==="list")r.dataset.indexView="list"}catch(e){}`;
 
 /**
  * The same as themeScript, from React: switching language swaps the root layout, and React clears
@@ -18,6 +20,7 @@ export function restoreRootState(): void {
     const root = document.documentElement;
     const theme = localStorage.getItem(THEME_STORAGE_KEY);
     if (theme === "light" || theme === "dark") root.dataset.theme = theme;
+    if (localStorage.getItem(INDEX_VIEW_STORAGE_KEY) === "list") root.dataset.indexView = "list";
   } catch {
     // Storage blocked: the defaults apply.
   }

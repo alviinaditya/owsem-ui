@@ -157,7 +157,7 @@ function LabPage({ lang, entry, dict }: PageArgs) {
         labels={dict.lab}
         item={entry.name}
       >
-        <Mdx components={getMDXComponents({ section: Scene })} />
+        <Mdx components={getMDXComponents(lang, { section: Scene })} />
       </Lab>
     </PageMain>
   );

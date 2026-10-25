@@ -35,6 +35,8 @@ export default [
   entry("toggle-group", "dist/components/toggle-group/index.js", "3 kB"),
   entry("toolbar", "dist/components/toolbar/index.js", "3 kB"),
   entry("tooltip", "dist/components/tooltip/index.js", "3 kB"),
+  // Code Block builds on Copy Button, Button, and Icon Morph, which count here too.
+  entry("code-block", "dist/components/code-block/index.js", "8 kB"),
   entry("command-menu", "dist/components/command-menu/index.js", "8 kB"),
   // Copy Button builds on Button and Icon Morph, which count here too.
   entry("copy-button", "dist/components/copy-button/index.js", "8 kB"),

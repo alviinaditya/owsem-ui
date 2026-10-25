@@ -31,8 +31,16 @@ const same = (a: Box, b: Box) =>
   Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y), Math.abs(a.w - b.w), Math.abs(a.h - b.h)) <
   0.01;
 
-/** Wires the thumb to `root`, whose items match `items`. */
-export function createThumb(root: HTMLElement, thumb: HTMLElement, items: string): Thumb {
+/**
+ * Wires the thumb to `root`, whose items match `items`; it sits under the one with the `pressed`
+ * attribute (Code Block's tabs are `data-active`).
+ */
+export function createThumb(
+  root: HTMLElement,
+  thumb: HTMLElement,
+  items: string,
+  pressed = "data-pressed",
+): Thumb {
   // The item the thumb is under, and its box; null while hidden.
   let on: HTMLElement | null = null;
   let last: Box | null = null;
@@ -48,6 +56,7 @@ export function createThumb(root: HTMLElement, thumb: HTMLElement, items: string
   /**
    * An element's box from the root's padding edge, in the root's own px: a scaled ancestor (the
    * Lab's fitted stage, a dialog growing in) is divided out, and so is the element's press scale.
+   * A root that scrolls carries the thumb with its items, so its scroll is added back.
    */
   function measure(el: HTMLElement): Box | null {
     const rect = el.getBoundingClientRect();
@@ -63,8 +72,8 @@ export function createThumb(root: HTMLElement, thumb: HTMLElement, items: string
     const w = rect.width / sx / press - inset;
     const h = rect.height / sy / press - inset;
     return {
-      x: (rect.left + rect.width / 2 - box.left) / sx - w / 2 - root.clientLeft,
-      y: (rect.top + rect.height / 2 - box.top) / sy - h / 2 - root.clientTop,
+      x: (rect.left + rect.width / 2 - box.left) / sx - w / 2 - root.clientLeft + root.scrollLeft,
+      y: (rect.top + rect.height / 2 - box.top) / sy - h / 2 - root.clientTop + root.scrollTop,
       w,
       h,
     };
@@ -86,7 +95,7 @@ export function createThumb(root: HTMLElement, thumb: HTMLElement, items: string
   function sync(): void {
     const item = root.hasAttribute("data-multiple")
       ? null
-      : root.querySelector<HTMLElement>(`${items}[data-pressed]`);
+      : root.querySelector<HTMLElement>(`${items}[${pressed}]`);
     const to = item && measure(item);
     if (!item || !to) {
       on = null;
@@ -160,7 +169,7 @@ export function createThumb(root: HTMLElement, thumb: HTMLElement, items: string
     subtree: true,
     childList: true,
     attributes: true,
-    attributeFilter: ["data-pressed", "data-multiple"],
+    attributeFilter: [pressed, "data-multiple"],
   });
   observeSizes();
   root.addEventListener("pointerdown", onPointerDown);

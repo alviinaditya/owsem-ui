@@ -57,6 +57,8 @@ export const en = {
     stage: "Stage",
     tools: "Stage tools",
     theme: "Stage theme",
+    light: "Light",
+    dark: "Dark",
     controls: "Controls",
     code: "Code",
     inspect: "Inspect",
@@ -148,7 +150,7 @@ export const en = {
     menu: "A popup list of actions, with submenus and shortcuts.",
     tabs: "Panels switched by tabs, with an indicator that follows the selection.",
     "scroll-area": "A scroll container with thin scrollbars that appear on hover.",
-    toggle: "A two-state button that stays pressed while on.",
+    toggle: "A two-state button that stays raised while on.",
     "toggle-group": "A set of toggles that work as one, such as a segmented control.",
     toolbar: "A group of buttons and toggles with keyboard navigation.",
     "checkbox-group": "A set of checkboxes with a select-all option.",
@@ -177,5 +179,6 @@ export const en = {
     "spotlight-card": "A card whose border and light follow the cursor.",
     "color-picker":
       "A color picker with an area, hue and opacity sliders, fields, and swatches, inline or in a popover.",
+    kbd: "A key on the keyboard, drawn as a small raised keycap.",
   },
 } satisfies Dictionary;

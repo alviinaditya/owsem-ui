@@ -22,3 +22,10 @@ export function restoreRootState(): void {
     // Storage blocked: the defaults apply.
   }
 }
+
+/** The site's color scheme at this moment: <html data-theme>, else the system preference. */
+export function siteScheme(): "light" | "dark" {
+  const theme = document.documentElement.dataset.theme;
+  if (theme === "light" || theme === "dark") return theme;
+  return matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}

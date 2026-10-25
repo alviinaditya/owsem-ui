@@ -12,6 +12,13 @@ test("the token setup rewrites a Lab's code and install steps (DS-4)", async ({ 
   await chip.click();
   await expect(panel).toBeVisible();
   await expect(panel.getByRole("radio", { name: "Theme tokens" })).toBeFocused();
+  // A Popover beside the chip that opened it: under it, or above when there is no room.
+  const chipBox = await chip.boundingBox();
+  const panelBox = await panel.boundingBox();
+  if (!chipBox || !panelBox) throw new Error("The chip and the panel need boxes.");
+  const below = panelBox.y - (chipBox.y + chipBox.height);
+  const above = chipBox.y - (panelBox.y + panelBox.height);
+  expect(Math.min(Math.abs(below - 8), Math.abs(above - 8))).toBeLessThan(1);
 
   await panel.getByRole("radio", { name: "Isolated tokens" }).check();
   const prefix = panel.getByLabel("Prefix");

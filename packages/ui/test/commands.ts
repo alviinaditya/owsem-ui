@@ -23,10 +23,18 @@ export const setReducedMotion: BrowserCommand<[mode: "reduce" | "no-preference"]
   await ctx.page.emulateMedia({ reducedMotion: mode });
 };
 
+// A held press, for :active (DP-4): composite items act on Space's keydown, so only a pointer
+// holds them in. Move the pointer onto the element first, e.g. with userEvent.hover().
+export const mouse: BrowserCommand<[action: "down" | "up"]> = async (ctx, action) => {
+  if (ctx.provider.name !== "playwright") throw new Error("requires the playwright provider");
+  await ctx.page.mouse[action]();
+};
+
 declare module "vitest/browser" {
   interface BrowserCommands {
     setColorScheme: (scheme: "light" | "dark") => Promise<void>;
     setForcedColors: (mode: "active" | "none") => Promise<void>;
     setReducedMotion: (mode: "reduce" | "no-preference") => Promise<void>;
+    mouse: (action: "down" | "up") => Promise<void>;
   }
 }

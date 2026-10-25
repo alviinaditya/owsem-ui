@@ -46,6 +46,9 @@ export const en = {
     soon: "Soon",
     progress: "{available} of {total} components available.",
     filter: "Family",
+    view: "View",
+    grid: "Grid",
+    list: "List",
     all: "All",
     phase: "Phase {phase}",
     families: {

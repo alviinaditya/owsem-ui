@@ -48,6 +48,9 @@ export const id = {
     soon: "Segera",
     progress: "{available} dari {total} komponen tersedia.",
     filter: "Keluarga",
+    view: "Tampilan",
+    grid: "Grid",
+    list: "Daftar",
     all: "Semua",
     phase: "Fase {phase}",
     families: {

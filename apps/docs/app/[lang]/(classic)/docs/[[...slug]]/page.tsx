@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getMDXComponents } from "@/components/mdx";
+import { PageMain } from "@/components/page-main";
 import { Toc } from "@/components/toc";
 import { getDictionary } from "@/lib/dictionaries";
 import { isLang, localeAlternates } from "@/lib/i18n";
@@ -18,7 +19,7 @@ export default async function DocsPage(props: PageProps<"/[lang]/docs/[[...slug]
   if (!page || !isLang(lang)) notFound();
   const Mdx = page.data.body;
   return (
-    <main className="with-toc">
+    <PageMain className="site-content with-toc">
       <article>
         <header className="page-header">
           <h1>{page.data.title}</h1>
@@ -27,7 +28,7 @@ export default async function DocsPage(props: PageProps<"/[lang]/docs/[[...slug]
         <Mdx components={getMDXComponents()} />
       </article>
       <Toc items={page.data.toc} label={getDictionary(lang).lab.toc} />
-    </main>
+    </PageMain>
   );
 }
 

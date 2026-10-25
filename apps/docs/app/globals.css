@@ -99,6 +99,65 @@
   scroll-padding-top: calc(var(--top-h) + 16px);
 }
 
+/*
+ * Page changes (components/page-main.tsx): a navigation is a view transition. The old page leaves
+ * quickly, then the new one fades in and rises a little, so a change of layout (a page to a Lab)
+ * reads as one move. The sidebar and the dock are their own layers and stay live: their trail and
+ * scene list animate as usual. Clicks pass through while it runs.
+ */
+.site-sidebar {
+  view-transition-name: site-sidebar;
+}
+
+.dock {
+  view-transition-name: site-dock;
+}
+
+::view-transition {
+  pointer-events: none;
+}
+
+::view-transition-group(site-sidebar),
+::view-transition-group(site-dock),
+::view-transition-new(site-sidebar),
+::view-transition-new(site-dock) {
+  animation: none;
+}
+
+::view-transition-old(site-sidebar),
+::view-transition-old(site-dock) {
+  display: none;
+}
+
+::view-transition-old(.page-out) {
+  animation: 100ms ease-in both page-fade reverse;
+}
+
+::view-transition-new(.page-in) {
+  animation: 220ms var(--ease) 80ms both page-fade;
+}
+
+/* Reduced motion keeps the fade, without the rise. */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-new(.page-in) {
+    animation:
+      220ms var(--ease) 80ms both page-fade,
+      320ms var(--ease) 80ms both page-rise;
+  }
+}
+
+@keyframes page-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes page-rise {
+  from {
+    translate: 0 8px;
+  }
+}
+
 /* Base UI global setup: portaled popups above the app, and backdrops on iOS Safari 26+. */
 .app-root {
   isolation: isolate;

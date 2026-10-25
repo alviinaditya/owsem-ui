@@ -183,3 +183,29 @@ test("no top bar: the sidebar's foot holds the settings, and a dock opens it bel
   // The token setup opens from the Labs (stage toolbar, Token chips), not from the foot.
   await expect(foot.getByRole("button", { name: /Token/ })).toHaveCount(0);
 });
+
+test("a navigation fades between pages, and the sidebar stays put", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name === "mobile-390", "the sidebar is a panel below 1100 px");
+  await page.goto("/en/docs/glide");
+  // Records the animations of the next view transition once it is ready.
+  await page.evaluate(() => {
+    const start = document.startViewTransition.bind(document);
+    document.startViewTransition = (update) => {
+      const transition = start(update);
+      transition.ready.then(() => {
+        document.documentElement.dataset.animations = document
+          .getAnimations()
+          .flatMap((animation) =>
+            animation instanceof CSSAnimation ? animation.animationName : [],
+          )
+          .join(" ");
+      });
+      return transition;
+    };
+  });
+  const sidebar = page.getByRole("navigation", { name: "Documentation navigation" });
+  await sidebar.getByRole("link", { name: "Button", exact: true }).click();
+  await expect(page).toHaveURL(/\/en\/button$/);
+  await expect(page.locator("html")).toHaveAttribute("data-animations", /page-fade.*page-rise/);
+  await expect(page.locator(".site-sidebar")).toHaveCSS("view-transition-name", "site-sidebar");
+});

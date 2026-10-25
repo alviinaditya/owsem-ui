@@ -30,13 +30,13 @@ test("the sidebar fades the edges that have more to scroll", async ({ page }, te
 });
 
 test("planned components show Coming soon and stay out of search", async ({ page }) => {
-  await page.goto("/en/button");
+  await page.goto("/en/meter");
   const main = page.getByRole("main");
-  await expect(main.getByRole("heading", { level: 1, name: "Button" })).toBeVisible();
+  await expect(main.getByRole("heading", { level: 1, name: "Meter" })).toBeVisible();
   await expect(main.getByText("Coming soon", { exact: true })).toBeVisible();
-  await expect(main.getByRole("link", { name: "Button", exact: true })).toHaveAttribute(
+  await expect(main.getByRole("link", { name: "Meter", exact: true })).toHaveAttribute(
     "href",
-    "https://base-ui.com/react/components/button",
+    "https://base-ui.com/react/components/meter",
   );
   await expect(robots(page)).toHaveAttribute("content", /noindex/);
 
@@ -134,14 +134,14 @@ test("sidebar groups close and open again (DS-14)", async ({ page }, testInfo) =
     await page.getByRole("button", { name: "Menu", exact: true }).click();
   }
   const sidebar = page.getByRole("navigation", { name: "Documentation navigation" });
-  const actions = sidebar.getByRole("button", { name: "Actions" });
-  const button = sidebar.getByRole("link", { name: "Button Soon" });
-  await expect(actions).toHaveAttribute("aria-expanded", "true");
-  await actions.click();
-  await expect(actions).toHaveAttribute("aria-expanded", "false");
-  await expect(button).toBeHidden();
-  await actions.click();
-  await expect(button).toBeVisible();
+  const display = sidebar.getByRole("button", { name: "Display" });
+  const meter = sidebar.getByRole("link", { name: "Meter Soon" });
+  await expect(display).toHaveAttribute("aria-expanded", "true");
+  await display.click();
+  await expect(display).toHaveAttribute("aria-expanded", "false");
+  await expect(meter).toBeHidden();
+  await display.click();
+  await expect(meter).toBeVisible();
 });
 
 test("the sidebar stays mounted from the docs to a Lab, so the trail travels there", async ({

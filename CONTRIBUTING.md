@@ -166,7 +166,6 @@ deleted CSS:
 
 | Phase | Component | Replaces in the docs |
 | --- | --- | --- |
-| 1 | Button | Copy and Reset (`.ghost-button`), Previous and Next links |
 | 1 | Tabs | The code drawer's file tabs (`.lab-tabs`) |
 | 1 | Field, Input | The prefix field (`.prefix-field`) and the hex field (`.color-field`) |
 | 1 | Scroll Area | `ScrollFade` (sidebar, controls, code drawer, commands) |

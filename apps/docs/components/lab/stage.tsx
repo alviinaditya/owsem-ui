@@ -1,6 +1,6 @@
 "use client";
 
-import { Kbd, Menu, Popover, Toggle, ToggleGroup, Toolbar, Tooltip } from "owsem-ui/base";
+import { Button, Kbd, Menu, Popover, Toggle, ToggleGroup, Toolbar, Tooltip } from "owsem-ui/base";
 import {
   Fragment,
   type KeyboardEvent,
@@ -636,9 +636,9 @@ function ControlsPanel({
           />
         ),
       )}
-      <button type="button" className="ghost-button" onClick={state.reset}>
+      <Button variant="outline" size="sm" onClick={state.reset}>
         {labels.reset}
-      </button>
+      </Button>
     </div>
   );
 }

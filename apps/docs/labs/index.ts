@@ -4,6 +4,7 @@ import type { ComponentName } from "@/lib/catalog";
 import ButtonLab from "./button";
 import ColorPickerLab from "./color-picker";
 import CommandMenuLab from "./command-menu";
+import CopyButtonLab from "./copy-button";
 import IconMorphLab from "./icon-morph";
 import KbdLab from "./kbd";
 import MenuLab from "./menu";
@@ -24,6 +25,7 @@ export const labs: Partial<Record<ComponentName, ComponentType<LabProps>>> = {
   button: ButtonLab,
   "color-picker": ColorPickerLab,
   "command-menu": CommandMenuLab,
+  "copy-button": CopyButtonLab,
   "icon-morph": IconMorphLab,
   kbd: KbdLab,
   menu: MenuLab,

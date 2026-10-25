@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, Kbd, Menu, Popover, Toggle, ToggleGroup, Toolbar, Tooltip } from "owsem-ui/base";
+import { CopyButton } from "owsem-ui/owsem";
 import {
   Fragment,
   type KeyboardEvent,
@@ -20,7 +21,6 @@ import { ScrollFade } from "../scroll-fade";
 import { Tip } from "../tip";
 import { type TokenSetupPlace, tokenSetupHandle, useTokenSetup } from "../token-setup";
 import { ColorField } from "./color-field";
-import { CopyButton } from "./copy-button";
 import { Inspect } from "./inspect";
 import {
   INSPECT_CARD,
@@ -706,7 +706,15 @@ function CodeDrawer({
           ))}
         </div>
         {/* Each install command has its own Copy. */}
-        {current.file ? <CopyButton text={current.file.code} labels={labels} /> : null}
+        {current.file ? (
+          <CopyButton
+            value={current.file.code}
+            labels={labels}
+            showLabel
+            variant="outline"
+            size="sm"
+          />
+        ) : null}
       </div>
       <ScrollFade
         id={`${id}-panel`}

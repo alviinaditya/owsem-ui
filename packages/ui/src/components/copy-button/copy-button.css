@@ -1,0 +1,68 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * Copy Button, an Owsem component (Kinetic): a Button whose copy icon morphs into a check (Icon
+ * Morph), and the check draws its stroke in as it enters, on the same spring. With a label, both
+ * words share one cell, so the button keeps its width.
+ */
+@layer owsem.components {
+  .ow-copy-button {
+    /* The theme tokens it reads (TK-9), besides the Button's own. */
+    --_duration: var(--ow-spring-settle-duration);
+    --_spring: var(--ow-spring-settle);
+  }
+
+  .ow-copy-button__icon {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* The path's length is 1: it draws in from its short stroke, as a hand writes a check. */
+  .ow-copy-button__check > path {
+    animation: ow-copy-button-draw var(--_duration) var(--_spring);
+  }
+
+  @keyframes ow-copy-button-draw {
+    from {
+      stroke-dasharray: 1;
+      stroke-dashoffset: -1;
+    }
+
+    to {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 0;
+    }
+  }
+
+  .ow-copy-button__label {
+    display: inline-grid;
+  }
+
+  .ow-copy-button__label-text {
+    grid-area: 1 / 1;
+  }
+
+  /* Hidden, it still holds its width, and it is not read. */
+  .ow-copy-button__label-text:not([data-visible]) {
+    visibility: hidden;
+  }
+
+  .ow-copy-button__status {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* FR-20: the check is just there. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-copy-button__check > path {
+      animation: none;
+    }
+  }
+}

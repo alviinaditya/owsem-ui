@@ -1,11 +1,11 @@
 "use client";
 
 import { ToggleGroup } from "owsem-ui/base";
+import { CopyButton } from "owsem-ui/owsem";
 import { useSyncExternalStore } from "react";
 import type { Dictionary } from "@/lib/dictionaries";
 import { PACKAGE_MANAGER_STORAGE_KEY } from "@/lib/theme";
 import { isDefaultSetup, type TokenSetup } from "@/lib/token-setup";
-import { CopyButton } from "./lab/copy-button";
 import { ScrollFade } from "./scroll-fade";
 import { useTokenSetup } from "./token-setup";
 
@@ -112,7 +112,7 @@ function Command({ text, labels }: { text: string; labels: Labels }) {
           })}
         </code>
       </ScrollFade>
-      <CopyButton text={text} labels={labels} />
+      <CopyButton value={text} labels={labels} showLabel variant="outline" size="sm" />
     </div>
   );
 }

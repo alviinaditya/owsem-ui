@@ -1,0 +1,110 @@
+---
+title: Copy Button
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Copy Button copies a piece of text, such as a link, a command, or a key. It is a Button whose copy
+icon morphs into a check that draws itself in, and back after a moment; a status region tells
+screen readers it copied. These docs use it for every Copy. Scroll to start the tour; the stage
+follows each part.
+
+## Copying [#copying]
+
+Give it the text as `value`, or a function that returns it, read at the moment of the press:
+`value={() => editor.getValue()}`. A press writes it with the Clipboard API; once the browser
+confirms, the copy icon turns into a check (Icon Morph), the check draws its stroke in, and
+`onCopy` gets the text. After `timeout` (1600 ms) it goes back. Another press starts the time over.
+
+When the browser refuses, or has no Clipboard API (outside a secure context, such as plain
+`http`), the button shows nothing copied and `onError` gets the reason, so you can show the text to
+select instead. An `onClick` of your own runs first; `preventDefault()` in it skips the copy.
+
+The stage copies the invite link: watch the check draw itself, then turn back into the copy icon. A
+scene's press stands in for the clipboard, so yours stays as it was; press it yourself to copy the
+link.
+
+## Icon or label [#label]
+
+On its own it is an icon, named by its label (`aria-label="Copy"`), as square as an IconButton.
+`showLabel` puts the word beside the icon: Copy, then Copied. Both words share one cell, so the
+button keeps its width and nothing around it moves; the hidden one is not read. `labels` translates
+both, as these docs do in Indonesian.
+
+The stage shows the label, on an outline button, and copies again.
+
+## Anatomy [#anatomy]
+
+The Button and its parts, with the icon in Icon Morph, and a status region beside the button.
+Inspect (I) outlines each part on the stage; pick a name, here or on the stage, to see its tokens.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `button.ow-button.ow-copy-button` | A Button: `data-variant`, `data-size`, `data-icon-only` without a label, and `data-copied` while it shows Copied. The ref goes here |
+| <Part name="Icon" /> | `svg.ow-copy-button__icon` | Copy, or the check (`.ow-copy-button__check`), in the Button's icon slot, swapped by Icon Morph |
+| <Part name="Label" /> | `span.ow-copy-button__label` | With `showLabel`: the two words (`__label-text`), the one on show with `data-visible` |
+| Status | `span.ow-copy-button__status` | `role="status"` after the button, visually hidden: says Copied while it shows |
+
+## States and variants [#states]
+
+The stage sets the light and dark themes side by side: icon only on a ghost button, and with a label
+on an outline one, each ready and copied.
+
+| State | What shows it |
+| --- | --- |
+| Ready | The copy icon, and Copy if the label shows |
+| Copied | The check, Copied, `data-copied`, and the status region's text, for `timeout` |
+| Refused | Nothing changes; `onError` gets the reason |
+
+Copy Button is an Owsem component (Kinetic): the icons swap on the settle spring, and the check
+draws itself on it too. It has no glow, and nothing runs between copies.
+
+## Keyboard and accessibility [#keyboard]
+
+It is a native `button`: Tab reaches it, and Enter or Space copies. Its name stays the same while
+it shows Copied; the status region announces the copy instead, so a screen reader hears it once.
+With a label the name is the word on show. Icons are `aria-hidden`.
+
+With `prefers-reduced-motion`, the icons only crossfade and the check is just there. In forced
+colors (Windows High Contrast), the Button draws its edge and the icons take its text color.
+
+## Customization [#customization]
+
+The stage controls are open: show the label, or change the variant or the size, and the code
+follows. Copy Button takes every Button prop except the icons and the children, and reads the
+Button's theme tokens (see Button), plus these:
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-spring-settle`, `--ow-spring-settle-duration` | The icon swap and the check drawing in |
+| `--ow-motion-scale` | How far the icons shrink and blur in the swap |
+| `--ow-ease-out` | The crossfade under reduced motion |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each component's root, so set yours on the button itself, as
+in `.invite-link .ow-copy-button`.
+
+</ForMode>
+
+<TokenChip lang="en" />
+
+## Ship it [#ship]
+
+The code drawer writes the component exactly as the stage is set up. Change anything and the lines
+that moved light up.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `value` | `string \| () => string` | |
+| `timeout` | `number`, in ms | `1600` |
+| `labels` | `{ copy?: string; copied?: string }` | `{ copy: "Copy", copied: "Copied" }` |
+| `showLabel` | `boolean` | `false` |
+| `onCopy` | `(text: string) => void` | |
+| `onError` | `(error: unknown) => void` | |
+| `variant` | as Button's | `"ghost"` |
+
+`size`, `disabled`, `className`, `style`, `onClick`, and the other Button props pass through, and
+so does the ref. Import it from `owsem-ui/owsem`. In the registry, it is the `copy-button` item,
+which installs Button and Icon Morph with it.

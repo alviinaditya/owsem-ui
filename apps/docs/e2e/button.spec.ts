@@ -1,7 +1,10 @@
 import { expect, test } from "@playwright/test";
 import { openSheet, stage } from "./lab.ts";
 
-test("Copy is a Button that keeps its width when it says Copied", async ({ page, context }) => {
+test("Copy is a Copy Button that keeps its width when it says Copied", async ({
+  page,
+  context,
+}) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/en/separator");
   // Below 960 px the page header is in the docs sheet.
@@ -16,7 +19,10 @@ test("Copy is a Button that keeps its width when it says Copied", async ({ page,
   await copy.click();
   await expect(install.getByRole("status")).toHaveText("Copied");
   await expect(copy).toHaveAccessibleName("Copied");
+  await expect(copy).toHaveAttribute("data-copied", "");
+  await expect(copy.locator(".ow-copy-button__check")).toHaveCount(1);
   expect(await width()).toBe(before);
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe("pnpm add owsem-ui");
 });
 
 test("Reset in the stage controls is a Button", async ({ page }) => {

@@ -1,0 +1,312 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * Code Block, an Owsem component (Kinetic): nested cards. The outer card is a flat well holding
+ * the header; the code sits in an inner card, the flat panel material, over the well's lower
+ * part, with the same corners. The header's tabs sit in the well as in Toggle Group: a raised
+ * thumb slides under the active one (thumb.ts), and Glide lights the hovered one. One leading
+ * icon morphs into the active snippet's (Icon Morph).
+ */
+@layer owsem.components {
+  .ow-code-block {
+    /* The theme tokens it reads (TK-9). */
+    --_well: var(--ow-well-bg);
+    --_well-edge: var(--ow-well-shadow);
+    --_panel: var(--ow-panel);
+    --_key: var(--ow-raised-bg);
+    --_key-edge: var(--ow-raised-shadow);
+    --_fg: var(--ow-fg);
+    --_muted: var(--ow-muted);
+    --_focus: var(--ow-focus);
+    --_radius: var(--ow-radius);
+    --_scrollbar: color-mix(in oklab, var(--ow-muted) 40%, transparent);
+    /* How far a held tab presses in (DP-4), scaled by the motion intensity. */
+    --_press: calc(1 - 0.03 * var(--ow-motion-scale));
+    --_travel: var(--ow-spring-travel-duration) var(--ow-spring-travel);
+    --_settle: var(--ow-spring-settle-duration) var(--ow-spring-settle);
+    --_press-in: 90ms var(--ow-ease-out);
+    /* The header's padding: the outer corners are the keys' plus it (FR-10b). */
+    --_pad: 6px;
+    /* How far the inner card reaches up over the header's padding. */
+    --_overlap: 10px;
+    --_corner: calc(var(--_radius) + var(--_pad));
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+    border-radius: var(--_corner);
+    background-color: var(--_well);
+    box-shadow: var(--_well-edge);
+    color: var(--_fg);
+  }
+
+  .ow-code-block__header {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    min-inline-size: 0;
+    padding: var(--_pad) var(--_pad) calc(var(--_pad) + var(--_overlap));
+    color: var(--_muted);
+    font-size: 0.8125rem;
+    line-height: 1.25;
+  }
+
+  /* As tall as the keys, so the icon is as far from the edge as from the top. */
+  .ow-code-block__icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    inline-size: 2.25em;
+    block-size: 2.25em;
+  }
+
+  .ow-code-block__icon svg {
+    inline-size: calc(1em + 2px);
+    block-size: calc(1em + 2px);
+  }
+
+  .ow-code-block__title {
+    flex: 1;
+    min-inline-size: 0;
+    overflow: hidden;
+    padding-inline-end: 0.5em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* The tabs scroll sideways inside the header when they do not fit; focus brings one in. */
+  .ow-code-block__list {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex: 1;
+    gap: 2px;
+    min-inline-size: 0;
+    overflow-x: auto;
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement (NF-1) */
+    scrollbar-width: none;
+  }
+
+  .ow-code-block__list > .ow-glide {
+    --_radius: var(--ow-radius);
+  }
+
+  /*
+   * The raised key under the active tab: thumb.ts lays it out on that tab's box (--_x, --_y, --_w,
+   * --_h) and slides it there from the last by --_dx, --_dy, --_sx, --_sy, which end at none.
+   */
+  .ow-code-block__thumb {
+    position: absolute;
+    z-index: -1;
+    /* biome-ignore-start lint/nursery/useLogicalProperties: the script measures physical edges */
+    top: var(--_y, 0px);
+    left: var(--_x, 0px);
+    width: var(--_w, 0px);
+    height: var(--_h, 0px);
+    /* biome-ignore-end lint/nursery/useLogicalProperties: the script measures physical edges */
+    border-radius: var(--_radius);
+    background-color: var(--_key);
+    box-shadow: var(--_key-edge);
+    opacity: 0;
+    pointer-events: none;
+    translate: var(--_dx, 0) var(--_dy, 0);
+    transform: scale(var(--_sx, 1), var(--_sy, 1));
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: translate, transform, scale;
+    transition:
+      translate var(--_travel),
+      transform var(--_travel),
+      scale var(--_settle),
+      opacity 150ms ease;
+  }
+
+  .ow-code-block__thumb[data-visible] {
+    opacity: 1;
+  }
+
+  /* Pressed in quickly, released with the settle spring. */
+  .ow-code-block__thumb[data-held] {
+    scale: var(--_press);
+    transition:
+      translate var(--_travel),
+      transform var(--_travel),
+      scale var(--_press-in),
+      opacity 150ms ease;
+  }
+
+  .ow-code-block__tab {
+    position: relative;
+    flex: none;
+    margin: 0;
+    padding: 0.5em 0.75em;
+    border: 0;
+    border-radius: var(--_radius);
+    /* DP-8: invisible here, the tab's edge in forced colors. */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background: none;
+    color: inherit;
+    font: inherit;
+    white-space: nowrap;
+    cursor: pointer;
+    touch-action: manipulation;
+    will-change: scale;
+    transition:
+      color 150ms ease,
+      scale var(--_settle);
+  }
+
+  .ow-code-block__tab:is([data-active], [data-glide-active]) {
+    color: var(--_fg);
+  }
+
+  /* The active tab as a key of its own before the script places the thumb (server HTML). */
+  .ow-code-block__list:not([data-thumb]) > .ow-code-block__tab[data-active] {
+    background-color: var(--_key);
+    box-shadow: var(--_key-edge);
+  }
+
+  .ow-code-block__tab[data-held] {
+    scale: var(--_press);
+    transition:
+      color 150ms ease,
+      scale var(--_press-in);
+  }
+
+  /* Inside, so the scrolling list never cuts it (FR-13). */
+  .ow-code-block__tab:focus-visible {
+    outline: 2px solid var(--_focus);
+    outline-offset: -2px;
+  }
+
+  .ow-code-block__tab:disabled {
+    color: color-mix(in oklab, var(--_muted) 50%, transparent);
+    cursor: not-allowed;
+  }
+
+  .ow-code-block__copy {
+    flex: none;
+    margin-inline-start: auto;
+  }
+
+  /*
+   * The inner card: the panel material over the header's lower padding, with the outer corners.
+   * Its code scrolls sideways inside it, and its padding stays at the end of a long line.
+   */
+  .ow-code-block__panel {
+    position: relative;
+    /* Code reads left to right on any page, and scrolls from its start. */
+    direction: ltr;
+    margin-block-start: calc(var(--_overlap) * -1);
+    overflow-x: auto;
+    border-radius: var(--_corner);
+    background-color: var(--_panel);
+    font-family: var(--ow-font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+    font-size: 0.875rem;
+    line-height: 1.7;
+    /* A thin, quiet scrollbar without arrows: the standard properties here (Firefox)… */
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement (NF-1) */
+    scrollbar-width: thin;
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement (NF-1) */
+    scrollbar-color: var(--_scrollbar) transparent;
+  }
+
+  /* …and WebKit's pseudo-elements where the browser has them, which the standard ones would turn
+   * off. The track keeps clear of the rounded corners. */
+  @supports selector(::-webkit-scrollbar) {
+    .ow-code-block__panel {
+      scrollbar-width: auto;
+      scrollbar-color: auto;
+    }
+
+    .ow-code-block__panel::-webkit-scrollbar {
+      block-size: 10px;
+    }
+
+    .ow-code-block__panel::-webkit-scrollbar-track {
+      margin-inline: var(--_corner);
+      background: none;
+    }
+
+    .ow-code-block__panel::-webkit-scrollbar-thumb {
+      border: 3px solid transparent;
+      /* literal: a pill, whatever the theme's radius */
+      border-radius: 999px;
+      background: var(--_scrollbar) padding-box;
+    }
+  }
+
+  /* Base UI keeps a panel a frame after its tab is left, for an exit animation; it has none, so
+   * it goes at once and two panels never stack. */
+  .ow-code-block__panel[data-ending-style] {
+    display: none;
+  }
+
+  .ow-code-block__panel:focus-visible {
+    outline: 2px solid var(--_focus);
+    outline-offset: -2px;
+  }
+
+  .ow-code-block__panel > :where(pre) {
+    box-sizing: border-box;
+    inline-size: max-content;
+    min-inline-size: 100%;
+    margin: 0;
+    padding: 14px 16px;
+    background: none;
+    font: inherit;
+    tab-size: 2;
+  }
+
+  /* FR-20: the thumb does not slide or press; it only fades. A held tab dims instead. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-code-block__thumb,
+    .ow-code-block__thumb[data-held] {
+      scale: none;
+      transition: opacity 150ms ease;
+    }
+
+    .ow-code-block__tab,
+    .ow-code-block__tab[data-held] {
+      scale: none;
+      transition: color 150ms ease;
+    }
+
+    .ow-code-block__thumb[data-held][data-visible] {
+      opacity: 0.8;
+    }
+  }
+
+  /* DP-8: fills and edges drop out, so outlines draw both cards, and the system highlight fills
+   * the active tab. */
+  @media (forced-colors: active) {
+    .ow-code-block,
+    .ow-code-block__panel {
+      outline: 1px solid transparent;
+      outline-offset: -1px;
+    }
+
+    .ow-code-block__tab[data-active] {
+      forced-color-adjust: none;
+      color: HighlightText;
+    }
+
+    /* The label turns as the fill arrives, so the fill does not travel. */
+    .ow-code-block__thumb,
+    .ow-code-block__list:not([data-thumb]) > .ow-code-block__tab[data-active] {
+      forced-color-adjust: none;
+      background-color: Highlight;
+      box-shadow: none;
+      transition: opacity 150ms ease;
+    }
+
+    .ow-code-block__tab:focus-visible,
+    .ow-code-block__panel:focus-visible {
+      outline-color: Highlight;
+    }
+  }
+
+  /* The thumb's first placement and every jump: nothing transitions. Last, so it wins. */
+  .ow-code-block__thumb[data-instant] {
+    transition: none;
+  }
+}

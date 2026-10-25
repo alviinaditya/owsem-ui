@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { Fragment, type ReactNode, useEffect, useMemo, useState } from "react";
 import type { HighlighterCore, ThemedToken } from "shiki/core";
 import { CODE_THEME, codeTheme } from "@/lib/code-theme";
 import type { CodeFile } from "./types";
@@ -125,6 +125,25 @@ export function LiveCode({ file }: { file: CodeFile }) {
             </span>
           );
         })}
+      </code>
+    </pre>
+  );
+}
+
+/** Highlighted code as a plain `<pre>`, such as a Code Block's in a Lab demo. */
+export function Highlighted({ file }: { file: CodeFile }) {
+  const highlighter = useHighlighter();
+  const tokens = useMemo(() => tokenize(highlighter, file), [highlighter, file]);
+  return (
+    <pre>
+      <code>
+        {file.code.split("\n").map((line, i) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: lines are positional
+          <Fragment key={i}>
+            {i > 0 ? "\n" : ""}
+            {highlight(line, tokens?.[i])}
+          </Fragment>
+        ))}
       </code>
     </pre>
   );

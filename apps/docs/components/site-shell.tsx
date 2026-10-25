@@ -53,7 +53,7 @@ export function SiteShell({ lang, children }: { lang: Lang; children: ReactNode 
         <SidebarToggle label={dict.nav.menu} />
         <SearchButton label={dict.search.button} />
       </div>
-      <TokenSetupPanel labels={dict.tokens} />
+      <TokenSetupPanel labels={dict.tokens} copyLabels={dict.lab} />
       <DocsSearch
         groups={buildSearchIndex(lang, dict)}
         labels={dict.search}

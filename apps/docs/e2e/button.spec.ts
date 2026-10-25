@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { openSheet, stage } from "./lab.ts";
 
-test("Copy is a Copy Button that keeps its width when it says Copied", async ({
+test("the install box is a Code Block whose Copy keeps its width when it says Copied", async ({
   page,
   context,
 }) => {
@@ -10,8 +10,10 @@ test("Copy is a Copy Button that keeps its width when it says Copied", async ({
   // Below 960 px the page header is in the docs sheet.
   await openSheet(page);
   const install = page.locator(".page-header .install");
-  const copy = install.locator(".ow-button");
-  await expect(copy).toHaveAttribute("data-variant", "outline");
+  await expect(install.locator(".ow-code-block")).toHaveCount(1);
+  await expect(install.getByRole("tablist", { name: "Package manager" })).toBeVisible();
+  const copy = install.locator(".ow-code-block__copy");
+  await expect(copy).toHaveAttribute("data-variant", "ghost");
   await expect(copy).toHaveAccessibleName("Copy");
   // Layout width: the press scales the box for a moment.
   const width = () => copy.evaluate((el) => (el as HTMLElement).offsetWidth);
@@ -22,6 +24,7 @@ test("Copy is a Copy Button that keeps its width when it says Copied", async ({
   await expect(copy).toHaveAttribute("data-copied", "");
   await expect(copy.locator(".ow-copy-button__check")).toHaveCount(1);
   expect(await width()).toBe(before);
+  // The command, without its prompt.
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe("pnpm add owsem-ui");
 });
 

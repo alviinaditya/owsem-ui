@@ -157,3 +157,24 @@ test("Glide lights the item nearest the pointer, in the sidebar and the demo", a
   await expect(page.locator(".glide-demo-status")).toHaveText("Picked: Profile");
   await expect(theming).not.toBeFocused();
 });
+
+test("code blocks are Code Blocks: the language's icon and name, and Copy takes the code", async ({
+  page,
+  context,
+}) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto("/en/docs");
+  const blocks = main(page).locator(".ow-code-block");
+  // The install command by package manager, then the MDX blocks.
+  await expect(blocks.first().getByRole("tab", { name: "pnpm" })).toBeVisible();
+  const tsx = blocks.filter({ hasText: 'import "owsem-ui/styles.css";' }).first();
+  await expect(tsx.locator(".ow-code-block__title")).toHaveText("TSX");
+  await expect(tsx.locator(".ow-code-block__icon svg")).toHaveCount(1);
+  await tsx.getByRole("button", { name: "Copy" }).click();
+  await expect(tsx.getByRole("status")).toHaveText("Copied");
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+    'import "owsem-ui/styles.css";\nimport { Separator } from "owsem-ui/base";',
+  );
+  const css = blocks.filter({ hasText: "isolation: isolate;" }).first();
+  await expect(css.locator(".ow-code-block__title")).toHaveText("CSS");
+});

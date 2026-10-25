@@ -733,6 +733,29 @@ test("the Icon Morph Lab swaps an icon in place, the old one leaving unread", as
   await expect(items).not.toHaveAttribute("data-ending-style");
 });
 
+test("the Code Block Lab's tabs swap the code, and the one icon morphs with them", async ({
+  page,
+}) => {
+  await page.goto("/en/code-block");
+  const block = demo(page).locator(".ow-code-block");
+  const icon = block.locator(".ow-code-block__icon .ow-icon-morph__item");
+  await expect(icon).toHaveCount(1);
+  await block.getByRole("tab", { name: "theme.css" }).click();
+  await expect(block.getByRole("tabpanel", { name: "theme.css" })).toContainText("--ow-accent");
+  // The TSX file's icon leaves as the CSS file's enters, then goes.
+  await expect(icon).toHaveCount(2);
+  await expect(icon.first()).toHaveAttribute("data-ending-style", "");
+  await expect(icon).toHaveCount(1);
+  await page.keyboard.press("ArrowRight");
+  await expect(block.getByRole("tab", { name: "Terminal" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
+  await expect(block.getByRole("tabpanel", { name: "Terminal" })).toContainText(
+    "pnpm add owsem-ui",
+  );
+});
+
 test("a Lab without animations has no Play scene or Replay", async ({ page }) => {
   await page.goto("/en/separator");
   for (const id of ["anatomy", "states", "ship"]) {

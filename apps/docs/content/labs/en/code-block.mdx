@@ -1,0 +1,138 @@
+---
+title: Code Block
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Code Block shows code in nested cards: an outer card with a header, and the code in an inner card
+that reaches over the header's lower edge, with the same corners. The header has one icon, a title
+or a row of tabs, and Copy at the end. Every code block in these docs is one. Scroll to start the
+tour; the stage follows each part.
+
+## Snippets in tabs [#tabs]
+
+One snippet takes a Title; several take a List of Tabs, one per snippet, and a Panel each. Tabs are
+Base UI's Tabs: the arrow keys move between them and pick as they move, Home and End go to the
+ends, and the Panel on show is a `tabpanel`. Root takes Base UI's `value`, `defaultValue`, and
+`onValueChange`, as these docs do to keep your package manager on every page.
+
+The header has one icon. Give each Tab its own with `icon`: the active tab's leads the list, and
+morphs into the next one's as the tab changes (Icon Morph). Tabs whose icons share a `key`, such as
+one terminal icon for every package manager, keep it still. The stage walks the tabs: a TSX file,
+a CSS file, and a command.
+
+## Copying [#copy]
+
+Copy is a Copy Button at the end of the header. It copies the text of the Panel on show, read at
+the moment of the press, so it follows the tabs and any text a script changed. Pass `value` to copy
+something else, such as a command without its prompt; a prompt that CSS draws (`::before`) is not
+part of the text, so it stays out on its own. It shows its label by default; `showLabel={false}`
+makes it an icon.
+
+The stage copies the TSX file, then the CSS one. A scene's press stands in for the clipboard, so
+yours stays as it was.
+
+## Long lines [#scroll]
+
+Code keeps its lines: a line wider than the block scrolls sideways inside the Panel, never the page,
+and the Panel's padding stays at the end of it. A Panel whose code overflows can be focused, so the
+arrow keys scroll it, and its Title names it. Code reads left to right on any page, and scrolls from
+its start. Tabs that do not fit scroll sideways in the header too; the focused one comes into view.
+
+The stage shows one file with a long line and scrolls it to its end and back.
+
+## Anatomy [#anatomy]
+
+Eight parts, and a Title in place of the List for one snippet. Code Block does not highlight code:
+give each Panel its code highlighted already, such as by Shiki at build time, as a `<pre>`. Inspect
+(I) outlines each part on the stage; pick a name, here or on the stage, to see its tokens.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-code-block` | The outer card; Base UI's Tabs root, with `value`, `defaultValue`, `onValueChange` |
+| <Part name="Header" /> | `div.ow-code-block__header` | The row above the code |
+| <Part name="Icon" /> | `span.ow-code-block__icon` | Drawn by Title or List from their `icon`; `aria-hidden` |
+| Title | `span.ow-code-block__title` | One snippet's name, with `icon`. It names a Panel that scrolls |
+| <Part name="List" /> | `div.ow-code-block__list` | Base UI's Tabs list (`role="tablist"`); name it with `aria-label` |
+| <Part name="Tab" /> | `button.ow-code-block__tab` | `value`, and `icon` for the header. The active one has `data-active` and `aria-selected` |
+| <Part name="Thumb" /> | `span.ow-code-block__thumb` | The raised key under the active tab, as in Toggle Group; `aria-hidden` |
+| <Part name="Copy" /> | `button.ow-code-block__copy` | A Copy Button: `size="sm"`, its label shown. `value` is optional here |
+| <Part name="Panel" /> | `div.ow-code-block__panel` | The inner card. With `value`, Base UI's Tabs panel; without, a box that the keyboard can focus while its code overflows |
+
+## States and variants [#states]
+
+The stage sets the light and dark themes side by side: one snippet, tabs, and a block that just
+copied.
+
+| State | What shows it |
+| --- | --- |
+| Active tab | The thumb, a raised key with a crisp edge, slides under it; its text takes the text color |
+| Hover | Glide lights the tab under the pointer |
+| Copied | Copy shows a check and Copied |
+| Overflow | The Panel scrolls sideways, and takes focus |
+| Keyboard focus | A ring inside the tab or the Panel, so the scrolling never cuts it |
+
+Code Block is an Owsem component (Kinetic): the thumb slides to the active tab on the travel spring,
+the icon morphs on the settle spring, and the check in Copy draws itself in. Both cards are flat
+fills, the outer one with a crisp 1px edge, and it has no glow.
+
+## Keyboard and accessibility [#keyboard]
+
+Tab reaches the active tab, then Copy, then a Panel that scrolls. In the tabs, the arrow keys move
+and pick, and Home and End go to the first and the last; the List is named by its `aria-label`. A
+Panel that overflows is a region named by the Title, and the arrow keys scroll it. The icon is
+`aria-hidden`; Copy announces Copied in a status region.
+
+With `prefers-reduced-motion`, the thumb and Glide only fade, and the icon only crossfades. In forced
+colors (Windows High Contrast), outlines draw both cards, and the thumb takes `Highlight`.
+
+## Customization [#customization]
+
+The stage controls are open: switch between one snippet and tabs, hide Copy's label, add a long
+line, or pick the cards' colors, and the code follows. Code Block reads these theme tokens; set
+them on the block or around it, such as `.snippets`.
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-well-bg`, `--ow-well-shadow` | The outer card and its edge |
+| `--ow-panel` | The inner card |
+| `--ow-raised-bg`, `--ow-raised-shadow` | The thumb under the active tab |
+| `--ow-radius` | The tabs' corners; the cards' are 6px more, around them |
+| `--ow-fg`, `--ow-muted` | The active and hovered tab, and the header's other text |
+| `--ow-hover` | Glide's highlight |
+| `--ow-focus` | The focus ring |
+| `--ow-font-mono` | The code's font, which your app sets |
+
+Copy reads the Button's tokens as well (see Copy Button). The code's own colors come with your
+highlighted code; give it no background, so the panel shows.
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each component's root, so set yours on the block itself, as
+`snippets.css` does with `.snippets.ow-code-block`.
+
+</ForMode>
+
+<TokenChip lang="en" />
+
+## Ship it [#ship]
+
+The code drawer writes the component exactly as the stage is set up. Change anything and the lines
+that moved light up.
+
+| Part | Prop | Type | Default |
+| --- | --- | --- | --- |
+| Root | `value`, `defaultValue` | the active Tab's `value` | |
+| Root | `onValueChange` | `(value, details) => void` | |
+| Title | `icon` | `ReactElement` | |
+| List | `activateOnFocus` | `boolean` | `true` |
+| Tab | `value` | `any` | |
+| Tab | `icon` | `ReactElement` | |
+| Copy | `value` | `string \| () => string` | the Panel on show |
+| Copy | `showLabel` | `boolean` | `true` |
+| Panel | `value` | the Tab's `value` | |
+
+Other props pass through to each part's element, and so do refs; Copy takes every Copy Button
+prop. Import it from `owsem-ui/owsem`. In the registry, it is the `code-block` item, which installs
+Copy Button, Button, and Icon Morph with it.

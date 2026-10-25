@@ -99,6 +99,16 @@
   scroll-padding-top: calc(var(--top-h) + 16px);
 }
 
+/*
+ * In-page links (On this page, the skip link) glide to their section. Next turns this off while
+ * it changes pages, since <html> has data-scroll-behavior="smooth".
+ */
+@media (prefers-reduced-motion: no-preference) {
+  :root {
+    scroll-behavior: smooth;
+  }
+}
+
 /* Base UI global setup: portaled popups above the app, and backdrops on iOS Safari 26+. */
 .app-root {
   isolation: isolate;

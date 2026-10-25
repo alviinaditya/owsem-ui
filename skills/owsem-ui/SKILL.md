@@ -614,8 +614,10 @@ import { TableOfContents } from "owsem-ui/owsem"; // or "@/components/owsem/tabl
   link is the last whose target crossed a line 30% down the targets' nearest scrolling ancestor
   (or the window); at the very end it is the last link; a clicked link holds until the visitor
   scrolls. It gets `aria-current="location"`, and `data-current` to style it by.
-- Links are plain anchors: the browser scrolls to the section. Under a sticky header, set
-  `scroll-padding-top` on the scroll area instead of handling clicks.
+- Links are plain anchors: the browser scrolls to the section. For a smooth scroll, set
+  `scroll-behavior: smooth` on the scroll area inside `@media (prefers-reduced-motion:
+  no-preference)` (in Next.js on `<html>`, add `data-scroll-behavior="smooth"` there too); under
+  a sticky header, set `scroll-padding-top`. Do not handle the clicks instead.
 - Reads `--ow-accent` (the marker), `--ow-line` (the rail), `--ow-fg` (current and hovered links),
   `--ow-muted` (other links), `--ow-focus`, and `--ow-radius`.
 

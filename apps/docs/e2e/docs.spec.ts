@@ -59,9 +59,14 @@ test("On this page marks the section being read, and the link picked", async ({
   await page.evaluate(() => document.getElementById("recoloring")?.scrollIntoView());
   await expect(current).toHaveText("Recoloring");
   await expect(toc.locator(".ow-table-of-contents__marker")).toHaveAttribute("data-visible", "");
+  // The page glides to the section; the wheel below waits until it lands.
+  const landed = page.evaluate(
+    () => new Promise((done) => addEventListener("scrollend", done, { once: true })),
+  );
   await toc.getByRole("link", { name: "Cascade layers" }).click();
   await expect(page).toHaveURL(/#cascade-layers$/);
   await expect(current).toHaveText("Cascade layers");
+  await landed;
   // The end of the page makes the last section current.
   await page.mouse.move(600, 300);
   await page.mouse.wheel(0, 20000);

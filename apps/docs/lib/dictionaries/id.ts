@@ -18,6 +18,24 @@ export const id = {
   language: {
     label: "Bahasa",
   },
+  search: {
+    trigger: "Cari…",
+    button: "Cari",
+    dialog: "Cari dokumentasi",
+    input: "Cari komponen, halaman, dan scene",
+    placeholder: "Cari komponen, halaman, scene…",
+    empty: "Tidak ada yang cocok dengan “{query}”.",
+    close: "Tutup pencarian",
+    move: "Pindah",
+    open: "Buka",
+    dismiss: "Tutup",
+    scene: "{component} · Scene {n}",
+    groups: {
+      pages: "Halaman",
+      components: "Komponen",
+      scenes: "Scene Lab",
+    },
+  },
   theme: {
     label: "Tema",
     light: "Terang",
@@ -161,7 +179,8 @@ export const id = {
     "lumen-rail-nav": "Navigasi sidebar dengan cahaya yang berjalan di sepanjang rail.",
     "tree-rail-nav":
       "Navigasi sidebar tiga tingkat, dengan jejak di sepanjang rail menuju halaman yang dibuka.",
-    "command-menu": "Palet perintah dengan pencarian, dibangun dari Dialog dan Combobox.",
+    "command-menu":
+      "Palet perintah yang dibuka dengan ⌘K: panel kaca yang menyaring hasil saat Anda mengetik.",
     "number-ticker": "Angka yang digitnya bergulir saat nilainya berubah.",
     "spotlight-card": "Kartu dengan border dan cahaya yang mengikuti kursor.",
     kbd: "Tombol keyboard, digambar sebagai tuts kecil yang timbul.",

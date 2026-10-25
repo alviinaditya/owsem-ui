@@ -190,6 +190,38 @@ describe("Glide", () => {
     expect(picked).toEqual([]);
   });
 
+  test("another control in the container is not a gap", async () => {
+    const picked: string[] = [];
+    let searched = 0;
+    function WithField() {
+      const glide = useGlide<HTMLDivElement>();
+      return (
+        <div ref={glide.ref} data-testid="list" style={{ display: "grid", gap: 4, width: 200 }}>
+          <GlideHighlight glide={glide} />
+          <button type="button" data-testid="field" onClick={() => searched++}>
+            Search
+          </button>
+          <button type="button" data-glide-item="" onClick={() => picked.push("One")}>
+            One
+          </button>
+        </div>
+      );
+    }
+    const { list, highlight } = await mount(<WithField />);
+    const field = list.querySelector<HTMLElement>('[data-testid="field"]');
+    const box = field?.getBoundingClientRect();
+    if (!field || !box) throw new Error("no field");
+    // Its lower edge is 4px from One: a gap click there would reach One.
+    const at = { clientX: box.left + 10, clientY: box.bottom - 1, bubbles: true };
+    field.dispatchEvent(new PointerEvent("pointermove", { ...at, pointerType: "mouse" }));
+    await new Promise((resolve) => setTimeout(resolve, 120));
+    expect(highlight.hasAttribute("data-visible")).toBe(false);
+    field.dispatchEvent(new PointerEvent("pointerdown", { ...at, button: 0 }));
+    field.dispatchEvent(new MouseEvent("click", at));
+    expect(searched).toBe(1);
+    expect(picked).toEqual([]);
+  });
+
   test("fades out a moment after the pointer leaves, and ignores touch", async () => {
     const { list, highlight, items } = await mount(<List options={{ hideDelay: 30 }} />);
     const one = items[0] && box(items[0]);

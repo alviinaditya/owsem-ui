@@ -1,0 +1,184 @@
+---
+title: Command Menu
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Command Menu is a command palette: a search field over grouped commands that filter as you type.
+⌘K or Ctrl K opens it from anywhere, at once, and its panel is glass, with the page blurred behind
+it. Scroll to start the tour; the stage follows each part.
+
+## Opened with ⌘K [#shortcut]
+
+Root listens for ⌘K or Ctrl K anywhere in the document, and the same keys close it again. Escape
+closes it too, and focus goes back where it was: to the Trigger, or to whatever had focus before
+the shortcut.
+
+A palette opens many times a day, from the keyboard, so it does not animate: it is there the moment
+you press, and gone the moment you leave. Nothing scales or fades in.
+
+The stage plays it: Escape, ⌘K, Escape, then the Trigger. Here ⌘K works while the stage has focus;
+elsewhere on the page it opens the docs search, which is a Command Menu too. Set `shortcut` to
+another key, or to `false` for a second menu on the page. A key that something else has handled
+(`preventDefault`) is left alone.
+
+## Filtering with Glide [#filter]
+
+Typing filters the list: Base UI's Autocomplete matches each item's label, and a group without
+matches goes. The first match is always highlighted, so Enter runs it right away.
+
+One highlight marks the item that Enter runs. It is Glide, from `owsem-ui/core`: whenever the
+arrows, the pointer, or the query move Base UI's highlight, it slides there by transform alone,
+then stops. Focus stays in the field; the list follows through `aria-activedescendant`.
+
+The stage types a query, walks the matches with the arrows, and clears it. Pass `filteredItems` to
+rank the results yourself, as the docs search does with fuzzy matching.
+
+## Groups and items [#groups]
+
+Items sit in groups, each named by a GroupLabel, which also labels the group for screen readers.
+An item lays its parts out in one row: ItemIcon, ItemLabel, ItemDescription, which gives way first
+when the row runs short, and a Shortcut of small keycaps at the end. A long list scrolls, and
+an edge fades while there is more that way, as far as the list has scrolled.
+
+The stage moves the pointer over both groups, then steps back with the arrow keys. The highlight
+follows either one, and stays put when the pointer leaves, on the item Enter runs. Restore version
+is disabled: it is muted and Enter does nothing there, but the arrows still reach it, so a screen
+reader can read it.
+
+## Anatomy [#anatomy]
+
+Command Menu is a Base UI Dialog with an Autocomplete inside. Inspect (I) outlines each part on the
+stage; pick a name, here or on the stage, to see its tokens.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| Root | none | Dialog.Root, the list's items and query, and the `shortcut` |
+| <Part name="Trigger" /> | `button.ow-command-menu__trigger` | Dialog.Trigger, a flat field with a search icon (`svg.ow-command-menu__icon`) and `aria-keyshortcuts`; `data-size` |
+| <Part name="Popup" /> | `div.ow-command-menu__popup` | A `dialog`: Dialog.Popup, with Autocomplete.Root inside; `data-size`. Its portal holds `div.ow-command-menu__backdrop` (`data-blur` with `backdrop="blur"`), then `div.ow-command-menu__viewport` around the popup |
+| <Part name="Input" /> | `input.ow-command-menu__input` | A `combobox`: Autocomplete.Input, after a search icon (`svg.ow-command-menu__icon`), in the search row `div.ow-command-menu__field` |
+| <Part name="List" /> | `div.ow-command-menu__list` | A `listbox`: Autocomplete.List; it scrolls, and holds the Glide highlight (`span.ow-glide`); `data-empty` when nothing matches |
+| <Part name="Group" /> | `div.ow-command-menu__group` | A `group`: Autocomplete.Group; `items` feeds the Collection inside it |
+| <Part name="GroupLabel" /> | `div.ow-command-menu__group-label` | Labels its group |
+| Collection | none | Renders the filtered items, one function call each |
+| <Part name="Item" /> | `div.ow-command-menu__item` | An `option`: Autocomplete.Item, with `closeOnClick`; `data-highlighted`, `data-disabled` |
+| <Part name="ItemIcon" /> | `span.ow-command-menu__item-icon` | Decorative (`aria-hidden`), the font size plus 2px |
+| ItemLabel | `span.ow-command-menu__item-label` | One line |
+| <Part name="ItemDescription" /> | `span.ow-command-menu__item-description` | Muted, on the same line; gives way first |
+| <Part name="Shortcut" /> | `kbd.ow-kbd.ow-command-menu__shortcut` | A [Kbd](/en/kbd) keycap, at an item's end, in the Trigger, or in the Footer |
+| Empty | `div.ow-command-menu__empty` | Shown when nothing matches, and announced politely |
+| <Part name="Footer" /> | `div.ow-command-menu__footer` | Key hints, past an etched line |
+
+Popup also renders a close button, `button.ow-command-menu__close`, hidden until it has focus: touch
+screen readers have no Escape key. `closeLabel` names it.
+
+## States and variants [#states]
+
+The stage sets the light and dark themes side by side, each with its results, a filtered list, and
+nothing found.
+
+| State | What shows it |
+| --- | --- |
+| Highlighted | Glide's highlight behind the item, and its icon in the text color |
+| Disabled | Muted text; Enter does nothing |
+| Nothing matches | Empty's text, announced politely, and the list hides |
+| Input focused | The caret: the field has focus all the while the menu is open |
+| Trigger focused | A 2px ring in the focus color, 2px out |
+
+Three sizes, `sm`, `md` (the default), and `lg`, set on Popup and Trigger: 13, 14, and 16px text.
+Items and the Trigger follow the `--py` rule, so they stand 29.25, 38.5, and 48px tall, with each
+icon as far from the side as from the top; the search row and the Footer are a little taller,
+and as tall as each other. Try them in the controls (P).
+
+Command Menu is an Owsem component, Kinetic and Surface: the highlight glides, and the panel is
+glass, the panel material over a blur of the page, with the popup's crisp 1px edge and drop shadow.
+The rest is flat: the Trigger is a well, a flat darker fill, and the keycaps are flat keys with a
+1px edge. It has no grain and no glow.
+
+## Keyboard and accessibility [#keyboard]
+
+| Key | Action |
+| --- | --- |
+| ⌘K, Ctrl K | Opens the menu from anywhere, or closes it |
+| Arrow Down, Arrow Up | Next or previous item, across groups |
+| Enter | Runs the highlighted item |
+| Escape | Closes the menu; focus goes back where it was |
+| Tab | To the close button, shown while it has focus |
+
+The menu is a modal dialog: focus stays inside while it is open, and returns when it closes. The
+field is a combobox whose `aria-activedescendant` is the highlighted item; each group is labelled
+by its GroupLabel, and disabled items have `aria-disabled`. Empty is a polite live region.
+
+With `prefers-reduced-motion`, the highlight fades from item to item instead of sliding; nothing
+else moves. With `prefers-reduced-transparency`, the panel is opaque and the page is not blurred. In
+forced colors (Windows High Contrast), the panel, the Trigger, and the keycaps keep an outline, and
+the highlight is a `Highlight` outline. Right to left, the layout mirrors: the Popup renders in the
+body, so it takes its direction from Base UI's `DirectionProvider`.
+
+Every text is yours to translate: the Input's label and placeholder, Empty, the group names, the
+Footer, and `closeLabel`.
+
+## Customization [#customization]
+
+The stage controls are open: pick a size, an opaque surface, or a blurred backdrop, and the code
+follows.
+
+Command Menu reads these theme tokens. The Popup renders in the body, outside your layout, so set
+them on `:root`, or on the Popup itself through `className` or `style`.
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-panel` | The glass, at 80% over a blur of the page, and the opaque panel |
+| `--ow-popup-shadow` | The panel's crisp edge and drop shadow |
+| `--ow-backdrop` | The scrim over the page, which `backdrop="blur"` also blurs |
+| `--ow-fg` | Text, and the lit item's icon |
+| `--ow-muted` | The Trigger's text, group names, descriptions, icons, keys, and disabled items |
+| `--ow-focus` | The Trigger's ring |
+| `--ow-hover` | The highlight (Glide) |
+| `--ow-radius` | Items' corners; the panel adds its padding, and keys take half |
+| `--ow-well-bg`, `--ow-well-shadow`, `--ow-edge` | The Trigger, a flat field with a 3:1 edge |
+| `--ow-raised-bg`, `--ow-raised-shadow` | The keycaps |
+| `--ow-line-dark`, `--ow-line-light` | The etched lines under the search row and over the footer |
+
+The scrim sits outside the Popup, so set `--ow-backdrop` on `:root`, where it dims every modal
+layer. The panel is at most 560px wide: to change that, set the Popup's `inline-size` through
+`className` or `style`, such as `min(100%, 720px)`. For an opaque panel, as the Solid surface
+does, give it `background-color: var(--ow-panel)` and `backdrop-filter: none`.
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each part's own root, the Trigger, the Popup, and the scrim, so
+a value on `:root` does not reach them. Set yours on the part itself, as `commands.css` does with
+the Popup's `className`.
+
+</ForMode>
+
+<TokenChip lang="en" />
+
+## Ship it [#ship]
+
+The code drawer writes the menu exactly as the stage is set up. Change a control and the lines that
+change light up.
+
+| Part | Prop | Type | Default |
+| --- | --- | --- | --- |
+| Root | `shortcut` | `string \| false` | `"k"` |
+| Root | `items` | `Item[] \| Group[]` | |
+| Root | `value` | `string` | `""` |
+| Root | `open` | `boolean` | |
+| Root | `handle` | `createHandle()` | |
+| Trigger | `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| Popup | `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| Popup | `backdrop` | `"dim" \| "blur"` | `"dim"` |
+| Popup | `container` | `HTMLElement` | `body` |
+| Popup | `closeLabel` | `string` | `"Close"` |
+| Item | `closeOnClick` | `boolean` | `true` |
+
+Root also takes Base UI Autocomplete's `filteredItems`, `filter`, `defaultValue`, and
+`onValueChange` (the query), and Base UI Dialog's `defaultOpen`, `onOpenChange`, and `modal`.
+Other props pass through to Base UI as they are, such as Popup's `initialFocus` and `finalFocus`,
+or Item's `disabled`. A handle from `CommandMenu.createHandle()` opens the menu from anywhere, as the
+search button in these docs' dock does.
+
+Import it from `owsem-ui/owsem`. In the registry, it is the `command-menu` item.

@@ -39,6 +39,42 @@ test("the theming page lists every theme token with its light and dark value", a
   }
 });
 
+test("On this page marks the section being read, and the link picked", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name === "mobile-390", "the list shows beside the text from 1280 px");
+  await page.goto("/en/docs/theming");
+  const toc = page.getByRole("navigation", { name: "On this page" });
+  const current = toc.locator('[aria-current="location"]');
+  await expect(toc.getByRole("link")).toHaveText([
+    "Light, dark, and system",
+    "Switching without a flash",
+    "Recoloring",
+    "Customizing one component",
+    "Cascade layers",
+    "Token reference",
+    "Token modes and prefix",
+  ]);
+  await expect(current).toHaveCount(0);
+  await page.evaluate(() =>
+    document.getElementById("recoloring")?.scrollIntoView({ behavior: "instant" }),
+  );
+  await expect(current).toHaveText("Recoloring");
+  await expect(toc.locator(".ow-table-of-contents__marker")).toHaveAttribute("data-visible", "");
+  // The page glides to the section; the wheel below waits until it lands.
+  const landed = page.evaluate(
+    () => new Promise((done) => addEventListener("scrollend", done, { once: true })),
+  );
+  await toc.getByRole("link", { name: "Cascade layers" }).click();
+  await expect(page).toHaveURL(/#cascade-layers$/);
+  await expect(current).toHaveText("Cascade layers");
+  await landed;
+  // The end of the page makes the last section current.
+  await page.mouse.move(600, 300);
+  await page.mouse.wheel(0, 20000);
+  await expect(current).toHaveText("Token modes and prefix");
+});
+
 test("docs links open a Lab on the scene they name", async ({ page }) => {
   await page.goto("/en/docs/theming");
   await main(page).getByRole("link", { name: "Separator", exact: true }).click();

@@ -248,7 +248,7 @@ export function LabShell({
       requestAnimationFrame(() =>
         sections.current
           .get(id)
-          ?.scrollIntoView({ block: "start", behavior: smooth ? "smooth" : "auto" }),
+          ?.scrollIntoView({ block: "start", behavior: smooth ? "smooth" : "instant" }),
       );
     },
     [setSheet],
@@ -460,7 +460,7 @@ export function LabShell({
     const row = sceneNav.current?.querySelector<HTMLElement>(".scroll-fade");
     const link = row?.querySelector<HTMLElement>(`[href="#scene-${CSS.escape(active)}"]`);
     if (!row || !link || matchMedia(SIDE_BY_SIDE).matches) return;
-    row.scrollTo({ left: link.offsetLeft - 20, behavior: reduced ? "auto" : "smooth" });
+    row.scrollTo({ left: link.offsetLeft - 20, behavior: reduced ? "instant" : "smooth" });
   }, [active, reduced]);
   // A scene's link scrolls the sheet to it; the scene holds until the visitor scrolls.
   const onSceneLink = (event: MouseEvent<HTMLAnchorElement>, id: string) => {
@@ -469,7 +469,7 @@ export function LabShell({
     history.replaceState(null, "", `#scene-${id}`);
     sections.current
       .get(id)
-      ?.scrollIntoView({ block: "start", behavior: reduced ? "auto" : "smooth" });
+      ?.scrollIntoView({ block: "start", behavior: reduced ? "instant" : "smooth" });
   };
   // The handle: a tap (or Enter) switches half and full height; a drag sets the height, then
   // settles on the nearest height when let go, or shuts the sheet when dragged low enough.

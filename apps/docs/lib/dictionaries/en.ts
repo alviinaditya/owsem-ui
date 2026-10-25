@@ -202,5 +202,7 @@ export const en = {
     "color-picker":
       "A color picker with an area, hue and opacity sliders, fields, and swatches, inline or in a popover.",
     kbd: "A key on the keyboard, drawn as a small raised keycap.",
+    "table-of-contents":
+      "An “On this page” list that marks the section being read, with a marker sliding along its rail.",
   },
 } satisfies Dictionary;

@@ -99,6 +99,16 @@
   scroll-padding-top: calc(var(--top-h) + 16px);
 }
 
+/*
+ * In-page links (On this page, the skip link) glide to their section. Next turns this off while
+ * it changes pages, since <html> has data-scroll-behavior="smooth".
+ */
+@media (prefers-reduced-motion: no-preference) {
+  :root {
+    scroll-behavior: smooth;
+  }
+}
+
 /* Base UI global setup: portaled popups above the app, and backdrops on iOS Safari 26+. */
 .app-root {
   isolation: isolate;
@@ -842,6 +852,53 @@ body {
   display: none;
 }
 
+/* Table of Contents beside a page sketch that scrolls. */
+.component-preview-toc {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.component-preview-toc-article {
+  box-sizing: border-box;
+  inline-size: 88px;
+  block-size: 112px;
+  padding: 8px 10px;
+  overflow-y: auto;
+  border: 1px solid var(--ow-line-dark);
+  border-radius: var(--docs-radius);
+  background-color: var(--docs-surface);
+  color: var(--docs-control);
+  scrollbar-width: none;
+}
+
+.component-preview-toc-article > div {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  block-size: 56px;
+}
+
+.component-preview-toc-article span {
+  block-size: 4px;
+  border-radius: 2px;
+  background-color: currentColor;
+  opacity: 0.35;
+}
+
+.component-preview-toc-article span:first-child {
+  inline-size: 60%;
+  block-size: 6px;
+  opacity: 0.8;
+}
+
+.component-preview .ow-table-of-contents {
+  --ow-accent: var(--docs-accent);
+  --ow-line: var(--docs-line-strong);
+  inline-size: 104px;
+  font-size: 12.5px;
+}
+
 .component-preview-sketch {
   inline-size: 160px;
   block-size: 96px;
@@ -1404,12 +1461,6 @@ body {
   flex: none;
 }
 
-.toc ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
 .sidebar-scene-n {
   flex: none;
   color: var(--docs-muted);
@@ -1497,19 +1548,21 @@ body {
 }
 
 .toc .sidebar-heading {
-  margin-block: 20px 6px;
+  margin-block: 20px 10px;
 }
 
-.toc a {
-  display: block;
-  padding-block: 2px;
-  color: var(--docs-muted);
+/*
+ * "On this page" is a Table of Contents (owsem-ui) in the docs' colors, set as theme tokens on the
+ * nav, as the sidebar's Tree Rail Nav has them: the same rail and accent.
+ */
+.toc-nav {
+  --ow-fg: var(--docs-fg);
+  --ow-muted: var(--docs-muted);
+  --ow-focus: var(--docs-accent);
+  --ow-radius: var(--docs-radius);
+  --ow-accent: var(--docs-accent);
+  --ow-line: var(--docs-line-strong);
   font-size: 14px;
-  text-decoration: none;
-}
-
-.toc a:hover {
-  color: var(--docs-fg);
 }
 
 /* Prose, code, and tables inside pages and Lab scenes */
@@ -2934,6 +2987,112 @@ figure[data-code-block] pre {
 
 .demo-tree-rail[data-compact] {
   inline-size: 220px;
+}
+
+/* The Table of Contents Lab's demo: a small article that scrolls in its frame, beside its list. */
+.demo-toc {
+  display: grid;
+  grid-template-columns: 300px 176px;
+  box-sizing: border-box;
+  border: 1px solid var(--ow-line);
+  border-radius: 14px;
+  background-color: var(--ow-bg);
+  color: var(--ow-fg);
+}
+
+.demo-toc[data-compact] {
+  grid-template-columns: 176px 156px;
+}
+
+.demo-toc-frame {
+  position: relative;
+  border-inline-end: 1px solid var(--ow-line);
+}
+
+/* Positioned, so its headings' offsetTop is measured from it. */
+.demo-toc-article {
+  position: relative;
+  box-sizing: border-box;
+  block-size: 300px;
+  padding: 18px 20px 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-start-start-radius: 13px;
+  border-end-start-radius: 13px;
+  font-size: 13px;
+  line-height: 1.6;
+  scrollbar-width: thin;
+}
+
+.demo-toc[data-compact] .demo-toc-article {
+  block-size: 160px;
+  padding: 12px 14px 14px;
+  font-size: 11px;
+}
+
+.demo-toc-article p {
+  margin: 0;
+  color: var(--ow-muted);
+}
+
+.demo-toc-article .demo-toc-title {
+  margin-block-end: 6px;
+  color: var(--ow-fg);
+  font-size: 1.3em;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.demo-toc-article :is(h3, h4) {
+  margin: 1.4em 0 0.4em;
+  color: var(--ow-fg);
+  font-size: 1.08em;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: normal;
+}
+
+.demo-toc-article h4 {
+  font-size: 1em;
+}
+
+/* The reading line: 30% down the article's frame, where tracking reads it. */
+.demo-toc-line {
+  position: absolute;
+  inset-block-start: 30%;
+  inset-inline: 0;
+  border-block-start: 1px dashed var(--ow-accent);
+  pointer-events: none;
+}
+
+.demo-toc-line-label {
+  position: absolute;
+  inset-block-end: 3px;
+  inset-inline-end: 10px;
+  padding-inline: 4px;
+  border-radius: 4px;
+  background-color: var(--ow-bg);
+  color: var(--ow-accent);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+}
+
+.demo-toc-nav {
+  padding: 18px 16px 18px 18px;
+}
+
+.demo-toc[data-compact] .demo-toc-nav {
+  padding: 12px 10px 12px 12px;
+  font-size: 12px;
+}
+
+.demo-toc-heading {
+  margin: 0 0 10px;
+  color: var(--ow-muted);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 /* The Color Picker Lab's demo: the panel, and what its two callbacks last sent. */

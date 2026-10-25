@@ -144,7 +144,9 @@ test("the sidebar's trail runs to the page, then to the scene being read (DS-14)
   );
   // The deepest current row wins: the scene, under its component.
   await expect(sidebar.locator("[data-arrived]")).toContainText("Overview");
-  await page.evaluate(() => document.getElementById("scene-states")?.scrollIntoView());
+  await page.evaluate(() =>
+    document.getElementById("scene-states")?.scrollIntoView({ behavior: "instant" }),
+  );
   await expect(sidebar.locator("[data-arrived]")).toContainText("States and variants", {
     timeout: 4000,
   });

@@ -206,6 +206,8 @@ export const id = {
     "color-picker":
       "Pemilih warna dengan area, slider rona dan opasitas, kolom isian, dan contoh warna, langsung atau di popover.",
     kbd: "Tombol keyboard, digambar sebagai tuts kecil yang timbul.",
+    "table-of-contents":
+      "Daftar “Di halaman ini” yang menandai bagian yang sedang dibaca, dengan penanda yang meluncur di sepanjang rail-nya.",
   } satisfies Record<ComponentName, string>,
 };
 

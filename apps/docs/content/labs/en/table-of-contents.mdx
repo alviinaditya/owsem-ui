@@ -1,0 +1,121 @@
+---
+title: Table of Contents
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Table of Contents lists a page's sections, with their sub-sections nested, and marks the one being
+read. A rail runs along the list, and a marker slides along it to the current section. Scroll to
+start the tour; the stage follows each part.
+
+## Following the reader [#reading]
+
+Each link names its section by hash: `href="#install"` points at the element with that id. The
+current section is the last one whose top has crossed the reading line, 30% down the scroll area.
+The scroll area is the sections' nearest scrolling ancestor, so a list beside a scrolling box works
+as well as one beside the page; without one, it is the window.
+
+A short last section can never reach the line, so at the very end of the scroll area the last
+section is current. Before the first section reaches the line, and before the page hydrates,
+none is.
+
+The stage plays it: the article scrolls a section at a time, past the dashed reading line, and the
+marker slides to each link as its section crosses. At the bottom Changelog is current, then the
+article goes back to the top. Scroll the article yourself to take over.
+
+## Jumping to a section [#links]
+
+Links are plain anchors, so the browser scrolls to the section and the URL takes its hash; how it
+scrolls is the page's choice, such as `scroll-behavior: smooth` on the scroll area, without reduced
+motion, as these docs do. A clicked
+link stays current until you scroll by yourself, with the wheel, a touch, or a scroll key, so the
+link you picked is marked even when its section is too short to reach the line.
+
+The stage picks Light and dark, a sub-section, then Components: the article scrolls
+as far as it goes, and Components stays current although the end of the article would pick
+Changelog. A wheel lets go of it, and the reading line decides again. In this demo the links scroll
+the article, not the page.
+
+## Anatomy [#anatomy]
+
+Four parts, and the marker that Root draws. Root finds each link's section by id, and tracks
+scrolling with events: nothing runs while the page is still. Inspect (I) outlines each part on the
+stage; pick a name, here or on the stage, to see its tokens.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `nav.ow-table-of-contents` | Tracks the section being read and holds the marker. Name it with `aria-label` |
+| <Part name="List" /> | `ul.ow-table-of-contents__list` | `data-depth` from 1. The top List draws the rail; a nested one, inside an Item, indents |
+| <Part name="Item" /> | `li.ow-table-of-contents__item` | One section: its Link, and a List for its sub-sections |
+| <Part name="Link" /> | `a.ow-table-of-contents__link` | `href="#id"`; `render` swaps in a router link. The current one has `aria-current="location"` and `data-current`; `data-depth` |
+| <Part name="Marker" /> | `span.ow-table-of-contents__marker` | Drawn by Root on the rail (`aria-hidden`), as tall as the current link; `data-visible` while a link is current |
+
+## States and variants [#states]
+
+The stage sets the light and dark themes side by side, each article read at three places: the top,
+before any section reaches the line, a sub-section with a title on two lines, and the very end.
+
+| State | What shows it |
+| --- | --- |
+| None current | Muted links and no marker, until a section reaches the line |
+| Current | The link in the text color, and the marker beside it, as tall as the link |
+| Sub-section | Indented 12px; the marker stays on the one rail |
+| Hover | The link's text in the text color |
+| Keyboard focus | A ring inside the link, so a scrolling container never cuts it |
+
+Table of Contents is an Owsem component (Kinetic): the marker slides on the travel spring, and at
+rest it is laid out on the link's own box, untransformed, so it lines up with the link at any zoom.
+It has no glow.
+
+## Keyboard and accessibility [#keyboard]
+
+Tab moves through the links, and Enter follows one: the browser scrolls to its section. The current
+link has `aria-current="location"`, so a screen reader names it as the current location; the server
+renders none, so nothing wrong is announced before tracking starts. The marker is `aria-hidden`.
+
+With `prefers-reduced-motion`, the marker jumps to the next link and only fades in and out. In
+forced colors (Windows High Contrast), the marker uses `Highlight` and the current link is
+underlined. Right to left, the rail and the marker are on the right.
+
+## Customization [#customization]
+
+The stage controls are open: pick a marker or rail color and the code follows. Table of Contents
+reads these theme tokens, the marker and the rail the same ones as Tree Rail Nav's trail and rail;
+set them on the nav, or on an element around it such as `.on-this-page`.
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-accent` | The marker |
+| `--ow-line` | The rail |
+| `--ow-fg` | The current link, and a hovered one |
+| `--ow-muted` | The other links |
+| `--ow-focus` | The focus ring |
+| `--ow-radius` | The focus ring's corners |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each nav's root, so set yours on the nav itself, as in
+`.on-this-page.ow-table-of-contents`.
+
+</ForMode>
+
+A sticky header over the top of the page hides a section the browser scrolls to: set
+`scroll-padding-top` on the scroll area, as tall as the header, so links land below it.
+
+<TokenChip lang="en" />
+
+## Ship it [#ship]
+
+The code drawer writes the component exactly as the stage is set up, from a list of headings. Pick a
+color in the controls and the lines that change light up.
+
+| Part | Prop | Type | Default |
+| --- | --- | --- | --- |
+| Link | `href` | `string`, as `"#id"` | |
+| Link | `render` | `ReactElement \| (props, state) => ReactElement` | |
+
+Root is a `nav`, List a `ul`, Item an `li`, and Link an `a`; other props pass through to them as
+they are, and so do refs. Give every section an id, as Markdown pipelines with heading slugs do.
+
+Import it from `owsem-ui/owsem`. In the registry, it is the `table-of-contents` item.

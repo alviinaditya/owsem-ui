@@ -6,7 +6,10 @@ const stageBody = (page: Page) => page.locator(".lab-stage-body");
 const lab = (page: Page) => page.locator(".lab");
 const scene = async (page: Page, id: string) => {
   await openSheet(page);
-  await page.evaluate((id) => document.getElementById(`scene-${id}`)?.scrollIntoView(), id);
+  await page.evaluate(
+    (id) => document.getElementById(`scene-${id}`)?.scrollIntoView({ behavior: "instant" }),
+    id,
+  );
 };
 
 test("scenes shape the stage as you scroll (DS-2)", async ({ page }, testInfo) => {
@@ -79,7 +82,9 @@ test("on a tall window the page's start and end pick the first and last scene", 
     "aria-current",
     "step",
   );
-  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await page.evaluate(() =>
+    window.scrollTo({ top: document.body.scrollHeight, behavior: "instant" }),
+  );
   await expect(scenes.getByRole("link", { name: /Ship it/ })).toHaveAttribute(
     "aria-current",
     "step",
@@ -687,6 +692,27 @@ test("the Toolbar Lab names the item Tab lands on", async ({ page }) => {
   await page.keyboard.press("ArrowRight");
   await expect(bar.getByRole("button", { name: "Underline" })).toBeFocused();
   await expect(demo(page).getByText("Tab lands on Underline")).toBeVisible();
+});
+
+test("the Table of Contents Lab follows its article, and a picked link holds", async ({ page }) => {
+  await page.goto("/en/table-of-contents");
+  const toc = demo(page).getByRole("navigation", { name: "On this page" });
+  const current = toc.locator('[aria-current="location"]');
+  const article = demo(page).locator(".demo-toc-article");
+  await expect(current).toHaveCount(0);
+  await article.evaluate((el) => {
+    el.scrollTop = (el.querySelector<HTMLElement>("#toc-theming")?.offsetTop ?? 0) - 8;
+  });
+  await expect(current).toHaveText("Theming");
+  // Components is too short to reach the line: the article goes as far as it can, and it holds.
+  await toc.getByRole("link", { name: "Components" }).click();
+  await expect(current).toHaveText("Components");
+  await expect
+    .poll(() => article.evaluate((el) => el.scrollHeight - el.clientHeight - el.scrollTop))
+    .toBeLessThan(1);
+  await expect(current).toHaveText("Components");
+  // The demo's links scroll the article, not the page.
+  expect(new URL(page.url()).hash).toBe("");
 });
 
 test("a Lab without animations has no Play scene or Replay", async ({ page }) => {

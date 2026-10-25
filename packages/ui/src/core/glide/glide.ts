@@ -40,6 +40,7 @@ export interface Glide {
 export const ACTIVE_ATTR = "data-glide-active";
 
 const DISABLED = ':disabled, [aria-disabled="true"], [data-disabled]';
+const CONTROL = "a[href], button, input, select, textarea, [tabindex]";
 
 interface Hit {
   item: HTMLElement;
@@ -69,6 +70,17 @@ export function createGlide(
   container.setAttribute("data-glide", "");
 
   const disabled = (item: HTMLElement) => read().isDisabled?.(item) ?? item.matches(DISABLED);
+  // Another control in the container, such as a search field above the list, is not a gap: the
+  // pointer on it lights nothing, and a click on it stays its own.
+  const onOtherControl = (target: EventTarget | null) => {
+    const control = target instanceof Element ? target.closest(CONTROL) : null;
+    return (
+      control !== null &&
+      control !== container &&
+      container.contains(control) &&
+      !control.closest(read().items ?? "[data-glide-item]")
+    );
+  };
 
   function distance(x: number, y: number, r: DOMRect): number {
     const dx = Math.max(r.left - x, 0, x - r.right);
@@ -169,13 +181,15 @@ export function createGlide(
   };
 
   const onMove = (event: PointerEvent) => {
-    if (event.pointerType !== "touch") track(event.clientX, event.clientY);
+    if (event.pointerType === "touch") return;
+    if (onOtherControl(event.target)) onLeave();
+    else track(event.clientX, event.clientY);
   };
-  const onLeave = () => {
+  function onLeave() {
     pointer = null;
     clearTimeout(hideTimer);
     hideTimer = window.setTimeout(() => light(null), read().hideDelay ?? 70);
-  };
+  }
   const gapLimit = () => {
     const gap = read().gapClick ?? true;
     return gap === false ? -1 : gap === true ? 16 : gap.maxDistance;
@@ -183,7 +197,7 @@ export function createGlide(
   const onDown = (event: PointerEvent) => {
     // Pointer coordinates are fractional; click coordinates are rounded, so decide with these.
     down = { x: event.clientX, y: event.clientY };
-    if (event.button !== 0 || !active) return;
+    if (event.button !== 0 || !active || onOtherControl(event.target)) return;
     const onItem = (event.target as Element).closest(read().items ?? "[data-glide-item]");
     const hit = onItem ? null : nearest(event.clientX, event.clientY);
     const pressed = onItem ? onItem === active : hit?.item === active && hit.distance <= gapLimit();
@@ -198,6 +212,7 @@ export function createGlide(
   const onClick = (event: MouseEvent) => {
     // A click on any item, disabled ones included, belongs to that item.
     if ((event.target as Element).closest(read().items ?? "[data-glide-item]")) return;
+    if (onOtherControl(event.target)) return;
     const near =
       down && Math.abs(down.x - event.clientX) < 1.5 && Math.abs(down.y - event.clientY) < 1.5;
     const point = near && down ? down : { x: event.clientX, y: event.clientY };

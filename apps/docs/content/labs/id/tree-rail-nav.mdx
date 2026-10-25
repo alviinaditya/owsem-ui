@@ -39,14 +39,14 @@ sebuah nama, di sini atau di stage, untuk melihat tokennya.
 | Bagian | Elemen | Catatan |
 | --- | --- | --- |
 | <Part name="Root" /> | `nav.ow-tree-rail-nav` | Memuat SVG rail dan highlight hover |
-| <Part name="List" /> | `ul` | List bersarang diberi label oleh barisnya (`aria-labelledby`) |
-| <Part name="Node" /> | `li` | `Collapsible.Root` dari Base UI |
-| <Part name="Toggle" /> | `button` | Baris grup: `Collapsible.Trigger`, dengan `aria-expanded` |
-| <Part name="Link" /> | `a` | `render` menggantinya dengan link router; `current` memasang `aria-current` |
-| <Part name="Panel" /> | `div` | `Collapsible.Panel`, tetap ada di DOM saat tertutup supaya rail bisa berakhir di barisnya |
-| <Part name="Icon" /> | `span` | Dekoratif (`aria-hidden`); ukurannya font baris ditambah 2px, dan ikon apa pun di dalamnya mengikuti ukuran itu |
-| <Part name="Label" /> | `span` | Satu baris; teks yang tidak muat memudar di ujung, dan berjalan ke kiri berulang selama barisnya di-hover atau difokus |
-| <Part name="Origin" /> | `div` | Label opsional di paling atas; jejak berawal di sampingnya |
+| <Part name="List" /> | `ul.ow-tree-rail-nav__list` | List bersarang diberi label oleh barisnya (`aria-labelledby`); `data-depth` mulai dari 1 |
+| <Part name="Node" /> | `li.ow-tree-rail-nav__node` | `Collapsible.Root` dari Base UI |
+| <Part name="Toggle" /> | `button.ow-tree-rail-nav__item` | Baris grup: `Collapsible.Trigger`, dengan `aria-expanded`, `data-panel-open`, dan `data-depth` |
+| <Part name="Link" /> | `a.ow-tree-rail-nav__item` | `render` menggantinya dengan link router; `current` memasang `aria-current` dan `data-current`; `data-depth` |
+| <Part name="Panel" /> | `div.ow-tree-rail-nav__panel` | `Collapsible.Panel`, tetap ada di DOM saat tertutup supaya rail bisa berakhir di barisnya |
+| <Part name="Icon" /> | `span.ow-tree-rail-nav__icon` | Dekoratif (`aria-hidden`); ukurannya font baris ditambah 2px, dan ikon apa pun di dalamnya mengikuti ukuran itu |
+| <Part name="Label" /> | `span.ow-tree-rail-nav__label` | Satu baris; teks yang tidak muat memudar di ujung (`data-overflow`), dan berjalan ke kiri berulang selama barisnya di-hover atau difokus |
+| <Part name="Origin" /> | `div.ow-tree-rail-nav__origin` | Label opsional di paling atas; jejak berawal di sampingnya. Tanpa label ini, rail berawal di baris pertama |
 
 ## State dan varian [#states]
 
@@ -91,50 +91,31 @@ Untuk teks kanan ke kiri, rail dicerminkan.
 
 ## Kustomisasi [#customization]
 
-Kontrol di stage terbuka: pilih warna jejak atau rail, dan kodenya ikut berubah. Warna dan posisi
-rail adalah token komponen yang Anda atur di CSS sendiri.
+Kontrol di stage terbuka: pilih warna jejak atau rail, dan kodenya ikut berubah. Tree Rail Nav
+membaca token tema berikut; pasang di nav-nya, atau di elemen di sekitarnya seperti `.sidebar`.
 
-<ForMode mode="theme">
-
-Token komponen menimpa token tema hanya untuk Tree Rail Nav di dalam elemen tempat token itu
-dipasang, misalnya `.sidebar`.
-
-| Token komponen | Bawaan | Fungsi |
-| --- | --- | --- |
-| `--ow-tree-rail-trail` | `--ow-fg` di Base, `--ow-accent` di Owsem | Jejak, titik yang menyala, penanda, dan latar baris aktif |
-| `--ow-tree-rail-rail` | `--ow-line` | Rail |
-| `--ow-tree-rail-node` | `--ow-fg` 24% | Titik yang belum dinyalakan jejak |
-| `--ow-tree-rail-surface` | `--ow-bg` | Memotong titik dari rail; samakan dengan latar di belakang nav |
-| `--ow-tree-rail-r0` | `9px` | Posisi x rail tingkat 1 |
-| `--ow-tree-rail-r1` | `34px` | Posisi x rail tingkat 2 |
-| `--ow-tree-rail-r2` | `59px` | Posisi x rail tingkat 3 |
-
-</ForMode>
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-accent` | Jejak, titik yang menyala, penanda, dan latar baris aktif |
+| `--ow-line` | Rail |
+| `--ow-fg` | Teks, dan pada 24% titik yang belum dinyalakan jejak |
+| `--ow-muted` | Label origin |
+| `--ow-bg` | Memotong titik dari rail; samakan dengan latar di belakang nav |
+| `--ow-hover` | Highlight hover (Glide) |
+| `--ow-radius` | Sudut baris dan highlight |
 
 <ForMode mode="isolated">
 
-Setiap Tree Rail Nav membawa nilainya sendiri di elemen root-nya dan tidak membaca token bersama,
-jadi atur token di nav itu sendiri, misalnya `.sidebar .ow-tree-rail-nav`.
-
-| Token komponen | Bawaan | Fungsi |
-| --- | --- | --- |
-| `--ow-tree-rail-trail` | Nilainya sendiri: netral di Base, accent di Owsem | Jejak, titik yang menyala, penanda, dan latar baris aktif |
-| `--ow-tree-rail-rail` | Nilainya sendiri, per tema | Rail |
-| `--ow-tree-rail-node` | Nilainya sendiri, per tema | Titik yang belum dinyalakan jejak |
-| `--ow-tree-rail-surface` | Nilainya sendiri, per tema | Memotong titik dari rail; samakan dengan latar di belakang nav |
-| `--ow-tree-rail-r0` | `9px` | Posisi x rail tingkat 1 |
-| `--ow-tree-rail-r1` | `34px` | Posisi x rail tingkat 2 |
-| `--ow-tree-rail-r2` | `59px` | Posisi x rail tingkat 3 |
+Di mode isolated, nilainya ada di root setiap nav, jadi atur di nav itu sendiri, misalnya
+`.sidebar.ow-tree-rail-nav`.
 
 </ForMode>
 
 Rail berjarak 25px satu sama lain: setiap cabang melengkung dengan cara yang sama, dan anak dari
-baris tingkat pertama segaris dengan teksnya, setelah ikon. Tulis posisi rail dalam px biasa,
-karena skripnya membaca nilai itu sebagai angka. Baris menjorok sedikit melewati rail-nya, jadi
-menggeser rail ikut menggeser barisnya. Highlight hover milik Glide, jadi warna dan sudutnya
-diatur lewat `--ow-glide-bg` dan `--ow-glide-radius`.
+baris tingkat pertama segaris dengan teksnya, setelah ikon. Baris menjorok sedikit melewati
+rail-nya.
 
-<TokenChip item="tree-rail-nav" lang="id" />
+<TokenChip lang="id" />
 
 ## Ship it [#ship]
 

@@ -30,17 +30,18 @@ test("the token setup rewrites a Lab's code and install steps (DS-4)", async ({ 
   await expect(chip).toBeFocused();
 
   // The narrative's code, the intro, and the stage follow the setup.
-  await expect(narrative(page)).toContainText("--acme-separator-line-dark");
-  await expect(narrative(page)).not.toContainText("--ow-separator-line-dark");
-  await expect(narrative(page)).toContainText("Isolated tokens · --acme-separator-*");
+  await expect(narrative(page)).toContainText("--acme-line-dark");
+  await expect(narrative(page)).not.toContainText("--ow-line-dark");
+  await expect(narrative(page)).toContainText("Isolated tokens · --acme-*");
   const intro = page.locator(".install").first();
   await expect(intro).toContainText("pnpm dlx owsem@latest init --tokens isolated --prefix acme");
   await expect(intro).toContainText("pnpm dlx owsem@latest add separator");
   await expect(intro).toContainText("not released yet");
   // The Customization scene describes the mode in use.
   const customization = page.locator("#scene-customization");
-  await expect(customization).toContainText("Its own, per theme");
-  await expect(customization).not.toContainText("--acme-line-dark");
+  await expect(customization).toContainText(
+    "In isolated mode the values sit on each Separator's root",
+  );
   await stage(page).getByRole("button", { name: "Controls" }).click();
   await stage(page).getByLabel("Dark line", { exact: true }).fill("#ff0000");
   await stage(page).getByRole("button", { name: "Code" }).click();
@@ -48,17 +49,17 @@ test("the token setup rewrites a Lab's code and install steps (DS-4)", async ({ 
   await expect(code).toContainText('import { Separator } from "@/components/owsem/separator";');
   await stage(page).getByRole("tab", { name: "settings.css" }).click();
   await expect(code).toContainText(".settings .ow-separator {");
-  await expect(code).toContainText("--acme-separator-line-dark: #ff0000;");
+  await expect(code).toContainText("--acme-line-dark: #ff0000;");
   await stage(page).getByRole("tab", { name: "Install" }).click();
   await expect(code).toContainText("pnpm dlx owsem@latest init --tokens isolated --prefix acme");
 
   // Kept for the next visit, until reset.
   await page.reload();
-  await expect(narrative(page)).toContainText("--acme-separator-line-dark");
+  await expect(narrative(page)).toContainText("--acme-line-dark");
   await openSheet(page);
   await chip.click();
   await panel.getByRole("button", { name: "Reset to theme tokens, --ow" }).click();
-  await expect(narrative(page)).toContainText("--ow-separator-line-dark");
+  await expect(narrative(page)).toContainText("--ow-line-dark");
   await expect(page.locator(".install").first()).toContainText("pnpm add owsem-ui");
   expect(await page.evaluate(() => localStorage.getItem("owsem-token-setup"))).toBeNull();
 });

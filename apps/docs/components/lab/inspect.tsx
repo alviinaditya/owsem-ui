@@ -39,6 +39,8 @@ interface Box {
 }
 
 interface InspectProps {
+  /** Turned off: it fades out, and nothing in it takes focus or the pointer. */
+  leaving: boolean;
   parts: readonly Part[];
   lang: Lang;
   labels: Dictionary["lab"];
@@ -97,6 +99,7 @@ function PartCard({ part, lang, values }: { part: Part; lang: Lang; values: read
  * On a narrow stage the names and the card dock under the demo instead, without leader lines.
  */
 export function Inspect({
+  leaving,
   parts,
   lang,
   labels,
@@ -259,7 +262,7 @@ export function Inspect({
   ));
 
   return (
-    <div className="lab-inspect">
+    <div className="lab-inspect" data-leaving={leaving ? "" : undefined} inert={leaving}>
       <span ref={probe} hidden />
       {compact ? null : (
         <svg className="lab-inspect-lines" aria-hidden="true">

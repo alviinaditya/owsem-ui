@@ -7,8 +7,8 @@
 @layer owsem.components {
   /* Zero thickness keeps the two borders together; flex and grid stretch only the length. */
   .ow-separator {
-    --_dark: var(--ow-separator-line-dark, var(--ow-line-dark, #d9d9e0));
-    --_light: var(--ow-separator-line-light, var(--ow-line-light, #ffffff));
+    --_dark: var(--ow-line-dark);
+    --_light: var(--ow-line-light);
     flex: none;
     align-self: stretch;
     border: 0 solid;

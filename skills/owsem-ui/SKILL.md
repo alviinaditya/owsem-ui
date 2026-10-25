@@ -83,10 +83,11 @@ body { position: relative; } /* backdrops in iOS Safari 26 and later */
 
 - **Themes**: without `data-theme`, the theme follows `prefers-color-scheme`. `data-theme="light"`
   or `data-theme="dark"` on `<html>` or any element forces a theme for that subtree.
-- **Theme tokens**: every color is an `--ow-*` token. Today's set is `--ow-bg`, `--ow-fg`,
-  `--ow-muted`, `--ow-line`, `--ow-line-dark`, `--ow-line-light`, and `--ow-accent`. It will grow,
-  so read `tokens.css` for the current names. A token that differs by theme must be set for every
-  case `tokens.css` covers, or the override leaks into the other theme:
+- **Theme tokens**: every color, material, radius, and spring is an `--ow-*` theme token, such as
+  `--ow-bg`, `--ow-fg`, `--ow-accent`, `--ow-hover`, `--ow-panel`, `--ow-raised-bg`, and
+  `--ow-radius`; read `tokens.css` for the current names. They are the only tokens: components
+  have none of their own. A token that differs by theme must be set for every case `tokens.css`
+  covers, or the override leaks into the other theme:
 
   ```css
   :root,
@@ -98,9 +99,14 @@ body { position: relative; } /* backdrops in iOS Safari 26 and later */
 
   `--ow-line-dark` and `--ow-line-light` are not derived from other tokens: when changing
   neutrals such as `--ow-bg`, set them per theme too, so etched lines stay visible.
-- **Component tokens**: a component reads its own token first and falls back to a theme token,
-  for example `var(--ow-separator-line-dark, var(--ow-line-dark))`. Set one on an element to
-  restyle that component only inside it: `.sidebar { --ow-separator-line-dark: #b8b8c4; }`.
+- **One component**: set a theme token on the component, or on an element around it, to restyle
+  only what is inside: `.sidebar { --ow-line-dark: #b8b8c4; }`. For what no token covers, style the
+  part with `className`, or in CSS by its class and data attributes.
+- **Class names**: the root part is `.ow-<component>` and every other part
+  `.ow-<component>__<part>` (BEM elements), such as `.ow-tree-rail-nav__label`. Variants and states
+  are data attributes, never classes: Base UI's (`data-orientation`, `data-highlighted`, and
+  `data-pressed` for a toggle that is on) and OwsemUI's (`data-variant`, `data-size`, `data-held`
+  while held down). Rely only on the classes and attributes in a Lab's parts table.
 - **Layers**: tokens live in `@layer owsem.tokens` and component CSS in `@layer owsem.components`.
   Plain, unlayered app CSS always wins, so overrides need no `!important`.
 - **Tailwind CSS v4**: the first stylesheet that names a layer fixes the order. Put this line
@@ -127,8 +133,8 @@ const glide = useGlide<HTMLDivElement>({ axis: "y" }); // "x" for a row
 </div>
 ```
 
-Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`. Restyle it with
-`--ow-glide-bg` and `--ow-glide-radius`, not by overriding `.ow-glide`.
+Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`. Its color is
+`--ow-hover`: set it on the container to recolor one list's highlight.
 
 ## Components available now
 
@@ -151,8 +157,7 @@ import { Separator } from "owsem-ui/base"; // or "@/components/owsem/separator"
 - Props: `orientation` (`"horizontal"`, the default, or `"vertical"`), `className` (a string or
   `(state) => string`), `style`, and `render`. Other props pass through to Base UI. The ref goes
   to the `div`.
-- Tokens: `--ow-separator-line-dark` (falls back to `--ow-line-dark`) and
-  `--ow-separator-line-light` (falls back to `--ow-line-light`).
+- Reads `--ow-line-dark` and `--ow-line-light`.
 
 ### Tree Rail Nav
 
@@ -186,17 +191,16 @@ import { TreeRailNav } from "owsem-ui/owsem"; // or "@/components/owsem/tree-rai
 - `Link`: `current` (`true`, `"page"`, or `"step"`; the trail ends at the deepest current row),
   `disabled`, and `render` for a router link (`render={<Link href="/x" />}`).
 - `Root`: arrow keys, Home, and End move between rows; do not add your own.
-- Tokens: `--ow-tree-rail-trail`, `--ow-tree-rail-rail`, `--ow-tree-rail-node`,
-  `--ow-tree-rail-surface` (the background behind the nav), and rail positions
-  `--ow-tree-rail-r0` to `--ow-tree-rail-r2` in px.
+- Reads `--ow-accent` (the trail), `--ow-line` (rails), `--ow-fg`, `--ow-muted`, `--ow-bg` (behind
+  the dots; match the nav's background), `--ow-hover`, and `--ow-radius`.
 
 ## Rules
 
 1. **Check the docs first.** Before using a component, fetch its docs page or registry item. If
    it is missing from `registry.json` or its page says "Coming soon", tell the user it is not
    built and ask how to proceed. Never write a stand-in that looks like an OwsemUI component.
-2. **Tokens over CSS overrides.** Change colors with theme or component tokens. Use `className`
-   for layout, such as margins and grid placement. Do not override `.ow-*` rules for color.
+2. **Tokens over CSS overrides.** Change colors with theme tokens, on `:root` or on an element
+   around the component. Use `className` for layout and for what no token covers.
 3. **Leave behavior to Base UI.** Focus, keyboard, ARIA, and positioning come from Base UI. Do not
    add key handlers, `role`, `aria-*`, or focus management to replace them. Compose with `render`,
    and style states through the `data-*` attributes Base UI sets.

@@ -107,7 +107,7 @@ export const id = {
     themeNote:
       "Semua komponen membaca satu set token bersama. Ubah accent sekali, semua komponen ikut. Cocok untuk app dengan satu design system.",
     isolatedNote:
-      "Setiap komponen membawa token sendiri di elemen root-nya dan tidak berbagi dengan komponen lain. Pakai untuk memberi satu komponen tema tersendiri, atau menambah komponen ke app dengan design system lain tanpa bentrok nama.",
+      "Token yang sama, dengan nilainya di elemen root setiap komponen, bukan di root halaman, sehingga tidak ada yang dibagi. Pakai untuk memberi satu komponen tema tersendiri, atau menambah komponen ke app dengan design system lain.",
     prefix: "Prefix",
     prefixHelp:
       "Diawali huruf; huruf kecil, angka, dan tanda hubung tunggal; maksimal 16 karakter.",

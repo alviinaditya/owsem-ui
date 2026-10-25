@@ -15,9 +15,9 @@ A single part. Base UI renders `<div role="separator">` with `aria-orientation` 
 `data-orientation`; OwsemUI adds the `ow-separator` class and draws both lines as borders. Inspect
 (I) outlines it on the stage, with its tokens.
 
-| Part | Element | Tokens |
+| Part | Element | Notes |
 | --- | --- | --- |
-| <Part name="Root" /> | `div.ow-separator` | `--ow-separator-line-dark`, `--ow-separator-line-light` |
+| <Part name="Root" /> | `div.ow-separator` | `data-orientation`; reads `--ow-line-dark` and `--ow-line-light` |
 
 ## States and variants [#states]
 
@@ -35,30 +35,21 @@ Contrast), both lines use the system color so the line stays visible.
 
 The stage controls are open; once you change a color, its CSS is in the `settings.css` tab.
 
-<ForMode mode="theme">
+Separator reads these theme tokens. Set one on an element to change the separators inside it.
 
-Component tokens override the theme tokens for separators inside the element that sets them.
-
-| Component token | Default | Purpose |
-| --- | --- | --- |
-| `--ow-separator-line-dark` | `--ow-line-dark` | Dark line |
-| `--ow-separator-line-light` | `--ow-line-light` | Light line beside it |
-
-</ForMode>
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-line-dark` | Dark line |
+| `--ow-line-light` | Light line beside it |
 
 <ForMode mode="isolated">
 
-Each Separator carries its own values on its root and reads no shared token, so set them on the
-Separator itself, as `settings.css` does with `.settings .ow-separator`.
-
-| Component token | Default | Purpose |
-| --- | --- | --- |
-| `--ow-separator-line-dark` | Its own, per theme | Dark line |
-| `--ow-separator-line-light` | Its own, per theme | Light line beside it |
+In isolated mode the values sit on each Separator's root, so set yours on the Separator itself, as
+`settings.css` does with `.settings .ow-separator`.
 
 </ForMode>
 
-<TokenChip item="separator" lang="en" />
+<TokenChip lang="en" />
 
 ## Ship it [#ship]
 

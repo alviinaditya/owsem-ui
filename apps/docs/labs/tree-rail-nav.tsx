@@ -213,7 +213,7 @@ const states: SceneScript = async (stage) => {
 
 // Closes the group holding the current row, then opens it again.
 const groups: SceneScript = async (stage) => {
-  const toggle = stage.get('[data-demo="theming"] > .ow-tree-rail-item');
+  const toggle = stage.get('[data-demo="theming"] > .ow-tree-rail-nav__item');
   for (let i = 0; i < 2; i++) {
     await stage.click(toggle);
     await stage.wait(1500);
@@ -242,22 +242,19 @@ const treeRailNavLab = defineLab({
       name: "Root",
       selector: ".ow-tree-rail-nav",
       note: {
-        id: "nav yang memuat SVG rail dan highlight hover. Token komponen dipasang di sini.",
-        en: "The nav, holding the rail SVG and the hover highlight. Component tokens go here.",
+        id: "nav yang memuat SVG rail dan highlight hover. Token tema yang dipasang di sini hanya berlaku untuknya.",
+        en: "The nav, holding the rail SVG and the hover highlight. Theme tokens set here apply to it alone.",
       },
       tokens: {
-        "--ow-tree-rail-trail": "--_trail",
-        "--ow-tree-rail-rail": "--_rail",
-        "--ow-tree-rail-node": "--_node",
-        "--ow-tree-rail-surface": "--_surface",
-        "--ow-tree-rail-r0": "--_r0",
-        "--ow-tree-rail-r1": "--_r1",
-        "--ow-tree-rail-r2": "--_r2",
+        "--ow-accent": "--_trail",
+        "--ow-line": "--_rail",
+        "--ow-fg": "--_node",
+        "--ow-bg": "--_surface",
       },
     },
     {
       name: "List",
-      selector: ".ow-tree-rail-list",
+      selector: ".ow-tree-rail-nav__list",
       note: {
         id: "Satu tingkat, dengan satu rail. List bersarang diberi label oleh barisnya.",
         en: "One level, with one rail. A nested List is labelled by its row.",
@@ -273,7 +270,7 @@ const treeRailNavLab = defineLab({
     },
     {
       name: "Toggle",
-      selector: '[data-demo="guides"] > .ow-tree-rail-item',
+      selector: '[data-demo="guides"] > .ow-tree-rail-nav__item',
       note: {
         id: "Baris grup: membuka dan menutup Panel-nya, dengan aria-expanded.",
         en: "A group's row: opens and closes its Panel, with aria-expanded.",
@@ -289,7 +286,7 @@ const treeRailNavLab = defineLab({
     },
     {
       name: "Panel",
-      selector: '[data-demo="theming"] > .ow-tree-rail-panel',
+      selector: '[data-demo="theming"] > .ow-tree-rail-nav__panel',
       note: {
         id: "Tingkat berikutnya dari grup, tetap ada di DOM supaya rail bisa berakhir di barisnya.",
         en: "A group's next level, kept mounted so the rail can end at its row.",
@@ -297,7 +294,7 @@ const treeRailNavLab = defineLab({
     },
     {
       name: "Icon",
-      selector: '[href="#changelog"] .ow-tree-rail-icon',
+      selector: '[href="#changelog"] .ow-tree-rail-nav__icon',
       note: {
         id: "Ikon dekoratif sebelum label, seukuran font baris ditambah 2px.",
         en: "A decorative icon before the label, the row's font size plus 2px.",
@@ -305,7 +302,7 @@ const treeRailNavLab = defineLab({
     },
     {
       name: "Label",
-      selector: '[href="#install"] .ow-tree-rail-label',
+      selector: '[href="#install"] .ow-tree-rail-nav__label',
       note: {
         id: "Satu baris. Teks yang tidak muat memudar, lalu berjalan selama barisnya di-hover.",
         en: "One line. Text that does not fit fades, and runs while its row is hovered.",
@@ -313,7 +310,7 @@ const treeRailNavLab = defineLab({
     },
     {
       name: "Origin",
-      selector: ".ow-tree-rail-origin",
+      selector: ".ow-tree-rail-nav__origin",
       note: {
         id: "Label opsional di paling atas; jejak berawal di sampingnya.",
         en: "An optional label at the top; the trail starts beside it.",
@@ -323,8 +320,8 @@ const treeRailNavLab = defineLab({
 
   demo(cfg, lang) {
     const style = {
-      "--ow-tree-rail-trail": cfg.trail || undefined,
-      "--ow-tree-rail-rail": cfg.rail || undefined,
+      "--ow-accent": cfg.trail || undefined,
+      "--ow-line": cfg.rail || undefined,
     } as CSSProperties;
     return <Demo lang={lang} style={style} />;
   },
@@ -366,12 +363,12 @@ const treeRailNavLab = defineLab({
     ];
     const files = [{ name: "sidebar.tsx", code: usage.join("\n") }];
     if (custom) {
-      const token = `--${setup.prefix}-tree-rail`;
-      // Isolated tokens are set on each nav's root, so set them there too.
+      const token = `--${setup.prefix}`;
+      // Isolated values sit on each nav's root, so set them there too.
       const lines = [
         setup.mode === "isolated" ? ".sidebar.ow-tree-rail-nav {" : ".sidebar {",
-        ...(cfg.trail ? [`  ${token}-trail: ${cfg.trail};`] : []),
-        ...(cfg.rail ? [`  ${token}-rail: ${cfg.rail};`] : []),
+        ...(cfg.trail ? [`  ${token}-accent: ${cfg.trail};`] : []),
+        ...(cfg.rail ? [`  ${token}-line: ${cfg.rail};`] : []),
         "}",
       ];
       files.push({ name: "sidebar.css", code: lines.join("\n") });

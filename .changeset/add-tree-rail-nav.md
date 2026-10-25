@@ -12,6 +12,5 @@ line: text that does not fit fades, and runs left in a loop while the row is hov
 
 Groups are Base UI Collapsibles; a panel clips only while it opens or closes, so focus rings are
 never cut. Rows hover with Glide, and arrow keys move between rows and open, close, and climb
-groups. Restyle it with `--ow-tree-rail-trail`, `--ow-tree-rail-rail`, `--ow-tree-rail-node`,
-`--ow-tree-rail-surface`, and the rail positions `--ow-tree-rail-r0` to `--ow-tree-rail-r2`
-(25px apart by default).
+groups. It reads the theme tokens: `--ow-accent` for the trail, `--ow-line` for the rails, and
+`--ow-bg` behind the dots; set them on the nav to restyle it.

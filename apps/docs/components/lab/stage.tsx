@@ -25,6 +25,7 @@ import {
   INSPECT_CARD_MIN,
   INSPECT_CHIPS,
   INSPECT_COMPACT,
+  INSPECT_LEAVE_MS,
   SIDE_PANEL_MIN,
   SIDE_PANEL_WIDTH,
 } from "./layout";
@@ -110,6 +111,14 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
   const [compact, setCompact] = useState(false);
   const [dockHeight, setDockHeight] = useState(0);
   const inspect = state.inspect && Boolean(lab.parts?.length);
+  // Turned off, Inspect stays a moment to fade out (globals.css), then leaves.
+  const [inspectShown, setInspectShown] = useState(inspect);
+  if (inspect && !inspectShown) setInspectShown(true);
+  useEffect(() => {
+    if (inspect || !inspectShown) return;
+    const timer = setTimeout(() => setInspectShown(false), INSPECT_LEAVE_MS);
+    return () => clearTimeout(timer);
+  }, [inspect, inspectShown]);
 
   // A narrow stage has one slot for the controls and the code.
   const both = state.code && state.controls && !wide;
@@ -443,8 +452,9 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
           </div>
         </div>
 
-        {inspect && lab.parts ? (
+        {inspectShown && lab.parts ? (
           <Inspect
+            leaving={!inspect}
             parts={lab.parts}
             lang={lang}
             labels={labels}

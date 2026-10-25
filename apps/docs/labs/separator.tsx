@@ -60,8 +60,8 @@ const separatorLab = defineLab({
         en: "The dark and light lines, drawn as borders. Base UI gives it the separator role.",
       },
       tokens: {
-        "--ow-separator-line-dark": "--_dark",
-        "--ow-separator-line-light": "--_light",
+        "--ow-line-dark": "--_dark",
+        "--ow-line-light": "--_light",
       },
     },
   ],
@@ -69,8 +69,8 @@ const separatorLab = defineLab({
   demo(cfg, lang) {
     const t = TEXT[lang];
     const style = {
-      "--ow-separator-line-dark": cfg.dark || undefined,
-      "--ow-separator-line-light": cfg.light || undefined,
+      "--ow-line-dark": cfg.dark || undefined,
+      "--ow-line-light": cfg.light || undefined,
     } as CSSProperties;
     if (cfg.orientation === "vertical") {
       return (
@@ -135,8 +135,8 @@ const separatorLab = defineLab({
           ];
     const files = [{ name: "usage.tsx", code: usage.join("\n") }];
     if (custom) {
-      const token = `--${setup.prefix}-separator-line`;
-      // Isolated tokens are set on each Separator's root, so an inherited value would lose.
+      const token = `--${setup.prefix}-line`;
+      // Isolated values sit on each Separator's root, so an inherited value would lose.
       const lines = [
         "/* Every Separator inside .settings */",
         setup.mode === "isolated" ? ".settings .ow-separator {" : ".settings {",

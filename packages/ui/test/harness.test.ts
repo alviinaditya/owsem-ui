@@ -28,11 +28,25 @@ function tokenNames(): string[] {
   return [...names].sort();
 }
 
+/** WCAG contrast ratio of two #rrggbb colors. */
+function contrast(a = "", b = ""): number {
+  const luminance = (hex: string) => {
+    const [r = 0, g = 0, b = 0] = [1, 3, 5].map((i) => {
+      const c = Number.parseInt(hex.slice(i, i + 2), 16) / 255;
+      return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const [hi = 0, lo = 0] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
 function themeOf(element: Element): Record<string, string> {
   const style = getComputedStyle(element);
   return Object.fromEntries([
     ["color-scheme", style.colorScheme],
-    ...tokenNames().map((name) => [name, style.getPropertyValue(name).trim()]),
+    // Whitespace in a custom property is kept as written; a wrapped value is still the same value.
+    ...tokenNames().map((name) => [name, style.getPropertyValue(name).trim().replace(/\s+/g, " ")]),
   ]);
 }
 
@@ -77,20 +91,59 @@ describe("light, dark, and system themes (TK-5)", () => {
     onTestFinished(() => {
       delete root.dataset.theme;
     });
-    const luminance = (hex: string) => {
-      const [r = 0, g = 0, b = 0] = [1, 3, 5].map((i) => {
-        const c = Number.parseInt(hex.slice(i, i + 2), 16) / 255;
-        return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-      });
-      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-    };
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
       const tokens = themeOf(root);
-      const [hi, lo] = [tokens["--ow-accent"], tokens["--ow-bg"]]
-        .map((hex) => luminance(hex ?? ""))
-        .sort((a, b) => b - a);
-      expect((hi ?? 0) + 0.05, theme).toBeGreaterThanOrEqual(((lo ?? 0) + 0.05) * 3);
+      expect(contrast(tokens["--ow-accent"], tokens["--ow-bg"]), theme).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  test("text reads at 4.5:1, and focus and control edges stand out at 3:1 (FR-12, DP-6)", () => {
+    onTestFinished(() => {
+      delete root.dataset.theme;
+    });
+    // [foreground, background, minimum ratio]
+    const pairs = [
+      ["--ow-fg", "--ow-bg", 4.5],
+      ["--ow-muted", "--ow-bg", 4.5],
+      ["--ow-muted", "--ow-well-bg", 4.5],
+      ["--ow-muted", "--ow-raised-bg", 4.5],
+      ["--ow-muted", "--ow-panel", 4.5],
+      ["--ow-good", "--ow-bg", 4.5],
+      ["--ow-warning", "--ow-bg", 4.5],
+      ["--ow-critical", "--ow-bg", 4.5],
+      ["--ow-on-accent", "--ow-accent", 4.5],
+      // A destructive button: its text on the solid critical fill, which stands out from the page.
+      ["--ow-on-critical", "--ow-critical-solid", 4.5],
+      ["--ow-critical-solid", "--ow-bg", 3],
+      ["--ow-tooltip-fg", "--ow-tooltip-bg", 4.5],
+      ["--ow-focus", "--ow-bg", 3],
+      ["--ow-edge", "--ow-bg", 3],
+      ["--ow-edge", "--ow-well-bg", 3],
+    ] as const;
+    for (const theme of ["light", "dark"]) {
+      root.dataset.theme = theme;
+      const tokens = themeOf(root);
+      for (const [fg, bg, min] of pairs) {
+        expect(contrast(tokens[fg], tokens[bg]), `${theme}: ${fg} on ${bg}`).toBeGreaterThanOrEqual(
+          min,
+        );
+      }
+    }
+  });
+
+  test("the depth materials and springs are valid CSS (TK-7, FR-21)", () => {
+    const tokens = themeOf(root);
+    for (const material of ["panel", "raised", "well", "pressed", "primary"]) {
+      const shadow = tokens[`--ow-${material}-shadow`] ?? "";
+      expect(CSS.supports("box-shadow", shadow), material).toBe(true);
+    }
+    for (const spring of ["travel", "settle", "glide"]) {
+      const easing = tokens[`--ow-spring-${spring}`] ?? "";
+      expect(CSS.supports("transition-timing-function", easing), spring).toBe(true);
+      expect(
+        CSS.supports("transition-duration", tokens[`--ow-spring-${spring}-duration`] ?? ""),
+      ).toBe(true);
     }
   });
 

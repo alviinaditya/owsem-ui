@@ -66,17 +66,17 @@ attribute before React hydrates.
 
 ## Recoloring
 
-Tokens come in tiers. Each component reads its own component token first, then the theme token,
-then a built-in value.
+Theme tokens are the only tokens. Components read them directly, with no token of their own, so
+one value changes every component that uses it.
 
-| Tier | Examples | Set by |
+| Kind | Examples | Set by |
 | --- | --- | --- |
-| Semantic | `--ow-bg`, `--ow-fg`, `--ow-muted`, `--ow-line`, `--ow-accent` | Your app, once for all components |
-| Material depth | `--ow-line-dark`, `--ow-line-light` | OwsemUI per theme; you may override them |
-| Component | `--ow-separator-line-dark`, `--ow-separator-line-light` | Per component, for local changes |
+| Semantic | `--ow-bg`, `--ow-fg`, `--ow-muted`, `--ow-line`, `--ow-accent`, `--ow-hover` | Your app, once for all components |
+| Material depth | `--ow-panel`, `--ow-raised-bg`, `--ow-line-dark`, `--ow-line-light` | OwsemUI per theme; you may override them |
+| Shape and motion | `--ow-radius`, `--ow-motion-scale` | Your app |
 
-Set a theme token on `:root` to recolor every component, or on any element to recolor only that
-subtree:
+Set a theme token on `:root` to recolor every component, or on any element to recolor only what
+is inside it:
 
 ```css
 :root {
@@ -118,25 +118,37 @@ Material depth tokens are written out for each theme, not derived from other tok
 neutrals such as `--ow-bg`, set `--ow-line-dark` and `--ow-line-light` for each theme too, so
 etched lines stay visible.
 
-To change one component only, set its component token. The Separator, for example, reads
-`--ow-separator-line-dark`, then `--ow-line-dark`, then a built-in value:
+## Customizing one component
+
+The same tokens change one component, or one instance of it: set them on the component, or on an
+element around it.
 
 ```css
-.ow-separator {
-  --_dark: var(--ow-separator-line-dark, var(--ow-line-dark, #d9d9e0));
-}
-```
-
-Names that start with `--_` are private and may change. Override the public token instead:
-
-```css
+/* Every separator in the settings page */
 .settings {
-  --ow-separator-line-dark: #b9b0d0;
+  --ow-line-dark: #b9b0d0;
 }
 ```
 
-A component's tokens are listed in the Customization section of its Lab, as for the
-[Separator](/en/separator#scene-customization).
+Values without a token of their own come from the theme tokens: inner corners from `--ow-radius`
+(each layer adds its padding), tints from `--ow-fg` or `--ow-accent` with `color-mix()`, and
+Glide's highlight from `--ow-hover`. Names that start with `--_` are private and may change.
+
+For anything a token does not cover, style the part itself. Each part has a class: `.ow-<component>`
+on the root and `.ow-<component>__<part>` on the others, such as `.ow-tree-rail-nav__label`. States
+and variants are data attributes, never classes, such as `data-orientation` or `data-current`.
+Every part also takes `className` and `style`. Your CSS is unlayered, so it wins over the
+component's (see below):
+
+```css
+.settings .ow-separator[data-orientation="horizontal"] {
+  border-block-start-style: dashed;
+}
+```
+
+Each Lab's parts table lists the classes and the data attributes you can rely on; other data
+attributes are internal and may change. Its Customization section lists the theme tokens the
+component reads, as for the [Separator](/en/separator#scene-customization).
 
 ## Cascade layers
 
@@ -147,32 +159,29 @@ your CSS is in layers too, as with Tailwind, the layer order decides: see
 
 ## Token reference
 
-Every theme token in the library's `tokens.css` with its light and dark value, read when these docs
-are built. Component tokens are listed in each component's Lab. Neutral values are still
-placeholders and will change with the full token set. More tokens, such as radius and fonts, come
-later.
+Every token in the library's `tokens.css` with its light and dark value, read when these docs are
+built. There are no others: components read only these.
 
 <TokenTable lang="en" />
 
 ## Token modes and prefix
 
-Everything above is theme mode, where components share one set of tokens. Isolated mode gives
-each component its own:
+Everything above is theme mode, where the token values live once on the page root. Isolated mode
+keeps the same tokens but writes their values on each component's root instead:
 
 | | Theme | Isolated |
 | --- | --- | --- |
-| Token names | `--{prefix}-accent` | `--{prefix}-{component}-accent` |
+| Token names | `--{prefix}-accent` | `--{prefix}-accent` |
 | Values live | On `:root` and each theme, written once | On each component's root, with the component |
 | Changing the accent | One line for every component | Per component |
-| Name clashes | Possible, if your app has tokens with the same names | Hardly any |
 | Best for | An app with one design system | One component with its own theme, or components in an app with another design system |
 
-An isolated component reads no shared tokens, so changing one never touches another. Its values
-sit on its own root, so set them on the component itself rather than on a parent:
+An isolated component shares no values, so changing one never touches another, and a value set on
+a parent does not reach it. Set yours on the component itself:
 
 ```css
 .settings .ow-separator {
-  --acme-separator-line-dark: #b9b0d0;
+  --acme-line-dark: #b9b0d0;
 }
 ```
 

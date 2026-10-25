@@ -3,6 +3,7 @@ import { describe, expect, onTestFinished, test } from "vitest";
 import { commands } from "vitest/browser";
 import { render } from "vitest-browser-react";
 import { axeReport } from "../../../test/a11y.ts";
+import { rect } from "../../../test/geometry.ts";
 import { measureIdle, settle } from "../../../test/raf-counter.ts";
 import { TreeRailNav } from "./index";
 
@@ -44,10 +45,10 @@ function Nav({ current = "dark", open = true }: { current?: string; open?: boole
 async function mount(ui: ReactNode) {
   const screen = await render(ui);
   const nav = screen.container.querySelector<HTMLElement>("nav");
-  const tree = screen.container.querySelector<HTMLElement>(".ow-tree-rail");
+  const tree = screen.container.querySelector<HTMLElement>(".ow-tree-rail-nav__tree");
   if (!nav || !tree) throw new Error("not mounted");
   const row = (name: string) => {
-    const el = [...tree.querySelectorAll<HTMLElement>("[data-tree-rail-item]")].find(
+    const el = [...tree.querySelectorAll<HTMLElement>(".ow-tree-rail-nav__item")].find(
       (r) => r.textContent === name,
     );
     if (!el) throw new Error(`no row ${name}`);
@@ -81,8 +82,13 @@ function contrast(a: number[], b: number[]): number {
 
 /** The marker's y in the tree, and a row's middle, to compare where the trail ends. */
 const markerY = (tree: HTMLElement) => {
-  const t = tree.querySelector('[data-part="marker"]')?.getAttribute("transform") ?? "";
+  const t = tree.querySelector(".ow-tree-rail-nav__rail-marker")?.getAttribute("transform") ?? "";
   return Number(/translate\([\d.-]+ ([\d.-]+)\)/.exec(t)?.[1] ?? Number.NaN);
+};
+/** Where the trail starts: the y of its path's first point, in the tree. */
+const trailStart = (tree: HTMLElement) => {
+  const d = tree.querySelector(".ow-tree-rail-nav__rail-trail")?.getAttribute("d") ?? "";
+  return Number(/^M[\d.-]+ ([\d.-]+)/.exec(d)?.[1] ?? Number.NaN);
 };
 const middle = (tree: HTMLElement, row: HTMLElement) => {
   const r = row.getBoundingClientRect();
@@ -111,7 +117,7 @@ describe("Tree Rail Nav", () => {
     expect(row("Home").hasAttribute("data-trail")).toBe(false);
     // Lit: Home and Settings on the root rail, Profile and Appearance on the next, and Dark mode.
     // About is below the branch, and Density is past the end.
-    expect(tree.querySelectorAll('[data-part="node"][data-lit]').length).toBe(5);
+    expect(tree.querySelectorAll(".ow-tree-rail-nav__rail-node[data-lit]").length).toBe(5);
     // The first draw is simply there, as after a client-side route change: the trail, its dots,
     // the rows on it, and the tint. Nothing fades or sweeps in.
     const current = row("Dark mode");
@@ -122,6 +128,42 @@ describe("Tree Rail Nav", () => {
       .map((a) => a.transitionProperty);
     expect(fading).toEqual([]);
     expect(getComputedStyle(current, "::before").opacity).toBe("1");
+  });
+
+  test("until the script has drawn the rail, CSS draws its resting shape in the same place", async () => {
+    const { tree, row } = await mount(<Nav />);
+    await expect.poll(() => tree.hasAttribute("data-rail")).toBe(true);
+    expect(getComputedStyle(row("Home"), "::after").content).toBe("none");
+    // As before hydration, when only the server's HTML and the CSS are there.
+    tree.removeAttribute("data-rail");
+    const box = tree.getBoundingClientRect();
+    const nodes = [...tree.querySelectorAll(".ow-tree-rail-nav__rail-node")];
+    const rows = [...tree.querySelectorAll<HTMLElement>(".ow-tree-rail-nav__item")];
+    expect(nodes.length).toBe(rows.length);
+    for (const [i, el] of rows.entries()) {
+      if (!el.getClientRects().length) continue;
+      const at = /translate\(([\d.-]+) ([\d.-]+)\)/.exec(nodes[i]?.getAttribute("transform") ?? "");
+      const dot = rect({ el, pseudo: "::after" });
+      const name = el.textContent ?? "";
+      expect(dot.left + dot.width / 2 - box.left, name).toBeCloseTo(Number(at?.[1]), 1);
+      expect(dot.top + dot.height / 2 - box.top, name).toBeCloseTo(Number(at?.[2]), 1);
+    }
+    // A rail runs from each row to the next, and a branch leads into each open group.
+    const home = row("Home").parentElement as HTMLElement;
+    expect(getComputedStyle(home, "::before").content).not.toBe("none");
+    const panel = tree.querySelector(".ow-tree-rail-nav__panel:not([hidden])") as HTMLElement;
+    expect(getComputedStyle(panel, "::before").maskImage).toContain("svg");
+  });
+
+  test("never shows a dot for a row in a closed group, not even fading out", async () => {
+    const { tree } = await mount(<Nav current="none" open={false} />);
+    await expect.poll(() => tree.hasAttribute("data-rail")).toBe(true);
+    const hidden = [...tree.querySelectorAll(".ow-tree-rail-nav__rail-node[data-hidden] circle")];
+    expect(hidden.length).toBeGreaterThan(0);
+    for (const dot of hidden) {
+      expect(dot.getAnimations()).toEqual([]);
+      expect(getComputedStyle(dot).opacity).toBe("0");
+    }
   });
 
   test("draws the trail to the current row inside a scaled ancestor", async () => {
@@ -163,14 +205,29 @@ describe("Tree Rail Nav", () => {
     expect(getComputedStyle(old, "::before").content).toBe("none");
   });
 
+  test("travels from the top to a current row that arrives after mount", async () => {
+    // As when a page outside the nav (the home page) links to one in it.
+    const { screen, tree, row } = await mount(<Nav current="none" />);
+    screen.rerender(<Nav />);
+    const to = middle(tree, row("Dark mode"));
+    await new Promise((resolve) => setTimeout(resolve, 120));
+    expect(markerY(tree)).not.toBeCloseTo(to, 0);
+    await expect.poll(() => markerY(tree), { timeout: 2000 }).toBeCloseTo(to, 0);
+    await expect.poll(() => row("Dark mode").hasAttribute("data-arrived")).toBe(true);
+  });
+
   test("ends at the group's row while the current row is closed inside it", async () => {
     const { tree, row } = await mount(<Nav />);
     const settings = row("Settings");
+    // The first draw puts the trail on the current row; closing its group starts from there.
+    await expect.poll(() => markerY(tree)).toBeCloseTo(middle(tree, row("Dark mode")), 0);
     settings.click();
     await expect
       .poll(() => markerY(tree), { timeout: 2000 })
       .toBeCloseTo(middle(tree, settings), 0);
-    expect(tree.querySelector('[data-part="marker"]')?.hasAttribute("data-hollow")).toBe(true);
+    expect(tree.querySelector(".ow-tree-rail-nav__rail-marker")?.hasAttribute("data-hollow")).toBe(
+      true,
+    );
     expect(row("Dark mode").hasAttribute("data-arrived")).toBe(false);
     settings.click();
     await expect
@@ -240,6 +297,14 @@ describe("Tree Rail Nav", () => {
     expect(clicks).toBe(0);
   });
 
+  test("without an Origin label, the rail and the trail start at the first row", async () => {
+    const { tree, row } = await mount(<Nav />);
+    await expect.poll(() => trailStart(tree)).toBeCloseTo(middle(tree, row("Home")), 0);
+    const root = tree.querySelector(".ow-tree-rail-nav__rail-base path")?.getAttribute("d") ?? "";
+    expect(Number(/^M[\d.-]+ ([\d.-]+)/.exec(root)?.[1])).toBeCloseTo(middle(tree, row("Home")), 0);
+    expect(getComputedStyle(tree, "::before").content).toBe("none");
+  });
+
   test("an Origin label sets where the trail starts", async () => {
     const screen = await render(
       <TreeRailNav.Root aria-label="Docs" style={{ inlineSize: 280 }}>
@@ -253,14 +318,16 @@ describe("Tree Rail Nav", () => {
         </TreeRailNav.List>
       </TreeRailNav.Root>,
     );
-    const tree = screen.container.querySelector<HTMLElement>(".ow-tree-rail");
-    const label = screen.container.querySelector<HTMLElement>("[data-tree-rail-origin]");
+    const tree = screen.container.querySelector<HTMLElement>(".ow-tree-rail-nav__tree");
+    const label = screen.container.querySelector<HTMLElement>(".ow-tree-rail-nav__origin");
     if (!tree || !label) throw new Error("not mounted");
-    const originY = () => {
-      const t = tree.querySelector('[data-part="origin"]')?.getAttribute("transform") ?? "";
-      return Number(/translate\([\d.-]+ ([\d.-]+)\)/.exec(t)?.[1] ?? Number.NaN);
-    };
-    await expect.poll(originY).toBeCloseTo(label.offsetTop + label.offsetHeight / 2, 0);
+    // The origin (drawn by CSS) and the trail's start (the script's) both sit at its middle.
+    const box = label.getBoundingClientRect();
+    const middle = box.top + box.height / 2;
+    const origin = rect({ el: label, pseudo: "::before" });
+    expect(origin.top + origin.height / 2).toBeCloseTo(middle, 1);
+    const top = tree.getBoundingClientRect().top;
+    await expect.poll(() => trailStart(tree) + top).toBeCloseTo(middle, 0);
   });
 
   test("a Label too long for its row fades, and runs only while the row is hovered", async () => {
@@ -281,7 +348,7 @@ describe("Tree Rail Nav", () => {
       </TreeRailNav.Root>,
     );
     const [short, long] = [
-      ...screen.container.querySelectorAll<HTMLElement>(".ow-tree-rail-label"),
+      ...screen.container.querySelectorAll<HTMLElement>(".ow-tree-rail-nav__label"),
     ];
     if (!short || !long) throw new Error("no labels");
     await expect.poll(() => long.hasAttribute("data-overflow")).toBe(true);
@@ -299,8 +366,8 @@ describe("Tree Rail Nav", () => {
     const fade = () => getComputedStyle(long).maskPosition;
     expect(fade()).toBe("-16px 0px, 0px 0px");
     expect(getComputedStyle(long).transitionDuration).toBe("0s");
-    const row = long.closest<HTMLElement>("[data-tree-rail-item]");
-    const tree = screen.container.querySelector<HTMLElement>(".ow-tree-rail");
+    const row = long.closest<HTMLElement>(".ow-tree-rail-nav__item");
+    const tree = screen.container.querySelector<HTMLElement>(".ow-tree-rail-nav__tree");
     const r = row?.getBoundingClientRect();
     if (!row || !tree || !r) throw new Error("no row");
     tree.dispatchEvent(
@@ -333,8 +400,8 @@ describe("Tree Rail Nav", () => {
         </TreeRailNav.List>
       </TreeRailNav.Root>,
     );
-    const label = screen.container.querySelector<HTMLElement>(".ow-tree-rail-label");
-    const row = label?.closest<HTMLElement>("[data-tree-rail-item]");
+    const label = screen.container.querySelector<HTMLElement>(".ow-tree-rail-nav__label");
+    const row = label?.closest<HTMLElement>(".ow-tree-rail-nav__item");
     if (!label || !row) throw new Error("no label");
     await expect.poll(() => label.title).toBe("Keyboard and accessibility");
     row.setAttribute("data-glide-active", "");
@@ -372,7 +439,7 @@ describe("Tree Rail Nav", () => {
     );
     const link = screen.container.querySelector("[data-router]");
     expect(link?.getAttribute("aria-current")).toBe("page");
-    expect(link?.classList.contains("ow-tree-rail-item")).toBe(true);
+    expect(link?.classList.contains("ow-tree-rail-nav__item")).toBe(true);
   });
 
   test("does not travel under reduced motion (FR-20)", async () => {
@@ -384,7 +451,7 @@ describe("Tree Rail Nav", () => {
     await expect
       .poll(() => markerY(tree), { timeout: 200 })
       .toBeCloseTo(middle(tree, row("Home")), 0);
-    const panel = tree.querySelector(".ow-tree-rail-panel");
+    const panel = tree.querySelector(".ow-tree-rail-nav__panel");
     expect(panel && getComputedStyle(panel).transitionDuration).toBe("0s");
   });
 
@@ -392,7 +459,7 @@ describe("Tree Rail Nav", () => {
     onTestFinished(() => commands.setForcedColors("none"));
     const { tree } = await mount(<Nav />);
     await commands.setForcedColors("active");
-    const trail = tree.querySelector('[data-part="trail"]');
+    const trail = tree.querySelector(".ow-tree-rail-nav__rail-trail");
     const probe = document.createElement("span");
     probe.style.color = "Highlight";
     document.body.append(probe);
@@ -406,7 +473,7 @@ describe("Tree Rail Nav", () => {
         <Nav />
       </div>,
     );
-    const svg = screen.container.querySelector(".ow-tree-rail-svg");
+    const svg = screen.container.querySelector(".ow-tree-rail-nav__rail");
     expect(svg && getComputedStyle(svg).scale).toBe("-1 1");
   });
 
@@ -417,16 +484,16 @@ describe("Tree Rail Nav", () => {
     const { screen, tree, row } = await mount(<Nav />);
     // The rail draws only in the indent left of each row, never behind its text: every dot sits
     // left of its row. axe counts any SVG behind text as an image, so it measures without it.
-    await expect.poll(() => tree.querySelectorAll('[data-part="node"]').length).toBe(7);
+    await expect.poll(() => tree.querySelectorAll(".ow-tree-rail-nav__rail-node").length).toBe(7);
     for (const name of ["Home", "Settings", "Profile", "Dark mode"]) {
       const r = row(name).getBoundingClientRect();
-      const dots = [...tree.querySelectorAll('[data-part="node"]')].map((d) =>
+      const dots = [...tree.querySelectorAll(".ow-tree-rail-nav__rail-node")].map((d) =>
         d.getBoundingClientRect(),
       );
       const dot = dots.find((d) => Math.abs(d.top + d.height / 2 - (r.top + r.height / 2)) < 1);
       expect(dot?.right).toBeLessThan(r.left);
     }
-    const svg = tree.querySelector<SVGElement>(".ow-tree-rail-svg");
+    const svg = tree.querySelector<SVGElement>(".ow-tree-rail-nav__rail");
     if (svg) svg.style.display = "none";
     for (const theme of ["light", "dark"]) {
       document.documentElement.dataset.theme = theme;

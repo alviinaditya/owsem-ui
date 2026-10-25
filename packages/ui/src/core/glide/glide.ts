@@ -150,7 +150,7 @@ export function createGlide(
     } else if (visible) {
       visible = false;
       highlight.removeAttribute("data-visible");
-      highlight.removeAttribute("data-pressed");
+      highlight.removeAttribute("data-held");
     }
     if (changed) read().onChange?.(item);
   }
@@ -189,11 +189,11 @@ export function createGlide(
     const pressed = onItem ? onItem === active : hit?.item === active && hit.distance <= gapLimit();
     if (!pressed) return;
     clearTimeout(pressTimer);
-    highlight.setAttribute("data-pressed", "");
+    highlight.setAttribute("data-held", "");
   };
   const onUp = () => {
     clearTimeout(pressTimer);
-    pressTimer = window.setTimeout(() => highlight.removeAttribute("data-pressed"), 90);
+    pressTimer = window.setTimeout(() => highlight.removeAttribute("data-held"), 90);
   };
   const onClick = (event: MouseEvent) => {
     // A click on any item, disabled ones included, belongs to that item.

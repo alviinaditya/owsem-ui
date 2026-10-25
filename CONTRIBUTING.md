@@ -68,6 +68,39 @@ subtree. The dark set is written twice (media query and `[data-theme="dark"]`); 
 they drift. The docs site stores the visitor's choice (light, dark, or system) in `localStorage`
 and applies it from an inline `<head>` script before first paint.
 
+The theme tokens are the only public tokens (TK-9). Component CSS reads them directly: no
+component tokens such as `--ow-menu-bg`, and no fallbacks such as `var(--ow-panel, #fff)`, since
+`tokens.css` always ships with the components. A value without a token is derived from one:
+inner radii from `--ow-radius` (FR-10b), tints with `color-mix()` from `--ow-fg` or `--ow-accent`.
+Add a theme token only for a theming value (color, radius, shadow, font, motion) that no token
+gives and that more than one component needs. `test/theming.test.ts` fails on any other `--ow-*`
+name, a fallback, or a literal color, radius, or font. A literal that is not theming, such as a
+color picker's hue spectrum, takes a `/* literal: <reason> */` comment right before it.
+
+## Class names and states
+
+Class names follow BEM blocks and elements; modifiers are data attributes (FR-6b).
+
+- The block is the component's folder name. The root part takes `.ow-<block>`, and every other
+  part `.ow-<block>__<element>`, also when it renders outside the root (a portal) or is drawn by a
+  script (an SVG rail). The element is the Base UI part name in kebab case where there is one
+  (`__positioner`, `__group-label`); an element inside an element joins with a hyphen
+  (`__item-label`), never a second `__`.
+- A part is found by its class, in CSS and in scripts. No `--modifier` classes and no
+  `data-part`: variants and states are data attributes, Base UI's own (`data-pressed` for a toggle
+  that is on, `data-highlighted`, `data-side`) or OwsemUI's (`data-variant`, `data-size`).
+- One meaning, one name: `data-held` while the pointer holds a control down (never
+  `data-pressed`, which Base UI uses for on), `data-visible` while an indicator shows, and
+  `data-instant` for a change without a transition.
+- Keyframes are named after the block too: `ow-<block>-<name>`, such as
+  `ow-tree-rail-nav-marquee`.
+- The classes and the states in a Lab's parts table are public. Other data attributes are
+  private, like `--_*` properties.
+
+`test/naming.test.ts` fails on a class outside this pattern, a class in a folder that is not its
+block, CSS for a class no component renders, keyframes named after another block, and
+`data-part`.
+
 ## Icons
 
 Icons come from [Lucide](https://lucide.dev) (ISC). Copy an icon's inner SVG elements into the
@@ -110,12 +143,13 @@ To build one, use Separator as the reference:
    | File | Contents |
    | --- | --- |
    | `<name>.tsx` | Styled Base UI parts. Imports its own CSS; class names are constants (FR-6a) |
-   | `<name>.css` | Layer order first, rules in `@layer owsem.components`, tokens read as component token, then theme token, then a literal |
+   | `<name>.css` | Layer order first, rules in `@layer owsem.components`, theme tokens read directly (TK-9) |
    | `<name>.test.tsx` | Behavior, tokens in light and dark, forced colors, axe, and idle cost |
    | `index.ts` | Public exports |
 
 2. Export it from `src/base.ts` or `src/owsem.ts`, import its CSS in `src/styles.css`, and add a
-   size budget to `.size-limit.mjs` (Base 3 kB, Owsem 8 kB).
+   size budget to `.size-limit.mjs` (Base 3 kB, Owsem 8 kB; the Core it uses counts once, in the
+   core entry).
 3. Build its Lab (see below), then set its `status` in the catalog to `prototype` and add a
    changeset.
 4. Add it to "Components available now" in `skills/owsem-ui/SKILL.md`, the agent skill users
@@ -126,7 +160,7 @@ To build one, use Separator as the reference:
 
 ### Docs stand-ins
 
-Until a component exists, the docs build its job by hand, in the same depth material (sunken
+Until a component exists, the docs build its job by hand, in the same depth material (flat
 `--docs-well`, raised `--docs-raised`, the `--docs-radius*` scale), so the swap is markup and
 deleted CSS:
 
@@ -144,8 +178,8 @@ deleted CSS:
 | 2 | Combobox, Dialog | ⌘K search (DS-5), through Command Menu |
 | 3 | Drawer | The sidebar as a menu panel below 1100 px, and the Lab's docs, controls, and code sheets below 960 px (DS-10) |
 
-When the depth material tokens land in `tokens.css` (TK-7), point `--docs-well`, `--docs-raised`,
-and their shadows at them, so the docs and the library share one source.
+The docs' `--docs-well`, `--docs-raised`, and their shadows point at the library's depth
+materials (TK-7), so the docs and the library share one source.
 
 Items in a list (menus, selects, tabs, toggle groups) are lit with Glide from
 `src/core/glide/`, not a hover style of their own; a component that moves its highlight with the
@@ -154,6 +188,37 @@ keyboard calls `setActive()`.
 The package and registry builds pick up the folder automatically. Registry copies rewrite imports
 that leave the folder: Core to `@/lib/owsem/...` and other components to
 `@/components/owsem/<name>/...` (CLI-6 in the PRD). Every component is one item, `<name>`.
+
+### Materials and motion
+
+Surfaces come from the materials in `tokens.css` (TK-7): `--ow-panel` and `--ow-popup-shadow` for
+panels and popups, `--ow-raised-*` for buttons, thumbs, and on states, `--ow-well-*` for tracks and
+fields, `--ow-pressed-*` while a control is held down, `--ow-accent` with `--ow-on-accent` and
+`--ow-primary-shadow` for the primary button, and `--ow-critical-solid` with `--ow-on-critical`
+for the destructive one (`--ow-critical` is the critical text tone).
+Depth comes from flat fills and crisp 1px edges, drawn as inset shadows so they add no size; never
+use soft, blurred, or sunken (inset blur) shadows, which read as neumorphism. Separators and layout
+lines stay etched grooves (`--ow-line-dark` over `--ow-line-light`). Base never glows (DP-1).
+
+Motion explains a state change (principle 4), with these rules:
+
+- Ask first whether it should move at all. Anything opened or toggled from the keyboard many times
+  a day (a command palette, shortcuts) changes instantly.
+- Animate `transform` and `opacity` only (FR-18). Enter and exit with `data-starting-style` and
+  `data-ending-style` and CSS transitions (FR-7); never from `scale(0)`, start at 0.95 or more.
+- An element that transitions `transform`, `scale`, `translate`, or `rotate` declares `will-change`
+  for it (NF-8). Otherwise Chrome draws it on a GPU layer only while it moves, and at a fractional
+  zoom (110%) its content lands a device pixel away when the motion ends. `test/layers.test.ts`
+  checks every stylesheet.
+- Popups scale from their trigger (`transform-origin: var(--transform-origin)`); dialogs stay
+  centered.
+- Ease with `--ow-ease-out` for entering and leaving, `--ow-ease-in-out` for moving on screen, and
+  never `ease-in`. Springs are `--ow-spring-travel`, `--ow-spring-settle` (a press releasing), and
+  `--ow-spring-glide`, each with its `-duration` token.
+- Keep UI motion short: 100 to 160 ms for a press, 125 to 200 ms for tooltips, 150 to 250 ms for
+  menus and popovers, up to 300 ms for dialogs.
+- Gate hover motion with `@media (hover: hover) and (pointer: fine)`, and give every animation a
+  reduced-motion version without movement (FR-20).
 
 A component has one type. **Base** is a Base UI component with OwsemUI's styling and small
 improvements, exported from `src/base.ts` (`owsem-ui/base`). **Owsem** is OwsemUI's own component,
@@ -179,7 +244,7 @@ component and marks the one being read. Separator is the reference. A Lab has tw
   after the scene. Controls are `choice` (a segmented radio group) or `color` (a hex field and the
   browser's picker; `token` names the theme token the component uses until a color is chosen).
 
-The token setup in the sidebar's foot (mode and prefix, DS-4) reaches every Lab: `code(cfg, setup)` writes
+The token setup (the stage toolbar's Token button; mode and prefix, DS-4) reaches every Lab: `code(cfg, setup)` writes
 token names with `setup.prefix` and any setup but theme with `ow` imports from the owsem CLI's copy,
 the install tab switches to the owsem CLI, and `--ow-` in the narrative's code is renamed in the
 browser (`data-token-literal` keeps a name as written).
@@ -196,8 +261,8 @@ ring. Style the docs by class; a new element default goes in `docs-base`.
 The `states` scene compares rather than describes: its `demo` returns a `Matrix`
 (`components/lab/matrix.tsx`) of live cells, such as variants by sizes or states by themes.
 
-Each part in `parts` has a selector into the demo, a note, and its public tokens, each mapped to
-the private property that holds the value in use (a public token is empty until someone sets it).
+Each part in `parts` has a selector into the demo, a note, and the theme tokens it reads, each
+mapped to the private property that holds the value in use.
 In the anatomy table, `<Part name="Root" />` names a part and picks it on the stage.
 
 A `play` script drives the demo through `ScriptStage`: `click` and `point` move a drawn pointer

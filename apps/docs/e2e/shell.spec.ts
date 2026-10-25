@@ -156,6 +156,13 @@ test("no top bar: the sidebar's foot holds the settings, and a dock opens it bel
   const foot = page.locator(".site-sidebar-foot");
   if (testInfo.project.name === "mobile-390") {
     await expect(foot).toBeHidden();
+    // The dock sits at the top left, above the page's text, as on a Lab.
+    const dock = await page.locator(".dock").boundingBox();
+    const title = await page.getByRole("heading", { level: 1 }).boundingBox();
+    if (!dock || !title) throw new Error("The dock and the title need boxes.");
+    expect(dock.x).toBeLessThan(20);
+    expect(dock.y).toBeLessThan(20);
+    expect(title.y).toBeGreaterThan(dock.y + dock.height);
     await menu.click();
   } else {
     await expect(menu).toBeHidden();

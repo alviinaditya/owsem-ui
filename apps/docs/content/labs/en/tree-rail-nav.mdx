@@ -38,14 +38,14 @@ on the stage, to see its tokens.
 | Part | Element | Notes |
 | --- | --- | --- |
 | <Part name="Root" /> | `nav.ow-tree-rail-nav` | Holds the rail SVG and the hover highlight |
-| <Part name="List" /> | `ul` | A nested List is labelled by its row (`aria-labelledby`) |
-| <Part name="Node" /> | `li` | A Base UI `Collapsible.Root` |
-| <Part name="Toggle" /> | `button` | A group's row: `Collapsible.Trigger`, with `aria-expanded` |
-| <Part name="Link" /> | `a` | `render` swaps in a router link; `current` sets `aria-current` |
-| <Part name="Panel" /> | `div` | `Collapsible.Panel`, kept mounted so the rail can end at its row |
-| <Part name="Icon" /> | `span` | Decorative (`aria-hidden`); the row's font size plus 2px, any icon inside it filled to fit |
-| <Part name="Label" /> | `span` | One line; text that does not fit fades, and runs left in a loop while its row is hovered or focused |
-| <Part name="Origin" /> | `div` | Optional label at the top; the trail starts beside it |
+| <Part name="List" /> | `ul.ow-tree-rail-nav__list` | A nested List is labelled by its row (`aria-labelledby`); `data-depth` from 1 |
+| <Part name="Node" /> | `li.ow-tree-rail-nav__node` | A Base UI `Collapsible.Root` |
+| <Part name="Toggle" /> | `button.ow-tree-rail-nav__item` | A group's row: `Collapsible.Trigger`, with `aria-expanded`, `data-panel-open`, and `data-depth` |
+| <Part name="Link" /> | `a.ow-tree-rail-nav__item` | `render` swaps in a router link; `current` sets `aria-current` and `data-current`; `data-depth` |
+| <Part name="Panel" /> | `div.ow-tree-rail-nav__panel` | `Collapsible.Panel`, kept mounted so the rail can end at its row |
+| <Part name="Icon" /> | `span.ow-tree-rail-nav__icon` | Decorative (`aria-hidden`); the row's font size plus 2px, any icon inside it filled to fit |
+| <Part name="Label" /> | `span.ow-tree-rail-nav__label` | One line; text that does not fit fades (`data-overflow`), and runs left in a loop while its row is hovered or focused |
+| <Part name="Origin" /> | `div.ow-tree-rail-nav__origin` | Optional label at the top; the trail starts beside it. Without it, the rail starts at the first row |
 
 ## States and variants [#states]
 
@@ -89,49 +89,30 @@ is mirrored.
 
 ## Customization [#customization]
 
-The stage controls are open: pick a trail or rail color and the code follows. Colors and rail
-positions are component tokens that you set in your own CSS.
+The stage controls are open: pick a trail or rail color and the code follows. Tree Rail Nav reads
+these theme tokens; set them on the nav, or on an element around it such as `.sidebar`.
 
-<ForMode mode="theme">
-
-Component tokens override the theme tokens for every Tree Rail Nav inside the element that sets
-them, such as `.sidebar`.
-
-| Component token | Default | Purpose |
-| --- | --- | --- |
-| `--ow-tree-rail-trail` | `--ow-fg` in Base, `--ow-accent` in Owsem | Trail, lit dots, marker, and the current row's tint |
-| `--ow-tree-rail-rail` | `--ow-line` | Rails |
-| `--ow-tree-rail-node` | `--ow-fg` at 24% | Dots the trail has not lit |
-| `--ow-tree-rail-surface` | `--ow-bg` | Cuts the dots out of the rail; match the background behind the nav |
-| `--ow-tree-rail-r0` | `9px` | Rail x of level 1 |
-| `--ow-tree-rail-r1` | `34px` | Rail x of level 2 |
-| `--ow-tree-rail-r2` | `59px` | Rail x of level 3 |
-
-</ForMode>
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-accent` | Trail, lit dots, marker, and the current row's tint |
+| `--ow-line` | Rails |
+| `--ow-fg` | Text, and at 24% the dots the trail has not lit |
+| `--ow-muted` | The origin label |
+| `--ow-bg` | Cuts the dots out of the rail; match the background behind the nav |
+| `--ow-hover` | The hover highlight (Glide) |
+| `--ow-radius` | The rows' and the highlight's corners |
 
 <ForMode mode="isolated">
 
-Each Tree Rail Nav carries its own values on its root and reads no shared token, so set them on
-the nav itself, as in `.sidebar .ow-tree-rail-nav`.
-
-| Component token | Default | Purpose |
-| --- | --- | --- |
-| `--ow-tree-rail-trail` | Its own: neutral in Base, accent in Owsem | Trail, lit dots, marker, and the current row's tint |
-| `--ow-tree-rail-rail` | Its own, per theme | Rails |
-| `--ow-tree-rail-node` | Its own, per theme | Dots the trail has not lit |
-| `--ow-tree-rail-surface` | Its own, per theme | Cuts the dots out of the rail; match the background behind the nav |
-| `--ow-tree-rail-r0` | `9px` | Rail x of level 1 |
-| `--ow-tree-rail-r1` | `34px` | Rail x of level 2 |
-| `--ow-tree-rail-r2` | `59px` | Rail x of level 3 |
+In isolated mode the values sit on each nav's root, so set yours on the nav itself, as in
+`.sidebar.ow-tree-rail-nav`.
 
 </ForMode>
 
 The rails sit 25px apart: every branch curves the same way, and a first-level row's children line
-up with its text, after the icon. Write their positions in plain px: the script reads them as
-numbers. Rows indent just past their rail, so moving a rail moves its rows. The hover highlight is
-Glide's, so `--ow-glide-bg` and `--ow-glide-radius` set its color and corners.
+up with its text, after the icon. Rows indent just past their rail.
 
-<TokenChip item="tree-rail-nav" lang="en" />
+<TokenChip lang="en" />
 
 ## Ship it [#ship]
 

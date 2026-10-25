@@ -189,10 +189,7 @@ export function TokenSetupPanel({ labels }: { labels: Labels }) {
   const panel = useRef<HTMLDivElement>(null);
   // Remounted on each open, so a half-typed prefix does not outlive the panel.
   const [opened, setOpened] = useState(0);
-  const names =
-    setup.mode === "theme"
-      ? ["accent", "bg", "line-dark"]
-      : ["separator-line-dark", "separator-line-light"];
+  const names = ["accent", "bg", "line-dark"];
   return (
     <div
       ref={panel}
@@ -258,11 +255,10 @@ export function TokenSetupPanel({ labels }: { labels: Labels }) {
 }
 
 /** "Theme tokens · --ow-*", with a button that opens the panel. */
-export function TokenChip({ item, lang }: { item?: string; lang: Lang }) {
+export function TokenChip({ lang }: { lang: Lang }) {
   const setup = useTokenSetup();
   const labels = getDictionary(lang).tokens;
-  const names =
-    setup.mode === "isolated" && item ? `--${setup.prefix}-${item}-*` : `--${setup.prefix}-*`;
+  const names = `--${setup.prefix}-*`;
   return (
     <p className="token-chip">
       {labels[setup.mode]} · <code data-token-literal="">{names}</code>

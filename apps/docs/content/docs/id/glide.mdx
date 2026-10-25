@@ -64,14 +64,12 @@ kotak yang ber-posisi dan terisolasi, dan highlight berada di bawah item. CSS-ny
 pointer yang diam. Tanpa React, `createGlide(container, highlight, options)` melakukan hal yang
 sama dan mengembalikan `destroy()`.
 
-## Token
+## Tema
 
-| Token | Bawaan |
-| --- | --- |
-| `--ow-glide-bg` | `--ow-fg` 7% |
-| `--ow-glide-pressed-bg` | `--ow-fg` 11%, saat item ditekan |
-| `--ow-glide-radius` | `8px` |
-| `--ow-glide-duration` | `260ms` |
+Glide hanya membaca token tema. Highlight-nya `--ow-hover`, sedikit lebih kuat saat item ditekan;
+sudutnya `--ow-radius`, atau sudut item bila komponennya mengaturnya. Geraknya memakai spring glide,
+`--ow-spring-glide` selama `--ow-spring-glide-duration`. Pasang `--ow-hover` di wadahnya untuk
+mengganti warna highlight satu daftar saja.
 
 ## Gerak dan aksesibilitas
 

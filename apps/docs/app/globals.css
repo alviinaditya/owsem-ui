@@ -8,42 +8,35 @@
  * property is declared, so the stage's own data-theme needs its own copy. */
 :root,
 [data-theme] {
-  --docs-bg: light-dark(#fbfafd, #09080d);
-  --docs-surface: light-dark(#ffffff, #0f0e14);
-  --docs-line-strong: light-dark(rgb(27 23 38 / 0.16), rgb(255 255 255 / 0.12));
+  --docs-bg: light-dark(#fafafa, #19191b);
+  --docs-surface: light-dark(#ffffff, #1f1f21);
+  --docs-line-strong: light-dark(rgb(0 0 0 / 0.14), rgb(255 255 255 / 0.1));
   /* Control boundaries need 3:1 (WCAG 1.4.11). */
-  --docs-control: light-dark(#8a8497, #6a6578);
-  --docs-fg: light-dark(#1b1726, #ece9f3);
-  --docs-body: light-dark(#3e3950, #b3aec0);
-  --docs-muted: light-dark(#5c5669, #9893a6);
+  --docs-control: light-dark(#82828b, #6e6e76);
+  --docs-fg: light-dark(#18181b, #ededef);
+  --docs-body: light-dark(#3f3f46, #b4b4bb);
+  --docs-muted: light-dark(#63636b, #a1a1a8);
   --docs-accent: light-dark(#5b4a9a, #d4cbe5);
-  --docs-on-accent: light-dark(#ffffff, #17141f);
-  --docs-hover: light-dark(rgb(27 23 38 / 0.05), rgb(255 255 255 / 0.05));
+  --docs-on-accent: light-dark(#ffffff, #18181a);
+  --docs-hover: light-dark(rgb(0 0 0 / 0.04), rgb(255 255 255 / 0.05));
   /* Errors in fields: 4.5:1 on surfaces and wells, light and dark. */
   --docs-critical: light-dark(#b03f2a, #f2ab96);
-  --docs-stage: light-dark(#f1eff6, #13121a);
-  /* Depth material for choice controls, after the owner's docs-redesign.html: a sunken track (lit
-   * from above, so its top edge is in shadow) and a softly raised thumb. The chosen option also
-   * reads by its brighter text. */
-  --docs-well: light-dark(#eceaf2, #050408);
-  --docs-well-shadow:
-    inset 0 1.5px 3px light-dark(rgb(40 30 20 / 0.16), rgb(0 0 0 / 0.75)),
-    inset 0 -1px 0 light-dark(rgb(255 255 255 / 0.75), rgb(255 255 255 / 0.05)),
-    0 0 0 1px light-dark(rgb(30 25 40 / 0.06), rgb(255 255 255 / 0.04));
-  --docs-raised: light-dark(#ffffff, #1e1c26);
-  --docs-raised-shadow:
-    inset 0 1px 0 light-dark(rgb(255 255 255 / 0.95), rgb(255 255 255 / 0.1)),
-    0 0 0 1px light-dark(rgb(30 25 40 / 0.12), rgb(255 255 255 / 0.075)),
-    0 1.5px 2px light-dark(rgb(40 30 20 / 0.13), rgb(0 0 0 / 0.55));
-  --docs-stage-line: light-dark(rgb(40 30 70 / 0.07), rgb(212 203 229 / 0.06));
+  --docs-stage: light-dark(#f4f4f5, #1c1c1f);
+  /* Materials from owsem-ui's tokens (TK-7): a flat darker track and a crisp-edged thumb, so the
+   * docs and the library share one source. */
+  --docs-well: var(--ow-well-bg);
+  --docs-well-shadow: var(--ow-well-shadow);
+  --docs-raised: var(--ow-raised-bg);
+  --docs-raised-shadow: var(--ow-raised-shadow);
+  --docs-stage-line: light-dark(rgb(0 0 0 / 0.06), rgb(255 255 255 / 0.05));
   /* A groove: a dark line with a faint highlight under it, so it reads as one thin line. */
-  --docs-groove-dark: light-dark(rgb(40 30 20 / 0.17), rgb(0 0 0 / 0.85));
-  --docs-groove-light: light-dark(rgb(255 255 255 / 0.95), rgb(255 255 255 / 0.075));
+  --docs-groove-dark: light-dark(rgb(0 0 0 / 0.12), rgb(0 0 0 / 0.8));
+  --docs-groove-light: light-dark(rgb(255 255 255 / 0.95), rgb(255 255 255 / 0.06));
   /* Code colors (lib/code-theme.ts); each is at least 4.5:1 on every code background. */
   --tk-bg: var(--docs-surface);
-  --tk-text: light-dark(#2a2533, #d9d5e3);
-  --tk-punct: light-dark(#5f5970, #a19cb1);
-  --tk-com: light-dark(#6b6578, #8f8aa3);
+  --tk-text: light-dark(#27272a, #d9d9de);
+  --tk-punct: light-dark(#5f5f68, #a1a1aa);
+  --tk-com: light-dark(#6b6b74, #8e8e96);
   --tk-kw: light-dark(#6a4fb8, #c8b9f3);
   --tk-str: light-dark(#8a5413, #e3c9a8);
   --tk-num: light-dark(#b03f2a, #f2ab96);
@@ -434,8 +427,10 @@ body {
   white-space: nowrap;
 }
 
+/* The box draws the fill: the command's own covered the box's rounded border at the corners. */
 .install .command {
   border: 0;
+  background: none;
   box-shadow: none;
 }
 
@@ -923,7 +918,7 @@ body {
     position: fixed;
     inset: 0;
     z-index: 35;
-    background-color: light-dark(rgb(20 16 32 / 0.25), rgb(0 0 0 / 0.5));
+    background-color: light-dark(rgb(0 0 0 / 0.25), rgb(0 0 0 / 0.5));
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.35s var(--ease);
@@ -935,45 +930,64 @@ body {
   }
 }
 
-/* Below 1100 px: the dock at the bottom opens the sidebar. The page leaves room for it. */
+/*
+ * Below 1100 px: the dock at the top left opens the sidebar on every page, a well of icon buttons
+ * like a narrow Lab's stage toolbar. Pages leave room for it above their text.
+ */
 .dock {
   position: fixed;
-  inset-block-end: 16px;
-  inset-inline-start: 50%;
+  inset: 12px auto auto 12px;
   z-index: 50;
   display: flex;
-  padding: 4px;
-  border-radius: 999px;
-  background-color: var(--docs-surface);
-  box-shadow:
-    inset 0 0 0 1px var(--docs-line-strong),
-    0 12px 32px -12px rgb(0 0 0 / 0.6);
-  translate: -50% 0;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--docs-radius);
+  background-color: var(--docs-well);
+  box-shadow: var(--docs-well-shadow);
 }
 
+/* The stage toolbar's size: 24 px in a 30 px track, with a taller target for a finger. */
 .dock-button {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  block-size: 40px;
-  padding-inline: 14px 18px;
+  justify-content: center;
+  min-inline-size: 30px;
+  block-size: 24px;
+  padding: 0;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--docs-radius-inner);
   background: none;
-  color: var(--docs-fg);
-  font-size: 14px;
-  font-weight: 500;
+  color: var(--docs-muted);
+}
+
+.dock-button::after {
+  content: "";
+  position: absolute;
+  inset: -5px -2px;
+}
+
+.dock-button svg {
+  inline-size: 16px;
+  block-size: 16px;
 }
 
 .dock-button:hover {
   background-color: var(--docs-hover);
+  color: var(--docs-fg);
+}
+
+/* Icons only; the label names the button. */
+.dock-label {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 @media (width < 1100px) {
-  .site-main {
-    padding-block-end: 72px;
-  }
-
   /* Open, the panel has its own close button; the dock steps aside under the scrim. */
   .dock {
     transition:
@@ -1019,19 +1033,19 @@ body {
 }
 
 /*
- * The sidebar is a Tree Rail Nav (owsem-ui, DS-14) in the docs' colors: an accent trail to the
- * current page or scene, and the docs' hover for Glide. Groups have icons, so the default rails fit.
+ * The sidebar is a Tree Rail Nav (owsem-ui, DS-14) in the docs' colors, set as theme tokens on the
+ * nav: an accent trail to the current page or scene, and the docs' hover for Glide. Groups have
+ * icons, so the default rails fit.
  */
 .sidebar-nav {
   --ow-fg: var(--docs-fg);
   --ow-muted: var(--docs-muted);
   --ow-focus: var(--docs-accent);
   --ow-radius: var(--docs-radius);
-  --ow-tree-rail-trail: var(--docs-accent);
-  --ow-tree-rail-rail: var(--docs-line-strong);
-  --ow-tree-rail-surface: var(--docs-bg);
-  --ow-glide-bg: var(--docs-hover);
-  --ow-glide-pressed-bg: color-mix(in oklab, var(--docs-fg) 9%, transparent);
+  --ow-accent: var(--docs-accent);
+  --ow-line: var(--docs-line-strong);
+  --ow-bg: var(--docs-bg);
+  --ow-hover: var(--docs-hover);
   font-size: 14px;
 }
 
@@ -1045,7 +1059,7 @@ body {
 }
 
 /* Available pages read as such; planned ones stay muted, with the "Soon" tag beside them. */
-.sidebar-nav .ow-tree-rail-node:not([data-planned]) > .ow-tree-rail-item[data-depth="2"] {
+.sidebar-nav .ow-tree-rail-nav__node:not([data-planned]) > .ow-tree-rail-nav__item[data-depth="2"] {
   color: var(--docs-fg);
 }
 
@@ -1139,6 +1153,14 @@ body {
 @media (width >= 900px) {
   .site-content {
     padding-inline: 40px;
+  }
+}
+
+/* Room above the text for the dock, until the sidebar shows. */
+@media (width < 1100px) {
+  .site-content,
+  .page {
+    padding-block-start: 64px;
   }
 }
 
@@ -1359,6 +1381,13 @@ figure[data-code-block] pre {
   .lab-stage-frame,
   .lab-stage-frame > .lab-stage {
     block-size: 100%;
+  }
+}
+
+/* Until the sidebar shows, the dock sits above the narrative. */
+@media (960px <= width < 1100px) {
+  .lab-narrative {
+    padding-block-start: 64px;
   }
 }
 
@@ -1884,9 +1913,8 @@ figure[data-code-block] pre {
     display: none;
   }
 
-  /* The switchers' size (24 px in a 30 px track), with a taller target for a finger. */
-  .lab-stage-bar .lab-tool,
-  :root:has(.lab-main) .dock-button {
+  /* The switchers' size (24 px in a 30 px track), with a taller target for a finger; the dock's. */
+  .lab-stage-bar .lab-tool {
     position: relative;
     justify-content: center;
     min-inline-size: 30px;
@@ -1895,8 +1923,7 @@ figure[data-code-block] pre {
     border-radius: var(--docs-radius-inner);
   }
 
-  .lab-stage-bar .lab-tool::after,
-  :root:has(.lab-main) .dock-button::after {
+  .lab-stage-bar .lab-tool::after {
     content: "";
     position: absolute;
     inset: -5px -2px;
@@ -1905,38 +1932,6 @@ figure[data-code-block] pre {
   /* Under the full sheet, only the toolbar shows: the way back to the stage. */
   .lab[data-sheet="full"] .lab-stage-body {
     visibility: hidden;
-  }
-
-  :root:has(.lab-main) .dock {
-    inset: 12px auto auto 12px;
-    padding: 3px;
-    border-radius: var(--docs-radius);
-    background-color: var(--docs-well);
-    box-shadow: var(--docs-well-shadow);
-    translate: none;
-  }
-
-  :root:has(.lab-main) .dock-button {
-    padding: 0;
-    color: var(--docs-muted);
-  }
-
-  :root:has(.lab-main) .dock-button svg {
-    inline-size: 16px;
-    block-size: 16px;
-  }
-
-  :root:has(.lab-main) .dock-button:hover {
-    color: var(--docs-fg);
-  }
-
-  :root:has(.lab-main) .dock-label {
-    position: absolute;
-    inline-size: 1px;
-    block-size: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
   }
 }
 
@@ -2082,14 +2077,27 @@ figure[data-code-block] pre {
 }
 
 /*
- * Inspect (DS-3): dashed outlines on the parts, the selected one solid; leader lines run from a
- * dot on each part to its name. Positions come from components/lab/inspect.tsx.
+ * Inspect (DS-3): dashed outlines on the parts, the selected one solid, with no glow; leader lines
+ * run from a dot on each part to its name. Positions come from components/lab/inspect.tsx.
  */
 .lab-inspect {
   position: absolute;
   inset: 0;
   z-index: 3;
   pointer-events: none;
+  /* It fades in while the demo makes room for it, and out before it leaves (stage.tsx). */
+  transition: opacity 0.2s var(--ease);
+}
+
+@starting-style {
+  .lab-inspect {
+    opacity: 0;
+  }
+}
+
+.lab-inspect[data-leaving] {
+  opacity: 0;
+  transition-duration: 0.15s;
 }
 
 .lab-inspect-lines {
@@ -2131,7 +2139,6 @@ figure[data-code-block] pre {
   border-style: solid;
   border-color: var(--docs-accent);
   background-color: color-mix(in srgb, var(--docs-accent) 7%, transparent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--docs-accent) 9%, transparent);
 }
 
 .lab-ichips {
@@ -2158,8 +2165,7 @@ figure[data-code-block] pre {
   pointer-events: auto;
   transition:
     color 0.15s ease,
-    background-color 0.15s ease,
-    box-shadow 0.15s ease;
+    background-color 0.15s ease;
 }
 
 .lab-ichip:hover {
@@ -2169,7 +2175,6 @@ figure[data-code-block] pre {
 .lab-ichip[aria-pressed="true"] {
   border-color: transparent;
   background-color: var(--docs-accent);
-  box-shadow: 0 0 14px color-mix(in srgb, var(--docs-accent) 45%, transparent);
   color: var(--docs-on-accent);
 }
 
@@ -2289,6 +2294,12 @@ figure[data-code-block] pre {
   }
 }
 
+.lab-inspect[data-leaving] .lab-inspect-dock {
+  translate: 0 100%;
+  transition-duration: 0.25s;
+  transition-delay: 0s;
+}
+
 .lab-stage-body:is([data-code], [data-controls]) .lab-inspect-dock {
   display: none;
 }
@@ -2349,7 +2360,7 @@ figure[data-code-block] pre {
   display: block;
   margin: -3px 0 0 -4px;
   fill: #fff;
-  stroke: #17141f;
+  stroke: #18181b;
   stroke-width: 1.3;
   stroke-linejoin: round;
   transform-origin: 4px 3px;
@@ -2512,8 +2523,8 @@ figure[data-code-block] pre {
   background-color: var(--swatch);
   /* Light and dark swatches both keep an edge. */
   box-shadow:
-    inset 0 0 0 1px light-dark(rgb(27 23 38 / 0.22), rgb(255 255 255 / 0.22)),
-    0 1px 2px light-dark(rgb(27 23 38 / 0.14), rgb(0 0 0 / 0.5));
+    inset 0 0 0 1px light-dark(rgb(0 0 0 / 0.22), rgb(255 255 255 / 0.22)),
+    0 1px 2px light-dark(rgb(0 0 0 / 0.14), rgb(0 0 0 / 0.5));
 }
 
 .color-swatch input {

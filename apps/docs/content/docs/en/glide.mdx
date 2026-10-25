@@ -64,14 +64,12 @@ its own in `owsem-ui/css/glide.css`.
 pointer. Without React, `createGlide(container, highlight, options)` does the same and returns
 `destroy()`.
 
-## Tokens
+## Theming
 
-| Token | Default |
-| --- | --- |
-| `--ow-glide-bg` | `--ow-fg` at 7% |
-| `--ow-glide-pressed-bg` | `--ow-fg` at 11%, while an item is pressed |
-| `--ow-glide-radius` | `8px` |
-| `--ow-glide-duration` | `260ms` |
+Glide reads theme tokens only. The highlight is `--ow-hover`, a little stronger while an item is
+pressed; its corners are `--ow-radius`, or the items' corners when a component sets them. It moves
+with the glide spring, `--ow-spring-glide` over `--ow-spring-glide-duration`. Set `--ow-hover` on
+the container to recolor one list's highlight.
 
 ## Motion and accessibility
 

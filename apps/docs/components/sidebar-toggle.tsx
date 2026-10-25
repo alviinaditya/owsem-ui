@@ -41,8 +41,8 @@ export function revealCurrentLink(): HTMLElement | undefined {
 }
 
 /**
- * Below 1100 px the sidebar is a panel opened from the dock (bottom center; top left on a narrow
- * Lab). The open panel has its own close button, so the dock steps aside meanwhile.
+ * Below 1100 px the sidebar is a panel opened from the dock, at the top left of every page. The
+ * open panel has its own close button, so the dock steps aside meanwhile.
  */
 export function SidebarToggle({ label }: { label: string }) {
   const open = useSyncExternalStore(subscribe, isOpen, () => false);

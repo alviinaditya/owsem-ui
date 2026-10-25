@@ -84,6 +84,28 @@ test("the index filters components by family", async ({ page }) => {
   await expect(main.getByRole("link", { name: "Button", exact: true })).toBeVisible();
 });
 
+test("the index shows a grid or a list, and keeps the choice", async ({ page }) => {
+  await page.goto("/en");
+  const main = page.getByRole("main");
+  const view = main.getByRole("group", { name: "View" });
+  const preview = main.locator(".component-preview").first();
+  await expect(preview).toBeVisible();
+
+  await view.getByRole("button", { name: "List" }).click();
+  await expect(view.getByRole("button", { name: "List" })).toHaveAttribute("aria-pressed", "true");
+  await expect(preview).toBeHidden();
+
+  // Laid out as a list from the first paint, before hydration.
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-index-view", "list");
+  await expect(preview).toBeHidden();
+  await expect(view.getByRole("button", { name: "List" })).toHaveAttribute("aria-pressed", "true");
+
+  await view.getByRole("button", { name: "Grid" }).click();
+  await expect(preview).toBeVisible();
+  await expect(page.locator("html")).not.toHaveAttribute("data-index-view");
+});
+
 test("the mobile menu opens and closes after navigating", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "mobile-390", "the menu button only shows below 900 px");
   await page.goto("/id/docs");
@@ -122,7 +144,9 @@ test("the sidebar's trail runs to the page, then to the scene being read (DS-14)
   );
   // The deepest current row wins: the scene, under its component.
   await expect(sidebar.locator("[data-arrived]")).toContainText("Overview");
-  await page.evaluate(() => document.getElementById("scene-states")?.scrollIntoView());
+  await page.evaluate(() =>
+    document.getElementById("scene-states")?.scrollIntoView({ behavior: "instant" }),
+  );
   await expect(sidebar.locator("[data-arrived]")).toContainText("States and variants", {
     timeout: 4000,
   });

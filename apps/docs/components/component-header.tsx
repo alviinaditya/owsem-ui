@@ -20,10 +20,12 @@ export function ComponentBadges({ entry, dict }: { entry: CatalogEntry; dict: Di
         {dict.catalog.families[entry.family]}
       </li>
       {entry.phase ? (
-        <li className="badge">{format(dict.catalog.phase, { phase: entry.phase })}</li>
+        <li className="badge" data-phase={entry.phase}>
+          {format(dict.catalog.phase, { phase: entry.phase })}
+        </li>
       ) : null}
       {entry.expressions?.map((expression) => (
-        <li key={expression} className="badge">
+        <li key={expression} className="badge" data-expression={expression}>
           {EXPRESSION_LABELS[expression]}
         </li>
       ))}

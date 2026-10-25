@@ -100,6 +100,16 @@
 }
 
 /*
+ * In-page links (On this page, the skip link) glide to their section. Next turns this off while
+ * it changes pages, since <html> has data-scroll-behavior="smooth".
+ */
+@media (prefers-reduced-motion: no-preference) {
+  :root {
+    scroll-behavior: smooth;
+  }
+}
+
+/*
  * Page changes (components/page-main.tsx): a navigation is a view transition. The old page leaves
  * quickly, then the new one fades in and rises a little, so a change of layout (a page to a Lab)
  * reads as one move. The sidebar and the dock are their own layers and stay live: their trail and
@@ -382,7 +392,25 @@ body {
   box-sizing: border-box;
   max-inline-size: 1080px;
   margin-inline: auto;
-  padding: 40px 16px 80px;
+  padding: 40px 16px 96px;
+}
+
+@media (width >= 900px) {
+  .page {
+    max-inline-size: calc(1080px + 2 * 48px);
+    padding: 64px 48px 128px;
+  }
+}
+
+/* A page of text (Coming soon) keeps the classic pages' column. */
+.page-text {
+  max-inline-size: calc(42rem + 2 * 16px);
+}
+
+@media (width >= 900px) {
+  .page-text {
+    max-inline-size: calc(42rem + 2 * 48px);
+  }
 }
 
 @layer docs-base {
@@ -435,7 +463,7 @@ body {
 
 /* Install commands (components/install.tsx): a package manager picker and copyable commands. */
 .install {
-  margin-block-start: 20px;
+  margin-block-start: 32px;
   border: 1px solid var(--ow-line-dark);
   border-radius: var(--docs-radius-box);
   background-color: var(--tk-bg);
@@ -596,11 +624,30 @@ body {
 
 /* Index */
 
-/* The family filter: a Toggle Group with its name inside the track, before the choices. */
+/* The family filter and the view: Toggle Groups with their names inside the track. */
+.index-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  margin-block-end: 40px;
+}
+
 .filter {
   flex-wrap: wrap;
   align-items: center;
-  margin: 0 0 24px;
+}
+
+.view-picker .ow-toggle-group__item {
+  gap: 6px;
+}
+
+/* Grid until hydration, or the list stored on <html> (component-index.tsx). */
+:root:not([data-index-view]) .view-picker:not(:has([aria-pressed="true"])) [data-option="grid"],
+:root[data-index-view="list"] .view-picker:not(:has([aria-pressed="true"])) [data-option="list"] {
+  background-color: var(--docs-raised);
+  box-shadow: var(--docs-raised-shadow);
+  color: var(--docs-fg);
 }
 
 .filter-legend {
@@ -650,63 +697,338 @@ body {
 }
 
 .page section + section {
-  margin-block-start: 40px;
+  margin-block-start: 56px;
 }
 
-.component-list {
+.page :where(section > h2) {
+  margin-block-end: 20px;
+}
+
+/* Grid: a card per component, its preview on top. */
+.component-index {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
-  gap: 12px;
+  gap: 20px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.component-list > li {
+.component-card {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 16px;
+  overflow: hidden;
   border: 1px solid var(--ow-line-dark);
   box-shadow: inset 0 1px 0 var(--ow-line-light);
   border-radius: var(--docs-radius-box);
   background-color: var(--docs-surface);
 }
 
-.component-list > li:hover {
-  border-color: var(--docs-control);
+/*
+ * Glide lights the card nearest the pointer with the hover tint, as in the sidebar and menus.
+ * Cards are opaque, so in the grid the tint lies over the card; in the list it is under the row.
+ */
+.component-index-glide {
+  --ow-hover: var(--docs-hover);
 }
 
-.component-list a {
+:root:not([data-index-view]) .component-index-glide > .ow-glide {
+  --_radius: var(--docs-radius-box);
+  z-index: 2;
+}
+
+.component-card:has(a:focus-visible) {
+  outline: 2px solid var(--docs-accent);
+  outline-offset: 2px;
+}
+
+.component-card a {
   font-weight: 600;
   text-decoration: none;
 }
 
+.component-card a:focus-visible {
+  outline: none;
+}
+
 /* The whole card is the link. */
-.component-list a::after {
+.component-card a::after {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 1;
   border-radius: inherit;
 }
 
-.component-list p {
+.component-card-text {
+  display: flex;
   flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 18px 0;
+}
+
+.component-card p {
   margin: 0;
   color: var(--docs-muted);
   font-size: 14px;
   line-height: 1.5;
 }
 
-.component-list .badges {
+.component-card .badges {
   margin: 0;
+  padding: 14px 18px 18px;
+}
+
+/* The status shows in the preview, the phase in the list. */
+:root:not([data-index-view]) .component-card .badge:is([data-status], [data-phase]) {
+  display: none;
+}
+
+/* The stage's canvas in small: the component at rest on a faint grid. */
+.component-preview {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  block-size: 152px;
+  overflow: hidden;
+  border-block-end: 2px solid var(--docs-groove-dark);
+  border-image: var(--docs-etch-bottom);
+  background: radial-gradient(ellipse 75% 70% at 50% 50%, var(--docs-stage), var(--docs-surface));
+  color: var(--docs-fg);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.component-preview::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(var(--docs-stage-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--docs-stage-line) 1px, transparent 1px);
+  background-position: center;
+  background-size: 24px 24px;
+  mask-image: radial-gradient(ellipse 60% 55% at 50% 50%, #000 15%, transparent 75%);
+}
+
+.component-preview-live {
+  display: grid;
+  place-items: center;
+}
+
+.component-preview-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.component-preview-separator {
+  display: grid;
+  gap: 10px;
+  inline-size: 180px;
+  font-size: 13px;
+}
+
+.component-preview-separator .component-preview-row {
+  block-size: 18px;
+  gap: 12px;
+  color: var(--docs-muted);
+}
+
+.component-preview-keys {
+  display: flex;
+  gap: 6px;
+  font-size: 26px;
+}
+
+.component-preview-tree {
+  inline-size: 190px;
+  font-size: 13px;
+}
+
+/* Popups portal here: out of the layout, in the preview's own box. */
+.component-preview-portal {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/*
+ * Room for each popup, with margins: a transform here would make the popups' containing block the
+ * trigger's box instead of the preview's.
+ */
+.component-preview-live[data-preview="popover"] {
+  margin-block-end: 80px;
+}
+
+.component-preview .ow-popover__popup {
+  inline-size: 224px;
+  max-inline-size: none;
+}
+
+.component-preview-live[data-preview="tooltip"] {
+  margin-block-start: 32px;
+}
+
+.component-preview-live[data-preview="menu"] {
+  margin-block-end: 64px;
+  margin-inline-end: 168px;
+}
+
+/* The area and the hue slider, smaller. */
+.component-preview .ow-color-picker {
+  inline-size: 200px;
+  scale: 0.9;
+}
+
+.component-preview .ow-color-picker__area {
+  block-size: 96px;
+}
+
+/* Wider than the card, so it is centered out of the flow, then scaled. */
+.component-preview-command {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  inline-size: 300px;
+  translate: -50% -50%;
+  scale: 0.72;
+}
+
+.component-preview-command :is(.ow-command-menu__backdrop, .ow-command-menu__viewport) {
+  position: static;
+}
+
+.component-preview-command .ow-command-menu__viewport {
+  padding: 0;
+}
+
+.component-preview-command .ow-command-menu__backdrop {
+  display: none;
+}
+
+/* Table of Contents beside a page sketch that scrolls. */
+.component-preview-toc {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.component-preview-toc-article {
+  box-sizing: border-box;
+  inline-size: 88px;
+  block-size: 112px;
+  padding: 8px 10px;
+  overflow-y: auto;
+  border: 1px solid var(--ow-line-dark);
+  border-radius: var(--docs-radius);
+  background-color: var(--docs-surface);
+  color: var(--docs-control);
+  scrollbar-width: none;
+}
+
+.component-preview-toc-article > div {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  block-size: 56px;
+}
+
+.component-preview-toc-article span {
+  block-size: 4px;
+  border-radius: 2px;
+  background-color: currentColor;
+  opacity: 0.35;
+}
+
+.component-preview-toc-article span:first-child {
+  inline-size: 60%;
+  block-size: 6px;
+  opacity: 0.8;
+}
+
+.component-preview .ow-table-of-contents {
+  --ow-accent: var(--docs-accent);
+  --ow-line: var(--docs-line-strong);
+  inline-size: 104px;
+  font-size: 12.5px;
+}
+
+.component-preview-sketch {
+  inline-size: 160px;
+  block-size: 96px;
+  color: var(--docs-control);
+}
+
+.component-preview-soon {
+  position: absolute;
+  inset-block-start: 10px;
+  inset-inline-end: 10px;
+  padding-inline: 8px;
+  border: 1px solid var(--docs-line-strong);
+  border-radius: 999px;
+  background-color: var(--docs-surface);
+  color: var(--docs-muted);
+  font-size: 12px;
+  line-height: 22px;
+}
+
+/* List: one row per component, read straight down; the columns line up across rows. */
+:root[data-index-view="list"] .component-index {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+:root[data-index-view="list"] .component-card {
+  display: grid;
+  gap: 6px;
+  padding: 14px 12px;
+  overflow: visible;
+  border: 0;
+  border-block-end: 2px solid var(--docs-groove-dark);
+  border-image: var(--docs-etch-bottom);
+  border-radius: 0;
+  box-shadow: none;
+  background: none;
+}
+
+:root[data-index-view="list"] .component-index-glide > .ow-glide {
+  --_radius: var(--docs-radius);
+}
+
+:root[data-index-view="list"] .component-preview {
+  display: none;
+}
+
+:root[data-index-view="list"] :is(.component-card-text, .component-card .badges) {
+  padding: 0;
+}
+
+@media (width >= 760px) {
+  :root[data-index-view="list"] .component-index {
+    grid-template-columns: 11rem minmax(0, 1fr) 21rem;
+    column-gap: 32px;
+  }
+
+  :root[data-index-view="list"] .component-card {
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    align-items: center;
+  }
+
+  :root[data-index-view="list"] .component-card-text {
+    display: contents;
+  }
 }
 
 /* Component pages */
 
 .coming-soon {
-  padding: 20px 24px;
+  padding: 24px 28px;
   border: 1px solid var(--ow-line-dark);
   box-shadow: inset 0 1px 0 var(--ow-line-light);
   border-radius: var(--docs-radius-box);
@@ -725,7 +1047,7 @@ body {
   --ow-edge: var(--docs-line-strong);
   display: flex;
   gap: 12px;
-  margin-block: 40px 16px;
+  margin-block: 56px 16px;
 }
 
 .neighbors a {
@@ -1198,12 +1520,6 @@ body {
   flex: none;
 }
 
-.toc ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
 .sidebar-scene-n {
   flex: none;
   color: var(--docs-muted);
@@ -1217,12 +1533,12 @@ body {
 
 .site-content {
   min-inline-size: 0;
-  padding: 40px 16px 80px;
+  padding: 40px 16px 96px;
 }
 
 @media (width >= 900px) {
   .site-content {
-    padding-inline: 40px;
+    padding: 64px 48px 128px;
   }
 }
 
@@ -1234,15 +1550,15 @@ body {
   }
 }
 
+/*
+ * The text column stays near 85 characters a line, and with the TOC it sits in the middle of the
+ * space beside the sidebar, so the room left over falls on both sides.
+ */
 .with-toc {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 48px;
-  max-inline-size: 68rem;
-}
-
-.with-toc h2 {
-  margin-block-start: 40px;
+  grid-template-columns: minmax(0, 42rem);
+  justify-content: center;
+  column-gap: 64px;
 }
 
 .toc {
@@ -1251,42 +1567,72 @@ body {
 
 @media (width >= 1280px) {
   .with-toc {
-    grid-template-columns: minmax(0, 1fr) 180px;
+    grid-template-columns: minmax(0, 42rem) 200px;
   }
 
   .toc {
     display: block;
     position: sticky;
-    inset-block-start: calc(var(--top-h) + 24px);
+    inset-block-start: calc(var(--top-h) + 64px);
     align-self: start;
   }
 }
 
+/*
+ * Prose rhythm: more room above a section than inside it, so each one reads as a group. Low
+ * specificity, so a page's own blocks (the changelog) keep their spacing.
+ */
+.with-toc article {
+  line-height: 1.75;
+}
+
+.with-toc :where(article > p, article > ul, article > ol) {
+  margin-block: 0 20px;
+}
+
+.with-toc :where(article li + li) {
+  margin-block-start: 6px;
+}
+
+.with-toc :where(article h2) {
+  margin-block: clamp(44px, 3vw + 32px, 64px) 16px;
+}
+
+.with-toc :where(article h3) {
+  margin-block: 40px 12px;
+}
+
+.with-toc .page-header {
+  margin-block-end: clamp(32px, 2vw + 24px, 48px);
+}
+
 .toc .sidebar-heading {
-  margin-block: 20px 6px;
+  margin-block: 20px 10px;
 }
 
-.toc a {
-  display: block;
-  padding-block: 2px;
-  color: var(--docs-muted);
+/*
+ * "On this page" is a Table of Contents (owsem-ui) in the docs' colors, set as theme tokens on the
+ * nav, as the sidebar's Tree Rail Nav has them: the same rail and accent.
+ */
+.toc-nav {
+  --ow-fg: var(--docs-fg);
+  --ow-muted: var(--docs-muted);
+  --ow-focus: var(--docs-accent);
+  --ow-radius: var(--docs-radius);
+  --ow-accent: var(--docs-accent);
+  --ow-line: var(--docs-line-strong);
   font-size: 14px;
-  text-decoration: none;
-}
-
-.toc a:hover {
-  color: var(--docs-fg);
 }
 
 /* Prose, code, and tables inside pages and Lab scenes */
 
 figure[data-code-block] {
-  margin: 16px 0;
+  margin: 24px 0;
 }
 
 figure[data-code-block] pre {
   margin: 0;
-  padding: 12px 16px;
+  padding: 16px 20px;
   overflow-x: auto;
   border: 1px solid var(--ow-line-dark);
   box-shadow: inset 0 1px 0 var(--ow-line-light);
@@ -1300,7 +1646,7 @@ figure[data-code-block] pre {
   table {
     display: block;
     max-inline-size: 100%;
-    margin-block: 16px;
+    margin-block: 24px;
     overflow-x: auto;
     border-collapse: separate;
     border-spacing: 0;
@@ -1435,7 +1781,7 @@ figure[data-code-block] pre {
 
   .lab-narrative {
     grid-area: 1 / 1;
-    padding: 16px 32px 64px;
+    padding: 24px clamp(32px, 2.5vw, 48px) 96px;
   }
 
   .lab-stage-column {
@@ -1677,15 +2023,15 @@ figure[data-code-block] pre {
 }
 
 .lab-narrative .page-header {
-  margin-block-end: 24px;
+  margin-block-end: 40px;
 }
 
 .lab-hint {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px 14px;
-  margin-block: 16px 0;
+  gap: 8px 16px;
+  margin-block: 32px 0;
   color: var(--docs-muted);
   font-size: 13px;
 }
@@ -2700,6 +3046,112 @@ figure[data-code-block] pre {
 
 .demo-tree-rail[data-compact] {
   inline-size: 220px;
+}
+
+/* The Table of Contents Lab's demo: a small article that scrolls in its frame, beside its list. */
+.demo-toc {
+  display: grid;
+  grid-template-columns: 300px 176px;
+  box-sizing: border-box;
+  border: 1px solid var(--ow-line);
+  border-radius: 14px;
+  background-color: var(--ow-bg);
+  color: var(--ow-fg);
+}
+
+.demo-toc[data-compact] {
+  grid-template-columns: 176px 156px;
+}
+
+.demo-toc-frame {
+  position: relative;
+  border-inline-end: 1px solid var(--ow-line);
+}
+
+/* Positioned, so its headings' offsetTop is measured from it. */
+.demo-toc-article {
+  position: relative;
+  box-sizing: border-box;
+  block-size: 300px;
+  padding: 18px 20px 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-start-start-radius: 13px;
+  border-end-start-radius: 13px;
+  font-size: 13px;
+  line-height: 1.6;
+  scrollbar-width: thin;
+}
+
+.demo-toc[data-compact] .demo-toc-article {
+  block-size: 160px;
+  padding: 12px 14px 14px;
+  font-size: 11px;
+}
+
+.demo-toc-article p {
+  margin: 0;
+  color: var(--ow-muted);
+}
+
+.demo-toc-article .demo-toc-title {
+  margin-block-end: 6px;
+  color: var(--ow-fg);
+  font-size: 1.3em;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.demo-toc-article :is(h3, h4) {
+  margin: 1.4em 0 0.4em;
+  color: var(--ow-fg);
+  font-size: 1.08em;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: normal;
+}
+
+.demo-toc-article h4 {
+  font-size: 1em;
+}
+
+/* The reading line: 30% down the article's frame, where tracking reads it. */
+.demo-toc-line {
+  position: absolute;
+  inset-block-start: 30%;
+  inset-inline: 0;
+  border-block-start: 1px dashed var(--ow-accent);
+  pointer-events: none;
+}
+
+.demo-toc-line-label {
+  position: absolute;
+  inset-block-end: 3px;
+  inset-inline-end: 10px;
+  padding-inline: 4px;
+  border-radius: 4px;
+  background-color: var(--ow-bg);
+  color: var(--ow-accent);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+}
+
+.demo-toc-nav {
+  padding: 18px 16px 18px 18px;
+}
+
+.demo-toc[data-compact] .demo-toc-nav {
+  padding: 12px 10px 12px 12px;
+  font-size: 12px;
+}
+
+.demo-toc-heading {
+  margin: 0 0 10px;
+  color: var(--ow-muted);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 /* The Color Picker Lab's demo: the panel, and what its two callbacks last sent. */

@@ -51,7 +51,12 @@ export default async function IndexPage(props: PageProps<"/[lang]">) {
           all: dict.catalog.all,
           base: dict.catalog.families.base,
           owsem: dict.catalog.families.owsem,
+          view: dict.catalog.view,
+          grid: dict.catalog.grid,
+          list: dict.catalog.list,
+          soon: dict.catalog.comingSoon,
         }}
+        lang={lang}
       />
     </PageMain>
   );

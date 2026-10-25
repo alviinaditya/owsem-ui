@@ -10,6 +10,9 @@ export const thumbKey = (thumb: Locator) =>
     return { x: box.x + border, width: box.width - 2 * border };
   });
 
+/** The component on the stage, apart from the stage's own toolbar and panels. */
+export const demo = (page: Page) => page.locator(".lab-demo");
+
 /** Below 960 px the narrative is a sheet over the stage, opened from the stage's toolbar. */
 export async function openSheet(page: Page): Promise<void> {
   const docs = page.locator(".lab-tool-docs");
@@ -23,7 +26,7 @@ export async function stageTool(page: Page, name: string, item = name): Promise<
   const more = stage(page).getByRole("button", { name: "More", exact: true });
   if (await more.isVisible()) {
     await more.click();
-    await page.locator(".lab-more").getByRole("button", { name: item }).click();
+    await page.getByRole("menu").locator('[role^="menuitem"]', { hasText: item }).click();
   } else {
     await stage(page).getByRole("button", { name, exact: true }).click();
   }

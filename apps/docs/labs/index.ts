@@ -1,8 +1,14 @@
 import type { ComponentType } from "react";
 import type { LabProps } from "@/components/lab/lab-shell";
 import type { ComponentName } from "@/lib/catalog";
+import KbdLab from "./kbd";
+import MenuLab from "./menu";
+import PopoverLab from "./popover";
 import SeparatorLab from "./separator";
+import ToggleLab from "./toggle";
 import ToggleGroupLab from "./toggle-group";
+import ToolbarLab from "./toolbar";
+import TooltipLab from "./tooltip";
 import TreeRailNavLab from "./tree-rail-nav";
 
 /**
@@ -10,7 +16,13 @@ import TreeRailNavLab from "./tree-rail-nav";
  * build fails if an available component has none (see the component page).
  */
 export const labs: Partial<Record<ComponentName, ComponentType<LabProps>>> = {
+  kbd: KbdLab,
+  menu: MenuLab,
+  popover: PopoverLab,
   separator: SeparatorLab,
+  toggle: ToggleLab,
   "toggle-group": ToggleGroupLab,
+  toolbar: ToolbarLab,
+  tooltip: TooltipLab,
   "tree-rail-nav": TreeRailNavLab,
 };

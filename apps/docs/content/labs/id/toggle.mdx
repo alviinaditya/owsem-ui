@@ -1,0 +1,143 @@
+---
+title: Toggle
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Toggle adalah tombol dengan dua state, menyala dan mati. Saat mati, ia datar dan sedikit berwarna
+di bawah pointer; saat menyala, ia menjadi tombol timbul dengan tepi tegas. Ukuran dan spacing-nya
+sama dengan Button. Gulir untuk mulai tur; stage mengikuti setiap bagian.
+
+## Tombol yang tetap timbul [#pressing]
+
+Menyala adalah material, bukan warna. Toggle yang menyala memakai tombol timbul: isian datar dengan
+tepi 1px yang lebih gelap dari isiannya dan garis terang di dalamnya, seperti segmen yang dipilih.
+Isiannya condong 8% ke warna teks, sehingga tetap terlihat di atas permukaan yang warnanya sama
+dengan tombol, seperti panel putih di tema terang. Saat mati, ia datar seperti tombol ghost:
+teksnya muted, dan sedikit berwarna di bawah pointer. Teksnya berubah dari muted ke kontras penuh.
+
+Setiap tekanan masuk lebih dulu. Selama ditahan, toggle mengecil ke 0,97 dan berpindah ke material
+ditekan dalam 90 ms, lalu dilepas dengan spring settle yang sedikit melewati batas, dan kembali
+timbul atau datar. Dengan reduced motion, materialnya tetap berganti tanpa ada yang bergerak.
+
+Stage memutarnya: pointer menyalakan Miring dan Garis bawah, lalu mematikannya lagi, dan teks
+catatan mengikutinya. Putar scene memutarnya lagi; tekan sendiri toggle-nya untuk merasakan
+tekanannya.
+
+## Ukuran dan spacing Button [#geometry]
+
+Toggle adalah kontrol satu baris, jadi geometrinya sama dengan Button. `--py` satu-satunya input:
+padding blok `max(--py, (24px - 1lh) / 2)`, padding samping ditambah `(1lh - 1cap) / 2` supaya
+teks terlihat sama lega di samping dan di atas, dan tingginya selalu `2 × --py + 1lh`. Ikon
+berukuran font ditambah 2px, ditarik ke tepi sehingga jaraknya ke samping sama dengan jaraknya ke
+atas. Tanpa children, toggle menjadi persegi.
+
+Stage mengukur setiap ukuran secara langsung: dengan ikon dan label, label saja, atau ikon saja,
+setiap ukuran punya satu tinggi.
+
+| Ukuran | Font | `--py` | Tinggi | Ikon |
+| --- | --- | --- | --- | --- |
+| `sm` | 13px | `0.5em` | 29,25px | 15px |
+| `md` | 14px | `0.75em` | 38,5px | 16px |
+| `lg` | 16px | `0.875em` | 48px | 18px |
+
+Atur `--py` lewat `style` di toggle itu sendiri untuk mengubah tingginya. Tingginya tidak pernah
+di bawah 24px, target terkecil yang diizinkan WCAG 2.5.8.
+
+## Anatomi [#anatomy]
+
+Dua bagian. Base UI merender `<button>` dengan `aria-pressed`, `data-pressed` selama menyala, dan
+`data-disabled`; OwsemUI menambahkan class `ow-toggle` dan `data-size`, lalu membungkus `startIcon`
+dan `endIcon` masing-masing dengan span. Inspeksi (I) menandainya di stage.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `button.ow-toggle` | `aria-pressed`, `data-pressed`, `data-size`, dan `data-icon-only` bila tanpa children |
+| <Part name="Icon" /> | `span.ow-toggle__icon` | Dekoratif (`aria-hidden`), `data-side="start"` atau `"end"`; svg atau img di dalamnya mengisinya |
+
+## State dan varian [#states]
+
+Stage menampilkan tema terang dan gelap berdampingan: mati, menyala, dan disabled di kedua state.
+Pointer singgah di toggle yang mati di setiap tema, lalu menyalakan dan mematikannya.
+
+| State | Tandanya |
+| --- | --- |
+| Mati | Datar, dengan teks muted |
+| Hover, saat mati | Warna `--ow-hover`, dan teks dengan kontras penuh |
+| Sedang ditekan | Mengecil ke 0,97 dalam 90 ms, dengan material ditekan: `--ow-pressed-bg` dan `--ow-pressed-shadow` |
+| Menyala | Tombol timbul: `--ow-raised-bg` condong 8% ke `--ow-fg`, `--ow-raised-shadow`, teks `--ow-fg` |
+| Hover, saat menyala | Isiannya bergeser 4% ke warna teks; tepinya tetap |
+| Fokus keyboard | Ring 2px dengan jarak 2px, warna `--ow-focus` |
+| Disabled | Opacity 45%, dan tekanan tidak berpengaruh |
+
+Toggle yang menyala tetap mempertahankan tepinya di bawah pointer, jadi hover tidak pernah terlihat
+seperti mematikannya.
+
+## Keyboard dan aksesibilitas [#keyboard]
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab | Memindahkan fokus ke toggle |
+| Space, Enter | Menyalakan atau mematikannya |
+
+Screen reader mengenalinya sebagai tombol toggle beserta state-nya lewat `aria-pressed`. Biarkan
+namanya sama di kedua state, misalnya "Tebal": yang berubah adalah state-nya. Toggle tanpa children
+perlu `aria-label`; ikonnya `aria-hidden`.
+
+Dengan `prefers-reduced-motion`, tekanan mengganti material tanpa mengecil. Di mode forced colors
+(Windows High Contrast), toggle tetap punya tepi 1px berwarna sistem, toggle yang menyala diisi
+`Highlight`, dan ring fokusnya juga `Highlight`. Dari kanan ke kiri, `startIcon` berada di kanan.
+
+## Kustomisasi [#customization]
+
+Kontrol di stage terbuka: pilih warna permukaan atau teks saat menyala, dan kodenya mengikuti.
+
+Toggle membaca token tema berikut. Pasang di sebuah elemen untuk mengubah toggle di dalamnya.
+`note.css` memasangnya di toggle itu sendiri, sehingga `--ow-fg` tidak mengubah teks catatannya.
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-muted` | Teks saat mati |
+| `--ow-hover` | Warna di bawah pointer saat mati |
+| `--ow-fg` | Teks di bawah pointer, saat menyala, atau ditahan |
+| `--ow-raised-bg` | Isian saat menyala |
+| `--ow-raised-shadow` | Tepi saat menyala |
+| `--ow-pressed-bg` | Isian saat ditahan |
+| `--ow-pressed-shadow` | Tepi saat ditahan |
+| `--ow-radius` | Sudut |
+| `--ow-focus` | Ring fokus |
+
+<ForMode mode="isolated">
+
+Di mode isolated, nilainya ada di root setiap Toggle, jadi atur di toggle itu sendiri, seperti
+`note.css`.
+
+</ForMode>
+
+<TokenChip lang="id" />
+
+## Ship it [#ship]
+
+Drawer kode menulis komponen persis seperti yang diatur di stage. Ganti ukuran atau warna, dan
+baris yang berubah akan menyala.
+
+| Prop | Tipe | Bawaan |
+| --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| `startIcon` | `ReactNode` | |
+| `endIcon` | `ReactNode` | |
+| `pressed` | `boolean` | |
+| `defaultPressed` | `boolean` | `false` |
+| `onPressedChange` | `(pressed, eventDetails) => void` | |
+| `disabled` | `boolean` | `false` |
+| `value` | `string` | |
+| `className` | `string \| (state) => string` | |
+| `style` | `CSSProperties` | |
+| `render` | `ReactElement \| (props, state) => ReactElement` | |
+
+`pressed`, `defaultPressed`, `onPressedChange`, `disabled`, dan `value` (di dalam Toggle Group)
+berasal dari Base UI. Ref diteruskan ke elemen `button`, dan props lain diteruskan ke Base UI apa
+adanya.
+
+Impor dari `owsem-ui/base`. Di registry, namanya item `toggle`.

@@ -9,6 +9,7 @@ import MenuLab from "./menu";
 import PopoverLab from "./popover";
 import SeparatorLab from "./separator";
 import ToggleLab from "./toggle";
+import ToggleGroupLab from "./toggle-group";
 import ToolbarLab from "./toolbar";
 import TooltipLab from "./tooltip";
 import TreeRailNavLab from "./tree-rail-nav";
@@ -26,6 +27,7 @@ export const labs: Partial<Record<ComponentName, ComponentType<LabProps>>> = {
   popover: PopoverLab,
   separator: SeparatorLab,
   toggle: ToggleLab,
+  "toggle-group": ToggleGroupLab,
   toolbar: ToolbarLab,
   tooltip: TooltipLab,
   "tree-rail-nav": TreeRailNavLab,

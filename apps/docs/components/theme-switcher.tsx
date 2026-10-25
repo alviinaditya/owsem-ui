@@ -1,5 +1,6 @@
 "use client";
 
+import { ToggleGroup } from "owsem-ui/base";
 import { useSyncExternalStore } from "react";
 import type { Dictionary } from "@/lib/dictionaries";
 import { THEME_STORAGE_KEY, THEMES, type Theme } from "@/lib/theme";
@@ -49,28 +50,31 @@ function setTheme(theme: Theme): void {
 }
 
 /**
- * Three radios. The raised thumb and the chosen icon's color follow <html data-theme> in CSS, not
- * the radios, so they are right from the first paint, before the stored choice reaches React.
+ * Three toggles, one always pressed (a Toggle Group). The server cannot know the stored theme, so
+ * it renders none pressed; until hydration the theme in use is raised from <html data-theme> in
+ * CSS, and then the thumb appears in place, without sliding from a default.
  */
 export function ThemeSwitcher({ labels }: { labels: Dictionary["theme"] }) {
-  // The server renders "system"; the stored value is read after hydration without a mismatch.
-  const theme = useSyncExternalStore(subscribe, getTheme, () => "system" as const);
+  const theme = useSyncExternalStore(subscribe, getTheme, () => null);
   return (
-    <fieldset className="seg theme-switcher">
-      <legend className="visually-hidden">{labels.label}</legend>
+    <ToggleGroup.Root
+      aria-label={labels.label}
+      className="docs-choice theme-switcher"
+      equal
+      value={theme ? [theme] : []}
+      onValueChange={([next]) => next && setTheme(next)}
+    >
       {THEMES.map((value) => (
-        <label key={value} className="seg-item" data-option={value} title={labels[value]}>
-          <input
-            type="radio"
-            name="site-theme"
-            value={value}
-            checked={theme === value}
-            onChange={() => setTheme(value)}
-          />
+        <ToggleGroup.Item
+          key={value}
+          value={value}
+          data-option={value}
+          aria-label={labels[value]}
+          title={labels[value]}
+        >
           <Icon name={ICONS[value]} size={14} />
-          <span className="visually-hidden">{labels[value]}</span>
-        </label>
+        </ToggleGroup.Item>
       ))}
-    </fieldset>
+    </ToggleGroup.Root>
   );
 }

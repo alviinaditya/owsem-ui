@@ -5,5 +5,6 @@ export * from "./components/menu";
 export * from "./components/popover";
 export { Separator } from "./components/separator";
 export { Toggle, type ToggleProps, type ToggleSize } from "./components/toggle";
+export * from "./components/toggle-group";
 export * from "./components/toolbar";
 export * from "./components/tooltip";

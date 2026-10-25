@@ -1,0 +1,176 @@
+---
+title: Toggle Group
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Toggle Group adalah sederet tombol toggle yang bekerja sebagai satu kesatuan. Dengan satu pilihan
+dalam satu waktu, komponen ini menjadi segmented control: track datar dengan thumb bertepi tegas
+yang bergeser ke item yang ditekan. Dengan `multiple`, setiap item menyala dan padam sendiri. Gulir
+untuk mulai tur; stage mengikuti setiap bagian.
+
+## Segmented control [#segmented]
+
+Hanya satu item yang ditekan dalam satu waktu, dan thumb berada di bawahnya: tombol timbul berupa
+isian datar dengan tepi 1 px yang tegas. Pilih item lain, dan thumb bergeser ke sana dengan spring
+travel (`--ow-spring-travel`); label yang ditinggalkan meredup, dan label yang dituju menyala.
+Pointer menyalakan item terdekat dengan Glide di sumbu x, jadi highlight tidak pernah padam di
+celah, dan klik di celah diteruskan ke item yang menyala.
+
+Stage memutarnya: sebuah pointer memilih setiap tampilan bergantian. Base UI membolehkan item yang
+sedang ditekan ditekan lagi sampai tidak ada yang terpilih; segmented control selalu menyimpan
+satu pilihan, jadi demo ini mengabaikan nilai kosong:
+
+```tsx
+const [view, setView] = useState("list");
+
+<ToggleGroup.Root
+  aria-label="View"
+  value={[view]}
+  onValueChange={([next]) => next && setView(next)}
+>
+```
+
+Thumb tidak pernah menyapu masuk. Saat render pertama, dan saat nilainya baru datang setelah
+hydration, thumb langsung muncul di tempatnya; hanya perpindahan dari satu item ke item lain yang
+bergeser.
+
+## Spring pada thumb [#spring]
+
+Thumb ini Tactile. Tahan item yang sedang ditekan, dan item itu mengecil ke 0,97 dalam 90 ms bersama
+thumb-nya, lalu memantul kembali dengan spring settle (`--ow-spring-settle`) saat dilepas. Kalau
+berubah pikiran di tengah jalan, thumb berbelok dari posisinya saat itu: geserannya adalah transisi
+CSS pada `translate` dan `transform`, jadi tidak ada frame yang berjalan begitu thumb tiba.
+
+Stage menekan tampilan yang sedang dipilih, lalu memilih Kalender dan, di tengah geseran, Papan.
+Kalau lebar item berbeda, thumb ikut menyesuaikan lebarnya di perjalanan, diskalakan dari tengah.
+
+## Banyak pilihan [#multiple]
+
+Dengan `multiple`, setiap item menyala dan padam sendiri, dan tidak ada thumb: setiap item yang
+ditekan menjadi tombol tersendiri, dengan material yang sama seperti thumb, seperti setiap toggle
+yang menyala. Arahkan pointer ke tombol itu, dan isiannya bergeser 3% ke arah warna label, karena
+klik akan memadamkannya; tepinya tetap. Stage menyalakan Miring dan Garis bawah, lalu memadamkannya
+lagi.
+
+## Anatomi [#anatomy]
+
+Tiga bagian, dua di antaranya Anda tulis sendiri: Root dan Item. Inspeksi (I) menandai setiap
+bagian di stage; pilih sebuah nama, di sini atau di stage, untuk melihat tokennya. Highlight
+hover-nya adalah Glide dari `owsem-ui/core`.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-toggle-group` | `ToggleGroup` dari Base UI, dengan `role="group"`: track-nya. Token tema yang dipasang di sini hanya berlaku untuknya. `data-orientation`, `data-multiple`, `data-disabled`; `data-size`, dan `data-equal` dengan `equal` |
+| <Part name="Item" /> | `button.ow-toggle-group__item` | `Toggle` dari Base UI, dengan `aria-pressed` dan `data-pressed`; `data-disabled`, dan `data-held` selama ditahan. Teksnya dibungkus `span.ow-toggle-group__label`, jadi item yang hanya berisi ikon tetap persegi |
+| <Part name="Thumb" /> | `span.ow-toggle-group__thumb` | Dekoratif (`aria-hidden`): ditempatkan oleh skrip, digerakkan oleh CSS. `data-visible` selama berada di bawah item yang ditekan, `data-held` selama item itu ditahan |
+
+Item mengikuti geometri kontrol: padding-nya dari `--py` (FR-9), dan ikon seukuran font ditambah
+2 px, sama jauhnya dari tepi samping dan dari tepi atas. Track menambah 3 px di setiap sisi, dan
+radiusnya adalah radius item ditambah 3 px itu, jadi sudutnya tetap konsentris. `--ow-radius`
+mengatur radius item; tidak ada radius kedua yang perlu disamakan.
+
+## State dan varian [#states]
+
+Stage menjajarkan tiga ukuran, grup yang dinonaktifkan, dan banyak pilihan, di tema terang dan
+gelap. Pointer memilih Kalender di grup `md` setiap tema, lalu Papan lagi.
+
+| Ukuran | Font | Item | Track |
+| --- | --- | --- | --- |
+| `sm` | 13 px | 29,25 px | 35,25 px |
+| `md` (bawaan) | 14 px | 38,5 px | 44,5 px |
+| `lg` | 16 px | 48 px | 54 px |
+
+| State | Yang menandainya |
+| --- | --- |
+| Ditekan | Thumb di bawahnya, dan labelnya tampil penuh |
+| Hover | Highlight Glide, dan labelnya tampil penuh; dengan `multiple`, isian tombol yang ditekan bergeser 3% |
+| Ditahan | Item mengecil ke 0,97, bersama thumb kalau item itu yang sedang ditekan |
+| Disabled | Labelnya redup; tombol panah dan Glide melewatinya |
+| Fokus keyboard | Cincin 2 px, berjarak 2 px, di atas item tetangganya |
+
+`equal` membuat setiap item selebar item terlebar. Saat grup diregangkan (oleh induk flex atau
+grid, atau `inline-size: 100%`), item yang sama lebar membagi lebarnya rata; tanpa `equal`, setiap
+item selebar isinya.
+
+## Keyboard dan aksesibilitas [#keyboard]
+
+Grup ini satu tab stop, dan perilaku keyboard-nya dari Base UI:
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab, Shift Tab | Masuk ke grup, lalu keluar lagi |
+| Panah Kanan, Panah Kiri | Item berikutnya atau sebelumnya, terbalik untuk kanan ke kiri. Berputar dan melewati item disabled |
+| Home, End | Item pertama atau terakhir |
+| Spasi, Enter | Menekan atau melepas item yang difokus |
+
+Dengan `orientation="vertical"`, Panah Bawah dan Panah Atas yang berpindah. Screen reader membaca
+setiap item sebagai tombol toggle beserta state ditekannya: beri nama grup dengan `aria-label`
+atau `aria-labelledby`, dan item yang hanya berisi ikon dengan `aria-label`.
+
+Dengan `prefers-reduced-motion`, thumb langsung berpindah dan tidak ada yang mengecil saat ditahan;
+thumb yang ditahan meredup sebagai gantinya. Di mode forced colors (Windows High Contrast), item
+yang ditekan diisi `Highlight` dengan label `HighlightText`, dan track tetap punya tepi yang
+terlihat. Untuk teks kanan ke kiri, item pertama berada di kanan, begitu juga thumb-nya.
+
+## Kustomisasi [#customization]
+
+Kontrol di stage terbuka: ukuran, jenis pilihan, lebar item, isi, serta warna thumb dan track.
+Begitu Anda memilih warna, CSS-nya muncul di tab tersendiri di drawer kode.
+
+Toggle Group membaca token tema berikut; pasang di grup, atau di elemen di sekitarnya seperti
+`.toolbar`.
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-well-bg` | Track |
+| `--ow-well-shadow` | Tepi tipis track |
+| `--ow-raised-bg` | Thumb, dan item yang ditekan pada banyak pilihan |
+| `--ow-raised-shadow` | Tepi tegasnya |
+| `--ow-fg` | Label item yang ditekan dan di-hover |
+| `--ow-muted` | Label lainnya |
+| `--ow-focus` | Cincin fokus keyboard |
+| `--ow-hover` | Highlight hover (Glide) |
+| `--ow-radius` | Sudut item, thumb, dan highlight; track menambah 3 px-nya |
+
+<ForMode mode="isolated">
+
+Di mode isolated, nilainya ada di root setiap grup, jadi atur di grup itu sendiri, seperti CSS di
+stage dengan `.view-switcher.ow-toggle-group`.
+
+</ForMode>
+
+Geraknya berasal dari Core: `--ow-spring-travel` untuk geseran, `--ow-spring-settle` untuk
+pelepasan, dan `--ow-motion-scale` untuk seberapa jauh tekanan (0 mematikannya). Padding item
+adalah `--py` milik item itu sendiri (FR-11): pasang di item, bukan di grup.
+
+<TokenChip lang="id" />
+
+## Ship it [#ship]
+
+Drawer kode menulis komponen persis seperti yang diatur di stage. Ubah apa saja, dan baris kode
+yang berubah akan menyala.
+
+| Bagian | Prop | Tipe | Bawaan |
+| --- | --- | --- | --- |
+| Root | `value` | `string[]` | |
+| Root | `defaultValue` | `string[]` | |
+| Root | `onValueChange` | `(value, eventDetails) => void` | |
+| Root | `multiple` | `boolean` | `false` |
+| Root | `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| Root | `equal` | `boolean` | `false` |
+| Root | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` |
+| Root | `disabled` | `boolean` | `false` |
+| Root | `loopFocus` | `boolean` | `true` |
+| Item | `value` | `string` | |
+| Item | `disabled` | `boolean` | `false` |
+
+`size` dan `equal` milik OwsemUI; prop lain diteruskan ke Base UI apa adanya. Setiap bagian juga
+menerima `className`, `style`, dan `render`, dan ref-nya mengarah ke `div` atau `button`.
+
+Nilai yang disimpan di storage baru diketahui setelah hydration. Render tanpa nilai di server
+(`value={[]}`) lalu nilai tersimpan setelahnya: thumb pun muncul di tempatnya, bukan bergeser dari
+nilai bawaan.
+
+Impor dari `owsem-ui/base`. Di registry, item-nya bernama `toggle-group`.

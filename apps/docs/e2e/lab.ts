@@ -1,6 +1,14 @@
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 export const stage = (page: Page) => page.getByRole("region", { name: "Stage" });
+
+/** A Toggle Group thumb's key: its box inside the clear border that keeps the track's padding. */
+export const thumbKey = (thumb: Locator) =>
+  thumb.evaluate((el) => {
+    const box = el.getBoundingClientRect();
+    const border = Number.parseFloat(getComputedStyle(el).borderTopWidth);
+    return { x: box.x + border, width: box.width - 2 * border };
+  });
 
 /** The component on the stage, apart from the stage's own toolbar and panels. */
 export const demo = (page: Page) => page.locator(".lab-demo");

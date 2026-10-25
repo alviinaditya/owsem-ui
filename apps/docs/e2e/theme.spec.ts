@@ -1,4 +1,5 @@
 import { expect, type TestInfo, test } from "@playwright/test";
+import { thumbKey } from "./lab.ts";
 
 type Page = import("@playwright/test").Page;
 const html = (page: Page) => page.locator("html");
@@ -29,21 +30,23 @@ test("stores the chosen theme and restores it on load", async ({ page }, testInf
 
   await page.goto("/en");
   await showSettings(page, testInfo);
-  const dark = themes(page, "Theme").getByRole("radio", { name: "Dark" });
-  await dark.check();
+  const dark = themes(page, "Theme").getByRole("button", { name: "Dark" });
+  await dark.click();
   await expect(html(page)).toHaveAttribute("data-theme", "dark");
 
   // Only the inline <head> script sets data-theme on load; hydration must not log a mismatch.
   await page.reload();
   await expect(html(page)).toHaveAttribute("data-theme", "dark");
   await showSettings(page, testInfo);
-  await expect(dark).toBeChecked();
-  // The thumb follows <html data-theme> in CSS: under Dark, the second of three.
-  const thumb = await page
-    .locator(".theme-switcher")
-    .evaluate((el) => getComputedStyle(el).getPropertyValue("--theme-index").trim());
-  expect(thumb).toBe("1");
-  await themes(page, "Theme").getByRole("radio", { name: "System" }).check();
+  await expect(dark).toHaveAttribute("aria-pressed", "true");
+  // The thumb is under Dark, placed there on hydration without sliding from a default.
+  const thumb = page.locator(".theme-switcher .ow-toggle-group__thumb");
+  await expect(thumb).toHaveCSS("opacity", "1");
+  expect(await thumb.evaluate((el) => el.getAnimations().length)).toBe(0);
+  const [at, under] = await Promise.all([thumbKey(thumb), dark.boundingBox()]);
+  expect(Math.abs(at.x - (under?.x ?? 1))).toBeLessThanOrEqual(0.5);
+  expect(Math.abs(at.width - (under?.width ?? 1))).toBeLessThanOrEqual(0.5);
+  await themes(page, "Theme").getByRole("button", { name: "System" }).click();
   await expect(html(page)).not.toHaveAttribute("data-theme");
   expect(await page.evaluate(() => localStorage.getItem("owsem-theme"))).toBeNull();
   expect(errors).toEqual([]);
@@ -57,7 +60,7 @@ test("keeps the chosen theme when switching language", async ({ page }, testInfo
 
   await page.goto("/en/docs");
   await showSettings(page, testInfo);
-  await themes(page, "Theme").getByRole("radio", { name: "Dark" }).check();
+  await themes(page, "Theme").getByRole("button", { name: "Dark" }).click();
   // A client-side switch: the page is not reloaded, so this survives.
   await page.evaluate(() => Object.assign(window, { owsemMark: "kept" }));
   await page.getByRole("link", { name: "Bahasa Indonesia" }).click();
@@ -68,6 +71,9 @@ test("keeps the chosen theme when switching language", async ({ page }, testInfo
   );
   await expect(html(page)).toHaveAttribute("data-theme", "dark");
   await showSettings(page, testInfo);
-  await expect(themes(page, "Tema").getByRole("radio", { name: "Gelap" })).toBeChecked();
+  await expect(themes(page, "Tema").getByRole("button", { name: "Gelap" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
   expect(errors).toEqual([]);
 });

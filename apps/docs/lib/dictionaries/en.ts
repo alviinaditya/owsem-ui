@@ -170,7 +170,7 @@ export const en = {
     tabs: "Panels switched by tabs, with an indicator that follows the selection.",
     "scroll-area": "A scroll container with thin scrollbars that appear on hover.",
     toggle: "A two-state button that stays raised while on.",
-    "toggle-group": "A set of toggles that work as one, such as a segmented control.",
+    "toggle-group": "Toggles that work as one, such as a segmented control with a sliding thumb.",
     toolbar: "A group of buttons and toggles with keyboard navigation.",
     "checkbox-group": "A set of checkboxes with a select-all option.",
     "number-field": "A number input with increment and decrement buttons and drag to scrub.",

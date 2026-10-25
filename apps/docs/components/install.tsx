@@ -1,6 +1,7 @@
 "use client";
 
-import { useId, useSyncExternalStore } from "react";
+import { ToggleGroup } from "owsem-ui/base";
+import { useSyncExternalStore } from "react";
 import type { Dictionary } from "@/lib/dictionaries";
 import { PACKAGE_MANAGER_STORAGE_KEY } from "@/lib/theme";
 import { isDefaultSetup, type TokenSetup } from "@/lib/token-setup";
@@ -59,27 +60,29 @@ function subscribe(listener: () => void): () => void {
   };
 }
 
-const usePackageManager = () => useSyncExternalStore(subscribe, read, () => "pnpm" as const);
+// The server cannot know the stored choice: null there, and pnpm in the commands.
+const useStoredPackageManager = () => useSyncExternalStore(subscribe, read, () => null);
+const usePackageManager = () => useStoredPackageManager() ?? "pnpm";
 
+/**
+ * A Toggle Group, one always pressed. None is pressed until hydration, while pnpm is raised in
+ * CSS, so the thumb appears in place instead of sliding from pnpm to a stored choice.
+ */
 function Picker({ labels }: { labels: Labels }) {
-  const name = useId();
-  const current = usePackageManager();
+  const current = useStoredPackageManager();
   return (
-    <fieldset className="pm-picker">
-      <legend className="visually-hidden">{labels.packageManager}</legend>
+    <ToggleGroup.Root
+      aria-label={labels.packageManager}
+      className="docs-choice pm-picker"
+      value={current ? [current] : []}
+      onValueChange={([next]) => next && choose(next)}
+    >
       {PACKAGE_MANAGERS.map((pm) => (
-        <label key={pm}>
-          <input
-            type="radio"
-            name={name}
-            value={pm}
-            checked={current === pm}
-            onChange={() => choose(pm)}
-          />
+        <ToggleGroup.Item key={pm} value={pm} data-option={pm}>
           {pm}
-        </label>
+        </ToggleGroup.Item>
       ))}
-    </fieldset>
+    </ToggleGroup.Root>
   );
 }
 

@@ -11,6 +11,7 @@
 @import "./components/popover/popover.css";
 @import "./components/separator/separator.css";
 @import "./components/toggle/toggle.css";
+@import "./components/toggle-group/toggle-group.css";
 @import "./components/toolbar/toolbar.css";
 @import "./components/tooltip/tooltip.css";
 @import "./components/command-menu/command-menu.css";

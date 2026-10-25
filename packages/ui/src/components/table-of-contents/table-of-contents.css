@@ -1,0 +1,122 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * Table of Contents (tracker.ts finds the section being read), an Owsem component (Kinetic): a
+ * rail along the list, and a marker that slides along it to the current link. The rail and the
+ * marker read Tree Rail Nav's tokens for its rail and trail, so both navs read as one.
+ */
+@layer owsem.components {
+  .ow-table-of-contents {
+    --_fg: var(--ow-fg);
+    --_muted: var(--ow-muted);
+    --_rail: var(--ow-line);
+    --_marker: var(--ow-accent);
+    --_focus: var(--ow-focus);
+    --_radius: var(--ow-radius);
+    --_travel: var(--ow-spring-travel-duration) var(--ow-spring-travel);
+    position: relative;
+    font-size: 13.5px;
+    line-height: 1.4;
+  }
+
+  .ow-table-of-contents__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* The rail, a 1px line at the top list's inline start. The 2px marker covers it, and the 1px
+   * padding keeps a link's focus ring clear of the marker. */
+  .ow-table-of-contents__list[data-depth="1"] {
+    padding-inline-start: 1px;
+    border-inline-start: 1px solid var(--_rail);
+  }
+
+  /* Sub-sections indent; the marker stays on the one rail. */
+  .ow-table-of-contents__list .ow-table-of-contents__list {
+    padding-inline-start: 12px;
+  }
+
+  .ow-table-of-contents__link {
+    display: block;
+    padding-block: 4px;
+    padding-inline: 12px 8px;
+    border-radius: var(--_radius);
+    color: var(--_muted);
+    overflow-wrap: break-word;
+    text-decoration: none;
+  }
+
+  .ow-table-of-contents__link[data-current] {
+    color: var(--_fg);
+  }
+
+  @media (hover: hover) {
+    .ow-table-of-contents__link:hover {
+      color: var(--_fg);
+    }
+  }
+
+  .ow-table-of-contents__link:focus-visible {
+    outline: 2px solid var(--_focus);
+    /* Inside, so a scrolling container never cuts it (FR-13). */
+    outline-offset: -2px;
+  }
+
+  /*
+   * The marker, beside the current link: tracker.ts lays it out on that link's box (--_x, --_y,
+   * --_h), and slides it there from where it was by --_dx, --_dy, and --_sy, which end at none.
+   */
+  .ow-table-of-contents__marker {
+    position: absolute;
+    /* biome-ignore-start lint/nursery/useLogicalProperties: the script measures physical edges */
+    top: var(--_y, 0px);
+    left: var(--_x, 0px);
+    width: 2px;
+    height: var(--_h, 0px);
+    /* biome-ignore-end lint/nursery/useLogicalProperties: the script measures physical edges */
+    background-color: var(--_marker);
+    opacity: 0;
+    pointer-events: none;
+    translate: var(--_dx, 0) var(--_dy, 0);
+    scale: 1 var(--_sy, 1);
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: translate, scale;
+    transition:
+      translate var(--_travel),
+      scale var(--_travel),
+      opacity 150ms ease;
+  }
+
+  .ow-table-of-contents__marker[data-visible] {
+    opacity: 1;
+  }
+
+  /* The first placement and a resize: no transition. */
+  .ow-table-of-contents__marker[data-instant] {
+    transition: none;
+  }
+
+  /* FR-20: the marker jumps to the next link, and only fades in and out. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-table-of-contents__marker {
+      transition: opacity 150ms ease;
+    }
+  }
+
+  /* DP-8: the marker in the system highlight; the current link is underlined. */
+  @media (forced-colors: active) {
+    .ow-table-of-contents__link[data-current] {
+      text-decoration: underline;
+    }
+
+    .ow-table-of-contents__link:focus-visible {
+      outline-color: Highlight;
+    }
+
+    .ow-table-of-contents__marker {
+      forced-color-adjust: none;
+      background-color: Highlight;
+    }
+  }
+}

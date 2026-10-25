@@ -154,9 +154,9 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
 **Button**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toggle Group**,
 **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`) and **Color Picker**, **Command Menu**,
-and **Tree Rail Nav** (Owsem, from `owsem-ui/owsem`) are built. Base components are Base UI
-components with OwsemUI's styling, and small primitives without a Base UI part, such as Kbd; Owsem
-components are OwsemUI's own. No component has a `flavor` prop.
+**Table of Contents**, and **Tree Rail Nav** (Owsem, from `owsem-ui/owsem`) are built. Base
+components are Base UI components with OwsemUI's styling, and small primitives without a Base UI
+part, such as Kbd; Owsem components are OwsemUI's own. No component has a `flavor` prop.
 
 ### Button
 
@@ -581,6 +581,43 @@ import { CommandMenu } from "owsem-ui/owsem"; // or "@/components/owsem/command-
   the body: set them on `:root` or on the Popup. Its width is `min(100%, 560px)`; set
   `inline-size` on the Popup to change it. The panel is glass with the popup's crisp edge, the
   Trigger a flat well, the shortcuts crisp keys; do not add soft shadows, inset blurs, or glow.
+
+### Table of Contents
+
+An "On this page" list that marks the section being read: a rail along the list, and a marker that
+slides along it to the current link. Registry item: `table-of-contents`.
+
+```tsx
+import { TableOfContents } from "owsem-ui/owsem"; // or "@/components/owsem/table-of-contents"
+<TableOfContents.Root aria-label="On this page">
+  <TableOfContents.List>
+    <TableOfContents.Item>
+      <TableOfContents.Link href="#install">Installation</TableOfContents.Link>
+    </TableOfContents.Item>
+    <TableOfContents.Item>
+      <TableOfContents.Link href="#theming">Theming</TableOfContents.Link>
+      <TableOfContents.List>
+        <TableOfContents.Item>
+          <TableOfContents.Link href="#dark">Dark mode</TableOfContents.Link>
+        </TableOfContents.Item>
+      </TableOfContents.List>
+    </TableOfContents.Item>
+  </TableOfContents.List>
+</TableOfContents.Root>
+```
+
+- `Root` (`nav`; give it `aria-label`), `List` (`ul`, nested inside an `Item` for sub-sections,
+  which indent), `Item` (`li`), and `Link` (`a`, `render` for a router link). No other props:
+  everything else passes through.
+- Tracking is built in; do not add an IntersectionObserver, scroll handlers, or `aria-current`. A
+  link's target is the element whose id its hash names, so give every heading an id. The current
+  link is the last whose target crossed a line 30% down the targets' nearest scrolling ancestor
+  (or the window); at the very end it is the last link; a clicked link holds until the visitor
+  scrolls. It gets `aria-current="location"`, and `data-current` to style it by.
+- Links are plain anchors: the browser scrolls to the section. Under a sticky header, set
+  `scroll-padding-top` on the scroll area instead of handling clicks.
+- Reads `--ow-accent` (the marker), `--ow-line` (the rail), `--ow-fg` (current and hovered links),
+  `--ow-muted` (other links), `--ow-focus`, and `--ow-radius`.
 
 ## Rules
 

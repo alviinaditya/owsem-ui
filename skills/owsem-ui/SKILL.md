@@ -61,11 +61,12 @@ npx shadcn add @owsem/separator
 ```
 
 Component files land in `components/owsem/<name>/`; the first one also adds the shared
-`@owsem/core` item, `lib/owsem/tokens.css` and `lib/owsem/class-name.ts`. Import
-`lib/owsem/tokens.css` once in the app's CSS entry; each component imports its own CSS. Import
-components from the copy, such as `@/components/owsem/separator`. The registry ships no providers:
-import them from `@base-ui/react/direction-provider` and `@base-ui/react/csp-provider`, the copy
-the copied components use.
+`@owsem/core` item, `lib/owsem/tokens.css`, `lib/owsem/tailwind.css` (for Tailwind projects), and
+`lib/owsem/class-name.ts`. Import `lib/owsem/tokens.css` once in the app's CSS entry; each
+component imports its own CSS. Import components from the copy, such as
+`@/components/owsem/separator`. The registry ships no providers: import them from
+`@base-ui/react/direction-provider` and `@base-ui/react/csp-provider`, the copy the copied
+components use.
 
 Pick one path per project: if `components/owsem/` exists, import from there, not from `owsem-ui`.
 To update a copy, preview with `npx shadcn add @owsem/<name> --diff` and keep the user's changes.
@@ -109,15 +110,27 @@ body { position: relative; } /* backdrops in iOS Safari 26 and later */
   while held down). Rely only on the classes and attributes in a Lab's parts table.
 - **Layers**: tokens live in `@layer owsem.tokens` and component CSS in `@layer owsem.components`.
   Plain, unlayered app CSS always wins, so overrides need no `!important`.
-- **Tailwind CSS v4**: the first stylesheet that names a layer fixes the order. Put this line
-  first in the global CSS and load OwsemUI from that CSS, not from JavaScript (registry projects
-  import `lib/owsem/tokens.css` at the same spot):
+- **Tailwind CSS v4**: import `owsem-ui/tailwind.css` first in the global CSS, before Tailwind,
+  and load OwsemUI's CSS from that file, not from JavaScript (registry projects import
+  `lib/owsem/tailwind.css` and `lib/owsem/tokens.css` by relative path at the same spots):
 
   ```css
-  @layer theme, base, owsem, components, utilities;
+  @import "owsem-ui/tailwind.css"; /* the layer order and the theme */
   @import "tailwindcss";
   @import "owsem-ui/styles.css";
   ```
+
+  Its first line, `@layer theme, base, owsem, components, utilities;`, puts OwsemUI above
+  preflight and below utilities, so utilities in `className` win; imported after `tailwindcss` it
+  comes too late. It maps the theme tokens to utilities that read `var(--ow-*)`: colors
+  (`bg-ow-panel`, `text-ow-muted`, `border-ow-line`, `bg-ow-raised` for `--ow-raised-bg`),
+  `shadow-ow-raised` (and panel, popup, well, pressed, primary), `rounded-ow`, and `ease-ow-out`
+  (and in-out, drawer, spring-travel, spring-settle, spring-glide); spring durations go through
+  `duration-(--ow-spring-glide-duration)`. Style states with data attribute variants such as
+  `data-panel-open:` or `data-[orientation=vertical]:`, with no plugin. Set a token on one element
+  with an arbitrary property: `[--ow-panel:var(--color-zinc-900)]`. OwsemUI needs no `cn()`, but
+  the project's own `cn()` works in `className`. Tailwind's `dark:` ignores `data-theme` unless
+  the project adds the `@custom-variant dark` from https://owsem.dev/en/docs#tailwind-css-v4.
 
 ## Glide (Core)
 

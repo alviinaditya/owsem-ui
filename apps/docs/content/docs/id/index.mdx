@@ -49,15 +49,80 @@ kedip, mengganti warna, dan daftar token tema ada di halaman [Tema](/id/docs/the
 
 ## Tailwind CSS v4
 
-Utility Tailwind berada di dalam `@layer`, dan urutan layer ditentukan oleh stylesheet pertama yang
-menyebutnya. Karena itu, muat OwsemUI dari CSS global, setelah baris urutan layer, bukan dari
+OwsemUI tidak butuh Tailwind, tetapi bisa dipakai bersamanya. Import `owsem-ui/tailwind.css` paling
+awal di CSS global, sebelum Tailwind, dan muat CSS OwsemUI dari file yang sama, bukan dari
 JavaScript:
 
 ```css
-@layer theme, base, owsem, components, utilities;
+@import "owsem-ui/tailwind.css";
 @import "tailwindcss";
 @import "owsem-ui/styles.css";
 ```
+
+`tailwind.css` diawali urutan layer, `@layer theme, base, owsem, components, utilities;`.
+Stylesheet pertama yang menyebut sebuah layer menentukan posisinya, jadi CSS OwsemUI berada di atas
+preflight Tailwind dan di bawah utility-nya: utility di `className` mengalahkan CSS komponen itu
+sendiri. Pastikan file ini paling awal; kalau di-import setelah `tailwindcss`, ia datang terlambat.
+Dari registry, import `lib/owsem/tailwind.css` dan `lib/owsem/tokens.css` lewat path relatifnya, di
+posisi yang sama.
+
+File yang sama mengubah token tema menjadi nilai tema Tailwind, untuk utility seperti ini:
+
+```tsx
+<div className="bg-ow-panel text-ow-muted border-ow-line rounded-ow shadow-ow-raised" />
+```
+
+| Utility | Dari token |
+| --- | --- |
+| Warna: `bg-ow-*`, `text-ow-*`, `border-ow-*`, dan utility warna lainnya | `bg`, `fg`, `muted`, `accent`, `on-accent`, `focus`, `line`, `edge`, `hover`, `good`, `warning`, `critical`, `critical-solid`, `on-critical`, `panel`, `raised`, `well`, `pressed`, `line-dark`, `line-light`, `tooltip`, `tooltip-fg`, `backdrop` |
+| `shadow-ow-*` | `panel`, `popup`, `raised`, `well`, `pressed`, `primary` |
+| `rounded-ow` | `--ow-radius` |
+| `ease-ow-*` | `out`, `in-out`, `drawer`, `spring-travel`, `spring-settle`, `spring-glide` |
+
+Utility membaca token `--ow-*` di tempat ia dipakai, jadi `data-theme` dan token yang dipasang di
+sebuah elemen tetap berlaku. Easing spring berpasangan dengan durasinya, yang tidak punya utility
+sendiri: `ease-ow-spring-glide duration-(--ow-spring-glide-duration)`.
+
+Setiap part menerima `className` berupa string; part yang dibangun di atas Base UI juga menerima
+fungsi dari state-nya. State berupa atribut data, dan Tailwind v4 mengubahnya menjadi variant tanpa
+plugin, seperti `data-highlighted:`, `data-pressed:`, atau `data-[size=sm]:`:
+
+```tsx
+<Separator className="data-[orientation=vertical]:mx-2" />
+<Separator className={(state) => (state.orientation === "vertical" ? "mx-2" : "my-4")} />
+<TreeRailNav.Toggle className="data-panel-open:text-ow-accent">Settings</TreeRailNav.Toggle>
+```
+
+OwsemUI menambahkan class-nya sendiri ke class Anda dan tidak butuh `cn()`: utility Anda menang
+karena urutan layer, bukan karena penggabungan class. Kalau project Anda punya helper `cn()`, helper
+itu tetap bisa dipakai di `className` seperti biasa, juga di dalam fungsinya:
+
+```tsx
+<Separator className={cn("my-4", inset && "mx-4")} />
+<Separator className={(state) => cn("my-4", state.orientation === "vertical" && "mx-2")} />
+```
+
+Variant `dark:` Tailwind mengikuti tema sistem. Supaya mengikuti `data-theme` seperti token, dengan
+tema sistem bila atributnya tidak ada, tambahkan variant ini di CSS global:
+
+```css
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *):not(
+      :where([data-theme="dark"] [data-theme="light"], [data-theme="dark"] [data-theme="light"] *)
+    ) {
+    @slot;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    &:where(:not([data-theme="light"], [data-theme="light"] *)) {
+      @slot;
+    }
+  }
+}
+```
+
+Variant ini mencakup tema di `<html>` dan satu tema bertingkat di dalamnya. `tailwind.css` tidak
+mengubah variant `dark` milik Anda.
 
 ## Salin ke project
 

@@ -82,6 +82,8 @@ export default defineConfig([
       ),
     },
     dts: false,
+    // Copied as is: Lightning CSS would move its layer order statement after the @theme block.
+    copy: "src/tailwind.css",
     css: {
       splitting: true,
       minify: false,

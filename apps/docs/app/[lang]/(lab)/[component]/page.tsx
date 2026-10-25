@@ -7,6 +7,7 @@ import { Icon } from "@/components/icons/icon";
 import { InstallCommand } from "@/components/install";
 import { Scene, StageShortcuts } from "@/components/lab/lab-shell";
 import { getMDXComponents } from "@/components/mdx";
+import { PageMain } from "@/components/page-main";
 import { TokenChip } from "@/components/token-setup";
 import { labs } from "@/labs";
 import {
@@ -145,7 +146,7 @@ function LabPage({ lang, entry, dict }: PageArgs) {
   const Mdx = page.data.body;
   const scenes = labPageScenes(entry.name, lang, dict.lab.overview) ?? [];
   return (
-    <main className="lab-main">
+    <PageMain className="lab-main">
       <Lab
         title={entry.title}
         lang={lang}
@@ -158,7 +159,7 @@ function LabPage({ lang, entry, dict }: PageArgs) {
       >
         <Mdx components={getMDXComponents({ section: Scene })} />
       </Lab>
-    </main>
+    </PageMain>
   );
 }
 
@@ -166,7 +167,7 @@ function ComingSoon({ lang, entry, dict }: PageArgs) {
   const url = baseUiUrl(entry);
   const [before, after] = dict.comingSoon.baseUi.split("{link}");
   return (
-    <main className="page page-text">
+    <PageMain className="page page-text">
       <Intro lang={lang} entry={entry} dict={dict} />
       <div className="coming-soon">
         <p>{dict.comingSoon.body}</p>
@@ -183,7 +184,7 @@ function ComingSoon({ lang, entry, dict }: PageArgs) {
         </p>
       </div>
       <Neighbors lang={lang} entry={entry} dict={dict} />
-    </main>
+    </PageMain>
   );
 }
 

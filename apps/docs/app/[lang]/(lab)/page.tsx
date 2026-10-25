@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ComponentBadges } from "@/components/component-header";
 import { ComponentIndex } from "@/components/component-index";
+import { PageMain } from "@/components/page-main";
 import { CATEGORIES, catalog, isAvailable } from "@/lib/catalog";
 import { format, getDictionary } from "@/lib/dictionaries";
 import { isLang, localeAlternates } from "@/lib/i18n";
@@ -31,7 +32,7 @@ export default async function IndexPage(props: PageProps<"/[lang]">) {
       })),
   }));
   return (
-    <main className="page">
+    <PageMain className="page">
       <header className="page-header">
         <p className="eyebrow">{dict.nav.components}</p>
         <h1>OwsemUI</h1>
@@ -57,6 +58,6 @@ export default async function IndexPage(props: PageProps<"/[lang]">) {
         }}
         lang={lang}
       />
-    </main>
+    </PageMain>
   );
 }

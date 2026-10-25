@@ -1,0 +1,174 @@
+---
+title: Button
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Button runs an action. Base UI gives it button semantics, the keyboard, and a loading state that
+keeps focus; OwsemUI adds flat fills with crisp edges, one number for every size, a press with a
+ripple from the point you pressed, and a spinner that never changes the width. Scroll to start the
+tour; the stage follows each part.
+
+## Press and ripple [#press]
+
+A press scales the button to 0.97 within 90 ms. While you hold it, secondary and ghost take the
+pressed material, outline fills with it and keeps its line, and primary and destructive keep their
+edges while their fill darkens a little. Letting go, it settles with the Core settle spring.
+A ripple grows from the point you pressed, clipped to the face, and fades when you let go.
+
+The stage plays it: a pointer presses four variants in turn. Press any button to try it yourself.
+Both effects move only `transform` and `opacity`, as CSS transitions, so nothing runs between
+presses. With `prefers-reduced-motion`, a press only changes the material, and there is no ripple.
+
+## Loading [#loading]
+
+`loading` shows a spinner without changing the button's size. With a start icon, the spinner takes
+the icon's place; without one, the content fades but keeps its box, and the spinner sits in the
+middle. The number under each button is its width: press one and watch it hold.
+
+While loading, the button keeps focus but ignores clicks, Enter, and Space. This is Base UI's
+`focusableWhenDisabled`: the button gets `aria-disabled` and, from OwsemUI, `aria-busy`. Keep the
+label the same while it loads, since screen readers do not reliably announce new text inside a
+focused button.
+
+## Geometry [#geometry]
+
+One number, `--py`, sets every size. It is the padding above and below the text, and the padding
+at the sides adds half the gap between the line height and the cap height, so the text looks
+evenly spaced on all four sides. Icons are the font size plus 2px, and are pulled toward the edge:
+the dashed lines on the stage show the same distance to the top, the bottom, and the side. An
+icon-only button is square and as tall as the others. The large pair is `lg` at 32px, set with
+`style`: the rule holds at any size.
+
+| Size | Font | `--py` | Icon | Height | Icon to edge |
+| --- | --- | --- | --- | --- | --- |
+| `sm` | 13px | `0.5em` | 15px | 29.25px | 7.1px |
+| `md` | 14px | `0.75em` | 16px | 38.5px | 11.25px |
+| `lg` | 16px | `0.875em` | 18px | 48px | 15px |
+
+Every variant of a size has the same height, so buttons, inputs, and selects line up in a row. Set
+`--py` on the button itself to make your own size, such as `style={{ "--py": "0.6em" }}`; the
+padding never lets a target drop below 24px.
+
+## Anatomy [#anatomy]
+
+Base UI renders a `<button>`; OwsemUI adds the `ow-button` class and draws the face as a
+pseudo-element, so the button stays one element. Its edges are inset shadows, so they add no size.
+Inspect (I) outlines each part on the stage, with its tokens.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `button.ow-button` | Base UI Button; `data-variant`, `data-size`, and `data-soft` choose the look; `data-held` while held down, `data-loading`, `data-disabled`, and `data-icon-only` on IconButton |
+| <Part name="Icon" /> | `span.ow-button__icon` | `startIcon` or `endIcon`, with `data-side`; decorative (`aria-hidden`). Button wraps the icon in `span.ow-button__glyph` |
+| <Part name="Label" /> | `span.ow-button__label` | The children |
+| <Part name="Spinner" /> | `span.ow-button__spinner` | Only on buttons with a `loading` prop |
+| <Part name="Ripple" /> | `span.ow-button__layer` | Clips the ripple, `span.ow-button__ripple`, to the face; not on `link` |
+
+## States and variants [#states]
+
+The stage shows every variant in both themes, each soft version after its solid one: the three
+sizes, then disabled and loading.
+
+| Variant | Material |
+| --- | --- |
+| `primary` (default) | The primary fill: a 1px edge darker than the fill, and a thin light line inside its top |
+| `secondary` | A neutral solid, grey in light and silver in dark, with the primary's edges |
+| `outline` | Transparent, with a quiet 1px line from the text color, firmer on hover |
+| `ghost` | Flat; tinted only on hover |
+| `link` | Text; underlined on hover |
+| `destructive` | The critical solid, with the primary's edges |
+
+`soft` turns `primary`, `secondary`, and `destructive` into a flat tint of their tone, with text in
+that tone and no edge. Nothing casts a shadow and Base never glows: fills and edges set the hierarchy, and every
+variant of a size is the same height.
+
+| State | What marks it |
+| --- | --- |
+| Hover | `--ow-hover` over the face, only for a mouse or a pen; the edges stay |
+| Pressed | `data-held` (or `:active`); scaled to 0.97, the pressed material (solid fills darken a little), and the ripple |
+| Keyboard focus | A 2px ring, 2px outside the button |
+| Disabled | `data-disabled`; dimmed, and out of the tab order |
+| Loading | `data-loading` and `aria-busy`; a spinner, focus kept |
+
+## Keyboard and accessibility [#keyboard]
+
+| Key | Action |
+| --- | --- |
+| Tab | Moves focus to the button, unless it is disabled |
+| Enter, Space | Activates it |
+
+Button is a native `<button type="button">`, so forms, the keyboard, and screen readers work as
+they do for any button. `disabled` takes it out of the tab order; add `focusableWhenDisabled` to
+keep it there with `aria-disabled`. `IconButton` has no visible text, so its `aria-label` is
+required.
+
+Base UI's Button is not for links. To make a link look like a button, spread `buttonStyles()` on
+the `<a>` or your router's `Link`, and wrap its icons in `ButtonIcon`: it stays a link, with the
+same look, hover, and press, but no ripple.
+
+With `prefers-reduced-motion`, nothing moves: a press only changes the material, and the spinner
+pulses in place. In forced colors (Windows High Contrast), each button keeps a system-color
+outline and its focus ring uses `Highlight`. Right to left, the start icon is on the right.
+
+## Customization [#customization]
+
+The stage controls are open: change the size, the icons, soft, loading, the radius, or the accent
+color, and the code follows. Colors and the radius are theme tokens that you set in your own CSS.
+
+Button reads these theme tokens. Set one on an element to change the buttons inside it, such as
+`.actions`.
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-radius` | Corner radius |
+| `--ow-accent` | Primary fill; the link's text, mixed toward `--ow-fg` for 4.5:1 |
+| `--ow-on-accent` | Text on the primary fill |
+| `--ow-critical-solid` | Destructive fill |
+| `--ow-on-critical` | Text on the destructive fill |
+| `--ow-critical` | Soft destructive's tint and text |
+| `--ow-primary-shadow` | Primary, secondary, and destructive edges |
+| `--ow-fg`, `--ow-bg` | Secondary's fill (the text color 75% toward the page) and its text |
+| `--ow-pressed-bg`, `--ow-pressed-shadow` | Pressed face |
+| `--ow-hover` | Hover tint |
+| `--ow-fg` | Text on outline and ghost, and outline's line (16%, 28% on hover) |
+| `--ow-focus` | Focus ring |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Button's root, so set yours on the button itself, as
+`actions.css` does with `.actions .ow-button`.
+
+</ForMode>
+
+`--py` is not a color: set it with `style` on the button itself (see Geometry). The press and the
+ripple follow `--ow-motion-scale`: `0` keeps the button still.
+
+<TokenChip lang="en" />
+
+## Ship it [#ship]
+
+The code drawer writes the buttons exactly as the stage is set up. Change anything and the lines
+that moved light up.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `variant` | `"primary" \| "secondary" \| "outline" \| "ghost" \| "link" \| "destructive"` | `"primary"` |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| `soft` | `boolean` | `false` |
+| `loading` | `boolean` | |
+| `startIcon`, `endIcon` | `ReactNode` | |
+| `disabled` | `boolean` | `false` |
+| `focusableWhenDisabled` | `boolean` | `false` |
+| `nativeButton` | `boolean` | `true` |
+| `className` | `string \| (state) => string` | |
+| `style` | `CSSProperties` | |
+| `render` | `ReactElement \| (props, state) => ReactElement` | |
+
+`IconButton` takes the same props, except the icons and children, plus `icon` and a required
+`aria-label`; its variant defaults to `ghost`. `buttonStyles({ variant, size, soft, className })`
+returns the class and data attributes for a link, and `ButtonIcon` (`side`: `"start"` or `"end"`)
+sizes an icon inside it. The ref goes to the `button`, and other props pass through to Base UI as
+they are.
+
+Import them from `owsem-ui/base`. In the registry, it is the `button` item.

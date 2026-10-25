@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import type { LabProps } from "@/components/lab/lab-shell";
 import type { ComponentName } from "@/lib/catalog";
+import ButtonLab from "./button";
 import ColorPickerLab from "./color-picker";
 import CommandMenuLab from "./command-menu";
 import KbdLab from "./kbd";
@@ -17,6 +18,7 @@ import TreeRailNavLab from "./tree-rail-nav";
  * build fails if an available component has none (see the component page).
  */
 export const labs: Partial<Record<ComponentName, ComponentType<LabProps>>> = {
+  button: ButtonLab,
   "color-picker": ColorPickerLab,
   "command-menu": CommandMenuLab,
   kbd: KbdLab,

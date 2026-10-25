@@ -6,6 +6,7 @@
 @import "./core/glide/glide.css";
 @import "./components/kbd/kbd.css";
 @import "./components/menu/menu.css";
+@import "./components/popover/popover.css";
 @import "./components/separator/separator.css";
 @import "./components/toggle/toggle.css";
 @import "./components/toolbar/toolbar.css";

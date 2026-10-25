@@ -815,3 +815,18 @@ test("the Menu Lab opens Edit with Glide on its items, and View's choices", asyn
   await expect(demo(page).getByRole("menu")).toBeVisible();
   await expect(demo(page).getByRole("menu")).not.toBeFocused();
 });
+
+test("the Popover Lab opens its panel from Share, then hands it between triggers", async ({
+  page,
+}) => {
+  await page.goto("/en/popover");
+  await scene(page, "panel");
+  const panel = demo(page).getByRole("dialog", { name: "Share the draft" });
+  await expect(panel).toBeVisible();
+  await expect(panel.locator(".ow-popover__arrow")).toHaveCount(1);
+  await scene(page, "detached");
+  await expect(panel).toBeVisible();
+  // The link takes the panel over: it moves under it.
+  const link = demo(page).getByRole("button", { name: "sharing settings" });
+  await expect(link).toHaveAttribute("aria-expanded", "true");
+});

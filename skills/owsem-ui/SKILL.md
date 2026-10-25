@@ -139,7 +139,7 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Kbd**, **Menu**, **Separator**, **Toggle**, **Toolbar**, and **Tooltip** (Base, from
+**Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toolbar**, and **Tooltip** (Base, from
 `owsem-ui/base`) and **Tree Rail Nav** (Owsem, from `owsem-ui/owsem`) are built. Base components are
 Base UI components with OwsemUI's styling, and small primitives without a Base UI part, such as Kbd;
 Owsem components are OwsemUI's own. No component has a `flavor` prop.
@@ -203,6 +203,43 @@ import { Menu } from "owsem-ui/base"; // or "@/components/owsem/menu"
   `data-theme` on the Positioner when the trigger sits in a themed subtree.
 - Reads `--ow-panel`, `--ow-popup-shadow`, `--ow-fg`, `--ow-muted`, `--ow-hover` (Glide),
   `--ow-line-dark` and `--ow-line-light` (grooves), `--ow-radius`, and `--ow-focus`.
+
+### Popover
+
+A panel of content and controls opened from a button: a dialog, usable with touch and screen
+readers. Registry item: `popover`.
+
+```tsx
+import { Popover } from "owsem-ui/base"; // or "@/components/owsem/popover"
+<Popover.Root>
+  <Popover.Trigger render={<button type="button" />}>Share</Popover.Trigger>
+  <Popover.Portal>
+    <Popover.Positioner>
+      <Popover.Popup>
+        <Popover.Arrow />
+        <Popover.Title>Share the draft</Popover.Title>
+        <Popover.Description>Anyone with the link can read it.</Popover.Description>
+        {/* controls */}
+        <Popover.Close render={<button type="button" />}>Done</Popover.Close>
+      </Popover.Popup>
+    </Popover.Positioner>
+  </Popover.Portal>
+</Popover.Root>
+```
+
+- Focus, Escape, outside clicks, and ARIA come from Base UI; always give the popup a
+  `Popover.Title`. Use a Popover, not a Tooltip, for anything people must read or act on.
+- `Positioner`: `side` (`"bottom"` default), `align`, `sideOffset` (10 by default, room for the
+  arrow); `Arrow` is optional. `Popup`: `initialFocus` and `finalFocus`; `Root`: `modal` (`false`
+  default), `open`, `onOpenChange`.
+- One panel for several triggers: `const handle = Popover.createHandle()`, then
+  `<Popover.Root handle={handle}>` and `<Popover.Trigger handle={handle} payload={...}>` anywhere;
+  `handle.open(triggerId)` and `handle.close()` work from code.
+- The panel renders in a portal: set tokens on the Popup's class or on `:root`, and `data-theme` on
+  the Positioner when the trigger sits in a themed subtree. Long content scrolls in a container
+  inside the popup (the popup itself has no overflow, so the arrow shows).
+- Reads `--ow-panel` and `--ow-popup-shadow` (the arrow takes both), `--ow-fg`, `--ow-muted`, and
+  `--ow-radius`.
 
 ### Separator
 

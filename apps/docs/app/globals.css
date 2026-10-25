@@ -2793,6 +2793,56 @@ figure[data-code-block] pre {
   max-block-size: none;
 }
 
+/* The Popover Lab: a document's toolbar with its Share popover, and room for the panel. */
+.demo-popover {
+  position: relative;
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: 14px;
+  inline-size: 400px;
+  block-size: 290px;
+}
+
+.demo-portal .ow-popover__popup {
+  inline-size: 16rem;
+}
+
+.demo-popover-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 12px 0;
+  color: var(--ow-muted);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+}
+
+.demo-popover-link svg {
+  inline-size: 14px;
+  block-size: 14px;
+}
+
+/* The second trigger: a link-like button in the caption. */
+.demo-popover-link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ow-fg);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+/* A matrix cell with a trigger and its popover pinned open under it. */
+.demo-cell.demo-popover-cell {
+  position: relative;
+  display: block;
+  inline-size: 280px;
+  block-size: 150px;
+  box-sizing: border-box;
+}
+
 /* A matrix of controls on the components' own background. */
 .demo-surface {
   padding: 20px 24px;
@@ -2832,57 +2882,14 @@ figure[data-code-block] pre {
   font-variant-numeric: tabular-nums;
 }
 
-/* Token setup panel (components/token-setup.tsx): bottom left, or under a Lab's toolbar (below). */
+/* Token setup panel (components/token-setup.tsx, an owsem-ui Popover): under a Lab's toolbar, or
+ * under the Token chip that opened it. */
 .token-setup {
-  position: fixed;
-  inset: auto auto 112px 12px;
-  box-sizing: border-box;
   inline-size: min(380px, calc(100vw - 24px));
-  max-block-size: calc(100dvh - 136px);
-  margin: 0;
-  padding: 16px;
+  max-block-size: var(--available-height);
   overflow: auto;
   overscroll-behavior: contain;
-  border: 1px solid var(--ow-line-dark);
-  border-radius: var(--docs-radius-box);
-  background-color: var(--docs-surface);
-  box-shadow:
-    inset 0 1px 0 var(--ow-line-light),
-    0 24px 60px -20px rgb(0 0 0 / 0.5);
-  color: var(--docs-fg);
   font-size: 13px;
-  line-height: 1.5;
-  opacity: 0;
-  translate: 0 -4px;
-  transition:
-    opacity 0.2s ease,
-    translate 0.2s var(--ease),
-    display 0.2s allow-discrete,
-    overlay 0.2s allow-discrete;
-}
-
-.token-setup:popover-open {
-  opacity: 1;
-  translate: none;
-}
-
-@starting-style {
-  .token-setup:popover-open {
-    opacity: 0;
-    translate: 0 -4px;
-  }
-}
-
-/* Opened from a Lab stage's toolbar: under it, at its end. */
-.token-setup[data-place="stage"] {
-  inset: 50px 12px auto auto;
-  max-block-size: calc(100dvh - 62px);
-}
-
-@media (width >= 960px) {
-  .token-setup[data-place="stage"] {
-    inset: 52px 8px auto auto;
-  }
 }
 
 .token-setup-head {

@@ -49,14 +49,78 @@ switching themes without a flash, recoloring, and the theme tokens.
 
 ## Tailwind CSS v4
 
-Tailwind's utilities live in `@layer`, and the first stylesheet that names a layer fixes its order.
-So load OwsemUI from your global CSS, after the layer order line, rather than from JavaScript:
+OwsemUI needs no Tailwind, but works with it. Import `owsem-ui/tailwind.css` first in your global
+CSS, before Tailwind, and load OwsemUI's CSS from the same file rather than from JavaScript:
 
 ```css
-@layer theme, base, owsem, components, utilities;
+@import "owsem-ui/tailwind.css";
 @import "tailwindcss";
 @import "owsem-ui/styles.css";
 ```
+
+`tailwind.css` starts with the layer order, `@layer theme, base, owsem, components, utilities;`.
+The first stylesheet that names a layer fixes its place, so OwsemUI's CSS lands above Tailwind's
+preflight and below its utilities: a utility in `className` beats the component's own CSS. Keep the
+file first; imported after `tailwindcss`, it comes too late. From the registry, import
+`lib/owsem/tailwind.css` and `lib/owsem/tokens.css` by their relative paths in the same places.
+
+The same file turns the theme tokens into Tailwind theme values, for utilities such as these:
+
+```tsx
+<div className="bg-ow-panel text-ow-muted border-ow-line rounded-ow shadow-ow-raised" />
+```
+
+| Utilities | From the tokens |
+| --- | --- |
+| Colors: `bg-ow-*`, `text-ow-*`, `border-ow-*`, and the other color utilities | `bg`, `fg`, `muted`, `accent`, `on-accent`, `focus`, `line`, `edge`, `hover`, `good`, `warning`, `critical`, `critical-solid`, `on-critical`, `panel`, `raised`, `well`, `pressed`, `line-dark`, `line-light`, `tooltip`, `tooltip-fg`, `backdrop` |
+| `shadow-ow-*` | `panel`, `popup`, `raised`, `well`, `pressed`, `primary` |
+| `rounded-ow` | `--ow-radius` |
+| `ease-ow-*` | `out`, `in-out`, `drawer`, `spring-travel`, `spring-settle`, `spring-glide` |
+
+The utilities read the `--ow-*` tokens where they are used, so `data-theme` and tokens set on an
+element still apply. A spring easing pairs with its duration, which has no utility of its own:
+`ease-ow-spring-glide duration-(--ow-spring-glide-duration)`.
+
+Every part takes `className` as a string; parts built on Base UI also take a function of their
+state. States are data attributes, and Tailwind v4 turns them into variants with no plugin, such as
+`data-highlighted:`, `data-pressed:`, or `data-[size=sm]:`:
+
+```tsx
+<Separator className="data-[orientation=vertical]:mx-2" />
+<Separator className={(state) => (state.orientation === "vertical" ? "mx-2" : "my-4")} />
+<TreeRailNav.Toggle className="data-panel-open:text-ow-accent">Settings</TreeRailNav.Toggle>
+```
+
+OwsemUI adds its own class to yours and needs no `cn()`: your utilities win by the layer order, not
+by merging classes. If your project has a `cn()` helper, it works in `className` as anywhere else,
+also inside the function:
+
+```tsx
+<Separator className={cn("my-4", inset && "mx-4")} />
+<Separator className={(state) => cn("my-4", state.orientation === "vertical" && "mx-2")} />
+```
+
+Tailwind's `dark:` variant follows the system theme. To make it follow `data-theme` as the tokens
+do, with the system theme where no attribute is set, add this variant to your global CSS:
+
+```css
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *):not(
+      :where([data-theme="dark"] [data-theme="light"], [data-theme="dark"] [data-theme="light"] *)
+    ) {
+    @slot;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    &:where(:not([data-theme="light"], [data-theme="light"] *)) {
+      @slot;
+    }
+  }
+}
+```
+
+It covers a theme on `<html>` and one theme nested inside it. `tailwind.css` leaves your `dark`
+variant as it is.
 
 ## Copy into your project
 

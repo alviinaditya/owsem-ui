@@ -1,3 +1,4 @@
+import { compile } from "@tailwindcss/node";
 import type { BrowserCommand } from "vitest/node";
 
 // Run in Node; called as `commands.<name>(...)` from "vitest/browser".
@@ -30,11 +31,22 @@ export const mouse: BrowserCommand<[action: "down" | "up"]> = async (ctx, action
   await ctx.page.mouse[action]();
 };
 
+// Compiles `css` with Tailwind CSS v4 for the given class names; imports resolve from packages/ui.
+export const compileTailwind: BrowserCommand<[css: string, candidates: string[]]> = async (
+  ctx,
+  css,
+  candidates,
+) => {
+  const compiler = await compile(css, { base: ctx.project.config.root, onDependency: () => {} });
+  return compiler.build(candidates);
+};
+
 declare module "vitest/browser" {
   interface BrowserCommands {
     setColorScheme: (scheme: "light" | "dark") => Promise<void>;
     setForcedColors: (mode: "active" | "none") => Promise<void>;
     setReducedMotion: (mode: "reduce" | "no-preference") => Promise<void>;
     mouse: (action: "down" | "up") => Promise<void>;
+    compileTailwind: (css: string, candidates: string[]) => Promise<string>;
   }
 }

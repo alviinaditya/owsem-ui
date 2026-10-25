@@ -1,0 +1,140 @@
+---
+title: Code Block
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Code Block menampilkan kode di dalam kartu bersarang: kartu luar dengan header, dan kode di kartu
+dalam yang menumpuk di atas tepi bawah header, dengan sudut yang sama. Header-nya punya satu ikon,
+judul atau deretan tab, dan Salin di ujung. Setiap blok kode di docs ini adalah Code Block. Gulir
+untuk mulai tur; stage mengikuti setiap bagian.
+
+## Snippet dalam tab [#tabs]
+
+Satu snippet memakai Title; beberapa snippet memakai List berisi Tab, satu per snippet, dan
+masing-masing sebuah Panel. Tab-nya Tabs Base UI: tombol panah berpindah di antaranya dan memilih
+sambil bergerak, Home dan End ke ujung, dan Panel yang tampil adalah `tabpanel`. Root menerima
+`value`, `defaultValue`, dan `onValueChange` dari Base UI, seperti yang dipakai docs ini untuk
+mengingat package manager Anda di setiap halaman.
+
+Header-nya punya satu ikon. Beri setiap Tab ikonnya sendiri lewat `icon`: ikon tab yang aktif
+memimpin daftarnya, dan berubah jadi ikon tab berikutnya saat tab berganti (Icon Morph). Tab yang
+ikonnya berbagi `key`, misalnya satu ikon terminal untuk setiap package manager, membiarkan ikonnya
+diam. Stage menelusuri tab-nya: file TSX, file CSS, dan sebuah perintah.
+
+## Menyalin [#copy]
+
+Salin adalah Copy Button di ujung header. Ia menyalin teks Panel yang tampil, dibaca saat ditekan,
+jadi ia mengikuti tab dan teks apa pun yang diubah script. Berikan `value` untuk menyalin hal lain,
+misalnya perintah tanpa prompt-nya; prompt yang digambar CSS (`::before`) bukan bagian dari teks,
+jadi ia otomatis tidak ikut. Labelnya tampil secara bawaan; `showLabel={false}` menjadikannya ikon.
+
+Stage menyalin file TSX, lalu file CSS. Tekanan dari scene menggantikan clipboard, jadi clipboard
+Anda tetap seperti semula.
+
+## Baris panjang [#scroll]
+
+Kode mempertahankan barisnya: baris yang lebih lebar dari bloknya bergulir ke samping di dalam
+Panel, tidak pernah halamannya, dan padding Panel tetap ada di ujungnya. Panel yang kodenya meluap
+bisa difokus, jadi tombol panah menggulirnya, dan Title menamainya. Kode dibaca dari kiri ke kanan
+di halaman mana pun, dan bergulir dari awalnya. Tab yang tidak muat juga bergulir ke samping di
+header; tab yang difokus ikut terlihat.
+
+Stage menampilkan satu file dengan baris panjang lalu menggulirnya ke ujung dan kembali.
+
+## Anatomi [#anatomy]
+
+Delapan bagian, dan Title sebagai ganti List untuk satu snippet. Code Block tidak mewarnai kode:
+berikan setiap Panel kodenya yang sudah diwarnai, misalnya oleh Shiki saat build, sebagai `<pre>`.
+Inspect (I) menandai setiap bagian di stage; pilih namanya, di sini atau di stage, untuk melihat
+token-nya.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-code-block` | Kartu luar; root Tabs Base UI, dengan `value`, `defaultValue`, `onValueChange` |
+| <Part name="Header" /> | `div.ow-code-block__header` | Baris di atas kode |
+| <Part name="Icon" /> | `span.ow-code-block__icon` | Digambar oleh Title atau List dari `icon`-nya; `aria-hidden` |
+| Title | `span.ow-code-block__title` | Nama satu snippet, dengan `icon`. Ia menamai Panel yang bergulir |
+| <Part name="List" /> | `div.ow-code-block__list` | List Tabs Base UI (`role="tablist"`); namai dengan `aria-label` |
+| <Part name="Tab" /> | `button.ow-code-block__tab` | `value`, dan `icon` untuk header. Yang aktif punya `data-active` dan `aria-selected` |
+| <Part name="Thumb" /> | `span.ow-code-block__thumb` | Tombol timbul di bawah tab yang aktif, seperti di Toggle Group; `aria-hidden` |
+| <Part name="Copy" /> | `button.ow-code-block__copy` | Sebuah Copy Button: `size="sm"`, labelnya tampil. `value` opsional di sini |
+| <Part name="Panel" /> | `div.ow-code-block__panel` | Kartu dalam. Dengan `value`, panel Tabs Base UI; tanpa itu, kotak yang bisa difokus keyboard selama kodenya meluap |
+
+## State dan varian [#states]
+
+Stage memasang tema terang dan gelap berdampingan: satu snippet, tab, dan blok yang baru menyalin.
+
+| State | Yang menandainya |
+| --- | --- |
+| Tab aktif | Thumb, tombol timbul bertepi tajam, bergeser ke bawahnya; teksnya memakai warna teks |
+| Hover | Glide menerangi tab di bawah pointer |
+| Tersalin | Salin menampilkan centang dan Tersalin |
+| Meluap | Panel bergulir ke samping, dan bisa difokus |
+| Fokus keyboard | Cincin di dalam tab atau Panel, jadi guliran tidak pernah memotongnya |
+
+Code Block adalah komponen Owsem (Kinetic): thumb bergeser ke tab yang aktif dengan spring travel,
+ikonnya berubah dengan spring settle, dan centang di Salin tergambar sendiri. Kedua kartunya isian
+datar, yang luar dengan tepi 1px yang tajam, tanpa glow.
+
+## Keyboard dan aksesibilitas [#keyboard]
+
+Tab mencapai tab yang aktif, lalu Salin, lalu Panel yang bergulir. Di deretan tab, tombol panah
+berpindah dan memilih, dan Home dan End ke tab pertama dan terakhir; List dinamai oleh
+`aria-label`-nya. Panel yang meluap adalah region yang dinamai Title, dan tombol panah menggulirnya.
+Ikonnya `aria-hidden`; Salin mengumumkan Tersalin di region status.
+
+Dengan `prefers-reduced-motion`, thumb dan Glide hanya memudar, dan ikonnya hanya crossfade. Di
+forced colors (Windows High Contrast), outline menggambar kedua kartu, dan thumb-nya memakai
+`Highlight`.
+
+## Kustomisasi [#customization]
+
+Kontrol stage terbuka: berganti antara satu snippet dan tab, sembunyikan label Salin, tambah baris
+panjang, atau pilih warna kartunya, dan kodenya mengikuti. Code Block membaca token tema ini; pasang
+di bloknya atau di sekelilingnya, misalnya `.snippets`.
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-well-bg`, `--ow-well-shadow` | Kartu luar dan tepinya |
+| `--ow-panel` | Kartu dalam |
+| `--ow-raised-bg`, `--ow-raised-shadow` | Thumb di bawah tab yang aktif |
+| `--ow-radius` | Sudut tab; sudut kartu 6px lebih besar, di sekelilingnya |
+| `--ow-fg`, `--ow-muted` | Tab yang aktif dan yang disorot, dan teks lain di header |
+| `--ow-hover` | Sorotan Glide |
+| `--ow-focus` | Cincin fokus |
+| `--ow-font-mono` | Font kode, yang diatur app Anda |
+
+Salin juga membaca token Button (lihat Copy Button). Warna kodenya ikut bersama kode yang sudah
+diwarnai; jangan beri latar, supaya panelnya terlihat.
+
+<ForMode mode="isolated">
+
+Di mode isolated nilainya ada di root setiap komponen, jadi pasang nilai Anda di bloknya sendiri,
+seperti `snippets.css` dengan `.snippets.ow-code-block`.
+
+</ForMode>
+
+<TokenChip lang="id" />
+
+## Ship it [#ship]
+
+Drawer kode menulis komponen persis seperti yang diatur di stage. Ubah apa pun, dan baris yang
+berubah akan menyala.
+
+| Bagian | Prop | Tipe | Bawaan |
+| --- | --- | --- | --- |
+| Root | `value`, `defaultValue` | `value` dari Tab yang aktif | |
+| Root | `onValueChange` | `(value, details) => void` | |
+| Title | `icon` | `ReactElement` | |
+| List | `activateOnFocus` | `boolean` | `true` |
+| Tab | `value` | `any` | |
+| Tab | `icon` | `ReactElement` | |
+| Copy | `value` | `string \| () => string` | Panel yang tampil |
+| Copy | `showLabel` | `boolean` | `true` |
+| Panel | `value` | `value` dari Tab-nya | |
+
+Prop lain diteruskan ke elemen setiap bagian, begitu juga ref; Copy menerima semua prop Copy Button.
+Impor dari `owsem-ui/owsem`. Di registry, item-nya bernama `code-block`, yang ikut memasang Copy
+Button, Button, dan Icon Morph.

@@ -208,6 +208,8 @@ export const id = {
     kbd: "Tombol keyboard, digambar sebagai tuts kecil yang timbul.",
     "table-of-contents":
       "Daftar “Di halaman ini” yang menandai bagian yang sedang dibaca, dengan penanda yang meluncur di sepanjang rail-nya.",
+    "code-block":
+      "Kode di dalam kartu bersarang: satu ikon, judul atau tab, dan tombol Salin di header.",
     "copy-button":
       "Tombol yang menyalin teks: ikon salinnya berubah jadi centang yang tergambar, lalu kembali.",
     "icon-morph":

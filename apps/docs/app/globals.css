@@ -219,7 +219,8 @@ body {
     font-family: var(--font-mono), ui-monospace, monospace;
   }
 
-  code {
+  /* Inline code; a block's code keeps its block's size. */
+  :not(pre) > code {
     font-size: 0.88em;
   }
 }
@@ -461,20 +462,12 @@ body {
   line-height: 1.6;
 }
 
-/* Install commands (components/install.tsx): a package manager picker and copyable commands. */
+/* Install commands (components/install.tsx): a Code Block in the page header, a picker and
+ * copyable commands in the code drawer. */
 .install {
+  display: grid;
+  gap: 8px;
   margin-block-start: 32px;
-  border: 1px solid var(--ow-line-dark);
-  border-radius: var(--docs-radius-box);
-  background-color: var(--tk-bg);
-  box-shadow: inset 0 1px 0 var(--ow-line-light);
-}
-
-/* 4px around the picker's track keeps its corners concentric with the box's (FR-10b). */
-.install-head {
-  padding: 4px;
-  border-block-end: 2px solid var(--docs-groove-dark);
-  border-image: var(--docs-etch-bottom);
 }
 
 .pm-picker {
@@ -526,19 +519,8 @@ body {
   line-height: 1.5;
 }
 
-.install .install-note {
-  padding: 2px 12px 10px;
-}
-
 .install-note code {
   white-space: nowrap;
-}
-
-/* The box draws the fill: the command's own covered the box's rounded border at the corners. */
-.install .command {
-  border: 0;
-  background: none;
-  box-shadow: none;
 }
 
 /* minmax(0, 1fr): a long command scrolls inside its box instead of widening the pane. */
@@ -834,6 +816,10 @@ body {
   display: flex;
   gap: 6px;
   font-size: 26px;
+}
+
+.component-preview-code {
+  inline-size: 220px;
 }
 
 .component-preview-copy {
@@ -1638,19 +1624,14 @@ body {
 
 /* Prose, code, and tables inside pages and Lab scenes */
 
-figure[data-code-block] {
-  margin: 24px 0;
+/* MDX code blocks (components/mdx.tsx), owsem-ui Code Blocks. */
+.docs-code {
+  margin-block: 24px;
 }
 
-figure[data-code-block] pre {
-  margin: 0;
-  padding: 16px 20px;
-  overflow-x: auto;
-  border: 1px solid var(--ow-line-dark);
-  box-shadow: inset 0 1px 0 var(--ow-line-light);
-  border-radius: var(--docs-radius-box);
-  font-size: 13px;
-  line-height: 1.7;
+/* Code in every Code Block takes the code theme's text color (lib/code-theme.ts). */
+.ow-code-block__panel {
+  color: var(--tk-text);
 }
 
 @layer docs-base {
@@ -3012,7 +2993,19 @@ figure[data-code-block] pre {
   }
 }
 
-/* Commands outside Shiki (components/install.tsx). */
+/* Code outside Shiki: install commands, owsem.json, and the index's previews. */
+.tk-kw {
+  color: var(--tk-kw);
+}
+
+.tk-type {
+  color: var(--tk-type);
+}
+
+.tk-attr {
+  color: var(--tk-attr);
+}
+
 .tk-punct {
   color: var(--tk-punct);
 }
@@ -3831,14 +3824,8 @@ figure[data-code-block] pre {
   color: var(--docs-critical);
 }
 
-.token-setup-json {
-  margin: 0;
-  padding: 10px 12px;
-  border: 1px solid var(--ow-line-dark);
-  border-radius: var(--docs-radius-box);
-  background-color: var(--tk-bg);
-  box-shadow: inset 0 1px 0 var(--ow-line-light);
-  color: var(--tk-text);
+/* owsem.json, a Code Block: smaller code in the narrow panel. */
+.token-setup-json .ow-code-block__panel {
   font-size: 12px;
   line-height: 1.6;
 }
@@ -4125,4 +4112,27 @@ figure[data-code-block] pre {
   font-size: 13px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Code Block Lab: snippets in a Code Block, and a matrix of them. */
+.demo-code {
+  inline-size: 400px;
+}
+
+.demo-cell.demo-code-cell {
+  display: block;
+  padding: 12px;
+}
+
+/* Wide enough for its tabs: Base UI scrolls a list to its active tab, and inside the stage's
+ * scaled matrix it measures that scroll wrong. */
+.demo-code-cell .demo-code {
+  inline-size: 380px;
+}
+
+/* The prompt, drawn by CSS: not part of the text that Copy takes. */
+.demo-code-shell::before {
+  content: "$ ";
+  color: var(--tk-punct);
+  user-select: none;
 }

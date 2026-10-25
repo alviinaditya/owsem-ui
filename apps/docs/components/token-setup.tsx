@@ -1,6 +1,7 @@
 "use client";
 
 import { Popover } from "owsem-ui/base";
+import { CodeBlock, type CopyButtonLabels } from "owsem-ui/owsem";
 import {
   type ReactNode,
   type RefObject,
@@ -24,6 +25,7 @@ import {
   type TokenSetup,
   withPrefix,
 } from "@/lib/token-setup";
+import { Icon } from "./icons/icon";
 
 type Labels = Dictionary["tokens"];
 
@@ -108,8 +110,8 @@ export function ForMode({ mode, children }: { mode: TokenMode; children: ReactNo
   return useTokenSetup().mode === mode ? children : null;
 }
 
-/** owsem.json's token part, colored like the docs' code. */
-function OwsemJson({ setup }: { setup: TokenSetup }) {
+/** owsem.json's token part in a Code Block, colored like the docs' code. */
+function OwsemJson({ setup, labels }: { setup: TokenSetup; labels: CopyButtonLabels }) {
   const entry = (key: string, value: string, comma: boolean) => (
     <>
       {"    "}
@@ -121,20 +123,26 @@ function OwsemJson({ setup }: { setup: TokenSetup }) {
     </>
   );
   return (
-    <pre className="token-setup-json">
-      <code>
-        <span className="tk-com">{"// owsem.json"}</span>
-        {"\n"}
-        <span className="tk-punct">{"{"}</span>
-        {"\n  "}
-        <span className="tk-attr">"tokens"</span>
-        <span className="tk-punct">{": {"}</span>
-        {"\n"}
-        {entry("mode", setup.mode, true)}
-        {entry("prefix", setup.prefix, false)}
-        <span className="tk-punct">{"  }\n}"}</span>
-      </code>
-    </pre>
+    <CodeBlock.Root className="token-setup-json">
+      <CodeBlock.Header>
+        <CodeBlock.Title icon={<Icon name="braces" />}>owsem.json</CodeBlock.Title>
+        <CodeBlock.Copy labels={labels} />
+      </CodeBlock.Header>
+      <CodeBlock.Panel>
+        <pre>
+          <code>
+            <span className="tk-punct">{"{"}</span>
+            {"\n  "}
+            <span className="tk-attr">"tokens"</span>
+            <span className="tk-punct">{": {"}</span>
+            {"\n"}
+            {entry("mode", setup.mode, true)}
+            {entry("prefix", setup.prefix, false)}
+            <span className="tk-punct">{"  }\n}"}</span>
+          </code>
+        </pre>
+      </CodeBlock.Panel>
+    </CodeBlock.Root>
   );
 }
 
@@ -183,7 +191,13 @@ function PrefixField({ setup, labels }: { setup: TokenSetup; labels: Labels }) {
  * The panel a Lab stage's Token button and every Token chip open (a Popover: Escape and a click
  * outside close it, and focus goes back). Rendered once in the site shell, so every page shares it.
  */
-export function TokenSetupPanel({ labels }: { labels: Labels }) {
+export function TokenSetupPanel({
+  labels,
+  copyLabels,
+}: {
+  labels: Labels;
+  copyLabels: CopyButtonLabels;
+}) {
   const setup = useTokenSetup();
   const modes = useId();
   const popup = useRef<HTMLDivElement>(null);
@@ -237,7 +251,7 @@ export function TokenSetupPanel({ labels }: { labels: Labels }) {
                 {setup.mode === "theme" ? labels.themeNote : labels.isolatedNote}
               </p>
               <PrefixField setup={setup} labels={labels} />
-              <OwsemJson setup={setup} />
+              <OwsemJson setup={setup} labels={copyLabels} />
               <h3 className="token-setup-names">{labels.names}</h3>
               <ul className="token-names">
                 {names.map((name) => (

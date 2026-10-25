@@ -11,7 +11,14 @@ import {
   Toolbar,
   Tooltip,
 } from "owsem-ui/base";
-import { ColorPicker, CommandMenu, CopyButton, TableOfContents, TreeRailNav } from "owsem-ui/owsem";
+import {
+  CodeBlock,
+  ColorPicker,
+  CommandMenu,
+  CopyButton,
+  TableOfContents,
+  TreeRailNav,
+} from "owsem-ui/owsem";
 import { type ReactNode, useEffect, useId, useRef, useState } from "react";
 import type { ComponentName } from "@/lib/catalog";
 import type { Lang } from "@/lib/i18n";
@@ -49,6 +56,7 @@ const TEXT = {
     settings: "Pengaturan",
     toolbar: "Format teks",
     contents: "Di halaman ini",
+    files: "File",
     sections: ["Instalasi", "Tema", "Pemakaian", "API"],
   },
   en: {
@@ -81,6 +89,7 @@ const TEXT = {
     settings: "Settings",
     toolbar: "Text format",
     contents: "On this page",
+    files: "Files",
     sections: ["Installation", "Theming", "Usage", "API"],
   },
 };
@@ -339,6 +348,33 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
   ),
   "command-menu": (t) => <CommandMenuPreview t={t} />,
   "table-of-contents": (t) => <TableOfContentsPreview t={t} />,
+  "code-block": (t) => (
+    <CodeBlock.Root defaultValue="tsx" className="component-preview-code">
+      <CodeBlock.Header>
+        <CodeBlock.List aria-label={t.files}>
+          <CodeBlock.Tab value="tsx" icon={<Icon name="atom" />}>
+            App.tsx
+          </CodeBlock.Tab>
+          <CodeBlock.Tab value="css" icon={<Icon name="palette" />}>
+            app.css
+          </CodeBlock.Tab>
+        </CodeBlock.List>
+        <CodeBlock.Copy labels={{ copy: t.copy }} showLabel={false} />
+      </CodeBlock.Header>
+      <CodeBlock.Panel value="tsx">
+        <pre>
+          <code>
+            <span className="tk-kw">import</span> {"{ "}
+            <span className="tk-type">Button</span>
+            {" }"}
+            {"\n"}
+            <span className="tk-kw">export</span> <span className="tk-kw">default</span>{" "}
+            <span className="tk-fn">App</span>
+          </code>
+        </pre>
+      </CodeBlock.Panel>
+    </CodeBlock.Root>
+  ),
   "copy-button": (t) => (
     <div className="component-preview-copy">
       <code>pnpm add owsem-ui</code>

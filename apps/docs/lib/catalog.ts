@@ -81,6 +81,7 @@ export const catalog = [
   { name: "table-of-contents", title: "Table of Contents", family: "owsem", category: "navigation", expressions: ["kinetic"], status: "prototype" },
   { name: "icon-morph", title: "Icon Morph", family: "owsem", category: "display", expressions: ["kinetic"], status: "prototype" },
   { name: "copy-button", title: "Copy Button", family: "owsem", category: "action", expressions: ["kinetic"], status: "prototype" },
+  { name: "code-block", title: "Code Block", family: "owsem", category: "display", expressions: ["kinetic"], status: "prototype" },
 ] as const satisfies readonly CatalogEntry[];
 
 export type ComponentName = (typeof catalog)[number]["name"];

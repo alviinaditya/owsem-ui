@@ -153,9 +153,9 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
 **Button**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toggle Group**,
-**Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`) and **Color Picker**, **Command Menu**,
-**Copy Button**, **Icon Morph**, **Table of Contents**, and **Tree Rail Nav** (Owsem, from
-`owsem-ui/owsem`) are built. Base
+**Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`) and **Code Block**, **Color Picker**,
+**Command Menu**, **Copy Button**, **Icon Morph**, **Table of Contents**, and **Tree Rail Nav**
+(Owsem, from `owsem-ui/owsem`) are built. Base
 components are Base UI components with OwsemUI's styling, and small primitives without a Base UI
 part, such as Kbd; Owsem components are OwsemUI's own. No component has a `flavor` prop.
 
@@ -621,6 +621,52 @@ import { TableOfContents } from "owsem-ui/owsem"; // or "@/components/owsem/tabl
   a sticky header, set `scroll-padding-top`. Do not handle the clicks instead.
 - Reads `--ow-accent` (the marker), `--ow-line` (the rail), `--ow-fg` (current and hovered links),
   `--ow-muted` (other links), `--ow-focus`, and `--ow-radius`.
+
+### Code Block
+
+Code in nested cards: a header with one icon, a title or tabs, and Copy, over an inner card that
+holds the code. Registry item: `code-block` (installs Copy Button, Button, and Icon Morph too).
+
+```tsx
+import { CodeBlock } from "owsem-ui/owsem"; // or "@/components/owsem/code-block"
+<CodeBlock.Root>
+  <CodeBlock.Header>
+    <CodeBlock.Title icon={<FileCode />}>greet.ts</CodeBlock.Title>
+    <CodeBlock.Copy />
+  </CodeBlock.Header>
+  <CodeBlock.Panel>{highlightedPre}</CodeBlock.Panel>
+</CodeBlock.Root>
+
+<CodeBlock.Root defaultValue="tsx">
+  <CodeBlock.Header>
+    <CodeBlock.List aria-label="Files">
+      <CodeBlock.Tab value="tsx" icon={<Atom />}>Button.tsx</CodeBlock.Tab>
+      <CodeBlock.Tab value="css" icon={<Palette />}>button.css</CodeBlock.Tab>
+    </CodeBlock.List>
+    <CodeBlock.Copy />
+  </CodeBlock.Header>
+  <CodeBlock.Panel value="tsx">{tsx}</CodeBlock.Panel>
+  <CodeBlock.Panel value="css">{css}</CodeBlock.Panel>
+</CodeBlock.Root>
+```
+
+- It does not highlight code. Give each Panel a `<pre>` highlighted already (Shiki at build time,
+  for example), with no background of its own, so the panel shows.
+- `Root` is Base UI's Tabs root (`value`, `defaultValue`, `onValueChange`); `List` and `Tab` are
+  Base UI's Tabs list and tab (arrow keys pick as they move; `activateOnFocus` defaults to true);
+  `Panel` takes the tab's `value`, or none for a single snippet. Name the List with `aria-label`.
+- One leading icon: `Title`'s `icon`, or the active `Tab`'s `icon`, which morphs into the next
+  tab's (Icon Morph). Tabs whose icons share a `key` keep one icon still. Do not add icons inside
+  the tabs.
+- `Copy` is a Copy Button (`size="sm"`, `showLabel` by default) that copies the Panel on show; pass
+  `value` for other text, such as a command without its prompt.
+- Long lines scroll inside the Panel, never the page; a single Panel that overflows becomes a
+  focusable region named by the Title. Code reads left to right on any page. Tabs that do not fit
+  scroll sideways in the header.
+- A raised thumb slides under the active tab, as in Toggle Group; the inner card is a flat fill.
+- Reads `--ow-well-bg` and `--ow-well-shadow` (the outer card), `--ow-panel` (the inner card),
+  `--ow-raised-bg` and `--ow-raised-shadow` (the thumb), `--ow-radius` (tabs; the cards are 6px
+  more), `--ow-fg`, `--ow-muted`, `--ow-hover`, `--ow-focus`, and `--ow-font-mono` for the code.
 
 ### Copy Button
 

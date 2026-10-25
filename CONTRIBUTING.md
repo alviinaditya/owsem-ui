@@ -174,7 +174,8 @@ deleted CSS:
 
 Swapped already: Tree Rail Nav is the sidebar (DS-14), Table of Contents is the docs pages' "On
 this page", Color Picker opens from the swatch of every Lab color control, in place of the
-browser's `<input type="color">`, and Copy Button is every Copy, its status region included.
+browser's `<input type="color">`, Copy Button is every Copy, its status region included, and Code
+Block is every code block outside the Lab's code drawer.
 
 The docs' `--docs-well`, `--docs-raised`, and their shadows point at the library's depth
 materials (TK-7), so the docs and the library share one source.

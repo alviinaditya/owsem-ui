@@ -25,7 +25,7 @@ export default async function DocsPage(props: PageProps<"/[lang]/docs/[[...slug]
           <h1>{page.data.title}</h1>
           {page.data.description ? <p className="lead">{page.data.description}</p> : null}
         </header>
-        <Mdx components={getMDXComponents()} />
+        <Mdx components={getMDXComponents(lang)} />
       </article>
       <Toc items={page.data.toc} label={getDictionary(lang).lab.toc} />
     </PageMain>

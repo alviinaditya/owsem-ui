@@ -1,0 +1,123 @@
+---
+title: Table of Contents
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Table of Contents mendaftar bagian-bagian sebuah halaman, dengan sub-bagiannya bersarang, dan
+menandai bagian yang sedang dibaca. Sebuah rail membentang di sepanjang daftar, dan penandanya
+meluncur di rail itu ke bagian yang aktif. Gulir untuk mulai tur; stage mengikuti setiap bagian.
+
+## Mengikuti pembaca [#reading]
+
+Setiap link menyebut bagiannya lewat hash: `href="#install"` menunjuk elemen dengan id itu. Bagian
+yang aktif adalah bagian terakhir yang bagian atasnya sudah melewati garis baca, 30% dari atas area
+gulir. Area gulir adalah leluhur terdekat bagian-bagian itu yang bisa digulir, jadi daftar di
+samping kotak yang bergulir sama baiknya dengan daftar di samping halaman; tanpa leluhur seperti
+itu, area gulirnya adalah window.
+
+Bagian terakhir yang pendek tidak akan pernah mencapai garis itu, jadi di ujung area gulir bagian
+terakhirlah yang aktif. Sebelum bagian pertama mencapai garis, dan sebelum halaman ter-hydrate,
+belum ada yang aktif.
+
+Stage memutarnya: artikel bergulir satu bagian demi satu bagian, melewati garis baca yang
+putus-putus, dan penandanya meluncur ke setiap link begitu bagiannya melewati garis. Di paling bawah
+Changelog aktif, lalu artikel kembali ke atas. Gulir sendiri artikelnya untuk mengambil alih.
+
+## Melompat ke sebuah bagian [#links]
+
+Link-nya anchor biasa, jadi browser menggulir ke bagian itu dan URL mendapat hash-nya. Link yang
+diklik tetap aktif sampai Anda menggulir sendiri, dengan roda mouse, sentuhan, atau tombol gulir,
+jadi link yang Anda pilih tetap ditandai walaupun bagiannya terlalu pendek untuk mencapai garis.
+
+Stage memilih Terang dan gelap, sebuah sub-bagian, lalu Komponen: artikel bergulir
+sejauh yang bisa, dan Komponen tetap aktif walaupun ujung artikel akan memilih Changelog. Satu
+putaran roda mouse melepasnya, dan garis baca kembali menentukan. Di demo ini link-nya menggulir
+artikel, bukan halaman.
+
+## Anatomi [#anatomy]
+
+Empat bagian, plus penanda yang digambar Root. Root mencari bagian setiap link lewat id-nya, dan
+melacak guliran lewat event: tidak ada yang berjalan saat halaman diam. Inspeksi (I) menandai setiap
+bagian di stage; pilih sebuah nama, di sini atau di stage, untuk melihat tokennya.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `nav.ow-table-of-contents` | Melacak bagian yang sedang dibaca dan memuat penandanya. Beri nama dengan `aria-label` |
+| <Part name="List" /> | `ul.ow-table-of-contents__list` | `data-depth` mulai dari 1. List teratas menggambar rail; list bersarang, di dalam Item, menjorok ke dalam |
+| <Part name="Item" /> | `li.ow-table-of-contents__item` | Satu bagian: Link-nya, plus List untuk sub-bagiannya |
+| <Part name="Link" /> | `a.ow-table-of-contents__link` | `href="#id"`; `render` menggantinya dengan link router. Link yang aktif mendapat `aria-current="location"` dan `data-current`; `data-depth` |
+| <Part name="Marker" /> | `span.ow-table-of-contents__marker` | Digambar Root di atas rail (`aria-hidden`), setinggi link yang aktif; `data-visible` selama ada link yang aktif |
+
+## State dan varian [#states]
+
+Stage menjajarkan tema terang dan gelap, masing-masing dengan artikel yang dibaca di tiga tempat:
+di awal, sebelum ada bagian yang mencapai garis, di sebuah sub-bagian yang judulnya dua baris, dan
+di ujung paling akhir.
+
+| State | Yang menandainya |
+| --- | --- |
+| Belum ada yang aktif | Link redup tanpa penanda, sampai sebuah bagian mencapai garis |
+| Aktif | Link berwarna teks, dan penanda di sampingnya, setinggi link itu |
+| Sub-bagian | Menjorok 12px; penandanya tetap di satu rail yang sama |
+| Hover | Teks link berwarna teks |
+| Fokus keyboard | Cincin di dalam link, jadi tidak pernah terpotong wadah yang bergulir |
+
+Table of Contents adalah komponen Owsem (Kinetic): penandanya meluncur dengan pegas travel, dan saat
+diam ia ditata tepat di kotak link itu sendiri, tanpa transform, jadi selalu segaris dengan link di
+zoom berapa pun. Tanpa glow.
+
+## Keyboard dan aksesibilitas [#keyboard]
+
+Tab berpindah ke setiap link, dan Enter mengikutinya: browser menggulir ke bagiannya. Link yang
+aktif mendapat `aria-current="location"`, jadi screen reader menyebutnya sebagai lokasi saat ini;
+server tidak merender satu pun, jadi tidak ada yang salah diumumkan sebelum pelacakan dimulai.
+Penandanya memakai `aria-hidden`.
+
+Dengan `prefers-reduced-motion`, penanda langsung melompat ke link berikutnya dan hanya memudar
+masuk dan keluar. Di mode forced colors (Windows High Contrast), penanda memakai `Highlight` dan
+link yang aktif diberi garis bawah. Untuk teks kanan ke kiri, rail dan penandanya ada di kanan.
+
+## Kustomisasi [#customization]
+
+Kontrol di stage terbuka: pilih warna penanda atau rail, dan kodenya ikut berubah. Table of Contents
+membaca token tema berikut, dengan penanda dan rail memakai token yang sama dengan jejak dan rail
+Tree Rail Nav; pasang di nav-nya, atau di elemen di sekitarnya seperti `.on-this-page`.
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-accent` | Penanda |
+| `--ow-line` | Rail |
+| `--ow-fg` | Link yang aktif, dan link yang di-hover |
+| `--ow-muted` | Link lainnya |
+| `--ow-focus` | Cincin fokus |
+| `--ow-radius` | Sudut cincin fokus |
+
+<ForMode mode="isolated">
+
+Di mode isolated, nilainya ada di root setiap nav, jadi atur di nav itu sendiri, misalnya
+`.on-this-page.ow-table-of-contents`.
+
+</ForMode>
+
+Header sticky di atas halaman menutupi bagian yang dituju browser: pasang `scroll-padding-top` di
+area gulirnya, setinggi header itu, supaya link mendarat di bawahnya.
+
+<TokenChip lang="id" />
+
+## Ship it [#ship]
+
+Drawer kode menulis komponen persis seperti yang diatur di stage, dari sebuah daftar heading. Pilih
+warna di kontrol, dan baris kode yang berubah akan menyala.
+
+| Bagian | Prop | Tipe | Bawaan |
+| --- | --- | --- | --- |
+| Link | `href` | `string`, berupa `"#id"` | |
+| Link | `render` | `ReactElement \| (props, state) => ReactElement` | |
+
+Root adalah `nav`, List `ul`, Item `li`, dan Link `a`; props lain diteruskan ke elemennya apa
+adanya, begitu juga ref. Beri setiap bagian sebuah id, seperti yang dilakukan pipeline Markdown
+dengan slug heading.
+
+Impor dari `owsem-ui/owsem`. Di registry, item-nya bernama `table-of-contents`.

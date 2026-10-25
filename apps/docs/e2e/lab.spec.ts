@@ -689,6 +689,27 @@ test("the Toolbar Lab names the item Tab lands on", async ({ page }) => {
   await expect(demo(page).getByText("Tab lands on Underline")).toBeVisible();
 });
 
+test("the Table of Contents Lab follows its article, and a picked link holds", async ({ page }) => {
+  await page.goto("/en/table-of-contents");
+  const toc = demo(page).getByRole("navigation", { name: "On this page" });
+  const current = toc.locator('[aria-current="location"]');
+  const article = demo(page).locator(".demo-toc-article");
+  await expect(current).toHaveCount(0);
+  await article.evaluate((el) => {
+    el.scrollTop = (el.querySelector<HTMLElement>("#toc-theming")?.offsetTop ?? 0) - 8;
+  });
+  await expect(current).toHaveText("Theming");
+  // Components is too short to reach the line: the article goes as far as it can, and it holds.
+  await toc.getByRole("link", { name: "Components" }).click();
+  await expect(current).toHaveText("Components");
+  await expect
+    .poll(() => article.evaluate((el) => el.scrollHeight - el.clientHeight - el.scrollTop))
+    .toBeLessThan(1);
+  await expect(current).toHaveText("Components");
+  // The demo's links scroll the article, not the page.
+  expect(new URL(page.url()).hash).toBe("");
+});
+
 test("a Lab without animations has no Play scene or Replay", async ({ page }) => {
   await page.goto("/en/separator");
   for (const id of ["anatomy", "states", "ship"]) {

@@ -1,0 +1,196 @@
+---
+title: Color Picker
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Color Picker chooses a color the way designers expect: drag across saturation and brightness, slide
+hue and opacity, type hex, RGB, or HSL, or take a swatch. Use it inline as a panel, or open it from
+a trigger in a popover. Scroll to start the tour; the stage follows each part.
+
+## Saturation and brightness [#area]
+
+The large area holds every shade of one hue: saturation grows to the right, brightness upward.
+Press anywhere in it and drag; the thumb compacts under the pointer and springs back when you let
+go.
+
+The stage drags the thumb around and back. The log under the panel shows how the two callbacks
+differ: `onChange` follows every move, for a live preview; `onChangeComplete` arrives once, when the
+drag ends, for saving or for work too heavy for every frame.
+
+## Opacity over a checkerboard [#alpha]
+
+Under the hue slider, the opacity slider runs from clear to solid over a checkerboard, so a
+translucent color shows what lies behind it. The preview beside the sliders, the swatches, and the
+popover's trigger paint translucent colors over the same pattern, drawn from the panel's color and
+`--ow-line`, so it follows the theme.
+
+The stage drags the opacity down to 15% and back. A translucent hex gains a fourth byte
+(`#7c6ab826`), `rgb()` becomes `rgba()`, and `hsl()` becomes `hsla()`. Set `alpha={false}` when a
+color must stay opaque.
+
+## Formats and swatches [#formats]
+
+The switch before the fields cycles HEX, RGB, and HSL. Numbers apply as you type and step with the
+arrow keys (Shift: 10); hex applies on Enter or when the field loses focus, and anything it cannot
+read goes back. `format` sets the fields shown first and the string the callbacks receive.
+
+Swatches are a Base UI Toggle Group: one Tab stop, arrow keys between them, and a check on the one
+that matches the current color. Give `swatches` your palette, with names to announce, such as
+`{ color: "#7c6ab8", label: "Lilac" }`. The stage cycles the formats and tries two swatches.
+
+## Anatomy [#anatomy]
+
+The panel is ten parts in one `div`. Inspect (I) outlines each on the stage; pick a name, here or
+on the stage, to see its tokens.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-color-picker` | The panel; theme tokens set here apply to it alone; `data-disabled` |
+| <Part name="Area" /> | `div.ow-color-picker__area` | `role="slider"` in two dimensions, with its own keys; `data-dragging` while dragged |
+| <Part name="Thumb" /> | `span.ow-color-picker__thumb` | A ring around the color with a 1px dark edge, on each slider too (a `div` with `data-dragging`) |
+| <Part name="Hue" /> | `div.ow-color-picker__slider` | A Base UI `Slider`, `data-channel="hue"`; its `div.ow-color-picker__control` holds the `div.ow-color-picker__track` |
+| <Part name="Alpha" /> | `div.ow-color-picker__slider` | A Base UI `Slider` over the checkerboard, `data-channel="alpha"` |
+| <Part name="EyeDropper" /> | `button.ow-color-picker__tool` | Only where the browser has the EyeDropper API |
+| <Part name="Preview" /> | `span.ow-color-picker__preview` | The current color, as tall as both tracks |
+| <Part name="Format" /> | `button.ow-color-picker__format` | Cycles HEX, RGB, and HSL |
+| <Part name="Field" /> | `label.ow-color-picker__field` | Holds an `input.ow-color-picker__input`; the letter under it, `span.ow-color-picker__label`, is notation |
+| <Part name="Swatches" /> | `div.ow-color-picker__swatches` | A Base UI `ToggleGroup`; each `button.ow-color-picker__swatch` has `aria-pressed` and `data-pressed`, and `data-alpha` when translucent |
+
+`div.ow-color-picker__tools` holds the eye dropper, the sliders (in `div.ow-color-picker__sliders`),
+and the preview; `div.ow-color-picker__inputs` holds the format switch and the fields. Icons are
+`svg.ow-color-picker__icon`.
+
+`ColorPickerPopover` adds a trigger, `button.ow-color-picker__trigger` (Base UI `Popover.Trigger`,
+with `data-size` and `data-variant`), that shows `span.ow-color-picker__chip` (`data-alpha` when
+translucent) and `span.ow-color-picker__value`, and a popup, `div.ow-color-picker__popup`
+(`Popover.Popup`, a dialog, in `div.ow-color-picker__positioner`), that holds the panel.
+
+## States and variants [#states]
+
+The stage shows the popover's trigger in light and dark: three sizes, each as a field
+(`variant="field"`: the color and its value) and as a swatch (`variant="swatch"`: a square of the
+color), then translucent and disabled. The pointer opens one in each theme. The popup fades in
+place in 150 ms and out in 100 ms, without scaling: it is large, so a scale moved its far edges
+enough to read as a shift. Opened from the keyboard, it appears at once.
+
+| State | What shows it |
+| --- | --- |
+| Pressed | A thumb compacts while dragged and springs back; buttons and swatches shrink a little |
+| Keyboard focus | A 2 px ring in `--ow-focus` around the area, a thumb, a field, or a swatch |
+| Current swatch | A check, dark or light to suit the swatch |
+| Translucent | The checkerboard under the preview, the swatches, and the trigger's color |
+| Disabled | Dimmed; nothing moves or takes focus |
+
+Sizes follow the `--py` rule: the trigger is 29.25, 38.5, or 48 px tall, and its color sits as far
+from the edge as from the top and bottom. Color Picker is an Owsem component (Tactile): thumbs and
+swatches press with a spring, and nothing glows. Every part has a crisp 1px edge, with no soft or
+sunken shadow; only the popover floats.
+
+## Keyboard and accessibility [#keyboard]
+
+Tab moves through the area, the eye dropper, the sliders, the format switch, the fields, and the
+swatches.
+
+| Where | Key | Action |
+| --- | --- | --- |
+| Area | Arrow keys | Saturation (left, right) or brightness (up, down) by 1; with Shift, by 10 |
+| Area | Page Up, Page Down | Brightness by 10 |
+| Area | Home, End | Saturation to 0 or 100 |
+| Hue, opacity | Arrow keys, Page Up, Page Down, Home, End | Base UI Slider's keys |
+| Field | Arrow Up, Arrow Down | A number by 1; with Shift, by 10 |
+| Field | Enter | Applies the hex |
+| Field | Escape | Drops the edit; a second Escape closes the popover |
+| Swatches | Arrow keys, Enter, Space | Move between swatches, and apply one |
+| Trigger | Enter, Space | Opens the popover on the area; Escape closes it and focus returns |
+
+The area is a `role="slider"` whose `aria-valuetext` names both values, such as "Saturation 42%,
+Brightness 72%". Hue and opacity are Base UI sliders, with a range input in each thumb. Every word
+the picker shows or announces is in `labels` (FR-17); the Indonesian version of this page passes
+Indonesian ones. The format and channel letters (HEX, R, G, B, H, S, L, A) are notation and stay.
+
+With `prefers-reduced-motion`, the popover still fades, and thumbs, buttons, and swatches
+keep their size. In forced colors (Windows High Contrast), the area, the tracks, and the swatches
+keep their own colors inside a system-color outline, focus uses `Highlight`, and the current swatch
+gets a `Highlight` outline. Right to left, saturation, hue, and opacity grow toward the left.
+
+## Customization [#customization]
+
+The stage controls are open: pick a panel or checkerboard color and the code follows. Color Picker
+reads these theme tokens; set them on the picker, or on an element around it such as
+`.brand-picker`.
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-panel` | The panel, and the light squares of the checkerboard |
+| `--ow-line` | The dark squares of the checkerboard |
+| `--ow-panel-shadow` | The panel's edge; in the popover, `--ow-popup-shadow` |
+| `--ow-well-bg`, `--ow-edge` | Fields: a flat well inside a 3:1 edge |
+| `--ow-well-shadow` | The trigger: the same well, without the edge, since it is a button |
+| `--ow-raised-bg`, `--ow-raised-shadow` | The eye dropper and the format switch, as raised keys |
+| `--ow-pressed-bg`, `--ow-pressed-shadow` | Those keys while held |
+| `--ow-line-dark`, `--ow-line-light` | The etched line over the swatches |
+| `--ow-fg`, `--ow-muted`, `--ow-focus` | Text, labels, and focus rings |
+| `--ow-radius` | Corners of the area, fields, and keys; the panel's and the swatches' follow |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each picker's root, so set yours on the picker itself, as in
+`.brand-picker.ow-color-picker`.
+
+</ForMode>
+
+The width (256 px) and the area's height (160 px) are layout: set `inline-size` on the picker with
+`className` or `style`, and `block-size` on its `.ow-color-picker__area`. The gradients, the hue
+spectrum, the thumbs' white ring with its dark edges, and the check on a swatch stay the same in
+every theme, so they read on any color. The popover's panel is portaled to the body, so set its
+tokens where the popup can read them, such as `:root` or `.ow-color-picker`; it carries its
+trigger's theme and direction itself.
+
+<TokenChip lang="en" />
+
+## Ship it [#ship]
+
+The code drawer writes the panel exactly as the stage is set up. For a field that opens the picker,
+use `ColorPickerPopover`, and name it after its label plus its own value:
+
+```tsx
+<span id="brand-label">Brand color</span>
+<ColorPickerPopover
+  id="brand"
+  aria-labelledby="brand-label brand"
+  defaultValue="#7c6ab8"
+/>
+```
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `value` | `string` | |
+| `defaultValue` | `string` | `#7c6ab8` |
+| `onChange` | `(value, color) => void` | |
+| `onChangeComplete` | `(value, color) => void` | |
+| `format` | `hex`, `rgb`, `hsl` | `hex` |
+| `alpha`, `inputs`, `eyeDropper` | `boolean` | `true` |
+| `swatches` | `ColorSwatch[]`, `false` | 16 colors |
+| `disabled` | `boolean` | `false` |
+| `labels` | `ColorPickerLabels`, in part | English |
+
+`value` and `defaultValue` take hex, `rgb()`, `hsl()`, or any CSS color the browser can resolve,
+such as `oklch()` or `var(--ow-accent)`. `color` is every model at once: `{ hex, rgb, hsl, hsv }`.
+`ColorPickerPopover` takes the same props, plus the trigger's:
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `size` | `sm`, `md`, `lg` | `md` |
+| `variant` | `field`, `swatch` | `field` |
+| `open`, `defaultOpen`, `onOpenChange` | Base UI Popover | |
+| `side`, `align`, `sideOffset` | Base UI Positioner | `bottom`, `start`, `8` |
+| `disabled` | `boolean` | `false` |
+| `children` | `ReactNode` | The color and its value |
+
+The panel's ref goes to its `div`, the popover's to the trigger `button`; other props pass through.
+`parseColor`, `formatColor`, and the conversions (`hsvaToRgba`, `rgbaToHsva`, `hsvaToHsla`,
+`hslaToHsva`, `rgbaToHex`) are exported too, and work in Server Components.
+
+Import it from `owsem-ui/owsem`. In the registry, it is the `color-picker` item.

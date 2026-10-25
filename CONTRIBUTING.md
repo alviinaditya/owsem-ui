@@ -167,11 +167,14 @@ deleted CSS:
 | Phase | Component | Replaces in the docs |
 | --- | --- | --- |
 | 1 | Tabs | The code drawer's file tabs (`.lab-tabs`) |
-| 1 | Field, Input | The prefix field (`.prefix-field`) and the hex field (`.color-field`) |
+| 1 | Field, Input | The prefix field (`.prefix-field`) and the color controls' hex field (`.color-field`) |
 | 1 | Scroll Area | `ScrollFade` (sidebar, controls, code drawer, commands) |
 | 2 | Toggle Group | The Token setup's mode (`.seg`), with Popover. Already replaced: the theme, the Lab's choices, the Family filter, and the package manager picker |
 | 2 | Toast | The Copied status |
 | 3 | Drawer | The sidebar as a menu panel below 1100 px, and the Lab's docs, controls, and code sheets below 960 px (DS-10) |
+
+Swapped already: Tree Rail Nav is the sidebar (DS-14), and Color Picker opens from the swatch of
+every Lab color control, in place of the browser's `<input type="color">`.
 
 The docs' `--docs-well`, `--docs-raised`, and their shadows point at the library's depth
 materials (TK-7), so the docs and the library share one source.
@@ -237,8 +240,9 @@ component and marks the one being read. Separator is the reference. A Lab has tw
   stage shows: `cfg`, `code`, `controls`, `theme`, `inspect`, a `play` script, and a `demo` of
   its own), and is
   registered in `labs/index.ts`. A scene borrows the stage: the visitor's own changes win and stay
-  after the scene. Controls are `choice` (a segmented radio group) or `color` (a hex field and the
-  browser's picker; `token` names the theme token the component uses until a color is chosen).
+  after the scene. Controls are `choice` (a segmented radio group) or `color` (a hex field and a
+  swatch that opens Color Picker; `token` names the theme token the component uses until a color
+  is chosen, which the swatch paints and the picker opens on).
 
 The token setup (the stage toolbar's Token button; mode and prefix, DS-4) reaches every Lab: `code(cfg, setup)` writes
 token names with `setup.prefix` and any setup but theme with `ow` imports from the owsem CLI's copy,
@@ -262,11 +266,12 @@ mapped to the private property that holds the value in use.
 In the anatomy table, `<Part name="Root" />` names a part and picks it on the stage.
 
 A `play` script drives the demo through `ScriptStage`: `click` and `point` move a drawn pointer
-that sends real pointer and mouse events (hover effects and tooltips react; focus stays put), and
-`wait` pauses. Popups in a demo portal into it (`container`), so they take the stage's theme and
-Inspect finds them. It plays once its scene settles, except under reduced motion, where it waits
-for Play scene or Replay. The visitor's own press or key stops it where it is; Stop and a scene
-change remount the demo, so end a script where it started.
+that sends real pointer and mouse events (hover effects and tooltips react; focus stays put),
+`drag` presses and moves it through points in an element's box (start on a thumb), and `wait`
+pauses. Popups in a demo portal into it (`container`), so they take the stage's theme and Inspect
+finds them. It plays once its scene settles, except under reduced motion, where it waits for Play
+scene or Replay. The visitor's own press or key stops it where it is; Stop and a scene change
+remount the demo, so end a script where it started.
 
 Stage shortcuts (I, T, P, C, and R for Replay) work only while focus is on the
 stage; a click anywhere on it puts focus there, and the page header names the ones a Lab has. Play scene and Replay appear only for scenes with an animation; scripted motion uses Motion

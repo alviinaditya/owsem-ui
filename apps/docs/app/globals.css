@@ -94,6 +94,8 @@
   --docs-text-subtitle: clamp(1.0625rem, 1rem + 0.3vw, 1.125rem);
   --docs-text-lead: clamp(0.9375rem, 0.875rem + 0.35vw, 1.03125rem);
   --docs-text-body: clamp(0.9375rem, 0.9rem + 0.15vw, 0.96875rem);
+  /* owsem-ui's mono text (Color Picker's values and fields) in the docs' mono font. */
+  --ow-font-mono: var(--font-mono);
   scroll-padding-top: calc(var(--top-h) + 16px);
 }
 
@@ -579,17 +581,12 @@ body {
     fill: Highlight;
   }
 
-  /* The well's shadow is gone: a transparent outline turns into the field's edge, and the
-   * swatch keeps its own color, which is the point of it. */
+  /* The well's shadow is gone: a transparent outline turns into the field's edge. Color
+   * Picker's swatch keeps its own color. */
   .color-field,
   .prefix-field {
     outline: 1px solid transparent;
     outline-offset: -1px;
-  }
-
-  .color-swatch {
-    outline: 1px solid CanvasText;
-    forced-color-adjust: none;
   }
 }
 
@@ -2164,11 +2161,12 @@ figure[data-code-block] pre {
   list-style: none;
 }
 
+/* A value that does not fit beside a long token name goes to the next line, at the end. */
 .lab-part-card li {
-  display: grid;
-  grid-template-columns: 14px auto minmax(0, 1fr);
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 2px 8px;
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 11px;
   line-height: 1.3;
@@ -2179,6 +2177,7 @@ figure[data-code-block] pre {
 }
 
 .lab-part-card-swatch {
+  flex: none;
   inline-size: 14px;
   block-size: 14px;
   box-sizing: border-box;
@@ -2191,6 +2190,8 @@ figure[data-code-block] pre {
 }
 
 .lab-part-card-value {
+  flex: 1 1 auto;
+  min-inline-size: 0;
   overflow: hidden;
   color: var(--docs-muted);
   text-align: end;
@@ -2447,83 +2448,58 @@ figure[data-code-block] pre {
   font-size: 12px;
 }
 
-/* Color controls (components/lab/color-field.tsx): a sunken field, like the segmented track. */
+/* Color controls (components/lab/color-field.tsx): a flat well, like the segmented track. The
+ * control is a button named by its value, so it has no field edge (DP-6). */
 .color-field {
   display: flex;
   align-items: center;
   gap: 2px;
   box-sizing: border-box;
-  inline-size: 100%;
-  max-inline-size: 220px;
+  /* A set width, so it keeps its size whatever the value. */
+  inline-size: 220px;
+  max-inline-size: 100%;
   padding: 3px;
   border-radius: var(--docs-radius);
   background-color: var(--docs-well);
-  /* A text field's edge needs 3:1 against the panel (DP-6). */
-  box-shadow:
-    inset 0 0 0 1px var(--docs-control),
-    var(--docs-well-shadow);
+  box-shadow: var(--docs-well-shadow);
 }
 
-.color-swatch {
-  position: relative;
+/* Color Picker's trigger, flat inside the well: the color as a square, then its value. */
+.color-trigger {
+  flex: 1;
+  justify-content: flex-start;
+  gap: 8px;
+  min-inline-size: 0;
+  block-size: 26px;
+  padding: 0 8px 0 0;
+  border-radius: var(--docs-radius-inner);
+  background: none;
+  box-shadow: none;
+  font-size: 12px;
+}
+
+.color-trigger:hover {
+  background-color: var(--docs-hover);
+}
+
+.color-trigger .ow-color-picker__chip {
   flex: none;
   inline-size: 26px;
   block-size: 26px;
-  border-radius: var(--docs-radius-inner);
-  background-color: var(--swatch);
-  /* Light and dark swatches both keep an edge. */
-  box-shadow:
-    inset 0 0 0 1px light-dark(rgb(0 0 0 / 0.22), rgb(255 255 255 / 0.22)),
-    0 1px 2px light-dark(rgb(0 0 0 / 0.14), rgb(0 0 0 / 0.5));
-}
-
-.color-swatch input {
-  position: absolute;
-  inset: 0;
-  inline-size: 100%;
-  block-size: 100%;
   margin: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.color-swatch:has(:focus-visible) {
-  outline: 2px solid var(--docs-accent);
-  outline-offset: 2px;
-}
-
-.color-hex {
-  flex: 1;
-  min-inline-size: 0;
-  block-size: 26px;
-  padding-inline: 8px;
-  border: 0;
   border-radius: var(--docs-radius-inner);
-  background: none;
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 12px;
-  text-transform: lowercase;
 }
 
-.color-hex::placeholder {
+.color-value {
+  overflow: hidden;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.color-value[data-empty] {
   color: var(--docs-muted);
   font-family: var(--font-sans), system-ui, sans-serif;
-  text-transform: none;
-}
-
-/* A field takes the focus ring as a whole. */
-.color-hex:focus-visible {
-  outline: none;
-}
-
-.color-field:has(.color-hex:focus-visible) {
-  outline: 2px solid var(--docs-accent);
-  outline-offset: 2px;
-}
-
-.color-hex[aria-invalid="true"] {
-  text-decoration: wavy underline var(--docs-critical);
-  text-underline-offset: 4px;
 }
 
 .color-clear {
@@ -2665,6 +2641,51 @@ figure[data-code-block] pre {
 
 .demo-tree-rail[data-compact] {
   inline-size: 220px;
+}
+
+/* The Color Picker Lab's demo: the panel, and what its two callbacks last sent. */
+.demo-color {
+  display: grid;
+  gap: 12px;
+  inline-size: 256px;
+}
+
+.demo-color-log {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: space-between;
+  gap: 4px 16px;
+  margin: 0;
+  padding-inline: 10px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.demo-color-log > div {
+  display: contents;
+}
+
+.demo-color-log dt {
+  color: var(--ow-muted);
+}
+
+.demo-color-log dd {
+  margin: 0;
+  color: var(--ow-fg);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+/* A states cell: triggers on the theme's own background. */
+.demo-color-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--ow-line);
+  border-radius: 14px;
+  background-color: var(--ow-bg);
 }
 
 .demo-card p {

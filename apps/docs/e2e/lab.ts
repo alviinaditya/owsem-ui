@@ -31,3 +31,14 @@ export async function stageTool(page: Page, name: string, item = name): Promise<
     await stage(page).getByRole("button", { name, exact: true }).click();
   }
 }
+
+/** Sets a Lab color control through Color Picker's Hex field, as a person types it. */
+export async function pickColor(page: Page, label: string, hex: string): Promise<void> {
+  await stage(page)
+    .getByRole("button", { name: new RegExp(`^${label} `) })
+    .click();
+  const field = page.getByRole("dialog", { name: label }).getByRole("textbox", { name: "Hex" });
+  await field.fill(hex.replace("#", ""));
+  await field.press("Enter");
+  await page.keyboard.press("Escape");
+}

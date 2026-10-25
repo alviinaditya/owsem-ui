@@ -44,6 +44,11 @@ export interface ScriptStage {
   point(target: Element): Promise<void>;
   /** Points at an element and clicks it. Focus stays where the visitor left it. */
   click(target: Element): Promise<void>;
+  /**
+   * Presses on an element, drags through `path` (points in its box, from 0 to 1 on each axis),
+   * and lets go. Start on a thumb, so the press does not jump. Focus stays put here too.
+   */
+  drag(target: Element, path: readonly { x: number; y: number }[]): Promise<void>;
 }
 
 /** An animation on the demo (DS-11); it should end with the demo as it found it. */

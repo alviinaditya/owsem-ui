@@ -1,0 +1,559 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * Color Picker, an Owsem component (Tactile): flat fills with crisp 1px edges (TK-7). The area,
+ * tracks, and swatches are colors inside a 1px edge, the thumbs are rings that compact when
+ * pressed, the buttons are raised keys, the fields are wells, and the popover is a popup panel
+ * that scales out of its trigger. The colors being picked are painted inline; the rest are theme
+ * tokens (TK-9), apart from the literals that must read on any color.
+ */
+@layer owsem.components {
+  .ow-color-picker,
+  .ow-color-picker__trigger {
+    --_fg: var(--ow-fg);
+    --_muted: var(--ow-muted);
+    --_focus: var(--ow-focus);
+    --_edge: var(--ow-edge);
+    --_radius: var(--ow-radius);
+    --_well: var(--ow-well-bg);
+    --_well-shadow: var(--ow-well-shadow);
+    --_bg: var(--ow-panel);
+    /* literal: a color's own 1px edge, darker than the color under it in any theme */
+    --_color-edge: inset 0 0 0 1px rgb(0 0 0 / 0.2);
+    /* Translucent colors sit on a checkerboard of the panel and the line color. */
+    --_checker: var(--ow-line);
+    --_checkers: repeating-conic-gradient(var(--_checker) 0 25%, var(--_bg) 0 50%);
+    /* Tactile: a press compacts by up to 12%, scaled by the motion intensity. */
+    --_press: calc(1 - 0.12 * var(--ow-motion-scale));
+    --_ease-out: var(--ow-ease-out);
+    --_settle: var(--ow-spring-settle);
+    --_settle-duration: var(--ow-spring-settle-duration);
+    --_mono: var(--ow-font-mono, ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* The width and the area's height are layout: change them with className or style. */
+  .ow-color-picker {
+    --_pad: 10px;
+    --_track: 12px;
+    /* Each slider is a 24px target (FR-14) around its track. */
+    --_slider: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--_pad);
+    box-sizing: border-box;
+    inline-size: 256px;
+    max-inline-size: 100%;
+    padding: var(--_pad);
+    /* Concentric with the area (FR-10b). */
+    border-radius: calc(var(--_radius) + var(--_pad));
+    background-color: var(--_bg);
+    box-shadow: var(--ow-panel-shadow);
+    color: var(--_fg);
+    font-size: 13px;
+    line-height: 1.25;
+    /* DP-8: the shadow edge is gone in forced colors; this outline takes its place. */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+  }
+
+  .ow-color-picker[data-disabled] > * {
+    opacity: 0.5;
+  }
+
+  /* Saturation from the start edge, brightness from the bottom; the hue is painted inline. */
+  .ow-color-picker__area {
+    position: relative;
+    flex: none;
+    block-size: 160px;
+    border-radius: var(--_radius);
+    /* literal: the value and saturation gradients over the hue, the same in every theme */
+    background-image:
+      linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, transparent);
+    box-shadow: var(--_color-edge);
+    cursor: crosshair;
+    touch-action: none;
+    forced-color-adjust: none;
+  }
+
+  .ow-color-picker__area:dir(rtl) {
+    /* literal: the value and saturation gradients over the hue, the same in every theme */
+    background-image:
+      linear-gradient(to top, #000, transparent), linear-gradient(to left, #fff, transparent);
+  }
+
+  .ow-color-picker__area:focus-visible {
+    outline: 2px solid var(--_focus);
+    outline-offset: 2px;
+  }
+
+  /*
+   * A ring around the color with a 1px dark edge outside and a faint one inside, so it shows on
+   * every color. It compacts while pressed and springs back (Tactile); its edges stay the same.
+   */
+  .ow-color-picker__thumb {
+    position: absolute;
+    box-sizing: border-box;
+    inline-size: 16px;
+    block-size: 16px;
+    /* literal: a white ring, so the thumb reads on any color in either theme */
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    /* literal: its dark edges, so the ring also reads on light colors */
+    box-shadow:
+      0 0 0 1px rgb(0 0 0 / 0.4),
+      inset 0 0 0 1px rgb(0 0 0 / 0.12);
+    forced-color-adjust: none;
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: scale;
+    transition: scale var(--_settle-duration) var(--_settle);
+  }
+
+  .ow-color-picker__area > .ow-color-picker__thumb {
+    translate: -50% -50%;
+    pointer-events: none;
+  }
+
+  .ow-color-picker__area:dir(rtl) > .ow-color-picker__thumb {
+    translate: 50% -50%;
+  }
+
+  :is(
+    .ow-color-picker__area[data-dragging] > .ow-color-picker__thumb,
+    .ow-color-picker__thumb[data-dragging]
+  ) {
+    scale: var(--_press);
+    transition: scale 120ms var(--_ease-out);
+  }
+
+  /* Base UI focuses the range input inside the thumb (FR-13). */
+  .ow-color-picker__thumb:has(:focus-visible) {
+    outline: 2px solid var(--_focus);
+    outline-offset: 2px;
+  }
+
+  /* The eye dropper, the sliders, and the preview, as tall as the two tracks together. */
+  .ow-color-picker__tools {
+    --_tool: var(--_slider);
+    display: flex;
+    align-items: center;
+    gap: var(--_pad);
+  }
+
+  .ow-color-picker__tools[data-stack] {
+    --_tool: calc(var(--_slider) + var(--_track));
+  }
+
+  .ow-color-picker__sliders {
+    flex: 1;
+    min-inline-size: 0;
+    /* Room for a thumb at either end, and its focus ring. */
+    padding-inline: 6px;
+  }
+
+  .ow-color-picker__control {
+    display: flex;
+    align-items: center;
+    block-size: var(--_slider);
+    cursor: pointer;
+    touch-action: none;
+  }
+
+  .ow-color-picker__track {
+    position: relative;
+    flex: 1;
+    block-size: var(--_track);
+    border-radius: calc(var(--_track) / 2);
+    box-shadow: var(--_color-edge);
+    forced-color-adjust: none;
+  }
+
+  [data-channel="hue"] .ow-color-picker__track {
+    /* literal: the hue spectrum, the same in every theme */
+    background-image: linear-gradient(
+      to right,
+      #f00 0%,
+      #ff0 16.667%,
+      #0f0 33.333%,
+      #0ff 50%,
+      #00f 66.667%,
+      #f0f 83.333%,
+      #f00 100%
+    );
+  }
+
+  [data-channel="hue"] .ow-color-picker__track:dir(rtl) {
+    /* literal: the hue spectrum, the same in every theme */
+    background-image: linear-gradient(
+      to left,
+      #f00 0%,
+      #ff0 16.667%,
+      #0f0 33.333%,
+      #0ff 50%,
+      #00f 66.667%,
+      #f0f 83.333%,
+      #f00 100%
+    );
+  }
+
+  [data-channel="alpha"] .ow-color-picker__track {
+    background-image: linear-gradient(to right, transparent, var(--_alpha)), var(--_checkers);
+    background-size:
+      100% 100%,
+      8px 8px;
+  }
+
+  [data-channel="alpha"] .ow-color-picker__track:dir(rtl) {
+    background-image: linear-gradient(to left, transparent, var(--_alpha)), var(--_checkers);
+  }
+
+  /* One element paints the color over the checkerboard, so no light edge shows at the corners. */
+  .ow-color-picker__preview,
+  .ow-color-picker__chip,
+  .ow-color-picker__swatch {
+    flex: none;
+    background-color: var(--_color);
+    box-shadow: var(--_color-edge);
+    forced-color-adjust: none;
+  }
+
+  .ow-color-picker__preview,
+  :is(.ow-color-picker__chip, .ow-color-picker__swatch)[data-alpha] {
+    background-color: transparent;
+    background-image: linear-gradient(var(--_color), var(--_color)), var(--_checkers);
+    background-size:
+      100% 100%,
+      8px 8px;
+  }
+
+  .ow-color-picker__preview {
+    inline-size: var(--_tool);
+    block-size: var(--_tool);
+    border-radius: var(--_radius);
+  }
+
+  /* An icon is the font size plus 2px (FR-10). */
+  .ow-color-picker__icon {
+    flex: none;
+    inline-size: calc(1em + 2px);
+    block-size: calc(1em + 2px);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Raised keys: a flat fill with a crisp edge, the pressed material while held (DP-4). */
+  .ow-color-picker__tool,
+  .ow-color-picker__format {
+    --_key: var(--ow-raised-bg);
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    margin: 0;
+    border: 0;
+    border-radius: var(--_radius);
+    background-color: var(--_key);
+    box-shadow: var(--ow-raised-shadow);
+    color: var(--_fg);
+    font: inherit;
+    cursor: pointer;
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    will-change: scale;
+    transition: scale var(--_settle-duration) var(--_settle);
+  }
+
+  .ow-color-picker__tool {
+    inline-size: var(--_tool);
+    block-size: var(--_tool);
+    padding: 0;
+  }
+
+  /* Hover tints the fill a little toward the text; the edge stays. */
+  @media (hover: hover) and (pointer: fine) {
+    :is(.ow-color-picker__tool, .ow-color-picker__format):hover:not(:disabled) {
+      background-color: color-mix(in oklab, var(--_key), var(--_fg) 4%);
+    }
+  }
+
+  :is(.ow-color-picker__tool, .ow-color-picker__format):active:not(:disabled) {
+    background-color: var(--ow-pressed-bg);
+    box-shadow: var(--ow-pressed-shadow);
+    scale: 0.97;
+    transition: scale 90ms var(--_ease-out);
+  }
+
+  /* Fields and the format switch: one-line controls on the --py rule (FR-9), sm size. */
+  .ow-color-picker__inputs {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .ow-color-picker__format,
+  .ow-color-picker__input {
+    --py: 0.5em;
+    --_py: max(var(--py), (24px - 1lh) / 2);
+    --px: calc(var(--_py) + (1lh - 1cap) / 2);
+    box-sizing: border-box;
+    /* Firefox grows a field to its font's own line height when that is taller; pin both. */
+    block-size: calc(1lh + 2 * var(--_py));
+    padding: var(--_py) var(--px);
+    font-family: var(--_mono);
+    font-size: 13px;
+    line-height: 1.25;
+  }
+
+  .ow-color-picker__format {
+    gap: 2px;
+    padding-inline-end: calc(var(--px) - 4px);
+    font-weight: 600;
+  }
+
+  .ow-color-picker__format > .ow-color-picker__icon {
+    margin-inline-end: calc((1cap - (1em + 2px)) / 2);
+    color: var(--_muted);
+  }
+
+  .ow-color-picker__field {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: 4px;
+    min-inline-size: 0;
+  }
+
+  .ow-color-picker__field[data-wide] {
+    flex-grow: 3;
+  }
+
+  .ow-color-picker__input {
+    box-sizing: border-box;
+    inline-size: 100%;
+    min-inline-size: 0;
+    margin: 0;
+    padding-inline: 2px;
+    border: 0;
+    border-radius: var(--_radius);
+    /* A flat well; a field's edge needs 3:1 (DP-6). */
+    background-color: var(--_well);
+    box-shadow: inset 0 0 0 1px var(--_edge);
+    color: var(--_fg);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+  }
+
+  .ow-color-picker__label {
+    color: var(--_muted);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-align: center;
+  }
+
+  :is(.ow-color-picker__tool, .ow-color-picker__format, .ow-color-picker__swatch):focus-visible,
+  .ow-color-picker__input:focus-visible {
+    outline: 2px solid var(--_focus);
+    outline-offset: 2px;
+  }
+
+  /* Swatches under an etched line: a dark line, and a light one inside it. */
+  .ow-color-picker__swatches {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(24px, 1fr));
+    gap: 6px;
+    padding-block-start: var(--_pad);
+    border-block-start: 1px solid var(--ow-line-dark);
+    box-shadow: inset 0 1px 0 var(--ow-line-light);
+  }
+
+  .ow-color-picker__swatch {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: calc(var(--_radius) - 2px);
+    /* literal: the check contrasts with the swatch's own color, not with the theme */
+    color: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    will-change: scale;
+    transition: scale var(--_settle-duration) var(--_settle);
+  }
+
+  .ow-color-picker__swatch[data-light] {
+    /* literal: a dark check on a light swatch, in either theme */
+    color: #000;
+  }
+
+  .ow-color-picker__swatch:active:not(:disabled) {
+    scale: 0.9;
+    transition: scale 100ms var(--_ease-out);
+  }
+
+  /* The swatch of the current color carries a check. */
+  .ow-color-picker__swatch:not([data-pressed]) > .ow-color-picker__icon {
+    visibility: hidden;
+  }
+
+  /* The trigger: a flat well that shows the color and its value, or a square of the color. A
+   * button named by its text needs no 3:1 edge, unlike a field you type in (DP-6). */
+  .ow-color-picker__trigger {
+    --py: 0.75em;
+    --_py: max(var(--py), (24px - 1lh) / 2);
+    --px: calc(var(--_py) + (1lh - 1cap) / 2);
+    --icon: calc(1em + 2px);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    box-sizing: border-box;
+    margin: 0;
+    padding: var(--_py) var(--px);
+    border: 0;
+    border-radius: var(--_radius);
+    background-color: var(--_well);
+    box-shadow: var(--_well-shadow);
+    color: var(--_fg);
+    font: inherit;
+    font-size: 14px;
+    line-height: 1.25;
+    cursor: pointer;
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    will-change: scale;
+    transition: scale var(--_settle-duration) var(--_settle);
+  }
+
+  .ow-color-picker__trigger[data-size="sm"] {
+    --py: 0.5em;
+    font-size: 13px;
+  }
+
+  .ow-color-picker__trigger[data-size="lg"] {
+    --py: 0.875em;
+    font-size: 16px;
+  }
+
+  .ow-color-picker__trigger:active:not(:disabled) {
+    scale: 0.97;
+    transition: scale 90ms var(--_ease-out);
+  }
+
+  .ow-color-picker__trigger:focus-visible {
+    outline: 2px solid var(--_focus);
+    outline-offset: 2px;
+  }
+
+  .ow-color-picker__trigger:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* The color is the leading icon: as far from the edges as from the top and bottom (FR-10). */
+  .ow-color-picker__chip {
+    inline-size: var(--icon);
+    block-size: var(--icon);
+    margin-inline-start: calc((1cap - var(--icon)) / 2);
+    border-radius: calc(var(--_radius) / 2);
+  }
+
+  .ow-color-picker__value {
+    font-family: var(--_mono);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  /* A square as tall as the field, filled with the color. */
+  .ow-color-picker__trigger[data-variant="swatch"] {
+    justify-content: center;
+    inline-size: calc(2 * var(--_py) + 1lh);
+    block-size: calc(2 * var(--_py) + 1lh);
+    padding: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  .ow-color-picker__trigger[data-variant="swatch"] > .ow-color-picker__chip {
+    inline-size: 100%;
+    block-size: 100%;
+    margin: 0;
+    border-radius: inherit;
+  }
+
+  /* Scales out of the trigger (Base UI's --transform-origin), and back into it. */
+  /*
+   * The popup fades in place. It is large, so even a 0.96 scale moved its far edges 10 to 14px,
+   * which read as the panel shifting as it opened.
+   */
+  .ow-color-picker__popup {
+    transition: opacity 150ms var(--ow-ease-out);
+  }
+
+  .ow-color-picker__popup:is([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+  }
+
+  .ow-color-picker__popup[data-ending-style] {
+    transition-duration: 100ms;
+  }
+
+  /* Opened from the keyboard, or dismissed: no motion (Base UI's data-instant). */
+  .ow-color-picker__popup[data-instant] {
+    transition: none;
+  }
+
+  .ow-color-picker__popup > .ow-color-picker {
+    box-shadow: var(--ow-popup-shadow);
+  }
+
+  /* FR-20: no compacting; the popover still fades. */
+  @media (prefers-reduced-motion: reduce) {
+    :is(
+        .ow-color-picker__area[data-dragging] > .ow-color-picker__thumb,
+        .ow-color-picker__thumb[data-dragging]
+      ),
+    :is(.ow-color-picker__tool, .ow-color-picker__format):active:not(:disabled),
+    .ow-color-picker__swatch:active:not(:disabled),
+    .ow-color-picker__trigger:active:not(:disabled) {
+      scale: none;
+    }
+  }
+
+  /* DP-8: colors keep their own paint; edges, the selected swatch, and focus use system colors. */
+  @media (forced-colors: active) {
+    :is(
+        .ow-color-picker__area,
+        .ow-color-picker__track,
+        .ow-color-picker__preview,
+        .ow-color-picker__chip,
+        .ow-color-picker__swatch
+      ) {
+      outline: 1px solid CanvasText;
+      outline-offset: 0;
+    }
+
+    .ow-color-picker__swatch[data-pressed] {
+      outline: 3px solid Highlight;
+    }
+
+    :is(
+        .ow-color-picker__area,
+        .ow-color-picker__tool,
+        .ow-color-picker__format,
+        .ow-color-picker__input,
+        .ow-color-picker__swatch,
+        .ow-color-picker__trigger
+      ):focus-visible,
+    .ow-color-picker__thumb:has(:focus-visible) {
+      outline: 2px solid Highlight;
+      outline-offset: 2px;
+    }
+  }
+}

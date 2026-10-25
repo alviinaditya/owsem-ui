@@ -1,0 +1,134 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * A short label on a solid dark surface, with no material (depth: Tooltip). It grows out of its
+ * trigger in 125 ms; once one tooltip is open, the next one opens at once (data-instant).
+ */
+@layer owsem.components {
+  .ow-tooltip__popup {
+    --_bg: var(--ow-tooltip-bg);
+    --_fg: var(--ow-tooltip-fg);
+    /* One line is 24px tall. */
+    --_py: calc((24px - 1lh) / 2);
+    --_px: 8px;
+    --_radius: calc(var(--ow-radius) - 2px);
+    box-sizing: border-box;
+    max-inline-size: min(20rem, var(--available-width, 20rem));
+    padding: var(--_py) var(--_px);
+    border-radius: var(--_radius);
+    /* Invisible until forced colors draw it as the edge (DP-8). */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--_bg);
+    color: var(--_fg);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    line-height: 1.25;
+    overflow-wrap: break-word;
+    transform-origin: var(--transform-origin);
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: transform;
+    transition:
+      opacity 125ms var(--ow-ease-out),
+      transform 125ms var(--ow-ease-out);
+  }
+
+  .ow-tooltip__popup:is([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+
+  /* Leaving is quicker than arriving. */
+  .ow-tooltip__popup[data-ending-style] {
+    transition-duration: 100ms;
+  }
+
+  /* Opened by focus, or next to an open one, or shut with Escape: no animation. */
+  .ow-tooltip__popup[data-instant] {
+    transition: none;
+  }
+
+  /*
+   * A shortcut, such as <kbd>⌘B</kbd>, after the label, whatever the app's kbd style. Its chip is a
+   * line tall, so at the end it sits as far from the edge as from the top and bottom (FR-10), with
+   * corners concentric with the popup's (FR-10b).
+   */
+  .ow-tooltip__popup kbd {
+    display: inline-block;
+    vertical-align: top;
+    margin-inline-start: 0.5em;
+    padding-inline: 0.3em;
+    border: 0;
+    border-radius: max(2px, var(--_radius) - var(--_py));
+    background-color: color-mix(in oklab, var(--_fg) 14%, transparent);
+    color: color-mix(in oklab, var(--_fg) 80%, transparent);
+    font: inherit;
+  }
+
+  .ow-tooltip__popup kbd:last-child {
+    margin-inline-end: calc(var(--_py) - var(--_px));
+  }
+
+  /*
+   * A 12px box; the triangle fills the half next to the popup and overlaps it by 1px, so no seam
+   * shows. Base UI places the arrow with physical sides, and centers it with top or left.
+   */
+  .ow-tooltip__arrow {
+    inline-size: 12px;
+    block-size: 12px;
+    background-color: var(--_bg);
+  }
+
+  /* biome-ignore-start lint/nursery/useLogicalProperties: Base UI's physical sides */
+  .ow-tooltip__arrow[data-side="top"] {
+    top: calc(100% - 1px);
+    clip-path: polygon(0 0, 100% 0, 50% 50%);
+  }
+
+  .ow-tooltip__arrow[data-side="bottom"] {
+    bottom: calc(100% - 1px);
+    clip-path: polygon(50% 50%, 100% 100%, 0 100%);
+  }
+
+  .ow-tooltip__arrow[data-side="left"] {
+    left: calc(100% - 1px);
+    clip-path: polygon(0 0, 50% 50%, 0 100%);
+  }
+
+  .ow-tooltip__arrow[data-side="right"] {
+    right: calc(100% - 1px);
+    clip-path: polygon(100% 0, 100% 100%, 50% 50%);
+  }
+  /* biome-ignore-end lint/nursery/useLogicalProperties: Base UI's physical sides */
+
+  /* Logical sides: mirrored right to left. */
+  .ow-tooltip__arrow[data-side="inline-start"] {
+    inset-inline-start: calc(100% - 1px);
+    clip-path: polygon(0 0, 50% 50%, 0 100%);
+  }
+
+  .ow-tooltip__arrow[data-side="inline-end"] {
+    inset-inline-end: calc(100% - 1px);
+    clip-path: polygon(100% 0, 100% 100%, 50% 50%);
+  }
+
+  .ow-tooltip__positioner[dir="rtl"]
+    .ow-tooltip__arrow:is([data-side="inline-start"], [data-side="inline-end"]) {
+    transform: scaleX(-1);
+  }
+
+  /* FR-20 and the PRD: no animation at all. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-tooltip__popup {
+      transition: none;
+    }
+  }
+
+  /* DP-8: the surface becomes Canvas inside a CanvasText edge; the arrow stays visible. */
+  @media (forced-colors: active) {
+    .ow-tooltip__arrow {
+      forced-color-adjust: none;
+      background-color: CanvasText;
+    }
+  }
+}

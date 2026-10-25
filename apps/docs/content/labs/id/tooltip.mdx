@@ -1,0 +1,135 @@
+---
+title: Tooltip
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Tooltip memberi nama sebuah tombol bagi pengguna pointer dan keyboard: label singkat, beserta
+shortcut-nya, di atas permukaan gelap yang solid. Tooltip pertama menunggu sebentar; berikutnya
+langsung terbuka. Gulir untuk mulai tur; stage mengikuti setiap bagian.
+
+## Satu delay per grup [#group]
+
+Tooltip yang terbuka setiap kali pointer lewat akan berkedip di sepanjang toolbar, jadi tooltip
+pertama menunggu dulu: 600 ms secara bawaan. Begitu terbuka, masa tunggu itu berlaku untuk seluruh
+grup: bergeser di sepanjang toolbar langsung membuka tooltip tetangganya, tanpa animasi. Tinggalkan
+toolbar lebih dari 400 ms, dan tooltip berikutnya menunggu lagi.
+
+Grupnya adalah `Tooltip.Provider` yang membungkus trigger, dengan satu `delay` untuk semuanya. Tanpa
+Provider, setiap trigger menunggu sendiri-sendiri.
+
+Tooltip pertama tumbuh dari trigger-nya dalam 125 ms, dari 0,97 dan transparan ke ukuran penuh
+dengan ease-out, lalu pergi dalam 100 ms. Tetangga yang langsung terbuka melewati animasi itu,
+begitu pula tooltip yang terbuka karena fokus keyboard.
+
+Stage memutarnya: pointer diam di Tebal sampai tooltip-nya muncul, bergeser di sepanjang toolbar,
+keluar, lalu kembali setelah masa tunggunya habis. Putar scene memutarnya lagi; pilih Delay Per
+tombol di kontrol untuk merasakan bedanya.
+
+## Diposisikan oleh trigger-nya [#placement]
+
+Base UI menaruh tooltip di `side` yang diminta, bawaannya `top`, 8px dari trigger, dan
+membaliknya ke sisi seberang bila tooltip akan keluar layar. Panahnya ikut: tetap menunjuk tengah
+trigger meski tooltip bergeser agar tetap di layar, dan tooltip tumbuh dari ujung panah itu.
+
+`inline-start` dan `inline-end` juga termasuk sisi. Keduanya mengikuti arah teks, dan panahnya ikut
+berbalik.
+
+## Anatomi [#anatomy]
+
+Base UI merender bagian-bagiannya dan menaruhnya; OwsemUI memberi gaya pada popup dan panah,
+memasang jarak 8px, dan membawa arah teks ke dalam portal. Provider, Root, dan Portal tidak punya
+kotak sendiri. Inspeksi (I) menandai bagian lainnya di stage; pilih sebuah nama, di sini atau di
+stage, untuk melihat tokennya.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| Provider | Tidak ada | Grupnya: satu `delay`, `closeDelay`, dan `timeout` untuk tooltip di dalamnya |
+| Root | Tidak ada | Satu tooltip: `open`, `defaultOpen`, `onOpenChange`, dan `disabled` |
+| <Part name="Trigger" /> | Tombol Anda | Diberikan lewat `render`; `data-popup-open` selama tooltip-nya tampil |
+| Portal | `div` | Memindahkan tooltip ke `body`, atau ke dalam `container` |
+| Positioner | `div.ow-tooltip__positioner` | `side`, `align`, `sideOffset`, dan `dir` |
+| <Part name="Popup" /> | `div.ow-tooltip__popup` | `data-side`, dan `data-instant` saat melewati animasi |
+| <Part name="Arrow" /> | `div.ow-tooltip__arrow` | Opsional dan `aria-hidden`, dengan `data-side`; segitiga di dalam kotak 12px |
+| <Part name="Shortcut" /> | `kbd` | Opsional, di dalam popup setelah label |
+
+## State dan varian [#states]
+
+Stage menampilkan tooltip di kedua tema: label saja, label dengan shortcut, dan satu tanpa panah.
+Permukaannya solid di keduanya, tanpa tepi dan tanpa bayangan: gelap di halaman terang, gelap yang
+sedikit lebih terang di halaman gelap. Satu baris setinggi 24px.
+
+| State | Tandanya |
+| --- | --- |
+| Menunggu | Belum ada apa-apa, selama delay |
+| Masuk | Dari 0,97 dan transparan ke ukuran penuh, dalam 125 ms, dengan ease-out |
+| Terbuka | `data-side` di popup dan panah, `data-popup-open` di trigger |
+| Langsung | `data-instant`: `delay` di samping tooltip yang terbuka, `focus` dari keyboard, `dismiss` setelah Escape |
+| Keluar | Kembali ke 0,97 dan transparan, dalam 100 ms |
+
+## Keyboard dan aksesibilitas [#keyboard]
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab | Fokus di trigger langsung membuka tooltip-nya |
+| Escape | Menutup tooltip; fokus tetap di trigger |
+
+Tooltip hanya label visual. Screen reader membaca nama trigger itu sendiri, jadi tombol ikon tetap
+memakai `aria-label`, dan tooltip mengulanginya. Layar sentuh tidak menampilkan tooltip, karena
+ketukan juga menekan tombolnya: apa pun yang dibutuhkan pengguna layar sentuh harus ada di halaman,
+atau di Popover.
+
+Dengan `prefers-reduced-motion`, tooltip muncul dan hilang tanpa animasi sama sekali. Di forced
+colors (Windows High Contrast), popup tetap punya tepi 1px dengan warna sistem, dan panahnya tetap
+solid.
+
+## Kustomisasi [#customization]
+
+Kontrol stage terbuka: pilih sisi, panah, delay, atau warnanya, dan kodenya ikut berubah.
+
+Tooltip membaca token tema berikut, dipakai bersama oleh semua tooltip di app: pasang di `:root`,
+untuk setiap tema. Untuk satu tooltip saja, pasang di Popup-nya lewat class, seperti `tip.css`.
+Class di sekitar trigger tidak sampai, karena tooltip dirender di portal, di luar subtree
+trigger-nya.
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-tooltip-bg` | Permukaan |
+| `--ow-tooltip-fg` | Teks; shortcut memakainya 80%, di atas tuts yang samar |
+| `--ow-radius` | Sudut, 2px lebih kecil; sudut shortcut setengahnya |
+
+<ForMode mode="isolated">
+
+Di mode isolated, nilainya ada di setiap Popup, jadi atur di Popup lewat class, seperti `tip.css`.
+
+</ForMode>
+
+<TokenChip lang="id" />
+
+## Ship it [#ship]
+
+Drawer kode menulis toolbar persis seperti pengaturan stage. Ubah sisi, panah, delay, atau warna,
+dan baris yang berubah akan menyala.
+
+| Bagian | Prop | Tipe | Bawaan |
+| --- | --- | --- | --- |
+| Provider | `delay` | `number` | Milik trigger |
+| Provider | `timeout` | `number` | `400` |
+| Root | `open`, `defaultOpen` | `boolean` | `false` |
+| Root | `onOpenChange` | `(open, details) => void` | |
+| Root | `disabled` | `boolean` | `false` |
+| Trigger | `delay` | `number` | `600` |
+| Trigger | `closeDelay` | `number` | `0` |
+| Trigger | `closeOnClick` | `boolean` | `true` |
+| Positioner | `side` | `"top" \| "right" \| "bottom" \| "left" \| "inline-start" \| "inline-end"` | `"top"` |
+| Positioner | `sideOffset` | `number` | `8` |
+| Positioner | `align` | `"start" \| "center" \| "end"` | `"center"` |
+| Semua bagian | `className`, `style`, `render` | | |
+
+Semuanya, kecuali `sideOffset` 8px, berasal dari Base UI, yang mendokumentasikan sisanya, seperti
+trigger yang terpisah dari tooltip-nya dengan `Tooltip.createHandle()`. Ref diteruskan ke elemen
+setiap bagian.
+
+Impor dari `owsem-ui/base`. Di registry, item-nya `tooltip`; toolbar di sini juga butuh `toolbar`
+dan `toggle`.

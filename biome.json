@@ -73,6 +73,10 @@
           }
         }
       }
+    },
+    {
+      "includes": ["packages/ui/src/tailwind.css"],
+      "css": { "parser": { "tailwindDirectives": true } }
     }
   ]
 }

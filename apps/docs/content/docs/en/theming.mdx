@@ -131,6 +131,14 @@ element around it.
 }
 ```
 
+With Tailwind, an arbitrary property sets a token on one part, or on an element around parts (see
+[Tailwind CSS v4](/en/docs#tailwind-css-v4)):
+
+```tsx
+<Separator className="[--ow-line-dark:var(--color-zinc-400)]" />
+<aside className="bg-ow-panel [--ow-panel:var(--color-zinc-900)]">{children}</aside>
+```
+
 Values without a token of their own come from the theme tokens: inner corners from `--ow-radius`
 (each layer adds its padding), tints from `--ow-fg` or `--ow-accent` with `color-mix()`, and
 Glide's highlight from `--ow-hover`. Names that start with `--_` are private and may change.

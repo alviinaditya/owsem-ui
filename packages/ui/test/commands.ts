@@ -1,3 +1,4 @@
+import { compile } from "@tailwindcss/node";
 import type { CDPSession } from "playwright";
 import type { BrowserCommand } from "vitest/node";
 
@@ -51,6 +52,16 @@ export const setReducedTransparency: BrowserCommand<[mode: "reduce" | "no-prefer
   await ctx.page.emulateMedia({});
 };
 
+// Compiles `css` with Tailwind CSS v4 for the given class names; imports resolve from packages/ui.
+export const compileTailwind: BrowserCommand<[css: string, candidates: string[]]> = async (
+  ctx,
+  css,
+  candidates,
+) => {
+  const compiler = await compile(css, { base: ctx.project.config.root, onDependency: () => {} });
+  return compiler.build(candidates);
+};
+
 declare module "vitest/browser" {
   interface BrowserCommands {
     setColorScheme: (scheme: "light" | "dark") => Promise<void>;
@@ -58,5 +69,6 @@ declare module "vitest/browser" {
     setReducedMotion: (mode: "reduce" | "no-preference") => Promise<void>;
     mouse: (action: "down" | "up") => Promise<void>;
     setReducedTransparency: (mode: "reduce" | "no-preference") => Promise<void>;
+    compileTailwind: (css: string, candidates: string[]) => Promise<string>;
   }
 }

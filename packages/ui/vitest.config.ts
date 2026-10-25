@@ -1,6 +1,7 @@
 import { playwright } from "@vitest/browser-playwright";
 import { defineConfig } from "vitest/config";
 import {
+  compileTailwind,
   mouse,
   setColorScheme,
   setForcedColors,
@@ -39,6 +40,7 @@ export default defineConfig({
         setReducedMotion,
         setReducedTransparency,
         mouse,
+        compileTailwind,
       },
       // Traces are off: Vitest 5.0.5 names them by test name, so parallel files overwrite each
       // other. Debug with --browser.trace=retain-on-failure --no-file-parallelism <file>.

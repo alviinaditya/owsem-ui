@@ -74,7 +74,7 @@ export const catalog = [
   { name: "meter", title: "Meter", family: "base", category: "display", phase: 3, status: "planned" },
   { name: "tree-rail-nav", title: "Tree Rail Nav", family: "owsem", category: "navigation", expressions: ["kinetic"], status: "prototype" },
   { name: "lumen-rail-nav", title: "Lumen Rail Nav", family: "owsem", category: "navigation", expressions: ["lumen", "kinetic"], status: "planned" },
-  { name: "command-menu", title: "Command Menu", family: "owsem", category: "navigation", expressions: ["kinetic", "surface"], status: "planned" },
+  { name: "command-menu", title: "Command Menu", family: "owsem", category: "navigation", expressions: ["kinetic", "surface"], status: "prototype" },
   { name: "number-ticker", title: "Number Ticker", family: "owsem", category: "display", expressions: ["kinetic"], status: "planned" },
   { name: "spotlight-card", title: "Spotlight Card", family: "owsem", category: "display", expressions: ["surface", "lumen"], status: "planned" },
   { name: "color-picker", title: "Color Picker", family: "owsem", category: "form", expressions: ["tactile"], status: "prototype" },

@@ -1,0 +1,418 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * Command Menu, an Owsem component (Kinetic, Surface): a glass panel over a dimmed page, with one
+ * highlight gliding through the results. No glow, and no open or close animation: a palette opened
+ * from the keyboard many times a day appears and goes at once. Only Glide moves.
+ *
+ * It reads the theme tokens only (TK-9). The popup renders in the body, so set them on :root, or
+ * on the Popup itself through className or style.
+ */
+@layer owsem.components {
+  /* The trigger: a search field on the well (a flat darker fill), as tall as controls (FR-9). */
+  .ow-command-menu__trigger {
+    --py: 0.75em;
+    --_py: max(var(--py), (24px - 1lh) / 2);
+    --px: calc(var(--_py) + (1lh - 1cap) / 2);
+    --icon: calc(1em + 2px);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    box-sizing: border-box;
+    min-inline-size: 0;
+    padding: var(--_py) var(--px);
+    overflow: hidden;
+    border: 0;
+    border-radius: var(--ow-radius);
+    /* DP-8: invisible until forced colors drop the shadows. */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--ow-well-bg);
+    /* A crisp 1px edge at 3:1 (DP-6), over the well's own. */
+    box-shadow:
+      inset 0 0 0 1px var(--ow-edge),
+      var(--ow-well-shadow);
+    color: var(--ow-muted);
+    font: inherit;
+    font-size: 14px;
+    line-height: 1.25;
+    text-align: start;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color 0.15s ease;
+  }
+
+  .ow-command-menu__trigger[data-size="sm"] {
+    --py: 0.5em;
+    font-size: 13px;
+  }
+
+  .ow-command-menu__trigger[data-size="lg"] {
+    --py: 0.875em;
+    font-size: 16px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .ow-command-menu__trigger:hover {
+      color: var(--ow-fg);
+    }
+  }
+
+  .ow-command-menu__trigger:focus-visible {
+    outline: 2px solid var(--ow-focus);
+    outline-offset: 2px;
+  }
+
+  .ow-command-menu__icon {
+    flex: none;
+    inline-size: var(--icon);
+    block-size: var(--icon);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* FR-10: the icon sits as far from the edge as from the top and bottom. */
+  .ow-command-menu__trigger > .ow-command-menu__icon,
+  .ow-command-menu__field > .ow-command-menu__icon {
+    margin-inline-start: calc((1cap - var(--icon)) / 2);
+  }
+
+  .ow-command-menu__backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: var(--ow-backdrop);
+  }
+
+  /* The popup hangs from the upper part of the screen, so its top stays put as results change. */
+  .ow-command-menu__viewport {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: clamp(16px, 12vh, 120px) 16px 16px;
+  }
+
+  /*
+   * The glass panel (Surface): the panel material at 80% over a blur of the page, with the popup's
+   * crisp edge and drop shadow. The radius is the items' plus the padding around them (FR-10b).
+   * The width is a default: set inline-size on the Popup to change it.
+   */
+  .ow-command-menu__popup {
+    /* Item --py in em, per size (FR-11); the field and labels line up with the items from it. */
+    --_n: 0.75;
+    --_p: 6px;
+    --_radius: var(--ow-radius);
+    --_solid: var(--ow-panel);
+    --_glass: color-mix(in oklab, var(--_solid) 80%, transparent);
+    --_blur: 24px;
+    --_shadow: var(--ow-popup-shadow);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    inline-size: min(100%, 560px);
+    max-block-size: min(100%, 32rem);
+    box-sizing: border-box;
+    border-radius: calc(var(--_radius) + var(--_p));
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--_solid);
+    box-shadow: var(--_shadow);
+    color: var(--ow-fg);
+    font-size: 14px;
+    line-height: 1.25;
+  }
+
+  .ow-command-menu__popup[data-size="sm"] {
+    --_n: 0.5;
+    font-size: 13px;
+  }
+
+  .ow-command-menu__popup[data-size="lg"] {
+    --_n: 0.875;
+    font-size: 16px;
+  }
+
+  @supports (backdrop-filter: blur(1px)) {
+    .ow-command-menu__popup {
+      background-color: var(--_glass);
+      backdrop-filter: blur(var(--_blur)) saturate(1.6);
+    }
+
+    /* backdrop="blur": the page also blurs under the scrim. */
+    .ow-command-menu__backdrop[data-blur] {
+      backdrop-filter: blur(8px);
+    }
+
+    /* Opaque for those who ask for less transparency, and the page left sharp. */
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement (NF-1) */
+    @media (prefers-reduced-transparency: reduce) {
+      .ow-command-menu__popup {
+        background-color: var(--_solid);
+        backdrop-filter: none;
+      }
+
+      .ow-command-menu__backdrop[data-blur] {
+        backdrop-filter: none;
+      }
+    }
+  }
+
+  /* The search row and the footer stand as tall as each other (FR-9). */
+  .ow-command-menu__field,
+  .ow-command-menu__footer {
+    --py: calc((var(--_n) + 0.25) * 1em);
+    --_py: max(var(--py), (24px - 1lh) / 2);
+    display: flex;
+    flex: none;
+    align-items: center;
+    min-block-size: 1lh;
+    padding-block: var(--_py);
+    color: var(--ow-muted);
+  }
+
+  /*
+   * The search row, its icon and text in line with the items' (FR-10). An etched line under it, as
+   * over the footer; the input always has focus while the menu is open, so its caret shows it.
+   */
+  .ow-command-menu__field {
+    --icon: calc(1em + 2px);
+    gap: 0.5em;
+    padding-inline: calc(var(--_p) + max(var(--_n) * 1em, (24px - 1lh) / 2) + (1lh - 1cap) / 2);
+    border-block-end: 1px solid var(--ow-line-dark);
+    box-shadow: 0 1px 0 var(--ow-line-light);
+  }
+
+  /* One line tall: Firefox can make a text field taller, from the font's rounded metrics. */
+  .ow-command-menu__input {
+    flex: 1;
+    min-inline-size: 0;
+    block-size: 1lh;
+    padding: 0;
+    border: 0;
+    outline: none;
+    background: none;
+    color: var(--ow-fg);
+    font: inherit;
+    line-height: inherit;
+  }
+
+  .ow-command-menu__input::placeholder {
+    color: var(--ow-muted);
+    opacity: 1;
+  }
+
+  /* Shown only while focused: the way out for touch screen readers. */
+  .ow-command-menu__close {
+    position: absolute;
+    inset-block-start: var(--_p);
+    inset-inline-end: var(--_p);
+    display: grid;
+    place-items: center;
+    inline-size: 2em;
+    block-size: 2em;
+    padding: 0;
+    border: 0;
+    border-radius: var(--_radius);
+    background: none;
+    color: var(--ow-muted);
+  }
+
+  .ow-command-menu__close:not(:focus-visible) {
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .ow-command-menu__close:focus-visible {
+    outline: 2px solid var(--ow-focus);
+    outline-offset: -2px;
+  }
+
+  .ow-command-menu__close svg {
+    inline-size: calc(1em + 2px);
+    block-size: calc(1em + 2px);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+
+  /*
+   * The results scroll inside the panel; Glide's highlight rides along (glide.ts). An edge fades
+   * while there is more to scroll that way, by as much as has scrolled, up to 2em: List sets
+   * --_above and --_below as it scrolls.
+   */
+  .ow-command-menu__list {
+    --_thumb: color-mix(in oklab, var(--ow-muted) 40%, transparent);
+    --_above: 0px;
+    --_below: 0px;
+    position: relative;
+    isolation: isolate;
+    flex: 0 1 auto;
+    min-block-size: 0;
+    padding: var(--_p);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-padding-block: var(--_p);
+    outline: none;
+    mask-image: linear-gradient(
+      transparent,
+      #000 min(var(--_above), 2em),
+      #000 calc(100% - min(var(--_below), 2em)),
+      transparent
+    );
+    /* A thin, quiet scrollbar without arrows: the standard properties here (Firefox)… */
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement (NF-1) */
+    scrollbar-width: thin;
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement (NF-1) */
+    scrollbar-color: var(--_thumb) transparent;
+  }
+
+  /* …and WebKit's pseudo-elements where the browser has them, which the standard ones would turn off. */
+  @supports selector(::-webkit-scrollbar) {
+    .ow-command-menu__list {
+      scrollbar-width: auto;
+      scrollbar-color: auto;
+    }
+
+    .ow-command-menu__list::-webkit-scrollbar {
+      inline-size: 10px;
+    }
+
+    .ow-command-menu__list::-webkit-scrollbar-track {
+      background: none;
+    }
+
+    .ow-command-menu__list::-webkit-scrollbar-thumb {
+      border: 3px solid transparent;
+      /* literal: a pill, whatever the theme's radius */
+      border-radius: 999px;
+      background: var(--_thumb) padding-box;
+    }
+  }
+
+  .ow-command-menu__list[data-empty] {
+    display: none;
+  }
+
+  .ow-command-menu__empty:not(:empty) {
+    padding: 2.25em 1em;
+    color: var(--ow-muted);
+    text-align: center;
+  }
+
+  /* A group's name, in line with its items' icons. */
+  .ow-command-menu__group-label {
+    padding-block: 0.75em 0.375em;
+    padding-inline: calc((var(--_n) + 0.125) / 0.857 * 1em - 1px);
+    color: var(--ow-muted);
+    font-size: 0.857em;
+    font-weight: 500;
+  }
+
+  .ow-command-menu__group:first-child > .ow-command-menu__group-label {
+    padding-block-start: 0.375em;
+  }
+
+  .ow-command-menu__item {
+    --py: calc(var(--_n) * 1em);
+    --_py: max(var(--py), (24px - 1lh) / 2);
+    --px: calc(var(--_py) + (1lh - 1cap) / 2);
+    --icon: calc(1em + 2px);
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    box-sizing: border-box;
+    padding: var(--_py) var(--px);
+    border-radius: var(--_radius);
+    color: var(--ow-fg);
+    cursor: default;
+    outline: none;
+  }
+
+  .ow-command-menu__item[data-disabled] {
+    color: var(--ow-muted);
+  }
+
+  .ow-command-menu__item-icon {
+    display: inline-flex;
+    flex: none;
+    inline-size: var(--icon);
+    block-size: var(--icon);
+    margin-inline-start: calc((1cap - var(--icon)) / 2);
+    color: var(--ow-muted);
+  }
+
+  .ow-command-menu__item[data-highlighted]:not([data-disabled]) > .ow-command-menu__item-icon {
+    color: var(--ow-fg);
+  }
+
+  .ow-command-menu__item-icon > svg {
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  /* One line each; the description takes what the label leaves, so it gives way first. */
+  .ow-command-menu__item-label,
+  .ow-command-menu__item-description {
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ow-command-menu__item-label {
+    flex: 0 1 auto;
+  }
+
+  .ow-command-menu__item-description {
+    flex: 1 1 0;
+    color: var(--ow-muted);
+  }
+
+  /* Keys as small keycaps: the raised material, a flat fill with a crisp edge. */
+  /* Shortcuts are Kbd keycaps (components/kbd), at the end of the trigger or the item. */
+  .ow-command-menu__trigger > .ow-command-menu__shortcut,
+  .ow-command-menu__item > .ow-command-menu__shortcut {
+    margin-inline-start: auto;
+  }
+
+  /* Past an etched groove: a dark line, then a light one. Its hints start where group names do. */
+  .ow-command-menu__footer {
+    flex-wrap: wrap;
+    gap: 0.5em 1em;
+    padding-inline: calc(var(--_p) + (var(--_n) + 0.125) * 1em - 1px);
+    border-block-start: 1px solid var(--ow-line-dark);
+    box-shadow: inset 0 1px 0 var(--ow-line-light);
+  }
+
+  .ow-command-menu__footer > * {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    font-size: 0.857em;
+  }
+
+  /* DP-8: backgrounds and shadows drop out; outlines and system colors carry the shapes. */
+  @media (forced-colors: active) {
+    .ow-command-menu__field,
+    .ow-command-menu__footer {
+      border-color: CanvasText;
+    }
+
+    .ow-command-menu__item[data-disabled] {
+      color: GrayText;
+    }
+
+    .ow-command-menu__trigger:focus-visible,
+    .ow-command-menu__close:focus-visible {
+      outline-color: Highlight;
+    }
+  }
+}

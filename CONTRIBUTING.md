@@ -172,7 +172,6 @@ deleted CSS:
 | 1 | Scroll Area | `ScrollFade` (sidebar, controls, code drawer, commands) |
 | 2 | Toggle Group | Segmented choices (`.seg`): theme, Orientation, Family filter, and the package manager picker (`.pm-picker`) |
 | 2 | Toast | The Copied status |
-| 2 | Combobox, Dialog | ⌘K search (DS-5), through Command Menu |
 | 3 | Drawer | The sidebar as a menu panel below 1100 px, and the Lab's docs, controls, and code sheets below 960 px (DS-10) |
 
 Swapped already: Tree Rail Nav is the sidebar (DS-14), and Color Picker opens from the swatch of

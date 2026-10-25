@@ -166,7 +166,7 @@ function ComingSoon({ lang, entry, dict }: PageArgs) {
   const url = baseUiUrl(entry);
   const [before, after] = dict.comingSoon.baseUi.split("{link}");
   return (
-    <main className="page">
+    <main className="page page-text">
       <Intro lang={lang} entry={entry} dict={dict} />
       <div className="coming-soon">
         <p>{dict.comingSoon.body}</p>

@@ -323,7 +323,25 @@ body {
   box-sizing: border-box;
   max-inline-size: 1080px;
   margin-inline: auto;
-  padding: 40px 16px 80px;
+  padding: 40px 16px 96px;
+}
+
+@media (width >= 900px) {
+  .page {
+    max-inline-size: calc(1080px + 2 * 48px);
+    padding: 64px 48px 128px;
+  }
+}
+
+/* A page of text (Coming soon) keeps the classic pages' column. */
+.page-text {
+  max-inline-size: calc(42rem + 2 * 16px);
+}
+
+@media (width >= 900px) {
+  .page-text {
+    max-inline-size: calc(42rem + 2 * 48px);
+  }
 }
 
 @layer docs-base {
@@ -376,7 +394,7 @@ body {
 
 /* Install commands (components/install.tsx): a package manager picker and copyable commands. */
 .install {
-  margin-block-start: 20px;
+  margin-block-start: 32px;
   border: 1px solid var(--ow-line-dark);
   border-radius: var(--docs-radius-box);
   background-color: var(--tk-bg);
@@ -647,7 +665,7 @@ body {
 /* Component pages */
 
 .coming-soon {
-  padding: 20px 24px;
+  padding: 24px 28px;
   border: 1px solid var(--ow-line-dark);
   box-shadow: inset 0 1px 0 var(--ow-line-light);
   border-radius: var(--docs-radius-box);
@@ -666,7 +684,7 @@ body {
   --ow-edge: var(--docs-line-strong);
   display: flex;
   gap: 12px;
-  margin-block: 40px 16px;
+  margin-block: 56px 16px;
 }
 
 .neighbors a {
@@ -1158,12 +1176,12 @@ body {
 
 .site-content {
   min-inline-size: 0;
-  padding: 40px 16px 80px;
+  padding: 40px 16px 96px;
 }
 
 @media (width >= 900px) {
   .site-content {
-    padding-inline: 40px;
+    padding: 64px 48px 128px;
   }
 }
 
@@ -1175,15 +1193,15 @@ body {
   }
 }
 
+/*
+ * The text column stays near 85 characters a line, and with the TOC it sits in the middle of the
+ * space beside the sidebar, so the room left over falls on both sides.
+ */
 .with-toc {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 48px;
-  max-inline-size: 68rem;
-}
-
-.with-toc h2 {
-  margin-block-start: 40px;
+  grid-template-columns: minmax(0, 42rem);
+  justify-content: center;
+  column-gap: 64px;
 }
 
 .toc {
@@ -1192,15 +1210,43 @@ body {
 
 @media (width >= 1280px) {
   .with-toc {
-    grid-template-columns: minmax(0, 1fr) 180px;
+    grid-template-columns: minmax(0, 42rem) 200px;
   }
 
   .toc {
     display: block;
     position: sticky;
-    inset-block-start: calc(var(--top-h) + 24px);
+    inset-block-start: calc(var(--top-h) + 64px);
     align-self: start;
   }
+}
+
+/*
+ * Prose rhythm: more room above a section than inside it, so each one reads as a group. Low
+ * specificity, so a page's own blocks (the changelog) keep their spacing.
+ */
+.with-toc article {
+  line-height: 1.75;
+}
+
+.with-toc :where(article > p, article > ul, article > ol) {
+  margin-block: 0 20px;
+}
+
+.with-toc :where(article li + li) {
+  margin-block-start: 6px;
+}
+
+.with-toc :where(article h2) {
+  margin-block: clamp(44px, 3vw + 32px, 64px) 16px;
+}
+
+.with-toc :where(article h3) {
+  margin-block: 40px 12px;
+}
+
+.with-toc .page-header {
+  margin-block-end: clamp(32px, 2vw + 24px, 48px);
 }
 
 .toc .sidebar-heading {
@@ -1222,12 +1268,12 @@ body {
 /* Prose, code, and tables inside pages and Lab scenes */
 
 figure[data-code-block] {
-  margin: 16px 0;
+  margin: 24px 0;
 }
 
 figure[data-code-block] pre {
   margin: 0;
-  padding: 12px 16px;
+  padding: 16px 20px;
   overflow-x: auto;
   border: 1px solid var(--ow-line-dark);
   box-shadow: inset 0 1px 0 var(--ow-line-light);
@@ -1241,7 +1287,7 @@ figure[data-code-block] pre {
   table {
     display: block;
     max-inline-size: 100%;
-    margin-block: 16px;
+    margin-block: 24px;
     overflow-x: auto;
     border-collapse: separate;
     border-spacing: 0;
@@ -1376,7 +1422,7 @@ figure[data-code-block] pre {
 
   .lab-narrative {
     grid-area: 1 / 1;
-    padding: 16px 32px 64px;
+    padding: 24px clamp(32px, 2.5vw, 48px) 96px;
   }
 
   .lab-stage-column {
@@ -1618,15 +1664,15 @@ figure[data-code-block] pre {
 }
 
 .lab-narrative .page-header {
-  margin-block-end: 24px;
+  margin-block-end: 40px;
 }
 
 .lab-hint {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px 14px;
-  margin-block: 16px 0;
+  gap: 8px 16px;
+  margin-block: 32px 0;
   color: var(--docs-muted);
   font-size: 13px;
 }

@@ -11,8 +11,8 @@ import {
   Toolbar,
   Tooltip,
 } from "owsem-ui/base";
-import { ColorPicker, CommandMenu, TreeRailNav } from "owsem-ui/owsem";
-import { type ReactNode, useState } from "react";
+import { ColorPicker, CommandMenu, TableOfContents, TreeRailNav } from "owsem-ui/owsem";
+import { type ReactNode, useEffect, useId, useRef, useState } from "react";
 import type { ComponentName } from "@/lib/catalog";
 import type { Lang } from "@/lib/i18n";
 import { Icon } from "./icons/icon";
@@ -47,6 +47,8 @@ const TEXT = {
     openRecent: "Buka terbaru",
     settings: "Pengaturan",
     toolbar: "Format teks",
+    contents: "Di halaman ini",
+    sections: ["Instalasi", "Tema", "Pemakaian", "API"],
   },
   en: {
     create: "New",
@@ -77,6 +79,8 @@ const TEXT = {
     openRecent: "Open recent",
     settings: "Settings",
     toolbar: "Text format",
+    contents: "On this page",
+    sections: ["Installation", "Theming", "Usage", "API"],
   },
 };
 
@@ -208,6 +212,37 @@ function CommandMenuPreview({ t }: { t: Text }) {
   );
 }
 
+/** A page sketch that reads along: scrolled to its second section, so the marker stands there. */
+function TableOfContentsPreview({ t }: { t: Text }) {
+  const id = useId();
+  const article = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (article.current) article.current.scrollTop = 48;
+  }, []);
+  return (
+    <div className="component-preview-toc">
+      <div ref={article} className="component-preview-toc-article">
+        {t.sections.map((section, i) => (
+          <div key={section}>
+            <span id={`${id}-${i}`} />
+            <span />
+            <span />
+          </div>
+        ))}
+      </div>
+      <TableOfContents.Root aria-label={t.contents}>
+        <TableOfContents.List>
+          {t.sections.map((section, i) => (
+            <TableOfContents.Item key={section}>
+              <TableOfContents.Link href={`#${id}-${i}`}>{section}</TableOfContents.Link>
+            </TableOfContents.Item>
+          ))}
+        </TableOfContents.List>
+      </TableOfContents.Root>
+    </div>
+  );
+}
+
 /** Each built component, small and still: what a visitor gets on its page, minus the motion. */
 const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
   button: (t) => (
@@ -302,6 +337,7 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
     </TreeRailNav.Root>
   ),
   "command-menu": (t) => <CommandMenuPreview t={t} />,
+  "table-of-contents": (t) => <TableOfContentsPreview t={t} />,
   "color-picker": () => (
     <ColorPicker
       defaultValue="#7c6ab8"

@@ -842,6 +842,53 @@ body {
   display: none;
 }
 
+/* Table of Contents beside a page sketch that scrolls. */
+.component-preview-toc {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.component-preview-toc-article {
+  box-sizing: border-box;
+  inline-size: 88px;
+  block-size: 112px;
+  padding: 8px 10px;
+  overflow-y: auto;
+  border: 1px solid var(--ow-line-dark);
+  border-radius: var(--docs-radius);
+  background-color: var(--docs-surface);
+  color: var(--docs-control);
+  scrollbar-width: none;
+}
+
+.component-preview-toc-article > div {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  block-size: 56px;
+}
+
+.component-preview-toc-article span {
+  block-size: 4px;
+  border-radius: 2px;
+  background-color: currentColor;
+  opacity: 0.35;
+}
+
+.component-preview-toc-article span:first-child {
+  inline-size: 60%;
+  block-size: 6px;
+  opacity: 0.8;
+}
+
+.component-preview .ow-table-of-contents {
+  --ow-accent: var(--docs-accent);
+  --ow-line: var(--docs-line-strong);
+  inline-size: 104px;
+  font-size: 12.5px;
+}
+
 .component-preview-sketch {
   inline-size: 160px;
   block-size: 96px;

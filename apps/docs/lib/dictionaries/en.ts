@@ -204,6 +204,8 @@ export const en = {
     kbd: "A key on the keyboard, drawn as a small raised keycap.",
     "table-of-contents":
       "An “On this page” list that marks the section being read, with a marker sliding along its rail.",
+    "copy-button":
+      "A button that copies text: its copy icon morphs into a check that draws itself, then back.",
     "icon-morph":
       "One icon swaps for another in place: the old one shrinks and fades as the new one grows in.",
   },

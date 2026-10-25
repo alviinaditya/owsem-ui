@@ -11,7 +11,7 @@ import {
   Toolbar,
   Tooltip,
 } from "owsem-ui/base";
-import { ColorPicker, CommandMenu, TableOfContents, TreeRailNav } from "owsem-ui/owsem";
+import { ColorPicker, CommandMenu, CopyButton, TableOfContents, TreeRailNav } from "owsem-ui/owsem";
 import { type ReactNode, useEffect, useId, useRef, useState } from "react";
 import type { ComponentName } from "@/lib/catalog";
 import type { Lang } from "@/lib/i18n";
@@ -339,6 +339,12 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
   ),
   "command-menu": (t) => <CommandMenuPreview t={t} />,
   "table-of-contents": (t) => <TableOfContentsPreview t={t} />,
+  "copy-button": (t) => (
+    <div className="component-preview-copy">
+      <code>pnpm add owsem-ui</code>
+      <CopyButton value="pnpm add owsem-ui" labels={{ copy: t.copy }} showLabel size="sm" />
+    </div>
+  ),
   // One swap, Copy to Check, held at its start, mid-way, and at rest.
   "icon-morph": () => (
     <div className="component-preview-row">

@@ -1,0 +1,155 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * A ghost button that stays up while on: flat and tinted on hover while off, the raised key while
+ * on, and the pressed material only while held down (DP-4). Button's geometry (FR-9 to FR-11):
+ * --py is the only input.
+ */
+@layer owsem.components {
+  .ow-toggle {
+    --_muted: var(--ow-muted);
+    --_fg: var(--ow-fg);
+    --_hover: var(--ow-hover);
+    --_raised-bg: var(--ow-raised-bg);
+    --_raised-shadow: var(--ow-raised-shadow);
+    --_pressed-bg: var(--ow-pressed-bg);
+    --_pressed-shadow: var(--ow-pressed-shadow);
+    --py: 0.75em;
+    --_py: max(var(--py), (24px - 1lh) / 2);
+    --px: calc(var(--_py) + (1lh - 1cap) / 2);
+    --icon: calc(1em + 2px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    box-sizing: border-box;
+    margin: 0;
+    padding: var(--_py) var(--px);
+    border: 0;
+    border-radius: var(--ow-radius);
+    /* Invisible until forced colors draw it as the edge (DP-8). */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: transparent;
+    color: var(--_muted);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    touch-action: manipulation;
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: transform;
+    /* A press lets go on the settle spring (FR-21). */
+    transition: transform var(--ow-spring-settle-duration) var(--ow-spring-settle);
+  }
+
+  .ow-toggle[data-size="sm"] {
+    --py: 0.5em;
+    font-size: 0.8125rem;
+  }
+
+  .ow-toggle[data-size="lg"] {
+    --py: 0.875em;
+    font-size: 1rem;
+  }
+
+  /* Icons sit as far from the edge as from the top and bottom (FR-10). */
+  .ow-toggle__icon {
+    display: inline-flex;
+    flex: none;
+    inline-size: var(--icon);
+    block-size: var(--icon);
+  }
+
+  .ow-toggle__icon > :where(svg, img) {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  .ow-toggle__icon[data-side="start"] {
+    margin-inline-start: calc((1cap - var(--icon)) / 2);
+  }
+
+  .ow-toggle__icon[data-side="end"] {
+    margin-inline-end: calc((1cap - var(--icon)) / 2);
+  }
+
+  /* Icon only: a square as tall as a labelled toggle (FR-10a). */
+  .ow-toggle[data-icon-only] {
+    padding: calc(var(--_py) + (1lh - var(--icon)) / 2);
+  }
+
+  .ow-toggle[data-icon-only] > .ow-toggle__icon {
+    margin: 0;
+  }
+
+  /*
+   * On: the raised key, a flat fill with crisp edges, tinted toward its text. The tint keeps it
+   * apart from a surface of the key's own color, such as a white panel in the light theme.
+   */
+  .ow-toggle[data-pressed] {
+    background-color: color-mix(in oklab, var(--_raised-bg), var(--_fg) 8%);
+    box-shadow: var(--_raised-shadow);
+    color: var(--_fg);
+  }
+
+  @media (hover: hover) {
+    .ow-toggle:hover:not([data-pressed], [data-disabled]) {
+      background-color: var(--_hover);
+      color: var(--_fg);
+    }
+
+    /* The key tints a few percent further toward its text; its edges stay. */
+    .ow-toggle[data-pressed]:hover:not(:active, [data-disabled]) {
+      background-color: color-mix(in oklab, var(--_raised-bg), var(--_fg) 12%);
+    }
+  }
+
+  /* Held down, on or off: the pressed material, going in to 0.97 within 90 ms (DP-4). */
+  .ow-toggle:active:not([data-disabled]) {
+    background-color: var(--_pressed-bg);
+    box-shadow: var(--_pressed-shadow);
+    color: var(--_fg);
+    transform: scale(0.97);
+    transition-duration: 90ms;
+    transition-timing-function: var(--ow-ease-out);
+  }
+
+  .ow-toggle:focus-visible {
+    outline: 2px solid var(--ow-focus);
+    outline-offset: 2px;
+  }
+
+  .ow-toggle[data-disabled] {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
+  /* FR-20: the material still changes, nothing moves. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-toggle:active:not([data-disabled]) {
+      transform: none;
+    }
+  }
+
+  /* DP-8: the raised key is gone, so on is the system's highlight. */
+  @media (forced-colors: active) {
+    .ow-toggle[data-pressed] {
+      background-color: Highlight;
+      color: HighlightText;
+    }
+
+    .ow-toggle:focus-visible {
+      outline-color: Highlight;
+    }
+
+    .ow-toggle[data-disabled] {
+      color: GrayText;
+      opacity: 1;
+    }
+  }
+}

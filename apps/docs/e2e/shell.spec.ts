@@ -53,7 +53,7 @@ test("a Lab links the components before and after it", async ({ page }) => {
     "rel",
     "prev",
   );
-  await expect(nav.getByRole("link", { name: "Next: Scroll Area" })).toHaveAttribute("rel", "next");
+  await expect(nav.getByRole("link", { name: "Next: Kbd" })).toHaveAttribute("rel", "next");
 });
 
 test("the index filters components by family", async ({ page }) => {

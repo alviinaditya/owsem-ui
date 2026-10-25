@@ -1,6 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 import { SIDE_PANEL_WIDTH } from "../components/lab/layout.ts";
-import { openSheet, stage, stageTool } from "./lab.ts";
+import { demo, openSheet, stage, stageTool } from "./lab.ts";
 
 const stageBody = (page: Page) => page.locator(".lab-stage-body");
 const lab = (page: Page) => page.locator(".lab");
@@ -16,14 +16,11 @@ test("scenes shape the stage as you scroll (DS-2)", async ({ page }, testInfo) =
   });
   await page.goto("/en/separator");
   await expect(stage(page)).toContainText("Live · Separator");
-  await expect(stage(page).getByRole("separator")).toHaveAttribute(
-    "aria-orientation",
-    "horizontal",
-  );
+  await expect(demo(page).getByRole("separator")).toHaveAttribute("aria-orientation", "horizontal");
 
   await scene(page, "states");
   await expect(stage(page)).toContainText("States and variants");
-  await expect(stage(page).getByRole("separator").first()).toHaveAttribute(
+  await expect(demo(page).getByRole("separator").first()).toHaveAttribute(
     "aria-orientation",
     "vertical",
   );
@@ -41,11 +38,8 @@ test("scenes shape the stage as you scroll (DS-2)", async ({ page }, testInfo) =
   // Leaving the scene gives the stage back.
   await scene(page, "anatomy");
   await expect(stageBody(page)).not.toHaveAttribute("data-code");
-  await expect(stage(page).getByRole("separator")).toHaveCount(1);
-  await expect(stage(page).getByRole("separator")).toHaveAttribute(
-    "aria-orientation",
-    "horizontal",
-  );
+  await expect(demo(page).getByRole("separator")).toHaveCount(1);
+  await expect(demo(page).getByRole("separator")).toHaveAttribute("aria-orientation", "horizontal");
   expect(errors).toEqual([]);
 });
 
@@ -97,7 +91,7 @@ test("controls rewrite the code", async ({ page }) => {
   await stage(page).getByRole("button", { name: "Controls" }).click();
   await stage(page).getByLabel("Vertical").check();
   await stage(page).getByLabel("Dark line", { exact: true }).fill("#ff0000");
-  await expect(stage(page).getByRole("separator").first()).toHaveCSS(
+  await expect(demo(page).getByRole("separator").first()).toHaveCSS(
     "border-inline-start-color",
     "rgb(255, 0, 0)",
   );
@@ -226,7 +220,7 @@ test("the stage theme changes the whole stage, and the stage only (DS-12)", asyn
   const dark = await background();
   const darkBar = await bar();
 
-  await stageTool(page, "Stage theme");
+  await stageTool(page, "Stage theme", "Light");
   await expect(stage(page)).toHaveAttribute("data-theme", "light");
   expect(await background()).not.toBe(dark);
   // The toolbar goes light with the stage.
@@ -277,13 +271,13 @@ test("the docs sheet opens from the stage, half or full, and shuts (DS-10)", asy
   await expect(docs).toHaveAttribute("aria-expanded", "true");
   await expect(page.getByText("Dokumentasi Separator")).toBeFocused();
   await expect(caption).toBeHidden();
-  await expect(stage(page).getByRole("separator")).toBeVisible();
+  await expect(demo(page).getByRole("separator")).toBeVisible();
 
   // The handle switches half and full; under the full sheet only the toolbar shows.
   const handle = page.getByRole("button", { name: "Seret atau ketuk untuk mengubah tinggi" });
   await handle.click();
   await expect(lab(page)).toHaveAttribute("data-sheet", "full");
-  await expect(stage(page).getByRole("separator")).toBeHidden();
+  await expect(demo(page).getByRole("separator")).toBeHidden();
   await handle.click();
   await expect(lab(page)).toHaveAttribute("data-sheet", "half");
 
@@ -380,23 +374,56 @@ test("the toolbar fits a 320 px screen, stage theme and tokens in its More menu"
   const more = stage(page).getByRole("button", { name: "More", exact: true });
   await expect(stage(page).getByRole("button", { name: "Stage theme" })).toBeHidden();
   await more.click();
-  await page
-    .locator(".lab-more")
-    .getByRole("button", { name: /Stage theme/ })
-    .click();
-  await expect(stage(page)).toHaveAttribute("data-theme");
+  // A Menu under the toolbar's end, on screen.
+  const menu = page.getByRole("menu");
+  await expect(menu).toBeVisible();
+  const box = await menu.boundingBox();
+  const bar = await page.locator(".lab-stage-bar").boundingBox();
+  if (!box || !bar) throw new Error("The menu and the toolbar need boxes.");
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeCloseTo(bar.x + bar.width, 0);
+  expect(box.y).toBeGreaterThan(bar.y + bar.height);
+  // The stage theme is a choice of two; picking one shuts the menu.
+  await expect(menu.getByRole("menuitemradio", { name: "Light" })).toHaveAttribute(
+    "aria-checked",
+    "true",
+  );
+  await menu.getByRole("menuitemradio", { name: "Dark" }).click();
+  await expect(stage(page)).toHaveAttribute("data-theme", "dark");
+  await expect(menu).toBeHidden();
+  await more.click();
+  await expect(menu.getByRole("menuitemradio", { name: "Dark" })).toHaveAttribute(
+    "aria-checked",
+    "true",
+  );
 
   // The token setup takes the menu's place, under the toolbar, and gives focus back to More.
-  await page
-    .locator(".lab-more")
-    .getByRole("button", { name: /Token setup/ })
-    .click();
+  await menu.getByRole("menuitem", { name: "Token setup" }).click();
   const panel = page.getByRole("dialog", { name: "Token setup" });
   await expect(panel).toBeVisible();
-  await expect(page.locator(".lab-more")).toBeHidden();
+  await expect(menu).toBeHidden();
+  await expect(panel.getByRole("radio", { name: "Theme tokens" })).toBeFocused();
   expect((await panel.boundingBox())?.y).toBeLessThan(100);
   await page.keyboard.press("Escape");
   await expect(panel).toBeHidden();
+  await expect(more).toBeFocused();
+});
+
+test("the More menu works from the keyboard, and Glide follows it", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile-390", "More shows on a narrow stage");
+  await page.goto("/en/separator");
+  const more = stage(page).getByRole("button", { name: "More", exact: true });
+  await more.focus();
+  await page.keyboard.press("Enter");
+  const menu = page.getByRole("menu");
+  // Opened from the keyboard: no animation, the first item lit.
+  await expect(menu).toHaveAttribute("data-instant", "click");
+  await expect(menu.getByRole("menuitemradio", { name: "Light" })).toBeFocused();
+  await expect(menu.locator("[data-glide-active]")).toHaveText("Light");
+  await page.keyboard.press("ArrowDown");
+  await expect(menu.locator("[data-glide-active]")).toHaveText("Dark");
+  await page.keyboard.press("Escape");
+  await expect(menu).toBeHidden();
   await expect(more).toBeFocused();
 });
 
@@ -470,7 +497,7 @@ test("a scene link takes the sheet to its scene; a drag down shuts it", async ({
   await row.hover();
   await page.mouse.wheel(0, 200);
   await expect.poll(() => row.evaluate((el) => el.scrollLeft)).toBeGreaterThan(before);
-  await expect(stage(page).getByRole("separator").first()).toHaveAttribute(
+  await expect(demo(page).getByRole("separator").first()).toHaveAttribute(
     "aria-orientation",
     "vertical",
   );
@@ -484,7 +511,7 @@ test("a scene link takes the sheet to its scene; a drag down shuts it", async ({
   await page.mouse.up();
   await expect(lab(page)).toHaveAttribute("data-sheet", "closed");
   // The scene stays as it was read.
-  await expect(stage(page).getByRole("separator").first()).toHaveAttribute(
+  await expect(demo(page).getByRole("separator").first()).toHaveAttribute(
     "aria-orientation",
     "vertical",
   );
@@ -571,6 +598,75 @@ test("under reduced motion a scene plays only when asked", async ({ page }) => {
   await expect(current(page)).toHaveText("Dark mode");
 });
 
+test("the stage's Inspect, Controls, and Code are Toggles", async ({ page }) => {
+  await page.goto("/en/separator");
+  for (const name of ["Inspect", "Controls", "Code"]) {
+    await expect(stage(page).getByRole("button", { name, exact: true })).toHaveClass(/ow-toggle/);
+  }
+  const code = stage(page).getByRole("button", { name: "Code", exact: true });
+  await code.click();
+  await expect(code).toHaveAttribute("aria-pressed", "true");
+  await expect(code).toHaveAttribute("data-pressed", "");
+  await expect(stageBody(page)).toHaveAttribute("data-code", "");
+});
+
+test("the stage toolbar is one Tab stop; arrow keys move between its tools", async ({
+  page,
+}, testInfo) => {
+  await page.goto("/en/separator");
+  const tools = stage(page).getByRole("toolbar", { name: "Stage tools" });
+  await expect(tools.locator('[tabindex="0"]')).toHaveCount(1);
+  await tools.getByRole("button", { name: "Inspect" }).focus();
+  // A narrow stage keeps the stage theme in More, and arrows skip what is hidden.
+  await page.keyboard.press("ArrowRight");
+  const next = testInfo.project.name === "mobile-390" ? "Controls" : "Stage theme";
+  await expect(tools.getByRole("button", { name: next, exact: true })).toBeFocused();
+  await page.keyboard.press("ArrowLeft");
+  await page.keyboard.press("ArrowLeft");
+  const last = testInfo.project.name === "mobile-390" ? "More" : "Tokens";
+  await expect(tools.getByRole("button", { name: last, exact: true })).toBeFocused();
+  // The stage's own shortcuts still work from the toolbar.
+  await page.keyboard.press("c");
+  await expect(stageBody(page)).toHaveAttribute("data-code", "");
+});
+
+test("the Toggle Lab's note follows its toggles, and the first scene plays them", async ({
+  page,
+}) => {
+  await page.goto("/en/toggle");
+  const italic = stage(page).getByRole("button", { name: "Italic" });
+  const note = stage(page).getByText("Launch moves to Friday");
+  await expect(italic).toHaveAttribute("aria-pressed", "false");
+  await expect(note).toHaveCSS("font-weight", "600");
+  await scene(page, "pressing");
+  await expect(italic).toHaveAttribute("aria-pressed", "true");
+  await expect(note).toHaveCSS("font-style", "italic");
+});
+
+test("the Toolbar Lab's first scene presses its items, and the line follows", async ({ page }) => {
+  await page.goto("/en/toolbar");
+  const italic = demo(page).getByRole("button", { name: "Italic" });
+  await expect(italic).toHaveAttribute("aria-pressed", "false");
+  await scene(page, "together");
+  await expect(italic).toHaveAttribute("aria-pressed", "true");
+  await expect(demo(page).getByText("The toolbar formats this line.")).toHaveCSS(
+    "font-style",
+    "italic",
+  );
+});
+
+test("the Toolbar Lab names the item Tab lands on", async ({ page }) => {
+  await page.goto("/en/toolbar");
+  await scene(page, "roving");
+  const bar = demo(page).getByRole("toolbar", { name: "Formatting" });
+  await expect(demo(page).getByText("Tab lands on Bold")).toBeVisible();
+  await bar.getByRole("button", { name: "Bold" }).focus();
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("ArrowRight");
+  await expect(bar.getByRole("button", { name: "Underline" })).toBeFocused();
+  await expect(demo(page).getByText("Tab lands on Underline")).toBeVisible();
+});
+
 test("a Lab without animations has no Play scene or Replay", async ({ page }) => {
   await page.goto("/en/separator");
   for (const id of ["anatomy", "states", "ship"]) {
@@ -640,4 +736,97 @@ test("the scene being read stands out; the others recede (DS-2)", async ({ page 
   // Play scene sits beside the scene's number.
   const head = page.locator("#scene-groups .lab-scene-head");
   await expect(head.getByRole("button", { name: /^(Play scene|Stop)$/ })).toBeVisible();
+});
+
+test("the stage tools name themselves and their key in a tooltip, not a title", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "desktop", "a wide stage shows every tool");
+  await page.goto("/en/separator");
+  const tools = stage(page).getByRole("toolbar", { name: "Stage tools" });
+  await expect(tools.locator("[title]")).toHaveCount(0);
+  const tip = page.locator(".ow-tooltip__popup");
+  // Hovered again until the page has hydrated.
+  await expect(async () => {
+    await page.mouse.move(0, 0);
+    await tools.getByRole("button", { name: "Code", exact: true }).hover();
+    await expect(tip).toHaveText("CodeC", { timeout: 1500 });
+  }).toPass();
+  await expect(tip.locator("kbd")).toHaveText("C");
+  // The next tool's tooltip opens at once, unanimated.
+  await tools.getByRole("button", { name: "Controls", exact: true }).hover();
+  await expect(tip).toHaveText("ControlsP");
+  await expect(tip).toHaveAttribute("data-instant", "delay");
+  // The tooltip takes the stage's theme, and leaves the button's name alone.
+  await page.keyboard.press("Escape");
+  await page.mouse.move(0, 0);
+  await stage(page).click({ position: { x: 20, y: 200 } });
+  await page.keyboard.press("t");
+  await tools.getByRole("button", { name: "Inspect", exact: true }).hover();
+  await expect(page.locator(".ow-tooltip__positioner")).toHaveAttribute(
+    "data-theme",
+    (await stage(page).getAttribute("data-theme")) ?? "",
+  );
+  await expect(tools.getByRole("button", { name: "Inspect", exact: true })).toBeVisible();
+});
+
+test("a phone's Docs button shows its name in a tooltip only when it is an icon", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile-390", "a phone's widths");
+  await page.goto("/en/separator");
+  const docs = page.locator(".lab-tool-docs");
+  const tip = page.locator(".ow-tooltip__popup");
+  // 390 px: the label shows, so no tooltip repeats it.
+  await docs.hover();
+  await page.waitForTimeout(900);
+  await expect(tip).toHaveCount(0);
+  await page.mouse.move(0, 400);
+  await page.setViewportSize({ width: 320, height: 640 });
+  await docs.hover();
+  await expect(tip).toHaveText("Docs");
+  await expect(docs).toHaveAccessibleName("Docs");
+  // The sheet's close button has one too.
+  await docs.click();
+  await page.locator(".lab-sheet-close").hover();
+  await expect(tip).toHaveText("Close");
+});
+
+test("the Tooltip Lab's first scene walks the toolbar's tooltips", async ({ page }) => {
+  await page.goto("/en/tooltip");
+  await scene(page, "group");
+  // The one closing stays a moment, without data-open.
+  const open = demo(page).locator(".ow-tooltip__popup[data-open]");
+  await expect(open).toHaveText("Bold⌘B");
+  await expect(open).toHaveText("Italic⌘I");
+});
+
+test("the Menu Lab opens Edit with Glide on its items, and View's choices", async ({ page }) => {
+  await page.goto("/en/menu");
+  await scene(page, "glide");
+  await expect(demo(page).locator("[data-glide-active]")).toHaveText(/Copy/);
+  await scene(page, "choices");
+  await expect(demo(page).getByRole("menuitemcheckbox", { name: "Line numbers" })).toHaveAttribute(
+    "aria-checked",
+    "true",
+  );
+  // Anatomy pins a menu open without taking focus from the page.
+  await scene(page, "anatomy");
+  await expect(demo(page).getByRole("menu")).toBeVisible();
+  await expect(demo(page).getByRole("menu")).not.toBeFocused();
+});
+
+test("the Popover Lab opens its panel from Share, then hands it between triggers", async ({
+  page,
+}) => {
+  await page.goto("/en/popover");
+  await scene(page, "panel");
+  const panel = demo(page).getByRole("dialog", { name: "Share the draft" });
+  await expect(panel).toBeVisible();
+  await expect(panel.locator(".ow-popover__arrow")).toHaveCount(1);
+  await scene(page, "detached");
+  await expect(panel).toBeVisible();
+  // The link takes the panel over: it moves under it.
+  const link = demo(page).getByRole("button", { name: "sharing settings" });
+  await expect(link).toHaveAttribute("aria-expanded", "true");
 });

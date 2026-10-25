@@ -1,0 +1,142 @@
+---
+title: Toggle
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Toggle is a button with two states, on and off. Off, it is flat and tinted under the pointer; on,
+it is a raised key with crisp edges. Its sizes and spacing are Button's. Scroll to start the tour;
+the stage follows each part.
+
+## A key that stays up [#pressing]
+
+On is a material, not a color. An on toggle is the raised key: a flat fill with a 1px edge darker
+than the fill and a light line inside it, like a selected segment. Its fill leans 8% toward the
+text, so it stands apart from a surface of the key's own color, such as a white panel in the light
+theme. Off, it is flat like a ghost button: muted text, and a faint tint under the pointer. Text
+turns from muted to full strength.
+
+Every press goes in first. While held, the toggle shrinks to 0.97 and takes the pressed material
+within 90 ms, then lets go on the settle spring, with a small overshoot, and comes up raised or
+flat. Under reduced motion it changes material without moving.
+
+The stage plays it: the pointer turns Italic and Underline on, then off again, and the note's text
+follows them. Play scene runs it again; press the toggles yourself to feel the press.
+
+## Button's size and spacing [#geometry]
+
+Toggle is a one-line control, so it follows Button's geometry. `--py` is the only input: the block
+padding is `max(--py, (24px - 1lh) / 2)`, the inline padding adds `(1lh - 1cap) / 2` so the text
+looks as padded at the sides as at the top, and the height is always `2 × --py + 1lh`. Icons are
+the font size plus 2px, pulled toward the edge so they sit as far from the side as from the top.
+Without children, a toggle is a square.
+
+The stage measures every size live: with an icon and a label, a label only, or an icon only, each
+size has one height.
+
+| Size | Font | `--py` | Height | Icon |
+| --- | --- | --- | --- | --- |
+| `sm` | 13px | `0.5em` | 29.25px | 15px |
+| `md` | 14px | `0.75em` | 38.5px | 16px |
+| `lg` | 16px | `0.875em` | 48px | 18px |
+
+Set `--py` in `style` on the toggle itself to change its height. It never drops under 24px, the
+smallest target WCAG 2.5.8 allows.
+
+## Anatomy [#anatomy]
+
+Two parts. Base UI renders a `<button>` with `aria-pressed`, `data-pressed` while on, and
+`data-disabled`; OwsemUI adds the `ow-toggle` class and `data-size`, and wraps `startIcon` and
+`endIcon` in a span each. Inspect (I) outlines them on the stage.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `button.ow-toggle` | `aria-pressed`, `data-pressed`, `data-size`, and `data-icon-only` without children |
+| <Part name="Icon" /> | `span.ow-toggle__icon` | Decorative (`aria-hidden`), `data-side="start"` or `"end"`; an svg or img inside fills it |
+
+## States and variants [#states]
+
+The stage sets the light and dark themes side by side: off, on, and disabled both ways. The pointer
+rests on the off toggle in each theme, then turns it on and off.
+
+| State | What shows it |
+| --- | --- |
+| Off | Flat, with muted text |
+| Hover, while off | The `--ow-hover` tint, and text at full strength |
+| Pressing | Scaled to 0.97 within 90 ms, in the pressed material: `--ow-pressed-bg` and `--ow-pressed-shadow` |
+| On | The raised key: `--ow-raised-bg` 8% toward `--ow-fg`, `--ow-raised-shadow`, text in `--ow-fg` |
+| Hover, while on | The fill tints 4% toward the text; the edges stay |
+| Keyboard focus | A 2px ring 2px out, in `--ow-focus` |
+| Disabled | 45% opacity, and presses do nothing |
+
+An on toggle keeps its edges under the pointer, so hovering never looks like turning it off.
+
+## Keyboard and accessibility [#keyboard]
+
+| Key | Action |
+| --- | --- |
+| Tab | Moves focus to the toggle |
+| Space, Enter | Turns it on or off |
+
+Screen readers announce a toggle button and its state through `aria-pressed`. Keep its name the
+same in both states, such as "Bold": the state is what changes. A toggle without children needs an
+`aria-label`; its icons are `aria-hidden`.
+
+With `prefers-reduced-motion`, a press changes material without shrinking. In forced colors
+(Windows High Contrast), the toggle keeps a 1px edge in the system color, an on toggle is filled
+with `Highlight`, and the focus ring is `Highlight` too. Right to left, `startIcon` sits on the
+right.
+
+## Customization [#customization]
+
+The stage controls are open: pick the on surface or its text, and the code follows.
+
+Toggle reads these theme tokens. Set one on an element to change the toggles inside it. `note.css`
+sets them on the toggles themselves, so `--ow-fg` leaves the note's own text alone.
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-muted` | Text while off |
+| `--ow-hover` | Tint under the pointer while off |
+| `--ow-fg` | Text under the pointer, while on, or held down |
+| `--ow-raised-bg` | Fill while on |
+| `--ow-raised-shadow` | Edges while on |
+| `--ow-pressed-bg` | Fill while held down |
+| `--ow-pressed-shadow` | Edges while held down |
+| `--ow-radius` | Corners |
+| `--ow-focus` | Focus ring |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Toggle's root, so set yours on the toggle itself, as
+`note.css` does.
+
+</ForMode>
+
+<TokenChip lang="en" />
+
+## Ship it [#ship]
+
+The code drawer writes the component exactly as the stage is set up. Change the size or a color and
+the lines that change light up.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| `startIcon` | `ReactNode` | |
+| `endIcon` | `ReactNode` | |
+| `pressed` | `boolean` | |
+| `defaultPressed` | `boolean` | `false` |
+| `onPressedChange` | `(pressed, eventDetails) => void` | |
+| `disabled` | `boolean` | `false` |
+| `value` | `string` | |
+| `className` | `string \| (state) => string` | |
+| `style` | `CSSProperties` | |
+| `render` | `ReactElement \| (props, state) => ReactElement` | |
+
+`pressed`, `defaultPressed`, `onPressedChange`, `disabled`, and `value` (inside a Toggle Group)
+come from Base UI. The ref goes to the `button`, and other props pass through to Base UI as they
+are.
+
+Import it from `owsem-ui/base`. In the registry, it is the `toggle` item.

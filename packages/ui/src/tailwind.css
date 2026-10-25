@@ -1,0 +1,57 @@
+/*
+ * For Tailwind CSS v4 only: import it before "tailwindcss" (FR-8). The first layer statement fixes
+ * the order, so utilities in className beat component CSS and preflight stays below it.
+ */
+@layer theme, base, owsem, components, utilities;
+
+/*
+ * The theme tokens as Tailwind theme variables, for bg-ow-panel, shadow-ow-raised, rounded-ow, or
+ * ease-ow-out. `inline` makes each utility read var(--ow-*) itself, so data-theme and a token set
+ * on an element still apply. Tailwind writes its own theme variables where it meets the first
+ * @theme, hence @layer theme. Not mapped, as no documented Tailwind namespace takes them:
+ * --ow-motion-scale, --ow-spring-travel-duration, --ow-spring-settle-duration, and
+ * --ow-spring-glide-duration (write duration-(--ow-spring-glide-duration)).
+ */
+@layer theme {
+  @theme inline {
+    --color-ow-bg: var(--ow-bg);
+    --color-ow-fg: var(--ow-fg);
+    --color-ow-muted: var(--ow-muted);
+    --color-ow-accent: var(--ow-accent);
+    --color-ow-on-accent: var(--ow-on-accent);
+    --color-ow-focus: var(--ow-focus);
+    --color-ow-line: var(--ow-line);
+    --color-ow-edge: var(--ow-edge);
+    --color-ow-hover: var(--ow-hover);
+    --color-ow-good: var(--ow-good);
+    --color-ow-warning: var(--ow-warning);
+    --color-ow-critical: var(--ow-critical);
+    --color-ow-critical-solid: var(--ow-critical-solid);
+    --color-ow-on-critical: var(--ow-on-critical);
+    --color-ow-panel: var(--ow-panel);
+    --color-ow-raised: var(--ow-raised-bg);
+    --color-ow-well: var(--ow-well-bg);
+    --color-ow-pressed: var(--ow-pressed-bg);
+    --color-ow-line-dark: var(--ow-line-dark);
+    --color-ow-line-light: var(--ow-line-light);
+    --color-ow-tooltip: var(--ow-tooltip-bg);
+    --color-ow-tooltip-fg: var(--ow-tooltip-fg);
+    --color-ow-backdrop: var(--ow-backdrop);
+
+    --shadow-ow-panel: var(--ow-panel-shadow);
+    --shadow-ow-popup: var(--ow-popup-shadow);
+    --shadow-ow-raised: var(--ow-raised-shadow);
+    --shadow-ow-well: var(--ow-well-shadow);
+    --shadow-ow-pressed: var(--ow-pressed-shadow);
+    --shadow-ow-primary: var(--ow-primary-shadow);
+
+    --radius-ow: var(--ow-radius);
+
+    --ease-ow-out: var(--ow-ease-out);
+    --ease-ow-in-out: var(--ow-ease-in-out);
+    --ease-ow-drawer: var(--ow-ease-drawer);
+    --ease-ow-spring-travel: var(--ow-spring-travel);
+    --ease-ow-spring-settle: var(--ow-spring-settle);
+    --ease-ow-spring-glide: var(--ow-spring-glide);
+  }
+}

@@ -132,6 +132,14 @@ elemen di sekitarnya.
 }
 ```
 
+Dengan Tailwind, arbitrary property memasang token di satu part, atau di elemen di sekitar beberapa
+part (lihat [Tailwind CSS v4](/id/docs#tailwind-css-v4)):
+
+```tsx
+<Separator className="[--ow-line-dark:var(--color-zinc-400)]" />
+<aside className="bg-ow-panel [--ow-panel:var(--color-zinc-900)]">{children}</aside>
+```
+
 Nilai yang tidak punya token sendiri diambil dari token tema: sudut bagian dalam dari `--ow-radius`
 (setiap lapisan menambahkan padding-nya), warna tipis dari `--ow-fg` atau `--ow-accent` lewat
 `color-mix()`, dan highlight Glide dari `--ow-hover`. Nama yang diawali `--_` bersifat privat dan

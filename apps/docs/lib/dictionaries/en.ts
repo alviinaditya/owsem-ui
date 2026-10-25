@@ -57,6 +57,8 @@ export const en = {
     stage: "Stage",
     tools: "Stage tools",
     theme: "Stage theme",
+    light: "Light",
+    dark: "Dark",
     controls: "Controls",
     code: "Code",
     inspect: "Inspect",

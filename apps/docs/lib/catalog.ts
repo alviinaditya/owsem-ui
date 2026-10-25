@@ -48,7 +48,7 @@ export const catalog = [
   { name: "dialog", title: "Dialog", family: "base", category: "overlay", phase: 1, status: "planned" },
   { name: "popover", title: "Popover", family: "base", category: "overlay", phase: 1, status: "planned" },
   { name: "tooltip", title: "Tooltip", family: "base", category: "overlay", phase: 1, status: "prototype" },
-  { name: "menu", title: "Menu", family: "base", category: "navigation", phase: 1, status: "planned" },
+  { name: "menu", title: "Menu", family: "base", category: "navigation", phase: 1, status: "prototype" },
   { name: "tabs", title: "Tabs", family: "base", category: "navigation", phase: 1, expressions: ["kinetic"], status: "planned" },
   { name: "scroll-area", title: "Scroll Area", family: "base", category: "display", phase: 1, status: "planned" },
   { name: "toggle", title: "Toggle", family: "base", category: "action", phase: 2, status: "prototype" },

@@ -7,6 +7,8 @@ const MOUSE: Partial<Record<string, string>> = {
   pointerover: "mouseover",
   pointerenter: "mouseenter",
   pointermove: "mousemove",
+  pointerdown: "mousedown",
+  pointerup: "mouseup",
   pointerout: "mouseout",
   pointerleave: "mouseleave",
 };
@@ -37,8 +39,8 @@ export function createScriptStage(
   let at: Spot | null = null;
   let over: Element | null = null;
 
-  // `pressed` undefined is a move, true a press, false a release. Moves also send the mouse
-  // events a browser sends after them, which hover popups such as tooltips listen to.
+  // `pressed` undefined is a move, true a press, false a release. Each also sends the mouse event
+  // a browser sends after it: tooltips listen to those, and menus open on mousedown.
   const fire = (type: string, target: Element, spot: Spot, pressed?: boolean) => {
     const init = {
       bubbles: type !== "pointerenter" && type !== "pointerleave",

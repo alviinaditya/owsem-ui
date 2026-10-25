@@ -26,6 +26,7 @@ const entry = (name, path, limit) => ({
 export default [
   entry("core", "dist/core/index.js", "6 kB"),
   entry("kbd", "dist/components/kbd/index.js", "3 kB"),
+  entry("menu", "dist/components/menu/index.js", "3 kB"),
   entry("separator", "dist/components/separator/index.js", "3 kB"),
   entry("toggle", "dist/components/toggle/index.js", "3 kB"),
   entry("toolbar", "dist/components/toolbar/index.js", "3 kB"),

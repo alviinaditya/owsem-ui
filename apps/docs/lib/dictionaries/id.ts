@@ -59,6 +59,8 @@ export const id = {
     stage: "Stage",
     tools: "Alat stage",
     theme: "Tema stage",
+    light: "Terang",
+    dark: "Gelap",
     controls: "Kontrol",
     code: "Kode",
     inspect: "Inspeksi",

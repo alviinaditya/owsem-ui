@@ -1,6 +1,6 @@
 "use client";
 
-import { Kbd, Toggle, Toolbar, Tooltip } from "owsem-ui/base";
+import { Kbd, Menu, Toggle, Toolbar, Tooltip } from "owsem-ui/base";
 import {
   Fragment,
   type KeyboardEvent,
@@ -13,6 +13,7 @@ import {
 } from "react";
 import type { Dictionary } from "@/lib/dictionaries";
 import type { Lang } from "@/lib/i18n";
+import { siteScheme } from "@/lib/theme";
 import { Icon, type IconName } from "../icons/icon";
 import { InstallPane } from "../install";
 import { ScrollFade } from "../scroll-fade";
@@ -277,14 +278,13 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
 
   const setup = useTokenSetup();
   const files = lab.code(state.cfg, setup);
-  // The More menu gives way to the token setup, which opens under the toolbar; focus comes back
-  // to the menu's button when it shuts.
-  const moreId = `${id}-more`;
-  const moreRef = useRef<HTMLFieldSetElement>(null);
+  // The More menu gives way to the token setup, which opens under the toolbar once the menu has
+  // shut and handed focus back; focus comes back to the menu's button when the setup shuts too.
+  const barRef = useRef<HTMLDivElement>(null);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
   const docsLabelRef = useRef<HTMLSpanElement>(null);
+  const tokensFromMore = useRef(false);
   const openTokenSetup = () => {
-    moreRef.current?.hidePopover();
     const panel = document.getElementById(TOKEN_SETUP_ID);
     if (!panel) return;
     placeTokenSetup("stage");
@@ -292,7 +292,9 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
     const back = (event: Event) => {
       if ((event as ToggleEvent).newState !== "closed") return;
       panel.removeEventListener("toggle", back);
-      if (document.activeElement === document.body) moreButtonRef.current?.focus();
+      // Focus is still inside the hidden panel, or already fell back to the body.
+      const lost = document.activeElement;
+      if (!lost || lost === document.body || panel.contains(lost)) moreButtonRef.current?.focus();
     };
     panel.addEventListener("toggle", back);
   };
@@ -354,7 +356,7 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
       tabIndex={-1}
       data-theme={state.theme}
     >
-      <div className="lab-stage-bar">
+      <div ref={barRef} className="lab-stage-bar">
         <p className="lab-stage-title">
           <span className="lab-live" aria-hidden="true" />
           <span className="lab-stage-title-text">{title}</span>
@@ -438,44 +440,59 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
                 if (open && (docsLabelRef.current?.offsetWidth ?? 0) > 1) details.cancel();
               }}
             />
-            <Tip
-              trigger={
-                <Toolbar.Button
-                  ref={moreButtonRef}
-                  className="lab-tool lab-tool-more"
-                  popoverTarget={moreId}
-                  aria-label={labels.more}
+            {/* Narrow stages: the stage theme and the token setup, under the toolbar's end. */}
+            <Menu.Root
+              onOpenChangeComplete={(open) => {
+                if (open || !tokensFromMore.current) return;
+                tokensFromMore.current = false;
+                openTokenSetup();
+              }}
+            >
+              <Tip
+                trigger={
+                  <Toolbar.Button
+                    ref={moreButtonRef}
+                    render={<Menu.Trigger />}
+                    className="lab-tool lab-tool-more"
+                    aria-label={labels.more}
+                  >
+                    <Icon name="ellipsis" size={15} />
+                  </Toolbar.Button>
+                }
+                label={labels.more}
+                theme={state.theme}
+              />
+              <Menu.Portal>
+                <Menu.Positioner
+                  anchor={barRef}
+                  align="end"
+                  sideOffset={8}
+                  data-theme={state.theme}
                 >
-                  <Icon name="ellipsis" size={15} />
-                </Toolbar.Button>
-              }
-              label={labels.more}
-              theme={state.theme}
-            />
+                  <Menu.Popup className="lab-more">
+                    <Menu.Group>
+                      <Menu.GroupLabel className="lab-more-label">
+                        {labels.theme}
+                        <Kbd>T</Kbd>
+                      </Menu.GroupLabel>
+                      <ThemeChoice labels={labels} theme={state.theme} toggle={state.toggleTheme} />
+                    </Menu.Group>
+                    <Menu.Separator />
+                    <Menu.Item
+                      aria-haspopup="dialog"
+                      onClick={() => {
+                        tokensFromMore.current = true;
+                      }}
+                    >
+                      <Icon name="palette" size={15} />
+                      {labels.tokenSetup}
+                    </Menu.Item>
+                  </Menu.Popup>
+                </Menu.Positioner>
+              </Menu.Portal>
+            </Menu.Root>
           </Toolbar.Root>
         </Tooltip.Provider>
-        <fieldset ref={moreRef} id={moreId} popover="auto" className="lab-more">
-          <legend className="visually-hidden">{labels.more}</legend>
-          <button
-            type="button"
-            className="lab-more-item"
-            aria-keyshortcuts="T"
-            onClick={state.toggleTheme}
-          >
-            <Icon name="contrast" size={15} />
-            {labels.theme}
-            <Kbd>T</Kbd>
-          </button>
-          <button
-            type="button"
-            className="lab-more-item"
-            aria-haspopup="dialog"
-            onClick={openTokenSetup}
-          >
-            <Icon name="palette" size={15} />
-            {labels.tokenSetup}
-          </button>
-        </fieldset>
       </div>
 
       <div
@@ -550,6 +567,34 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
         <div className="lab-caption-inner">{caption}</div>
       </div>
     </section>
+  );
+}
+
+/** The stage theme as a choice of the two, read from the page once the menu shows it. */
+function ThemeChoice({
+  labels,
+  theme,
+  toggle,
+}: {
+  labels: Dictionary["lab"];
+  theme: StageState["theme"];
+  toggle: () => void;
+}) {
+  const current = theme ?? siteScheme();
+  return (
+    <Menu.RadioGroup
+      value={current}
+      onValueChange={(value) => {
+        if (value !== current) toggle();
+      }}
+    >
+      {(["light", "dark"] as const).map((option) => (
+        <Menu.RadioItem key={option} value={option} closeOnClick>
+          <Menu.RadioItemIndicator />
+          {labels[option]}
+        </Menu.RadioItem>
+      ))}
+    </Menu.RadioGroup>
   );
 }
 

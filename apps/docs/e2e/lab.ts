@@ -18,7 +18,7 @@ export async function stageTool(page: Page, name: string, item = name): Promise<
   const more = stage(page).getByRole("button", { name: "More", exact: true });
   if (await more.isVisible()) {
     await more.click();
-    await page.locator(".lab-more").getByRole("button", { name: item }).click();
+    await page.getByRole("menu").locator('[role^="menuitem"]', { hasText: item }).click();
   } else {
     await stage(page).getByRole("button", { name, exact: true }).click();
   }

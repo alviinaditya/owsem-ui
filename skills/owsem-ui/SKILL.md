@@ -152,7 +152,7 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Button**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toggle Group**,
+**Button**, **Input**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toggle Group**,
 **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`) and **Color Picker**, **Command Menu**,
 **Table of Contents**, and **Tree Rail Nav** (Owsem, from `owsem-ui/owsem`) are built. Base
 components are Base UI components with OwsemUI's styling, and small primitives without a Base UI
@@ -197,6 +197,38 @@ import { Button, ButtonIcon, buttonStyles, IconButton } from "owsem-ui/base"; //
   `--ow-fg` and `--ow-bg` (secondary's fill and text, outline's line), `--ow-primary-shadow` (the
   solid fills' edges), `--ow-pressed-*` (held down), `--ow-hover`, `--ow-focus`, `--ow-radius`,
   and `--ow-motion-scale`.
+
+### Input
+
+A one-line text field: a flat well with a 3:1 edge, Button's heights, and a focus ring. A name is all
+it needs, and it fills its parent. Registry item: `input`.
+
+```tsx
+import { Input } from "owsem-ui/base"; // or "@/components/owsem/input"
+<Input aria-label="Email" />
+<Input aria-label="Search" placeholder="Search" startIcon={<SearchIcon />} />
+<Input aria-label="Name" value={name} onValueChange={setName} />
+```
+
+- Renders an `<input>` with `data-size` and Base UI's `data-disabled`, `data-invalid`, `data-valid`,
+  `data-filled`, `data-focused`, `data-dirty`, and `data-touched`. Controlled with `value` and
+  `onValueChange(value, eventDetails)`, or uncontrolled with `defaultValue`. Inside a `Field`, Base
+  UI wires its name and validity; use `Field.Control`, which is this Input.
+- Props: `size` (`"sm"`, `"md"` default, `"lg"`: Button's heights; this replaces the native attribute,
+  so set `inline-size` for a width), `startIcon` and `endIcon` (any node; sized to the font plus 2px,
+  decorative), plus Base UI's `disabled`, `className`, `style`, and `render`.
+- **`ref`, `className`, `style`, and every other prop always reach the `<input>`, with or without
+  icons.** The input is always the well. An icon adds `span.ow-input__wrapper`, which has no look and
+  only places it; custom properties and `fontSize` in `style` reach it too. Passing the first icon
+  later remounts the input, so choose at the first render, and swap icons rather than passing `null`.
+- It has no margins. It fills its parent; a width on the input narrows it. In a flex row, an Input
+  with icons keeps its wrapper at the full width, so size `.ow-input__wrapper` or the parent there.
+- A plain `aria-invalid` draws the invalid edge. `render={<textarea rows={3} />}` keeps the look
+  and grows past one line.
+- Height comes from `--py` (set it in `style`, never under a 24 px target), and `font-size` scales it.
+- Reads `--ow-well-bg`, `--ow-well-shadow`, `--ow-edge`, `--ow-critical` (invalid edge), `--ow-fg`,
+  `--ow-muted` (placeholder and icons), `--ow-radius`, and `--ow-focus`. A token on the input or an
+  ancestor wins, and so does any unlayered CSS or Tailwind utility on its `className`.
 
 ### Menu
 

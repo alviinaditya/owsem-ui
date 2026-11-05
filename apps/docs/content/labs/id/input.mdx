@@ -1,0 +1,168 @@
+---
+title: Input
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Input adalah field teks satu baris. Base UI memberinya sambungan ke Field dan Form; OwsemUI
+menambahkan well datar dengan tepi tegas, tinggi yang sama dengan Button, dan ikon yang duduk rata
+di dalamnya. Cukup beri nama, dan ia mengisi induknya. Gulir untuk mulai tur; stage mengikuti setiap
+bagian.
+
+```tsx
+<Input aria-label="Email" />
+```
+
+## Well dengan tepi tegas [#typing]
+
+Field adalah well: isian datar sedikit lebih gelap dari halaman, tanpa bayangan dalam. Tepinya garis
+1px tegas yang digambar sebagai inset shadow, sehingga tidak menambah ukuran, dan tetap 3:1 terhadap
+well di kedua tema, karena field tempat mengetik harus mudah ditemukan. Placeholder berwarna muted.
+Fokus menambahkan ring 2px di luar tepi dengan jarak 2px, dan tepinya tetap ada.
+
+Stage memutarnya: pointer mengetik sebuah alamat, tepinya berubah menjadi warna kritis selama teksnya
+belum berupa alamat, dan kembali setelah benar. Tepinya berganti seketika, tanpa fade. Pasang
+`aria-invalid` untuk mendapatkan tepi itu saja; di dalam Field, Base UI memasangkannya.
+
+## Tinggi Button [#geometry]
+
+Input adalah kontrol satu baris, jadi geometrinya sama dengan Button. `--py` satu-satunya input:
+padding blok `max(--py, (24px - 1lh) / 2)`, padding samping ditambah `(1lh - 1cap) / 2`, dan tingginya
+selalu `2 × --py + 1lh`. Input dan Button dengan ukuran yang sama sejajar dalam satu baris.
+
+Stage mengukur setiap ukuran secara langsung: polos, dengan ikon, dan sebuah Button di sebelahnya.
+
+| Ukuran | Font | `--py` | Tinggi | Ikon |
+| --- | --- | --- | --- | --- |
+| `sm` | 13px | `0.5em` | 29,25px | 15px |
+| `md` | 14px | `0.75em` | 38,5px | 16px |
+| `lg` | 16px | `0.875em` | 48px | 18px |
+
+`startIcon` dan `endIcon` menerima node apa pun. Ikon berukuran font ditambah 2px, jaraknya ke samping
+sama dengan jaraknya ke atas, dan teks memberi jarak sebesar gap Button. Ikon tidak mengambil ruang
+sendiri: ia duduk di atas padding input dan meneruskan pointer, sehingga klik di mana pun pada well
+masuk ke field.
+
+Atur `--py` lewat `style` untuk mengubah tinggi, atau `font-size` untuk menskalakan semuanya.
+Keduanya tidak pernah membuat target di bawah 24px.
+
+## Anatomi [#anatomy]
+
+Input adalah satu elemen, dengan dua tambahan hanya bila ada ikon. Inspeksi (I) menandainya di stage.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `input.ow-input` | Selalu berupa well. `data-size`, serta `data-disabled`, `data-invalid`, `data-valid`, `data-filled`, `data-focused`, `data-dirty`, dan `data-touched` dari Base UI |
+| <Part name="Wrapper" /> | `span.ow-input__wrapper` | Hanya bila ada ikon. `data-size`. Tanpa tampilan, dan mengisi induknya |
+| <Part name="Icon" /> | `span.ow-input__icon` | Dekoratif (`aria-hidden`), `data-side="start"` atau `"end"`; svg atau img di dalamnya mengisinya |
+
+**`ref`, `className`, `style`, dan semua props lain selalu sampai ke input**, dengan atau tanpa ikon,
+jadi menambah ikon tidak pernah memindahkan class Anda. Custom property dan `fontSize` di `style` juga
+sampai ke wrapper, sehingga ikon mengikutinya.
+
+Tentukan sejak render pertama apakah ia punya ikon: wrapper muncul bersama ikon pertama, dan
+menambahkannya belakangan me-remount input, sehingga fokusnya hilang. Untuk ikon yang datang dan
+pergi, tukar satu node dengan node lain, bukan dengan `null`.
+
+## State dan varian [#states]
+
+Stage menampilkan tema terang dan gelap berdampingan. Pointer mengisi field kosong di setiap tema.
+
+| State | Tandanya |
+| --- | --- |
+| Kosong | Well, dengan placeholder muted |
+| Terisi | Teks `--ow-fg` |
+| Fokus keyboard atau pointer | Ring 2px dengan jarak 2px, warna `--ow-focus`; tepinya tetap |
+| Invalid | Tepi `--ow-critical`, 3:1. `data-invalid` dari Field, atau `aria-invalid` Anda |
+| Disabled | Opacity 45%, termasuk ikon, dan tanpa fokus |
+
+## Keyboard dan aksesibilitas [#keyboard]
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab | Memindahkan fokus ke field |
+| Lainnya | Pengeditan teks bawaan browser |
+
+Ini `<input>` native, jadi autofill, spellcheck, dan input mode berjalan seperti biasa. Ia perlu nama:
+`Field.Label`, `<label>`, atau `aria-label`. Placeholder bukan nama. Ikonnya `aria-hidden`.
+
+Tidak ada yang bergerak, jadi reduced motion tidak mengubah apa pun. Di mode forced colors (Windows
+High Contrast), tepinya garis 1px berwarna sistem, tepi invalid 2px karena warnanya hilang, ring
+fokusnya `Highlight`, dan disabled memakai `GrayText`. Dari kanan ke kiri, `startIcon` berada di kanan.
+
+## Kustomisasi [#customization]
+
+Stage menampilkan tiga cara mengubahnya. Kontrolnya terbuka: pilih isian atau tepi, dan field pertama
+serta kodenya mengikuti.
+
+**Token** yang dipasang di input, atau di elemen apa pun di sekitarnya, mengubah field di dalamnya.
+
+```css
+.invite {
+  --ow-well-bg: #fff8e6;
+  --ow-edge: #a07a1c;
+}
+```
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-well-bg` | Isian |
+| `--ow-well-shadow` | Garis dalam, di bawah tepi |
+| `--ow-edge` | Tepi, 3:1 |
+| `--ow-critical` | Tepi saat invalid |
+| `--ow-fg` | Teks |
+| `--ow-muted` | Placeholder dan ikon |
+| `--ow-radius` | Sudut |
+| `--ow-focus` | Ring fokus |
+
+**`className`** mengalahkan nilai komponen sendiri, tanpa `!important`, karena nilainya berada di
+cascade layer yang lebih rendah. Utility Tailwind menang dengan cara yang sama.
+
+```tsx
+<Input aria-label="Nama" className="w-64 rounded-full" />
+```
+
+Ia mengisi induknya; lebar di input mempersempitnya, dan ikonnya tetap di dalam. Di baris flex, Input
+berikon mempertahankan wrapper selebar penuh, jadi atur lebar wrapper (`.ow-input__wrapper`) atau
+induknya di sana.
+
+**Komposisi:** `render` menukar elemennya dan mempertahankan tampilannya. `<textarea>` tumbuh lebih
+dari satu baris dan bisa diubah ukurannya.
+
+```tsx
+<Input aria-label="Catatan" render={<textarea rows={3} />} />
+```
+
+<ForMode mode="isolated">
+
+Di mode isolated, nilainya ada di root setiap Input, jadi atur di input itu sendiri, seperti
+`invite.css`.
+
+</ForMode>
+
+<TokenChip lang="id" />
+
+## Ship it [#ship]
+
+Drawer kode menulis komponen persis seperti yang diatur di stage. Ganti ukuran atau warna, dan baris
+yang berubah akan menyala.
+
+| Prop | Tipe | Bawaan |
+| --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| `startIcon` | `ReactNode` | |
+| `endIcon` | `ReactNode` | |
+| `value` | `string` | |
+| `defaultValue` | `string` | |
+| `onValueChange` | `(value, eventDetails) => void` | |
+| `disabled` | `boolean` | `false` |
+| `className` | `string \| (state) => string` | |
+| `style` | `CSSProperties \| (state) => CSSProperties` | |
+| `render` | `ReactElement \| (props, state) => ReactElement` | |
+
+`size` adalah skala tipe, bukan atribut native untuk lebar dalam karakter; atur `inline-size` sebagai
+gantinya. `value`, `defaultValue`, `onValueChange`, dan `disabled` berasal dari Base UI, dan props lain
+diteruskan ke `<input>` apa adanya. Ref diteruskan ke `<input>`.
+
+Impor dari `owsem-ui/base`. Di registry, namanya item `input`.

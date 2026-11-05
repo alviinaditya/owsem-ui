@@ -28,6 +28,7 @@ export default [
   entry("button", "dist/components/button/index.js", "3 kB"),
   entry("color-picker", "dist/components/color-picker/index.js", "8 kB"),
   entry("field", "dist/components/field/index.js", "3 kB"),
+  entry("fieldset", "dist/components/fieldset/index.js", "3 kB"),
   entry("input", "dist/components/input/index.js", "3 kB"),
   entry("kbd", "dist/components/kbd/index.js", "3 kB"),
   entry("menu", "dist/components/menu/index.js", "3 kB"),

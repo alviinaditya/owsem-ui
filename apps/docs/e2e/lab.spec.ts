@@ -696,6 +696,18 @@ test("the Field Lab's first scene types an address, and the error joins the wiri
   await expect(describedBy).toHaveText("We only use it to sign you in.");
 });
 
+test("the Fieldset Lab's first scene turns its whole group off, then on", async ({ page }) => {
+  await page.goto("/en/fieldset");
+  const group = demo(page).getByRole("group", { name: "Billing address" });
+  const street = group.getByRole("textbox", { name: "Street" });
+  const city = group.getByRole("textbox", { name: "City" });
+  await expect(street).toBeEnabled();
+  await scene(page, "group");
+  await expect(street).toBeDisabled();
+  await expect(city).toBeDisabled();
+  await expect(street).toBeEnabled();
+});
+
 test("the Toolbar Lab's first scene presses its items, and the line follows", async ({ page }) => {
   await page.goto("/en/toolbar");
   const italic = demo(page).getByRole("button", { name: "Italic" });

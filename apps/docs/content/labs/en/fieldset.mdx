@@ -1,0 +1,127 @@
+---
+title: Fieldset
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Fieldset groups related fields under one legend, and one `disabled` reaches them all. Base UI names
+the group and passes the state; OwsemUI adds even gaps and an etched line under the legend. Scroll to
+start the tour; the stage follows each part.
+
+```tsx
+<Fieldset.Root>
+  <Fieldset.Legend>Billing</Fieldset.Legend>
+  <Field.Root>
+    <Field.Label>Street</Field.Label>
+    <Field.Control />
+  </Field.Root>
+</Fieldset.Root>
+```
+
+## One switch, one gap [#group]
+
+`disabled` on the root reaches every control inside, whatever it is: Base UI passes it to its Fields,
+and a native `<fieldset>` disables the rest. A screen reader hears the legend as the group's name when
+focus enters it.
+
+The stage plays it: the pointer presses Same as shipping, the whole address fades, and it comes back.
+
+Everything in the group sits one gap apart, under the legend and between fields: `1.25em`, 17.5px at
+its 14px. The caption reads the gap in use, and the Controls panel changes it with plain CSS.
+
+## Anatomy [#anatomy]
+
+Two parts. Inspect (I) outlines them on the stage.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `fieldset.ow-fieldset` | One column with no frame; `disabled`, and `data-disabled` while it is |
+| <Part name="Legend" /> | `div.ow-fieldset__legend` | Names the group through `aria-labelledby`; `data-disabled`. The etched line is its `::after` |
+
+## States and variants [#states]
+
+The stage sets the light and dark themes side by side.
+
+| State | What shows it |
+| --- | --- |
+| Enabled | The legend in `--ow-fg`, over the line |
+| Disabled | The legend at 45% opacity, and each control faded by its own disabled look |
+
+## Keyboard and accessibility [#keyboard]
+
+Fieldset takes no focus: Tab moves through its controls, and skips them all while it is disabled. It is
+a native `<fieldset>`, so it has the `group` role, named by the legend. Give every group a legend, and
+use `render` for a heading when the page's outline needs one.
+
+Nothing moves, so reduced motion changes nothing. In forced colors (Windows High Contrast), the line
+stays, since it is two borders. Right to left, the legend sits on the right.
+
+## Customization [#customization]
+
+The stage shows three ways to change it. The controls are open: pick a line's color or the gap, and the
+code follows.
+
+**A token** set on the legend, on the root, or on any element around it changes the groups inside.
+
+```css
+.billing {
+  --ow-line-dark: #a07a1c;
+}
+```
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-fg` | Legend |
+| `--ow-line-dark` | Line's dark side |
+| `--ow-line-light` | Line's light side |
+
+**A `className`** wins over its own values, with no `!important`. `gap` is one property on one class,
+and the line is the legend's `::after`, so one rule removes it. Here, the fields sit in two columns:
+
+```css
+.billing {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75em;
+}
+
+.billing > .ow-fieldset__legend {
+  grid-column: 1 / -1;
+}
+
+.plain::after {
+  content: none;
+}
+```
+
+It has no outer margins and fills its parent, so a Form or your own layout sets the space around it.
+
+**Composition:** `render` swaps either element. The legend can be a heading, and it still names the
+group.
+
+```tsx
+<Fieldset.Legend render={<h3 />}>Billing address</Fieldset.Legend>
+```
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each part's root, so set yours on the legend itself.
+
+</ForMode>
+
+<TokenChip lang="en" />
+
+## Ship it [#ship]
+
+The code drawer writes the component exactly as the stage is set up.
+
+| Part | Prop | Type | Default |
+| --- | --- | --- | --- |
+| `Root` | `disabled` | `boolean` | `false` |
+
+Both parts take `className`, `style`, `render`, and `ref`, and other props pass through to Base UI as
+they are. The root's ref goes to the `fieldset`, and the legend's to its `div`.
+
+Import it from `owsem-ui/base`. In the registry, it is the `fieldset` item. It needs no other
+component: Field is what you will usually put in it, and any control works.

@@ -5,6 +5,7 @@ import ButtonLab from "./button";
 import ColorPickerLab from "./color-picker";
 import CommandMenuLab from "./command-menu";
 import FieldLab from "./field";
+import FieldsetLab from "./fieldset";
 import InputLab from "./input";
 import KbdLab from "./kbd";
 import MenuLab from "./menu";
@@ -26,6 +27,7 @@ export const labs: Partial<Record<ComponentName, ComponentType<LabProps>>> = {
   "color-picker": ColorPickerLab,
   "command-menu": CommandMenuLab,
   field: FieldLab,
+  fieldset: FieldsetLab,
   input: InputLab,
   kbd: KbdLab,
   menu: MenuLab,

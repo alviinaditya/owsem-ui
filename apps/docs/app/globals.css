@@ -825,6 +825,10 @@ body {
   gap: 8px;
 }
 
+.component-preview-fieldset {
+  inline-size: 100%;
+}
+
 .component-preview-separator {
   display: grid;
   gap: 10px;
@@ -3618,6 +3622,37 @@ figure[data-code-block] pre {
   display: grid;
   grid-template-columns: 7em 1fr;
   align-items: center;
+}
+
+/* The Fieldset Lab's demos: unlayered rules, as an app would write them. */
+.demo-fieldset {
+  inline-size: min(340px, 100%);
+}
+
+.demo-fieldset > .ow-toggle {
+  justify-self: start;
+}
+
+.demo-fieldset-tight {
+  gap: 0.5em;
+}
+
+.demo-fieldset-roomy {
+  gap: 2em;
+}
+
+.demo-fieldset-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75em;
+}
+
+.demo-fieldset-columns > .ow-fieldset__legend {
+  grid-column: 1 / -1;
+}
+
+.demo-fieldset-plain::after {
+  content: none;
 }
 
 /* The Toolbar Lab's editor: the toolbar over the line it formats. */

@@ -1,6 +1,7 @@
 // Base family exports. Components land per phase (PRD, Base scope).
 export * from "./components/button";
 export * from "./components/field";
+export * from "./components/fieldset";
 export * from "./components/input";
 export { Kbd } from "./components/kbd";
 export * from "./components/menu";

@@ -5,6 +5,7 @@ import {
   Kbd,
   Menu,
   Popover,
+  ScrollArea,
   Tabs,
   Toggle,
   ToggleGroup,
@@ -26,7 +27,6 @@ import type { Lang } from "@/lib/i18n";
 import { siteScheme } from "@/lib/theme";
 import { Icon, type IconName } from "../icons/icon";
 import { InstallPane } from "../install";
-import { ScrollFade } from "../scroll-fade";
 import { Tip } from "../tip";
 import { type TokenSetupPlace, tokenSetupHandle, useTokenSetup } from "../token-setup";
 import { ColorField } from "./color-field";
@@ -549,9 +549,16 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
           aria-label={labels.controls}
           inert={!controls}
         >
-          <ScrollFade className="lab-sheet-scroll">
-            <ControlsPanel lab={lab} lang={lang} labels={labels} state={state} />
-          </ScrollFade>
+          <ScrollArea.Root className="lab-sheet-scroll" fade>
+            {/* Its controls take the keyboard, so it is no tab stop itself. */}
+            <ScrollArea.Viewport tabIndex={-1}>
+              {/* As wide as the panel: the controls wrap to it. */}
+              <ScrollArea.Content style={{ minWidth: 0 }}>
+                <ControlsPanel lab={lab} lang={lang} labels={labels} state={state} />
+              </ScrollArea.Content>
+            </ScrollArea.Viewport>
+            <ScrollArea.Scrollbar />
+          </ScrollArea.Root>
         </aside>
 
         <section
@@ -701,13 +708,18 @@ function CodeDrawer({
       {/* One panel for every tab, so the code in it can flash the lines that change. The scroller
           inside is the keyboard's stop. */}
       <Tabs.Panel value={current.key} className="lab-drawer-panel" tabIndex={-1}>
-        <ScrollFade className="lab-sheet-scroll" tabIndex={0}>
-          {current.file ? (
-            <LiveCode file={current.file} />
-          ) : (
-            <InstallPane item={item} labels={labels} />
-          )}
-        </ScrollFade>
+        <ScrollArea.Root className="lab-sheet-scroll" fade>
+          <ScrollArea.Viewport tabIndex={0}>
+            {current.file ? (
+              <LiveCode file={current.file} />
+            ) : (
+              <InstallPane item={item} labels={labels} />
+            )}
+          </ScrollArea.Viewport>
+          <ScrollArea.Scrollbar />
+          <ScrollArea.Scrollbar orientation="horizontal" />
+          <ScrollArea.Corner />
+        </ScrollArea.Root>
       </Tabs.Panel>
     </Tabs.Root>
   );

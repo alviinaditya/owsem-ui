@@ -10,6 +10,7 @@ import IconMorphLab from "./icon-morph";
 import KbdLab from "./kbd";
 import MenuLab from "./menu";
 import PopoverLab from "./popover";
+import ScrollAreaLab from "./scroll-area";
 import SeparatorLab from "./separator";
 import TableOfContentsLab from "./table-of-contents";
 import TabsLab from "./tabs";
@@ -33,6 +34,7 @@ export const labs: Partial<Record<ComponentName, ComponentType<LabProps>>> = {
   kbd: KbdLab,
   menu: MenuLab,
   popover: PopoverLab,
+  "scroll-area": ScrollAreaLab,
   separator: SeparatorLab,
   "table-of-contents": TableOfContentsLab,
   tabs: TabsLab,

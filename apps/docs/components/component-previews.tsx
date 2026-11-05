@@ -5,6 +5,7 @@ import {
   Kbd,
   Menu,
   Popover,
+  ScrollArea,
   Separator,
   Tabs,
   Toggle,
@@ -330,6 +331,15 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
     </div>
   ),
   popover: (t) => <PopoverPreview t={t} />,
+  "scroll-area": (t) => (
+    <ScrollArea.Root className="component-preview-scroll" fade>
+      <ul>
+        {[...t.sections, t.components, t.guides, t.docs, t.blog].map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    </ScrollArea.Root>
+  ),
   tooltip: (t) => <TooltipPreview t={t} />,
   menu: (t) => <MenuPreview t={t} />,
   "tree-rail-nav": (t) => (
@@ -503,6 +513,18 @@ const SKETCHES: Partial<Record<ComponentName, ReactNode>> = {
         <g key={y}>{F(46, y, 52 - (i % 2) * 14, 4, 0.35)}</g>
       ))}
       <rect x={115} y={20} width={3} height={26} rx={1.5} fill="currentColor" stroke="none" />
+    </>
+  ),
+  tabs: (
+    <>
+      {B(26, 16, 36, 18, 5)}
+      {F(34, 23, 20)}
+      {F(70, 23, 20, 5, 0.35)}
+      {F(100, 23, 22, 5, 0.35)}
+      <path d="M26 42h108" opacity={0.5} />
+      {F(26, 54, 96, 4, 0.35)}
+      {F(26, 64, 76, 4, 0.35)}
+      {F(26, 74, 86, 4, 0.35)}
     </>
   ),
   "checkbox-group": (

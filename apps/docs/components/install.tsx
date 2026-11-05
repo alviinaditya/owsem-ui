@@ -1,6 +1,6 @@
 "use client";
 
-import { ToggleGroup } from "owsem-ui/base";
+import { ScrollArea, ToggleGroup } from "owsem-ui/base";
 import { CodeBlock, CopyButton } from "owsem-ui/owsem";
 import { Fragment, useSyncExternalStore } from "react";
 import { type Dictionary, getDictionary } from "@/lib/dictionaries";
@@ -8,7 +8,6 @@ import type { Lang } from "@/lib/i18n";
 import { PACKAGE_MANAGER_STORAGE_KEY } from "@/lib/theme";
 import { isDefaultSetup, type TokenSetup } from "@/lib/token-setup";
 import { Icon } from "./icons/icon";
-import { ScrollFade } from "./scroll-fade";
 import { useTokenSetup } from "./token-setup";
 
 const PACKAGE_MANAGERS = ["pnpm", "npm", "yarn", "bun"] as const;
@@ -117,12 +116,15 @@ const Prompt = () => (
 function Command({ text, labels }: { text: string; labels: Labels }) {
   return (
     <div className="command">
-      <ScrollFade className="command-text">
-        <code>
-          <Prompt />
-          <Words text={text} />
-        </code>
-      </ScrollFade>
+      {/* No Scrollbar: over one line of text it would only get in the way. */}
+      <ScrollArea.Root className="command-text" fade>
+        <ScrollArea.Viewport>
+          <code>
+            <Prompt />
+            <Words text={text} />
+          </code>
+        </ScrollArea.Viewport>
+      </ScrollArea.Root>
       <CopyButton value={text} labels={labels} showLabel variant="outline" size="sm" />
     </div>
   );

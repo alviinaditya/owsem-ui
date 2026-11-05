@@ -896,10 +896,11 @@ test("a phone's Docs button shows its name in a tooltip only when it is an icon"
 test("the Tooltip Lab's first scene walks the toolbar's tooltips", async ({ page }) => {
   await page.goto("/en/tooltip");
   await scene(page, "group");
-  // The one closing stays a moment, without data-open.
+  // The one closing stays a moment, without data-open. The script starts once scrolling settles
+  // and Bold waits out the delay: about 2s here, past 5s on a busy runner.
   const open = demo(page).locator(".ow-tooltip__popup[data-open]");
-  await expect(open).toHaveText("Bold⌘B");
-  await expect(open).toHaveText("Italic⌘I");
+  await expect(open).toHaveText("Bold⌘B", { timeout: 15_000 });
+  await expect(open).toHaveText("Italic⌘I", { timeout: 15_000 });
 });
 
 test("the Menu Lab opens Edit with Glide on its items, and View's choices", async ({ page }) => {

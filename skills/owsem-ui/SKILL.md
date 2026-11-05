@@ -152,7 +152,7 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Button**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toggle Group**,
+**Button**, **Dialog**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toggle Group**,
 **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`) and **Color Picker**, **Command Menu**,
 **Table of Contents**, and **Tree Rail Nav** (Owsem, from `owsem-ui/owsem`) are built. Base
 components are Base UI components with OwsemUI's styling, and small primitives without a Base UI
@@ -256,6 +256,45 @@ import { Menu } from "owsem-ui/base"; // or "@/components/owsem/menu"
   `data-theme` on the Positioner when the trigger sits in a themed subtree.
 - Reads `--ow-panel`, `--ow-popup-shadow`, `--ow-fg`, `--ow-muted`, `--ow-hover` (Glide),
   `--ow-line-dark` and `--ow-line-light` (grooves), `--ow-radius`, and `--ow-focus`.
+
+### Dialog
+
+A modal window centered on the screen, over a scrim. Registry item: `dialog`.
+
+```tsx
+import { Button, Dialog } from "owsem-ui/base"; // or "@/components/owsem/dialog" and ".../button"
+<Dialog.Root>
+  <Dialog.Trigger render={<Button />}>Share</Dialog.Trigger>
+  <Dialog.Portal>
+    <Dialog.Popup>
+      <Dialog.Title>Share the draft</Dialog.Title>
+      <Dialog.Description>Anyone with the link can read it.</Dialog.Description>
+      <Dialog.Close render={<Button />}>Done</Dialog.Close>
+    </Dialog.Popup>
+  </Dialog.Portal>
+</Dialog.Root>
+```
+
+- Focus, the scroll lock, Escape, outside presses, and ARIA come from Base UI; always give it a
+  `Dialog.Title` and a `Dialog.Close`. There is no built-in close icon, and Trigger and Close have no
+  look of their own: pass your button to `render`.
+- `Portal` draws the scrim. Write a `Dialog.Backdrop` as its first child only to change it (it
+  replaces the drawn one), and set `backdrop={false}` for none, as with `modal={false}`, where a scrim
+  would cover the page you meant to keep usable. `container` picks where it renders.
+- Long content scrolls inside the Popup, which stays 16px inside the screen; wrapped in
+  `Dialog.Viewport`, the Popup keeps its full height and the Viewport scrolls. A dialog too long to
+  show whole takes focus itself, so it opens at its start, unless `initialFocus` says otherwise.
+- Nest by putting a `Dialog.Root` inside a Popup: the parent steps back through `--nested-dialogs` and
+  `data-nested-dialog-open`, and the nested Portal's scrim dims it (`backdrop={false}` leaves it).
+- Width and padding are plain CSS on the Popup's `className` (`inline-size` is 32em; `font-size`
+  scales it). A sheet or a full screen is CSS too: override `inline-size`, `max-inline-size`,
+  `block-size`, `max-block-size`, `margin-block`, and `border-radius`, and a rule on
+  `[data-starting-style]` and `[data-ending-style]` replaces the growth. Do not add a positioner.
+- The dialog renders in a portal: set tokens on `:root`, on the Popup's class, or on the Portal's
+  class to reach the scrim too, and `data-theme` on the Portal when the trigger sits in a themed
+  subtree.
+- Reads `--ow-backdrop`, `--ow-panel`, `--ow-popup-shadow`, `--ow-fg`, `--ow-muted`, `--ow-radius`,
+  `--ow-focus`, and `--ow-ease-out`.
 
 ### Popover
 

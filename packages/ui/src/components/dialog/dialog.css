@@ -1,0 +1,150 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * A modal window centered on the screen: the panel material with the popup shadow, over a scrim.
+ * It fades in and grows from its own middle in 250 ms, without a translate to keep it there. Each
+ * rule weighs one class, so a class of yours sets the width or the padding, or makes it a sheet.
+ */
+@layer owsem.components {
+  .ow-dialog__backdrop {
+    --_bg: var(--ow-backdrop);
+    position: fixed;
+    inset: 0;
+    background-color: var(--_bg);
+    transition: opacity 250ms var(--ow-ease-out);
+  }
+
+  /* An explicit Dialog.Backdrop replaces the one Portal draws. */
+  .ow-dialog__backdrop:where(:has(+ .ow-dialog__backdrop)) {
+    display: none;
+  }
+
+  .ow-dialog__backdrop:where([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+  }
+
+  .ow-dialog__backdrop:where([data-ending-style]) {
+    transition-duration: 200ms;
+  }
+
+  /* Whichever scrolls does so on its own, with a thin, quiet scrollbar over the rounded corners. */
+  .ow-dialog__viewport,
+  .ow-dialog__popup {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement (NF-1) */
+    scrollbar-width: thin;
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement (NF-1) */
+    scrollbar-color: color-mix(in oklab, var(--ow-fg) 30%, transparent) transparent;
+  }
+
+  /* Optional: the popup grows with its content, and this scrolls instead. */
+  .ow-dialog__viewport {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    padding-block: 16px;
+  }
+
+  /* Base UI hides it with the attribute while keepMounted keeps it. */
+  .ow-dialog__viewport:where([hidden]) {
+    display: none;
+  }
+
+  /*
+   * Auto margins center it, in either text direction, and leave the transform to the motion. It
+   * stays 16px inside the screen and scrolls inside itself. The radius is a button's plus the
+   * padding around it (FR-10b).
+   */
+  .ow-dialog__popup {
+    --_bg: var(--ow-panel);
+    --_shadow: var(--ow-popup-shadow);
+    --_fg: var(--ow-fg);
+    --_muted: var(--ow-muted);
+    --_p: calc(16em / 14);
+    position: fixed;
+    inset: 0;
+    box-sizing: border-box;
+    inline-size: 32em;
+    max-inline-size: calc(100% - 32px);
+    block-size: fit-content;
+    max-block-size: calc(100% - 32px);
+    margin: auto;
+    padding: var(--_p);
+    border-radius: calc(var(--ow-radius) + var(--_p));
+    /* Invisible until forced colors draw it as the edge (DP-8). */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--_bg);
+    box-shadow: var(--_shadow);
+    color: var(--_fg);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: transform;
+    transition:
+      opacity 250ms var(--ow-ease-out),
+      transform 250ms var(--ow-ease-out);
+  }
+
+  /* Focused itself when it has nothing to tab to, or when `initialFocus` says so (FR-13). */
+  .ow-dialog__popup:where(:focus-visible) {
+    outline: 2px solid var(--ow-focus);
+    outline-offset: 2px;
+  }
+
+  .ow-dialog__popup:where(.ow-dialog__viewport *) {
+    position: relative;
+    inset: auto;
+    max-block-size: none;
+    overflow-y: visible;
+  }
+
+  /* Steps back while a dialog nested in it is open, further for each one. */
+  .ow-dialog__popup:where([data-nested-dialog-open]) {
+    transform: translateY(calc(var(--nested-dialogs) * -16px))
+      scale(calc(1 - var(--nested-dialogs) * 0.05));
+  }
+
+  .ow-dialog__popup:where([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  /* Leaving is quicker than arriving. */
+  .ow-dialog__popup:where([data-ending-style]) {
+    transition-duration: 200ms;
+  }
+
+  .ow-dialog__title {
+    margin: 0;
+    font-size: calc(16em / 14);
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .ow-dialog__description {
+    margin: 0;
+    color: var(--_muted);
+  }
+
+  /* The heading keeps its distance from what follows; a description stays close to its title. */
+  .ow-dialog__title:where(:not(:last-child)) {
+    margin-block-end: 1em;
+  }
+
+  .ow-dialog__title:where(:has(+ .ow-dialog__description)) {
+    margin-block-end: 0.25em;
+  }
+
+  .ow-dialog__description:where(:not(:last-child)) {
+    margin-block-end: var(--_p);
+  }
+
+  /* FR-20: it fades, without growing or stepping back. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-dialog__popup:where([data-starting-style], [data-ending-style], [data-nested-dialog-open]) {
+      transform: none;
+    }
+  }
+}

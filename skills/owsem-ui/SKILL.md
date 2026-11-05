@@ -152,7 +152,7 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Button**, **Field**, **Input**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toggle Group**,
+**Button**, **Field**, **Fieldset**, **Input**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toggle Group**,
 **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`) and **Color Picker**, **Command Menu**,
 **Table of Contents**, and **Tree Rail Nav** (Owsem, from `owsem-ui/owsem`) are built. Base
 components are Base UI components with OwsemUI's styling, and small primitives without a Base UI
@@ -237,6 +237,31 @@ import { Field } from "owsem-ui/base"; // or "@/components/owsem/field"
 - It has no outer margins and fills its parent; `gap` on the root sets the space between parts.
 - Reads `--ow-fg` (label), `--ow-muted` (description), and `--ow-critical` (error), plus Input's tokens
   on the control. A token on a part or an ancestor wins, and so does unlayered CSS on a `className`.
+
+### Fieldset
+
+Groups fields under one legend with even gaps, and `disabled` reaches them all. It has no frame and no
+outer margins. Registry item: `fieldset`.
+
+```tsx
+import { Field, Fieldset } from "owsem-ui/base"; // or "@/components/owsem/fieldset", ".../field"
+<Fieldset.Root>
+  <Fieldset.Legend>Billing address</Fieldset.Legend>
+  <Field.Root>
+    <Field.Label>Street</Field.Label>
+    <Field.Control />
+  </Field.Root>
+</Fieldset.Root>
+```
+
+- Parts: `Root` (a `<fieldset>`, role `group`, `data-disabled`) and `Legend` (a `<div>` that names it
+  through `aria-labelledby`). Both take `className`, `style`, `render`, and `ref`. Any control works
+  inside; Field is the usual one, and Fieldset does not import it.
+- The space between its children is `gap` on the root (`1.25em`), one property on one class.
+- An etched line sits under the legend, as its `::after`: `.my-legend::after { content: none; }`
+  removes it.
+- Reads `--ow-fg` (legend), `--ow-line-dark`, and `--ow-line-light`. A token on the legend or an
+  ancestor wins, and so does unlayered CSS on a `className`.
 
 ### Input
 

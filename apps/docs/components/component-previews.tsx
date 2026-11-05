@@ -3,6 +3,7 @@
 import {
   Button,
   Field,
+  Fieldset,
   Input,
   Kbd,
   Menu,
@@ -46,6 +47,8 @@ const TEXT = {
     search: "Cari…",
     email: "Email",
     emailHint: "Untuk masuk.",
+    address: "Alamat",
+    city: "Kota",
     commands: "Perintah",
     newFile: "File baru",
     openRecent: "Buka terbaru",
@@ -80,6 +83,8 @@ const TEXT = {
     search: "Search…",
     email: "Email",
     emailHint: "To sign in.",
+    address: "Address",
+    city: "City",
     commands: "Commands",
     newFile: "New file",
     openRecent: "Open recent",
@@ -268,6 +273,15 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
       <Field.Description>{t.emailHint}</Field.Description>
     </Field.Root>
   ),
+  fieldset: (t) => (
+    <Fieldset.Root className="component-preview-fieldset">
+      <Fieldset.Legend>{t.address}</Fieldset.Legend>
+      <Field.Root>
+        <Field.Label>{t.city}</Field.Label>
+        <Field.Control size="sm" placeholder="Bandung" />
+      </Field.Root>
+    </Fieldset.Root>
+  ),
   input: (t) => (
     <Input
       size="sm"
@@ -382,14 +396,6 @@ const B = (x: number, y: number, w: number, h: number, r = 5) => (
 );
 
 const SKETCHES: Partial<Record<ComponentName, ReactNode>> = {
-  fieldset: (
-    <>
-      {B(28, 18, 104, 66, 7)}
-      {F(36, 15, 36, 6, 0.6)}
-      {B(38, 30, 84, 18)}
-      {B(38, 56, 84, 18)}
-    </>
-  ),
   form: (
     <>
       {B(36, 14, 88, 18)}

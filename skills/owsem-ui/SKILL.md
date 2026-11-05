@@ -152,7 +152,7 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Button**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toggle Group**,
+**Button**, **Kbd**, **Menu**, **Popover**, **Separator**, **Tabs**, **Toggle**, **Toggle Group**,
 **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`) and **Color Picker**, **Command Menu**,
 **Table of Contents**, and **Tree Rail Nav** (Owsem, from `owsem-ui/owsem`) are built. Base
 components are Base UI components with OwsemUI's styling, and small primitives without a Base UI
@@ -325,6 +325,43 @@ import { Kbd } from "owsem-ui/base"; // or "@/components/owsem/kbd"
 - Hide a purely visual hint with `aria-hidden` when the control names its shortcut with
   `aria-keyshortcuts`.
 - Reads `--ow-raised-bg`, `--ow-raised-shadow`, `--ow-muted`, and `--ow-radius`.
+
+### Tabs
+
+One panel at a time, picked from a row of tabs: a flat well, with a raised key (the same as Toggle
+Group's thumb) that slides under the active tab. Registry item: `tabs`.
+
+```tsx
+import { Tabs } from "owsem-ui/base"; // or "@/components/owsem/tabs"
+<Tabs.Root defaultValue="overview">
+  <Tabs.List aria-label="Project">
+    <Tabs.Tab value="overview">Overview</Tabs.Tab>
+    <Tabs.Tab value="activity">Activity</Tabs.Tab>
+  </Tabs.List>
+  <Tabs.Panel value="overview">The project at a glance.</Tabs.Panel>
+  <Tabs.Panel value="activity">What happened lately.</Tabs.Panel>
+</Tabs.Root>
+```
+
+- `Root` takes Base UI's `value`, `defaultValue`, `onValueChange`, and `orientation`. Without
+  `defaultValue`, the first enabled tab is picked once the page runs, so the server's HTML has no
+  panel: set it on server-rendered pages.
+- `List` takes `size` (`"sm"`, `"md"`, the default, or `"lg"`), `activateOnFocus` (arrows pick as they
+  move; by default they only move focus, and Enter or Space picks), and `loopFocus`. It draws the
+  indicator and Glide's highlight itself: Base UI's `Tabs.Indicator` is not exported, and nothing else
+  needs wiring. Name it with `aria-label` or `aria-labelledby`.
+- `List` fits its content, and scrolls sideways with no scrollbar when it does not fit. To stretch it,
+  use plain CSS on a `className`; the key follows. Equal tabs are `.my-tabs .ow-tabs__list { inline-size:
+  100%; }` and `.my-tabs .ow-tabs__tab { flex: 1; }`. There is no `equal` prop.
+- `Tab` holds any node, such as an `svg` with text (sized to the font plus 2px); give one with only an
+  icon an `aria-label`, and it is square. `render` makes it a link: `nativeButton={false}
+  render={<a href="/docs" />}`.
+- `Panel` has no padding or margin. Do not set `display` on a panel's own class, which would beat the
+  `hidden` attribute that hides it: put your grid or flex on a child. It is a tab stop for scrolling;
+  give it `tabIndex={-1}` if it starts with something focusable.
+- Reads `--ow-well-bg` and `--ow-well-shadow` (the list), `--ow-raised-bg` and `--ow-raised-shadow`
+  (the indicator), `--ow-fg`, `--ow-muted`, `--ow-focus`, `--ow-hover` (Glide), and `--ow-radius`. Set
+  them on the root, on one part, or around it. A tab's height is its own `--py`.
 
 ### Toggle
 

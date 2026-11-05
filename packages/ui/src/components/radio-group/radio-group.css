@@ -1,0 +1,231 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * Radio Group (Base; Tactile). Options are <label> rows, each with a round radio: off, the well with
+ * a 3:1 edge (DP-6); on, the accent with the primary material's edges and a dot that scales in on
+ * the settle spring. Fills change at once (DP-5). A row has Button's geometry (FR-9), with the radio
+ * where Button has its icon (FR-10), and Glide lights the row under the pointer. The group sets no
+ * width: it fits its rows, and a rule on className lays them out in a row or a grid.
+ */
+@layer owsem.components {
+  .ow-radio-group {
+    --py: 0.75em;
+    --_fg: var(--ow-fg);
+    --_muted: var(--ow-muted);
+    display: inline-flex;
+    flex-direction: column;
+    color: var(--_fg);
+    font-size: 0.875rem;
+    line-height: 1.25;
+    vertical-align: top;
+  }
+
+  .ow-radio-group:where([data-size="sm"]) {
+    --py: 0.5em;
+    font-size: 0.8125rem;
+  }
+
+  .ow-radio-group:where([data-size="lg"]) {
+    --py: 0.875em;
+    font-size: 1rem;
+  }
+
+  /* A row: a label holding a radio. --py comes from the group, or from the row's own style. */
+  .ow-radio-group :where(label:has(.ow-radio-group__radio)) {
+    --_py: max(var(--py), (24px - 1lh) / 2);
+    --px: calc(var(--_py) + (1lh - 1cap) / 2);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5em;
+    box-sizing: border-box;
+    padding: var(--_py) var(--px);
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ow-radio-group :where(label:has(.ow-radio-group__radio[data-readonly])) {
+    cursor: default;
+  }
+
+  .ow-radio-group :where(label:has(.ow-radio-group__radio[data-disabled])) {
+    color: color-mix(in oklab, var(--_muted) 50%, transparent);
+    cursor: not-allowed;
+  }
+
+  /* The icon rule (FR-10), so the size is in em and --icon can be set through style. */
+  .ow-radio-group__radio {
+    --icon: calc(1em + 2px);
+    --_well: var(--ow-well-bg);
+    --_edge: var(--ow-edge);
+    --_accent: var(--ow-accent);
+    --_accent-shadow: var(--ow-primary-shadow);
+    --_pressed: var(--ow-pressed-bg);
+    --_focus: var(--ow-focus);
+    --_press: calc(1 - 0.03 * var(--ow-motion-scale));
+    /* The face, set per state. */
+    --_bg: var(--_well);
+    --_bg-held: var(--_pressed);
+    --_shadow: inset 0 0 0 1px var(--_edge);
+    position: relative;
+    display: inline-block;
+    flex: none;
+    box-sizing: border-box;
+    inline-size: var(--icon);
+    block-size: var(--icon);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    /* literal: a radio is round at any radius token */
+    border-radius: 50%;
+    /* Invisible until forced colors draw it as the edge (DP-8). */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--_bg);
+    box-shadow: var(--_shadow);
+    vertical-align: middle;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: transform;
+    /* A press lets go on the settle spring (FR-21). */
+    transition: transform var(--ow-spring-settle-duration) var(--ow-spring-settle);
+  }
+
+  /* FR-14: a 24px target around the circle, without changing the layout. */
+  .ow-radio-group__radio::before {
+    content: "";
+    position: absolute;
+    inset: min(0px, (var(--icon) - 24px) / 2);
+  }
+
+  /* In a row: on the first line of a label that wraps, and as far from the start as from the top. */
+  .ow-radio-group__radio:where(label > *) {
+    margin-block: calc((1lh - var(--icon)) / 2);
+  }
+
+  .ow-radio-group__radio:where(label > :first-child) {
+    margin-inline-start: calc((1cap - var(--icon)) / 2);
+  }
+
+  .ow-radio-group__radio:where([data-checked]) {
+    --_bg: var(--_accent);
+    /* literal: black darkens any fill */
+    --_bg-held: color-mix(in oklab, var(--_accent), black 10%);
+    --_shadow: var(--_accent-shadow);
+  }
+
+  /* DP-4, held or with its row held: in to 0.97 within 90 ms, with the pressed fill. The edge stays
+   * for its 3:1 (DP-6). */
+  .ow-radio-group__radio:where(:active, label:active *):where(
+    :not([data-disabled], [data-readonly])
+  ) {
+    background-color: var(--_bg-held);
+    transform: scale(var(--_press));
+    transition-duration: 90ms;
+    transition-timing-function: var(--ow-ease-out);
+  }
+
+  .ow-radio-group__radio:where(:focus-visible) {
+    outline: 2px solid var(--_focus);
+    outline-offset: 2px;
+  }
+
+  .ow-radio-group__radio:where([data-readonly]) {
+    cursor: default;
+  }
+
+  .ow-radio-group__radio:where([data-disabled]) {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* The circle's own box, so whatever it holds is centered in it at any zoom. */
+  .ow-radio-group__indicator {
+    --_dot: var(--ow-on-accent);
+    /* Where the dot scales in from. A mark, not a surface, so it may start small (FR-18). */
+    --_from: calc(1 - 0.5 * var(--ow-motion-scale));
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    border-radius: inherit;
+    color: var(--_dot);
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: transform;
+    transition:
+      transform var(--ow-spring-settle-duration) var(--ow-spring-settle),
+      opacity 100ms var(--ow-ease-out);
+  }
+
+  /*
+   * The dot: a clear border inside the circle's box. The border widths round alike, so the dot sits
+   * as far from the circle's edge on every side at a fractional zoom.
+   */
+  .ow-radio-group__indicator:where(:empty) {
+    box-sizing: border-box;
+    border: calc(var(--icon) * 0.34) solid transparent;
+    background-clip: padding-box;
+    background-color: currentcolor;
+  }
+
+  .ow-radio-group__indicator > :where(svg, img) {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  .ow-radio-group__indicator:where([data-starting-style], [data-unchecked]) {
+    opacity: 0;
+    transform: scale(var(--_from));
+  }
+
+  /* Gone with the fill, since a light dot does not belong on the well. */
+  .ow-radio-group__indicator:where([data-unchecked]) {
+    transition: none;
+  }
+
+  /* FR-20: the fill still changes and the dot fades in; nothing moves. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-radio-group__radio {
+      --_press: 1;
+    }
+
+    .ow-radio-group__indicator {
+      --_from: 1;
+    }
+  }
+
+  /* DP-8: the edge is the outline above; on is the system's highlight. */
+  @media (forced-colors: active) {
+    .ow-radio-group__radio:where([data-checked]) {
+      --_bg: Highlight;
+      --_bg-held: Highlight;
+      --_shadow: none;
+      forced-color-adjust: none;
+    }
+
+    .ow-radio-group__indicator {
+      --_dot: HighlightText;
+    }
+
+    .ow-radio-group__radio:where(:focus-visible) {
+      outline-color: Highlight;
+    }
+
+    .ow-radio-group :where(label:has(.ow-radio-group__radio[data-disabled])) {
+      color: GrayText;
+    }
+
+    .ow-radio-group__radio:where([data-disabled]) {
+      outline-color: GrayText;
+      opacity: 1;
+    }
+
+    .ow-radio-group__radio:where([data-disabled][data-checked]) {
+      --_bg: GrayText;
+      --_bg-held: GrayText;
+    }
+  }
+}

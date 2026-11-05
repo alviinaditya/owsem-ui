@@ -32,6 +32,7 @@ export default [
   entry("menu", "dist/components/menu/index.js", "3 kB"),
   entry("popover", "dist/components/popover/index.js", "3 kB"),
   entry("scroll-area", "dist/components/scroll-area/index.js", "3 kB"),
+  entry("radio-group", "dist/components/radio-group/index.js", "3 kB"),
   entry("separator", "dist/components/separator/index.js", "3 kB"),
   entry("tabs", "dist/components/tabs/index.js", "3 kB"),
   entry("toggle", "dist/components/toggle/index.js", "3 kB"),

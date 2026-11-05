@@ -7,6 +7,8 @@ import {
   Menu,
   Popover,
   ScrollArea,
+  Radio,
+  RadioGroup,
   Separator,
   Tabs,
   Toggle,
@@ -288,6 +290,22 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
       <Toggle aria-label={t.underline} startIcon={<Icon name="underline" />} />
     </div>
   ),
+  "radio-group": (t) => (
+    <RadioGroup size="sm" value="week" aria-label={t.week}>
+      <label>
+        <Radio.Root value="day" />
+        {t.day}
+      </label>
+      <label>
+        <Radio.Root value="week" />
+        {t.week}
+      </label>
+      <label>
+        <Radio.Root value="month" />
+        {t.month}
+      </label>
+    </RadioGroup>
+  ),
   "toggle-group": (t) => (
     <ToggleGroup.Root size="sm" value={["week"]} aria-label={t.week}>
       <ToggleGroup.Item value="day">{t.day}</ToggleGroup.Item>
@@ -487,6 +505,13 @@ const SKETCHES: Partial<Record<ComponentName, ReactNode>> = {
           {F(66, y - 2.5, 40 - i * 6)}
         </g>
       ))}
+    </>
+  ),
+  checkbox: (
+    <>
+      <rect x={42} y={38} width={20} height={20} rx={5} fill="currentColor" opacity={0.6} />
+      <path d="m46 48 4 4 8-8" stroke="var(--docs-surface)" strokeWidth={2.4} />
+      {F(70, 45, 48)}
     </>
   ),
   switch: (

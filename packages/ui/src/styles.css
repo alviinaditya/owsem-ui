@@ -11,6 +11,7 @@
 @import "./components/menu/menu.css";
 @import "./components/popover/popover.css";
 @import "./components/scroll-area/scroll-area.css";
+@import "./components/radio-group/radio-group.css";
 @import "./components/separator/separator.css";
 @import "./components/tabs/tabs.css";
 @import "./components/toggle/toggle.css";

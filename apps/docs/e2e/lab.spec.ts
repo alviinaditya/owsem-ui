@@ -670,6 +670,31 @@ test("the Toggle Lab's note follows its toggles, and the first scene plays them"
   await expect(note).toHaveCSS("font-style", "italic");
 });
 
+test("the Switch Lab's first scene plays its rows, and a pressed row's thumb lands at the far end", async ({
+  page,
+}) => {
+  await page.goto("/en/switch");
+  const push = stage(page).getByRole("switch", { name: "Push", exact: true });
+  await scene(page, "travel");
+  await expect(push).toHaveAttribute("aria-checked", "true");
+
+  // Under reduced motion nothing plays until asked, and the thumb goes to its place at once.
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.reload();
+  await expect(push).toHaveAttribute("aria-checked", "false");
+  await expect(stage(page).getByText("1 of 3 on", { exact: true })).toBeVisible();
+  await push.click();
+  await expect(push).toHaveAttribute("aria-checked", "true");
+  await expect(stage(page).getByText("2 of 3 on", { exact: true })).toBeVisible();
+  const [thumb, track] = await Promise.all([
+    push.locator(".ow-switch__thumb").boundingBox(),
+    push.boundingBox(),
+  ]);
+  expect(
+    Math.abs((thumb?.x ?? 0) + (thumb?.width ?? 0) - (track?.x ?? 0) - (track?.width ?? 99)),
+  ).toBeLessThanOrEqual(0.5);
+});
+
 test("the Toolbar Lab's first scene presses its items, and the line follows", async ({ page }) => {
   await page.goto("/en/toolbar");
   const italic = demo(page).getByRole("button", { name: "Italic" });

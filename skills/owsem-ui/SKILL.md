@@ -152,8 +152,8 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Button**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toggle Group**,
-**Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`) and **Color Picker**, **Command Menu**,
+**Button**, **Kbd**, **Menu**, **Popover**, **Separator**, **Switch**, **Toggle**, **Toggle
+Group**, **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`) and **Color Picker**, **Command Menu**,
 **Table of Contents**, and **Tree Rail Nav** (Owsem, from `owsem-ui/owsem`) are built. Base
 components are Base UI components with OwsemUI's styling, and small primitives without a Base UI
 part, such as Kbd; Owsem components are OwsemUI's own. No component has a `flavor` prop.
@@ -325,6 +325,36 @@ import { Kbd } from "owsem-ui/base"; // or "@/components/owsem/kbd"
 - Hide a purely visual hint with `aria-hidden` when the control names its shortcut with
   `aria-keyshortcuts`.
 - Reads `--ow-raised-bg`, `--ow-raised-shadow`, `--ow-muted`, and `--ow-radius`.
+
+### Switch
+
+An on/off setting that applies right away: the well with a 3:1 edge while off, the accent while on,
+and the raised key as its thumb, which moves on a spring and squashes while held. Registry item:
+`switch`.
+
+```tsx
+import { Switch } from "owsem-ui/base"; // or "@/components/owsem/switch"
+<Switch.Root aria-label="Wi-Fi" />
+<label><Switch.Root defaultChecked /> Email alerts</label>
+<Switch.Root checked={dark} onCheckedChange={setDark} aria-label="Dark mode">
+  <Switch.Thumb>{dark ? <Moon aria-hidden /> : <Sun aria-hidden />}</Switch.Thumb>
+</Switch.Root>
+```
+
+- `Root` is Base UI's Switch: a `<span role="switch">` with `aria-checked`, `data-checked` or
+  `data-unchecked`, and a hidden input beside it. Controlled with `checked` and
+  `onCheckedChange(checked, eventDetails)`, or uncontrolled with `defaultChecked`, plus `disabled`,
+  `readOnly`, `required`, and, for a plain `<form>`, `name`, `value`, and `uncheckedValue`.
+- Without children `Root` draws its `Thumb`; children replace it. Any icon in the thumb fills the key
+  less 2px; it is decorative, so give it `aria-hidden`.
+- It needs a name: a wrapping `<label>` or an `aria-label`. Keep it the same in both states.
+- `size` is `"sm"`, `"md"` (default), or `"lg"`: Button's fonts, for 34 × 19, 36 × 20, or 40 × 22
+  px. Sizes come from `em`, so `font-size` on the switch scales all of it. `inline-size` and
+  `block-size` set with plain CSS or a utility also work: the thumb's size and travel follow the
+  track. The press target stays at least 24 px.
+- Reads `--ow-well-bg` and `--ow-edge` (off), `--ow-accent` and `--ow-primary-shadow` (on),
+  `--ow-raised-bg` and `--ow-raised-shadow` (the thumb), `--ow-fg` (its icon), `--ow-radius`,
+  `--ow-motion-scale`, and `--ow-focus`.
 
 ### Toggle
 

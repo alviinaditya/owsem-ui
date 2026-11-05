@@ -8,6 +8,7 @@ import KbdLab from "./kbd";
 import MenuLab from "./menu";
 import PopoverLab from "./popover";
 import SeparatorLab from "./separator";
+import SwitchLab from "./switch";
 import TableOfContentsLab from "./table-of-contents";
 import ToggleLab from "./toggle";
 import ToggleGroupLab from "./toggle-group";
@@ -27,6 +28,7 @@ export const labs: Partial<Record<ComponentName, ComponentType<LabProps>>> = {
   menu: MenuLab,
   popover: PopoverLab,
   separator: SeparatorLab,
+  switch: SwitchLab,
   "table-of-contents": TableOfContentsLab,
   toggle: ToggleLab,
   "toggle-group": ToggleGroupLab,

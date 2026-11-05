@@ -1,0 +1,215 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * The thumb's progress along its travel, and how far a press holds it in. Registered, so they can
+ * transition; without @property the thumb goes to its place at once.
+ */
+/* biome-ignore lint/nursery/useBaseline: progressive enhancement (NF-1) */
+@property --_switch-travel {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+/* biome-ignore lint/nursery/useBaseline: progressive enhancement (NF-1) */
+@property --_switch-held {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+/*
+ * Switch (Base; Tactile). The track is the well with a 3:1 edge while off and the accent while on;
+ * the fill changes at once (DP-5). The thumb is the raised key in both.
+ *
+ * The thumb rests where layout puts it, at either end of the track, never on a translate: a resting
+ * translate lands between device pixels at a fractional zoom and blurs the key's edges. A change of
+ * state moves it there at once, and translate covers the distance while --_switch-travel catches up,
+ * so the motion can be interrupted and comes from the track's size. Nothing transitions a transform
+ * directly, so nothing needs a layer (NF-8): the thumb's edges snap with the track's.
+ */
+@layer owsem.components {
+  .ow-switch {
+    --_well: var(--ow-well-bg);
+    --_edge: var(--ow-edge);
+    --_accent: var(--ow-accent);
+    --_accent-shadow: var(--ow-primary-shadow);
+    --_focus: var(--ow-focus);
+    /* The key's radius; the track adds the inset (FR-10b). */
+    --_radius: var(--ow-radius);
+    --_inset: 2px;
+    /* 100cqi, the track's width, is what the thumb's travel comes from. */
+    container-type: inline-size;
+    position: relative;
+    display: inline-flex;
+    flex: none;
+    box-sizing: border-box;
+    /* Two keys wide and one tall, inside the inset: 34 × 19, 36 × 20, or 40 × 22. */
+    inline-size: calc(2em + 8px);
+    block-size: calc(1em + 6px);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: calc(var(--_radius) + var(--_inset));
+    /* Invisible until forced colors draw it as the edge (DP-8). */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--_well);
+    box-shadow: inset 0 0 0 1px var(--_edge);
+    font-size: 0.875rem;
+    vertical-align: middle;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ow-switch:where([data-size="sm"]) {
+    font-size: 0.8125rem;
+  }
+
+  .ow-switch:where([data-size="lg"]) {
+    font-size: 1rem;
+  }
+
+  .ow-switch:where([data-checked]) {
+    background-color: var(--_accent);
+    box-shadow: var(--_accent-shadow);
+  }
+
+  /* The target is at least 24px each way (FR-14). */
+  .ow-switch::before {
+    content: "";
+    position: absolute;
+    inset: min(0px, (100% - 24px) / 2);
+  }
+
+  .ow-switch:where(:focus-visible) {
+    outline: 2px solid var(--_focus);
+    outline-offset: 2px;
+  }
+
+  .ow-switch:where([data-readonly]) {
+    cursor: default;
+  }
+
+  .ow-switch:where([data-disabled]) {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  /*
+   * As tall as the track, keeping the inset as a clear border: its edges round to the same pixels as
+   * the track's and both borders round alike, so its gaps are even at any zoom. --_end is where
+   * layout puts it (0 or 1); translate covers the rest of the way, and scale squashes it toward its
+   * travel while held, from its leading edge.
+   */
+  .ow-switch__thumb {
+    --_key: var(--ow-raised-bg);
+    --_key-shadow: var(--ow-raised-shadow);
+    --_ink: var(--ow-fg);
+    --_side: 1;
+    --_end: 0;
+    --_switch-travel: 0;
+    --_switch-held: 0;
+    display: grid;
+    flex: none;
+    place-items: center;
+    box-sizing: border-box;
+    block-size: 100%;
+    aspect-ratio: 1;
+    border: var(--_inset) solid transparent;
+    border-radius: inherit;
+    background-clip: padding-box;
+    background-color: var(--_key);
+    box-shadow: var(--_key-shadow);
+    /* A drop shadow in the material would draw a ring around the key: only the key shows. */
+    mask: linear-gradient(#000 0 0) padding-box;
+    color: var(--_ink);
+    translate: calc(var(--_side) * (var(--_switch-travel) - var(--_end)) * (100cqi - 100%)) 0;
+    scale: calc(1 - 0.125 * var(--ow-motion-scale) * var(--_switch-held)) 1;
+    transform-origin: calc(
+        50% +
+        var(--_side) *
+        (1 - 2 * var(--_switch-travel)) *
+        (50% - var(--_inset))
+      )
+      50%;
+    transition:
+      --_switch-travel var(--ow-spring-travel-duration) var(--ow-spring-travel),
+      --_switch-held var(--ow-spring-settle-duration) var(--ow-spring-settle);
+  }
+
+  .ow-switch__thumb:where(:dir(rtl)) {
+    --_side: -1;
+  }
+
+  .ow-switch__thumb:where([data-checked]) {
+    --_end: 1;
+    --_switch-travel: 1;
+    margin-inline-start: auto;
+  }
+
+  /* Held: in within 90 ms (DP-4), and let go on the settle spring. */
+  :where(.ow-switch:active:not([data-disabled], [data-readonly])) > .ow-switch__thumb {
+    --_switch-held: 1;
+    transition:
+      --_switch-travel var(--ow-spring-travel-duration) var(--ow-spring-travel),
+      --_switch-held 90ms var(--ow-ease-out);
+  }
+
+  /* An icon in the thumb keeps 2px of the key around it. */
+  .ow-switch__thumb > :where(svg, img) {
+    display: block;
+    inline-size: calc(100% - 4px);
+    block-size: calc(100% - 4px);
+  }
+
+  /* FR-20: the thumb goes to its place with no travel and no squash. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-switch__thumb {
+      scale: none;
+      transition: none;
+    }
+  }
+
+  /* DP-8: the track keeps its outline, on is the system's highlight, and the key is drawn solid. */
+  @media (forced-colors: active) {
+    .ow-switch:where([data-checked]) {
+      background-color: Highlight;
+    }
+
+    .ow-switch:where(:focus-visible) {
+      outline-color: Highlight;
+    }
+
+    .ow-switch:where([data-disabled]) {
+      outline-color: GrayText;
+      opacity: 1;
+    }
+
+    .ow-switch:where([data-disabled][data-checked]) {
+      background-color: GrayText;
+    }
+
+    .ow-switch__thumb {
+      forced-color-adjust: none;
+      background-color: CanvasText;
+      box-shadow: none;
+      color: Canvas;
+    }
+
+    .ow-switch__thumb:where([data-checked]) {
+      background-color: HighlightText;
+      color: Highlight;
+    }
+
+    .ow-switch__thumb:where([data-disabled]) {
+      background-color: GrayText;
+    }
+
+    .ow-switch__thumb:where([data-disabled][data-checked]) {
+      background-color: Canvas;
+      color: GrayText;
+    }
+  }
+}

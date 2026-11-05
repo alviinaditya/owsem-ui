@@ -11,6 +11,7 @@ import {
   RadioGroup,
   Separator,
   Tabs,
+  Switch,
   Toggle,
   ToggleGroup,
   Toolbar,
@@ -63,6 +64,8 @@ const TEXT = {
     contents: "Di halaman ini",
     files: "File",
     sections: ["Instalasi", "Tema", "Pemakaian", "API"],
+    alerts: "Notifikasi",
+    sounds: "Suara",
   },
   en: {
     create: "New",
@@ -96,6 +99,8 @@ const TEXT = {
     contents: "On this page",
     files: "Files",
     sections: ["Installation", "Theming", "Usage", "API"],
+    alerts: "Alerts",
+    sounds: "Sounds",
   },
 };
 
@@ -281,6 +286,12 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
       <label>
         <Checkbox.Root /> {t.blog}
       </label>
+    </div>
+  ),
+  switch: (t) => (
+    <div className="component-preview-row">
+      <Switch.Root checked aria-label={t.alerts} />
+      <Switch.Root aria-label={t.sounds} />
     </div>
   ),
   toggle: (t) => (

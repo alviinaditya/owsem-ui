@@ -36,12 +36,19 @@ let restoreFocus = () => {};
 function holdFocus(skip: (el: HTMLElement) => boolean): () => void {
   if (holds.size === 0) {
     const focus = HTMLElement.prototype.focus;
+    const select = HTMLInputElement.prototype.select;
     HTMLElement.prototype.focus = function (this: HTMLElement, options?: FocusOptions) {
       for (const held of holds) if (held(this)) return;
       focus.call(this, options);
     };
+    // Chromium focuses an input it selects in, and Base UI's Form selects the first failed field.
+    HTMLInputElement.prototype.select = function (this: HTMLInputElement) {
+      for (const held of holds) if (held(this)) return;
+      select.call(this);
+    };
     restoreFocus = () => {
       HTMLElement.prototype.focus = focus;
+      HTMLInputElement.prototype.select = select;
     };
   }
   holds.add(skip);

@@ -1,0 +1,132 @@
+---
+title: Form
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { TokenChip } from "@/components/token-setup";
+
+Form adalah `<form>` native yang memeriksa Field-nya sebelum submit. Base UI menjalankan pengecekannya,
+menerima error dari server Anda, dan memindahkan fokus ke field pertama yang gagal; OwsemUI hanya menambahkan
+jarak antar-field. Gulir untuk mulai tur; stage mengikuti setiap bagian.
+
+```tsx
+<Form onFormSubmit={save}>
+  <Field.Root name="email">
+    <Field.Label>Email</Field.Label>
+    <Field.Control type="email" required />
+    <Field.Error />
+  </Field.Root>
+  <Button type="submit">Daftar</Button>
+</Form>
+```
+
+## Aturan browser, di dalam field [#native]
+
+Submit menjalankan pengecekan setiap Field: `required`, `type`, dan `pattern` milik kontrol, serta `validate`
+bila ada. Bila salah satu gagal, tidak ada yang terkirim, setiap field yang gagal menampilkan error-nya, dan
+fokus pindah ke yang pertama, dengan teksnya terpilih, siap diketik ulang. Base UI mematikan gelembung pesan
+browser (`noValidate`), jadi pesannya ada di `Field.Error`, dan tetap memakai kata-kata browser kecuali Anda
+menulis sendiri. `onFormSubmit` menerima nilai berdasarkan `name` setiap Field setelah semuanya lolos.
+
+Setelah submit gagal, field memeriksa lagi saat Anda mengetik, sehingga error pergi begitu tidak lagi benar.
+`validationMode` membuatnya memeriksa saat blur atau saat berubah sejak awal.
+
+Stage memutarnya: pointer men-submit form kosong, kedua field gagal, dan yang pertama menerima fokus, lalu
+mengisinya menghapus setiap error. Skrip tidak mengganggu fokus Anda, jadi stage menggambar ring itu; tekan
+sendiri Daftar untuk merasakannya.
+
+## Error dari server Anda [#server]
+
+Sebagian jawaban hanya diketahui server Anda. Berikan ke `errors`, dengan kunci `name` setiap Field. Masing-masing
+tampil di `Field.Error`-nya, menandai field-nya invalid, dan fokus pindah ke yang pertama, sama seperti kegagalan
+native.
+
+Tidak ada yang perlu dihapus. Mengedit field menghilangkan error-nya, dan membiarkan yang lain. (Base UI 1.9
+mengerjakannya sendiri; tidak ada `onClearErrors`.) Objek `errors` baru menggantikan yang lama.
+
+Stage memutarnya: server menolak `admin` setelah setengah detik, error-nya jatuh di nama, dan satu edit
+menghapusnya tanpa bertanya lagi ke server. Submit kedua berhasil.
+
+## Anatomi [#anatomy]
+
+Satu bagian. Inspeksi (I) menandainya di stage.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `form.ow-form` | Satu kolom dengan satu jarak. Tanpa bingkai, tanpa margin, dan tanpa state sendiri: Field-nya yang membawanya |
+
+Field dan Fieldset meregang selebar form. `<button>` yang langsung berada di dalamnya mempertahankan lebarnya.
+
+## State dan varian [#states]
+
+Form tidak punya tampilan sendiri untuk diubah, jadi stage menampilkan yang ditampilkan Field di dalamnya, di
+tema terang dan gelap berdampingan.
+
+| State | Tandanya |
+| --- | --- |
+| Belum disentuh | Belum ada apa-apa; dengan `onSubmit` bawaan, pengecekan menunggu submit pertama |
+| Error native | Tepi kritis Field, dan pesan browser atau pesan Anda |
+| Error server | Sama, dengan kata-kata server Anda, sampai field-nya diedit |
+
+## Keyboard dan aksesibilitas [#keyboard]
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab | Berpindah antar-field dan tombolnya |
+| Enter | Di dalam field, men-submit |
+
+Fokus yang pindah ke field pertama yang gagal berarti pengguna keyboard atau screen reader langsung tiba di
+masalahnya, dan mendengar nama serta error-nya, tanpa harus mencari. Beri form `aria-label` bila ia perlu
+menjadi landmark.
+
+Tidak ada yang bergerak, jadi reduced motion tidak mengubah apa pun, dan forced colors tidak punya apa pun
+untuk digambar ulang.
+
+## Kustomisasi [#customization]
+
+Stage menampilkan tiga cara mengubahnya. Kontrolnya terbuka: pilih jarak, mode validasi, atau warna error, dan
+kodenya mengikuti.
+
+**Token** di form sampai ke field di dalamnya. Form sendiri tidak membaca token.
+
+```css
+.signup {
+  --ow-critical: #9a2b5a;
+}
+```
+
+**`className`** mengalahkan nilainya sendiri, tanpa `!important`. `gap` adalah satu properti di satu class, dan
+selebihnya tentang layout adalah milik Anda, misalnya satu baris untuk kotak newsletter.
+
+```css
+.signup {
+  gap: 0.5em;
+}
+```
+
+Ia tidak punya margin luar dan mengisi induknya.
+
+**Komposisi:** kelompokkan field dengan Fieldset di dalamnya, atau tata dengan elemen Anda sendiri. Bagi Form,
+yang penting hanya `name` milik Field, sedalam apa pun letaknya. `render` menukar elemennya.
+
+<TokenChip lang="id" />
+
+## Ship it [#ship]
+
+Drawer kode menulis komponen persis seperti yang diatur di stage, dengan tab kedua untuk error server.
+
+| Prop | Tipe | Bawaan |
+| --- | --- | --- |
+| `errors` | `Record<string, string \| string[]>` | |
+| `onFormSubmit` | `(values, eventDetails) => void` | |
+| `validationMode` | `"onSubmit" \| "onBlur" \| "onChange"` | `"onSubmit"` |
+| `actionsRef` | `RefObject<{ validate(name?) }>` | |
+| `className` | `string \| (state) => string` | |
+| `style` | `CSSProperties \| (state) => CSSProperties` | |
+| `render` | `ReactElement \| (props, state) => ReactElement` | |
+
+Semuanya berasal dari Base UI, dan props lain diteruskan ke `<form>` apa adanya. `onSubmit` biasa tetap berjalan,
+begitu juga `action`. Ref diteruskan ke `form`.
+
+Impor dari `owsem-ui/base`. Di registry, namanya item `form`. Ia tidak butuh komponen lain, meski pengecekannya
+hanya sampai ke Field, dan kontrol Base UI apa pun di dalamnya.

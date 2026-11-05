@@ -6,6 +6,7 @@ import ColorPickerLab from "./color-picker";
 import CommandMenuLab from "./command-menu";
 import FieldLab from "./field";
 import FieldsetLab from "./fieldset";
+import FormLab from "./form";
 import InputLab from "./input";
 import KbdLab from "./kbd";
 import MenuLab from "./menu";
@@ -28,6 +29,7 @@ export const labs: Partial<Record<ComponentName, ComponentType<LabProps>>> = {
   "command-menu": CommandMenuLab,
   field: FieldLab,
   fieldset: FieldsetLab,
+  form: FormLab,
   input: InputLab,
   kbd: KbdLab,
   menu: MenuLab,

@@ -4,6 +4,7 @@ import {
   Button,
   Field,
   Fieldset,
+  Form,
   Input,
   Kbd,
   Menu,
@@ -282,6 +283,17 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
       </Field.Root>
     </Fieldset.Root>
   ),
+  form: (t) => (
+    <Form className="component-preview-form">
+      <Field.Root invalid>
+        <Field.Label>{t.email}</Field.Label>
+        <Field.Control size="sm" defaultValue="ana@" />
+      </Field.Root>
+      <Button size="sm" type="button">
+        {t.create}
+      </Button>
+    </Form>
+  ),
   input: (t) => (
     <Input
       size="sm"
@@ -396,13 +408,6 @@ const B = (x: number, y: number, w: number, h: number, r = 5) => (
 );
 
 const SKETCHES: Partial<Record<ComponentName, ReactNode>> = {
-  form: (
-    <>
-      {B(36, 14, 88, 18)}
-      {B(36, 38, 88, 18)}
-      <rect x={36} y={64} width={38} height={18} rx={5} fill="currentColor" opacity={0.6} />
-    </>
-  ),
   checkbox: (
     <>
       <rect x={42} y={38} width={20} height={20} rx={5} fill="currentColor" opacity={0.6} />

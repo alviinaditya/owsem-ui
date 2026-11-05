@@ -152,7 +152,7 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Button**, **Field**, **Fieldset**, **Input**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toggle Group**,
+**Button**, **Field**, **Fieldset**, **Form**, **Input**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toggle Group**,
 **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`) and **Color Picker**, **Command Menu**,
 **Table of Contents**, and **Tree Rail Nav** (Owsem, from `owsem-ui/owsem`) are built. Base
 components are Base UI components with OwsemUI's styling, and small primitives without a Base UI
@@ -262,6 +262,36 @@ import { Field, Fieldset } from "owsem-ui/base"; // or "@/components/owsem/field
   removes it.
 - Reads `--ow-fg` (legend), `--ow-line-dark`, and `--ow-line-light`. A token on the legend or an
   ancestor wins, and so does unlayered CSS on a `className`.
+
+### Form
+
+A native `<form>` that checks its Fields before it submits, takes server errors, and moves focus to the
+first invalid field. It draws only the gap between fields. Registry item: `form`.
+
+```tsx
+import { Button, Field, Form } from "owsem-ui/base"; // or "@/components/owsem/form", ...
+<Form onFormSubmit={save}>
+  <Field.Root name="email">
+    <Field.Label>Email</Field.Label>
+    <Field.Control type="email" required />
+    <Field.Error />
+  </Field.Root>
+  <Button type="submit">Sign up</Button>
+</Form>
+```
+
+- Props: `onFormSubmit(values, eventDetails)` (values by each Field's `name`), `errors`,
+  `validationMode` (`"onSubmit"` default, `"onBlur"`, `"onChange"`), and `actionsRef`
+  (`{ validate(name?) }`), plus `className`, `style`, `render`, and `ref`. Other props reach the
+  `<form>`.
+- Server errors: pass `errors`, keyed by Field `name`, such as `{ username: "That name is taken." }`.
+  Each shows in its `Field.Error` and focus goes to the first. There is no `onClearErrors` in Base UI
+  1.9: editing a field removes that field's error, and a new object replaces the old one.
+- Checks reach only Fields and Base UI controls inside one, however deep they sit, so Fieldsets and
+  your own layout elements are fine inside.
+- The space between children is `gap` on the root (`1.25em`), one property on one class. It has no
+  frame and no margins. A `<button>` directly inside keeps its own width.
+- Reads no token itself; a token set on it reaches the Fields inside.
 
 ### Input
 

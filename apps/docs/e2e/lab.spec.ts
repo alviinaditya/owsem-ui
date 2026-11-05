@@ -708,6 +708,34 @@ test("the Fieldset Lab's first scene turns its whole group off, then on", async 
   await expect(street).toBeEnabled();
 });
 
+test("the Form Lab focuses the first invalid field, and lands a server's error on its field", async ({
+  page,
+}) => {
+  await page.goto("/en/form");
+  const email = demo(page).getByRole("textbox", { name: "Email" });
+  const username = demo(page).getByRole("textbox", { name: "Username" });
+  const submit = demo(page).getByRole("button", { name: "Sign up" });
+  await submit.click();
+  await expect(email).toBeFocused();
+  await expect(email).toHaveAttribute("aria-invalid", "true");
+
+  await email.fill("ana@owsem.dev");
+  await username.fill("admin");
+  await submit.click();
+  const taken = demo(page).getByText("That name is taken.");
+  await expect(taken).toBeVisible();
+  await expect(username).toBeFocused();
+  await username.fill("admin7");
+  await expect(taken).toHaveCount(0);
+  await submit.click();
+  await expect(demo(page).getByText("Your account is ready.")).toBeVisible();
+
+  // The scene's run keeps the visitor's focus, so it draws the ring on the first failed field.
+  await scene(page, "native");
+  await expect(demo(page).locator('[data-demo="email"]')).toHaveAttribute("data-demo-focus", "");
+  await expect(demo(page).locator('[data-demo="email"]')).not.toBeFocused();
+});
+
 test("the Toolbar Lab's first scene presses its items, and the line follows", async ({ page }) => {
   await page.goto("/en/toolbar");
   const italic = demo(page).getByRole("button", { name: "Italic" });

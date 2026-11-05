@@ -1,0 +1,170 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * A box the size of an icon (FR-10), in em, so font-size scales it. Off it is the well with a 3:1
+ * edge (DP-6); checked or indeterminate it is the primary material. Fills change at once (DP-5);
+ * the press and the glyphs move. States sit in :where(), so one class of yours beats any of them.
+ */
+@layer owsem.components {
+  .ow-checkbox {
+    /* The theme tokens it reads (TK-9); set one on the box, or around it, to restyle it. */
+    --_well: var(--ow-well-bg);
+    --_edge: var(--ow-edge);
+    --_fg: var(--ow-fg);
+    --_accent: var(--ow-accent);
+    --_accent-shadow: var(--ow-primary-shadow);
+    --_on-accent: var(--ow-on-accent);
+    --_hover: var(--ow-hover);
+    --_pressed-bg: var(--ow-pressed-bg);
+    --_focus: var(--ow-focus);
+    /* Half the control radius, as a small key inside a control (FR-10b). */
+    --_radius: calc(var(--ow-radius) / 2);
+    --_held: var(--_pressed-bg);
+    --_press: calc(1 - 0.03 * var(--ow-motion-scale));
+    --_glyph-out: calc(1 - 0.2 * var(--ow-motion-scale));
+    --icon: calc(1em + 2px);
+    position: relative;
+    display: inline-flex;
+    flex: none;
+    box-sizing: border-box;
+    inline-size: var(--icon);
+    block-size: var(--icon);
+    border-radius: var(--_radius);
+    /* Invisible until forced colors draw it as the edge (DP-8). */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--_well);
+    box-shadow: inset 0 0 0 1px var(--_edge);
+    /* A glyph on its way out shows on the well. */
+    color: var(--_fg);
+    font-size: 0.875rem;
+    /* The middle of the text, in any state: a baseline would follow the glyphs. */
+    vertical-align: middle;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: transform;
+    /* A press lets go on the settle spring (FR-21). */
+    transition: transform var(--ow-spring-settle-duration) var(--ow-spring-settle);
+  }
+
+  .ow-checkbox:where([data-size="sm"]) {
+    font-size: 0.8125rem;
+  }
+
+  .ow-checkbox:where([data-size="lg"]) {
+    font-size: 1rem;
+  }
+
+  /* A 24px target around a smaller box, adding no layout (FR-14). */
+  .ow-checkbox::after {
+    content: "";
+    position: absolute;
+    inset: min(0px, (100% - 24px) / 2);
+  }
+
+  .ow-checkbox:where([data-checked], [data-indeterminate]) {
+    /* literal: black darkens any fill */
+    --_held: color-mix(in oklab, var(--_accent), black 10%);
+    background-color: var(--_accent);
+    box-shadow: var(--_accent-shadow);
+    color: var(--_on-accent);
+  }
+
+  /* A label and its box are one control, so pointing at the text counts. */
+  @media (hover: hover) and (pointer: fine) {
+    .ow-checkbox:where(:hover, label:hover *):where(:not([data-disabled], [data-readonly])) {
+      background-image: linear-gradient(var(--_hover) 0 0);
+    }
+  }
+
+  /* DP-4: in to 0.97 within 90 ms. The edge stays, so the box keeps its 3:1 boundary. */
+  .ow-checkbox:where(:active, label:active *):where(:not([data-disabled], [data-readonly])) {
+    background-color: var(--_held);
+    background-image: none;
+    transform: scale(var(--_press));
+    transition-duration: 90ms;
+    transition-timing-function: var(--ow-ease-out);
+  }
+
+  /* FR-13: 2px outside the box. */
+  .ow-checkbox:where(:focus-visible) {
+    outline: 2px solid var(--_focus);
+    outline-offset: 2px;
+  }
+
+  .ow-checkbox:where([data-readonly]) {
+    cursor: default;
+  }
+
+  .ow-checkbox:where([data-disabled]) {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  /* Fills the box, with its glyphs stacked. Base UI waits for this fade before it unmounts. */
+  .ow-checkbox__indicator {
+    display: grid;
+    place-items: center;
+    inline-size: 100%;
+    block-size: 100%;
+    transition: opacity 120ms var(--ow-ease-out);
+  }
+
+  .ow-checkbox__indicator:where([data-starting-style], [data-unchecked]) {
+    opacity: 0;
+  }
+
+  .ow-checkbox__indicator > * {
+    grid-area: 1 / 1;
+    will-change: transform;
+    transition:
+      opacity 120ms var(--ow-ease-out),
+      transform var(--ow-spring-settle-duration) var(--ow-spring-settle);
+  }
+
+  .ow-checkbox__indicator > :where(svg, img) {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  /* Out on the way in and out, and a marked glyph is out unless the state names it. */
+  .ow-checkbox__indicator:where([data-starting-style], [data-unchecked]) > *,
+  .ow-checkbox__indicator:where(:not([data-checked])) > [data-glyph="check"],
+  .ow-checkbox__indicator:where(:not([data-indeterminate])) > [data-glyph="minus"] {
+    opacity: 0;
+    transform: scale(var(--_glyph-out));
+  }
+
+  /* FR-20: the fills still change and the glyphs still fade; nothing moves. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-checkbox {
+      --_press: 1;
+      --_glyph-out: 1;
+    }
+  }
+
+  /* DP-8: the materials are gone, so the outline is the edge and a system color the fill. */
+  @media (forced-colors: active) {
+    .ow-checkbox:where([data-checked], [data-indeterminate]) {
+      background-color: Highlight;
+      color: HighlightText;
+    }
+
+    .ow-checkbox:where(:focus-visible) {
+      outline-color: Highlight;
+    }
+
+    .ow-checkbox:where([data-disabled]) {
+      outline-color: GrayText;
+      opacity: 1;
+    }
+
+    .ow-checkbox:where([data-disabled]):where([data-checked], [data-indeterminate]) {
+      background-color: GrayText;
+      color: Canvas;
+    }
+  }
+}

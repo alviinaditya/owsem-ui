@@ -152,8 +152,8 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Button**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toggle Group**,
-**Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`) and **Color Picker**, **Command Menu**,
+**Button**, **Kbd**, **Menu**, **Popover**, **Radio Group**, **Separator**, **Toggle**,
+**Toggle Group**, **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`) and **Color Picker**, **Command Menu**,
 **Table of Contents**, and **Tree Rail Nav** (Owsem, from `owsem-ui/owsem`) are built. Base
 components are Base UI components with OwsemUI's styling, and small primitives without a Base UI
 part, such as Kbd; Owsem components are OwsemUI's own. No component has a `flavor` prop.
@@ -293,6 +293,46 @@ import { Popover } from "owsem-ui/base"; // or "@/components/owsem/popover"
   inside the popup (the popup itself has no overflow, so the arrow shows).
 - Reads `--ow-panel` and `--ow-popup-shadow` (the arrow takes both), `--ow-fg`, `--ow-muted`, and
   `--ow-radius`.
+
+### Radio Group
+
+One choice from a few options, all in view. Each option is a `<label>` row holding a round radio.
+Registry item: `radio-group`.
+
+```tsx
+import { Radio, RadioGroup } from "owsem-ui/base"; // or "@/components/owsem/radio-group"
+<RadioGroup aria-label="Delivery" defaultValue="standard">
+  <label>
+    <Radio.Root value="standard" />
+    Standard
+  </label>
+  <label>
+    <Radio.Root value="express" />
+    Express
+  </label>
+</RadioGroup>
+```
+
+- `RadioGroup` is Base UI's: `value`, `defaultValue`, `onValueChange(value, eventDetails)`, `name`,
+  `form`, `disabled`, `readOnly`, `required`, and `inputRef`. OwsemUI adds `size` (`"sm"`, `"md"`,
+  the default, or `"lg"`: Button's fonts and heights). Name it with `aria-label` or
+  `aria-labelledby`. In a `<form>`, `name` submits the value.
+- `Radio.Root` draws its `Radio.Indicator` with no children; children replace it. The Indicator is
+  mounted only while checked, unless `keepMounted`. Empty, it is the dot; a glyph as its children
+  replaces the dot: `<Radio.Root value="a"><Radio.Indicator><Check /></Radio.Indicator></Radio.Root>`.
+- A row is a `label` holding a radio, at any depth. A press on it picks the option, and Glide lights
+  it on hover; do not add a hover style. A radio with no label row (including `<label htmlFor>`
+  beside it) gets no row styling and no Glide: give it an `aria-label` or that label.
+- The group has no width and no margin, and is a flex column. Lay it out with plain CSS or a utility
+  on `className` (`flex-flow: row wrap`, or a grid); Glide follows, so do not add an orientation
+  prop. Base UI's arrows already work in both directions and pick as they move; do not add your own.
+- States: `data-checked`, `data-unchecked`, `data-disabled`, `data-readonly` on the radio and the
+  Indicator; `data-size` and `data-disabled` on the group; `data-glide-active` on the lit row.
+- Sizes are in `em`, so `font-size` scales it all. `--py` sets the rows' height, on the group or a
+  row, and `--icon` the circle, on the radio, through `style`.
+- Reads `--ow-well-bg` and `--ow-edge` (off), `--ow-accent` and `--ow-primary-shadow` (on),
+  `--ow-on-accent` (the dot), `--ow-pressed-bg` (held), `--ow-fg`, `--ow-muted`, `--ow-focus`,
+  `--ow-hover` and `--ow-radius` (Glide).
 
 ### Separator
 

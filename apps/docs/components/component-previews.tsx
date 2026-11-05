@@ -5,6 +5,8 @@ import {
   Kbd,
   Menu,
   Popover,
+  Radio,
+  RadioGroup,
   Separator,
   Toggle,
   ToggleGroup,
@@ -262,6 +264,22 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
       <Toggle aria-label={t.underline} startIcon={<Icon name="underline" />} />
     </div>
   ),
+  "radio-group": (t) => (
+    <RadioGroup size="sm" value="week" aria-label={t.week}>
+      <label>
+        <Radio.Root value="day" />
+        {t.day}
+      </label>
+      <label>
+        <Radio.Root value="week" />
+        {t.week}
+      </label>
+      <label>
+        <Radio.Root value="month" />
+        {t.month}
+      </label>
+    </RadioGroup>
+  ),
   "toggle-group": (t) => (
     <ToggleGroup.Root size="sm" value={["week"]} aria-label={t.week}>
       <ToggleGroup.Item value="day">{t.day}</ToggleGroup.Item>
@@ -396,17 +414,6 @@ const SKETCHES: Partial<Record<ComponentName, ReactNode>> = {
       <rect x={42} y={38} width={20} height={20} rx={5} fill="currentColor" opacity={0.6} />
       <path d="m46 48 4 4 8-8" stroke="var(--docs-surface)" strokeWidth={2.4} />
       {F(70, 45, 48)}
-    </>
-  ),
-  "radio-group": (
-    <>
-      {[26, 48, 70].map((y, i) => (
-        <g key={y}>
-          <circle cx={52} cy={y} r={8} />
-          {i === 0 ? <circle cx={52} cy={y} r={4} fill="currentColor" stroke="none" /> : null}
-          {F(66, y - 2.5, 40 - i * 6)}
-        </g>
-      ))}
     </>
   ),
   switch: (

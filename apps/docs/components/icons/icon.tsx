@@ -31,6 +31,7 @@ const ICONS = {
       <path d="M3 10h18" />
     </>
   ),
+  check: <path d="M20 6 9 17l-5-5" />,
   "chevron-down": <path d="m6 9 6 6 6-6" />,
   "circle-help": (
     <>

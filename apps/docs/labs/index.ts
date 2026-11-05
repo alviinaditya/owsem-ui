@@ -9,6 +9,10 @@ import CommandMenuLab from "./command-menu";
 import CopyButtonLab from "./copy-button";
 import IconMorphLab from "./icon-morph";
 import DialogLab from "./dialog";
+import FieldLab from "./field";
+import FieldsetLab from "./fieldset";
+import FormLab from "./form";
+import InputLab from "./input";
 import KbdLab from "./kbd";
 import MenuLab from "./menu";
 import PopoverLab from "./popover";
@@ -38,6 +42,10 @@ export const labs: Partial<Record<ComponentName, ComponentType<LabProps>>> = {
   "copy-button": CopyButtonLab,
   "icon-morph": IconMorphLab,
   dialog: DialogLab,
+  field: FieldLab,
+  fieldset: FieldsetLab,
+  form: FormLab,
+  input: InputLab,
   kbd: KbdLab,
   menu: MenuLab,
   popover: PopoverLab,

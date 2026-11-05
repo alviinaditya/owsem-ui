@@ -719,6 +719,72 @@ test("the Switch Lab's first scene plays its rows, and a pressed row's thumb lan
   ).toBeLessThanOrEqual(0.5);
 });
 
+test("the Input Lab's first scene types an address, and the edge follows", async ({ page }) => {
+  await page.goto("/en/input");
+  const email = demo(page).getByRole("textbox", { name: "Email" });
+  await expect(email).toHaveValue("");
+  await scene(page, "typing");
+  await expect(email).toHaveAttribute("aria-invalid", "true");
+  await expect(demo(page).getByText("doesn't look like an email")).toBeVisible();
+  await expect(email).toHaveValue("ana@owsem.dev");
+  await expect(email).not.toHaveAttribute("aria-invalid");
+});
+
+test("the Field Lab's first scene types an address, and the error joins the wiring", async ({
+  page,
+}) => {
+  await page.goto("/en/field");
+  const email = demo(page).getByRole("textbox", { name: "Work email" });
+  const describedBy = demo(page).locator('[data-demo="aria-describedby"]');
+  await expect(describedBy).toHaveText("We only use it to sign you in.");
+  await scene(page, "wiring");
+  await expect(email).toHaveAttribute("aria-invalid", "true");
+  await expect(describedBy).toContainText("doesn't look like an email");
+  await expect(email).toHaveValue("ana@owsem.dev");
+  await expect(email).not.toHaveAttribute("aria-invalid");
+  await expect(describedBy).toHaveText("We only use it to sign you in.");
+});
+
+test("the Fieldset Lab's first scene turns its whole group off, then on", async ({ page }) => {
+  await page.goto("/en/fieldset");
+  const group = demo(page).getByRole("group", { name: "Billing address" });
+  const street = group.getByRole("textbox", { name: "Street" });
+  const city = group.getByRole("textbox", { name: "City" });
+  await expect(street).toBeEnabled();
+  await scene(page, "group");
+  await expect(street).toBeDisabled();
+  await expect(city).toBeDisabled();
+  await expect(street).toBeEnabled();
+});
+
+test("the Form Lab focuses the first invalid field, and lands a server's error on its field", async ({
+  page,
+}) => {
+  await page.goto("/en/form");
+  const email = demo(page).getByRole("textbox", { name: "Email" });
+  const username = demo(page).getByRole("textbox", { name: "Username" });
+  const submit = demo(page).getByRole("button", { name: "Sign up" });
+  await submit.click();
+  await expect(email).toBeFocused();
+  await expect(email).toHaveAttribute("aria-invalid", "true");
+
+  await email.fill("ana@owsem.dev");
+  await username.fill("admin");
+  await submit.click();
+  const taken = demo(page).getByText("That name is taken.");
+  await expect(taken).toBeVisible();
+  await expect(username).toBeFocused();
+  await username.fill("admin7");
+  await expect(taken).toHaveCount(0);
+  await submit.click();
+  await expect(demo(page).getByText("Your account is ready.")).toBeVisible();
+
+  // The scene's run keeps the visitor's focus, so it draws the ring on the first failed field.
+  await scene(page, "native");
+  await expect(demo(page).locator('[data-demo="email"]')).toHaveAttribute("data-demo-focus", "");
+  await expect(demo(page).locator('[data-demo="email"]')).not.toBeFocused();
+});
+
 test("the Toolbar Lab's first scene presses its items, and the line follows", async ({ page }) => {
   await page.goto("/en/toolbar");
   const italic = demo(page).getByRole("button", { name: "Italic" });

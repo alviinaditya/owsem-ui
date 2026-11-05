@@ -1,0 +1,18 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * Form draws only the gap between its fields: no frame, no margins, and no token of its own. A
+ * button stays as wide as its label, where a column would stretch it.
+ */
+@layer owsem.components {
+  .ow-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25em;
+    min-inline-size: 0;
+  }
+
+  .ow-form > :where(button) {
+    align-self: start;
+  }
+}

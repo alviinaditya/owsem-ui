@@ -160,6 +160,7 @@ Read the registry index or the docs, not a hard-coded list. As of this version o
 **Button**, **Checkbox**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toggle Group**,
 **Button**, **Dialog**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toggle Group**,
 **Button**, **Kbd**, **Menu**, **Popover**, **Select**, **Separator**, **Toggle**, **Toggle Group**,
+**Button**, **Field**, **Fieldset**, **Form**, **Input**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toggle Group**,
 **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`) and **Color Picker**, **Command Menu**,
 **Button**, **Kbd**, **Menu**, **Popover**, **Scroll Area**, **Separator**, **Toggle**,
 **Toggle Group**, **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`) and **Color Picker**, **Command Menu**,
@@ -245,6 +246,133 @@ import { Checkbox } from "owsem-ui/base"; // or "@/components/owsem/checkbox"
   `--ow-well-bg`, `--ow-edge`, `--ow-fg`, `--ow-accent`, `--ow-primary-shadow`, `--ow-on-accent`,
   `--ow-hover`, `--ow-pressed-bg`, `--ow-focus`, `--ow-radius` (half of it), and `--ow-motion-scale`.
   One class of yours beats any of its states; write `[data-checked]` on it to style one.
+
+### Field
+
+Ties a label, a control, and its messages together through Base UI's aria wiring, in one column with
+even gaps. Label and Control are all a common field needs. Registry item: `field` (brings `input`).
+
+```tsx
+import { Field } from "owsem-ui/base"; // or "@/components/owsem/field"
+<Field.Root>
+  <Field.Label>Email</Field.Label>
+  <Field.Control />
+</Field.Root>
+```
+
+```tsx
+<Field.Root validationMode="onChange" validate={(value) => (value === "admin" ? "Taken" : null)}>
+  <Field.Label>Username</Field.Label>
+  <Field.Control pattern="[a-z0-9]{3,}" size="sm" startIcon={<AtIcon />} />
+  <Field.Description>Lowercase letters and numbers.</Field.Description>
+  <Field.Error match="patternMismatch">Use lowercase letters and numbers.</Field.Error>
+  <Field.Error match="customError" />
+</Field.Root>
+```
+
+- Parts: `Root`, `Label`, `Control`, `Description`, `Error`, `Item` (an option in a checkbox or radio
+  group), and `Validity` (a function of the validity state; draws nothing). All but `Validity` take
+  `className`, `style`, `render`, and `ref`.
+- `Field.Control` is Input: `size`, `startIcon`, `endIcon`, and the same rule that every prop reaches
+  the `<input>`. `render` puts another control in the field, as `render={<textarea rows={3} />}`,
+  and any Base UI control inside `Field.Root` is wired without it. With per-component CSS, load
+  `owsem-ui/css/input.css` too.
+- No ids to write: the control gets `aria-labelledby`, `aria-describedby` for the description and for
+  the error while it shows, and `aria-invalid`.
+- On `Root`: `name`, `invalid`, `disabled`, `validate(value, formValues)`, and `validationMode`
+  (`"onSubmit"` default, `"onBlur"`, `"onChange"`). `Field.Error` without `match` shows on any failure,
+  with its children or the browser's message; `match` picks one validity state, and `match` alone
+  keeps it up for an `invalid` you control.
+- It has no outer margins and fills its parent; `gap` on the root sets the space between parts.
+- Reads `--ow-fg` (label), `--ow-muted` (description), and `--ow-critical` (error), plus Input's tokens
+  on the control. A token on a part or an ancestor wins, and so does unlayered CSS on a `className`.
+
+### Fieldset
+
+Groups fields under one legend with even gaps, and `disabled` reaches them all. It has no frame and no
+outer margins. Registry item: `fieldset`.
+
+```tsx
+import { Field, Fieldset } from "owsem-ui/base"; // or "@/components/owsem/fieldset", ".../field"
+<Fieldset.Root>
+  <Fieldset.Legend>Billing address</Fieldset.Legend>
+  <Field.Root>
+    <Field.Label>Street</Field.Label>
+    <Field.Control />
+  </Field.Root>
+</Fieldset.Root>
+```
+
+- Parts: `Root` (a `<fieldset>`, role `group`, `data-disabled`) and `Legend` (a `<div>` that names it
+  through `aria-labelledby`). Both take `className`, `style`, `render`, and `ref`. Any control works
+  inside; Field is the usual one, and Fieldset does not import it.
+- The space between its children is `gap` on the root (`1.25em`), one property on one class.
+- An etched line sits under the legend, as its `::after`: `.my-legend::after { content: none; }`
+  removes it.
+- Reads `--ow-fg` (legend), `--ow-line-dark`, and `--ow-line-light`. A token on the legend or an
+  ancestor wins, and so does unlayered CSS on a `className`.
+
+### Form
+
+A native `<form>` that checks its Fields before it submits, takes server errors, and moves focus to the
+first invalid field. It draws only the gap between fields. Registry item: `form`.
+
+```tsx
+import { Button, Field, Form } from "owsem-ui/base"; // or "@/components/owsem/form", ...
+<Form onFormSubmit={save}>
+  <Field.Root name="email">
+    <Field.Label>Email</Field.Label>
+    <Field.Control type="email" required />
+    <Field.Error />
+  </Field.Root>
+  <Button type="submit">Sign up</Button>
+</Form>
+```
+
+- Props: `onFormSubmit(values, eventDetails)` (values by each Field's `name`), `errors`,
+  `validationMode` (`"onSubmit"` default, `"onBlur"`, `"onChange"`), and `actionsRef`
+  (`{ validate(name?) }`), plus `className`, `style`, `render`, and `ref`. Other props reach the
+  `<form>`.
+- Server errors: pass `errors`, keyed by Field `name`, such as `{ username: "That name is taken." }`.
+  Each shows in its `Field.Error` and focus goes to the first. There is no `onClearErrors` in Base UI
+  1.9: editing a field removes that field's error, and a new object replaces the old one.
+- Checks reach only Fields and Base UI controls inside one, however deep they sit, so Fieldsets and
+  your own layout elements are fine inside.
+- The space between children is `gap` on the root (`1.25em`), one property on one class. It has no
+  frame and no margins. A `<button>` directly inside keeps its own width.
+- Reads no token itself; a token set on it reaches the Fields inside.
+
+### Input
+
+A one-line text field: a flat well with a 3:1 edge, Button's heights, and a focus ring. A name is all
+it needs, and it fills its parent. Registry item: `input`.
+
+```tsx
+import { Input } from "owsem-ui/base"; // or "@/components/owsem/input"
+<Input aria-label="Email" />
+<Input aria-label="Search" placeholder="Search" startIcon={<SearchIcon />} />
+<Input aria-label="Name" value={name} onValueChange={setName} />
+```
+
+- Renders an `<input>` with `data-size` and Base UI's `data-disabled`, `data-invalid`, `data-valid`,
+  `data-filled`, `data-focused`, `data-dirty`, and `data-touched`. Controlled with `value` and
+  `onValueChange(value, eventDetails)`, or uncontrolled with `defaultValue`. Inside a `Field`, Base
+  UI wires its name and validity; use `Field.Control`, which is this Input.
+- Props: `size` (`"sm"`, `"md"` default, `"lg"`: Button's heights; this replaces the native attribute,
+  so set `inline-size` for a width), `startIcon` and `endIcon` (any node; sized to the font plus 2px,
+  decorative), plus Base UI's `disabled`, `className`, `style`, and `render`.
+- **`ref`, `className`, `style`, and every other prop always reach the `<input>`, with or without
+  icons.** The input is always the well. An icon adds `span.ow-input__wrapper`, which has no look and
+  only places it; custom properties and `fontSize` in `style` reach it too. Passing the first icon
+  later remounts the input, so choose at the first render, and swap icons rather than passing `null`.
+- It has no margins. It fills its parent; a width on the input narrows it. In a flex row, an Input
+  with icons keeps its wrapper at the full width, so size `.ow-input__wrapper` or the parent there.
+- A plain `aria-invalid` draws the invalid edge. `render={<textarea rows={3} />}` keeps the look
+  and grows past one line.
+- Height comes from `--py` (set it in `style`, never under a 24 px target), and `font-size` scales it.
+- Reads `--ow-well-bg`, `--ow-well-shadow`, `--ow-edge`, `--ow-critical` (invalid edge), `--ow-fg`,
+  `--ow-muted` (placeholder and icons), `--ow-radius`, and `--ow-focus`. A token on the input or an
+  ancestor wins, and so does any unlayered CSS or Tailwind utility on its `className`.
 
 ### Menu
 

@@ -2,6 +2,10 @@
 export * from "./components/button";
 export * from "./components/checkbox";
 export * from "./components/dialog";
+export * from "./components/field";
+export * from "./components/fieldset";
+export * from "./components/form";
+export * from "./components/input";
 export { Kbd } from "./components/kbd";
 export * from "./components/menu";
 export * from "./components/popover";

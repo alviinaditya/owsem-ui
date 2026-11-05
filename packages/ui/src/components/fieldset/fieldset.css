@@ -1,0 +1,44 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * A group of fields: a legend over an etched line, then even gaps. No frame and no outer margins,
+ * so it sits in any layout. The line is two borders, so it stays in forced colors (DP-8).
+ */
+@layer owsem.components {
+  .ow-fieldset {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25em;
+    /* A fieldset's own minimum would stop it shrinking with its parent. */
+    min-inline-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 0.875rem;
+    line-height: 1.25;
+  }
+
+  .ow-fieldset__legend {
+    --_fg: var(--ow-fg);
+    --_dark: var(--ow-line-dark);
+    --_light: var(--ow-line-light);
+    /* A heading passed to `render` keeps the legend's look. */
+    margin: 0;
+    color: var(--_fg);
+    font-size: inherit;
+    font-weight: 600;
+  }
+
+  .ow-fieldset__legend::after {
+    content: "";
+    display: block;
+    margin-block-start: 0.75em;
+    border-block: 1px solid;
+    border-block-color: var(--_dark) var(--_light);
+  }
+
+  .ow-fieldset__legend:where([data-disabled]) {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+}

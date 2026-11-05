@@ -4,6 +4,10 @@ import {
   Button,
   Checkbox,
   Dialog,
+  Field,
+  Fieldset,
+  Form,
+  Input,
   Kbd,
   Menu,
   Popover,
@@ -59,6 +63,10 @@ const TEXT = {
     theming: "Tema",
     components: "Komponen",
     search: "Cari…",
+    email: "Email",
+    emailHint: "Untuk masuk.",
+    address: "Alamat",
+    city: "Kota",
     commands: "Perintah",
     newFile: "File baru",
     openRecent: "Buka terbaru",
@@ -95,6 +103,10 @@ const TEXT = {
     theming: "Theming",
     components: "Components",
     search: "Search…",
+    email: "Email",
+    emailHint: "To sign in.",
+    address: "Address",
+    city: "City",
     commands: "Commands",
     newFile: "New file",
     openRecent: "Open recent",
@@ -338,6 +350,41 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
       <Switch.Root aria-label={t.sounds} />
     </div>
   ),
+  field: (t) => (
+    <Field.Root>
+      <Field.Label>{t.email}</Field.Label>
+      <Field.Control size="sm" placeholder="ana@owsem.dev" />
+      <Field.Description>{t.emailHint}</Field.Description>
+    </Field.Root>
+  ),
+  fieldset: (t) => (
+    <Fieldset.Root className="component-preview-fieldset">
+      <Fieldset.Legend>{t.address}</Fieldset.Legend>
+      <Field.Root>
+        <Field.Label>{t.city}</Field.Label>
+        <Field.Control size="sm" placeholder="Bandung" />
+      </Field.Root>
+    </Fieldset.Root>
+  ),
+  form: (t) => (
+    <Form className="component-preview-form">
+      <Field.Root invalid>
+        <Field.Label>{t.email}</Field.Label>
+        <Field.Control size="sm" defaultValue="ana@" />
+      </Field.Root>
+      <Button size="sm" type="button">
+        {t.create}
+      </Button>
+    </Form>
+  ),
+  input: (t) => (
+    <Input
+      size="sm"
+      aria-label={t.search}
+      placeholder={t.search}
+      startIcon={<Icon name="search" />}
+    />
+  ),
   toggle: (t) => (
     <div className="component-preview-row">
       <Toggle pressed aria-label={t.bold} startIcon={<Icon name="bold" />} />
@@ -551,6 +598,13 @@ const SKETCHES: Partial<Record<ComponentName, ReactNode>> = {
       {B(28, 36, 104, 24, 6)}
       {F(38, 46, 40, 5, 0.4)}
       <path d="M82 43v11" />
+    </>
+  ),
+  checkbox: (
+    <>
+      <rect x={42} y={38} width={20} height={20} rx={5} fill="currentColor" opacity={0.6} />
+      <path d="m46 48 4 4 8-8" stroke="var(--docs-surface)" strokeWidth={2.4} />
+      {F(70, 45, 48)}
     </>
   ),
   "radio-group": (

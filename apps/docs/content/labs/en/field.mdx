@@ -1,0 +1,157 @@
+---
+title: Field
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Field ties a label, a control, and its messages together. Base UI does the wiring, so the label names
+the control, messages are read out with it, and its validity reaches every part; OwsemUI adds even
+gaps and the type. A label and a control are all a common field needs. Scroll to start the tour; the
+stage follows each part.
+
+```tsx
+<Field.Root>
+  <Field.Label>Email</Field.Label>
+  <Field.Control />
+</Field.Root>
+```
+
+## One name, one description [#wiring]
+
+You write no ids. Base UI gives the control an `aria-labelledby` for the label, and an
+`aria-describedby` for the description and for the error while it shows. The list under the field
+reads those attributes live.
+
+The stage plays it: the pointer types an address, and while the text isn't one yet, the control's
+edge turns critical, the error appears, and it joins the description in `aria-describedby`. Both
+leave once the address is right. Nothing animates: a message comes and goes at once, since a fade
+would only delay reading it.
+
+## Native and custom checks [#validation]
+
+Field reads the control's own constraints: `type`, `required`, `pattern`, `min`, and the others. Its
+`validate` prop adds your check, and returns a message or nothing. `validationMode` says when they
+run: on submit (the default), on blur, or on change.
+
+`Field.Error` without `match` shows on any failure, with your children or the browser's own message.
+With `match` it shows for one state, so each failure can have its words. `match` alone (true) keeps
+it up for a state you control. `Field.Validity` renders from the result and draws nothing itself.
+
+The stage plays it: too short shows the pattern's message, `admin` shows `validate`'s, and a free name
+passes.
+
+## Anatomy [#anatomy]
+
+Inspect (I) outlines each part, and the stage sets the field invalid so the error is there.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-field` | One column. Takes `invalid`, `disabled`, and `validate`, and carries their states |
+| <Part name="Label" /> | `label.ow-field__label` | Names the control |
+| <Part name="Control" /> | `input.ow-input` | [Input](/en/input) itself: its size and icons, and `render` for another control |
+| <Part name="Description" /> | `p.ow-field__description` | Muted help text |
+| <Part name="Error" /> | `div.ow-field__error` | Only while invalid; several messages come as a list |
+| Item | `div.ow-field__item` | One option in a checkbox or radio group, its control and label in a row |
+| Validity | none | A function of the validity state; renders what you return |
+
+Any Base UI control inside `Field.Root` is wired the same way, with or without `Field.Control`.
+
+## States and variants [#states]
+
+The stage sets the light and dark themes side by side. The pointer takes the empty field past an
+error and on to a valid address.
+
+| State | What shows it |
+| --- | --- |
+| Empty | The control's well, with its placeholder |
+| Filled | Text in `--ow-fg` |
+| Invalid | The control's edge in `--ow-critical`, and the error in the same tone. The label stays as it is |
+| Disabled | The control and the label at 45% opacity. A computed error hides; `invalid` you set stays |
+
+## Keyboard and accessibility [#keyboard]
+
+| Key | Action |
+| --- | --- |
+| Tab | Moves focus to the control |
+| Enter | In a form, submits; alone, runs the field's check |
+
+Clicking the label moves focus to the control. Screen readers read the label as its name and the
+description and the error as its description, and `aria-invalid` says it failed. Don't announce an
+error by color alone: the message is there, and the edge is its signal.
+
+Nothing moves, so reduced motion changes nothing. In forced colors (Windows High Contrast), messages
+take the system's text color, and the control keeps a 2px edge while invalid. Right to left, the
+label sits on the right, over the control's start.
+
+## Customization [#customization]
+
+The stage shows three ways to change it. The controls are open: pick the description or the error,
+and the first field and the code follow.
+
+**A token** set on a part, on the field, or on any element around it changes the parts inside.
+
+```css
+.signup {
+  --ow-critical: #9a2b5a;
+}
+```
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-fg` | Label |
+| `--ow-muted` | Description |
+| `--ow-critical` | Error, and the control's edge while invalid |
+
+The control reads Input's tokens too.
+
+**A `className`** on any part wins over its own values, with no `!important`. Here, a label beside its
+control:
+
+```css
+.inline {
+  display: grid;
+  grid-template-columns: 6em 1fr;
+  align-items: center;
+}
+```
+
+`gap` on the root sets the space between parts. The field has no outer margins and fills its parent.
+
+**Composition:** `Field.Control` takes `render`, so any control sits in a field and stays labelled and
+described. Or skip it, and put any Base UI control inside `Field.Root`.
+
+```tsx
+<Field.Control render={<textarea rows={3} />} />
+```
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each part's root, so set yours on the parts that read them, as
+`signup.css` does.
+
+</ForMode>
+
+<TokenChip lang="en" />
+
+## Ship it [#ship]
+
+The code drawer writes the component exactly as the stage is set up.
+
+| Part | Prop | Type |
+| --- | --- | --- |
+| `Root` | `name` | `string` |
+| `Root` | `invalid` | `boolean` |
+| `Root` | `disabled` | `boolean` |
+| `Root` | `validate` | `(value, formValues) => string \| string[] \| null` |
+| `Root` | `validationMode` | `"onSubmit" \| "onBlur" \| "onChange"` |
+| `Control` | Input's props | `size`, `startIcon`, `endIcon`, `value`, `onValueChange`, `render` |
+| `Error` | `match` | `boolean \| keyof ValidityState` |
+| `Validity` | `children` | `(state) => ReactNode` |
+
+Every part takes `className`, `style`, `render`, and `ref`, except Validity, which renders nothing of
+its own. Props come from Base UI, and other props pass through as they are.
+
+With per-component CSS, `Field.Control` needs Input's stylesheet too: `owsem-ui/css/input.css`.
+
+Import it from `owsem-ui/base`. In the registry, it is the `field` item, which brings `input` with it.

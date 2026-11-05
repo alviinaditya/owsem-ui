@@ -8,6 +8,7 @@ import ColorPickerLab from "./color-picker";
 import CommandMenuLab from "./command-menu";
 import CopyButtonLab from "./copy-button";
 import IconMorphLab from "./icon-morph";
+import DialogLab from "./dialog";
 import KbdLab from "./kbd";
 import MenuLab from "./menu";
 import PopoverLab from "./popover";
@@ -35,6 +36,7 @@ export const labs: Partial<Record<ComponentName, ComponentType<LabProps>>> = {
   "command-menu": CommandMenuLab,
   "copy-button": CopyButtonLab,
   "icon-morph": IconMorphLab,
+  dialog: DialogLab,
   kbd: KbdLab,
   menu: MenuLab,
   popover: PopoverLab,

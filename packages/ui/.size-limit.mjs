@@ -31,6 +31,7 @@ export default [
   entry("menu", "dist/components/menu/index.js", "3 kB"),
   entry("popover", "dist/components/popover/index.js", "3 kB"),
   entry("separator", "dist/components/separator/index.js", "3 kB"),
+  entry("switch", "dist/components/switch/index.js", "3 kB"),
   entry("toggle", "dist/components/toggle/index.js", "3 kB"),
   entry("toggle-group", "dist/components/toggle-group/index.js", "3 kB"),
   entry("toolbar", "dist/components/toolbar/index.js", "3 kB"),

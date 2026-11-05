@@ -10,6 +10,7 @@
 @import "./components/menu/menu.css";
 @import "./components/popover/popover.css";
 @import "./components/separator/separator.css";
+@import "./components/switch/switch.css";
 @import "./components/toggle/toggle.css";
 @import "./components/toggle-group/toggle-group.css";
 @import "./components/toolbar/toolbar.css";

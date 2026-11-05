@@ -43,7 +43,7 @@ export const catalog = [
   { name: "input", title: "Input", family: "base", category: "form", phase: 1, status: "planned" },
   { name: "checkbox", title: "Checkbox", family: "base", category: "form", phase: 1, status: "planned" },
   { name: "radio-group", title: "Radio Group", family: "base", category: "form", phase: 1, status: "planned" },
-  { name: "switch", title: "Switch", family: "base", category: "form", phase: 1, expressions: ["tactile"], status: "planned" },
+  { name: "switch", title: "Switch", family: "base", category: "form", phase: 1, expressions: ["tactile"], status: "prototype" },
   { name: "select", title: "Select", family: "base", category: "form", phase: 1, status: "planned" },
   { name: "dialog", title: "Dialog", family: "base", category: "overlay", phase: 1, status: "planned" },
   { name: "popover", title: "Popover", family: "base", category: "overlay", phase: 1, status: "prototype" },

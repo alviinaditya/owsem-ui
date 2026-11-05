@@ -1,0 +1,181 @@
+---
+title: Switch
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Switch turns one setting on or off, and the change applies right away. It is one line to use, with
+a name from a label or an `aria-label`; it draws its own thumb. Scroll to start the tour; the stage
+follows each part.
+
+## A key on a spring [#travel]
+
+```tsx
+<label>
+  <Switch.Root />
+  Email alerts
+</label>
+```
+
+Off, the track is the well with a crisp edge at 3:1. On, it is the accent with the primary button's
+edges. The fill changes at once with the state. The thumb is the same raised key in both, and it is
+what moves: `translate`, on the travel spring. Change your mind halfway and it turns back from where
+it is, since the motion is a CSS transition.
+
+The stage plays it: the pointer turns Push and the digest on, then off again, and the line under
+them counts. Play scene runs it again; press them yourself to feel it. Under reduced motion the
+thumb goes to its place with no travel.
+
+## It squashes while held [#press]
+
+Held down, the thumb goes in within 90 ms, toward where it is about to go, with its leading edge in
+place: 12.5% narrower, on the axis it travels and no other. Let go, and it comes back on the settle
+spring while it travels. The depth follows `--ow-motion-scale`. A press is the browser's own
+`:active`, so this takes no script. A disabled or read-only switch does not squash, and under
+reduced motion nothing does.
+
+This one takes its size from `font-size` alone, so the press is easy to see. Press it yourself; a
+scripted pointer cannot set `:active`, so Play scene holds the thumb in through the same property.
+
+## On whole pixels, at any size [#fit]
+
+The sizes follow Button's fonts, and everything comes from `em`: the key is the font size plus 2px,
+the track is two keys wide and one tall, with a 2px inset. At the three sizes these are whole
+pixels. The press target is at least 24px each way, from a pseudo-element, whatever the track's
+size.
+
+| Size | Font | Track | Key |
+| --- | --- | --- | --- |
+| `sm` | 13px | 34 × 19px | 15px |
+| `md` | 14px | 36 × 20px | 16px |
+| `lg` | 16px | 40 × 22px | 18px |
+
+Set `font-size` on the switch to scale all of it. Set `inline-size` or `block-size` on it with plain
+CSS, and the thumb follows, since its size and its travel come from the track's in CSS. The stage's
+last two rows do both.
+
+The thumb rests where layout puts it, at either end, never on a `translate`. At a fractional zoom
+such as 110%, a resting `translate` lands between device pixels and blurs the key's edges, so a
+change of state moves it there at once, and `translate` covers the distance while a registered
+number catches up. It also keeps the inset as a clear border, so its edges round to the same pixels
+as the track's. The gaps come out even at both ends, in both states, at any zoom.
+
+## Anatomy [#anatomy]
+
+Two parts. Base UI renders a `<span>` with the `switch` role, and a hidden `<input>` beside it for
+forms. Inspect (I) outlines them on the stage.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `span.ow-switch` | `role="switch"`, `aria-checked`, `data-size`, `data-checked` or `data-unchecked`, `data-disabled`, `data-readonly` |
+| <Part name="Thumb" /> | `span.ow-switch__thumb` | The same state attributes. Root draws one without children; children replace it |
+
+## States and variants [#states]
+
+The stage sets the light and dark themes side by side, each with a plain thumb and one holding an
+icon. The pointer turns the off switch on and off in each theme.
+
+| State | What shows it |
+| --- | --- |
+| Off | `--ow-well-bg`, with a 1px `--ow-edge` edge |
+| On | `--ow-accent`, with `--ow-primary-shadow` |
+| Held | The thumb squashes to 0.875 toward its travel, within 90 ms |
+| Keyboard focus | A 2px ring 2px out, in `--ow-focus` |
+| Disabled | 50% opacity, and presses do nothing |
+| Read-only | Looks the same, with a plain cursor, and presses do nothing |
+
+## Keyboard and accessibility [#keyboard]
+
+| Key | Action |
+| --- | --- |
+| Tab | Moves focus to the switch |
+| Space, Enter | Turns it on or off |
+
+Screen readers announce a switch and its state through `aria-checked`. Name it with a wrapping
+`<label>` or an `aria-label`, and keep the name the same in both states: the state is what changes.
+A wrapping label also makes its text a target. An icon in the thumb is decorative, so give it
+`aria-hidden`.
+
+With `prefers-reduced-motion`, the thumb goes to its place with no travel and no squash. In forced
+colors (Windows High Contrast), the track keeps a 1px edge in the system color and is filled with
+`Highlight` while on, and the key is drawn solid in `CanvasText` or `HighlightText`. Right to left,
+off is on the right.
+
+## Customization [#customization]
+
+The stage controls are open: pick a color, a width, or an icon in the thumb, and the code follows.
+
+**Tokens.** Switch reads these theme tokens. Set one on a switch, or on anything around it, to change
+what is inside.
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-well-bg` | Track while off |
+| `--ow-edge` | Track's edge while off |
+| `--ow-accent` | Track while on |
+| `--ow-primary-shadow` | Track's edges while on |
+| `--ow-raised-bg` | Thumb |
+| `--ow-raised-shadow` | Thumb's edges |
+| `--ow-fg` | An icon in the thumb |
+| `--ow-radius` | The key's corners; the track adds the inset |
+| `--ow-motion-scale` | How far a press goes in |
+| `--ow-focus` | Focus ring |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Switch's root, so set yours on the switch itself.
+
+</ForMode>
+
+<TokenChip lang="en" />
+
+**`className`.** Your own CSS wins with no fight. Every part takes a `className`, and a plain rule
+beats the component's value, with the thumb's travel following any size.
+
+```css
+.wide {
+  inline-size: 3.5em;
+}
+
+.wide[data-checked] {
+  background-color: var(--ow-good);
+}
+```
+
+**Composition.** Give `Switch.Root` a `Switch.Thumb` of your own to pass it props or an icon. Any
+node works; it fills the key less 2px.
+
+```tsx
+<Switch.Root checked={dark} onCheckedChange={setDark} aria-label="Dark mode">
+  <Switch.Thumb>{dark ? <Moon aria-hidden /> : <Sun aria-hidden />}</Switch.Thumb>
+</Switch.Root>
+```
+
+## Ship it [#ship]
+
+The code drawer writes the component exactly as the stage is set up. Change a control and the lines
+that change light up.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| `checked` | `boolean` | |
+| `defaultChecked` | `boolean` | `false` |
+| `onCheckedChange` | `(checked, eventDetails) => void` | |
+| `disabled` | `boolean` | `false` |
+| `readOnly` | `boolean` | `false` |
+| `required` | `boolean` | `false` |
+| `name` | `string` | |
+| `value` | `string` | |
+| `uncheckedValue` | `string` | |
+| `inputRef` | `Ref<HTMLInputElement>` | |
+| `className` | `string \| (state) => string` | |
+| `style` | `CSSProperties` | |
+| `render` | `ReactElement \| (props, state) => ReactElement` | |
+
+These go on `Switch.Root`; `className`, `style`, `render`, and the ref work on `Switch.Thumb` too. All
+but `size` come from Base UI, and other props pass through as they are. In a plain `<form>`, the
+hidden input submits `name` with `value`, or with `uncheckedValue` while off.
+
+Import it from `owsem-ui/base`. In the registry, it is the `switch` item.

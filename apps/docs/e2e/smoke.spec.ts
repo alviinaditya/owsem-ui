@@ -30,6 +30,7 @@ for (const path of [
   "/id/docs/skills",
   "/en/docs/changelog",
   "/id/separator",
+  "/en/switch",
   "/id/toggle-group",
   "/en/command-menu",
   "/id/table-of-contents",

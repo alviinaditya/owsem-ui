@@ -2560,6 +2560,7 @@ figure[data-code-block] pre {
 
 .lab-part-card ul {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 6px;
   margin: 10px 0 0;
   padding: 0;
@@ -3518,6 +3519,25 @@ figure[data-code-block] pre {
   margin: 0;
   padding: 0;
   border: 0;
+}
+
+/* The Switch Lab's settings card, and its large switch. A width from plain CSS: the thumb follows. */
+.demo-switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.demo-switch-press {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+}
+
+.demo-switch-wide {
+  inline-size: 3.5em;
 }
 
 /* The Toolbar Lab's editor: the toolbar over the line it formats. */

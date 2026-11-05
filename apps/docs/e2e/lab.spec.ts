@@ -931,3 +931,31 @@ test("the Popover Lab opens its panel from Share, then hands it between triggers
   const link = demo(page).getByRole("button", { name: "sharing settings" });
   await expect(link).toHaveAttribute("aria-expanded", "true");
 });
+
+test("the Dialog Lab opens from its trigger, scrolls inside, and steps back when nested", async ({
+  page,
+}) => {
+  await page.goto("/en/dialog");
+  // A person's press: focus goes in, and Escape brings it back to the trigger.
+  await scene(page, "keyboard");
+  const share = demo(page).locator('[data-demo="share"]');
+  await share.click();
+  const panel = demo(page).getByRole("dialog", { name: "Share the draft" });
+  await expect(panel).toBeVisible();
+  await expect(demo(page).locator(".ow-dialog__backdrop")).toHaveCount(1);
+  await expect(demo(page).locator('[data-demo="done"]')).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(panel).toHaveCount(0);
+  await expect(share).toBeFocused();
+  // Pinned open and long: it scrolls inside itself, in its window, without taking focus.
+  await scene(page, "long");
+  await expect.poll(() => panel.evaluate((el) => el.scrollHeight > el.clientHeight)).toBe(true);
+  await expect(panel).not.toBeFocused();
+  // The script opens one over the other.
+  await scene(page, "nested");
+  await expect(demo(page).locator('[data-demo="parent"]')).toHaveAttribute(
+    "data-nested-dialog-open",
+    "",
+  );
+  await expect(demo(page).getByRole("dialog", { name: "Remove this link?" })).toBeVisible();
+});

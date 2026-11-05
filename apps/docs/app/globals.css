@@ -870,6 +870,19 @@ body {
   max-inline-size: none;
 }
 
+.component-preview :is(.ow-dialog__backdrop, .ow-dialog__popup) {
+  position: absolute;
+}
+
+.component-preview .ow-dialog__popup {
+  inline-size: 224px;
+  max-block-size: none;
+}
+
+.component-preview .ow-dialog__description {
+  margin-block-end: 12px;
+}
+
 .component-preview-live[data-preview="tooltip"] {
   margin-block-start: 32px;
 }
@@ -3680,6 +3693,116 @@ figure[data-code-block] pre {
   inline-size: 280px;
   block-size: 150px;
   box-sizing: border-box;
+}
+
+/*
+ * The Dialog Lab: an app's window. Its dialogs portal into it and are placed against it, as they
+ * are against the screen in an app.
+ */
+.demo-dialog {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  inline-size: 560px;
+  block-size: 400px;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 1px solid var(--ow-line);
+  border-radius: 16px;
+  background-color: var(--ow-bg);
+  color: var(--ow-fg);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.demo-dialog :is(.ow-dialog__backdrop, .ow-dialog__viewport, .ow-dialog__popup) {
+  position: absolute;
+}
+
+.demo-dialog .ow-dialog__viewport .ow-dialog__popup {
+  position: relative;
+}
+
+.demo-dialog[data-cell] {
+  inline-size: 320px;
+  block-size: 200px;
+}
+
+/* Narrower than its parent, so the parent shows around it. */
+.demo-dialog[data-cell] [data-demo="nested"] {
+  inline-size: 240px;
+}
+
+.demo-dialog-bar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px 8px 16px;
+  border-block-end: 1px solid var(--ow-line);
+  font-weight: 600;
+}
+
+/* The page behind the dialog: lines of text, as shapes. */
+.demo-dialog-page {
+  display: grid;
+  flex: 1;
+  align-content: start;
+  gap: 12px;
+  padding: 20px 16px;
+}
+
+.demo-dialog-page > * {
+  block-size: 10px;
+  border-radius: 5px;
+  background-color: var(--ow-line);
+}
+
+.demo-dialog-page > :nth-child(3n + 2) {
+  inline-size: 80%;
+}
+
+.demo-dialog-page > :nth-child(3n) {
+  inline-size: 60%;
+}
+
+.demo-dialog-text {
+  margin-block: 0 12px;
+}
+
+.demo-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* The customization scene's layouts: plain CSS on the Popup's className. */
+.demo-dialog-narrow {
+  inline-size: 22em;
+  padding: 12px;
+  border-radius: calc(var(--ow-radius) + 12px);
+}
+
+.demo-dialog-sheet {
+  inline-size: 100%;
+  max-inline-size: none;
+  margin-block: auto 0;
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.demo-dialog-sheet:is([data-starting-style], [data-ending-style]) {
+  transform: translateY(100%);
+}
+
+.demo-dialog-full {
+  inline-size: 100%;
+  max-inline-size: none;
+  block-size: 100%;
+  max-block-size: none;
+  border-radius: 0;
 }
 
 /* A matrix of controls on the components' own background. */

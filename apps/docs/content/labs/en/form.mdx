@@ -1,0 +1,130 @@
+---
+title: Form
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { TokenChip } from "@/components/token-setup";
+
+Form is a native `<form>` that checks its Fields before it submits. Base UI runs the checks, takes your
+server's errors, and moves focus to the first field that failed; OwsemUI adds only the gap between
+fields. Scroll to start the tour; the stage follows each part.
+
+```tsx
+<Form onFormSubmit={save}>
+  <Field.Root name="email">
+    <Field.Label>Email</Field.Label>
+    <Field.Control type="email" required />
+    <Field.Error />
+  </Field.Root>
+  <Button type="submit">Sign up</Button>
+</Form>
+```
+
+## The browser's rules, in the fields [#native]
+
+Submitting runs each Field's checks: the control's own `required`, `type`, and `pattern`, and any
+`validate`. If one fails, nothing submits, each failed field shows its error, and focus goes to the
+first one, with its text selected, ready to retype. Base UI turns off the browser's bubbles
+(`noValidate`), so the messages sit in `Field.Error`, and they are still the browser's words unless you
+write your own. `onFormSubmit` gets the values by each Field's `name` once all of them pass.
+
+After a failed submit, fields check again as you type, so an error leaves the moment it stops being
+true. `validationMode` makes them check on blur or on change from the start.
+
+The stage plays it: the pointer submits an empty form, both fields fail, and the first takes focus, then
+filling them clears each error. A script leaves your own focus alone, so the stage draws that ring;
+press Sign up yourself to feel it.
+
+## Errors from your server [#server]
+
+Some answers only your server knows. Pass them to `errors`, keyed by each Field's `name`. Each one shows
+in its `Field.Error`, marks its field invalid, and focus goes to the first, as with a native failure.
+
+There is nothing to clear. Editing a field removes its error, and leaves the others. (Base UI 1.9 does
+this itself; it has no `onClearErrors`.) A new `errors` object replaces the old one.
+
+The stage plays it: the server turns down `admin` after half a second, the error lands on the name, and
+an edit clears it without asking the server again. The second submit goes through.
+
+## Anatomy [#anatomy]
+
+One part. Inspect (I) outlines it on the stage.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `form.ow-form` | One column with one gap. No frame, no margins, and no states of its own: its Fields carry them |
+
+Fields and Fieldsets stretch across it. A `<button>` directly inside keeps its own width.
+
+## States and variants [#states]
+
+Form has no look of its own to change, so the stage shows what a Field in it shows, in the light and
+dark themes side by side.
+
+| State | What shows it |
+| --- | --- |
+| Untouched | Nothing yet; with the default `onSubmit`, checks wait for the first submit |
+| Native error | The Field's critical edge, and the browser's message or yours |
+| Server error | The same, with your server's words, until the field is edited |
+
+## Keyboard and accessibility [#keyboard]
+
+| Key | Action |
+| --- | --- |
+| Tab | Moves through its fields and buttons |
+| Enter | In a field, submits |
+
+Focus going to the first failed field means a keyboard or screen reader user lands on the problem, and
+hears its name and its error, with no hunting. Give a form an `aria-label` when it should be a landmark.
+
+Nothing moves, so reduced motion changes nothing, and forced colors have nothing to redraw.
+
+## Customization [#customization]
+
+The stage shows three ways to change it. The controls are open: pick the gap, the validation mode, or
+the error's color, and the code follows.
+
+**A token** on the form reaches the fields inside. Form reads none itself.
+
+```css
+.signup {
+  --ow-critical: #9a2b5a;
+}
+```
+
+**A `className`** wins over its own values, with no `!important`. `gap` is one property on one class,
+and anything else about the layout is yours, such as a row for a newsletter box.
+
+```css
+.signup {
+  gap: 0.5em;
+}
+```
+
+It has no outer margins and fills its parent.
+
+**Composition:** group fields with a Fieldset inside it, or lay them out with your own elements. Only
+the Field's `name` matters to Form, however deep it sits. `render` swaps the element.
+
+<TokenChip lang="en" />
+
+## Ship it [#ship]
+
+The code drawer writes the component exactly as the stage is set up, with a second tab for server
+errors.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `errors` | `Record<string, string \| string[]>` | |
+| `onFormSubmit` | `(values, eventDetails) => void` | |
+| `validationMode` | `"onSubmit" \| "onBlur" \| "onChange"` | `"onSubmit"` |
+| `actionsRef` | `RefObject<{ validate(name?) }>` | |
+| `className` | `string \| (state) => string` | |
+| `style` | `CSSProperties \| (state) => CSSProperties` | |
+| `render` | `ReactElement \| (props, state) => ReactElement` | |
+
+These come from Base UI, and other props pass through to the `<form>` as they are. A plain `onSubmit`
+still works, and `action` too. The ref goes to the `form`.
+
+Import it from `owsem-ui/base`. In the registry, it is the `form` item. It needs no other component,
+though its checks reach only Fields, and any Base UI control inside one.

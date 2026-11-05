@@ -22,11 +22,15 @@ test("the sidebar fades the edges that have more to scroll", async ({ page }, te
     await page.getByRole("button", { name: "Menu", exact: true }).click();
   }
   const scroller = page.locator("#site-sidebar-scroll");
-  await expect(scroller).not.toHaveAttribute("data-fade-top");
-  await expect(scroller).toHaveAttribute("data-fade-bottom", "");
+  // Written out in a Server Component: Root still recognizes its Viewport and adds no other.
+  await expect(page.locator(".site-sidebar-scroll .ow-scroll-area__viewport")).toHaveCount(1);
+  await expect(scroller).not.toHaveAttribute("data-overflow-y-start");
+  await expect(scroller).toHaveAttribute("data-overflow-y-end", "");
   await scroller.evaluate((el) => el.scrollTo(0, el.scrollHeight));
-  await expect(scroller).toHaveAttribute("data-fade-top", "");
-  await expect(scroller).not.toHaveAttribute("data-fade-bottom");
+  await expect(scroller).toHaveAttribute("data-overflow-y-start", "");
+  await expect(scroller).not.toHaveAttribute("data-overflow-y-end");
+  // Long labels truncate inside it; only the height scrolls.
+  await expect(scroller).not.toHaveAttribute("data-has-overflow-x");
 });
 
 test("planned components show Coming soon and stay out of search", async ({ page }) => {

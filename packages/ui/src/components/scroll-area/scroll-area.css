@@ -1,0 +1,149 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * No surface of its own: a scroller and a thin scrollbar over whatever it sits on. The height that
+ * makes it scroll comes from your CSS, a max-height too (the flex column passes it on).
+ */
+@layer owsem.components {
+  .ow-scroll-area {
+    --_radius: var(--ow-radius);
+    --_focus: var(--ow-focus);
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+    min-block-size: 0;
+    border-radius: var(--_radius);
+  }
+
+  /* Native scrollbars are hidden here, so Base UI's <style> for it can be turned off (NF-4). */
+  .ow-scroll-area__viewport {
+    flex: auto;
+    border-radius: inherit;
+    /* biome-ignore lint/nursery/useBaseline: older engines use the pseudo-element below (NF-1) */
+    scrollbar-width: none;
+  }
+
+  .ow-scroll-area__viewport::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ow-scroll-area__viewport:where(:focus-visible) {
+    outline: none;
+  }
+
+  /* On the Root and over the content: the fade's mask would cut a ring on the Viewport (FR-13). */
+  .ow-scroll-area:where(:has(> .ow-scroll-area__viewport:focus-visible))::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    outline: 2px solid var(--_focus);
+    outline-offset: -2px;
+    pointer-events: none;
+  }
+
+  /* An edge fades by as much as has scrolled past it, up to --fade-size. */
+  :where(.ow-scroll-area[data-fade]) > .ow-scroll-area__viewport {
+    --_end: to right;
+    mask-image:
+      linear-gradient(
+        to bottom,
+        transparent,
+        #000 min(var(--fade-size, 2em), var(--scroll-area-overflow-y-start)),
+        #000 calc(100% - min(var(--fade-size, 2em), var(--scroll-area-overflow-y-end))),
+        transparent
+      ),
+      linear-gradient(
+        var(--_end),
+        transparent,
+        #000 min(var(--fade-size, 2em), var(--scroll-area-overflow-x-start)),
+        #000 calc(100% - min(var(--fade-size, 2em), var(--scroll-area-overflow-x-end))),
+        transparent
+      );
+    mask-composite: intersect;
+  }
+
+  :where(.ow-scroll-area[data-fade]) > .ow-scroll-area__viewport:dir(rtl) {
+    --_end: to left;
+  }
+
+  /*
+   * Base UI places it over the content. Its size is the pill's: set inline-size (block-size when
+   * horizontal) to change it. Its ends keep clear of the corners: with the pill's round end as far
+   * in as the corner's center, the gap around the corner stays --_gap. Hidden, it lets every
+   * pointer through, so a swipe at the edge still scrolls.
+   */
+  .ow-scroll-area__scrollbar {
+    --_ease: var(--ow-ease-out);
+    --_size: 0.375em;
+    --_gap: 0.25em;
+    --_clear: max(var(--_gap), var(--ow-radius) - var(--_size) / 2);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 150ms var(--_ease);
+  }
+
+  .ow-scroll-area__scrollbar:where([data-hovering], [data-scrolling], :active) {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .ow-scroll-area__scrollbar:where([data-orientation="vertical"]) {
+    inline-size: var(--_size);
+    margin-block: var(--_clear);
+    margin-inline-end: var(--_gap);
+  }
+
+  .ow-scroll-area__scrollbar:where([data-orientation="horizontal"]) {
+    block-size: var(--_size);
+    margin-inline: var(--_clear);
+    margin-block-end: var(--_gap);
+  }
+
+  .ow-scroll-area__thumb {
+    --_muted: var(--ow-muted);
+    /* 3:1 on the panel and the page, in both themes (DP-6). */
+    --_thumb: color-mix(in oklab, var(--_muted) 72%, transparent);
+    position: relative;
+    /* literal: a pill, whatever the theme's radius */
+    border-radius: 999px;
+    background-color: var(--_thumb);
+  }
+
+  .ow-scroll-area__thumb:where([data-orientation="vertical"]) {
+    inline-size: 100%;
+  }
+
+  .ow-scroll-area__thumb:where([data-orientation="horizontal"]) {
+    block-size: 100%;
+  }
+
+  /* The press area, at least 24px each way (FR-14), from the Root's edge inward. */
+  .ow-scroll-area__thumb::before {
+    content: "";
+    position: absolute;
+  }
+
+  .ow-scroll-area__thumb:where([data-orientation="vertical"])::before {
+    inset-block: min(0px, (100% - 24px) / 2);
+    inset-inline-end: calc(var(--_gap) * -1);
+    inline-size: 24px;
+  }
+
+  .ow-scroll-area__thumb:where([data-orientation="horizontal"])::before {
+    inset-inline: min(0px, (100% - 24px) / 2);
+    inset-block-end: calc(var(--_gap) * -1);
+    block-size: 24px;
+  }
+
+  /* Forced colors drop the fill, so the pill takes a system color (DP-8). */
+  @media (forced-colors: active) {
+    .ow-scroll-area__thumb {
+      background-color: CanvasText;
+    }
+
+    .ow-scroll-area:where(:has(> .ow-scroll-area__viewport:focus-visible))::after {
+      outline-color: Highlight;
+    }
+  }
+}

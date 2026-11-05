@@ -1,4 +1,6 @@
 import Link from "next/link";
+// Its own entry: in this layout, the barrel would reference every Base component's client code.
+import { ScrollArea } from "owsem-ui/components/scroll-area";
 import ui from "owsem-ui/package.json";
 import type { ReactNode } from "react";
 import { getDictionary } from "@/lib/dictionaries";
@@ -7,7 +9,6 @@ import { buildSearchIndex } from "@/lib/search-index";
 import { DocsSearch } from "./docs-search";
 import { LanguageSwitcher } from "./language-switcher";
 import { Logo } from "./logo";
-import { ScrollFade } from "./scroll-fade";
 import { Sidebar } from "./sidebar";
 import { SearchButton, SidebarClose, SidebarToggle } from "./sidebar-toggle";
 import { ThemeSwitcher } from "./theme-switcher";
@@ -35,9 +36,16 @@ export function SiteShell({ lang, children }: { lang: Lang; children: ReactNode 
           <span className="sidebar-version">{version}</span>
           <SidebarClose label={dict.nav.close} />
         </div>
-        <ScrollFade className="site-sidebar-scroll" id="site-sidebar-scroll">
-          <Sidebar lang={lang} />
-        </ScrollFade>
+        <ScrollArea.Root className="site-sidebar-scroll" fade>
+          {/* Its links take the keyboard, so it is no tab stop itself. */}
+          <ScrollArea.Viewport id="site-sidebar-scroll" tabIndex={-1}>
+            {/* As wide as the sidebar, so a long label truncates rather than scrolls. */}
+            <ScrollArea.Content style={{ minWidth: 0 }}>
+              <Sidebar lang={lang} />
+            </ScrollArea.Content>
+          </ScrollArea.Viewport>
+          <ScrollArea.Scrollbar />
+        </ScrollArea.Root>
         <div className="site-sidebar-foot">
           <div className="site-sidebar-switchers">
             <ThemeSwitcher labels={dict.theme} />

@@ -1,6 +1,16 @@
 "use client";
 
-import { Button, Kbd, Menu, Popover, Toggle, ToggleGroup, Toolbar, Tooltip } from "owsem-ui/base";
+import {
+  Button,
+  Kbd,
+  Menu,
+  Popover,
+  ScrollArea,
+  Toggle,
+  ToggleGroup,
+  Toolbar,
+  Tooltip,
+} from "owsem-ui/base";
 import {
   Fragment,
   type KeyboardEvent,
@@ -16,7 +26,6 @@ import type { Lang } from "@/lib/i18n";
 import { siteScheme } from "@/lib/theme";
 import { Icon, type IconName } from "../icons/icon";
 import { InstallPane } from "../install";
-import { ScrollFade } from "../scroll-fade";
 import { Tip } from "../tip";
 import { type TokenSetupPlace, tokenSetupHandle, useTokenSetup } from "../token-setup";
 import { ColorField } from "./color-field";
@@ -540,9 +549,16 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
           aria-label={labels.controls}
           inert={!controls}
         >
-          <ScrollFade className="lab-sheet-scroll">
-            <ControlsPanel lab={lab} lang={lang} labels={labels} state={state} />
-          </ScrollFade>
+          <ScrollArea.Root className="lab-sheet-scroll" fade>
+            {/* Its controls take the keyboard, so it is no tab stop itself. */}
+            <ScrollArea.Viewport tabIndex={-1}>
+              {/* As wide as the panel: the controls wrap to it. */}
+              <ScrollArea.Content style={{ minWidth: 0 }}>
+                <ControlsPanel lab={lab} lang={lang} labels={labels} state={state} />
+              </ScrollArea.Content>
+            </ScrollArea.Viewport>
+            <ScrollArea.Scrollbar />
+          </ScrollArea.Root>
         </aside>
 
         <section
@@ -708,20 +724,24 @@ function CodeDrawer({
         {/* Each install command has its own Copy. */}
         {current.file ? <CopyButton text={current.file.code} labels={labels} /> : null}
       </div>
-      <ScrollFade
-        id={`${id}-panel`}
-        role="tabpanel"
-        aria-labelledby={`${id}-tab-${all.indexOf(current)}`}
-        className="lab-sheet-scroll"
-        // Focusable, so the keyboard can scroll it.
-        tabIndex={0}
-      >
-        {current.file ? (
-          <LiveCode file={current.file} />
-        ) : (
-          <InstallPane item={item} labels={labels} />
-        )}
-      </ScrollFade>
+      <ScrollArea.Root className="lab-sheet-scroll" fade>
+        <ScrollArea.Viewport
+          id={`${id}-panel`}
+          role="tabpanel"
+          aria-labelledby={`${id}-tab-${all.indexOf(current)}`}
+          // Focusable even when it fits, as a tab panel is.
+          tabIndex={0}
+        >
+          {current.file ? (
+            <LiveCode file={current.file} />
+          ) : (
+            <InstallPane item={item} labels={labels} />
+          )}
+        </ScrollArea.Viewport>
+        <ScrollArea.Scrollbar />
+        <ScrollArea.Scrollbar orientation="horizontal" />
+        <ScrollArea.Corner />
+      </ScrollArea.Root>
     </>
   );
 }

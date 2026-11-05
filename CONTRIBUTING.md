@@ -166,7 +166,6 @@ deleted CSS:
 
 | Phase | Component | Replaces in the docs |
 | --- | --- | --- |
-| 1 | Tabs | The code drawer's file tabs (`.lab-tabs`) |
 | 1 | Field, Input | The prefix field (`.prefix-field`) and the color controls' hex field (`.color-field`) |
 | 1 | Scroll Area | `ScrollFade` (sidebar, controls, code drawer, commands) |
 | 2 | Toggle Group | The Token setup's mode (`.seg`), with Popover. Already replaced: the theme, the Lab's choices, the Family filter, and the package manager picker |

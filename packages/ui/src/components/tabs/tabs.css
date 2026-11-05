@@ -1,0 +1,305 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * Tabs (Base; Kinetic). The list is segmented, as in Toggle Group: a flat well (the track) and a
+ * raised key, the indicator, that slides under the active tab. thumb.ts lays it out on that tab's
+ * box (--_x, --_y, --_w, --_h), so it rests on the pixels the tab is painted on, and slides it there
+ * from where it was by --_dx, --_dy, --_sx, --_sy, which end at none. Glide lights the hovered tab.
+ * Each part reads its own tokens, so one set on a part changes that part and what is inside it.
+ */
+@layer owsem.components {
+  .ow-tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75em;
+    min-inline-size: 0;
+  }
+
+  .ow-tabs:where([data-orientation="vertical"]) {
+    flex-direction: row;
+  }
+
+  /* As big as its tabs, and no bigger than its parent: past that, it scrolls without a scrollbar. */
+  .ow-tabs__list {
+    --_well: var(--ow-well-bg);
+    --_well-edge: var(--ow-well-shadow);
+    /* The tabs' and the indicator's radius; the well adds its padding (FR-10b, TK-8). */
+    --_radius: var(--ow-radius);
+    --_inset: 3px;
+    /* How far a held tab presses in (DP-4), scaled by the motion intensity. */
+    --_press: calc(1 - 0.03 * var(--ow-motion-scale));
+    --_travel: var(--ow-spring-travel-duration) var(--ow-spring-travel);
+    --_settle: var(--ow-spring-settle-duration) var(--ow-spring-settle);
+    --_press-in: 90ms var(--ow-ease-out);
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    gap: 2px;
+    box-sizing: border-box;
+    inline-size: fit-content;
+    max-inline-size: 100%;
+    block-size: fit-content;
+    max-block-size: 100%;
+    padding: var(--_inset);
+    overflow: auto hidden;
+    /* A tab brought in by focus keeps the well's gap to the edge. */
+    scroll-padding: var(--_inset);
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement (NF-1) */
+    scrollbar-width: none;
+    border-radius: calc(var(--_radius) + var(--_inset));
+    background-color: var(--_well);
+    box-shadow: var(--_well-edge);
+    font-size: 14px;
+    /* A layer like the indicator's (NF-8), so both snap to device pixels alike and its gaps to the
+     * well stay even at a fractional zoom. */
+    will-change: transform;
+  }
+
+  .ow-tabs__list:where([data-size="sm"]) {
+    font-size: 13px;
+  }
+
+  .ow-tabs__list:where([data-size="lg"]) {
+    font-size: 16px;
+  }
+
+  .ow-tabs__list:where([data-orientation="vertical"]) {
+    flex-direction: column;
+    overflow: hidden auto;
+  }
+
+  /* The panel's height never squeezes the list out of the root. */
+  :where(.ow-tabs) > .ow-tabs__list {
+    flex-shrink: 0;
+  }
+
+  /*
+   * The indicator reaches out to the well's edges and keeps the well's padding as a clear border.
+   * Its edges then round to the same pixels as the well's, and both border widths round alike, so
+   * it sits as far from the well above as below at any zoom.
+   */
+  .ow-tabs__indicator {
+    --_key: var(--ow-raised-bg);
+    --_key-edge: var(--ow-raised-shadow);
+    --_radius: var(--ow-radius);
+    position: absolute;
+    z-index: -1;
+    box-sizing: border-box;
+    /* biome-ignore-start lint/nursery/useLogicalProperties: the script measures physical edges */
+    top: calc(var(--_y, 0px) - var(--_inset));
+    left: calc(var(--_x, 0px) - var(--_inset));
+    width: calc(var(--_w, 0px) + 2 * var(--_inset));
+    height: calc(var(--_h, 0px) + 2 * var(--_inset));
+    /* biome-ignore-end lint/nursery/useLogicalProperties: the script measures physical edges */
+    border: var(--_inset) solid transparent;
+    border-radius: calc(var(--_radius) + var(--_inset));
+    background-clip: padding-box;
+    background-color: var(--_key);
+    box-shadow: var(--_key-edge);
+    opacity: 0;
+    pointer-events: none;
+    translate: var(--_dx, 0) var(--_dy, 0);
+    transform: scale(var(--_sx, 1), var(--_sy, 1));
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: translate, transform, scale;
+    transition:
+      translate var(--_travel),
+      transform var(--_travel),
+      scale var(--_settle),
+      opacity 150ms ease;
+  }
+
+  .ow-tabs__indicator:where([data-visible]) {
+    opacity: 1;
+  }
+
+  /* Pressed in quickly, released with the settle spring. */
+  .ow-tabs__indicator:where([data-held]) {
+    scale: var(--_press);
+    transition:
+      translate var(--_travel),
+      transform var(--_travel),
+      scale var(--_press-in),
+      opacity 150ms ease;
+  }
+
+  .ow-tabs__tab {
+    --_fg: var(--ow-fg);
+    --_muted: var(--ow-muted);
+    --_focus: var(--ow-focus);
+    --_radius: var(--ow-radius);
+    --_key: var(--ow-raised-bg);
+    --_key-edge: var(--ow-raised-shadow);
+    --py: 0.75em;
+    --_py: max(var(--py), (24px - 1lh) / 2);
+    --px: calc(var(--_py) + (1lh - 1cap) / 2);
+    --icon: calc(1em + 2px);
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    box-sizing: border-box;
+    margin: 0;
+    padding: var(--_py) var(--px);
+    border: 0;
+    border-radius: var(--_radius);
+    /* DP-8: invisible here, the tab's edge in forced colors. */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background: none;
+    color: var(--_muted);
+    font: inherit;
+    line-height: 1.25;
+    white-space: nowrap;
+    cursor: pointer;
+    touch-action: manipulation;
+    will-change: scale;
+    transition:
+      color 150ms ease,
+      scale var(--_settle);
+  }
+
+  :where(.ow-tabs__list[data-size="sm"]) .ow-tabs__tab {
+    --py: 0.5em;
+  }
+
+  :where(.ow-tabs__list[data-size="lg"]) .ow-tabs__tab {
+    --py: 0.875em;
+  }
+
+  .ow-tabs__tab:where([data-orientation="vertical"]) {
+    justify-content: flex-start;
+  }
+
+  /* The active tab as a key of its own before the script places the indicator (server HTML). */
+  :where(.ow-tabs__list:not([data-thumb])) .ow-tabs__tab:where([data-active]) {
+    background-color: var(--_key);
+    box-shadow: var(--_key-edge);
+  }
+
+  .ow-tabs__tab:where([data-active], [data-glide-active]) {
+    color: var(--_fg);
+  }
+
+  .ow-tabs__tab:where([data-held]) {
+    scale: var(--_press);
+    transition:
+      color 150ms ease,
+      scale var(--_press-in);
+  }
+
+  /* Inside the tab, so the scrolling list never cuts it (FR-13). */
+  .ow-tabs__tab:where(:focus-visible) {
+    outline: 2px solid var(--_focus);
+    outline-offset: -2px;
+  }
+
+  .ow-tabs__tab:where([data-disabled]) {
+    color: color-mix(in oklab, var(--_muted) 50%, transparent);
+    cursor: not-allowed;
+  }
+
+  /* FR-10: the icon is the font size plus 2px, as far from the edge as from the top. */
+  .ow-tabs__tab > :where(svg) {
+    flex: none;
+    inline-size: var(--icon);
+    block-size: var(--icon);
+  }
+
+  .ow-tabs__tab > :where(svg:first-child) {
+    margin-inline-start: calc((1cap - var(--icon)) / 2);
+  }
+
+  /* With both margins, a tab with only an icon is square (FR-10a). */
+  .ow-tabs__tab > :where(svg:last-child) {
+    margin-inline-end: calc((1cap - var(--icon)) / 2);
+  }
+
+  /* Room for glyphs whose ink passes their advance (a monospace "m"), without changing the width. */
+  .ow-tabs__label {
+    min-inline-size: 0;
+    margin-inline: -0.125em;
+    padding-inline: 0.125em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* No padding of its own: what it holds decides. */
+  .ow-tabs__panel {
+    --_fg: var(--ow-fg);
+    --_focus: var(--ow-focus);
+    flex: 1;
+    min-inline-size: 0;
+    border-radius: var(--ow-radius);
+    color: var(--_fg);
+  }
+
+  /* Base UI keeps a panel a frame after its tab is left, for an exit animation; it has none, so it
+   * goes at once and two panels never stack. */
+  .ow-tabs__panel:where([data-ending-style]) {
+    display: none;
+  }
+
+  .ow-tabs__panel:where(:focus-visible) {
+    outline: 2px solid var(--_focus);
+    outline-offset: 2px;
+  }
+
+  /* FR-20: the indicator does not slide or press; it only fades. A held tab dims instead. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-tabs__indicator,
+    .ow-tabs__indicator:where([data-held]) {
+      scale: none;
+      transition: opacity 150ms ease;
+    }
+
+    .ow-tabs__tab,
+    .ow-tabs__tab:where([data-held]) {
+      scale: none;
+      transition: color 150ms ease;
+    }
+
+    .ow-tabs__indicator:where([data-held][data-visible]) {
+      opacity: 0.8;
+    }
+  }
+
+  /* DP-8: the well's edge shows, and the active tab is filled with the system highlight. */
+  @media (forced-colors: active) {
+    .ow-tabs__list {
+      outline: 1px solid transparent;
+      outline-offset: -1px;
+    }
+
+    .ow-tabs__tab:where([data-active]) {
+      forced-color-adjust: none;
+      color: HighlightText;
+    }
+
+    .ow-tabs__tab:where(:focus-visible),
+    .ow-tabs__panel:where(:focus-visible) {
+      outline-color: Highlight;
+    }
+
+    .ow-tabs__tab:where([data-disabled]) {
+      color: GrayText;
+    }
+
+    /* The label turns as the fill arrives, so the fill does not travel. */
+    .ow-tabs__indicator,
+    :where(.ow-tabs__list:not([data-thumb])) .ow-tabs__tab:where([data-active]) {
+      forced-color-adjust: none;
+      background-color: Highlight;
+      box-shadow: none;
+      transition: opacity 150ms ease;
+    }
+  }
+
+  /* The indicator's first placement and every jump: nothing transitions. Last, so it wins. */
+  .ow-tabs__indicator:where([data-instant]) {
+    transition: none;
+  }
+}

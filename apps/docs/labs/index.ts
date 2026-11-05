@@ -14,6 +14,7 @@ import MenuLab from "./menu";
 import PopoverLab from "./popover";
 import ScrollAreaLab from "./scroll-area";
 import RadioGroupLab from "./radio-group";
+import SelectLab from "./select";
 import SeparatorLab from "./separator";
 import SwitchLab from "./switch";
 import TableOfContentsLab from "./table-of-contents";
@@ -42,6 +43,7 @@ export const labs: Partial<Record<ComponentName, ComponentType<LabProps>>> = {
   popover: PopoverLab,
   "scroll-area": ScrollAreaLab,
   "radio-group": RadioGroupLab,
+  select: SelectLab,
   separator: SeparatorLab,
   switch: SwitchLab,
   "table-of-contents": TableOfContentsLab,

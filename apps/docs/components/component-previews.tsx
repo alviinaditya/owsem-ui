@@ -10,6 +10,7 @@ import {
   ScrollArea,
   Radio,
   RadioGroup,
+  Select,
   Separator,
   Tabs,
   Switch,
@@ -39,6 +40,7 @@ const TEXT = {
     day: "Hari",
     week: "Minggu",
     month: "Bulan",
+    period: "Periode",
     bold: "Tebal",
     italic: "Miring",
     underline: "Garis bawah",
@@ -74,6 +76,7 @@ const TEXT = {
     day: "Day",
     week: "Week",
     month: "Month",
+    period: "Period",
     bold: "Bold",
     italic: "Italic",
     underline: "Underline",
@@ -210,6 +213,28 @@ function MenuPreview({ t }: { t: Text }) {
           </Menu.Positioner>
         </Menu.Portal>
       </Menu.Root>
+      {portal.box}
+    </>
+  );
+}
+
+function SelectPreview({ t }: { t: Text }) {
+  const portal = usePortal();
+  return (
+    <>
+      <Select.Root {...pinned} defaultValue={t.week} size="sm">
+        <Select.Trigger aria-label={t.period} />
+        <Select.Portal container={portal.container}>
+          <Select.Positioner alignItemWithTrigger={false}>
+            {/* Inert, so the open list leaves focus with the page. */}
+            <Select.Popup inert>
+              <Select.Item value={t.day}>{t.day}</Select.Item>
+              <Select.Item value={t.week}>{t.week}</Select.Item>
+              <Select.Item value={t.month}>{t.month}</Select.Item>
+            </Select.Popup>
+          </Select.Positioner>
+        </Select.Portal>
+      </Select.Root>
       {portal.box}
     </>
   );
@@ -405,6 +430,7 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
   ),
   tooltip: (t) => <TooltipPreview t={t} />,
   menu: (t) => <MenuPreview t={t} />,
+  select: (t) => <SelectPreview t={t} />,
   "tree-rail-nav": (t) => (
     <TreeRailNav.Root aria-label={t.guides} className="component-preview-tree">
       <TreeRailNav.List>
@@ -550,13 +576,6 @@ const SKETCHES: Partial<Record<ComponentName, ReactNode>> = {
       <rect x={44} y={37} width={40} height={22} rx={11} fill="currentColor" opacity={0.6} />
       <circle cx={73} cy={48} r={8} fill="var(--docs-surface)" stroke="none" />
       {F(92, 45, 30)}
-    </>
-  ),
-  select: (
-    <>
-      {B(30, 36, 100, 24, 6)}
-      {F(40, 46, 44)}
-      <path d="m112 45 5 5 5-5" />
     </>
   ),
   dialog: (

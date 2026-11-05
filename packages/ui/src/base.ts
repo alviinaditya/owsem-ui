@@ -7,6 +7,7 @@ export * from "./components/menu";
 export * from "./components/popover";
 export * from "./components/scroll-area";
 export * from "./components/radio-group";
+export * from "./components/select";
 export { Separator } from "./components/separator";
 export * from "./components/tabs";
 export * from "./components/switch";

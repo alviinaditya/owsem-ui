@@ -6,6 +6,7 @@ import {
   Menu,
   Popover,
   Separator,
+  Tabs,
   Toggle,
   ToggleGroup,
   Toolbar,
@@ -269,6 +270,15 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
       <ToggleGroup.Item value="month">{t.month}</ToggleGroup.Item>
     </ToggleGroup.Root>
   ),
+  tabs: (t) => (
+    <Tabs.Root value="docs">
+      <Tabs.List size="sm" aria-label={t.guides}>
+        <Tabs.Tab value="docs">{t.docs}</Tabs.Tab>
+        <Tabs.Tab value="guides">{t.guides}</Tabs.Tab>
+        <Tabs.Tab value="blog">{t.blog}</Tabs.Tab>
+      </Tabs.List>
+    </Tabs.Root>
+  ),
   toolbar: (t) => (
     <Toolbar.Root size="sm" aria-label={t.toolbar}>
       <Toolbar.Button
@@ -431,18 +441,6 @@ const SKETCHES: Partial<Record<ComponentName, ReactNode>> = {
       {F(38, 46, 64, 4, 0.35)}
       {B(70, 62, 26, 13, 4)}
       <rect x={100} y={62} width={24} height={13} rx={4} fill="currentColor" opacity={0.6} />
-    </>
-  ),
-  tabs: (
-    <>
-      {B(26, 16, 36, 18, 5)}
-      {F(34, 23, 20)}
-      {F(70, 23, 20, 5, 0.35)}
-      {F(100, 23, 22, 5, 0.35)}
-      <path d="M26 42h108" opacity={0.5} />
-      {F(26, 54, 96, 4, 0.35)}
-      {F(26, 64, 76, 4, 0.35)}
-      {F(26, 74, 86, 4, 0.35)}
     </>
   ),
   "scroll-area": (

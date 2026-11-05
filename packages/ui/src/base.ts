@@ -4,6 +4,7 @@ export { Kbd } from "./components/kbd";
 export * from "./components/menu";
 export * from "./components/popover";
 export { Separator } from "./components/separator";
+export * from "./components/tabs";
 export { Toggle, type ToggleProps, type ToggleSize } from "./components/toggle";
 export * from "./components/toggle-group";
 export * from "./components/toolbar";

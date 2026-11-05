@@ -1,0 +1,159 @@
+---
+title: Field
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Field mengikat label, kontrol, dan pesannya. Base UI mengerjakan sambungannya, sehingga label menamai
+kontrol, pesan dibacakan bersamanya, dan validitasnya sampai ke setiap bagian; OwsemUI menambahkan jarak
+yang rata dan tipografinya. Label dan kontrol sudah cukup untuk field pada umumnya. Gulir untuk mulai
+tur; stage mengikuti setiap bagian.
+
+```tsx
+<Field.Root>
+  <Field.Label>Email</Field.Label>
+  <Field.Control />
+</Field.Root>
+```
+
+## Satu nama, satu deskripsi [#wiring]
+
+Anda tidak menulis id. Base UI memberi kontrol `aria-labelledby` untuk label, dan `aria-describedby`
+untuk deskripsi dan untuk error selama tampil. Daftar di bawah field membaca atribut itu secara langsung.
+
+Stage memutarnya: pointer mengetik sebuah alamat, dan selama teksnya belum berupa alamat, tepi kontrol
+menjadi warna kritis, error muncul, dan ikut masuk bersama deskripsi di `aria-describedby`. Keduanya
+pergi setelah alamatnya benar. Tidak ada animasi: pesan datang dan pergi seketika, karena fade hanya
+menunda membacanya.
+
+## Pengecekan native dan kustom [#validation]
+
+Field membaca batasan milik kontrol: `type`, `required`, `pattern`, `min`, dan lainnya. Prop `validate`
+menambahkan pengecekan Anda, dan mengembalikan pesan atau tidak sama sekali. `validationMode` menentukan
+kapan semuanya berjalan: saat submit (bawaan), saat blur, atau saat berubah.
+
+`Field.Error` tanpa `match` tampil untuk kegagalan apa pun, dengan children Anda atau pesan bawaan
+browser. Dengan `match`, ia tampil untuk satu state, sehingga setiap kegagalan bisa punya kata-katanya.
+`match` saja (true) mempertahankannya untuk state yang Anda kendalikan. `Field.Validity` merender dari
+hasilnya dan tidak menggambar apa pun sendiri.
+
+Stage memutarnya: terlalu pendek menampilkan pesan pattern, `admin` menampilkan pesan `validate`, dan
+nama yang masih kosong lolos.
+
+## Anatomi [#anatomy]
+
+Inspeksi (I) menandai setiap bagian, dan stage membuat field-nya invalid supaya error-nya ada.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-field` | Satu kolom. Menerima `invalid`, `disabled`, dan `validate`, dan membawa state-nya |
+| <Part name="Label" /> | `label.ow-field__label` | Menamai kontrol |
+| <Part name="Control" /> | `input.ow-input` | [Input](/id/input) itu sendiri: ukuran dan ikonnya, serta `render` untuk kontrol lain |
+| <Part name="Description" /> | `p.ow-field__description` | Teks bantuan muted |
+| <Part name="Error" /> | `div.ow-field__error` | Hanya saat invalid; beberapa pesan menjadi daftar |
+| Item | `div.ow-field__item` | Satu opsi di checkbox atau radio group, kontrol dan labelnya dalam satu baris |
+| Validity | tidak ada | Fungsi dari state validitas; merender yang Anda kembalikan |
+
+Kontrol Base UI apa pun di dalam `Field.Root` tersambung dengan cara yang sama, dengan atau tanpa
+`Field.Control`.
+
+## State dan varian [#states]
+
+Stage menampilkan tema terang dan gelap berdampingan. Pointer membawa field kosong melewati error sampai
+ke alamat yang valid.
+
+| State | Tandanya |
+| --- | --- |
+| Kosong | Well kontrol, dengan placeholder-nya |
+| Terisi | Teks `--ow-fg` |
+| Invalid | Tepi kontrol `--ow-critical`, dan error dengan warna yang sama. Labelnya tetap |
+| Disabled | Kontrol dan label dengan opacity 45%. Error hasil pengecekan hilang; `invalid` yang Anda pasang tetap |
+
+## Keyboard dan aksesibilitas [#keyboard]
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab | Memindahkan fokus ke kontrol |
+| Enter | Di dalam form, men-submit; sendirian, menjalankan pengecekan field |
+
+Klik pada label memindahkan fokus ke kontrol. Screen reader membaca label sebagai namanya, deskripsi dan
+error sebagai deskripsinya, dan `aria-invalid` menyatakan ia gagal. Jangan mengabarkan error hanya lewat
+warna: pesannya ada, dan tepinya adalah penandanya.
+
+Tidak ada yang bergerak, jadi reduced motion tidak mengubah apa pun. Di mode forced colors (Windows High
+Contrast), pesan memakai warna teks sistem, dan kontrol mempertahankan tepi 2px saat invalid. Dari kanan
+ke kiri, label berada di kanan, di atas awal kontrol.
+
+## Kustomisasi [#customization]
+
+Stage menampilkan tiga cara mengubahnya. Kontrolnya terbuka: pilih warna deskripsi atau error, dan field
+pertama serta kodenya mengikuti.
+
+**Token** yang dipasang di sebuah bagian, di field, atau di elemen apa pun di sekitarnya mengubah
+bagian di dalamnya.
+
+```css
+.signup {
+  --ow-critical: #9a2b5a;
+}
+```
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-fg` | Label |
+| `--ow-muted` | Deskripsi |
+| `--ow-critical` | Error, dan tepi kontrol saat invalid |
+
+Kontrolnya juga membaca token Input.
+
+**`className`** di bagian mana pun mengalahkan nilainya sendiri, tanpa `!important`. Di sini, label di
+samping kontrolnya:
+
+```css
+.inline {
+  display: grid;
+  grid-template-columns: 6em 1fr;
+  align-items: center;
+}
+```
+
+`gap` di root mengatur jarak antarbagian. Field tidak punya margin luar dan mengisi induknya.
+
+**Komposisi:** `Field.Control` menerima `render`, sehingga kontrol apa pun bisa duduk di field dan tetap
+berlabel dan berdeskripsi. Atau lewati saja, dan taruh kontrol Base UI apa pun di dalam `Field.Root`.
+
+```tsx
+<Field.Control render={<textarea rows={3} />} />
+```
+
+<ForMode mode="isolated">
+
+Di mode isolated, nilainya ada di root setiap bagian, jadi atur di bagian yang membacanya, seperti
+`signup.css`.
+
+</ForMode>
+
+<TokenChip lang="id" />
+
+## Ship it [#ship]
+
+Drawer kode menulis komponen persis seperti yang diatur di stage.
+
+| Bagian | Prop | Tipe |
+| --- | --- | --- |
+| `Root` | `name` | `string` |
+| `Root` | `invalid` | `boolean` |
+| `Root` | `disabled` | `boolean` |
+| `Root` | `validate` | `(value, formValues) => string \| string[] \| null` |
+| `Root` | `validationMode` | `"onSubmit" \| "onBlur" \| "onChange"` |
+| `Control` | Props Input | `size`, `startIcon`, `endIcon`, `value`, `onValueChange`, `render` |
+| `Error` | `match` | `boolean \| keyof ValidityState` |
+| `Validity` | `children` | `(state) => ReactNode` |
+
+Setiap bagian menerima `className`, `style`, `render`, dan `ref`, kecuali Validity, yang tidak merender
+elemen sendiri. Props berasal dari Base UI, dan props lain diteruskan apa adanya.
+
+Dengan CSS per komponen, `Field.Control` juga perlu stylesheet Input: `owsem-ui/css/input.css`.
+
+Impor dari `owsem-ui/base`. Di registry, namanya item `field`, yang ikut membawa `input`.

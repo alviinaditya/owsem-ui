@@ -152,7 +152,7 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Button**, **Input**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toggle Group**,
+**Button**, **Field**, **Input**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toggle Group**,
 **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`) and **Color Picker**, **Command Menu**,
 **Table of Contents**, and **Tree Rail Nav** (Owsem, from `owsem-ui/owsem`) are built. Base
 components are Base UI components with OwsemUI's styling, and small primitives without a Base UI
@@ -197,6 +197,46 @@ import { Button, ButtonIcon, buttonStyles, IconButton } from "owsem-ui/base"; //
   `--ow-fg` and `--ow-bg` (secondary's fill and text, outline's line), `--ow-primary-shadow` (the
   solid fills' edges), `--ow-pressed-*` (held down), `--ow-hover`, `--ow-focus`, `--ow-radius`,
   and `--ow-motion-scale`.
+
+### Field
+
+Ties a label, a control, and its messages together through Base UI's aria wiring, in one column with
+even gaps. Label and Control are all a common field needs. Registry item: `field` (brings `input`).
+
+```tsx
+import { Field } from "owsem-ui/base"; // or "@/components/owsem/field"
+<Field.Root>
+  <Field.Label>Email</Field.Label>
+  <Field.Control />
+</Field.Root>
+```
+
+```tsx
+<Field.Root validationMode="onChange" validate={(value) => (value === "admin" ? "Taken" : null)}>
+  <Field.Label>Username</Field.Label>
+  <Field.Control pattern="[a-z0-9]{3,}" size="sm" startIcon={<AtIcon />} />
+  <Field.Description>Lowercase letters and numbers.</Field.Description>
+  <Field.Error match="patternMismatch">Use lowercase letters and numbers.</Field.Error>
+  <Field.Error match="customError" />
+</Field.Root>
+```
+
+- Parts: `Root`, `Label`, `Control`, `Description`, `Error`, `Item` (an option in a checkbox or radio
+  group), and `Validity` (a function of the validity state; draws nothing). All but `Validity` take
+  `className`, `style`, `render`, and `ref`.
+- `Field.Control` is Input: `size`, `startIcon`, `endIcon`, and the same rule that every prop reaches
+  the `<input>`. `render` puts another control in the field, as `render={<textarea rows={3} />}`,
+  and any Base UI control inside `Field.Root` is wired without it. With per-component CSS, load
+  `owsem-ui/css/input.css` too.
+- No ids to write: the control gets `aria-labelledby`, `aria-describedby` for the description and for
+  the error while it shows, and `aria-invalid`.
+- On `Root`: `name`, `invalid`, `disabled`, `validate(value, formValues)`, and `validationMode`
+  (`"onSubmit"` default, `"onBlur"`, `"onChange"`). `Field.Error` without `match` shows on any failure,
+  with its children or the browser's message; `match` picks one validity state, and `match` alone
+  keeps it up for an `invalid` you control.
+- It has no outer margins and fills its parent; `gap` on the root sets the space between parts.
+- Reads `--ow-fg` (label), `--ow-muted` (description), and `--ow-critical` (error), plus Input's tokens
+  on the control. A token on a part or an ancestor wins, and so does unlayered CSS on a `className`.
 
 ### Input
 

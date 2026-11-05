@@ -1,0 +1,54 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * A label, a control, and its messages in one column. Field draws only type and even gaps: the
+ * control is Input, which shows the invalid state, and a message's color says what it is.
+ */
+@layer owsem.components {
+  .ow-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    min-inline-size: 0;
+    font-size: 0.875rem;
+    line-height: 1.25;
+  }
+
+  .ow-field__label {
+    --_fg: var(--ow-fg);
+    color: var(--_fg);
+    font-weight: 500;
+  }
+
+  .ow-field__label:where([data-disabled]) {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
+  .ow-field__description {
+    --_muted: var(--ow-muted);
+    margin: 0;
+    color: var(--_muted);
+    font-size: 0.93em;
+    line-height: 1.4;
+  }
+
+  .ow-field__error {
+    --_critical: var(--ow-critical);
+    color: var(--_critical);
+    font-size: 0.93em;
+    line-height: 1.4;
+  }
+
+  /* Base UI lists several messages. */
+  .ow-field__error > :where(ul) {
+    margin: 0;
+    padding-inline-start: 1.25em;
+  }
+
+  .ow-field__item {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+}

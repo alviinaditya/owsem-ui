@@ -681,6 +681,21 @@ test("the Input Lab's first scene types an address, and the edge follows", async
   await expect(email).not.toHaveAttribute("aria-invalid");
 });
 
+test("the Field Lab's first scene types an address, and the error joins the wiring", async ({
+  page,
+}) => {
+  await page.goto("/en/field");
+  const email = demo(page).getByRole("textbox", { name: "Work email" });
+  const describedBy = demo(page).locator('[data-demo="aria-describedby"]');
+  await expect(describedBy).toHaveText("We only use it to sign you in.");
+  await scene(page, "wiring");
+  await expect(email).toHaveAttribute("aria-invalid", "true");
+  await expect(describedBy).toContainText("doesn't look like an email");
+  await expect(email).toHaveValue("ana@owsem.dev");
+  await expect(email).not.toHaveAttribute("aria-invalid");
+  await expect(describedBy).toHaveText("We only use it to sign you in.");
+});
+
 test("the Toolbar Lab's first scene presses its items, and the line follows", async ({ page }) => {
   await page.goto("/en/toolbar");
   const italic = demo(page).getByRole("button", { name: "Italic" });

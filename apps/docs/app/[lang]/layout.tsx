@@ -5,6 +5,7 @@ import { NextProvider } from "fumadocs-core/framework/next";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
+import { CSPProvider } from "owsem-ui/core";
 import { RootState } from "@/components/root-state";
 import { SiteShell } from "@/components/site-shell";
 import { ThemeScript } from "@/components/theme-script";
@@ -51,15 +52,17 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
         <ThemeScript />
       </head>
       <body>
-        <NextProvider>
-          <RootState />
-          <div className="app-root">
-            <a className="skip-link" href="#content">
-              {dict.nav.skip}
-            </a>
-            <SiteShell lang={lang}>{children}</SiteShell>
-          </div>
-        </NextProvider>
+        <CSPProvider disableStyleElements>
+          <NextProvider>
+            <RootState />
+            <div className="app-root">
+              <a className="skip-link" href="#content">
+                {dict.nav.skip}
+              </a>
+              <SiteShell lang={lang}>{children}</SiteShell>
+            </div>
+          </NextProvider>
+        </CSPProvider>
       </body>
     </html>
   );

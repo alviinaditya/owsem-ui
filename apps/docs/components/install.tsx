@@ -1,12 +1,11 @@
 "use client";
 
-import { ToggleGroup } from "owsem-ui/base";
+import { ScrollArea, ToggleGroup } from "owsem-ui/base";
 import { useSyncExternalStore } from "react";
 import type { Dictionary } from "@/lib/dictionaries";
 import { PACKAGE_MANAGER_STORAGE_KEY } from "@/lib/theme";
 import { isDefaultSetup, type TokenSetup } from "@/lib/token-setup";
 import { CopyButton } from "./lab/copy-button";
-import { ScrollFade } from "./scroll-fade";
 import { useTokenSetup } from "./token-setup";
 
 const PACKAGE_MANAGERS = ["pnpm", "npm", "yarn", "bun"] as const;
@@ -90,28 +89,31 @@ function Picker({ labels }: { labels: Labels }) {
 function Command({ text, labels }: { text: string; labels: Labels }) {
   return (
     <div className="command">
-      <ScrollFade className="command-text">
-        <code>
-          <span className="command-prompt" aria-hidden="true">
-            $
-          </span>
-          {text.split(" ").map((word, i) => {
-            const tone =
-              i === 0 || word === "shadcn" || word === CLI
-                ? "tk-fn"
-                : word.startsWith("@owsem") || word === "owsem-ui"
-                  ? "tk-str"
-                  : undefined;
-            return (
-              // biome-ignore lint/suspicious/noArrayIndexKey: words are positional
-              <span key={i} className={tone}>
-                {i > 0 ? " " : ""}
-                {word}
-              </span>
-            );
-          })}
-        </code>
-      </ScrollFade>
+      {/* No Scrollbar: over one line of text it would only get in the way. */}
+      <ScrollArea.Root className="command-text" fade>
+        <ScrollArea.Viewport>
+          <code>
+            <span className="command-prompt" aria-hidden="true">
+              $
+            </span>
+            {text.split(" ").map((word, i) => {
+              const tone =
+                i === 0 || word === "shadcn" || word === CLI
+                  ? "tk-fn"
+                  : word.startsWith("@owsem") || word === "owsem-ui"
+                    ? "tk-str"
+                    : undefined;
+              return (
+                // biome-ignore lint/suspicious/noArrayIndexKey: words are positional
+                <span key={i} className={tone}>
+                  {i > 0 ? " " : ""}
+                  {word}
+                </span>
+              );
+            })}
+          </code>
+        </ScrollArea.Viewport>
+      </ScrollArea.Root>
       <CopyButton text={text} labels={labels} />
     </div>
   );

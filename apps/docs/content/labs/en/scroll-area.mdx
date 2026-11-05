@@ -1,0 +1,153 @@
+---
+title: Scroll Area
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Scroll Area scrolls its content with a thin scrollbar of its own, the same in every browser, that
+floats over the content and shows only on hover or while scrolling. Give it your content and a
+height; it draws the rest. Scroll to start the tour; the stage follows each part.
+
+```tsx
+<ScrollArea.Root className="h-64">
+  {content}
+</ScrollArea.Root>
+```
+
+## Only when needed [#shows]
+
+The scrollbar fades in as the pointer comes over the area and while it scrolls, by wheel, touch, or
+keyboard, and stays while its thumb is held. Then it fades out, by opacity alone. Scrolling from
+code does not show it. While hidden it lets every pointer through, so a swipe at the edge scrolls
+and a click reaches the content.
+
+It floats, so it takes no room: the content is as wide with a scrollbar as without one. Each end
+keeps clear of the rounded corners.
+
+The stage plays it: the pointer comes over the list, takes the thumb down and back, and leaves.
+
+## Both axes [#axes]
+
+A scrollbar appears only for an axis that overflows, and a tab stop only while something does, so
+the same markup fits a list, a wide table, and a box with nothing to scroll. When both axes
+overflow, the bars meet at the corner without touching.
+
+The stage plays it on a build log: one thumb across, the other down.
+
+## Edges that fade [#edges]
+
+Add `fade` to the Root and an edge fades while there is more to scroll that way, by as much as has
+scrolled past it, up to `--fade-size` (2em). Base UI measures the distances into variables on the
+Viewport as it scrolls, so this is plain CSS: no script of OwsemUI's, and nothing to transition.
+Without a scrollbar, a fade is what tells people there is more: these docs do this on their install
+commands and on the row of scenes in the Lab's sheet.
+
+The stage plays it: at the top only the bottom edge fades, in the middle both, at the end only the
+top.
+
+## Anatomy [#anatomy]
+
+With only content inside, Root draws the other parts. With a Viewport among its direct children,
+those are the parts, as in Base UI; leave out Content or Thumb and each draws itself, and leave out
+a Scrollbar and there is none. Wrapping the Viewport in a component of your own hides it from Root,
+so pass yours to its `render` instead. Inspect (I) outlines each part on the stage; pick a name,
+here or on the stage, to see its tokens.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-scroll-area` | `fade`; sized by you |
+| <Part name="Viewport" /> | `div.ow-scroll-area__viewport` | Scrolls; a tab stop while it overflows |
+| <Part name="Content" /> | `div.ow-scroll-area__content` | As wide as its longest line; `style={{ minWidth: 0 }}` to truncate instead |
+| <Part name="Scrollbar" /> | `div.ow-scroll-area__scrollbar` | `orientation`; `aria-hidden` |
+| <Part name="Thumb" /> | `div.ow-scroll-area__thumb` | The pill |
+| <Part name="Corner" /> | `div.ow-scroll-area__corner` | Empty; `aria-hidden` |
+
+## States and variants [#states]
+
+The stage sets the area in both themes: at rest, with its scrollbar showing, and scrolled between
+two fades. The thumb is `--ow-muted` at 72%, which keeps 3:1 against the panel and the page in both.
+
+| State | What shows it |
+| --- | --- |
+| Hidden | Opacity 0, and no pointer events |
+| Hovered | `data-hovering` on the Scrollbar: fades in within 150 ms |
+| Scrolling | `data-scrolling` on the Scrollbar, until 500 ms after the last movement |
+| Held | `:active` on the Scrollbar |
+| Overflowing | `data-has-overflow-x`, `data-has-overflow-y` on every part but Thumb; the other axis's Scrollbar is not rendered |
+| More that way | `data-overflow-x-start`, `-x-end`, `-y-start`, `-y-end`, with the distance in `--scroll-area-overflow-y-start` and the like on the Viewport |
+| Faded | `data-fade` on the Root |
+
+## Keyboard and accessibility [#keyboard]
+
+| Key | Action |
+| --- | --- |
+| Tab | Reaches the Viewport while its content overflows, with a focus ring inside the Root |
+| Arrow keys | Scroll by a line |
+| Page Up, Page Down | Scroll by a page |
+| Home, End | Scroll to the start or the end |
+
+The scrollbars are `aria-hidden`, as native ones are to assistive technology, which reads the
+content itself. Its press area is at least 24 × 24 px, reaching in from the edge, even on the
+shortest thumb (16px); it covers that much of the content's edge while the scrollbar shows. Pressing
+the track jumps there; the thumb can also be dragged.
+
+When everything in the Viewport can already take focus, such as a list of links, it does not need
+to be a stop of its own: set `tabIndex={-1}` on it, as these docs do on their sidebar. Reduced motion
+changes nothing, since only opacity moves. In forced colors (Windows High Contrast), the thumb takes
+`CanvasText` and the ring `Highlight`.
+
+## Customization [#customization]
+
+The stage controls are open, and the scrollbar is pinned on so you can see it. Pick the axes, the
+fade, the width, the composition, or the thumb's color, and the code follows.
+
+**Tokens.** Scroll Area reads these theme tokens. Set them on the Root or anywhere above it.
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-muted` | The thumb, at 72% |
+| `--ow-radius` | The corners, and how far the bars keep from them |
+| `--ow-focus` | The focus ring |
+| `--ow-ease-out` | The scrollbar's fade |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each part, so set yours on the part with a class, as `notes.css`
+does for the Thumb.
+
+</ForMode>
+
+**`className`.** Plain CSS wins with no `!important`. The size comes from you: `block-size` or
+`max-block-size` on the Root. The bar's `inline-size` (`block-size` when horizontal) is the pill's,
+the thumb follows it, and `background-color` on the Thumb recolors it. With only content inside,
+reach the parts through the Root's class, as `notes.css` does. Its sizes are in `em`, so `font-size`
+scales it, and `--fade-size` on the Root or above sets how far the edges fade. Past its end, a wheel
+moves the page, as with any scroller; `overscroll-behavior: contain` on the Viewport stops that.
+
+**Composition.** Write out the parts to give one its own props: a `ref` or an `id` on the Viewport,
+a Scrollbar for one axis only, or no Scrollbar at all, as these docs' install commands do.
+
+<TokenChip lang="en" />
+
+## Ship it [#ship]
+
+The code drawer writes the area exactly as the stage is set up. Change the axes or a color, and the
+lines that change light up.
+
+| Part | Prop | Type | Default |
+| --- | --- | --- | --- |
+| Root | `fade` | `boolean` | `false` |
+| Root | `overflowEdgeThreshold` | `number \| { xStart, xEnd, yStart, yEnd }` | `0` |
+| Scrollbar | `orientation` | `"vertical" \| "horizontal"` | `"vertical"` |
+| Scrollbar | `keepMounted` | `boolean` | `false` |
+| Every part | `className`, `style`, `render` | | |
+
+`fade` is OwsemUI's; the rest comes from Base UI, which documents it. Refs go to each part's
+element.
+
+Base UI hides native scrollbars with a `<style>` it adds at runtime; OwsemUI ships that rule in its
+stylesheet instead. For a strict Content Security Policy, turn Base UI's off by wrapping the app in
+`<CSPProvider disableStyleElements>`, from `owsem-ui/core`.
+
+Import it from `owsem-ui/base`. In the registry, it is the `scroll-area` item.

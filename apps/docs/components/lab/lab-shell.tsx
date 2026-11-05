@@ -1,6 +1,6 @@
 "use client";
 
-import { Kbd } from "owsem-ui/base";
+import { Kbd, ScrollArea } from "owsem-ui/base";
 import {
   type CSSProperties,
   createContext,
@@ -20,7 +20,6 @@ import { type Dictionary, format } from "@/lib/dictionaries";
 import type { Lang } from "@/lib/i18n";
 import { siteScheme } from "@/lib/theme";
 import { Icon } from "../icons/icon";
-import { ScrollFade } from "../scroll-fade";
 import { Tip } from "../tip";
 import { useTokenNames } from "../token-setup";
 import { SHEET_FULL_GAP, SHEET_HALF, SIDE_BY_SIDE } from "./layout";
@@ -153,7 +152,7 @@ export function LabShell({
   const narrative = useRef<HTMLDivElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const sheetTitle = useRef<HTMLParagraphElement>(null);
-  const sceneNav = useRef<HTMLElement>(null);
+  const sceneRow = useRef<HTMLDivElement>(null);
   useTokenNames(narrative);
   const [sheetState, setSheetState] = useState<{ at: Sheet; move: SheetMove }>({
     at: "closed",
@@ -457,11 +456,27 @@ export function LabShell({
   }, [sheet, closeSheet]);
   // The active scene's link stays in view in the sheet's row of scenes.
   useEffect(() => {
-    const row = sceneNav.current?.querySelector<HTMLElement>(".scroll-fade");
+    const row = sceneRow.current;
     const link = row?.querySelector<HTMLElement>(`[href="#scene-${CSS.escape(active)}"]`);
     if (!row || !link || matchMedia(SIDE_BY_SIDE).matches) return;
     row.scrollTo({ left: link.offsetLeft - 20, behavior: reduced ? "instant" : "smooth" });
   }, [active, reduced]);
+  // A mouse wheel over the row scrolls it sideways, then the page once the row reaches its end.
+  useEffect(() => {
+    const row = sceneRow.current;
+    if (!row) return;
+    const onWheel = (event: WheelEvent) => {
+      // A trackpad already scrolls sideways.
+      if (Math.abs(event.deltaX) >= Math.abs(event.deltaY)) return;
+      const end = row.scrollWidth - row.clientWidth;
+      const left = Math.max(0, Math.min(end, row.scrollLeft + event.deltaY));
+      if (left === row.scrollLeft) return;
+      event.preventDefault();
+      row.scrollLeft = left;
+    };
+    row.addEventListener("wheel", onWheel, { passive: false });
+    return () => row.removeEventListener("wheel", onWheel);
+  }, []);
   // A scene's link scrolls the sheet to it; the scene holds until the visitor scrolls.
   const onSceneLink = (event: MouseEvent<HTMLAnchorElement>, id: string) => {
     event.preventDefault();
@@ -598,20 +613,23 @@ export function LabShell({
             />
           </div>
           {/* Outside the text's scroller, so its scrollbar runs beside the text alone. */}
-          <nav ref={sceneNav} className="lab-scene-nav" aria-label={labels.scenes}>
-            <ScrollFade wheelX>
-              {scenes.map((scene, index) => (
-                <a
-                  key={scene.id}
-                  href={`#scene-${scene.id}`}
-                  aria-current={scene.id === active ? "true" : undefined}
-                  onClick={(event) => onSceneLink(event, scene.id)}
-                >
-                  <span>{String(index).padStart(2, "0")}</span>
-                  {scene.title}
-                </a>
-              ))}
-            </ScrollFade>
+          <nav className="lab-scene-nav" aria-label={labels.scenes}>
+            {/* No Scrollbar: it would sit on the current scene's underline. */}
+            <ScrollArea.Root fade>
+              <ScrollArea.Viewport ref={sceneRow} tabIndex={-1}>
+                {scenes.map((scene, index) => (
+                  <a
+                    key={scene.id}
+                    href={`#scene-${scene.id}`}
+                    aria-current={scene.id === active ? "true" : undefined}
+                    onClick={(event) => onSceneLink(event, scene.id)}
+                  >
+                    <span>{String(index).padStart(2, "0")}</span>
+                    {scene.title}
+                  </a>
+                ))}
+              </ScrollArea.Viewport>
+            </ScrollArea.Root>
           </nav>
           <div ref={scroller} className="lab-narrative-scroll">
             <div ref={start} />

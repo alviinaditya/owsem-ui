@@ -184,12 +184,13 @@ test("a long command hides its scrollbar and fades where it continues", async ({
   await page.goto("/en/separator");
   await stage(page).getByRole("button", { name: "Code" }).click();
   await stage(page).getByRole("tab", { name: "Install" }).click();
-  const command = stage(page).locator(".command-text > .scroll-fade").nth(1);
-  await expect(command).toHaveAttribute("data-fade-right", "");
-  await expect(command).not.toHaveAttribute("data-fade-left");
+  const command = stage(page).locator(".command-text .ow-scroll-area__viewport").nth(1);
+  await expect(command).toHaveAttribute("data-overflow-x-end", "");
+  await expect(command).not.toHaveAttribute("data-overflow-x-start");
+  expect(await command.evaluate((el) => getComputedStyle(el).maskImage)).toContain("gradient");
   await command.evaluate((el) => el.scrollTo(el.scrollWidth, 0));
-  await expect(command).toHaveAttribute("data-fade-left", "");
-  await expect(command).not.toHaveAttribute("data-fade-right");
+  await expect(command).toHaveAttribute("data-overflow-x-start", "");
+  await expect(command).not.toHaveAttribute("data-overflow-x-end");
   // No scrollbar takes room under the text.
   const scrollbar = await command.evaluate(
     (el) => el.getBoundingClientRect().height - el.clientHeight,
@@ -519,7 +520,7 @@ test("a scene link takes the sheet to its scene; a drag down shuts it", async ({
   );
   await expect(page).toHaveURL(/#scene-states$/);
   // A mouse wheel over the row scrolls it sideways.
-  const row = page.locator(".lab-scene-nav .scroll-fade");
+  const row = page.locator(".lab-scene-nav .ow-scroll-area__viewport");
   const before = await row.evaluate((el) => el.scrollLeft);
   await row.hover();
   await page.mouse.wheel(0, 200);
@@ -915,6 +916,31 @@ test("the Menu Lab opens Edit with Glide on its items, and View's choices", asyn
   await scene(page, "anatomy");
   await expect(demo(page).getByRole("menu")).toBeVisible();
   await expect(demo(page).getByRole("menu")).not.toBeFocused();
+});
+
+test("the Scroll Area Lab shows its scrollbar on hover, and the thumb scrolls", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name === "mobile-390", "a pointer hovers and drags");
+  await page.goto("/en/scroll-area");
+  const viewport = demo(page).locator(".ow-scroll-area__viewport");
+  const scrollbar = demo(page).locator(".ow-scroll-area__scrollbar");
+  const thumb = scrollbar.locator(".ow-scroll-area__thumb");
+  await expect(scrollbar).toHaveCSS("opacity", "0");
+  await viewport.hover();
+  await expect(scrollbar).toHaveCSS("opacity", "1");
+
+  const box = await thumb.boundingBox();
+  if (!box) throw new Error("The thumb has no box.");
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2, box.y + 120, { steps: 6 });
+  await page.mouse.up();
+  await expect.poll(() => viewport.evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
+
+  // Hidden by the stylesheet, with no <style> added at runtime (NF-4).
+  await expect(page.locator('style[data-href="base-ui-disable-scrollbar"]')).toHaveCount(0);
+  expect(await viewport.evaluate((el) => getComputedStyle(el).scrollbarWidth)).toBe("none");
 });
 
 test("the Popover Lab opens its panel from Share, then hands it between triggers", async ({

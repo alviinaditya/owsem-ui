@@ -2,6 +2,7 @@
 export * from "./components/button";
 export * from "./components/field";
 export * from "./components/fieldset";
+export * from "./components/form";
 export * from "./components/input";
 export { Kbd } from "./components/kbd";
 export * from "./components/menu";

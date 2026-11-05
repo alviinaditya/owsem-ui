@@ -829,6 +829,11 @@ body {
   inline-size: 100%;
 }
 
+.component-preview-form {
+  inline-size: 100%;
+  gap: 10px;
+}
+
 .component-preview-separator {
   display: grid;
   gap: 10px;
@@ -3653,6 +3658,51 @@ figure[data-code-block] pre {
 
 .demo-fieldset-plain::after {
   content: none;
+}
+
+/* The Form Lab's demos: a sign-up form, and unlayered rules, as an app would write them. */
+.demo-form {
+  inline-size: min(340px, 100%);
+}
+
+.demo-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Keeps its height when empty, so the form doesn't jump when the answer comes. */
+.demo-form-status {
+  min-block-size: 1.5em;
+}
+
+/* The ring a submit gives the first failed field; a scene's run leaves the visitor's focus alone. */
+.demo-form [data-demo-focus] {
+  outline: 2px solid var(--ow-focus);
+  outline-offset: 2px;
+}
+
+.demo-form-tight {
+  gap: 0.5em;
+}
+
+.demo-form-roomy {
+  gap: 2.5em;
+}
+
+.demo-form-row {
+  flex-direction: row;
+  align-items: end;
+  gap: 8px;
+}
+
+.demo-form-row > .ow-field {
+  flex: 1;
+}
+
+.demo-form-row > .ow-button {
+  align-self: end;
+  flex: none;
 }
 
 /* The Toolbar Lab's editor: the toolbar over the line it formats. */

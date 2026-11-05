@@ -39,7 +39,7 @@ export const catalog = [
   { name: "kbd", title: "Kbd", family: "base", category: "display", phase: 1, status: "prototype" },
   { name: "field", title: "Field", family: "base", category: "form", phase: 1, status: "prototype" },
   { name: "fieldset", title: "Fieldset", family: "base", category: "form", phase: 1, status: "prototype" },
-  { name: "form", title: "Form", family: "base", category: "form", phase: 1, status: "planned" },
+  { name: "form", title: "Form", family: "base", category: "form", phase: 1, status: "prototype" },
   { name: "input", title: "Input", family: "base", category: "form", phase: 1, status: "prototype" },
   { name: "checkbox", title: "Checkbox", family: "base", category: "form", phase: 1, status: "planned" },
   { name: "radio-group", title: "Radio Group", family: "base", category: "form", phase: 1, status: "planned" },

@@ -37,6 +37,7 @@ for (const path of [
   "/en/input",
   "/id/field",
   "/en/fieldset",
+  "/id/form",
 ]) {
   test(`${path} has no horizontal scroll (DS-9)`, async ({ page }) => {
     await page.goto(path);

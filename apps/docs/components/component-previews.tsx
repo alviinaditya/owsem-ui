@@ -2,6 +2,7 @@
 
 import {
   Button,
+  Checkbox,
   Kbd,
   Menu,
   Popover,
@@ -255,6 +256,19 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
       </Button>
     </div>
   ),
+  checkbox: (t) => (
+    <div className="component-preview-checkbox">
+      <label>
+        <Checkbox.Root indeterminate /> {t.guides}
+      </label>
+      <label>
+        <Checkbox.Root checked /> {t.docs}
+      </label>
+      <label>
+        <Checkbox.Root /> {t.blog}
+      </label>
+    </div>
+  ),
   toggle: (t) => (
     <div className="component-preview-row">
       <Toggle pressed aria-label={t.bold} startIcon={<Icon name="bold" />} />
@@ -389,13 +403,6 @@ const SKETCHES: Partial<Record<ComponentName, ReactNode>> = {
       {B(28, 36, 104, 24, 6)}
       {F(38, 46, 40, 5, 0.4)}
       <path d="M82 43v11" />
-    </>
-  ),
-  checkbox: (
-    <>
-      <rect x={42} y={38} width={20} height={20} rx={5} fill="currentColor" opacity={0.6} />
-      <path d="m46 48 4 4 8-8" stroke="var(--docs-surface)" strokeWidth={2.4} />
-      {F(70, 45, 48)}
     </>
   ),
   "radio-group": (

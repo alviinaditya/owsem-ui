@@ -1,0 +1,219 @@
+---
+title: Checkbox
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Checkbox is a box you tick. The shortest usage is all it needs: a label around a `Checkbox.Root`,
+which draws its own Indicator and glyphs. Scroll to start the tour; the stage follows each part.
+
+```tsx
+<label>
+  <Checkbox.Root /> Run the tests
+</label>
+```
+
+## A fill that changes, a glyph that moves [#marking]
+
+Off, the box is the well: a flat, darker fill with a 1px edge in `--ow-edge`, which holds 3:1 against
+the fill and the surface around it. Checked or indeterminate, it is the primary material: the accent
+fill and its edge, with the glyph in `--ow-on-accent`.
+
+The fill changes at once, because it states the answer. The glyph is what moves: it fades in within
+120 ms, growing from 0.8 on the settle spring. Between check and minus, the two glyphs sit in one
+cell and crossfade the same way, so a parent box never jumps while its tasks fill up. Under reduced
+motion, the glyphs only fade.
+
+Every press goes in first: while held, the box shrinks to 0.97 within 90 ms and its fill changes,
+then it lets go on the settle spring. Its edge stays.
+
+The stage plays it: the pointer finishes the list and takes it back, and the parent's minus turns
+into a check and back. The parent is your own code: `checked` when all are done, `indeterminate`
+when some are.
+
+## A plain label [#label]
+
+A `<label>` is all the composition it asks for, with no wrapper part and no extra CSS. A press on
+the text toggles the box, the pointer over the text tints it, a press on the text presses it, and the
+label becomes its accessible name. The stage plays it: the pointer presses only the text.
+
+With no visible text, such as a row in a table, give it a name of its own:
+
+```tsx
+<Checkbox.Root aria-label="Select row" />
+```
+
+The box is an inline element centered on the line, so it sits on the text in a plain label. For a
+flex row, `align-items: center` and a `gap` of your own do the same.
+
+## The size of an icon [#geometry]
+
+The box is an icon: the font size plus 2px, with Button's fonts for each size. It sits beside text,
+not around it, so it has no `--py`. Its corners are half of `--ow-radius`, so a small box stays
+square.
+
+A box this small is under the 24px target WCAG 2.5.8 asks for, so a pseudo-element extends it to 24px
+on every side, adding no layout. The stage draws that pseudo-element around each box; two boxes need
+8px between them for their targets to stay apart.
+
+| Size | Font | Box | Target |
+| --- | --- | --- | --- |
+| `sm` | 13px | 15px | 24px |
+| `md` | 14px | 16px | 24px |
+| `lg` | 16px | 18px | 24px |
+
+It has no margin, and it never moves its line: checking it changes nothing around it.
+
+## Anatomy [#anatomy]
+
+Three parts, and the last two draw themselves. Base UI renders a `<span>` with the `checkbox` role and
+a hidden `<input>` beside it; OwsemUI adds the classes and `data-size`. Inspect (I) outlines them on
+the stage.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `span.ow-checkbox` | `aria-checked`, `data-checked`, `data-unchecked`, `data-indeterminate`, `data-disabled`, `data-readonly`, `data-size` |
+| <Part name="Indicator" /> | `span.ow-checkbox__indicator` | The same states, and `data-starting-style` and `data-ending-style` while it comes and goes. Unmounted while off, unless `keepMounted` |
+| <Part name="Glyph" /> | `svg[data-glyph]` | `data-glyph="check"` or `"minus"`, `aria-hidden` |
+
+Children replace what is drawn. Passing `{null}` to Root leaves it empty.
+
+## States and variants [#states]
+
+The stage sets every state in the light and dark themes, at `md` and `lg`. The pointer rests on the
+off box in each theme, then checks and unchecks it.
+
+| State | What shows it |
+| --- | --- |
+| Off | `--ow-well-bg`, and a 1px inset edge in `--ow-edge` |
+| Hover, on the box or its label | The `--ow-hover` tint over the fill |
+| Pressing, on the box or its label | Scaled to 0.97 within 90 ms; `--ow-pressed-bg` while off, the accent 10% darker while on; the edge stays |
+| Checked | `--ow-accent`, `--ow-primary-shadow`, and the check in `--ow-on-accent` |
+| Indeterminate | The same material, with the minus |
+| Keyboard focus | A 2px ring 2px out, in `--ow-focus` |
+| Read-only | As it is, and presses do nothing |
+| Disabled | 50% opacity, and presses do nothing |
+
+## Keyboard and accessibility [#keyboard]
+
+| Key | Action |
+| --- | --- |
+| Tab | Moves focus to the box |
+| Space | Checks or unchecks it |
+| Enter | Submits the form it is in, without toggling |
+
+Screen readers announce a checkbox and its state through `aria-checked`, with `mixed` while
+indeterminate. Its name comes from the label or an `aria-label`; the glyphs are `aria-hidden`.
+
+With `prefers-reduced-motion`, the fills change and the glyphs fade, and nothing moves. In forced
+colors (Windows High Contrast), the box keeps a 1px edge in the system color, a checked box is filled
+with `Highlight`, and the glyph follows as `HighlightText`. Right to left, the label puts the box on
+the right, and the check is not mirrored.
+
+## Customization [#customization]
+
+The stage controls are open: pick the fill, the glyph, or the edge, and the code follows. The stage
+shows the four ways in.
+
+**Theme tokens.** Checkbox reads these. Set one on the box, or on any element around it.
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-well-bg` | Fill while off |
+| `--ow-edge` | Edge while off |
+| `--ow-fg` | The glyph on its way out |
+| `--ow-accent` | Fill while checked or indeterminate |
+| `--ow-primary-shadow` | Edges while checked or indeterminate |
+| `--ow-on-accent` | Glyph |
+| `--ow-hover` | Tint under the pointer |
+| `--ow-pressed-bg` | Fill while held down and off |
+| `--ow-radius` | Corners, at half its value |
+| `--ow-focus` | Focus ring |
+| `--ow-motion-scale` | How far the press and the glyphs move |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Checkbox's root, so set yours on the box itself, as
+`task.css` does.
+
+</ForMode>
+
+<TokenChip lang="en" />
+
+**A class of your own.** States are in `:where()`, so one class beats them, and a Tailwind utility
+wins the same way. Write `[data-checked]` on it to style one state.
+
+```css
+.ink {
+  border-radius: 0;
+}
+
+.ink[data-checked] {
+  background-color: var(--ow-fg);
+  box-shadow: none;
+  color: var(--ow-bg);
+}
+```
+
+**Size.** The box is in `em`: `font-size` on it scales the box and its glyphs. `--icon` or a width of
+your own sets it directly. Its target stays at 24px or more.
+
+**Your own glyphs.** Children replace them, with any node, and an svg fills the box. A single child
+fades and scales in as the default does; mark a pair with `data-glyph` and they crossfade.
+
+```tsx
+<Checkbox.Root>
+  <Checkbox.Indicator>
+    <X />
+  </Checkbox.Indicator>
+</Checkbox.Root>
+
+<Checkbox.Root indeterminate={some}>
+  <Checkbox.Indicator>
+    <Tick data-glyph="check" />
+    <Dash data-glyph="minus" />
+  </Checkbox.Indicator>
+</Checkbox.Root>
+```
+
+## Ship it [#ship]
+
+The code drawer writes the component exactly as the stage is set up. Change the size or a color and
+the lines that change light up.
+
+`Checkbox.Root`:
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| `checked` | `boolean` | |
+| `defaultChecked` | `boolean` | `false` |
+| `onCheckedChange` | `(checked, eventDetails) => void` | |
+| `indeterminate` | `boolean` | `false` |
+| `disabled` | `boolean` | `false` |
+| `readOnly` | `boolean` | `false` |
+| `required` | `boolean` | `false` |
+| `name` | `string` | |
+| `value` | `string` | |
+| `children` | `ReactNode` | `<Checkbox.Indicator />` |
+| `className` | `string \| (state) => string` | |
+| `style` | `CSSProperties` | |
+| `render` | `ReactElement \| (props, state) => ReactElement` | |
+
+`Checkbox.Indicator`:
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `keepMounted` | `boolean` | `false` |
+| `children` | `ReactNode` | The check and minus glyphs |
+| `className` | `string \| (state) => string` | |
+| `style` | `CSSProperties` | |
+| `render` | `ReactElement \| (props, state) => ReactElement` | |
+
+Everything but `size` comes from Base UI, and other props pass through as they are, such as `form`,
+`inputRef`, and `uncheckedValue`. It submits in a plain `<form>` through `name` and `value`. The ref
+goes to the `span`; `inputRef` reaches the hidden input. Checkbox Group is a later component; until
+then, a parent box is `checked` and `indeterminate` from your own state, as on the stage.
+
+Import it from `owsem-ui/base`. In the registry, it is the `checkbox` item.

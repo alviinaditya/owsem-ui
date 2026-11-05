@@ -47,7 +47,15 @@
   },
   "linter": {
     "enabled": true,
-    "rules": { "preset": "recommended" },
+    "rules": {
+      "preset": "recommended",
+      "a11y": {
+        "noLabelWithoutControl": {
+          "level": "error",
+          "options": { "inputComponents": ["Root"] }
+        }
+      }
+    },
     "domains": { "react": "recommended" }
   },
   "assist": {

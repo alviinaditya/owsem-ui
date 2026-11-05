@@ -41,7 +41,7 @@ export const catalog = [
   { name: "fieldset", title: "Fieldset", family: "base", category: "form", phase: 1, status: "planned" },
   { name: "form", title: "Form", family: "base", category: "form", phase: 1, status: "planned" },
   { name: "input", title: "Input", family: "base", category: "form", phase: 1, status: "planned" },
-  { name: "checkbox", title: "Checkbox", family: "base", category: "form", phase: 1, status: "planned" },
+  { name: "checkbox", title: "Checkbox", family: "base", category: "form", phase: 1, status: "prototype" },
   { name: "radio-group", title: "Radio Group", family: "base", category: "form", phase: 1, status: "planned" },
   { name: "switch", title: "Switch", family: "base", category: "form", phase: 1, expressions: ["tactile"], status: "planned" },
   { name: "select", title: "Select", family: "base", category: "form", phase: 1, status: "planned" },

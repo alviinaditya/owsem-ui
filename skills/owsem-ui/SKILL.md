@@ -152,7 +152,7 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Button**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toggle Group**,
+**Button**, **Checkbox**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toggle Group**,
 **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`) and **Color Picker**, **Command Menu**,
 **Table of Contents**, and **Tree Rail Nav** (Owsem, from `owsem-ui/owsem`) are built. Base
 components are Base UI components with OwsemUI's styling, and small primitives without a Base UI
@@ -197,6 +197,41 @@ import { Button, ButtonIcon, buttonStyles, IconButton } from "owsem-ui/base"; //
   `--ow-fg` and `--ow-bg` (secondary's fill and text, outline's line), `--ow-primary-shadow` (the
   solid fills' edges), `--ow-pressed-*` (held down), `--ow-hover`, `--ow-focus`, `--ow-radius`,
   and `--ow-motion-scale`.
+
+### Checkbox
+
+A box you tick. Registry item: `checkbox`.
+
+```tsx
+import { Checkbox } from "owsem-ui/base"; // or "@/components/owsem/checkbox"
+<label>
+  <Checkbox.Root /> Run the tests
+</label>
+<Checkbox.Root aria-label="Select row" checked={on} onCheckedChange={setOn} />
+<Checkbox.Root aria-label="All tasks" checked={all} indeterminate={some && !all} onCheckedChange={setAll} />
+```
+
+- `Root` is Base UI's Checkbox: a `<span role="checkbox">` with a hidden `<input>` beside it, and
+  `aria-checked` (`mixed` while indeterminate). States: `data-checked`, `data-unchecked`,
+  `data-indeterminate`, `data-disabled`, `data-readonly`. Controlled with `checked` and
+  `onCheckedChange(checked, eventDetails)`, or uncontrolled with `defaultChecked`. `name` and `value`
+  submit it in a plain `<form>`. The ref goes to the span; `inputRef` to the input.
+- It needs a name: a plain `<label>` around it is all it takes, and that label toggles, tints, and
+  presses it. Otherwise, an `aria-label`. Space toggles it; Enter submits the form. Do not build a
+  wrapper for the label, and use no Field for this.
+- Without children, `Root` draws its `Indicator`, and the `Indicator` draws a check and a minus that
+  crossfade. Children replace either, with any node, and an svg fills the box. Mark a pair with
+  `data-glyph="check"` and `data-glyph="minus"` to keep the crossfade.
+- Props: `size` (`"sm"`, `"md"` default, `"lg"`: Button's fonts), plus Base UI's. The box is an icon,
+  the font size plus 2px (15, 16, 18 px), in `em`: `font-size` on it scales the box and its glyphs,
+  and `--icon` sets it directly. A pseudo-element extends the press target to 24 px without adding
+  layout, so do not pad it. It has no margin.
+- A parent box is your own state for now (`checked` for all, `indeterminate` for some); Checkbox Group
+  is a later component.
+- Off is the well with a 3:1 edge; on is the primary material, and the fill changes at once. Reads
+  `--ow-well-bg`, `--ow-edge`, `--ow-fg`, `--ow-accent`, `--ow-primary-shadow`, `--ow-on-accent`,
+  `--ow-hover`, `--ow-pressed-bg`, `--ow-focus`, `--ow-radius` (half of it), and `--ow-motion-scale`.
+  One class of yours beats any of its states; write `[data-checked]` on it to style one.
 
 ### Menu
 

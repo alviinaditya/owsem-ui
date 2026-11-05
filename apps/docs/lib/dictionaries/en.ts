@@ -162,7 +162,7 @@ export const en = {
     fieldset: "A group of fields with a legend and consistent spacing.",
     form: "Native and server validation that focuses the first invalid field.",
     input: "A text input that lines up with Button, with leading or trailing icons.",
-    checkbox: "A checkbox with a morphing indeterminate state.",
+    checkbox: "A checkbox whose check crossfades to a minus when indeterminate.",
     "radio-group": "One choice from several options, with a spring indicator.",
     switch: "An on/off switch whose thumb moves on a spring.",
     select: "A choice from a popup list, with a trigger as tall as other controls.",

@@ -1,0 +1,223 @@
+---
+title: Checkbox
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Checkbox adalah kotak yang bisa dicentang. Pemakaian terpendeknya sudah cukup: sebuah label yang
+membungkus `Checkbox.Root`, yang menggambar Indicator dan glyph-nya sendiri. Gulir untuk mulai tur;
+stage mengikuti setiap bagian.
+
+```tsx
+<label>
+  <Checkbox.Root /> Jalankan tes
+</label>
+```
+
+## Isian yang berganti, glyph yang bergerak [#marking]
+
+Saat mati, kotaknya berupa well: isian datar yang lebih gelap dengan tepi 1px `--ow-edge`, yang
+kontrasnya 3:1 terhadap isian dan permukaan di sekitarnya. Saat dicentang atau indeterminate, ia
+memakai material primary: isian warna utama beserta tepinya, dengan glyph `--ow-on-accent`.
+
+Isiannya berganti seketika, karena itulah jawabannya. Yang bergerak adalah glyph: ia memudar masuk
+dalam 120 ms dan membesar dari 0,8 dengan spring settle. Antara centang dan minus, kedua glyph berada
+di satu sel dan saling memudar dengan cara yang sama, sehingga kotak induk tidak pernah melompat saat
+tugasnya terisi. Dengan reduced motion, glyph hanya memudar.
+
+Setiap tekanan masuk lebih dulu: selama ditahan, kotak mengecil ke 0,97 dalam 90 ms dan isiannya
+berganti, lalu dilepas dengan spring settle. Tepinya tetap.
+
+Stage memutarnya: pointer menyelesaikan daftar lalu membatalkannya lagi, dan minus di kotak induk
+berubah menjadi centang lalu kembali. Kotak induknya adalah kode Anda sendiri: `checked` bila semua
+selesai, `indeterminate` bila sebagian.
+
+## Label biasa [#label]
+
+Komposisi yang dibutuhkan cukup sebuah `<label>`, tanpa part pembungkus dan tanpa CSS tambahan.
+Menekan teksnya mengubah kotak, pointer di atas teks memberi warna pada kotak, menekan teks ikut
+menekan kotak, dan label menjadi nama aksesibelnya. Stage memutarnya: pointer hanya menekan teks.
+
+Tanpa teks yang terlihat, misalnya baris di tabel, beri nama sendiri:
+
+```tsx
+<Checkbox.Root aria-label="Pilih baris" />
+```
+
+Kotaknya elemen inline yang berada di tengah baris, jadi ia pas di samping teks dalam label biasa.
+Untuk baris flex, `align-items: center` dan `gap` milik Anda memberi hasil yang sama.
+
+## Sebesar ikon [#geometry]
+
+Kotak ini adalah ikon: ukuran font ditambah 2px, dengan font Button di setiap ukuran. Ia berada di
+samping teks, bukan di sekelilingnya, jadi tidak memakai `--py`. Sudutnya setengah dari `--ow-radius`,
+sehingga kotak kecil tetap persegi.
+
+Kotak sekecil ini di bawah target 24px yang diminta WCAG 2.5.8, jadi sebuah pseudo-element
+memperluasnya sampai 24px ke semua sisi tanpa menambah layout. Stage menggambar pseudo-element itu di
+sekeliling setiap kotak; dua kotak butuh jarak 8px agar targetnya tidak bertumpuk.
+
+| Ukuran | Font | Kotak | Target |
+| --- | --- | --- | --- |
+| `sm` | 13px | 15px | 24px |
+| `md` | 14px | 16px | 24px |
+| `lg` | 16px | 18px | 24px |
+
+Ia tidak punya margin dan tidak pernah menggeser barisnya: mencentangnya tidak mengubah apa pun di
+sekitarnya.
+
+## Anatomi [#anatomy]
+
+Tiga bagian, dan dua yang terakhir menggambar dirinya sendiri. Base UI merender `<span>` dengan role
+`checkbox` dan `<input>` tersembunyi di sampingnya; OwsemUI menambahkan class dan `data-size`.
+Inspeksi (I) menandainya di stage.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `span.ow-checkbox` | `aria-checked`, `data-checked`, `data-unchecked`, `data-indeterminate`, `data-disabled`, `data-readonly`, `data-size` |
+| <Part name="Indicator" /> | `span.ow-checkbox__indicator` | State yang sama, serta `data-starting-style` dan `data-ending-style` selama muncul dan hilang. Dilepas saat mati, kecuali dengan `keepMounted` |
+| <Part name="Glyph" /> | `svg[data-glyph]` | `data-glyph="check"` atau `"minus"`, `aria-hidden` |
+
+Children mengganti yang digambar. Memberi `{null}` ke Root membuatnya kosong.
+
+## State dan varian [#states]
+
+Stage menampilkan setiap state di tema terang dan gelap, pada `md` dan `lg`. Pointer singgah di kotak
+yang mati di setiap tema, lalu mencentang dan melepasnya.
+
+| State | Tandanya |
+| --- | --- |
+| Mati | `--ow-well-bg`, dan tepi inset 1px `--ow-edge` |
+| Hover, di kotak atau labelnya | Warna `--ow-hover` di atas isian |
+| Sedang ditekan, di kotak atau labelnya | Mengecil ke 0,97 dalam 90 ms; `--ow-pressed-bg` saat mati, warna utama 10% lebih gelap saat menyala; tepinya tetap |
+| Dicentang | `--ow-accent`, `--ow-primary-shadow`, dan centang `--ow-on-accent` |
+| Indeterminate | Material yang sama, dengan minus |
+| Fokus keyboard | Ring 2px dengan jarak 2px, warna `--ow-focus` |
+| Read-only | Tetap seperti adanya, dan tekanan tidak berpengaruh |
+| Disabled | Opacity 50%, dan tekanan tidak berpengaruh |
+
+## Keyboard dan aksesibilitas [#keyboard]
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab | Memindahkan fokus ke kotak |
+| Space | Mencentang atau melepasnya |
+| Enter | Mengirim form tempatnya berada, tanpa mengubah kotak |
+
+Screen reader mengenalinya sebagai checkbox beserta state-nya lewat `aria-checked`, dengan `mixed`
+saat indeterminate. Namanya berasal dari label atau `aria-label`; glyph-nya `aria-hidden`.
+
+Dengan `prefers-reduced-motion`, isian berganti dan glyph memudar, dan tidak ada yang bergerak. Di
+mode forced colors (Windows High Contrast), kotak tetap punya tepi 1px berwarna sistem, kotak yang
+dicentang diisi `Highlight`, dan glyph mengikuti sebagai `HighlightText`. Dari kanan ke kiri, label
+menaruh kotak di kanan, dan centangnya tidak dicerminkan.
+
+## Kustomisasi [#customization]
+
+Kontrol di stage terbuka: pilih isian, glyph, atau tepi, dan kodenya mengikuti. Stage menunjukkan
+keempat caranya.
+
+**Token tema.** Checkbox membaca token berikut. Pasang di kotak, atau di elemen apa pun di
+sekelilingnya.
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-well-bg` | Isian saat mati |
+| `--ow-edge` | Tepi saat mati |
+| `--ow-fg` | Glyph saat keluar |
+| `--ow-accent` | Isian saat dicentang atau indeterminate |
+| `--ow-primary-shadow` | Tepi saat dicentang atau indeterminate |
+| `--ow-on-accent` | Glyph |
+| `--ow-hover` | Warna di bawah pointer |
+| `--ow-pressed-bg` | Isian saat ditahan dan mati |
+| `--ow-radius` | Sudut, setengah dari nilainya |
+| `--ow-focus` | Ring fokus |
+| `--ow-motion-scale` | Seberapa jauh tekanan dan glyph bergerak |
+
+<ForMode mode="isolated">
+
+Di mode isolated, nilainya ada di root setiap Checkbox, jadi atur di kotak itu sendiri, seperti
+`task.css`.
+
+</ForMode>
+
+<TokenChip lang="id" />
+
+**Class sendiri.** State berada di dalam `:where()`, jadi satu class mengalahkannya, dan utility
+Tailwind menang dengan cara yang sama. Tulis `[data-checked]` di class itu untuk mengatur satu state.
+
+```css
+.ink {
+  border-radius: 0;
+}
+
+.ink[data-checked] {
+  background-color: var(--ow-fg);
+  box-shadow: none;
+  color: var(--ow-bg);
+}
+```
+
+**Ukuran.** Kotaknya dalam `em`: `font-size` di kotak itu mengubah ukuran kotak dan glyph-nya. `--icon`
+atau lebar milik Anda mengaturnya langsung. Targetnya tetap 24px atau lebih.
+
+**Glyph sendiri.** Children menggantinya dengan node apa pun, dan svg mengisi kotak. Satu child memudar
+dan membesar seperti bawaannya; tandai sepasang dengan `data-glyph` agar saling memudar.
+
+```tsx
+<Checkbox.Root>
+  <Checkbox.Indicator>
+    <X />
+  </Checkbox.Indicator>
+</Checkbox.Root>
+
+<Checkbox.Root indeterminate={some}>
+  <Checkbox.Indicator>
+    <Tick data-glyph="check" />
+    <Dash data-glyph="minus" />
+  </Checkbox.Indicator>
+</Checkbox.Root>
+```
+
+## Ship it [#ship]
+
+Drawer kode menulis komponen persis seperti yang diatur di stage. Ganti ukuran atau warna, dan baris
+yang berubah akan menyala.
+
+`Checkbox.Root`:
+
+| Prop | Tipe | Bawaan |
+| --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| `checked` | `boolean` | |
+| `defaultChecked` | `boolean` | `false` |
+| `onCheckedChange` | `(checked, eventDetails) => void` | |
+| `indeterminate` | `boolean` | `false` |
+| `disabled` | `boolean` | `false` |
+| `readOnly` | `boolean` | `false` |
+| `required` | `boolean` | `false` |
+| `name` | `string` | |
+| `value` | `string` | |
+| `children` | `ReactNode` | `<Checkbox.Indicator />` |
+| `className` | `string \| (state) => string` | |
+| `style` | `CSSProperties` | |
+| `render` | `ReactElement \| (props, state) => ReactElement` | |
+
+`Checkbox.Indicator`:
+
+| Prop | Tipe | Bawaan |
+| --- | --- | --- |
+| `keepMounted` | `boolean` | `false` |
+| `children` | `ReactNode` | Glyph centang dan minus |
+| `className` | `string \| (state) => string` | |
+| `style` | `CSSProperties` | |
+| `render` | `ReactElement \| (props, state) => ReactElement` | |
+
+Selain `size`, semuanya berasal dari Base UI, dan props lain diteruskan apa adanya, seperti `form`,
+`inputRef`, dan `uncheckedValue`. Ia terkirim dalam `<form>` biasa lewat `name` dan `value`. Ref
+diteruskan ke `span`; `inputRef` menuju input tersembunyi. Checkbox Group adalah komponen berikutnya;
+sampai saat itu, kotak induk memakai `checked` dan `indeterminate` dari state Anda sendiri, seperti di
+stage.
+
+Impor dari `owsem-ui/base`. Di registry, namanya item `checkbox`.

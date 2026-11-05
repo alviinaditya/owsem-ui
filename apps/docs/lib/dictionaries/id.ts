@@ -164,7 +164,7 @@ export const id = {
     fieldset: "Grup field dengan legend dan jarak yang konsisten.",
     form: "Validasi native dan dari server, dengan fokus ke field pertama yang error.",
     input: "Input teks yang sejajar dengan Button, dengan ikon di depan atau belakang.",
-    checkbox: "Kotak centang dengan state indeterminate yang ber-morph.",
+    checkbox: "Kotak centang yang centangnya memudar menjadi minus saat indeterminate.",
     "radio-group": "Satu pilihan dari beberapa opsi, dengan indikator ber-spring.",
     switch: "Saklar on/off dengan thumb yang bergerak dengan spring.",
     select: "Pilihan dari daftar dalam popup, dengan trigger setinggi kontrol lain.",

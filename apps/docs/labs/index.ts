@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 import type { LabProps } from "@/components/lab/lab-shell";
 import type { ComponentName } from "@/lib/catalog";
 import ButtonLab from "./button";
+import CheckboxLab from "./checkbox";
 import ColorPickerLab from "./color-picker";
 import CommandMenuLab from "./command-menu";
 import KbdLab from "./kbd";
@@ -21,6 +22,7 @@ import TreeRailNavLab from "./tree-rail-nav";
  */
 export const labs: Partial<Record<ComponentName, ComponentType<LabProps>>> = {
   button: ButtonLab,
+  checkbox: CheckboxLab,
   "color-picker": ColorPickerLab,
   "command-menu": CommandMenuLab,
   kbd: KbdLab,

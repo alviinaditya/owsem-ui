@@ -1,0 +1,156 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * A text field: a flat well with a 3:1 edge (DP-6), and focus adds the ring (FR-13). Button's
+ * geometry (FR-9 to FR-11): --py is the only input. The input is the well with or without icons,
+ * so className, style, and every state stay on one element; the wrapper only places the icons.
+ */
+@layer owsem.components {
+  .ow-input {
+    --_bg: var(--ow-well-bg);
+    --_shadow: var(--ow-well-shadow);
+    --_edge: var(--ow-edge);
+    --_fg: var(--ow-fg);
+    --_muted: var(--ow-muted);
+    --_focus: var(--ow-focus);
+    --_radius: var(--ow-radius);
+    box-sizing: border-box;
+    inline-size: 100%;
+    min-inline-size: 0;
+    margin: 0;
+    border: 0;
+    border-radius: var(--_radius);
+    /* Invisible until forced colors draw it as the edge (DP-8). */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--_bg);
+    box-shadow:
+      inset 0 0 0 1px var(--_edge),
+      var(--_shadow);
+    color: var(--_fg);
+    font: inherit;
+  }
+
+  /* --py is the one input; the icons need it too, and they measure in the same font. */
+  .ow-input,
+  .ow-input__wrapper {
+    --py: 0.75em;
+    --_py: max(var(--py), (24px - 1lh) / 2);
+    --px: calc(var(--_py) + (1lh - 1cap) / 2);
+    --icon: calc(1em + 2px);
+    /* An icon's distance from the edge, the same as from the top and bottom (FR-10). */
+    --_inset: calc(var(--px) + (1cap - var(--icon)) / 2);
+    font-size: 0.875rem;
+    line-height: 1.25;
+  }
+
+  .ow-input:where([data-size="sm"]),
+  .ow-input__wrapper:where([data-size="sm"]) {
+    --py: 0.5em;
+    font-size: 0.8125rem;
+  }
+
+  .ow-input:where([data-size="lg"]),
+  .ow-input__wrapper:where([data-size="lg"]) {
+    --py: 0.875em;
+    font-size: 1rem;
+  }
+
+  .ow-input {
+    /* Firefox grows a field to its font's own line height when that is taller; pin both. */
+    block-size: calc(2 * var(--_py) + 1lh);
+    padding: var(--_py) var(--px);
+  }
+
+  /* A control passed to `render` that takes more than one line. */
+  .ow-input:where(textarea) {
+    block-size: auto;
+    min-block-size: calc(2 * var(--_py) + 2lh);
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement (NF-1) */
+    resize: vertical;
+  }
+
+  .ow-input::placeholder {
+    color: var(--_muted);
+    opacity: 1;
+  }
+
+  .ow-input:where([data-invalid], [aria-invalid="true"]) {
+    --_edge: var(--ow-critical);
+  }
+
+  .ow-input:focus-visible {
+    outline: 2px solid var(--_focus);
+    outline-offset: 2px;
+  }
+
+  .ow-input:where([data-disabled], :disabled) {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
+  .ow-input__wrapper {
+    display: flex;
+    align-items: center;
+    inline-size: 100%;
+    min-inline-size: 0;
+  }
+
+  /* Over the input's padding, taking no room, so a click lands on the input. */
+  .ow-input__icon {
+    position: relative;
+    display: inline-flex;
+    flex: none;
+    inline-size: var(--icon);
+    block-size: var(--icon);
+    color: var(--ow-muted);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .ow-input__icon > :where(svg, img) {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  .ow-input__icon:where([data-side="start"]) {
+    margin-inline: var(--_inset) calc(-1 * (var(--_inset) + var(--icon)));
+  }
+
+  .ow-input__icon:where([data-side="end"]) {
+    margin-inline: calc(-1 * (var(--_inset) + var(--icon))) var(--_inset);
+  }
+
+  /* The text clears the icon by Button's gap. */
+  .ow-input__icon:where([data-side="start"]) + .ow-input {
+    padding-inline-start: calc(var(--_inset) + var(--icon) + 0.5em);
+  }
+
+  .ow-input:where(:has(+ .ow-input__icon)) {
+    padding-inline-end: calc(var(--_inset) + var(--icon) + 0.5em);
+  }
+
+  .ow-input__wrapper:where(:has(> :is([data-disabled], :disabled))) > .ow-input__icon {
+    opacity: 0.45;
+  }
+
+  /* DP-8: the transparent outline is the edge; invalid thickens it, since its color is gone. */
+  @media (forced-colors: active) {
+    .ow-input:where([data-invalid], [aria-invalid="true"]) {
+      outline-width: 2px;
+      outline-offset: -2px;
+    }
+
+    .ow-input:focus-visible {
+      outline-color: Highlight;
+      outline-offset: 2px;
+    }
+
+    .ow-input:where([data-disabled], :disabled),
+    .ow-input__wrapper:where(:has(> :is([data-disabled], :disabled))) > .ow-input__icon {
+      color: GrayText;
+      opacity: 1;
+    }
+  }
+}

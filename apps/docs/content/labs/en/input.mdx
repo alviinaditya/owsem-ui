@@ -1,0 +1,169 @@
+---
+title: Input
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Input is a one-line text field. Base UI gives it the wiring to Field and Form; OwsemUI adds a flat
+well with a firm edge, Button's heights, and icons that sit evenly inside it. A name is all it
+needs, and it fills its parent. Scroll to start the tour; the stage follows each part.
+
+```tsx
+<Input aria-label="Email" />
+```
+
+## A well with a firm edge [#typing]
+
+A field is a well: a flat fill a little darker than the page, with no inner shadow. Its edge is a
+crisp 1px line drawn as an inset shadow, so it adds no size, and it keeps 3:1 against the well in
+both themes, since a field you type in has to be found. Placeholders are muted. Focus adds a 2px
+ring 2px outside the edge, and the edge stays.
+
+The stage plays it: the pointer types an address, the edge turns critical while the text isn't one
+yet, and turns back once it is. The edge changes at once, with no fade. Set `aria-invalid` to get
+that edge alone; inside a Field, Base UI sets it for you.
+
+## Button's height [#geometry]
+
+Input is a one-line control, so it follows Button's geometry. `--py` is the only input: the block
+padding is `max(--py, (24px - 1lh) / 2)`, the inline padding adds `(1lh - 1cap) / 2`, and the height
+is always `2 × --py + 1lh`. An Input and a Button of one size line up in a row.
+
+The stage measures every size live: plain, with icons, and a Button beside them.
+
+| Size | Font | `--py` | Height | Icon |
+| --- | --- | --- | --- | --- |
+| `sm` | 13px | `0.5em` | 29.25px | 15px |
+| `md` | 14px | `0.75em` | 38.5px | 16px |
+| `lg` | 16px | `0.875em` | 48px | 18px |
+
+`startIcon` and `endIcon` take any node. Icons are the font size plus 2px, as far from the side as
+from the top, and the text clears them by Button's gap. They take no room of their own: they sit
+over the input's padding and let the pointer through, so a click anywhere in the well lands in the
+field.
+
+Set `--py` in `style` to change the height, or `font-size` to scale all of it. Neither drops a
+target under 24px.
+
+## Anatomy [#anatomy]
+
+Input is one element, with two more only when it has an icon. Inspect (I) outlines them on the
+stage.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `input.ow-input` | Always the well. `data-size`, and Base UI's `data-disabled`, `data-invalid`, `data-valid`, `data-filled`, `data-focused`, `data-dirty`, and `data-touched` |
+| <Part name="Wrapper" /> | `span.ow-input__wrapper` | Only with an icon. `data-size`. It has no look and fills its parent |
+| <Part name="Icon" /> | `span.ow-input__icon` | Decorative (`aria-hidden`), `data-side="start"` or `"end"`; an svg or img inside fills it |
+
+**`ref`, `className`, `style`, and every other prop always reach the input**, with or without icons,
+so adding an icon never moves your class. Custom properties and `fontSize` in `style` also reach the
+wrapper, so the icons follow them.
+
+Decide at the first render whether it has an icon: the wrapper arrives with the first one, and
+adding it later remounts the input, which loses focus. For an icon that comes and goes, swap one
+node for another instead of passing `null`.
+
+## States and variants [#states]
+
+The stage sets the light and dark themes side by side. The pointer fills the empty field in each.
+
+| State | What shows it |
+| --- | --- |
+| Empty | The well, with a muted placeholder |
+| Filled | Text in `--ow-fg` |
+| Keyboard or pointer focus | A 2px ring 2px out, in `--ow-focus`; the edge stays |
+| Invalid | The edge in `--ow-critical`, at 3:1. `data-invalid` from Field, or your `aria-invalid` |
+| Disabled | 45% opacity, icons too, and no focus |
+
+## Keyboard and accessibility [#keyboard]
+
+| Key | Action |
+| --- | --- |
+| Tab | Moves focus to the field |
+| Everything else | The browser's own text editing |
+
+It is a native `<input>`, so autofill, spellcheck, and input modes work as they always do. It needs
+a name: a `Field.Label`, a `<label>`, or `aria-label`. A placeholder is not a name. Icons are
+`aria-hidden`.
+
+Nothing moves, so reduced motion changes nothing. In forced colors (Windows High Contrast), the edge
+is a 1px line in the system color, an invalid edge is 2px, since its color is gone, the focus ring is
+`Highlight`, and disabled is `GrayText`. Right to left, `startIcon` sits on the right.
+
+## Customization [#customization]
+
+The stage shows three ways to change it. The controls are open: pick the fill or the edge, and the
+first field and the code follow.
+
+**A token** set on the input, or on any element around it, changes the fields inside.
+
+```css
+.invite {
+  --ow-well-bg: #fff8e6;
+  --ow-edge: #a07a1c;
+}
+```
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-well-bg` | Fill |
+| `--ow-well-shadow` | Inner line, under the edge |
+| `--ow-edge` | Edge, at 3:1 |
+| `--ow-critical` | Edge while invalid |
+| `--ow-fg` | Text |
+| `--ow-muted` | Placeholder and icons |
+| `--ow-radius` | Corners |
+| `--ow-focus` | Focus ring |
+
+**A `className`** wins over the component's own values, with no `!important`, since they sit in a
+lower cascade layer. Tailwind utilities win the same way.
+
+```tsx
+<Input aria-label="Name" className="w-64 rounded-full" />
+```
+
+It fills its parent; a width on the input narrows it, and its icons stay inside. In a flex row, an
+Input with icons keeps its wrapper at the full width, so size the wrapper (`.ow-input__wrapper`) or
+the parent there.
+
+**Composition:** `render` swaps the element and keeps the look. A `<textarea>` grows past one line
+and resizes.
+
+```tsx
+<Input aria-label="Note" render={<textarea rows={3} />} />
+```
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Input's root, so set yours on the input itself, as
+`invite.css` does.
+
+</ForMode>
+
+<TokenChip lang="en" />
+
+## Ship it [#ship]
+
+The code drawer writes the component exactly as the stage is set up. Change the size or a color and
+the lines that change light up.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| `startIcon` | `ReactNode` | |
+| `endIcon` | `ReactNode` | |
+| `value` | `string` | |
+| `defaultValue` | `string` | |
+| `onValueChange` | `(value, eventDetails) => void` | |
+| `disabled` | `boolean` | `false` |
+| `className` | `string \| (state) => string` | |
+| `style` | `CSSProperties \| (state) => CSSProperties` | |
+| `render` | `ReactElement \| (props, state) => ReactElement` | |
+
+`size` is the type scale, not the native attribute for a width in characters; set `inline-size`
+instead. `value`, `defaultValue`, `onValueChange`, and `disabled` come from Base UI, and every other
+prop goes to the `<input>` as it is. The ref goes to the `<input>`.
+
+Import it from `owsem-ui/base`. In the registry, it is the `input` item.

@@ -3520,6 +3520,52 @@ figure[data-code-block] pre {
   border: 0;
 }
 
+/* The Input Lab's demos: the field beside a Button, and the ways to restyle it. */
+.demo-input {
+  inline-size: min(380px, 100%);
+}
+
+.demo-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.demo-input-row > .ow-button {
+  flex: none;
+}
+
+.demo-input-measured {
+  inline-size: 160px;
+  max-inline-size: 100%;
+}
+
+.demo-input-cell {
+  inline-size: 220px;
+  max-inline-size: 100%;
+  box-sizing: border-box;
+}
+
+/* The focus ring on demand, for the states matrix. */
+.demo-input-ring {
+  outline: 2px solid var(--ow-focus);
+  outline-offset: 2px;
+}
+
+.demo-input-custom {
+  gap: 6px;
+}
+
+.demo-input-custom > .demo-caption:not(:first-child) {
+  margin-block-start: 8px;
+}
+
+/* An unlayered rule, as an app would write it: it beats the component's own values. */
+.demo-input-pill {
+  border-radius: 999px;
+  background-color: transparent;
+}
+
 /* The Toolbar Lab's editor: the toolbar over the line it formats. */
 .demo-editor {
   display: grid;

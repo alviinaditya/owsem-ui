@@ -2,6 +2,7 @@
 
 import {
   Button,
+  Field,
   Input,
   Kbd,
   Menu,
@@ -43,6 +44,8 @@ const TEXT = {
     theming: "Tema",
     components: "Komponen",
     search: "Cari…",
+    email: "Email",
+    emailHint: "Untuk masuk.",
     commands: "Perintah",
     newFile: "File baru",
     openRecent: "Buka terbaru",
@@ -75,6 +78,8 @@ const TEXT = {
     theming: "Theming",
     components: "Components",
     search: "Search…",
+    email: "Email",
+    emailHint: "To sign in.",
     commands: "Commands",
     newFile: "New file",
     openRecent: "Open recent",
@@ -256,6 +261,13 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
       </Button>
     </div>
   ),
+  field: (t) => (
+    <Field.Root>
+      <Field.Label>{t.email}</Field.Label>
+      <Field.Control size="sm" placeholder="ana@owsem.dev" />
+      <Field.Description>{t.emailHint}</Field.Description>
+    </Field.Root>
+  ),
   input: (t) => (
     <Input
       size="sm"
@@ -370,14 +382,6 @@ const B = (x: number, y: number, w: number, h: number, r = 5) => (
 );
 
 const SKETCHES: Partial<Record<ComponentName, ReactNode>> = {
-  field: (
-    <>
-      {F(36, 22, 32)}
-      {B(36, 33, 88, 22)}
-      {F(44, 42, 36, 4, 0.35)}
-      {F(36, 63, 56, 4, 0.3)}
-    </>
-  ),
   fieldset: (
     <>
       {B(28, 18, 104, 66, 7)}

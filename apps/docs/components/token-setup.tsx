@@ -1,6 +1,6 @@
 "use client";
 
-import { Popover } from "owsem-ui/base";
+import { Field, Popover } from "owsem-ui/base";
 import {
   type ReactNode,
   type RefObject,
@@ -139,7 +139,6 @@ function OwsemJson({ setup }: { setup: TokenSetup }) {
 }
 
 function PrefixField({ setup, labels }: { setup: TokenSetup; labels: Labels }) {
-  const id = useId();
   const [draft, setDraft] = useState(setup.prefix);
   const [shown, setShown] = useState(setup.prefix);
   // Reset, or another tab, changed the prefix: show it, unless the draft already is it.
@@ -149,33 +148,30 @@ function PrefixField({ setup, labels }: { setup: TokenSetup; labels: Labels }) {
   }
   const valid = isValidPrefix(draft);
   return (
-    <div className="lab-field">
-      <label htmlFor={id}>{labels.prefix}</label>
-      <div className="prefix-field" data-invalid={valid ? undefined : ""}>
-        <span aria-hidden="true">--</span>
-        <input
-          id={id}
-          value={draft}
-          maxLength={16}
-          spellCheck={false}
-          autoComplete="off"
-          autoCapitalize="none"
-          aria-invalid={!valid || undefined}
-          aria-describedby={`${id}-help`}
-          onChange={(event) => {
-            const next = event.currentTarget.value.toLowerCase().replace(/\s+/g, "-");
-            setDraft(next);
-            if (isValidPrefix(next)) setTokenSetup({ ...setup, prefix: next });
-          }}
-        />
-        <span aria-hidden="true">
-          {setup.mode === "theme" ? "-accent" : "-separator-line-dark"}
-        </span>
+    <Field.Root className="token-setup-prefix" invalid={!valid}>
+      <Field.Label>{labels.prefix}</Field.Label>
+      <Field.Control
+        size="sm"
+        startIcon="--"
+        value={draft}
+        maxLength={16}
+        spellCheck={false}
+        autoComplete="off"
+        autoCapitalize="none"
+        onValueChange={(value) => {
+          const next = value.toLowerCase().replace(/\s+/g, "-");
+          setDraft(next);
+          if (isValidPrefix(next)) setTokenSetup({ ...setup, prefix: next });
+        }}
+      />
+      <div aria-live="polite">
+        {valid ? (
+          <Field.Description>{labels.prefixHelp}</Field.Description>
+        ) : (
+          <Field.Error match>{format(labels.prefixError, { prefix: draft })}</Field.Error>
+        )}
       </div>
-      <p id={`${id}-help`} className="prefix-help" aria-live="polite">
-        {valid ? labels.prefixHelp : format(labels.prefixError, { prefix: draft })}
-      </p>
-    </div>
+    </Field.Root>
   );
 }
 

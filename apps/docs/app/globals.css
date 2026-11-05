@@ -689,8 +689,7 @@ body {
 
   /* The well's shadow is gone: a transparent outline turns into the field's edge. Color
    * Picker's swatch keeps its own color. */
-  .color-field,
-  .prefix-field {
+  .color-field {
     outline: 1px solid transparent;
     outline-offset: -1px;
   }
@@ -2845,8 +2844,7 @@ figure[data-code-block] pre {
 }
 
 .lab-field-label,
-.lab-field legend,
-.lab-field > label {
+.lab-field legend {
   margin-block-end: 6px;
   padding: 0;
   color: var(--docs-muted);
@@ -3566,6 +3564,62 @@ figure[data-code-block] pre {
   background-color: transparent;
 }
 
+/* The Field Lab's demos: the field over what its control says, and the ways to restyle it. */
+.demo-field {
+  inline-size: min(380px, 100%);
+}
+
+.demo-field-wiring {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-block-start: 12px;
+  border-block-start: 1px solid var(--ow-line);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.demo-field-wiring > div {
+  display: grid;
+  grid-template-columns: 11em 1fr;
+  gap: 8px;
+}
+
+.demo-field-wiring dt {
+  color: var(--ow-muted);
+  font-family: var(--font-mono), ui-monospace, monospace;
+}
+
+.demo-field-wiring dd {
+  margin: 0;
+}
+
+.demo-field-cell {
+  inline-size: 240px;
+  max-inline-size: 100%;
+  box-sizing: border-box;
+  justify-content: stretch;
+}
+
+.demo-field-cell > .ow-field {
+  flex: 1;
+}
+
+.demo-field-custom {
+  gap: 6px;
+}
+
+.demo-field-custom > .demo-caption:not(:first-child) {
+  margin-block-start: 10px;
+}
+
+/* An unlayered rule, as an app would write it: a label beside its control. */
+.demo-field-inline {
+  display: grid;
+  grid-template-columns: 7em 1fr;
+  align-items: center;
+}
+
 /* The Toolbar Lab's editor: the toolbar over the line it formats. */
 .demo-editor {
   display: grid;
@@ -3803,66 +3857,19 @@ figure[data-code-block] pre {
   margin-block: 10px 14px;
 }
 
-.token-setup .lab-field {
+.token-setup-prefix {
   margin-block-end: 12px;
+  font-size: 12px;
 }
 
-.prefix-field {
-  display: flex;
-  align-items: center;
-  block-size: 34px;
-  padding-inline: 10px;
-  border-radius: var(--docs-radius);
-  background-color: var(--docs-well);
-  box-shadow:
-    inset 0 0 0 1px var(--docs-control),
-    var(--docs-well-shadow);
+.token-setup-prefix .ow-field__label {
   color: var(--docs-muted);
+  font-weight: 400;
+}
+
+/* A token's name is code. */
+.token-setup-prefix .ow-input__wrapper {
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 13px;
-}
-
-/* Room for a 16-character prefix; the sample name after it gives way first. */
-.prefix-field input {
-  flex: 1 0 17ch;
-  min-inline-size: 0;
-  padding: 0 2px;
-  border: 0;
-  background: none;
-  color: var(--docs-fg);
-}
-
-.prefix-field > span:last-child {
-  min-inline-size: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.prefix-field input:focus-visible {
-  outline: none;
-}
-
-.prefix-field:has(input:focus-visible) {
-  outline: 2px solid var(--docs-accent);
-  outline-offset: 2px;
-}
-
-.prefix-field[data-invalid] {
-  box-shadow:
-    inset 0 0 0 1px var(--docs-critical),
-    var(--docs-well-shadow);
-}
-
-.prefix-help {
-  margin: 0;
-  color: var(--docs-muted);
-  font-size: 11.5px;
-  line-height: 1.45;
-}
-
-.prefix-field[data-invalid] + .prefix-help {
-  color: var(--docs-critical);
 }
 
 .token-setup-json {

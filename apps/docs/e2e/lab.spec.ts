@@ -670,6 +670,29 @@ test("the Toggle Lab's note follows its toggles, and the first scene plays them"
   await expect(note).toHaveCSS("font-style", "italic");
 });
 
+test("the Checkbox Lab: a label presses its box, and the parent shows a minus or a check", async ({
+  page,
+}) => {
+  await page.goto("/en/checkbox");
+  const all = demo(page).getByRole("checkbox", { name: "All tasks" });
+  const tag = demo(page).getByRole("checkbox", { name: "Tag the release" });
+  const changelog = demo(page).getByRole("checkbox", { name: "Write the changelog" });
+  await expect(all).toHaveAttribute("aria-checked", "mixed");
+  await expect(all.locator('[data-glyph="minus"]')).toHaveCSS("opacity", "1");
+  // The labels' text, not the boxes.
+  await demo(page).getByText("Tag the release").click();
+  await expect(tag).toHaveAttribute("aria-checked", "true");
+  await demo(page).getByText("Write the changelog").click();
+  await expect(changelog).toHaveAttribute("aria-checked", "true");
+  await expect(all).toHaveAttribute("aria-checked", "true");
+  await expect(all.locator('[data-glyph="check"]')).toHaveCSS("opacity", "1");
+  await expect(all.locator('[data-glyph="minus"]')).toHaveCSS("opacity", "0");
+  // The parent takes all of them off, and its Indicator leaves.
+  await all.click();
+  await expect(tag).toHaveAttribute("aria-checked", "false");
+  await expect(all.locator(".ow-checkbox__indicator")).toHaveCount(0);
+});
+
 test("the Toolbar Lab's first scene presses its items, and the line follows", async ({ page }) => {
   await page.goto("/en/toolbar");
   const italic = demo(page).getByRole("button", { name: "Italic" });

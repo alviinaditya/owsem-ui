@@ -826,6 +826,11 @@ body {
   gap: 8px;
 }
 
+.component-preview-checkbox {
+  display: grid;
+  gap: 6px;
+}
+
 .component-preview-separator {
   display: grid;
   gap: 10px;
@@ -2558,8 +2563,10 @@ figure[data-code-block] pre {
   line-height: 1.5;
 }
 
+/* The column holds the card's width, so a long value ends in an ellipsis. */
 .lab-part-card ul {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 6px;
   margin: 10px 0 0;
   padding: 0;
@@ -3518,6 +3525,50 @@ figure[data-code-block] pre {
   margin: 0;
   padding: 0;
   border: 0;
+}
+
+/* The Checkbox Lab's checklist: a parent box over its tasks, each in a label of its own. */
+.demo-checkbox[data-size="sm"] {
+  font-size: 13px;
+}
+
+.demo-checkbox[data-size="lg"] {
+  font-size: 16px;
+}
+
+.demo-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  cursor: pointer;
+}
+
+.demo-checkbox-tasks {
+  display: grid;
+  gap: 10px;
+  padding-inline-start: 1.5em;
+}
+
+/* The Geometry scene draws the box's own press target. */
+.demo-checkbox-target {
+  display: inline-grid;
+  padding: 4px;
+}
+
+.demo-checkbox-target > .ow-checkbox::after {
+  outline: 1px dashed var(--docs-muted);
+  border-radius: 2px;
+}
+
+/* The Customization scene's own class: it beats the component's values without a fight. */
+.demo-checkbox-mine {
+  border-radius: 0;
+}
+
+.demo-checkbox-mine[data-checked] {
+  background-color: var(--ow-fg);
+  box-shadow: none;
+  color: var(--ow-bg);
 }
 
 /* The Toolbar Lab's editor: the toolbar over the line it formats. */

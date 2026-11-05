@@ -1,5 +1,6 @@
 // Base family exports. Components land per phase (PRD, Base scope).
 export * from "./components/button";
+export * from "./components/checkbox";
 export { Kbd } from "./components/kbd";
 export * from "./components/menu";
 export * from "./components/popover";

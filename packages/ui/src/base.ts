@@ -8,6 +8,7 @@ export * from "./components/scroll-area";
 export * from "./components/radio-group";
 export { Separator } from "./components/separator";
 export * from "./components/tabs";
+export * from "./components/switch";
 export { Toggle, type ToggleProps, type ToggleSize } from "./components/toggle";
 export * from "./components/toggle-group";
 export * from "./components/toolbar";

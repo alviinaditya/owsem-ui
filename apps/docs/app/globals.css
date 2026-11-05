@@ -3558,6 +3558,25 @@ body {
   color: var(--ow-bg);
 }
 
+/* The Switch Lab's settings card, and its large switch. A width from plain CSS: the thumb follows. */
+.demo-switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.demo-switch-press {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+}
+
+.demo-switch-wide {
+  inline-size: 3.5em;
+}
+
 /* The Toolbar Lab's editor: the toolbar over the line it formats. */
 .demo-editor {
   display: grid;

@@ -3,6 +3,7 @@
 import {
   Button,
   Checkbox,
+  Dialog,
   Kbd,
   Menu,
   Popover,
@@ -135,6 +136,24 @@ function PopoverPreview({ t }: { t: Text }) {
           </Popover.Positioner>
         </Popover.Portal>
       </Popover.Root>
+      {portal.box}
+    </>
+  );
+}
+
+function DialogPreview({ t }: { t: Text }) {
+  const portal = usePortal();
+  return (
+    <>
+      <Dialog.Root {...pinned}>
+        <Dialog.Portal container={portal.container}>
+          <Dialog.Popup {...keepFocus}>
+            <Dialog.Title>{t.shareTitle}</Dialog.Title>
+            <Dialog.Description>{t.shareBody}</Dialog.Description>
+            <Dialog.Close render={<Button size="sm" />}>{t.share}</Dialog.Close>
+          </Dialog.Popup>
+        </Dialog.Portal>
+      </Dialog.Root>
       {portal.box}
     </>
   );
@@ -373,6 +392,7 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
       <Kbd>K</Kbd>
     </div>
   ),
+  dialog: (t) => <DialogPreview t={t} />,
   popover: (t) => <PopoverPreview t={t} />,
   "scroll-area": (t) => (
     <ScrollArea.Root className="component-preview-scroll" fade>

@@ -12,6 +12,7 @@ import KbdLab from "./kbd";
 import MenuLab from "./menu";
 import PopoverLab from "./popover";
 import ScrollAreaLab from "./scroll-area";
+import RadioGroupLab from "./radio-group";
 import SeparatorLab from "./separator";
 import TableOfContentsLab from "./table-of-contents";
 import TabsLab from "./tabs";
@@ -37,6 +38,7 @@ export const labs: Partial<Record<ComponentName, ComponentType<LabProps>>> = {
   menu: MenuLab,
   popover: PopoverLab,
   "scroll-area": ScrollAreaLab,
+  "radio-group": RadioGroupLab,
   separator: SeparatorLab,
   "table-of-contents": TableOfContentsLab,
   tabs: TabsLab,

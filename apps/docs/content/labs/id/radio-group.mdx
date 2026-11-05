@@ -1,0 +1,217 @@
+---
+title: Radio Group
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Radio Group adalah satu pilihan dari beberapa opsi yang semuanya terlihat. Setiap opsi berupa baris
+`<label>` yang memuat radio bundar, dan pemakaian terpendek ini sudah cukup:
+
+```tsx
+import { Radio, RadioGroup } from "owsem-ui/base";
+
+<RadioGroup aria-label="Delivery" defaultValue="standard">
+  <label>
+    <Radio.Root value="standard" />
+    Standard
+  </label>
+  <label>
+    <Radio.Root value="express" />
+    Express
+  </label>
+</RadioGroup>
+```
+
+Gulir untuk mulai tur; stage mengikuti setiap bagian.
+
+## Memilih [#choosing]
+
+Saat mati, radio berupa well dengan tepi 1 px yang tegas berkontras 3:1, jadi tetap terlihat di
+permukaan apa pun. Saat aktif, isinya memakai warna utama dengan tepi yang sama seperti tombol
+primary, ditambah titik yang membesar. Isiannya berganti seketika, bersama state-nya. Hanya titik yang
+bergerak, dengan spring settle (`--ow-spring-settle`), dari setengah ukurannya, dan ia pergi bersama
+isiannya: titik terang tidak cocok di atas well.
+
+Stage memutarnya: sebuah pointer memilih setiap opsi bergantian, dan catatan di bawahnya mengikuti
+nilainya. Render pertama tidak beranimasi, jadi nilai yang sudah ada langsung tampil.
+
+## Baris dan Glide [#rows]
+
+Baris adalah `<label>` yang memuat radio: tekan di mana saja padanya untuk memilih opsi, di lingkaran
+atau di teksnya. Pointer menyalakan baris di bawahnya dengan Glide, jadi satu highlight meluncur dari
+baris ke baris, bukan setiap baris punya gaya hover sendiri. Menahan baris menekan lingkarannya ke
+0,97 dalam 90 ms dengan isian ditekan, lalu lepas dengan spring settle.
+
+Stage menelusuri baris tanpa memilih, lalu memilih Kilat dan kembali. Glide melewati baris yang
+disabled dan read-only, tidak mengganggu konten lain di dalam grup, seperti caption, dan tidak pernah
+memilih opsi sendiri: hanya tekanan pada baris yang memilih. Radio tanpa baris label tidak mendapat
+Glide; ia tetap berfungsi, asalkan diberi nama dengan `aria-label`.
+
+## Tata letak apa pun [#layout]
+
+Grup tidak menetapkan lebar maupun margin. Ia mengikuti lebar barisnya, dan melebar saat kamu memberi
+lebar atau saat induk flex atau grid melebarkannya. Grup ini flex column, jadi satu aturan di
+`className` cukup untuk menatanya dengan cara lain:
+
+```css
+.delivery {
+  flex-flow: row wrap;
+}
+```
+
+Tidak ada prop orientation yang perlu diselaraskan, karena Base UI tidak memilikinya: tombol panah
+sudah bekerja ke dua arah. Glide mengukur baris terdekat di kedua sumbu dan highlight-nya berada di
+luar alur, jadi tidak memakan sel grid atau gap, dan ia menemukan baris yang dibungkus elemen milikmu.
+Stage menunjukkan satu aturan itu bekerja.
+
+## Anatomi [#anatomy]
+
+Tiga part, ditambah baris yang kamu tulis. Inspect (I) menandai masing-masing di stage; pilih namanya,
+di sini atau di stage, untuk melihat token-nya. Highlight hover adalah Glide, dari `owsem-ui/core`.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Group" /> | `div.ow-radio-group` | `RadioGroup` dari Base UI, dengan role radiogroup. Token tema yang dipasang di sini berlaku untuk isinya. `data-size`, `data-disabled` |
+| <Part name="Row" /> | `label` | Milikmu, tanpa class sendiri: `label` apa pun yang memuat radio, di kedalaman berapa pun. `data-glide-active` saat menyala |
+| <Part name="Radio" /> | `span.ow-radio-group__radio` | `Radio.Root` dari Base UI, dengan role radio dan `input` tersembunyi di sebelahnya. `data-checked`, `data-unchecked`, `data-disabled`, `data-readonly`. Tanpa children, ia menggambar Indicator; children menjadi gantinya |
+| <Part name="Indicator" /> | `span.ow-radio-group__indicator` | Indikator dari Base UI, hanya terpasang saat aktif kecuali dengan `keepMounted`. Saat kosong ia berupa titik; children, misalnya ikon, menggantikan titiknya |
+
+Baris memakai geometri Button: padding-nya dari `--py` (FR-9), dan lingkaran berada di tempat ikon
+Button, sejauh jaraknya ke atas dari awal baris. Lingkaran seukuran font + 2 px, lebih kecil dari
+target 24 px, jadi pseudo-element memperluas target tekannya ke 24 px tanpa mengubah layout. Label yang
+terlipat tetap menjaga lingkaran di baris pertamanya.
+
+## State dan varian [#states]
+
+Stage menjajarkan ketiga ukuran, grup disabled, dan grup read-only, di terang dan gelap. Sebuah pointer
+memilih opsi kedua di grup `md` setiap tema, lalu opsi pertama lagi.
+
+| Ukuran | Font | Lingkaran | Baris |
+| --- | --- | --- | --- |
+| `sm` | 13 px | 15 px | 29,25 px |
+| `md` (bawaan) | 14 px | 16 px | 38,5 px |
+| `lg` | 16 px | 18 px | 48 px |
+
+| State | Penandanya |
+| --- | --- |
+| Mati | Well, dengan tepi 1 px berkontras 3:1 |
+| Aktif | Warna utama dengan tepi primary, dan titik |
+| Hover | Highlight Glide di baris |
+| Ditahan | Lingkaran mengecil ke 0,97; yang mati memakai isian ditekan dan tepinya tetap, yang aktif menggelap |
+| Disabled | Lingkaran pudar dan label redup; tombol panah dan Glide melewatinya |
+| Read-only | Tampil seperti biasa dan mengabaikan tekanan; Glide melewatinya |
+| Fokus keyboard | Ring 2 px, berjarak 2 px, di sekeliling lingkaran |
+
+## Keyboard dan aksesibilitas [#keyboard]
+
+Grup adalah satu tab stop, dan keyboard-nya dari Base UI:
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab, Shift Tab | Masuk ke grup, di radio yang aktif atau yang pertama; dan keluar lagi |
+| Panah Bawah, Panah Kanan | Radio berikutnya, sekaligus memilihnya. Berputar dan melewati yang disabled |
+| Panah Atas, Panah Kiri | Radio sebelumnya, sekaligus memilihnya. Kiri dan kanan bertukar di RTL |
+| Spasi | Memilih radio yang difokus, saat belum ada yang aktif |
+
+Enter tidak melakukan apa-apa, seperti radio bawaan, jadi tetap bisa mengirim form. Beri nama grup
+dengan `aria-label` atau `aria-labelledby`; setiap radio mengambil namanya dari barisnya. Tekanan
+pointer memindahkan fokus ke radio tanpa menampilkan ring. Di dalam `<form>`, `name` mengirim nilainya
+lewat input tersembunyi dari Base UI.
+
+Dengan `prefers-reduced-motion`, tidak ada yang bergerak: lingkaran yang ditahan hanya berganti isian,
+dan titiknya memudar masuk. Di forced colors (Windows High Contrast), lingkaran tetap punya tepi yang
+terlihat, dan yang aktif diisi `Highlight` dengan titik `HighlightText`. Di RTL, lingkaran berada di
+kanan.
+
+## Kustomisasi [#customization]
+
+Kontrol stage terbuka: ukuran, tata letak, tanda, serta warna aktif dan well. Begitu kamu mengubah tata
+letak atau memilih warna, CSS-nya ada di tab tersendiri pada laci kode. Ada tiga jalan masuk, dan
+semuanya bisa digabung.
+
+**Token.** Radio Group membaca token tema berikut; pasang di radio, di grup, atau di elemen sekitarnya
+seperti `.settings`.
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-well-bg` | Lingkaran saat mati |
+| `--ow-edge` | Tepi 1 px-nya saat mati |
+| `--ow-accent` | Lingkaran saat aktif |
+| `--ow-primary-shadow` | Tepinya saat aktif |
+| `--ow-on-accent` | Titik, atau glyph milikmu |
+| `--ow-pressed-bg` | Lingkaran mati saat ditahan |
+| `--ow-fg` | Label |
+| `--ow-muted` | Label disabled |
+| `--ow-focus` | Ring fokus keyboard |
+| `--ow-hover` | Highlight hover (Glide) |
+| `--ow-radius` | Sudut highlight |
+
+<ForMode mode="isolated">
+
+Di mode isolated, nilainya berada di root setiap grup, jadi pasang milikmu di grup itu sendiri, seperti
+CSS stage dengan `.delivery.ow-radio-group`.
+
+</ForMode>
+
+Gerakannya dari Core: `--ow-spring-settle` untuk titik dan pelepasan, serta `--ow-motion-scale` untuk
+kedalaman tekan dan ukuran awal titik (0 mematikan keduanya).
+
+**`className`.** CSS biasa dan utility Tailwind milikmu menang atas nilai komponen tanpa `!important`,
+karena CSS komponen berada di dalam layer. Semua ukuran memakai `em`, jadi `font-size` menskalakan
+lingkaran dan baris. `--py` mengatur kerapatan baris, di grup atau di satu baris, dan `--icon` mengatur
+lingkaran, lewat `style`.
+
+```css
+.delivery {
+  font-size: 1.125rem;
+  --py: 0.5em;
+}
+
+.delivery .ow-radio-group__radio[data-checked] {
+  background-color: var(--ow-good);
+}
+```
+
+**Komposisi.** Children menggantikan tandanya, dan `render` mengganti elemennya:
+
+```tsx
+<Radio.Root value="express">
+  <Radio.Indicator>
+    <Check />
+  </Radio.Indicator>
+</Radio.Root>
+```
+
+<TokenChip lang="id" />
+
+## Ship it [#ship]
+
+Laci kode menulis komponen persis seperti stage diatur. Ubah apa saja, dan baris yang berubah akan
+menyala.
+
+| Bagian | Prop | Tipe | Bawaan |
+| --- | --- | --- | --- |
+| Group | `value` | `Value` | |
+| Group | `defaultValue` | `Value` | |
+| Group | `onValueChange` | `(value, eventDetails) => void` | |
+| Group | `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| Group | `name` | `string` | |
+| Group | `form` | `string` | |
+| Group | `disabled` | `boolean` | `false` |
+| Group | `readOnly` | `boolean` | `false` |
+| Group | `required` | `boolean` | `false` |
+| Group | `inputRef` | `Ref` | |
+| Radio | `value` | `Value` | |
+| Radio | `disabled` | `boolean` | `false` |
+| Radio | `readOnly` | `boolean` | `false` |
+| Radio | `required` | `boolean` | `false` |
+| Radio | `inputRef` | `Ref` | |
+| Radio | `nativeButton` | `boolean` | `false` |
+| Indicator | `keepMounted` | `boolean` | `false` |
+
+Group adalah `RadioGroup`, Radio adalah `Radio.Root`, dan Indicator adalah `Radio.Indicator`. `size`
+milik OwsemUI; prop lainnya diteruskan ke Base UI apa adanya. Setiap part juga menerima
+`className`, `style`, dan `render`, dan ref-nya menuju `div` atau `span`.
+
+Impor dari `owsem-ui/base`. Di registry, nama item-nya `radio-group`.

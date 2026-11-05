@@ -935,6 +935,33 @@ test("the Tabs Lab: the key lands on the picked tab, one panel shows, and the co
   );
 });
 
+test("the Radio Group Lab: a row picks its option, and one rule on className lays them out in a row", async ({
+  page,
+}) => {
+  await page.goto("/en/radio-group");
+  const group = stage(page).getByRole("radiogroup", { name: "Delivery" });
+  const row = (name: string) => group.locator("label", { hasText: name });
+  const express = group.getByRole("radio", { name: "Express" });
+  await expect(group.getByRole("radio", { name: "Standard" })).toHaveAttribute(
+    "aria-checked",
+    "true",
+  );
+  await row("Express").click();
+  await expect(express).toHaveAttribute("aria-checked", "true");
+  await expect(express.locator(".ow-radio-group__indicator")).toBeVisible();
+  await expect(stage(page)).toContainText("Arrives tomorrow morning.");
+
+  // The arrows move and pick.
+  await express.press("ArrowDown");
+  await expect(group.getByRole("radio", { name: "Pick up in store" })).toBeFocused();
+  await expect(stage(page)).toContainText("Ready to collect today.");
+
+  await stage(page).getByRole("button", { name: "Controls" }).click();
+  const layout = stage(page).getByRole("group", { name: "Layout" });
+  await layout.getByRole("button", { name: "Row" }).click();
+  await expect(group).toHaveCSS("flex-direction", "row");
+});
+
 test("the stage tools name themselves and their key in a tooltip, not a title", async ({
   page,
 }, testInfo) => {

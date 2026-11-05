@@ -5,6 +5,7 @@ export { Kbd } from "./components/kbd";
 export * from "./components/menu";
 export * from "./components/popover";
 export * from "./components/scroll-area";
+export * from "./components/radio-group";
 export { Separator } from "./components/separator";
 export * from "./components/tabs";
 export { Toggle, type ToggleProps, type ToggleSize } from "./components/toggle";

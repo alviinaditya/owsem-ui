@@ -879,6 +879,10 @@ body {
   margin-inline-end: 168px;
 }
 
+.component-preview-live[data-preview="select"] {
+  margin-block-end: 104px;
+}
+
 /* The area and the hue slider, smaller. */
 .component-preview .ow-color-picker {
   inline-size: 200px;
@@ -3630,6 +3634,50 @@ figure[data-code-block] pre {
 /* A scaled stage skews Base UI's room below the anchor; the cell holds the popup whole. */
 .demo-menu-cell .ow-menu__popup {
   max-block-size: none;
+}
+
+/* The Select Lab: the field in the middle, with room for its popup to land over it. */
+.demo-select {
+  position: relative;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  inline-size: 360px;
+  block-size: 320px;
+}
+
+.demo-select[data-side="top"] {
+  align-content: start;
+}
+
+.demo-select-field[data-width="fill"] {
+  inline-size: 14rem;
+}
+
+.demo-select-field[data-width="fill"] .ow-select__trigger {
+  inline-size: 100%;
+}
+
+.demo-select[data-pinned] .ow-select__popup {
+  max-block-size: 220px;
+}
+
+/* A long list stays under the stage's toolbar: Base UI takes these as the screen's margins. */
+.demo-select .ow-select__positioner[data-side="none"] {
+  margin-block: 56px;
+}
+
+.demo-cell.demo-select-cell {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  inline-size: 200px;
+  box-sizing: border-box;
+}
+
+.demo-select-cell[data-open] {
+  align-items: flex-start;
+  block-size: 136px;
 }
 
 /* The Popover Lab: a document's toolbar with its Share popover, and room for the panel. */

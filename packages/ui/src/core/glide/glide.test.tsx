@@ -237,6 +237,20 @@ describe("Glide", () => {
     expect(lit(items)).toEqual([]);
   });
 
+  test("forgets the pointer while hidden, as a closed popup that stays mounted", async () => {
+    const { list, items } = await mount(<List />);
+    const two = items[1] && box(items[1]);
+    if (!two) throw new Error("no items");
+    move(list, two.left + 20, two.top + 10);
+    expect(lit(items)).toEqual(["Two"]);
+    list.style.display = "none";
+    await expect.poll(() => lit(items)).toEqual([]);
+    // Shown again, nothing is lit until the pointer or the keyboard says so.
+    list.style.display = "flex";
+    await new Promise((resolve) => setTimeout(resolve, 60));
+    expect(lit(items)).toEqual([]);
+  });
+
   test("lights an item from code, for keyboard highlight", async () => {
     function Keyboard() {
       const glide = useGlide<HTMLDivElement>();

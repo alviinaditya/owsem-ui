@@ -152,7 +152,7 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Button**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toggle Group**,
+**Button**, **Kbd**, **Menu**, **Popover**, **Select**, **Separator**, **Toggle**, **Toggle Group**,
 **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`) and **Color Picker**, **Command Menu**,
 **Table of Contents**, and **Tree Rail Nav** (Owsem, from `owsem-ui/owsem`) are built. Base
 components are Base UI components with OwsemUI's styling, and small primitives without a Base UI
@@ -256,6 +256,53 @@ import { Menu } from "owsem-ui/base"; // or "@/components/owsem/menu"
   `data-theme` on the Positioner when the trigger sits in a themed subtree.
 - Reads `--ow-panel`, `--ow-popup-shadow`, `--ow-fg`, `--ow-muted`, `--ow-hover` (Glide),
   `--ow-line-dark` and `--ow-line-light` (grooves), `--ow-radius`, and `--ow-focus`.
+
+### Select
+
+A value, or several, picked from a list in a popup. Registry item: `select`.
+
+```tsx
+import { Select } from "owsem-ui/base"; // or "@/components/owsem/select"
+<Select.Root defaultValue="Cherry">
+  <Select.Trigger aria-label="Fruit" />
+  <Select.Popup>
+    <Select.Item value="Apple">Apple</Select.Item>
+    <Select.Item value="Cherry">Cherry</Select.Item>
+  </Select.Popup>
+</Select.Root>
+```
+
+That is the whole usage; the parts left out draw themselves, and a part you write replaces its
+default:
+
+- `Trigger` without children draws `Value` and `Icon` (its `placeholder` reaches that `Value`).
+  `Icon` draws chevrons and `ItemIndicator` a check; children replace them.
+- `Item` with plain children wraps them in `ItemText` after an `ItemIndicator`. Write either part
+  to arrange the row yourself, such as an icon before `ItemText` or the check last.
+- `Popup` without a `List` directly inside draws one, with `ScrollUpArrow` and `ScrollDownArrow`.
+  Without a `Positioner` around it, it draws `Portal` and `Positioner`. Write those to set
+  `container`, `side`, or `alignItemWithTrigger`.
+
+Details:
+
+- When values are not their labels, pass `items={[{ value, label }]}` to the Root, or the trigger
+  shows the raw value. The only prop accessibility needs is a name: `aria-label` on the trigger, or
+  a `Select.Label`.
+- `size` on the Root (`"sm"`, `"md"` default, `"lg"`) sets the trigger and the popup together. The
+  trigger has no width of its own and no margin: it fits its value, and `inline-size` stretches it.
+- The popup opens with the selected text on the trigger's text, ending where the trigger ends. Touch,
+  the screen's edges, and `multiple` hang it 6px below instead. It needs the screen's coordinates,
+  so with a transformed ancestor set `alignItemWithTrigger={false}`.
+- `multiple` on the Root is Base UI's: pass an array, and the trigger adds up the labels. `name`
+  submits in a plain `<form>`. `aria-invalid` or Base UI's `Field` turns the edge `--ow-critical`.
+- Keyboard, focus, typeahead, and ARIA come from Base UI; do not add handlers. Do not style item
+  hover or `data-highlighted`: Glide lights items (recolor it with `--ow-hover`).
+- A plain rule on a `className` wins over the component's own. The popup renders in a portal: set
+  tokens on the Popup's class or on `:root`, and `data-theme` on the Positioner when the trigger
+  sits in a themed subtree.
+- Reads `--ow-well-bg`, `--ow-well-shadow`, `--ow-edge`, `--ow-critical`, `--ow-panel`,
+  `--ow-popup-shadow`, `--ow-fg`, `--ow-muted`, `--ow-hover` (Glide), `--ow-line-dark` and
+  `--ow-line-light` (grooves), `--ow-radius`, and `--ow-focus`.
 
 ### Popover
 

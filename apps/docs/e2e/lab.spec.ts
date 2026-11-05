@@ -917,6 +917,38 @@ test("the Menu Lab opens Edit with Glide on its items, and View's choices", asyn
   await expect(demo(page).getByRole("menu")).not.toBeFocused();
 });
 
+test("the Select Lab lands the selected text on the trigger's, and adds up several", async ({
+  page,
+}, testInfo) => {
+  await page.goto("/en/select");
+  await scene(page, "align");
+  // A narrow stage is scaled or moved, and opens the list beside the trigger, as touch does.
+  const over = testInfo.project.name !== "mobile-390";
+  const popup = demo(page).locator(".ow-select__popup");
+  await expect(popup).toBeVisible();
+  await expect(popup).toHaveAttribute("data-side", over ? "none" : /top|bottom/);
+  await expect(demo(page).locator("[data-glide-active]")).toHaveText("Mango");
+  if (over) {
+    await expect
+      .poll(async () => {
+        const value = await demo(page).locator(".ow-select__value").boundingBox();
+        const text = await demo(page)
+          .locator('[role="option"][aria-selected="true"] .ow-select__item-text')
+          .boundingBox();
+        return value && text ? Math.abs(value.x - text.x) + Math.abs(value.y - text.y) : 99;
+      })
+      .toBeLessThan(1);
+  }
+  await scene(page, "multiple");
+  // Opening beside the trigger leaves the page, and so the scene, where it is.
+  await expect(demo(page).locator(".ow-select__value")).toHaveText(/Cherry, Mango/);
+  await expect(demo(page).getByRole("listbox")).toHaveAttribute("aria-multiselectable", "true");
+  // Anatomy pins a list open without taking focus from the page.
+  await scene(page, "anatomy");
+  await expect(demo(page).getByRole("listbox")).toBeVisible();
+  await expect(demo(page).locator(":focus")).toHaveCount(0);
+});
+
 test("the Popover Lab opens its panel from Share, then hands it between triggers", async ({
   page,
 }) => {

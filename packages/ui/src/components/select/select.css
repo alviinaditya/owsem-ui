@@ -1,0 +1,384 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * A field that opens a list. The trigger is the Field material: a flat well with a crisp edge at
+ * 3:1, as tall as a Button (FR-9). The popup is the panel with the popup shadow; items are flat, and
+ * Glide lights the one nearest the pointer or the one the keyboard reached. The trigger has no width
+ * of its own: it fits its value, and stretches when you set one.
+ */
+@layer owsem.components {
+  /* Its padding, not a margin, sets it apart from the trigger below. */
+  .ow-select__label {
+    --_fg: var(--ow-fg);
+    display: block;
+    padding-block-end: 0.375em;
+    color: var(--_fg);
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25;
+  }
+
+  .ow-select__trigger {
+    /* The one input; override it with style. The block padding never drops a target below 24px. */
+    --py: 0.75em;
+    --_py: max(var(--py), (24px - 1lh) / 2);
+    --px: calc(var(--_py) + (1lh - 1cap) / 2);
+    --icon: calc(1em + 2px);
+    --_bg: var(--ow-well-bg);
+    --_shadow: var(--ow-well-shadow);
+    --_edge: var(--ow-edge);
+    --_fg: var(--ow-fg);
+    --_focus: var(--ow-focus);
+    --_critical: var(--ow-critical);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    box-sizing: border-box;
+    max-inline-size: 100%;
+    margin: 0;
+    padding: var(--_py) var(--px);
+    border: 0;
+    border-radius: var(--ow-radius);
+    /* Invisible until forced colors draw it as the edge (DP-8). */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--_bg);
+    /* A crisp 1px edge at 3:1 (DP-6), over the well's own. */
+    box-shadow:
+      inset 0 0 0 1px var(--_edge),
+      var(--_shadow);
+    color: var(--_fg);
+    font: inherit;
+    font-size: 0.875rem;
+    line-height: 1.25;
+    text-align: start;
+    vertical-align: middle;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ow-select__trigger:where([data-size="sm"]) {
+    --py: 0.5em;
+    font-size: 0.8125rem;
+  }
+
+  .ow-select__trigger:where([data-size="lg"]) {
+    --py: 0.875em;
+    font-size: 1rem;
+  }
+
+  .ow-select__trigger:where(:focus-visible) {
+    outline: 2px solid var(--_focus);
+    outline-offset: 2px;
+  }
+
+  .ow-select__trigger:where([data-invalid], [aria-invalid="true"]) {
+    --_edge: var(--_critical);
+  }
+
+  .ow-select__trigger:where([data-disabled]) {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
+  /* It takes the room there is, so the icon stays at the end; empty, it still holds a line. */
+  .ow-select__value {
+    --_muted: var(--ow-muted);
+    display: block;
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    min-block-size: 1lh;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ow-select__value:where([data-placeholder]) {
+    color: var(--_muted);
+  }
+
+  /* As far from the edge as from the top and bottom (FR-10). */
+  .ow-select__icon {
+    --_muted: var(--ow-muted);
+    display: inline-flex;
+    flex: none;
+    inline-size: var(--icon);
+    block-size: var(--icon);
+    margin-inline-end: calc((1cap - var(--icon)) / 2);
+    color: var(--_muted);
+  }
+
+  .ow-select__icon > :where(svg) {
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  .ow-select__popup {
+    --_bg: var(--ow-panel);
+    --_shadow: var(--ow-popup-shadow);
+    --_fg: var(--ow-fg);
+    --_pad: 4px;
+    /* The items' --py less the trigger's, in em; see the hang below. */
+    --_py-less: -0.25em;
+    position: relative;
+    /* A height set on it reaches the list, which scrolls. */
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    min-inline-size: var(--anchor-width);
+    /* The room Base UI leaves at the sides of the screen. */
+    max-inline-size: calc(100vw - 10px);
+    overflow: hidden;
+    /* Concentric with the items (FR-10b). */
+    border-radius: calc(var(--ow-radius) + var(--_pad));
+    /* Invisible until forced colors draw it as the edge (DP-8). */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--_bg);
+    box-shadow: var(--_shadow);
+    color: var(--_fg);
+    font-size: 0.875rem;
+    line-height: 1.25;
+    transition: opacity 180ms var(--ow-ease-out);
+  }
+
+  .ow-select__popup:where([data-size="sm"]) {
+    --_py-less: 0em;
+    font-size: 0.8125rem;
+  }
+
+  .ow-select__popup:where([data-size="lg"]) {
+    font-size: 1rem;
+  }
+
+  /*
+   * Over the trigger, the selected text lands on the trigger's, so the check column hangs past the
+   * trigger's start. The hang is the text's start in the popup less the trigger's --px; added to
+   * the width, it ends the popup where the trigger ends.
+   */
+  .ow-select__popup:where([data-side="none"]) {
+    min-inline-size: calc(
+      var(--anchor-width) +
+      var(--_pad) +
+      var(--_py-less) +
+      (1cap + 1em + 2px) /
+      2 +
+      0.5em
+    );
+  }
+
+  /*
+   * Beside the trigger, it grows from it. Over the trigger, it only fades: growing would move the
+   * text that is meant to stay put, and the layer growing needs lands that text a device pixel off
+   * the trigger's at a fractional zoom.
+   */
+  .ow-select__popup:where(:not([data-side="none"])) {
+    transform-origin: var(--transform-origin);
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: transform;
+    transition:
+      opacity 180ms var(--ow-ease-out),
+      transform 180ms var(--ow-ease-out);
+  }
+
+  .ow-select__popup:where([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+  }
+
+  .ow-select__popup:where(:not([data-side="none"])):where(
+    [data-starting-style],
+    [data-ending-style]
+  ) {
+    transform: scale(0.96);
+  }
+
+  /* Leaving is quicker than arriving. */
+  .ow-select__popup:where([data-ending-style]) {
+    transition-duration: 120ms;
+  }
+
+  /* Used from the keyboard, or shut with Escape: no animation. */
+  .ow-select__popup:where([data-instant]) {
+    transition: none;
+  }
+
+  .ow-select__list {
+    flex: 1 1 auto;
+    box-sizing: border-box;
+    min-block-size: 0;
+    max-block-size: var(--available-height);
+    padding: var(--_pad);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    /* The keyboard's item stays clear of the scroll arrows. */
+    scroll-padding-block: 24px;
+  }
+
+  /* Items: Button's geometry rule (FR-9), --py the only input; the indicator first. */
+  .ow-select__item {
+    --py: 0.5em;
+    --_py: max(var(--py), (24px - 1lh) / 2);
+    --px: calc(var(--_py) + (1lh - 1cap) / 2);
+    --icon: calc(1em + 2px);
+    --_fg: var(--ow-fg);
+    --_focus: var(--ow-focus);
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    box-sizing: border-box;
+    padding: var(--_py) var(--px);
+    border-radius: var(--ow-radius);
+    outline: 0;
+    color: var(--_fg);
+    white-space: nowrap;
+    cursor: default;
+  }
+
+  /* 40px at lg, so the popup covers the 48px trigger even with its first item selected. */
+  :where(.ow-select__popup[data-size="lg"]) .ow-select__item {
+    --py: 0.625em;
+  }
+
+  /* FR-13: a 2px ring, inside the item so the popup does not clip it. */
+  .ow-select__item:where(:focus-visible) {
+    outline: 2px solid var(--_focus);
+    outline-offset: -2px;
+  }
+
+  .ow-select__item:where([data-disabled]) {
+    opacity: 0.45;
+  }
+
+  /* Icons and the indicator sit as far from the edge as from the top and bottom (FR-10). */
+  .ow-select__item > :where(svg),
+  .ow-select__item-indicator {
+    display: inline-flex;
+    flex: none;
+    inline-size: var(--icon);
+    block-size: var(--icon);
+  }
+
+  .ow-select__item > :where(svg, .ow-select__item-indicator):where(:first-child) {
+    margin-inline-start: calc((1cap - var(--icon)) / 2);
+  }
+
+  .ow-select__item > :where(svg, .ow-select__item-indicator):where(:last-child) {
+    margin-inline-end: calc((1cap - var(--icon)) / 2);
+  }
+
+  .ow-select__item-indicator > :where(svg) {
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  /* Unselected, the indicator keeps its room, so the labels stay in line. */
+  .ow-select__item-indicator:where(:not([data-selected])) {
+    visibility: hidden;
+  }
+
+  /* Positioned, so axe reads its contrast over Glide's highlight. */
+  .ow-select__item-text {
+    position: relative;
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* An icon among plain children, centered on the capitals as FR-10 centers one in a control. */
+  .ow-select__item-text > :where(svg) {
+    display: inline-block;
+    inline-size: var(--icon);
+    block-size: var(--icon);
+    margin-inline-end: 0.5em;
+    vertical-align: calc((1cap - var(--icon)) / 2);
+  }
+
+  /* Strips over the list's ends, inside the popup's edge (an inset shadow in dark). */
+  .ow-select__scroll-up-arrow,
+  .ow-select__scroll-down-arrow {
+    --icon: calc(1em + 2px);
+    --_bg: var(--ow-panel);
+    --_muted: var(--ow-muted);
+    /* The popup's corners, less the edge. */
+    --_corner: calc(var(--ow-radius) + var(--_pad) - 1px);
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inset-inline: 1px;
+    block-size: 24px;
+    background-color: var(--_bg);
+    color: var(--_muted);
+    cursor: default;
+  }
+
+  .ow-select__scroll-up-arrow {
+    inset-block-start: 1px;
+    border-start-start-radius: var(--_corner);
+    border-start-end-radius: var(--_corner);
+  }
+
+  .ow-select__scroll-down-arrow {
+    inset-block-end: 1px;
+    border-end-start-radius: var(--_corner);
+    border-end-end-radius: var(--_corner);
+  }
+
+  :where(.ow-select__scroll-up-arrow, .ow-select__scroll-down-arrow) > svg {
+    inline-size: var(--icon);
+    block-size: var(--icon);
+  }
+
+  /* Smaller than the items (12px of 14), with their inline padding: the item's --px in its em. */
+  .ow-select__group-label {
+    --_muted: var(--ow-muted);
+    padding-block: 0.6em 0.3em;
+    padding-inline: calc((0.5em + (1.25em - 1cap) / 2) / 0.8571);
+    color: var(--_muted);
+    font-size: 0.8571em;
+    font-weight: 500;
+    line-height: 1.25;
+  }
+
+  /* An etched groove: a dark line with a light one under it, as borders for forced colors. */
+  .ow-select__separator {
+    --_dark: var(--ow-line-dark);
+    --_light: var(--ow-line-light);
+    margin-block: var(--_pad);
+    border-block: 1px solid;
+    border-block-color: var(--_dark) var(--_light);
+  }
+
+  /* NF-4: the rule Base UI injects for a list with arrows, for apps that turn style elements off. */
+  .base-ui-disable-scrollbar {
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement (NF-1) */
+    scrollbar-width: none;
+  }
+
+  .base-ui-disable-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* FR-20: it fades, without growing. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-select__popup:where([data-starting-style], [data-ending-style]) {
+      transform: none;
+    }
+  }
+
+  /* The check follows the text color, and Glide's highlight turns into a Highlight outline. */
+  @media (forced-colors: active) {
+    .ow-select__trigger:where(:focus-visible),
+    .ow-select__item:where(:focus-visible) {
+      outline-color: Highlight;
+    }
+
+    .ow-select__trigger:where([data-disabled]),
+    .ow-select__item:where([data-disabled]) {
+      color: GrayText;
+      opacity: 1;
+    }
+  }
+}

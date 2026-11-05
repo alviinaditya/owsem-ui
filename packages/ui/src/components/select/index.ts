@@ -1,0 +1,23 @@
+export type {
+  SelectArrowProps,
+  SelectBackdropProps,
+  SelectGroupLabelProps,
+  SelectGroupProps,
+  SelectIconProps,
+  SelectItemIndicatorProps,
+  SelectItemProps,
+  SelectItemTextProps,
+  SelectLabelProps,
+  SelectListProps,
+  SelectPopupProps,
+  SelectPortalProps,
+  SelectPositionerProps,
+  SelectRootProps,
+  SelectScrollDownArrowProps,
+  SelectScrollUpArrowProps,
+  SelectSeparatorProps,
+  SelectSize,
+  SelectTriggerProps,
+  SelectValueProps,
+} from "./select";
+export * as Select from "./select.parts";

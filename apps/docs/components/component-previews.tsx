@@ -15,6 +15,7 @@ import { ColorPicker, CommandMenu, TableOfContents, TreeRailNav } from "owsem-ui
 import { type ReactNode, useEffect, useId, useRef, useState } from "react";
 import type { ComponentName } from "@/lib/catalog";
 import type { Lang } from "@/lib/i18n";
+import { FrozenMorph } from "./frozen-morph";
 import { Icon } from "./icons/icon";
 
 const TEXT = {
@@ -338,6 +339,16 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
   ),
   "command-menu": (t) => <CommandMenuPreview t={t} />,
   "table-of-contents": (t) => <TableOfContentsPreview t={t} />,
+  // One swap, Copy to Check, held at its start, mid-way, and at rest.
+  "icon-morph": () => (
+    <div className="component-preview-row">
+      {[0, 120, null].map((at) => (
+        <span key={String(at)} className="component-preview-morph">
+          <FrozenMorph from="copy" to="check" at={at} size={22} />
+        </span>
+      ))}
+    </div>
+  ),
   "color-picker": () => (
     <ColorPicker
       defaultValue="#7c6ab8"

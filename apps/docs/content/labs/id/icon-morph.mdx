@@ -1,0 +1,112 @@
+---
+title: Icon Morph
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Icon Morph mengganti satu ikon dengan ikon lain di tempatnya: ikon lama mengecil, memburam, dan
+memudar sementara ikon baru tumbuh masuk, keduanya di satu sel, jadi tidak ada yang bergeser di
+sekitarnya. Pakai di tempat sebuah ikon menunjukkan keadaan, misalnya Salin yang berubah jadi
+centang, Putar jadi Jeda, atau hati kosong jadi penuh. Gulir untuk mulai tur; stage mengikuti setiap
+bagian.
+
+## Berganti lewat key [#swap]
+
+Icon Morph memuat satu elemen ikon. Beri setiap ikon `key`-nya sendiri, lalu ganti ikonnya untuk
+menukarnya: `{copied ? <Check key="check" /> : <Copy key="copy" />}`. Key baru memulai pergantian;
+key yang sama memperbarui ikon di tempatnya, tanpa animasi. Render pertama juga tanpa animasi, jadi
+halaman yang dimuat dengan hati penuh langsung menampilkannya, di server juga. Tanpa ikon (`null`),
+ikon lama keluar dan selnya kosong.
+
+Stage memutarnya: Putar berubah jadi Jeda, hatinya terisi, dan Salin link berubah jadi centang, yang
+kembali sendiri setelah 1,6 detik. Lalu Jeda dan hatinya kembali. Tekan sendiri untuk mengambil
+alih.
+
+## Berubah di tengah jalan [#interrupt]
+
+Pergantian adalah dua transisi CSS, jadi perubahan di tengah jalan memutar balik kedua ikon dari
+posisinya saat itu, tanpa lompatan: ikon yang kembali tumbuh dari ukurannya sekarang, bukan dari
+nol. Paling banyak satu ikon keluar dalam satu waktu; ikon lebih lama yang masih keluar langsung
+hilang. Ikon tidak pernah berpindah di DOM, karena itu akan memulai ulang transisinya.
+
+Stage memperlambat spring-nya empat kali lalu menekan Putar empat kali berturut-turut, lebih cepat
+daripada satu pergantian. Setiap tekanan memutar balik ikonnya di tengah jalan, dan tekanan terakhir
+berhenti di keadaan awal kartu.
+
+## Anatomi [#anatomy]
+
+Dua bagian: sel Root dan Item di sekeliling setiap ikon. Selama pergantian ada dua Item, yang keluar
+di awal atau di akhir DOM, dan keduanya ditumpuk di sel yang sama, yang sebesar ikon terbesar.
+Inspect (I) menandai setiap bagian di stage; pilih namanya, di sini atau di stage, untuk melihat
+token-nya.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `span.ow-icon-morph` | Grid inline dengan satu sel. Di slot ikon Button, Toggle, atau item Toolbar, ia dan ikon-ikonnya mengisi slot itu, seperti satu ikon |
+| <Part name="Item" /> | `span.ow-icon-morph__item` | Satu ikon. `data-starting-style` selama masuk, `data-ending-style` dan `aria-hidden` selama keluar |
+
+## State dan varian [#states]
+
+Stage menahan satu pergantian, Salin ke Centang, di beberapa titik sepanjang spring, dengan tiga
+skala gerak. Pada skala gerak 1 ikon yang keluar mengecil sampai setengah ukurannya dengan blur 3px;
+pada 0,5 sampai tiga perempat dengan 1,5px; pada 0 ikon hanya memudar.
+
+| State | Yang menandainya |
+| --- | --- |
+| Diam | Satu Item, tanpa atribut state, dan tidak ada yang berjalan |
+| Masuk | Item baru tumbuh dari setengah ukuran, buram dan transparan, sampai diam |
+| Keluar | Item lama mengecil, memburam, dan memudar di atas yang baru, lalu hilang |
+
+Icon Morph adalah komponen Owsem (Kinetic): ia bergerak dengan spring settle, spring Core yang
+teredam kritis, jadi ikon mendarat tanpa memantul. Tanpa glow, dan tidak ada animasi yang berjalan
+setelah pergantian selesai.
+
+## Keyboard dan aksesibilitas [#keyboard]
+
+Icon Morph tidak bisa difokus dan tidak menambah role: kontrol tempatnya berada yang membawa nama
+dan state-nya. Namai kontrol itu sesuai yang dilakukannya sekarang (`aria-label` dari Putar ke
+Jeda), atau pertahankan satu nama dan tunjukkan state-nya dengan `aria-pressed`, seperti Suka dengan
+Toggle. Kalau perubahannya penting bagi orang yang tidak bisa melihatnya, misalnya saat menyalin,
+umumkan di region status. Ikon yang keluar `aria-hidden`, jadi tidak pernah dibaca dua kali.
+
+Dengan `prefers-reduced-motion`, ikon hanya crossfade, dalam 150 ms, tanpa mengecil atau memburam.
+Ikon digambar dengan `currentColor`, jadi forced colors (Windows High Contrast) mewarnainya dengan
+warna teks kontrolnya.
+
+## Kustomisasi [#customization]
+
+Kontrol stage terbuka: ubah skala gerak atau perlambat spring-nya, dan kodenya mengikuti. Icon Morph
+membaca token tema ini; pasang di ikonnya sendiri, seperti `like.css`, karena spring settle juga
+mengatur waktu tekanan tombol.
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-motion-scale` | Seberapa jauh ikon mengecil dan memburam: setengah ukuran dan 3px pada 1, tidak sama sekali pada 0 |
+| `--ow-spring-settle` | Easing setiap pergantian |
+| `--ow-spring-settle-duration` | Lama satu pergantian |
+| `--ow-ease-out` | Crossfade saat reduced motion |
+
+<ForMode mode="isolated">
+
+Di mode isolated nilainya ada di root setiap komponen, jadi `.like .ow-icon-morph` tetap berlaku
+apa adanya.
+
+</ForMode>
+
+<TokenChip lang="id" />
+
+## Ship it [#ship]
+
+Drawer kode menulis toggle Suka dengan gerak persis seperti stage diatur. Ubah sebuah kontrol dan
+baris yang berubah menyala.
+
+| Prop | Tipe | Bawaan |
+| --- | --- | --- |
+| `children` | `ReactElement \| null \| false` | |
+
+`children` adalah satu elemen ikon dengan `key`. Root adalah `span`; `className`, `style`, prop
+lain, dan ref diteruskan ke sana. Di luar slot, ikon mempertahankan ukurannya sendiri, jadi atur
+ukurannya seperti biasa; di slot ikon, slot yang mengaturnya.
+
+Impor dari `owsem-ui/owsem`. Di registry, item-nya bernama `icon-morph`.

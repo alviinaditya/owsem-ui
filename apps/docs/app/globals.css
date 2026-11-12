@@ -668,7 +668,6 @@ body {
   .language-switcher a[aria-current="page"],
   .lab-tool[aria-expanded="true"],
   .lab-scene-nav a[aria-current="true"],
-  .lab-tabs [aria-selected="true"],
   .lab-ichip[aria-pressed="true"],
   .lab-part[aria-pressed="true"] {
     outline: 2px solid Highlight;
@@ -2934,28 +2933,22 @@ figure[data-code-block] pre {
   border-image: var(--docs-etch-bottom);
 }
 
-.lab-tabs {
-  display: flex;
-  gap: 2px;
-  min-inline-size: 0;
-  overflow-x: auto;
+/* Tabs and panel fill the drawer under its bar; the file names keep the code's font. */
+.lab-drawer-tabs {
+  flex: 1;
+  gap: 0;
+  min-block-size: 0;
 }
 
-.lab-tabs [role="tab"] {
-  block-size: 28px;
-  padding-inline: 10px;
-  border: 0;
-  border-radius: var(--docs-radius-inner);
-  background: none;
-  color: var(--docs-muted);
+.lab-drawer-files {
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 12px;
-  white-space: nowrap;
 }
 
-.lab-tabs [role="tab"][aria-selected="true"] {
-  background-color: var(--docs-hover);
-  color: var(--docs-fg);
+.lab-drawer-panel {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
 }
 
 /* The scrolling part of the controls and the code drawer (components/scroll-fade.tsx). */
@@ -3250,6 +3243,38 @@ figure[data-code-block] pre {
 }
 
 .demo-toggle-group-surface {
+  padding: 12px;
+  border: 1px solid var(--ow-line);
+  border-radius: 14px;
+  background-color: var(--ow-bg);
+  color: var(--ow-fg);
+}
+
+/* The Tabs Lab's demos: a card with room for the tabs, equal tabs by className, and the matrix's
+ * surfaces. */
+.demo-tabs {
+  inline-size: 380px;
+}
+
+.demo-tabs-panel {
+  min-block-size: 3lh;
+}
+
+.demo-tabs-equal .ow-tabs__list {
+  inline-size: 100%;
+}
+
+.demo-tabs-equal .ow-tabs__tab {
+  flex: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .demo-tabs .ow-tabs__list {
+    scroll-behavior: smooth;
+  }
+}
+
+.demo-tabs-surface {
   padding: 12px;
   border: 1px solid var(--ow-line);
   border-radius: 14px;

@@ -1,0 +1,208 @@
+---
+title: Tabs
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Tabs menampilkan satu panel dalam satu waktu, dipilih dari sederet tab. Deretan itu berupa well datar,
+dan tombol timbul bergeser ke bawah tab aktif, dengan tampilan dan gerak yang sama seperti Toggle
+Group. Anda hanya menulis empat part; tombol timbul dan highlight hover tergambar sendiri. Gulir untuk
+mulai tur; stage mengikuti setiap bagian.
+
+## Tombol yang bergeser [#segmented]
+
+Hanya ini yang dibutuhkan:
+
+```tsx
+<Tabs.Root defaultValue="overview">
+  <Tabs.List aria-label="Project">
+    <Tabs.Tab value="overview">Overview</Tabs.Tab>
+    <Tabs.Tab value="activity">Activity</Tabs.Tab>
+  </Tabs.List>
+  <Tabs.Panel value="overview">The project at a glance.</Tabs.Panel>
+  <Tabs.Panel value="activity">What happened lately.</Tabs.Panel>
+</Tabs.Root>
+```
+
+Stage memutarnya: sebuah pointer memilih setiap tab bergantian. Tombol timbul bergerak dengan spring
+travel (`--ow-spring-travel`) sambil mengambil lebar tab yang baru; label yang ditinggalkan meredup, dan
+label yang dituju menyala. Panel berganti seketika, jadi dua panel tidak pernah bertumpuk. Tekan dan
+tahan sebuah tab, dan tab itu mengecil ke 0,97, bersama tombol timbulnya bila tab itu yang aktif.
+
+`aria-label` menamai list untuk screen reader; hanya prop ini yang wajib Anda tambahkan. `defaultValue`
+boleh dilewati: tanpanya, tab pertama yang aktif dipilih begitu halaman berjalan, tetapi HTML dari server
+lalu tidak punya panel. Di server, tab aktif menggambar tombol timbulnya sendiri, dan yang bergeser
+mengambil alih sebelum paint pertama. Ia tidak pernah menyapu masuk: hanya perpindahan dari satu tab ke
+tab lain yang bergeser.
+
+## Saat tab tidak muat [#overflow]
+
+List selebar tab-nya dan tidak pernah lebih lebar dari induknya. Melewati itu, list digulir ke samping
+tanpa scrollbar: dengan usapan, trackpad, atau Shift dan roda mouse. Stage memilih tab yang terpotong
+tepi list, menggulir ke ujung, memilih Tagihan, lalu kembali.
+
+Tombol timbul ikut bergerak bersama tab-nya saat list digulir, karena keduanya ada di dalam scroller.
+Klik pada tab yang terpotong tepi membawanya masuk, tombol panah membawa masuk tab yang dituju, begitu
+juga halaman yang dibuka pada tab di luar ujung list. Ring fokus digambar di dalam tab, jadi tepi list
+tidak pernah memotongnya.
+
+## Vertikal [#vertical]
+
+Dengan `orientation="vertical"` di root, list berdiri di samping panel, setiap tab selebar tab
+terlebar dengan label di awal, dan Arrow Down serta Arrow Up berpindah di antaranya. Glide mengikuti
+sumbu yang sama: di mana pun di sepanjang list, tab terdekat menurut tinggi yang menyala, dan klik di
+celah diteruskan ke tab itu. List yang lebih pendek dari tab-nya digulir ke bawah.
+
+Stage menunjuk di sepanjang list, lalu memilih sebuah tab.
+
+## Anatomi [#anatomy]
+
+Empat part yang Anda tulis. Inspect (I) menggarisi setiap part di stage, juga indikatornya; pilih satu
+nama, di sini atau di stage, untuk melihat tokennya.
+
+| Part | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-tabs` | `Tabs.Root` dari Base UI: list dan panel, berjarak 0,75em. `data-orientation`, dan `data-activation-direction` untuk gerak panel buatan Anda. Token tema yang dipasang di sini sampai ke setiap part di dalamnya |
+| <Part name="List" /> | `div.ow-tabs__list` | `Tabs.List` dari Base UI, dengan `role="tablist"`: well-nya. `data-orientation`, `data-size`. Menggambar indikator dan highlight Glide |
+| <Part name="Tab" /> | `button.ow-tabs__tab` | `Tabs.Tab` dari Base UI, dengan `role="tab"` dan `aria-selected`. `data-active`, `data-disabled`, `data-orientation`, dan `data-held` selama ditahan. Teksnya dibungkus `span.ow-tabs__label`, jadi tab yang hanya berisi ikon berbentuk persegi |
+| <Part name="Indicator" /> | `span.ow-tabs__indicator` | Dekoratif (`aria-hidden`), dan bukan part yang Anda render: List yang menggambarnya. `data-visible` selama berada di bawah tab aktif, `data-held` selama tab itu ditahan |
+| <Part name="Panel" /> | `div.ow-tabs__panel` | `Tabs.Panel` dari Base UI, dengan `role="tabpanel"`, dinamai oleh tab-nya. `data-hidden`, `data-orientation`. Tanpa padding, jadi isinya yang menentukan |
+
+Base UI punya `Tabs.Indicator` sendiri, yang tidak diekspor OwsemUI. Indikator itu ditempatkan dengan
+`translate`, yang jatuh di antara piksel pada zoom pecahan seperti 110%. Yang ini memakai skrip yang
+sama dengan thumb Toggle Group: ia diam di tempat layout menaruh tab, di piksel yang sama.
+
+Tab mengikuti geometri kontrol: padding-nya berasal dari `--py` (FR-9), dan ikon berukuran font
+ditambah 2 px, sejauh dari tepi samping seperti dari atas. Well menambah 3 px di setiap sisi, dan
+radiusnya adalah radius tab ditambah 3 px itu, sehingga sudutnya tetap konsentris.
+
+## State dan varian [#states]
+
+Stage menjejerkan tiga ukuran, tab disabled, dan list vertikal, di tema terang dan gelap. Sebuah pointer
+memilih Anggota di list `md` pada setiap tema, lalu Aktivitas lagi.
+
+| Ukuran | Font | Tab | Well |
+| --- | --- | --- | --- |
+| `sm` | 13 px | 29,25 px | 35,25 px |
+| `md` (bawaan) | 14 px | 38,5 px | 44,5 px |
+| `lg` | 16 px | 48 px | 54 px |
+
+| State | Penandanya |
+| --- | --- |
+| Aktif | Tombol timbul di bawahnya, dan label penuh |
+| Hover | Highlight Glide, dan label penuh |
+| Ditahan | Mengecil ke 0,97, bersama tombol timbul bila tab itu yang aktif |
+| Disabled | Label redup; Glide melewatinya, dan menekannya tidak berefek |
+| Fokus keyboard | Ring 2 px, di dalam tab |
+
+## Keyboard dan aksesibilitas [#keyboard]
+
+List adalah satu tab stop, dan keyboard-nya berasal dari Base UI:
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab, Shift Tab | Masuk ke list, lalu lanjut ke panel |
+| Arrow Right, Arrow Left | Tab berikutnya atau sebelumnya, terbalik untuk kanan ke kiri. Berputar, dan menggulir tab ke dalam pandangan |
+| Arrow Down, Arrow Up | Sama, dengan `orientation="vertical"` |
+| Home, End | Tab pertama atau terakhir |
+| Enter, Space | Memilih tab yang difokus |
+
+Secara bawaan, panah hanya memindahkan fokus, jadi panel yang lambat tampil tidak terbuka saat sekadar
+dilewati. Pasang `activateOnFocus` di list untuk langsung memilih saat panah bergerak: drawer kode Lab ini
+memakainya.
+
+Panel bisa dicapai dengan Tab, supaya keyboard bisa menggulirnya. Jika panel diawali elemen yang bisa
+difokus, beri `tabIndex={-1}` agar berhenti sekali lebih sedikit. Namai list dengan `aria-label` atau
+`aria-labelledby`, dan tab yang hanya berisi ikon dengan `aria-label`.
+
+Dengan `prefers-reduced-motion`, tombol timbul langsung berpindah dan tidak ada yang mengecil saat
+ditahan; tombol yang ditahan meredup sebagai gantinya. Di forced colors (Windows High Contrast), tab
+aktif diisi `Highlight` dengan teks `HighlightText`, dan well tetap punya tepi yang terlihat. Dari kanan ke
+kiri, tab pertama berada di kanan, begitu juga tombol timbulnya.
+
+## Kustomisasi [#customization]
+
+Kontrol stage terbuka: ukuran, arah, jumlah tab, lebar list, isi, tombol panah, serta warna indikator dan
+well. CSS untuk semua ini ada di tab tersendiri di drawer kode.
+
+Tabs membaca token tema berikut; pasang di root, di satu part, atau di elemen di sekitarnya seperti
+`.sidebar`.
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-well-bg` | Well |
+| `--ow-well-shadow` | Tepi halus well |
+| `--ow-raised-bg` | Indikator |
+| `--ow-raised-shadow` | Tepi tegasnya |
+| `--ow-fg` | Label tab aktif dan yang di-hover, serta teks panel |
+| `--ow-muted` | Label lainnya |
+| `--ow-focus` | Ring fokus keyboard |
+| `--ow-hover` | Highlight hover (Glide) |
+| `--ow-radius` | Sudut tab, indikator, dan highlight; well menambah 3 px-nya |
+
+<ForMode mode="isolated">
+
+Di mode isolated nilainya berada di setiap root, jadi pasang nilai Anda di root itu sendiri, seperti
+CSS stage dengan `.project-tabs.ow-tabs`.
+
+</ForMode>
+
+CSS biasa pada `className` mengalahkan aturan komponen tanpa `!important`, karena aturan komponen berada
+di dalam layer. List mengikuti isinya, jadi deretan selebar penuh dengan tab sama lebar hanya butuh dua
+aturan; stage sedang memakainya, dan tombol timbul mengikuti saat list atau tab berubah ukuran:
+
+```css
+.project-tabs .ow-tabs__list {
+  inline-size: 100%;
+}
+
+.project-tabs .ow-tabs__tab {
+  flex: 1;
+}
+```
+
+Ukuran memakai `em`, jadi `font-size` di list ikut menskalakan tab, dan padding tab adalah `--py`-nya
+sendiri (FR-11). Panel tidak punya padding atau margin yang perlu dibatalkan. `display` buatan Anda di
+panel akan mengalahkan atribut `hidden` yang menyembunyikannya, jadi taruh grid atau flex Anda di
+elemen anaknya.
+
+Setiap part menerima `render`. Isi tab boleh node apa pun, termasuk ikon dengan teks, dan tab boleh
+berupa link bila router yang memegang URL:
+
+```tsx
+<Tabs.Tab value="docs" nativeButton={false} render={<a href="/docs" />}>
+  <BookOpen />
+  Docs
+</Tabs.Tab>
+```
+
+Geraknya berasal dari Core: `--ow-spring-travel` untuk geser, `--ow-spring-settle` untuk pelepasan, dan
+`--ow-motion-scale` untuk seberapa jauh tekanan (0 mematikannya).
+
+<TokenChip lang="id" />
+
+## Ship it [#ship]
+
+Drawer kode menulis komponen persis seperti pengaturan stage. Ubah apa saja, dan baris yang berubah
+menyala.
+
+| Part | Prop | Tipe | Bawaan |
+| --- | --- | --- | --- |
+| Root | `value` | `any` | |
+| Root | `defaultValue` | `any` | Tab aktif pertama |
+| Root | `onValueChange` | `(value, eventDetails) => void` | |
+| Root | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` |
+| List | `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| List | `activateOnFocus` | `boolean` | `false` |
+| List | `loopFocus` | `boolean` | `true` |
+| Tab | `value` | `any` | |
+| Tab | `disabled` | `boolean` | `false` |
+| Tab | `nativeButton` | `boolean` | `true` |
+| Panel | `value` | `any` | |
+| Panel | `keepMounted` | `boolean` | `false` |
+
+`size` milik OwsemUI; prop lainnya diteruskan ke Base UI apa adanya. Setiap part juga menerima
+`className`, `style`, dan `render`, dan ref-nya mengarah ke elemen yang dirender.
+
+Impor dari `owsem-ui/base`. Di registry, nama itemnya `tabs`.

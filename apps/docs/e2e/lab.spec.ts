@@ -839,6 +839,37 @@ test("the Toggle Group Lab: its thumb lands on the picked view, and choices keep
   await expect(stage(page).getByRole("group", { name: "Formatting" })).toBeVisible();
 });
 
+test("the Tabs Lab: the key lands on the picked tab, one panel shows, and the code drawer is Tabs", async ({
+  page,
+}) => {
+  await page.goto("/en/tabs");
+  const list = demo(page).getByRole("tablist", { name: "Project" });
+  const members = list.getByRole("tab", { name: "Members" });
+  await members.click();
+  await expect(members).toHaveAttribute("aria-selected", "true");
+  const panel = demo(page).getByRole("tabpanel", { name: "Members" });
+  await expect(panel).toContainText("Five people on this project");
+  await expect(demo(page).getByRole("tabpanel")).toHaveCount(1);
+  const key = list.locator(".ow-tabs__indicator");
+  await expect
+    .poll(async () => {
+      const [at, under] = await Promise.all([thumbKey(key), members.boundingBox()]);
+      return Math.abs(at.x - (under?.x ?? 99));
+    })
+    .toBeLessThanOrEqual(0.5);
+
+  // The drawer's files are Tabs too; the arrows pick there.
+  await stage(page).getByRole("button", { name: "Code" }).click();
+  const files = stage(page).getByRole("tablist", { name: "Files" });
+  await expect(files.locator(".ow-tabs__indicator")).toBeVisible();
+  await files.getByRole("tab", { name: "project-tabs.tsx" }).click();
+  await page.keyboard.press("ArrowRight");
+  await expect(files.getByRole("tab", { name: "Install" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
+});
+
 test("the stage tools name themselves and their key in a tooltip, not a title", async ({
   page,
 }, testInfo) => {

@@ -1,9 +1,18 @@
 "use client";
 
-import { Button, Kbd, Menu, Popover, Toggle, ToggleGroup, Toolbar, Tooltip } from "owsem-ui/base";
+import {
+  Button,
+  Kbd,
+  Menu,
+  Popover,
+  Tabs,
+  Toggle,
+  ToggleGroup,
+  Toolbar,
+  Tooltip,
+} from "owsem-ui/base";
 import {
   Fragment,
-  type KeyboardEvent,
   type ReactNode,
   useEffect,
   useId,
@@ -659,7 +668,6 @@ function CodeDrawer({
   item: string;
   labels: Dictionary["lab"];
 }) {
-  const id = useId();
   // The code files, then how to install the component.
   const all: DrawerTab[] = [
     ...files.map((file) => ({ key: file.name, label: file.name, file })),
@@ -667,61 +675,32 @@ function CodeDrawer({
   ];
   const [selected, setSelected] = useState(all[0]?.key ?? "");
   const current = all.find((tab) => tab.key === selected) ?? all[0];
-  const tabs = useRef<(HTMLButtonElement | null)[]>([]);
   if (!current) return null;
 
-  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    const index = all.indexOf(current);
-    const next = { ArrowRight: index + 1, ArrowLeft: index - 1, Home: 0, End: all.length - 1 }[
-      event.key
-    ];
-    if (next === undefined) return;
-    event.preventDefault();
-    const target = all[(next + all.length) % all.length];
-    if (!target) return;
-    setSelected(target.key);
-    tabs.current[all.indexOf(target)]?.focus();
-  };
-
   return (
-    <>
+    <Tabs.Root className="lab-drawer-tabs" value={current.key} onValueChange={setSelected}>
       <div className="lab-drawer-bar">
-        <div role="tablist" aria-label={labels.files} className="lab-tabs" onKeyDown={onKeyDown}>
-          {all.map((tab, i) => (
-            <button
-              key={tab.key}
-              ref={(el) => {
-                tabs.current[i] = el;
-              }}
-              type="button"
-              role="tab"
-              id={`${id}-tab-${i}`}
-              aria-selected={tab === current}
-              aria-controls={`${id}-panel`}
-              tabIndex={tab === current ? 0 : -1}
-              onClick={() => setSelected(tab.key)}
-            >
+        <Tabs.List aria-label={labels.files} size="sm" className="lab-drawer-files" activateOnFocus>
+          {all.map((tab) => (
+            <Tabs.Tab key={tab.key} value={tab.key}>
               {tab.label}
-            </button>
+            </Tabs.Tab>
           ))}
-        </div>
+        </Tabs.List>
         {/* Each install command has its own Copy. */}
         {current.file ? <CopyButton text={current.file.code} labels={labels} /> : null}
       </div>
-      <ScrollFade
-        id={`${id}-panel`}
-        role="tabpanel"
-        aria-labelledby={`${id}-tab-${all.indexOf(current)}`}
-        className="lab-sheet-scroll"
-        // Focusable, so the keyboard can scroll it.
-        tabIndex={0}
-      >
-        {current.file ? (
-          <LiveCode file={current.file} />
-        ) : (
-          <InstallPane item={item} labels={labels} />
-        )}
-      </ScrollFade>
-    </>
+      {/* One panel for every tab, so the code in it can flash the lines that change. The scroller
+          inside is the keyboard's stop. */}
+      <Tabs.Panel value={current.key} className="lab-drawer-panel" tabIndex={-1}>
+        <ScrollFade className="lab-sheet-scroll" tabIndex={0}>
+          {current.file ? (
+            <LiveCode file={current.file} />
+          ) : (
+            <InstallPane item={item} labels={labels} />
+          )}
+        </ScrollFade>
+      </Tabs.Panel>
+    </Tabs.Root>
   );
 }

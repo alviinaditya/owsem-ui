@@ -1,0 +1,164 @@
+---
+title: Dialog
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Dialog opens a window over the page: a title, a line or two, and whatever the task needs, centered
+on the panel material over a scrim. Base UI keeps focus inside, locks the page's scroll, and handles
+the keyboard. Scroll to start the tour; the stage follows each part.
+
+## A window over the page [#window]
+
+The shortest dialog is a Root, a Trigger, a Portal, and a Popup with a Title. Nothing else needs
+setting up: `Dialog.Portal` draws the scrim, and the Popup centers itself at a width that suits a
+sentence or a short form.
+
+`Dialog.Trigger` and `Dialog.Close` have no look of their own, so they wear your button through
+`render`, here `<Button />`. There is no built-in close icon: you decide what shuts the dialog and
+what it says.
+
+The panel fades in and grows from 0.96 in 250 ms, eased out, from its own middle; it needs no
+translate to stay centered, so it does not drift. The scrim only fades. Both leave in 200 ms.
+
+The stage plays it: the pointer opens Share and shuts it with Done. Your own dialog is modal by
+default. The stage's are not, so these pages keep scrolling beside them.
+
+## Long content stays inside [#long]
+
+The panel stays 16px inside the screen at any size, down to a 320px phone. Content that does not
+fit scrolls inside the panel, not the page. A dialog too long to show whole takes focus itself
+rather than its first button, so it opens at its start, not scrolled down to that button.
+
+For a dialog that reads like a page, wrap the Popup in `Dialog.Viewport`: the panel keeps its full
+height, and the Viewport scrolls with it. Pick either in the controls.
+
+The stage plays it: it reads down the panel and back up.
+
+## One over another [#nested]
+
+Put a `Dialog.Root` inside a Popup and it nests. While the inner dialog is open, the parent steps
+back: 16px up and down to 0.95, more for each level, from Base UI's `--nested-dialogs`, under
+`data-nested-dialog-open`. Its Portal draws a second scrim, so the parent dims with the page; set
+`backdrop={false}` there to leave it undimmed. Escape shuts the top dialog alone.
+
+The stage plays it: Share, then Remove link over it, then back out one at a time.
+
+## Anatomy [#anatomy]
+
+Base UI renders the parts, the dialog's naming, focus, and the scroll lock; OwsemUI styles the scrim,
+the panel, the title, and the description, draws the scrim by default, and carries the text direction
+into the portal. Root and Portal add no look of their own, and Trigger and Close wear your button.
+Inspect (I) outlines the parts on the stage; pick a name, here or on the stage, to see its tokens.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| Root | None | Holds the state: `open`, `modal`, and `handle` |
+| <Part name="Trigger" /> | Your button | Passed to `render`; `aria-haspopup`, `aria-expanded`, and `data-popup-open` while open |
+| Portal | `div` | Moves the dialog to the end of the body, or into `container`, and draws the scrim |
+| <Part name="Backdrop" /> | `div.ow-dialog__backdrop` | Optional: write it only to change the scrim, and it replaces Portal's |
+| Viewport | `div.ow-dialog__viewport` | Optional, around the Popup: it scrolls, and the panel keeps its full height |
+| <Part name="Popup" /> | `div.ow-dialog__popup` | `role="dialog"`, `dir`, `--nested-dialogs`, and `data-nested-dialog-open` |
+| <Part name="Title" /> | `h2.ow-dialog__title` | Names the dialog; the one part accessibility requires |
+| <Part name="Description" /> | `p.ow-dialog__description` | Describes the dialog, muted |
+| <Part name="Close" /> | Your button | Shuts the dialog |
+
+## States and variants [#states]
+
+The stage sets the panel in both themes, open and stepped back behind a nested dialog. The surface
+is the panel material in both, with the popup shadow.
+
+| State | What shows it |
+| --- | --- |
+| Entering | `data-starting-style`: from 0.96 and transparent to full size, in 250 ms, eased out |
+| Open | `data-open` on the scrim and the panel; `data-popup-open` on the trigger |
+| Behind a nested dialog | `data-nested-dialog-open`, with `--nested-dialogs`: 16px up and 0.95 for each level |
+| Nested | `data-nested` on the inner panel |
+| Leaving | `data-ending-style`: back to 0.96 and transparent, in 200 ms |
+
+## Keyboard and accessibility [#keyboard]
+
+| Key | Action |
+| --- | --- |
+| Enter, Space | On the trigger: open the dialog; focus moves into it |
+| Tab, Shift + Tab | Moves through the dialog's controls, and stays inside while it is modal |
+| Escape | Shuts the top dialog; focus goes back to what opened it |
+
+Screen readers announce a dialog named by the title and described by the description. The rest of the
+page is inert while it is modal, so always give it a `Dialog.Title` and a `Dialog.Close`. `modal` is
+`true` by default; `"trap-focus"` keeps focus inside and leaves the page's scroll and pointer alone,
+and `false` leaves the page usable (add `backdrop={false}` on the Portal, since a scrim covers the
+page). `initialFocus` and `finalFocus` pick where focus goes.
+
+With `prefers-reduced-motion`, the panel fades without growing, and a parent stays in place behind a
+nested dialog. In forced colors (Windows High Contrast), the panel keeps a 1px edge in the system
+color. Dialog ships no text of its own, so there is nothing to translate but yours.
+
+## Customization [#customization]
+
+The stage controls are open: the layouts here are plain CSS, and the code writes it out. Each of
+Dialog's rules weighs one class, so a class of yours, or a Tailwind utility, wins without a fight.
+
+```css
+.wide {
+  inline-size: 40em; /* 32em by default; it still stays 16px inside the screen */
+  padding: 24px;
+}
+```
+
+Pass it to `className` on the Popup. Sizes are in `em`, so `font-size` on the Popup scales the panel.
+A full screen or a sheet needs only CSS as well: pick one above. Your rule for `data-starting-style`
+and `data-ending-style` replaces the growth, as the sheet's slide does.
+
+Composition goes through `render`: Trigger and Close take any button, and Popup, Title, and
+Description any element. `Portal` takes a `container`, and an explicit `Dialog.Backdrop` replaces the
+scrim it draws.
+
+Dialog reads these theme tokens. Set them on `:root` for every dialog, on the Popup for one panel, or
+on the Portal to reach the scrim as well. A class around the trigger does not reach: the dialog
+renders in a portal, outside the trigger's subtree.
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-backdrop` | The scrim |
+| `--ow-panel` | Surface |
+| `--ow-popup-shadow` | Edge and shadow |
+| `--ow-fg` | Text |
+| `--ow-muted` | The description |
+| `--ow-radius` | Corners, plus the padding around a button (FR-10b) |
+| `--ow-focus` | The ring, when the panel itself takes focus |
+| `--ow-ease-out` | Entering and leaving |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Popup, so set yours on the Popup with a class, as
+`share-dialog.css` does.
+
+</ForMode>
+
+<TokenChip lang="en" />
+
+## Ship it [#ship]
+
+The code drawer writes the dialog exactly as the stage is set up, starting from the shortest one.
+Change the content, the layout, or a color, and the lines that change light up.
+
+| Part | Prop | Type | Default |
+| --- | --- | --- | --- |
+| Root | `open`, `defaultOpen`, `onOpenChange` | | |
+| Root | `modal` | `boolean \| "trap-focus"` | `true` |
+| Root | `disablePointerDismissal` | `boolean` | `false` |
+| Root | `handle` | From `Dialog.createHandle()` | |
+| Trigger | `handle`, `payload` | | |
+| Portal | `backdrop` | `boolean` | `true` |
+| Portal | `container`, `keepMounted` | | |
+| Backdrop | `forceRender` | `boolean` | `true` |
+| Popup | `initialFocus`, `finalFocus` | | |
+| Every part | `className`, `style`, `render` | | |
+
+The defaults of `backdrop` and `forceRender`, and of `initialFocus` for a dialog too long to show
+whole, are OwsemUI's; the rest comes from Base UI, which documents it. Refs go to each part's element.
+
+Import it from `owsem-ui/base`. In the registry, it is the `dialog` item; the buttons here also need
+`button`.

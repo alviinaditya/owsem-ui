@@ -2,6 +2,7 @@
 
 import {
   Button,
+  Dialog,
   Kbd,
   Menu,
   Popover,
@@ -115,6 +116,24 @@ function PopoverPreview({ t }: { t: Text }) {
           </Popover.Positioner>
         </Popover.Portal>
       </Popover.Root>
+      {portal.box}
+    </>
+  );
+}
+
+function DialogPreview({ t }: { t: Text }) {
+  const portal = usePortal();
+  return (
+    <>
+      <Dialog.Root {...pinned}>
+        <Dialog.Portal container={portal.container}>
+          <Dialog.Popup {...keepFocus}>
+            <Dialog.Title>{t.shareTitle}</Dialog.Title>
+            <Dialog.Description>{t.shareBody}</Dialog.Description>
+            <Dialog.Close render={<Button size="sm" />}>{t.share}</Dialog.Close>
+          </Dialog.Popup>
+        </Dialog.Portal>
+      </Dialog.Root>
       {portal.box}
     </>
   );
@@ -309,6 +328,7 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
       <Kbd>K</Kbd>
     </div>
   ),
+  dialog: (t) => <DialogPreview t={t} />,
   popover: (t) => <PopoverPreview t={t} />,
   tooltip: (t) => <TooltipPreview t={t} />,
   menu: (t) => <MenuPreview t={t} />,
@@ -421,16 +441,6 @@ const SKETCHES: Partial<Record<ComponentName, ReactNode>> = {
       {B(30, 36, 100, 24, 6)}
       {F(40, 46, 44)}
       <path d="m112 45 5 5 5-5" />
-    </>
-  ),
-  dialog: (
-    <>
-      {B(26, 12, 108, 72, 8)}
-      {F(38, 24, 48, 6, 0.6)}
-      {F(38, 37, 80, 4, 0.35)}
-      {F(38, 46, 64, 4, 0.35)}
-      {B(70, 62, 26, 13, 4)}
-      <rect x={100} y={62} width={24} height={13} rx={4} fill="currentColor" opacity={0.6} />
     </>
   ),
   tabs: (

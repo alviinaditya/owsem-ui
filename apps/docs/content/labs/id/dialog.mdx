@@ -1,0 +1,167 @@
+---
+title: Dialog
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Dialog membuka jendela di atas halaman: judul, satu atau dua baris teks, dan apa pun yang dibutuhkan
+tugasnya, di tengah layar pada material panel, di atas scrim. Base UI menahan fokus di dalam,
+mengunci gulir halaman, dan mengatur keyboard. Gulir untuk mulai tur; stage mengikuti setiap bagian.
+
+## Jendela di atas halaman [#window]
+
+Dialog terpendek terdiri dari Root, Trigger, Portal, dan Popup dengan Title. Tidak ada lagi yang
+perlu diatur: `Dialog.Portal` menggambar scrim, dan Popup menengahkan dirinya dengan lebar yang pas
+untuk satu kalimat atau formulir pendek.
+
+`Dialog.Trigger` dan `Dialog.Close` tidak punya tampilan sendiri, jadi keduanya memakai tombol Anda
+lewat `render`, di sini `<Button />`. Tidak ada ikon tutup bawaan: Anda yang menentukan apa yang
+menutup dialog dan apa tulisannya.
+
+Panel memudar masuk dan tumbuh dari 0,96 dalam 250 ms, dengan ease-out, dari titik tengahnya; panel
+tidak butuh translate untuk tetap di tengah, jadi tidak bergeser. Scrim hanya memudar. Keduanya pergi
+dalam 200 ms.
+
+Stage memutarnya: pointer membuka Bagikan dan menutupnya dengan Selesai. Dialog Anda modal secara
+bawaan. Dialog di stage tidak, supaya halaman ini tetap bisa digulir di sampingnya.
+
+## Konten panjang tetap di dalam [#long]
+
+Panel tetap 16px di dalam layar pada ukuran berapa pun, sampai ponsel 320px. Konten yang tidak muat
+digulir di dalam panel, bukan halaman. Dialog yang terlalu panjang untuk tampil utuh mengambil fokus
+sendiri, bukan tombol pertamanya, sehingga terbuka di awal, tidak tergulir turun ke tombol itu.
+
+Untuk dialog yang terbaca seperti halaman, bungkus Popup dengan `Dialog.Viewport`: panel mempertahankan
+tinggi penuhnya, dan Viewport yang digulir. Pilih salah satunya di kontrol.
+
+Stage memutarnya: stage membaca panel sampai bawah lalu kembali ke atas.
+
+## Satu di atas yang lain [#nested]
+
+Letakkan `Dialog.Root` di dalam Popup, dan dialog itu bersarang. Selama dialog di dalamnya terbuka,
+induknya mundur: naik 16px dan mengecil ke 0,95, lebih jauh untuk setiap tingkat, dari `--nested-dialogs`
+milik Base UI, di bawah `data-nested-dialog-open`. Portal-nya menggambar scrim kedua, sehingga induknya
+meredup bersama halaman; pasang `backdrop={false}` di sana agar induknya tidak meredup. Escape hanya
+menutup dialog teratas.
+
+Stage memutarnya: Bagikan, lalu Hapus link di atasnya, lalu keluar satu per satu.
+
+## Anatomi [#anatomy]
+
+Base UI merender bagian-bagiannya, penamaan dialog, fokus, dan kunci gulir; OwsemUI memberi gaya pada
+scrim, panel, judul, dan deskripsi, menggambar scrim secara bawaan, dan membawa arah teks ke dalam
+portal. Root dan Portal tidak menambah tampilan, sedangkan Trigger dan Close memakai tombol Anda.
+Inspeksi (I) menandai bagian-bagiannya di stage; pilih sebuah nama, di sini atau di stage, untuk melihat
+tokennya.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| Root | Tidak ada | Memegang state: `open`, `modal`, dan `handle` |
+| <Part name="Trigger" /> | Tombol Anda | Diberikan lewat `render`; `aria-haspopup`, `aria-expanded`, dan `data-popup-open` selama terbuka |
+| Portal | `div` | Memindahkan dialog ke akhir body, atau ke `container`, dan menggambar scrim |
+| <Part name="Backdrop" /> | `div.ow-dialog__backdrop` | Opsional: tulis hanya untuk mengubah scrim, dan ia menggantikan milik Portal |
+| Viewport | `div.ow-dialog__viewport` | Opsional, di sekitar Popup: ia yang digulir, dan panel mempertahankan tinggi penuhnya |
+| <Part name="Popup" /> | `div.ow-dialog__popup` | `role="dialog"`, `dir`, `--nested-dialogs`, dan `data-nested-dialog-open` |
+| <Part name="Title" /> | `h2.ow-dialog__title` | Menamai dialog; satu-satunya bagian yang diwajibkan aksesibilitas |
+| <Part name="Description" /> | `p.ow-dialog__description` | Mendeskripsikan dialog, muted |
+| <Part name="Close" /> | Tombol Anda | Menutup dialog |
+
+## State dan varian [#states]
+
+Stage menampilkan panel di kedua tema, terbuka dan mundur di belakang dialog bersarang. Permukaannya
+material panel di keduanya, dengan bayangan popup.
+
+| State | Tandanya |
+| --- | --- |
+| Masuk | `data-starting-style`: dari 0,96 dan transparan ke ukuran penuh, dalam 250 ms, dengan ease-out |
+| Terbuka | `data-open` di scrim dan panel; `data-popup-open` di trigger |
+| Di belakang dialog bersarang | `data-nested-dialog-open`, dengan `--nested-dialogs`: naik 16px dan 0,95 untuk setiap tingkat |
+| Bersarang | `data-nested` di panel dalam |
+| Keluar | `data-ending-style`: kembali ke 0,96 dan transparan, dalam 200 ms |
+
+## Keyboard dan aksesibilitas [#keyboard]
+
+| Tombol | Aksi |
+| --- | --- |
+| Enter, Space | Di trigger: membuka dialog; fokus masuk ke dalamnya |
+| Tab, Shift + Tab | Berpindah antar kontrol di dialog, dan tetap di dalam selama modal |
+| Escape | Menutup dialog teratas; fokus kembali ke yang membukanya |
+
+Screen reader mengumumkan dialog yang dinamai oleh judul dan dideskripsikan oleh deskripsinya. Bagian
+halaman lainnya inert selama modal, jadi selalu beri `Dialog.Title` dan `Dialog.Close`. `modal` bawaannya
+`true`; `"trap-focus"` menahan fokus di dalam dan membiarkan gulir serta pointer halaman, dan `false`
+membuat halaman tetap bisa dipakai (tambahkan `backdrop={false}` di Portal, karena scrim menutupi
+halaman). `initialFocus` dan `finalFocus` menentukan ke mana fokus pergi.
+
+Dengan `prefers-reduced-motion`, panel memudar tanpa tumbuh, dan induk tetap di tempatnya di belakang
+dialog bersarang. Di forced colors (Windows High Contrast), panel tetap punya tepi 1px dengan warna
+sistem. Dialog tidak membawa teks sendiri, jadi tidak ada yang perlu diterjemahkan selain teks Anda.
+
+## Kustomisasi [#customization]
+
+Kontrol stage terbuka: tata letak di sini murni CSS, dan kodenya menuliskannya. Setiap aturan Dialog
+berbobot satu class, jadi class Anda, atau utility Tailwind, menang tanpa perlu berebut.
+
+```css
+.wide {
+  inline-size: 40em; /* bawaannya 32em; tetap 16px di dalam layar */
+  padding: 24px;
+}
+```
+
+Berikan ke `className` di Popup. Ukurannya dalam `em`, jadi `font-size` di Popup ikut menskalakan panel.
+Layar penuh atau sheet juga cukup dengan CSS: pilih salah satunya di atas. Aturan Anda untuk
+`data-starting-style` dan `data-ending-style` menggantikan efek tumbuh, seperti geser pada sheet.
+
+Komposisi lewat `render`: Trigger dan Close menerima tombol apa pun, dan Popup, Title, serta Description
+menerima elemen apa pun. `Portal` menerima `container`, dan `Dialog.Backdrop` yang ditulis eksplisit
+menggantikan scrim yang digambarnya.
+
+Dialog membaca token tema berikut. Pasang di `:root` untuk semua dialog, di Popup untuk satu panel, atau
+di Portal agar sampai ke scrim juga. Class di sekitar trigger tidak sampai: dialog dirender di portal,
+di luar subtree trigger-nya.
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-backdrop` | Scrim |
+| `--ow-panel` | Permukaan |
+| `--ow-popup-shadow` | Tepi dan bayangan |
+| `--ow-fg` | Teks |
+| `--ow-muted` | Deskripsi |
+| `--ow-radius` | Sudut, ditambah padding di sekitar tombol (FR-10b) |
+| `--ow-focus` | Cincin fokus, saat panel sendiri yang menerima fokus |
+| `--ow-ease-out` | Masuk dan keluar |
+
+<ForMode mode="isolated">
+
+Di mode isolated, nilainya ada di setiap Popup, jadi atur di Popup lewat class, seperti
+`share-dialog.css`.
+
+</ForMode>
+
+<TokenChip lang="id" />
+
+## Ship it [#ship]
+
+Drawer kode menulis dialog persis seperti pengaturan stage, mulai dari yang terpendek. Ganti isi, tata
+letak, atau warna, dan baris yang berubah akan menyala.
+
+| Bagian | Prop | Tipe | Bawaan |
+| --- | --- | --- | --- |
+| Root | `open`, `defaultOpen`, `onOpenChange` | | |
+| Root | `modal` | `boolean \| "trap-focus"` | `true` |
+| Root | `disablePointerDismissal` | `boolean` | `false` |
+| Root | `handle` | Dari `Dialog.createHandle()` | |
+| Trigger | `handle`, `payload` | | |
+| Portal | `backdrop` | `boolean` | `true` |
+| Portal | `container`, `keepMounted` | | |
+| Backdrop | `forceRender` | `boolean` | `true` |
+| Popup | `initialFocus`, `finalFocus` | | |
+| Semua bagian | `className`, `style`, `render` | | |
+
+Nilai bawaan `backdrop` dan `forceRender`, serta `initialFocus` untuk dialog yang terlalu panjang untuk
+tampil utuh, berasal dari OwsemUI; sisanya dari Base UI, yang mendokumentasikannya. Ref diteruskan ke
+elemen setiap bagian.
+
+Impor dari `owsem-ui/base`. Di registry, item-nya `dialog`; tombol di sini juga butuh `button`.

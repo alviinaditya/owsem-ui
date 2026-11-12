@@ -27,6 +27,7 @@ export default [
   entry("core", "dist/core/index.js", "6 kB"),
   entry("button", "dist/components/button/index.js", "3 kB"),
   entry("color-picker", "dist/components/color-picker/index.js", "8 kB"),
+  entry("dialog", "dist/components/dialog/index.js", "3 kB"),
   entry("kbd", "dist/components/kbd/index.js", "3 kB"),
   entry("menu", "dist/components/menu/index.js", "3 kB"),
   entry("popover", "dist/components/popover/index.js", "3 kB"),

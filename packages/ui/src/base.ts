@@ -3,6 +3,7 @@ export * from "./components/button";
 export { Kbd } from "./components/kbd";
 export * from "./components/menu";
 export * from "./components/popover";
+export * from "./components/scroll-area";
 export { Separator } from "./components/separator";
 export { Toggle, type ToggleProps, type ToggleSize } from "./components/toggle";
 export * from "./components/toggle-group";

@@ -152,8 +152,8 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Button**, **Kbd**, **Menu**, **Popover**, **Separator**, **Toggle**, **Toggle Group**,
-**Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`) and **Color Picker**, **Command Menu**,
+**Button**, **Kbd**, **Menu**, **Popover**, **Scroll Area**, **Separator**, **Toggle**,
+**Toggle Group**, **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`) and **Color Picker**, **Command Menu**,
 **Table of Contents**, and **Tree Rail Nav** (Owsem, from `owsem-ui/owsem`) are built. Base
 components are Base UI components with OwsemUI's styling, and small primitives without a Base UI
 part, such as Kbd; Owsem components are OwsemUI's own. No component has a `flavor` prop.
@@ -293,6 +293,45 @@ import { Popover } from "owsem-ui/base"; // or "@/components/owsem/popover"
   inside the popup (the popup itself has no overflow, so the arrow shows).
 - Reads `--ow-panel` and `--ow-popup-shadow` (the arrow takes both), `--ow-fg`, `--ow-muted`, and
   `--ow-radius`.
+
+### Scroll Area
+
+A scroller with a thin scrollbar of its own, the same in every browser, that floats over the content
+and shows on hover and while scrolling. Registry item: `scroll-area`.
+
+```tsx
+import { ScrollArea } from "owsem-ui/base"; // or "@/components/owsem/scroll-area"
+<ScrollArea.Root className="h-64">{content}</ScrollArea.Root>
+<ScrollArea.Root className="h-64" fade>{content}</ScrollArea.Root>
+```
+
+- The component has no size: set a height or a max-height on the Root with CSS, or nothing scrolls.
+  It fills its parent's width, and adds no width for the scrollbar.
+- With only content inside, Root draws the other parts for both axes. To give a part its own props,
+  write them out; a Viewport among Root's direct children turns the drawing off:
+
+  ```tsx
+  <ScrollArea.Root className="h-64">
+    <ScrollArea.Viewport ref={viewport} id="list">{content}</ScrollArea.Viewport>
+    <ScrollArea.Scrollbar />
+    <ScrollArea.Scrollbar orientation="horizontal" />
+    <ScrollArea.Corner />
+  </ScrollArea.Root>
+  ```
+
+  Viewport draws Content and Scrollbar draws Thumb when left out; no Scrollbar means none shows. Do
+  not wrap the Viewport in a component of your own, which hides it from Root: pass yours to its
+  `render`. Content is as wide as its longest line (Base UI's `min-width: fit-content`); for text
+  that truncates instead, write it out with `style={{ minWidth: 0 }}`.
+- `fade` on the Root fades an edge while there is more to scroll that way; `--fade-size` on the Root
+  or above sets how far (2em by default). A Viewport is a tab stop while its content overflows; set
+  `tabIndex={-1}` on it when everything inside can already take focus.
+- Restyle with plain CSS: `.list .ow-scroll-area__thumb { background-color: ... }`, and for the
+  width `.list .ow-scroll-area__scrollbar[data-orientation="vertical"] { inline-size: 10px; }`.
+  Give content room at the edge: the thumb's press area reaches 24px in while the scrollbar shows.
+- The rule that hides native scrollbars is in the stylesheet. Base UI still adds a `<style>` for it
+  unless the app is wrapped in `<CSPProvider disableStyleElements>`, which a strict CSP needs.
+- Reads `--ow-muted` (the thumb, at 72%), `--ow-radius`, `--ow-focus`, and `--ow-ease-out`.
 
 ### Separator
 

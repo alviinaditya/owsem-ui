@@ -32,6 +32,7 @@ for (const path of [
   "/id/separator",
   "/id/toggle-group",
   "/en/command-menu",
+  "/en/scroll-area",
   "/id/table-of-contents",
   "/en/button",
 ]) {

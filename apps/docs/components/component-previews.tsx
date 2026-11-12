@@ -5,6 +5,7 @@ import {
   Kbd,
   Menu,
   Popover,
+  ScrollArea,
   Separator,
   Toggle,
   ToggleGroup,
@@ -310,6 +311,15 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
     </div>
   ),
   popover: (t) => <PopoverPreview t={t} />,
+  "scroll-area": (t) => (
+    <ScrollArea.Root className="component-preview-scroll" fade>
+      <ul>
+        {[...t.sections, t.components, t.guides, t.docs, t.blog].map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    </ScrollArea.Root>
+  ),
   tooltip: (t) => <TooltipPreview t={t} />,
   menu: (t) => <MenuPreview t={t} />,
   "tree-rail-nav": (t) => (
@@ -443,15 +453,6 @@ const SKETCHES: Partial<Record<ComponentName, ReactNode>> = {
       {F(26, 54, 96, 4, 0.35)}
       {F(26, 64, 76, 4, 0.35)}
       {F(26, 74, 86, 4, 0.35)}
-    </>
-  ),
-  "scroll-area": (
-    <>
-      {B(36, 12, 88, 72, 7)}
-      {[24, 36, 48, 60, 72].map((y, i) => (
-        <g key={y}>{F(46, y, 52 - (i % 2) * 14, 4, 0.35)}</g>
-      ))}
-      <rect x={115} y={20} width={3} height={26} rx={1.5} fill="currentColor" stroke="none" />
     </>
   ),
   "checkbox-group": (

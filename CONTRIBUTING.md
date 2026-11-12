@@ -168,13 +168,13 @@ deleted CSS:
 | --- | --- | --- |
 | 1 | Tabs | The code drawer's file tabs (`.lab-tabs`) |
 | 1 | Field, Input | The prefix field (`.prefix-field`) and the color controls' hex field (`.color-field`) |
-| 1 | Scroll Area | `ScrollFade` (sidebar, controls, code drawer, commands) |
 | 2 | Toggle Group | The Token setup's mode (`.seg`), with Popover. Already replaced: the theme, the Lab's choices, the Family filter, and the package manager picker |
 | 2 | Toast | The Copied status |
 | 3 | Drawer | The sidebar as a menu panel below 1100 px, and the Lab's docs, controls, and code sheets below 960 px (DS-10) |
 
 Swapped already: Tree Rail Nav is the sidebar (DS-14), Table of Contents is the docs pages' "On
-this page", and Color Picker opens from the swatch of every Lab color control, in place of the
+this page", Scroll Area scrolls the sidebar, the Lab's controls and code drawer, its row of scenes,
+and the install commands, and Color Picker opens from the swatch of every Lab color control, in place of the
 browser's `<input type="color">`.
 
 The docs' `--docs-well`, `--docs-raised`, and their shadows point at the library's depth

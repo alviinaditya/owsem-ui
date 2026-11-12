@@ -911,6 +911,30 @@ body {
   display: none;
 }
 
+/* A short list that scrolls. */
+.component-preview-scroll {
+  --ow-radius: var(--docs-radius);
+  inline-size: 132px;
+  block-size: 104px;
+  border: 1px solid var(--ow-line-dark);
+  background-color: var(--docs-surface);
+  color: var(--docs-control);
+  font-size: 12.5px;
+}
+
+.component-preview-scroll ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  list-style: none;
+}
+
+/* Inert here, so nothing would ever show it. */
+.component-preview-scroll .ow-scroll-area__scrollbar {
+  opacity: 1;
+}
+
 /* Table of Contents beside a page sketch that scrolls. */
 .component-preview-toc {
   display: flex;
@@ -1079,96 +1103,10 @@ body {
   white-space: nowrap;
 }
 
-/*
- * Scrollers without a scrollbar (components/scroll-fade.tsx): each edge fades while there is
- * more to scroll that way. Registered so the fade sizes can transition.
- */
-@property --fade-top {
-  syntax: "<length>";
-  inherits: false;
-  initial-value: 0px;
-}
-
-@property --fade-bottom {
-  syntax: "<length>";
-  inherits: false;
-  initial-value: 0px;
-}
-
-@property --fade-left {
-  syntax: "<length>";
-  inherits: false;
-  initial-value: 0px;
-}
-
-@property --fade-right {
-  syntax: "<length>";
-  inherits: false;
-  initial-value: 0px;
-}
-
-/* Hosts may set --fade-size. */
-.scroll-fade {
-  box-sizing: border-box;
-  block-size: 100%;
-  overflow: auto;
+/* The docs' scrollers (Scroll Area) stop at their ends instead of moving the page. */
+:is(.site-sidebar-scroll, .lab-sheet-scroll, .command-text, .lab-scene-nav .ow-scroll-area)
+> .ow-scroll-area__viewport {
   overscroll-behavior: contain;
-  scrollbar-width: none;
-  mask-image:
-    linear-gradient(
-      to bottom,
-      transparent,
-      #000 var(--fade-top),
-      #000 calc(100% - var(--fade-bottom)),
-      transparent
-    ),
-    linear-gradient(
-      to right,
-      transparent,
-      #000 var(--fade-left),
-      #000 calc(100% - var(--fade-right)),
-      transparent
-    );
-  mask-composite: intersect;
-  transition:
-    --fade-top 0.2s ease,
-    --fade-bottom 0.2s ease,
-    --fade-left 0.2s ease,
-    --fade-right 0.2s ease;
-}
-
-.scroll-fade[data-instant] {
-  transition: none;
-}
-
-.scroll-fade::-webkit-scrollbar {
-  display: none;
-}
-
-.scroll-fade[data-fade-top] {
-  --fade-top: var(--fade-size, 32px);
-}
-
-.scroll-fade[data-fade-bottom] {
-  --fade-bottom: var(--fade-size, 32px);
-}
-
-.scroll-fade[data-fade-left] {
-  --fade-left: var(--fade-size, 32px);
-}
-
-.scroll-fade[data-fade-right] {
-  --fade-right: var(--fade-size, 32px);
-}
-
-/* The mask would fade the scroller's own focus ring at its edges, so the host draws it. */
-.scroll-fade:focus-visible {
-  outline: none;
-}
-
-.scroll-fade-host:has(> .scroll-fade:focus-visible) {
-  outline: 2px solid var(--docs-accent);
-  outline-offset: -2px;
 }
 
 /*
@@ -1198,7 +1136,7 @@ body {
   min-block-size: 0;
 }
 
-.site-sidebar-scroll > .scroll-fade {
+.site-sidebar-scroll .ow-scroll-area__content {
   padding: 8px 12px 24px;
 }
 
@@ -1877,12 +1815,11 @@ figure[data-code-block] pre {
 }
 
 /* Positioned, so a link's offsetLeft counts from the row's start (LabShell). */
-.lab-scene-nav .scroll-fade {
+.lab-scene-nav .ow-scroll-area__content {
   position: relative;
   display: flex;
   gap: 20px;
   padding-inline: 20px;
-  overflow-y: hidden;
 }
 
 .lab-scene-nav a {
@@ -2958,10 +2895,10 @@ figure[data-code-block] pre {
   color: var(--docs-fg);
 }
 
-/* The scrolling part of the controls and the code drawer (components/scroll-fade.tsx). */
+/* The scrolling part of the controls and the code drawer. */
 .lab-sheet-scroll {
+  --fade-size: 32px;
   flex: 1;
-  min-block-size: 0;
 }
 
 .live-code {
@@ -3680,6 +3617,71 @@ figure[data-code-block] pre {
   inline-size: 280px;
   block-size: 150px;
   box-sizing: border-box;
+}
+
+.demo-scroll-area-frame {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  inline-size: min(360px, 100%);
+}
+
+/* The height that makes it scroll, and a panel to scroll over. */
+.demo-scroll-area {
+  box-sizing: border-box;
+  inline-size: 100%;
+  block-size: 280px;
+  background-color: var(--ow-panel);
+  box-shadow: var(--ow-panel-shadow);
+  color: var(--ow-fg);
+}
+
+/* What the Scrollbar's className does in the Lab's code. */
+.demo-scroll-area[data-width="wide"] .ow-scroll-area__scrollbar[data-orientation="vertical"] {
+  inline-size: 10px;
+}
+
+.demo-scroll-area[data-width="wide"] .ow-scroll-area__scrollbar[data-orientation="horizontal"] {
+  block-size: 10px;
+}
+
+/* For a still look at it: only a pointer or a scroll shows it otherwise. */
+.demo-scroll-area[data-pin] .ow-scroll-area__scrollbar {
+  opacity: 1;
+}
+
+.demo-scroll-area-notes {
+  display: grid;
+  gap: 12px;
+  padding: 16px 20px;
+}
+
+.demo-scroll-area-notes .demo-title {
+  margin: 0;
+}
+
+.demo-scroll-area-note {
+  margin: 2px 0 0;
+  color: color-mix(in oklab, var(--ow-fg) 65%, transparent);
+  font-size: 12.5px;
+}
+
+.demo-scroll-area-log {
+  margin: 0;
+  padding: 16px 20px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.demo-cell.demo-scroll-area-cell {
+  display: block;
+  inline-size: 220px;
+  padding: 0;
+}
+
+.demo-scroll-area-cell .demo-scroll-area {
+  block-size: 112px;
 }
 
 /* A matrix of controls on the components' own background. */

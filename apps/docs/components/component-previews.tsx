@@ -2,6 +2,7 @@
 
 import {
   Button,
+  Input,
   Kbd,
   Menu,
   Popover,
@@ -255,6 +256,14 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
       </Button>
     </div>
   ),
+  input: (t) => (
+    <Input
+      size="sm"
+      aria-label={t.search}
+      placeholder={t.search}
+      startIcon={<Icon name="search" />}
+    />
+  ),
   toggle: (t) => (
     <div className="component-preview-row">
       <Toggle pressed aria-label={t.bold} startIcon={<Icon name="bold" />} />
@@ -382,13 +391,6 @@ const SKETCHES: Partial<Record<ComponentName, ReactNode>> = {
       {B(36, 14, 88, 18)}
       {B(36, 38, 88, 18)}
       <rect x={36} y={64} width={38} height={18} rx={5} fill="currentColor" opacity={0.6} />
-    </>
-  ),
-  input: (
-    <>
-      {B(28, 36, 104, 24, 6)}
-      {F(38, 46, 40, 5, 0.4)}
-      <path d="M82 43v11" />
     </>
   ),
   checkbox: (

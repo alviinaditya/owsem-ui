@@ -670,6 +670,17 @@ test("the Toggle Lab's note follows its toggles, and the first scene plays them"
   await expect(note).toHaveCSS("font-style", "italic");
 });
 
+test("the Input Lab's first scene types an address, and the edge follows", async ({ page }) => {
+  await page.goto("/en/input");
+  const email = demo(page).getByRole("textbox", { name: "Email" });
+  await expect(email).toHaveValue("");
+  await scene(page, "typing");
+  await expect(email).toHaveAttribute("aria-invalid", "true");
+  await expect(demo(page).getByText("doesn't look like an email")).toBeVisible();
+  await expect(email).toHaveValue("ana@owsem.dev");
+  await expect(email).not.toHaveAttribute("aria-invalid");
+});
+
 test("the Toolbar Lab's first scene presses its items, and the line follows", async ({ page }) => {
   await page.goto("/en/toolbar");
   const italic = demo(page).getByRole("button", { name: "Italic" });

@@ -3257,6 +3257,26 @@ figure[data-code-block] pre {
   color: var(--ow-fg);
 }
 
+/* The Radio Group Lab's demos: a card as wide as its rows, one rule that lays them out in a row, and
+ * the matrix's surfaces. */
+.demo-radio-group {
+  inline-size: max-content;
+  min-inline-size: 300px;
+  max-inline-size: 100%;
+}
+
+.demo-radio-group-across {
+  flex-flow: row wrap;
+}
+
+.demo-radio-group-surface {
+  padding: 4px;
+  border: 1px solid var(--ow-line);
+  border-radius: 14px;
+  background-color: var(--ow-bg);
+  color: var(--ow-fg);
+}
+
 /* The Button Lab's demos: every variant in a grid, and wrapping rows of buttons. */
 .demo-board {
   display: grid;

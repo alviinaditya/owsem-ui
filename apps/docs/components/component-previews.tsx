@@ -6,6 +6,7 @@ import {
   Menu,
   Popover,
   Separator,
+  Switch,
   Toggle,
   ToggleGroup,
   Toolbar,
@@ -49,6 +50,8 @@ const TEXT = {
     toolbar: "Format teks",
     contents: "Di halaman ini",
     sections: ["Instalasi", "Tema", "Pemakaian", "API"],
+    alerts: "Notifikasi",
+    sounds: "Suara",
   },
   en: {
     create: "New",
@@ -81,6 +84,8 @@ const TEXT = {
     toolbar: "Text format",
     contents: "On this page",
     sections: ["Installation", "Theming", "Usage", "API"],
+    alerts: "Alerts",
+    sounds: "Sounds",
   },
 };
 
@@ -255,6 +260,12 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
       </Button>
     </div>
   ),
+  switch: (t) => (
+    <div className="component-preview-row">
+      <Switch.Root checked aria-label={t.alerts} />
+      <Switch.Root aria-label={t.sounds} />
+    </div>
+  ),
   toggle: (t) => (
     <div className="component-preview-row">
       <Toggle pressed aria-label={t.bold} startIcon={<Icon name="bold" />} />
@@ -407,13 +418,6 @@ const SKETCHES: Partial<Record<ComponentName, ReactNode>> = {
           {F(66, y - 2.5, 40 - i * 6)}
         </g>
       ))}
-    </>
-  ),
-  switch: (
-    <>
-      <rect x={44} y={37} width={40} height={22} rx={11} fill="currentColor" opacity={0.6} />
-      <circle cx={73} cy={48} r={8} fill="var(--docs-surface)" stroke="none" />
-      {F(92, 45, 30)}
     </>
   ),
   select: (

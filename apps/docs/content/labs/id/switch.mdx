@@ -1,0 +1,183 @@
+---
+title: Switch
+---
+
+import { Part } from "@/components/lab/lab-shell";
+import { ForMode, TokenChip } from "@/components/token-setup";
+
+Switch menyalakan atau mematikan satu pengaturan, dan perubahannya langsung berlaku. Cukup satu
+baris untuk memakainya, dengan nama dari label atau `aria-label`; thumb-nya tergambar sendiri. Gulir
+untuk mulai tur; stage mengikuti setiap bagian.
+
+## Tombol di atas pegas [#travel]
+
+```tsx
+<label>
+  <Switch.Root />
+  Notifikasi email
+</label>
+```
+
+Saat mati, track-nya berupa well dengan tepi tegas 3:1. Saat menyala, track-nya memakai warna utama
+dengan tepi tombol primary. Isiannya berganti seketika mengikuti state. Thumb-nya tombol timbul yang
+sama di kedua state, dan itulah yang bergerak: `translate`, dengan spring travel. Berubah pikiran di
+tengah jalan, thumb berbalik dari posisinya, karena geraknya transisi CSS.
+
+Stage memutarnya: pointer menyalakan Push dan ringkasan, lalu mematikannya lagi, dan baris di
+bawahnya ikut menghitung. Putar scene memutarnya lagi; tekan sendiri untuk merasakannya. Dengan
+reduced motion, thumb langsung ke tempatnya tanpa perjalanan.
+
+## Memadat saat ditahan [#press]
+
+Saat ditahan, thumb masuk dalam 90 ms, ke arah tujuannya, dengan tepi depannya tetap di tempat: 12,5%
+lebih sempit, hanya di sumbu geraknya. Saat dilepas, ia kembali dengan spring settle sambil bergerak.
+Kedalamannya mengikuti `--ow-motion-scale`. Tekanan adalah `:active` milik browser, jadi tidak perlu
+script. Switch yang disabled atau read-only tidak memadat, dan dengan reduced motion tidak ada yang
+memadat.
+
+Ukuran switch ini datang dari `font-size` saja, supaya tekanannya mudah terlihat. Tekan sendiri;
+pointer buatan tidak bisa memicu `:active`, jadi Putar scene menahan thumb lewat properti yang sama.
+
+## Di piksel utuh, di ukuran apa pun [#fit]
+
+Ukurannya mengikuti font Button, dan semuanya berasal dari `em`: tombolnya sebesar font ditambah
+2px, track-nya selebar dua tombol dan setinggi satu tombol, dengan inset 2px. Di ketiga ukuran
+hasilnya piksel utuh. Area tekan minimal 24px ke tiap arah, dari pseudo-element, berapa pun ukuran
+track-nya.
+
+| Ukuran | Font | Track | Tombol |
+| --- | --- | --- | --- |
+| `sm` | 13px | 34 × 19px | 15px |
+| `md` | 14px | 36 × 20px | 16px |
+| `lg` | 16px | 40 × 22px | 18px |
+
+Atur `font-size` di switch untuk mengubah skala semuanya. Atur `inline-size` atau `block-size`
+dengan CSS biasa, dan thumb mengikutinya, karena ukuran dan perjalanannya berasal dari ukuran track
+di CSS. Dua baris terakhir di stage melakukan keduanya.
+
+Thumb beristirahat di tempat yang ditentukan layout, di salah satu ujung, tidak pernah di atas
+`translate`. Di zoom pecahan seperti 110%, `translate` yang beristirahat mendarat di antara piksel
+perangkat dan membuat tepi tombol kabur, jadi perubahan state langsung memindahkannya ke sana, dan
+`translate` menutup jaraknya selama sebuah angka terdaftar menyusul. Thumb juga menyimpan inset
+sebagai border bening, sehingga tepinya dibulatkan ke piksel yang sama dengan tepi track. Jaraknya
+sama di kedua ujung, di kedua state, di zoom berapa pun.
+
+## Anatomi [#anatomy]
+
+Dua bagian. Base UI merender `<span>` dengan role `switch`, dan `<input>` tersembunyi di sebelahnya
+untuk form. Inspeksi (I) menandainya di stage.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `span.ow-switch` | `role="switch"`, `aria-checked`, `data-size`, `data-checked` atau `data-unchecked`, `data-disabled`, `data-readonly` |
+| <Part name="Thumb" /> | `span.ow-switch__thumb` | Atribut state yang sama. Root menggambarnya bila tanpa children; children menggantikannya |
+
+## State dan varian [#states]
+
+Stage menampilkan tema terang dan gelap berdampingan, masing-masing dengan thumb polos dan thumb
+berikon. Pointer menyalakan dan mematikan switch yang mati di setiap tema.
+
+| State | Tandanya |
+| --- | --- |
+| Mati | `--ow-well-bg`, dengan tepi 1px `--ow-edge` |
+| Menyala | `--ow-accent`, dengan `--ow-primary-shadow` |
+| Ditahan | Thumb memadat ke 0,875 ke arah geraknya, dalam 90 ms |
+| Fokus keyboard | Ring 2px dengan jarak 2px, warna `--ow-focus` |
+| Disabled | Opacity 50%, dan tekanan tidak berpengaruh |
+| Read-only | Tampak sama, dengan kursor biasa, dan tekanan tidak berpengaruh |
+
+## Keyboard dan aksesibilitas [#keyboard]
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab | Memindahkan fokus ke switch |
+| Space, Enter | Menyalakan atau mematikannya |
+
+Screen reader mengenalinya sebagai switch beserta state-nya lewat `aria-checked`. Beri nama dengan
+`<label>` yang membungkusnya atau `aria-label`, dan biarkan namanya sama di kedua state: yang
+berubah adalah state-nya. Label pembungkus juga membuat teksnya bisa ditekan. Ikon di thumb bersifat
+dekoratif, jadi beri `aria-hidden`.
+
+Dengan `prefers-reduced-motion`, thumb langsung ke tempatnya tanpa perjalanan dan tanpa memadat. Di
+mode forced colors (Windows High Contrast), track tetap punya tepi 1px berwarna sistem dan diisi
+`Highlight` saat menyala, dan tombolnya digambar solid dengan `CanvasText` atau `HighlightText`. Dari
+kanan ke kiri, posisi mati ada di kanan.
+
+## Kustomisasi [#customization]
+
+Kontrol di stage terbuka: pilih warna, lebar, atau ikon di thumb, dan kodenya mengikuti.
+
+**Token.** Switch membaca token tema berikut. Pasang di switch, atau di elemen di sekitarnya, untuk
+mengubah yang ada di dalamnya.
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-well-bg` | Track saat mati |
+| `--ow-edge` | Tepi track saat mati |
+| `--ow-accent` | Track saat menyala |
+| `--ow-primary-shadow` | Tepi track saat menyala |
+| `--ow-raised-bg` | Thumb |
+| `--ow-raised-shadow` | Tepi thumb |
+| `--ow-fg` | Ikon di thumb |
+| `--ow-radius` | Sudut tombol; track menambahkan inset |
+| `--ow-motion-scale` | Kedalaman tekanan |
+| `--ow-focus` | Ring fokus |
+
+<ForMode mode="isolated">
+
+Di mode isolated, nilainya ada di root setiap Switch, jadi atur di switch itu sendiri.
+
+</ForMode>
+
+<TokenChip lang="id" />
+
+**`className`.** CSS Anda menang tanpa perlawanan. Setiap bagian menerima `className`, dan aturan
+biasa mengalahkan nilai komponen, dengan perjalanan thumb mengikuti ukuran apa pun.
+
+```css
+.wide {
+  inline-size: 3.5em;
+}
+
+.wide[data-checked] {
+  background-color: var(--ow-good);
+}
+```
+
+**Komposisi.** Beri `Switch.Root` sebuah `Switch.Thumb` milik Anda untuk meneruskan props atau ikon.
+Node apa pun bisa dipakai; ia mengisi tombol, dikurangi 2px.
+
+```tsx
+<Switch.Root checked={dark} onCheckedChange={setDark} aria-label="Mode gelap">
+  <Switch.Thumb>{dark ? <Moon aria-hidden /> : <Sun aria-hidden />}</Switch.Thumb>
+</Switch.Root>
+```
+
+## Ship it [#ship]
+
+Drawer kode menulis komponen persis seperti yang diatur di stage. Ganti kontrolnya, dan baris yang
+berubah akan menyala.
+
+| Prop | Tipe | Bawaan |
+| --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| `checked` | `boolean` | |
+| `defaultChecked` | `boolean` | `false` |
+| `onCheckedChange` | `(checked, eventDetails) => void` | |
+| `disabled` | `boolean` | `false` |
+| `readOnly` | `boolean` | `false` |
+| `required` | `boolean` | `false` |
+| `name` | `string` | |
+| `value` | `string` | |
+| `uncheckedValue` | `string` | |
+| `inputRef` | `Ref<HTMLInputElement>` | |
+| `className` | `string \| (state) => string` | |
+| `style` | `CSSProperties` | |
+| `render` | `ReactElement \| (props, state) => ReactElement` | |
+
+Semua ini dipasang di `Switch.Root`; `className`, `style`, `render`, dan ref juga berlaku di
+`Switch.Thumb`. Semua kecuali `size` berasal dari Base UI, dan props lain diteruskan apa adanya. Di
+`<form>` biasa, input tersembunyi mengirim `name` dengan `value`, atau dengan `uncheckedValue` saat
+mati.
+
+Impor dari `owsem-ui/base`. Di registry, namanya item `switch`.

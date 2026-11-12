@@ -182,7 +182,12 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
       );
       const x = (start - side - chips) / 2;
       const y = lower ? -body.clientHeight * 0.24 : -(under + dock) / 2;
-      fit.style.transform = `translate(${x}px, ${y.toFixed(1)}px) scale(${scale.toFixed(3)})`;
+      // None when there is nothing to do: a transform captures `position: fixed` inside it, which
+      // is how Select lays its popup over its trigger.
+      fit.style.transform =
+        scale === 1 && x === 0 && y === 0
+          ? "none"
+          : `translate(${x}px, ${y.toFixed(1)}px) scale(${scale.toFixed(3)})`;
     };
     apply();
     const observer = new ResizeObserver(apply);

@@ -173,6 +173,8 @@ export function createGlide(
     light(nearest(x, y));
   };
   const refresh = () => {
+    // Hidden, as a closed popup that stays mounted: it hears no more of the pointer.
+    if (!container.offsetWidth) pointer = null;
     if (pointer) track(pointer.x, pointer.y);
     else if (active) {
       const rect = active.getBoundingClientRect();

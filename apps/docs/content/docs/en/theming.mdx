@@ -72,8 +72,8 @@ one value changes every component that uses it.
 | Kind | Examples | Set by |
 | --- | --- | --- |
 | Semantic | `--ow-bg`, `--ow-fg`, `--ow-muted`, `--ow-line`, `--ow-accent`, `--ow-hover` | Your app, once for all components |
-| Material depth | `--ow-panel`, `--ow-raised-bg`, `--ow-line-dark`, `--ow-line-light` | OwsemUI per theme; you may override them |
-| Shape and motion | `--ow-radius`, `--ow-motion-scale` | Your app |
+| Materials | `--ow-panel`, `--ow-raised-bg`, `--ow-well-bg`, `--ow-pressed-bg`, `--ow-popup-shadow`, `--ow-primary-shadow` | OwsemUI per theme; you may override them |
+| Shape and motion | `--ow-radius` (the corners of every surface, 10px by default), `--ow-motion-scale` | Your app |
 
 Set a theme token on `:root` to recolor every component, or on any element to recolor only what
 is inside it:
@@ -88,10 +88,10 @@ is inside it:
 }
 ```
 
-Separator reads `--ow-line-dark` and `--ow-line-light`. Tree Rail Nav reads `--ow-fg`,
+Separator reads `--ow-line`. Tree Rail Nav reads `--ow-fg`,
 `--ow-muted`, `--ow-line`, `--ow-bg`, and `--ow-accent` for its trail. Command Menu reads
-`--ow-fg`, `--ow-muted`, `--ow-focus`, `--ow-edge`, `--ow-hover`, and `--ow-backdrop`, with the
-panel, well, and raised materials. Other semantic tokens take effect as the components that use them arrive.
+`--ow-fg`, `--ow-muted`, `--ow-line`, `--ow-focus`, `--ow-hover`, and `--ow-backdrop`, with the
+raised material and the popup shadow. Other semantic tokens take effect as the components that use them arrive.
 
 A token set on `:root` applies to both themes, which suits an accent that reads on either
 background. The default `--ow-accent` has a value per theme instead: a deeper lilac on light, a
@@ -115,9 +115,16 @@ the same selectors as `tokens.css`:
 }
 ```
 
-Material depth tokens are written out for each theme, not derived from other tokens. If you change
-neutrals such as `--ow-bg`, set `--ow-line-dark` and `--ow-line-light` for each theme too, so
-etched lines stay visible.
+Material tokens are written out for each theme, not derived from other tokens. If you change
+neutrals such as `--ow-bg`, set `--ow-line` and the material fills (`--ow-panel`, `--ow-raised-bg`,
+`--ow-well-bg`, `--ow-pressed-bg`) for each theme too, so hairlines and surfaces stay visible.
+
+Materials are told apart by tone, not by edges: a surface sits one tone step from what is under it,
+and fields, keys, and tracks are tints of `--ow-fg` (`color-mix(in oklab, var(--ow-fg) 6%, transparent)`
+for a field). So recoloring `--ow-fg` recolors them. `--ow-edge` is a boundary color kept for
+`@media (prefers-contrast: more)`, where fields, Checkbox, Radio, Switch, and popups draw a 1px edge
+in it. The panel, raised, and pressed shadow tokens are gone: `--ow-panel-shadow`,
+`--ow-raised-shadow`, and `--ow-pressed-shadow`.
 
 ## Customizing one component
 
@@ -125,9 +132,9 @@ The same tokens change one component, or one instance of it: set them on the com
 element around it.
 
 ```css
-/* Every separator in the settings page */
+/* Every line in the settings page, separators included */
 .settings {
-  --ow-line-dark: #b9b0d0;
+  --ow-line: #b9b0d0;
 }
 ```
 
@@ -135,13 +142,15 @@ With Tailwind, an arbitrary property sets a token on one part, or on an element 
 [Tailwind CSS v4](/en/docs#tailwind-css-v4)):
 
 ```tsx
-<Separator className="[--ow-line-dark:var(--color-zinc-400)]" />
+<Separator className="[--ow-line:var(--color-zinc-400)]" />
 <aside className="bg-ow-panel [--ow-panel:var(--color-zinc-900)]">{children}</aside>
 ```
 
-Values without a token of their own come from the theme tokens: inner corners from `--ow-radius`
-(each layer adds its padding), tints from `--ow-fg` or `--ow-accent` with `color-mix()`, and
-Glide's highlight from `--ow-hover`. Names that start with `--_` are private and may change.
+Values without a token of their own come from the theme tokens: tints from `--ow-fg` or
+`--ow-accent` with `color-mix()`, and Glide's highlight from `--ow-hover`. Corners come from one
+token: every surface takes `--ow-radius`, and a part nested inside a padded one, such as a menu item
+or a segmented thumb, takes it less that padding (`max(0px, var(--ow-radius) - <padding>)`). Names
+that start with `--_` are private and may change.
 
 For anything a token does not cover, style the part itself. Each part has a class: `.ow-<component>`
 on the root and `.ow-<component>__<part>` on the others, such as `.ow-tree-rail-nav__label`. States
@@ -190,7 +199,7 @@ a parent does not reach it. Set yours on the component itself:
 
 ```css
 .settings .ow-separator {
-  --acme-line-dark: #b9b0d0;
+  --acme-line: #b9b0d0;
 }
 ```
 

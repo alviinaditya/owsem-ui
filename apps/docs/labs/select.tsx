@@ -74,7 +74,7 @@ const DECADES = [2000, 2010, 2020, 2030];
 const labels = (lang: Lang) =>
   [...ORCHARD, ...TROPICAL].map((value) => ({ value, label: TEXT[lang].names[value] }));
 
-const initial = { size: "md", width: "fit", parts: "short", well: "", bg: "", fg: "" };
+const initial = { size: "md", width: "fit", parts: "short", bg: "", fg: "" };
 type Cfg = typeof initial;
 
 /**
@@ -112,11 +112,11 @@ function useFlatStage(inside: HTMLElement | null) {
 const fixed = { positionMethod: "fixed" } as const;
 
 function fieldTokens(cfg: Cfg) {
-  return { "--ow-well-bg": cfg.well || undefined, "--ow-fg": cfg.fg || undefined } as CSSProperties;
+  return { "--ow-fg": cfg.fg || undefined } as CSSProperties;
 }
 
 function popupTokens(cfg: Cfg) {
-  return { "--ow-panel": cfg.bg || undefined, "--ow-fg": cfg.fg || undefined } as CSSProperties;
+  return { "--ow-raised-bg": cfg.bg || undefined, "--ow-fg": cfg.fg || undefined } as CSSProperties;
 }
 
 /** The field, the short way or with every part spelled out. */
@@ -451,8 +451,12 @@ const selectLab = defineLab({
         { value: "explicit", label: { id: "Lengkap", en: "Explicit" } },
       ],
     },
-    { key: "well", type: "color", label: { id: "Field", en: "Field" }, token: "--ow-well-bg" },
-    { key: "bg", type: "color", label: { id: "Permukaan", en: "Surface" }, token: "--ow-panel" },
+    {
+      key: "bg",
+      type: "color",
+      label: { id: "Permukaan", en: "Surface" },
+      token: "--ow-raised-bg",
+    },
     { key: "fg", type: "color", label: { id: "Teks", en: "Text" }, token: "--ow-fg" },
   ],
 
@@ -470,13 +474,10 @@ const selectLab = defineLab({
       name: "Trigger",
       selector: ".ow-select__trigger",
       note: {
-        id: "Material field: well datar dengan tepi 3:1. Tingginya sama dengan Button; tanpa children, ia menggambar Value dan Icon.",
-        en: "The Field material: a flat well with a 3:1 edge. As tall as a Button; without children, it draws a Value and an Icon.",
+        id: "Material field: isian 6% dari warna teks tanpa tepi, 9% saat hover dan terbuka. Invalid mewarnainya critical 12% dan menggetarkannya sekali (kedip saat gerak dikurangi). Tingginya sama dengan Button; tanpa children, ia menggambar Value dan Icon.",
+        en: "The Field material: a 6% tint of the text color with no edge, 9% on hover and while open. Invalid turns it a 12% critical tint and shakes it once (a blink under reduced motion). As tall as a Button; without children, it draws a Value and an Icon.",
       },
       tokens: {
-        "--ow-well-bg": "--_bg",
-        "--ow-well-shadow": "--_shadow",
-        "--ow-edge": "--_edge",
         "--ow-fg": "--_fg",
         "--ow-focus": "--_focus",
         "--ow-critical": "--_critical",
@@ -504,11 +505,11 @@ const selectLab = defineLab({
       name: "Popup",
       selector: ".ow-select__popup",
       note: {
-        id: "Material panel dengan bayangan popup. Radiusnya radius item ditambah padding 4px.",
-        en: "The panel material with the popup shadow. Its radius is the item's plus the 4px padding.",
+        id: "Material raised dengan bayangan popup. Radiusnya --ow-radius; item memakainya dikurangi padding 4px.",
+        en: "The raised material with the popup shadow. Its radius is --ow-radius; items take it less the 4px padding.",
       },
       tokens: {
-        "--ow-panel": "--_bg",
+        "--ow-raised-bg": "--_bg",
         "--ow-popup-shadow": "--_shadow",
         "--ow-fg": "--_fg",
       },
@@ -526,8 +527,8 @@ const selectLab = defineLab({
       name: "Item",
       selector: '[data-demo="cherry"]',
       note: {
-        id: "Datar; Glide yang menyalakannya. Isi biasa masuk ke ItemText setelah ItemIndicator.",
-        en: "Flat; Glide lights it. Plain children go in an ItemText after an ItemIndicator.",
+        id: "Datar; Glide yang menyalakannya. Isi biasa masuk ke ItemText, lalu ItemIndicator di ujung baris.",
+        en: "Flat; Glide lights it. Plain children go in an ItemText, then an ItemIndicator at the row's end.",
       },
       tokens: { "--ow-fg": "--_fg", "--ow-focus": "--_focus" },
     },
@@ -535,26 +536,26 @@ const selectLab = defineLab({
       name: "ItemIndicator",
       selector: '[data-demo="cherry"] .ow-select__item-indicator',
       note: {
-        id: "Centang. Tetap menyimpan tempatnya saat tidak terpilih, jadi label tetap sejajar.",
-        en: "A check. It keeps its room while unselected, so labels stay in line.",
+        id: "Centang di ujung baris, sejajar dengan chevron trigger. Tetap menyimpan tempatnya saat tidak terpilih, lalu memudar dan membesar masuk saat dipilih.",
+        en: "A check at the row's end, in line with the trigger's chevron. It keeps its room while unselected, and fades and scales in when picked.",
       },
     },
     {
       name: "ItemText",
       selector: '[data-demo="cherry"] .ow-select__item-text',
       note: {
-        id: "Teks yang mendarat di atas teks trigger, dan yang dicocokkan saat mengetik.",
-        en: "The text that lands on the trigger's, and what typing matches.",
+        id: "Teks yang mendarat di atas teks trigger, dan yang dicocokkan saat mengetik. Satu baris, dengan elipsis.",
+        en: "The text that lands on the trigger's, and what typing matches. One line, with an ellipsis.",
       },
     },
     {
       name: "Separator",
       selector: ".ow-select__separator",
       note: {
-        id: "Alur terukir di antara grup.",
-        en: "An etched groove between groups.",
+        id: "Garis tipis di antara grup.",
+        en: "A hairline between groups.",
       },
-      tokens: { "--ow-line-dark": "--_dark", "--ow-line-light": "--_light" },
+      tokens: { "--ow-line": "--ow-line" },
     },
     {
       name: "ScrollDownArrow",
@@ -563,7 +564,7 @@ const selectLab = defineLab({
         id: "Muncul selama masih ada isi di bawah; pointer yang berhenti di atasnya menggulir.",
         en: "Shows while there is more below; the pointer resting on it scrolls.",
       },
-      tokens: { "--ow-panel": "--_bg", "--ow-muted": "--_muted" },
+      tokens: { "--ow-raised-bg": "--_bg", "--ow-muted": "--_muted" },
     },
   ],
 
@@ -577,7 +578,7 @@ const selectLab = defineLab({
       ? 'import { Select } from "owsem-ui/base";'
       : 'import { Select } from "@/components/owsem/select";';
     const size = cfg.size === "md" ? "" : ` size="${cfg.size}"`;
-    const fieldClass = cfg.well || cfg.fg || cfg.width === "fill";
+    const fieldClass = cfg.fg || cfg.width === "fill";
     const popupClass = cfg.bg || cfg.fg;
     const trigger = `<Select.Trigger aria-label="Fruit"${fieldClass ? ' className="field"' : ""}`;
     const popup = `<Select.Popup${popupClass ? ' className="popup"' : ""}>`;
@@ -654,7 +655,6 @@ const selectLab = defineLab({
             ? [
                 ".field {",
                 ...(cfg.width === "fill" ? ["  inline-size: 100%;"] : []),
-                ...(cfg.well ? [`  --${setup.prefix}-well-bg: ${cfg.well};`] : []),
                 ...(cfg.fg ? [`  --${setup.prefix}-fg: ${cfg.fg};`] : []),
                 "}",
               ]
@@ -664,7 +664,7 @@ const selectLab = defineLab({
                 "",
                 "/* The popup itself: it renders in a portal, outside the trigger's subtree. */",
                 ".popup {",
-                ...(cfg.bg ? [`  --${setup.prefix}-panel: ${cfg.bg};`] : []),
+                ...(cfg.bg ? [`  --${setup.prefix}-raised-bg: ${cfg.bg};`] : []),
                 ...(cfg.fg ? [`  --${setup.prefix}-fg: ${cfg.fg};`] : []),
                 "}",
               ]

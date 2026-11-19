@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
-import { concentric, insets, TOL } from "../../../test/geometry.ts";
+import { insets, nested, TOL } from "../../../test/geometry.ts";
 import { Toggle } from "../toggle";
 import { Toolbar, type ToolbarSize } from "./index";
 
@@ -19,8 +19,8 @@ async function mount(ui: ReactNode) {
 
 // FR-11: 2 × --py + 1lh at line-height 1.25; icons the font size plus 2 px.
 const SIZES: Record<ToolbarSize, { height: number; icon: number }> = {
-  sm: { height: 29.25, icon: 15 },
-  md: { height: 38.5, icon: 16 },
+  sm: { height: 32, icon: 15 },
+  md: { height: 40, icon: 16 },
   lg: { height: 48, icon: 18 },
 };
 
@@ -62,13 +62,15 @@ describe("Toolbar geometry (FR-9 to FR-11, FR-10b)", () => {
       const b = insets(end.parentElement, end);
       expect(Math.abs(b.right - b.top)).toBeLessThanOrEqual(TOL);
 
-      // The groove is as long as an icon; the panel's corners are its items' plus the padding.
+      // The separator is as long as an icon; the panel takes the one radius, its items that less
+      // the padding (TK-8).
       expect(one(".ow-toolbar__separator").getBoundingClientRect().height).toBeCloseTo(
         expected.icon,
         1,
       );
-      const r = concentric(one(".ow-toolbar"), one(".ow-toolbar__button"));
-      expect(r.delta).toBeLessThanOrEqual(TOL);
+      const r = nested(one(".ow-toolbar"), one(".ow-toolbar__button"));
+      expect(r.outerDelta).toBeLessThanOrEqual(TOL);
+      expect(r.innerDelta).toBeLessThanOrEqual(TOL);
       expect(r.insetDelta).toBeLessThanOrEqual(TOL);
     });
   }

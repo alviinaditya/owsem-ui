@@ -18,10 +18,11 @@ untuk mulai tur; stage mengikuti setiap bagian.
 </label>
 ```
 
-Saat mati, track-nya berupa well dengan tepi tegas 3:1. Saat menyala, track-nya memakai warna utama
-dengan tepi tombol primary. Isiannya berganti seketika mengikuti state. Thumb-nya tombol timbul yang
-sama di kedua state, dan itulah yang bergerak: `translate`, dengan spring travel. Berubah pikiran di
-tengah jalan, thumb berbalik dari posisinya, karena geraknya transisi CSS.
+Saat mati, track-nya tint 10% dari warna teks tanpa tepi, 13% di bawah pointer halus, di switch atau
+labelnya. Saat menyala, track-nya memakai warna utama dengan sorot atas tombol primary. Isiannya
+berganti seketika mengikuti state. Thumb-nya tombol raised tanpa bayangan yang sama di kedua state, dan itulah yang bergerak:
+`translate`, dengan spring travel. Berubah pikiran di tengah jalan, thumb berbalik dari posisinya,
+karena geraknya transisi CSS.
 
 Stage memutarnya: pointer menyalakan Push dan ringkasan, lalu mematikannya lagi, dan baris di
 bawahnya ikut menghitung. Putar scene memutarnya lagi; tekan sendiri untuk merasakannya. Dengan
@@ -79,7 +80,8 @@ berikon. Pointer menyalakan dan mematikan switch yang mati di setiap tema.
 
 | State | Tandanya |
 | --- | --- |
-| Mati | `--ow-well-bg`, dengan tepi 1px `--ow-edge` |
+| Mati | Tint 10% dari `--ow-fg`, tanpa tepi |
+| Hover, di switch atau labelnya | Mati: tint 13% |
 | Menyala | `--ow-accent`, dengan `--ow-primary-shadow` |
 | Ditahan | Thumb memadat ke 0,875 ke arah geraknya, dalam 90 ms |
 | Fokus keyboard | Ring 2px dengan jarak 2px, warna `--ow-focus` |
@@ -98,7 +100,8 @@ Screen reader mengenalinya sebagai switch beserta state-nya lewat `aria-checked`
 berubah adalah state-nya. Label pembungkus juga membuat teksnya bisa ditekan. Ikon di thumb bersifat
 dekoratif, jadi beri `aria-hidden`.
 
-Dengan `prefers-reduced-motion`, thumb langsung ke tempatnya tanpa perjalanan dan tanpa memadat. Di
+Dengan `prefers-reduced-motion`, thumb langsung ke tempatnya tanpa perjalanan dan tanpa memadat. Dengan
+`prefers-contrast: more`, track mendapat tepi 1px `--ow-edge`. Di
 mode forced colors (Windows High Contrast), track tetap punya tepi 1px berwarna sistem dan diisi
 `Highlight` saat menyala, dan tombolnya digambar solid dengan `CanvasText` atau `HighlightText`. Dari
 kanan ke kiri, posisi mati ada di kanan.
@@ -112,14 +115,11 @@ mengubah yang ada di dalamnya.
 
 | Token tema | Fungsi |
 | --- | --- |
-| `--ow-well-bg` | Track saat mati |
-| `--ow-edge` | Tepi track saat mati |
+| `--ow-fg` | Tint track saat mati (10%, 13% saat hover), dan ikon di thumb |
 | `--ow-accent` | Track saat menyala |
-| `--ow-primary-shadow` | Tepi track saat menyala |
+| `--ow-primary-shadow` | Sorot atas track saat menyala |
 | `--ow-raised-bg` | Thumb |
-| `--ow-raised-shadow` | Tepi thumb |
-| `--ow-fg` | Ikon di thumb |
-| `--ow-radius` | Sudut tombol; track menambahkan inset |
+| `--ow-radius` | Sudut track; tombolnya memakainya dikurangi inset 2px |
 | `--ow-motion-scale` | Kedalaman tekanan |
 | `--ow-focus` | Ring fokus |
 

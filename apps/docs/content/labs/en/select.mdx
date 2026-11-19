@@ -7,8 +7,8 @@ import { ForMode, TokenChip } from "@/components/token-setup";
 
 Select picks one value, or several, from a list in a popup. Its shortest form is a Root, a Trigger
 with a name, a Popup, and its Items, and that form already looks and works in full; the parts you
-leave out draw themselves. The trigger is a field, a flat well with a 3:1 edge, as tall as a Button.
-Scroll to start the tour; the stage follows each part.
+leave out draw themselves. The trigger is a field as tall as a Button: a 6% tint of the
+text color with no edge, which steps up to 9% under the pointer and while its list is open. Scroll to start the tour; the stage follows each part.
 
 ```tsx
 <Select.Root defaultValue="Cherry">
@@ -23,13 +23,17 @@ Scroll to start the tour; the stage follows each part.
 ## Over the trigger [#align]
 
 The popup opens over its trigger with the selected item's text exactly on the trigger's text, so
-the value you are reading stays put and the other choices appear around it. The check column hangs
-past the trigger's start, and the popup ends where the trigger ends. It fades in over 180 ms and out
-over 120 ms, and does not grow, since growing would move the text that is meant to stay put. Used
-from the keyboard, it opens and shuts at once.
+the value you are reading stays put and the other choices appear around it. Each row's check sits at
+its end, in line with the trigger's chevron, so the popup covers the trigger at its width and ends
+where it ends; it grows only when an item's text and check would not fit. An item's text stays on
+one line, ending in an ellipsis only past the screen's width.
+
+A pick's check fades and scales in on the settle spring. The popup fades in over 180 ms and, after a
+60 ms beat that lets that check land, out over 140 ms. It does not grow, since growing would move the
+text that is meant to stay put. Used from the keyboard, it opens and shuts at once.
 
 Near the top or bottom of the screen, or opened by touch, there is no room to do that well, and it
-hangs 6px below the trigger instead, growing from it as a Menu does. So does
+hangs 6px below the trigger instead, at least as wide as it, growing from it as a Menu does. So does
 `alignItemWithTrigger={false}` on a Positioner. Landing needs the screen's coordinates, so write that
 prop out when an ancestor has a transform: this stage does it for you once a panel opens.
 
@@ -42,7 +46,7 @@ way; the pointer resting on one rolls the list. Touch has no arrows, and swipes.
 item nearest the pointer, and the keyboard's item, with one highlight that scrolls with the list.
 
 The Popup draws its List and arrows when you leave them out. `Select.Group` and
-`Select.GroupLabel` name a group, and `Select.Separator` is an etched groove between groups. Over the
+`Select.GroupLabel` name a group, and `Select.Separator` is a hairline between groups. Over the
 trigger, a list longer than the screen takes the screen's height. To cap it, set
 `alignItemWithTrigger={false}` and a `max-block-size` on the Popup.
 
@@ -74,15 +78,16 @@ name, here or on the stage, to see its tokens.
 | <Part name="Trigger" /> | `button.ow-select__trigger` | `role="combobox"`, `data-size`, `data-popup-open`, `data-placeholder`, `data-disabled`, `data-invalid`. No children: a Value and an Icon |
 | <Part name="Value" /> | `span.ow-select__value` | `data-placeholder` while empty; the trigger's `placeholder` reaches the one it draws |
 | <Part name="Icon" /> | `span.ow-select__icon` | Lucide's `chevrons-up-down`; children replace it |
-| Positioner | `div.ow-select__positioner` | Over the trigger, or 6px below its start. A Popup without one draws it, and a Portal |
+| Backdrop | `div.ow-select__backdrop` | A modal select's, drawn by its Portal: clear, over the whole window, under the popup |
+| Positioner | `div.ow-select__positioner` | Over the trigger at its width, or 6px below its start and at least as wide. A Popup without one draws it, and a Portal |
 | <Part name="Popup" /> | `div.ow-select__popup` | `data-size`, `data-side` (`none` over the trigger), `data-instant` when it skips the animation |
 | ScrollUpArrow | `div.ow-select__scroll-up-arrow` | Shows while there is more above |
 | List | `div.ow-select__list` | `role="listbox"`, holds the Glide highlight. A Popup without one directly inside draws it, and both arrows |
 | <Part name="GroupLabel" /> | `div.ow-select__group-label` | Names its `Select.Group` |
-| <Part name="Item" /> | `div.ow-select__item` | `role="option"`, `data-selected`, `data-highlighted`, `data-disabled`. Plain children: an ItemIndicator and an ItemText |
-| <Part name="ItemIndicator" /> | `span.ow-select__item-indicator` | A check that keeps its room; `data-selected` |
-| <Part name="ItemText" /> | `div.ow-select__item-text` | What lands on the trigger's text |
-| <Part name="Separator" /> | `div.ow-select__separator` | An etched groove |
+| <Part name="Item" /> | `div.ow-select__item` | `role="option"`, `data-selected`, `data-highlighted`, `data-disabled`. Plain children: an ItemText, then an ItemIndicator at the end |
+| <Part name="ItemIndicator" /> | `span.ow-select__item-indicator` | A check at the row's end, in line with the trigger's chevron. It keeps its room, and fades and scales in when picked; `data-selected` |
+| <Part name="ItemText" /> | `div.ow-select__item-text` | What lands on the trigger's text; one line, with an ellipsis |
+| <Part name="Separator" /> | `div.ow-select__separator` | A hairline |
 | <Part name="ScrollDownArrow" /> | `div.ow-select__scroll-down-arrow` | Shows while there is more below |
 
 ## States and variants [#states]
@@ -99,11 +104,14 @@ cover the 48px trigger even with its first item selected.
 
 | State | What shows it |
 | --- | --- |
+| At rest | A 6% tint of `--ow-fg`, with no edge |
+| Hover, with a fine pointer | The tint at 9% |
+| Open | `data-popup-open`; the tint stays at 9% |
 | Placeholder | `data-placeholder`; muted text |
-| Keyboard focus | A 2px ring in `--ow-focus`: outside the trigger, inside an item |
+| Keyboard focus | A 2px ring in `--ow-focus`: outside the trigger, and inside an item |
 | Lit | The Glide highlight, under the pointer or at the keyboard's item |
-| Selected | `data-selected`, and the check shows |
-| Invalid | The edge in `--ow-critical`, from `aria-invalid` or Base UI's `Field` (`data-invalid`) |
+| Selected | `data-selected`; the check fades and scales in on the settle spring |
+| Invalid | A 12% tint of `--ow-critical` and one shake, from `aria-invalid` or Base UI's `Field` (`data-invalid`) |
 | Disabled | 45% opacity; the keyboard still reaches a disabled item, Glide passes it |
 
 ## Keyboard and accessibility [#keyboard]
@@ -121,8 +129,20 @@ cover the 48px trigger even with its first item selected.
 Screen readers announce a combobox with its name and value, and each option with its state. The only
 prop accessibility needs is that name: a `Select.Label`, or `aria-label` on the trigger.
 
+`modal` (true by default) keeps the rest of the page out of reach while the list is open. A clear
+backdrop takes a press outside, so that press only shuts the list, and the page holds its scroll.
+OwsemUI holds it without setting `overflow` on the page, which would make the browser draw the
+page's text again while the list is open: the wheel and the scroll keys still work inside the list,
+and are held back outside it. Opened by touch, as in Base UI, the page still scrolls. Laid over its
+trigger, the list cannot follow a scroll, so the page is held there even with `modal={false}`;
+Base UI's own `overflow` lock for that is put back before the page is drawn.
+
 With `prefers-reduced-motion`, the popup only fades wherever it opens, and Glide fades instead of
 sliding.
+
+Invalid is a tint, a message, and a motion, never color alone. The trigger shakes once when it
+becomes invalid and not again while the value changes; with reduced motion it blinks instead. With
+`prefers-contrast: more`, the trigger gets a 1px edge in `--ow-edge` and the popup an extra 1px ring.
 In forced colors (Windows High Contrast), the trigger and popup keep a 1px edge in the system color,
 the highlight is an outline in `Highlight`, the check follows the text color, and disabled text is
 `GrayText`.
@@ -137,18 +157,14 @@ on `:root`. A class around the trigger does not reach the popup, which renders i
 
 | Theme token | Purpose |
 | --- | --- |
-| `--ow-well-bg` | Trigger fill |
-| `--ow-well-shadow` | Trigger's own quiet edge |
-| `--ow-edge` | Trigger's 3:1 edge |
-| `--ow-critical` | Invalid edge |
-| `--ow-panel` | Popup surface, and the arrows |
-| `--ow-popup-shadow` | Popup edge and shadow |
-| `--ow-fg` | Text |
+| `--ow-fg` | Text, and the trigger's tint: 6% at rest, 9% on hover and while open |
+| `--ow-critical` | Invalid tint |
+| `--ow-raised-bg` | Popup surface, and the arrows |
+| `--ow-popup-shadow` | Popup shadow |
 | `--ow-muted` | Placeholder, icon, arrows, and group labels |
 | `--ow-hover` | The highlight (Glide) |
-| `--ow-line-dark` | Groove's dark line |
-| `--ow-line-light` | Groove's light line |
-| `--ow-radius` | Trigger and item corners; the popup's add its 4px padding |
+| `--ow-line` | Separators |
+| `--ow-radius` | Trigger and popup corners; items and Glide take it less the 4px padding, the scroll arrows less 1px |
 | `--ow-focus` | Focus ring |
 
 **Plain CSS.** Every part takes a `className`, and your rule wins over the component's without a
@@ -163,7 +179,7 @@ stretches when you say so. `--py`, `--px`, and `--icon` take a value through `st
 ```
 
 **Composition.** Write out a part and it replaces the default: here a summary for the Value, your own
-icon, and the check at the row's end.
+icon, and the check before the label instead of at the row's end.
 
 ```tsx
 <Select.Trigger>
@@ -174,13 +190,13 @@ icon, and the check at the row's end.
 </Select.Trigger>
 
 <Select.Item value="apple">
-  <Select.ItemText>Apple</Select.ItemText>
   <Select.ItemIndicator />
+  <Select.ItemText>Apple</Select.ItemText>
 </Select.Item>
 ```
 
-An icon before the label goes between the ItemIndicator and the ItemText, so the label still lands on
-the trigger's text. To open the list somewhere else, write out `Select.Portal` and
+Written parts keep your order. An icon before the label goes just before the ItemText, so the label
+still lands on the trigger's text. To open the list somewhere else, write out `Select.Portal` and
 `Select.Positioner`, with `container`, `side`, or `sideOffset`.
 
 <ForMode mode="isolated">

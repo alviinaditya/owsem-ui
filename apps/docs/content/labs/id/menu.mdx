@@ -6,9 +6,8 @@ import { Part } from "@/components/lab/lab-shell";
 import { ForMode, TokenChip } from "@/components/token-setup";
 
 Menu membuka daftar aksi dari sebuah tombol: item dengan ikon dan shortcut, centang dan pilihan,
-serta submenu, di atas material panel dengan bayangan popup: tepi 1px yang tegas (di tema gelap,
-garis terang di dalam cincin gelap) dan bayangan jatuh, karena ia melayang. Glide menyalakan item
-di bawah pointer. Gulir untuk mulai tur; stage mengikuti setiap bagian.
+serta submenu, di atas material raised dengan bayangan popup dan tanpa tepi, karena ia melayang. Glide menyalakan item di bawah pointer. Gulir untuk mulai tur;
+stage mengikuti setiap bagian.
 
 ## Dinyalakan oleh Glide [#glide]
 
@@ -59,14 +58,15 @@ menandai bagian lainnya di stage; pilih sebuah nama, di sini atau di stage, untu
 | Bagian | Elemen | Catatan |
 | --- | --- | --- |
 | <Part name="Trigger" /> | Tombol Anda | Diberikan lewat `render`; `aria-haspopup="menu"` dan `aria-expanded` |
-| Positioner | `div.ow-menu__positioner` | 6px dari trigger; submenu di samping item-nya, baris pertama sejajar |
+| Backdrop | `div.ow-menu__backdrop` | Milik menu modal, digambar oleh Portal-nya: bening, menutupi seluruh jendela, di bawah popup |
+| Positioner | `div.ow-menu__positioner` | 6px dari kotak trigger saat diam, jadi tekanan tidak menggeser menu; submenu di samping item-nya, baris pertama sejajar |
 | <Part name="Popup" /> | `div.ow-menu__popup` | `role="menu"`, `data-size`, `data-instant` saat melewati animasi, dan sorotan Glide di dalamnya |
 | <Part name="Item" /> | `div.ow-menu__item` | `role="menuitem"` dan `data-disabled`; `svg` di awal menjadi ikonnya |
 | <Part name="Shortcut" /> | `kbd` | Terakhir di item, di ujungnya |
 | <Part name="GroupLabel" /> | `div.ow-menu__group-label` | Menamai `Menu.Group` atau `Menu.RadioGroup`-nya |
 | <Part name="CheckboxItem" /> | `div.ow-menu__item` | `role="menuitemcheckbox"`, `aria-checked` |
 | <Part name="Indicator" /> | `span.ow-menu__indicator` | Centang, atau titik di RadioItem; `data-checked` atau `data-unchecked` |
-| <Part name="Separator" /> | `div.ow-menu__separator` | `role="separator"`, alur terukir |
+| <Part name="Separator" /> | `div.ow-menu__separator` | `role="separator"`, garis tipis |
 | <Part name="SubmenuTrigger" /> | `div.ow-menu__item` | `aria-haspopup`, `data-popup-open`, dan chevron |
 | Chevron | `span.ow-menu__chevron` | Di ujung SubmenuTrigger, dicerminkan untuk teks kanan-ke-kiri |
 
@@ -75,8 +75,9 @@ menandai bagian lainnya di stage; pilih sebuah nama, di sini atau di stage, untu
 ## State dan varian [#states]
 
 Stage menampilkan setiap ukuran di kedua tema, masing-masing menu berisi item dengan shortcut-nya,
-item disabled, dan item yang dicentang. Item mengikuti aturan `--py` milik Button dengan
-`--py: 0.5em`; padding popup 4px menjaga sudutnya konsentris dengan sudut item.
+item disabled, dan item yang dicentang. Item mengikuti aturan `--py` milik Button dengan `--py:
+0.5em`. Popup memakai `--ow-radius`, seperti setiap permukaan, dan item serta Glide-nya memakainya
+dikurangi padding popup 4px.
 
 | Ukuran | Font | Tinggi item | Ikon |
 | --- | --- | --- | --- |
@@ -104,11 +105,17 @@ item disabled, dan item yang dicentang. Item mengikuti aturan `--py` milik Butto
 | Escape | Menutup menu; fokus kembali ke trigger |
 | Sebuah huruf | Item berikutnya yang diawali huruf itu |
 
-Screen reader mengumumkan menu, role dan state setiap item, serta grup lewat labelnya. `modal`
-(bawaannya true) membuat bagian halaman lain tidak terjangkau selama menu terbuka.
+Screen reader mengumumkan menu, role dan state setiap item, serta grup lewat labelnya.
+
+`modal` (bawaannya true) membuat bagian halaman lain tidak terjangkau selama menu terbuka. Backdrop
+bening menangkap tekanan di luar, jadi tekanan itu hanya menutup menu, dan scroll halaman tertahan.
+OwsemUI menahannya tanpa memasang `overflow` di halaman, yang membuat browser menggambar ulang teks
+halaman selama menu terbuka: roda mouse dan tombol scroll tetap bekerja di dalam menu, dan ditahan di
+luarnya. Dibuka dengan sentuhan, seperti di Base UI, halaman tetap bisa di-scroll; menu yang dibuka
+lewat hover, dan submenu, tidak pernah modal.
 
 Dengan `prefers-reduced-motion`, menu memudar tanpa tumbuh, dan Glide memudar alih-alih bergeser.
-Di forced colors (Windows High Contrast), popup tetap punya tepi 1px dengan warna sistem, alurnya
+Dengan `prefers-contrast: more`, popup mendapat ring 1px berwarna `--ow-edge`. Di forced colors (Windows High Contrast), popup tetap punya tepi 1px dengan warna sistem, separatornya
 tetap ada, sorotannya menjadi outline `Highlight`, dan centangnya mengikuti warna teks.
 
 ## Kustomisasi [#customization]
@@ -121,14 +128,14 @@ trigger-nya.
 
 | Token tema | Fungsi |
 | --- | --- |
-| `--ow-panel` | Permukaan |
-| `--ow-popup-shadow` | Tepi dan bayangan |
+| `--ow-raised-bg` | Permukaan |
+| `--ow-popup-shadow` | Bayangan |
+| `--ow-edge` | Ring di bawah `prefers-contrast: more` |
 | `--ow-fg` | Teks item |
 | `--ow-muted` | Label grup, shortcut, dan chevron |
 | `--ow-hover` | Sorotan (Glide) |
-| `--ow-line-dark` | Garis gelap alur |
-| `--ow-line-light` | Garis terang alur |
-| `--ow-radius` | Sudut item; sudut popup menambahkan padding 4px-nya |
+| `--ow-line` | Separator |
+| `--ow-radius` | Sudut popup; item dan Glide memakainya dikurangi padding 4px |
 | `--ow-focus` | Ring fokus |
 
 <ForMode mode="isolated">

@@ -33,14 +33,14 @@ function Sample({
   );
 }
 
-/** More tabs than fit in 240px. */
+/** More tabs than fit in 220px. */
 function Long({
   dir,
   list,
   ...props
 }: Partial<Tabs.Root.Props> & { dir?: "ltr" | "rtl"; list?: Partial<Tabs.List.Props> }) {
   return (
-    <div dir={dir} style={{ inlineSize: 240 }}>
+    <div dir={dir} style={{ inlineSize: 220 }}>
       <Tabs.Root defaultValue="a" {...props}>
         <Tabs.List aria-label="Files" {...list}>
           {["a", "b", "c", "d", "e", "f"].map((name) => (
@@ -105,6 +105,11 @@ function resolve(property: string, value: string, scope: Element = document.body
   probe.remove();
   return computed;
 }
+
+/** The indicator's accent tint over the raised fill, and the active tab's text. */
+const TRACK = "color-mix(in oklab, var(--ow-fg) 6%, transparent)";
+const TINT = "color-mix(in oklab, var(--ow-accent) 14%, var(--ow-raised-bg))";
+const ON = "color-mix(in oklab, var(--ow-accent) 70%, var(--ow-fg))";
 
 /** An unlayered stylesheet, as an app's own CSS is, for one test. */
 function sheet(css: string) {
@@ -256,7 +261,7 @@ describe("Tabs", () => {
     expect(bold?.querySelector(":scope > b")?.textContent).toBe("Bold");
   });
 
-  test("draws a flat well, a raised key, and quiet tabs from the theme tokens, in light and dark", async () => {
+  test("draws a tinted list, an accent-tint key, and quiet tabs from the theme tokens, in light and dark", async () => {
     onTestFinished(() => {
       delete root.dataset.theme;
     });
@@ -265,15 +270,17 @@ describe("Tabs", () => {
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
       const well = getComputedStyle(list);
-      expect(well.backgroundColor, theme).toBe(resolve("background-color", "var(--ow-well-bg)"));
-      expect(well.boxShadow, theme).toBe(resolve("box-shadow", "var(--ow-well-shadow)"));
-      const key = getComputedStyle(thumb);
-      expect(key.backgroundColor, theme).toBe(resolve("background-color", "var(--ow-raised-bg)"));
-      expect(key.boxShadow, theme).toBe(resolve("box-shadow", "var(--ow-raised-shadow)"));
+      expect(well.backgroundColor, theme).toBe(resolve("background-color", TRACK));
+      // A list that is a tint of the text color, with no shadow, and a tinted key with no edge.
+      expect(well.boxShadow, theme).toBe("none");
+      const key = getComputedStyle(thumb, "::before");
+      expect(key.content, theme).toBe('""');
+      expect(key.backgroundColor, theme).toBe(resolve("background-color", TINT));
+      expect(getComputedStyle(thumb).boxShadow, theme).toBe("none");
       // Labels change color with a short transition.
       await expect
         .poll(() => getComputedStyle(tab("Activity")).color, { message: theme })
-        .toBe(resolve("color", "var(--ow-fg)"));
+        .toBe(resolve("color", ON));
       await expect
         .poll(() => getComputedStyle(tab("Overview")).color, { message: theme })
         .toBe(resolve("color", "var(--ow-muted)"));
@@ -288,8 +295,8 @@ describe("Tabs", () => {
         <Sample
           style={
             {
-              "--ow-well-bg": "rgb(1, 2, 3)",
-              "--ow-raised-bg": "rgb(4, 5, 6)",
+              "--ow-accent": "rgb(1, 2, 3)",
+              "--ow-fg": "rgb(4, 5, 6)",
               "--ow-muted": "rgb(7, 8, 9)",
             } as CSSProperties
           }
@@ -297,12 +304,15 @@ describe("Tabs", () => {
         <Sample />
       </>,
     );
-    expect(getComputedStyle(list).backgroundColor).toBe("rgb(1, 2, 3)");
-    expect(getComputedStyle(thumb).backgroundColor).toBe("rgb(4, 5, 6)");
+    expect(getComputedStyle(list).backgroundColor).toBe(resolve("background-color", TRACK, list));
+    expect(getComputedStyle(list).backgroundColor).not.toBe(resolve("background-color", TRACK));
+    expect(getComputedStyle(thumb, "::before").backgroundColor).toBe(
+      resolve("background-color", TINT, list),
+    );
     expect(getComputedStyle(tab("Overview")).color).toBe("rgb(7, 8, 9)");
     const lists = document.querySelectorAll(".ow-tabs__list");
     expect(getComputedStyle(lists[1] as Element).backgroundColor).toBe(
-      resolve("background-color", "var(--ow-well-bg)"),
+      resolve("background-color", TRACK),
     );
 
     // On one tab, that tab alone.
@@ -352,7 +362,7 @@ describe("Tabs", () => {
     expect(list.borderTopLeftRadius).toBe("1px");
     // The tabs are sized in em, so the list's font size scales them.
     expect(style(".mine-tab").fontSize).toBe("20px");
-    expect(style(".mine-tab").paddingBlockStart).toBe("15px");
+    expect(Number.parseFloat(style(".mine-tab").paddingBlockStart)).toBeCloseTo(10.36, 1);
     // On the active tab too, whose state is in the component's selector.
     expect(style('.mine-tab[aria-selected="true"]').color).toBe("rgb(4, 5, 6)");
     expect(style(".mine-tab").borderTopLeftRadius).toBe("2px");
@@ -378,7 +388,7 @@ describe("Tabs", () => {
     expect([panel.padding, panel.margin]).toEqual(["0px", "0px"]);
     const well = list.getBoundingClientRect();
     const end = tab("Settings").getBoundingClientRect().right;
-    expect(well.right - end).toBeCloseTo(3, 0);
+    expect(well.right - end).toBeCloseTo(4, 0);
     expect(getComputedStyle(list).margin).toBe("0px");
     expect(getComputedStyle(list.parentElement as Element).margin).toBe("0px");
   });
@@ -396,17 +406,33 @@ describe("Tabs", () => {
     const box = screen.container.querySelector(".box") as HTMLElement;
     expect(list.getBoundingClientRect().width).toBeCloseTo(600, 0);
     const widths = () => NAMES.map((name) => tab(name).getBoundingClientRect().width);
-    for (const width of widths()) expect(width).toBeCloseTo((600 - 6 - 4) / 3, 0);
+    for (const width of widths()) expect(width).toBeCloseTo((600 - 8 - 4) / 3, 0);
     expect(over(thumb, tab("Activity"))).toBe(true);
     // The parent resizes: it snaps along, without sliding.
     box.style.inlineSize = "450px";
     await expect.poll(() => over(thumb, tab("Activity"))).toBe(true);
     expect(transitions(thumb)).toEqual([]);
-    for (const width of widths()) expect(width).toBeCloseTo((450 - 6 - 4) / 3, 0);
+    for (const width of widths()) expect(width).toBeCloseTo((450 - 8 - 4) / 3, 0);
     // A class added later moves the tabs too.
     list.classList.remove("stretched");
     await expect.poll(() => over(thumb, tab("Activity"))).toBe(true);
     expect(list.getBoundingClientRect().width).toBeLessThan(450);
+  });
+
+  test("stretches the indicator's key along the way, and settles back to rest", async () => {
+    const { thumb, tab } = await mount(<Sample />);
+    const stretches = () =>
+      thumb
+        .getAnimations({ subtree: true })
+        .filter((a) => (a.effect as KeyframeEffect | null)?.pseudoElement === "::before");
+    expect(stretches()).toEqual([]);
+    tab("Settings").click();
+    await expect.poll(() => stretches().length).toBe(1);
+    const effect = stretches()[0]?.effect as KeyframeEffect;
+    const frames = effect.getKeyframes();
+    expect(frames.every((f) => f.transformOrigin === "100% 50%")).toBe(true);
+    expect(frames.map((f) => f.transform)[1]).toMatch(/^scale\(1\.[1-3]\d*, 1\)$/);
+    await expect.poll(() => stretches().length).toBe(0);
   });
 
   test("places the indicator under the active tab on mount, without sliding in", async () => {
@@ -444,10 +470,8 @@ describe("Tabs", () => {
     expect(background()).toBe("rgba(0, 0, 0, 0)");
     // As in server-rendered HTML before hydration.
     list.removeAttribute("data-thumb");
-    expect(background()).toBe(resolve("background-color", "var(--ow-raised-bg)"));
-    expect(getComputedStyle(tab("Activity")).boxShadow).toBe(
-      resolve("box-shadow", "var(--ow-raised-shadow)"),
-    );
+    expect(background()).toBe(resolve("background-color", TINT));
+    expect(getComputedStyle(tab("Activity")).boxShadow).toBe("none");
     expect(getComputedStyle(tab("Overview")).backgroundColor).toBe("rgba(0, 0, 0, 0)");
   });
 
@@ -590,7 +614,7 @@ describe("Tabs", () => {
 
   test("tabs that do not fit scroll sideways with no scrollbar, the indicator under its tab", async () => {
     const { list, thumb, tab } = await mount(<Long />);
-    expect(list.getBoundingClientRect().width).toBeCloseTo(240, 0);
+    expect(list.getBoundingClientRect().width).toBeCloseTo(220, 0);
     expect(list.scrollWidth).toBeGreaterThan(list.clientWidth);
     expect(list.scrollHeight).toBe(list.clientHeight);
     expect(list.offsetHeight - list.clientHeight).toBe(0);
@@ -618,7 +642,7 @@ describe("Tabs", () => {
     expect(cut.getBoundingClientRect().right).toBeGreaterThan(edge);
     cut.click();
     await expect.poll(() => list.scrollLeft).toBeGreaterThan(0);
-    expect(edge - cut.getBoundingClientRect().right).toBeCloseTo(3, 0);
+    expect(edge - cut.getBoundingClientRect().right).toBeCloseTo(4, 0);
     // The list's own onClick still runs.
     expect(seen).toEqual(["click"]);
   });
@@ -662,7 +686,7 @@ describe("Tabs", () => {
     const { list, thumb, tab } = await mount(<Sample />);
     await commands.setForcedColors("active");
     expect(matchMedia("(forced-colors: active)").matches).toBe(true);
-    expect(getComputedStyle(thumb).backgroundColor).toBe(resolve("color", "Highlight"));
+    expect(getComputedStyle(thumb, "::before").backgroundColor).toBe(resolve("color", "Highlight"));
     await expect
       .poll(() => getComputedStyle(tab("Activity")).color)
       .toBe(resolve("color", "HighlightText"));
@@ -731,5 +755,33 @@ describe("Tabs", () => {
     expect(getComputedStyle(thumb).scale).toBe("none");
     expect(getComputedStyle(active).scale).toBe("none");
     window.dispatchEvent(new PointerEvent("pointerup", { button: 0 }));
+  });
+
+  test("Glide's highlight never shows on the active tab, nor slides out from under the indicator", async () => {
+    const screen = await render(<Sample />);
+    await settle();
+    const list = screen.container.querySelector<HTMLElement>(".ow-tabs__list") as HTMLElement;
+    const glide = list.querySelector<HTMLElement>(":scope > .ow-glide") as HTMLElement;
+    const tab = (name: string) => screen.getByRole("tab", { name }).element() as HTMLElement;
+    // Over the active tab it stays hidden.
+    await userEvent.hover(tab("Activity"));
+    await settle();
+    expect(glide.hasAttribute("data-visible")).toBe(false);
+    // Over another tab it shows.
+    await userEvent.hover(tab("Overview"));
+    await expect.poll(() => glide.hasAttribute("data-visible")).toBe(true);
+    // Picking that tab takes the highlight away: it is the indicator's now.
+    await userEvent.click(tab("Overview"));
+    await expect.poll(() => glide.hasAttribute("data-visible")).toBe(false);
+    // From there it appears at the next tab in place, with no slide from the picked one.
+    await userEvent.hover(tab("Settings"));
+    await expect.poll(() => glide.hasAttribute("data-visible")).toBe(true);
+    const moving = glide
+      .getAnimations()
+      .filter((a) => a instanceof CSSTransition && a.transitionProperty === "transform");
+    expect(moving).toEqual([]);
+    const at = tab("Settings").getBoundingClientRect();
+    const lit = glide.getBoundingClientRect();
+    expect(Math.abs(lit.left - at.left)).toBeLessThan(1);
   });
 });

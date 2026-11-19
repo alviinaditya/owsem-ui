@@ -117,7 +117,6 @@ export const en = {
       lightness: "Lightness",
       swatches: "Swatches",
     },
-    shortcuts: "Click the stage or tab into it, then press:",
     previous: "Previous",
     next: "Next",
     component: "Component",
@@ -136,33 +135,27 @@ export const en = {
   },
   tokens: {
     title: "Token setup",
-    scope: "Applies to the code in every Lab",
     mode: "Token mode",
     theme: "Theme tokens",
     isolated: "Isolated tokens",
-    themeNote:
-      "Components read one shared set of tokens. Change the accent once and every component follows. Best when the app has one design system.",
-    isolatedNote:
-      "The same tokens, with their values on each component's root instead of the page root, so nothing is shared. Use it to give one component its own theme, or to add components to an app with another design system.",
+    themeNote: "Values on the page root, shared by every component.",
+    isolatedNote: "Values on each component's root; nothing is shared.",
     prefix: "Prefix",
-    prefixHelp:
-      "Starts with a letter; lowercase letters, numbers, and single hyphens; up to 16 characters.",
     prefixError:
       "“{prefix}” can't be a prefix. Start with a letter, then use lowercase letters, numbers, and single hyphens, up to 16 characters.",
-    names: "Names you will write",
-    cli: "Custom prefixes and isolated tokens are installed by the owsem CLI, which is not released yet.",
+    cli: "The owsem CLI, not released yet, installs this setup.",
     reset: "Reset to theme tokens, --ow",
     change: "Change",
   },
   components: {
     button:
       "An action button with crisp edges, a ripple when pressed, icons, and a loading state that keeps its width.",
-    separator: "An etched line between sections, horizontal or vertical.",
+    separator: "A hairline between sections, horizontal or vertical.",
     field: "A label, description, and error message wired to their control.",
     fieldset: "A group of fields with a legend and consistent spacing.",
     form: "Native and server validation that focuses the first invalid field.",
     input: "A text input that lines up with Button, with leading or trailing icons.",
-    checkbox: "A checkbox whose check crossfades to a minus when indeterminate.",
+    checkbox: "A checkbox whose check draws itself in, and turns to a minus when indeterminate.",
     "radio-group": "One choice from several options, with a spring indicator.",
     switch: "An on/off switch whose thumb moves on a spring.",
     select: "A choice from a popup list, with a trigger as tall as other controls.",
@@ -205,7 +198,7 @@ export const en = {
     "table-of-contents":
       "An “On this page” list that marks the section being read, with a marker sliding along its rail.",
     "code-block":
-      "Code in nested cards: one icon, a title or tabs, and a Copy button in the header.",
+      "Code on one surface: one icon, a title or tabs, and a Copy button with a tooltip in the header.",
     "copy-button":
       "A button that copies text: its copy icon morphs into a check that draws itself, then back.",
     "icon-morph":

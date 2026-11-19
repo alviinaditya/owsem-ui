@@ -57,6 +57,60 @@ describe("Form", () => {
     expect(screen.container.querySelectorAll(".ow-field__error")).toHaveLength(2);
   });
 
+  test("a submit that leaves a field invalid shakes it again, and a typed key does not", async () => {
+    const screen = await render(<Form onFormSubmit={vi.fn()}>{fields}</Form>);
+    const email = screen.getByRole("textbox", { name: "Email" }).element() as HTMLInputElement;
+    const submit = screen.getByRole("button", { name: "Sign up" });
+    const shaking = (el: HTMLElement) =>
+      el.getAnimations().filter((a) => (a as CSSAnimation).animationName === "ow-input-shake");
+    // The first submit makes the field invalid, and the CSS shakes it once.
+    await userEvent.click(submit);
+    await expect.poll(() => shaking(email).length).toBe(1);
+    await expect.poll(() => shaking(email).length, { timeout: 2000 }).toBe(0);
+    // Typing a character that leaves it invalid does not replay it.
+    await userEvent.type(email, "a");
+    await settle();
+    expect(shaking(email)).toHaveLength(0);
+    // A second failed submit shakes the field again, though it never stopped being invalid.
+    expect(email.hasAttribute("data-invalid")).toBe(true);
+    await userEvent.click(submit);
+    await expect.poll(() => shaking(email).length).toBe(1);
+    // Only the first invalid field: the second one's animation ran once, with the first submit.
+    const username = screen.getByRole("textbox", { name: "Username" }).element() as HTMLElement;
+    expect(shaking(username)).toHaveLength(0);
+  });
+
+  test("a field invalid from the start stays still, and a failed submit shakes it", async () => {
+    const screen = await render(
+      <Form onFormSubmit={vi.fn()}>
+        <Field.Root name="email" invalid>
+          <Field.Label>Email</Field.Label>
+          <Field.Control type="email" />
+          <Field.Error match />
+        </Field.Root>
+        <Button type="submit">Sign up</Button>
+      </Form>,
+    );
+    const email = screen.getByRole("textbox", { name: "Email" }).element() as HTMLInputElement;
+    const shaking = () =>
+      email.getAnimations().filter((a) => (a as CSSAnimation).animationName === "ow-input-shake");
+    await settle();
+    expect(shaking()).toHaveLength(0);
+    await userEvent.click(screen.getByRole("button", { name: "Sign up" }));
+    await expect.poll(() => shaking().length).toBe(1);
+  });
+
+  test("a valid form shakes nothing", async () => {
+    const screen = await render(<Form onFormSubmit={vi.fn()}>{fields}</Form>);
+    await userEvent.type(screen.getByRole("textbox", { name: "Email" }), "ana@owsem.dev");
+    await userEvent.type(screen.getByRole("textbox", { name: "Username" }), "ana");
+    await userEvent.click(screen.getByRole("button", { name: "Sign up" }));
+    await settle();
+    for (const input of screen.container.querySelectorAll("input")) {
+      expect(input.getAnimations()).toHaveLength(0);
+    }
+  });
+
   test("a valid form submits its values by name", async () => {
     const onFormSubmit = vi.fn();
     const screen = await render(<Form onFormSubmit={onFormSubmit}>{fields}</Form>);

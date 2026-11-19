@@ -40,13 +40,18 @@ comes with the first focusable component.
 The targets, in light and dark:
 
 - Text: at least 4.5:1 against its background.
-- Control boundaries and state indicators, such as a check mark, a filled switch, or the focus
-  ring: at least 3:1 against the colors beside them. Disabled controls are exempt, as WCAG 1.4.11
-  allows.
+- State indicators, such as a check mark, a filled switch, or the focus ring: at least 3:1 against
+  the colors beside them.
+- Control boundaries (DP-6): by default a control has no edge. A field, an unchecked box, and a track
+  are a fill one tone step from what they sit on, so the boundary is the fill, the 2px focus ring,
+  and the state indicators. This knowingly does not meet WCAG 1.4.11 for the boundary in the default
+  mode. Under `@media (prefers-contrast: more)`, fields (Input, the Select trigger, the Toolbar
+  field, the Command Menu trigger, the Color Picker fields), Checkbox, Radio, and Switch draw a 1px
+  `--ow-edge`, and popups an extra 1px ring in it.
+- Invalid is never color alone: it is a critical tint, the error message, and a one-time shake (an
+  opacity blink under reduced motion).
 
-Today axe checks text contrast on Separator's test page in both themes. The boundary check comes
-with the first control: it computes contrast from the token values, blending semi-transparent
-shadows onto the surface behind them first.
+Today axe checks text contrast on Separator's test page in both themes.
 
 ## Pointer targets
 
@@ -59,14 +64,16 @@ areas comes with the first control.
 
 The rules: animations move only `transform` and `opacity`, plus `clip-path` when needed, and every
 animation has a `prefers-reduced-motion` version without movement, only a change of opacity or
-color. This covers Owsem's richer effects too. Separator does not animate, so there is nothing to
-reduce yet.
+color. This covers Owsem's richer effects too: the invalid shake of Input and the Select trigger
+becomes a short opacity blink, and a Form that fails to submit shakes the first invalid field again
+the same way. Separator does not animate.
 
 ## Forced colors
 
 In forced colors mode (Windows High Contrast), the browser drops `box-shadow` and background
-gradients and paints backgrounds in the system color `Canvas`. The depth material would vanish.
-Separator draws its etched line with borders instead of a background, and its test checks that the
+gradients and paints backgrounds in the system color `Canvas`. The fills that tell materials apart
+would vanish.
+Separator draws its hairline with a border instead of a background, and its test checks that the
 line stays 1 px wide in the system text color. Controls follow two rules:
 
 - Every control gets `outline: 1px solid transparent; outline-offset: -1px`. The outline is

@@ -1,6 +1,6 @@
 "use client";
 
-import { ScrollArea, ToggleGroup } from "owsem-ui/base";
+import { Menu, ScrollArea, ToggleGroup } from "owsem-ui/base";
 import { CodeBlock, CopyButton } from "owsem-ui/owsem";
 import { Fragment, useSyncExternalStore } from "react";
 import { type Dictionary, getDictionary } from "@/lib/dictionaries";
@@ -8,7 +8,7 @@ import type { Lang } from "@/lib/i18n";
 import { PACKAGE_MANAGER_STORAGE_KEY } from "@/lib/theme";
 import { isDefaultSetup, type TokenSetup } from "@/lib/token-setup";
 import { Icon } from "./icons/icon";
-import { useTokenSetup } from "./token-setup";
+import { TokenChip, useTokenSetup } from "./token-setup";
 
 const PACKAGE_MANAGERS = ["pnpm", "npm", "yarn", "bun"] as const;
 type PackageManager = (typeof PACKAGE_MANAGERS)[number];
@@ -125,7 +125,7 @@ function Command({ text, labels }: { text: string; labels: Labels }) {
           </code>
         </ScrollArea.Viewport>
       </ScrollArea.Root>
-      <CopyButton value={text} labels={labels} showLabel variant="outline" size="sm" />
+      <CopyButton value={text} labels={labels} showLabel variant="ghost" size="sm" />
     </div>
   );
 }
@@ -213,17 +213,58 @@ function CliNote({ labels }: { labels: Labels }) {
   );
 }
 
-/** The page header's install command: the npm package, or the owsem CLI for another setup. */
+/**
+ * One line: the package manager as a small menu (kept across visits), the command, and Copy. The
+ * menu shows pnpm until hydration reads the stored choice.
+ */
+function InstallLine({ labels }: { labels: Labels }) {
+  const pm = usePackageManager();
+  const text = `${ADD[pm]} owsem-ui`;
+  return (
+    <div className="install-line">
+      <Menu.Root>
+        <Menu.Trigger className="install-pm" aria-label={labels.packageManager}>
+          <Icon name="terminal" size={14} />
+          <span>{pm}</span>
+          <Icon name="chevron-down" size={12} />
+        </Menu.Trigger>
+        <Menu.Portal>
+          <Menu.Positioner align="start" sideOffset={6}>
+            <Menu.Popup className="install-pm-menu">
+              <Menu.RadioGroup value={pm} onValueChange={(next) => choose(next as PackageManager)}>
+                {PACKAGE_MANAGERS.map((option) => (
+                  <Menu.RadioItem key={option} value={option} closeOnClick>
+                    <Menu.RadioItemIndicator />
+                    {option}
+                  </Menu.RadioItem>
+                ))}
+              </Menu.RadioGroup>
+            </Menu.Popup>
+          </Menu.Positioner>
+        </Menu.Portal>
+      </Menu.Root>
+      <ScrollArea.Root className="install-text" fade>
+        <ScrollArea.Viewport>
+          <code>
+            <Words text={text} />
+          </code>
+        </ScrollArea.Viewport>
+      </ScrollArea.Root>
+      <CopyButton value={text} labels={labels} variant="ghost" size="sm" className="install-copy" />
+    </div>
+  );
+}
+
+/** The page header's install command: one line for the npm package; the owsem CLI's steps for
+ * another setup. */
 export function InstallCommand({ item, labels }: { item: string; labels: Labels }) {
   const setup = useTokenSetup();
   const cli = !isDefaultSetup(setup);
+  if (!cli) return <InstallLine labels={labels} />;
   return (
     <div className="install">
-      <InstallBlock
-        labels={labels}
-        commands={(pm) => (cli ? cliSteps(setup, item, pm) : [`${ADD[pm]} owsem-ui`])}
-      />
-      {cli ? <CliNote labels={labels} /> : null}
+      <InstallBlock labels={labels} commands={(pm) => cliSteps(setup, item, pm)} />
+      <CliNote labels={labels} />
     </div>
   );
 }
@@ -232,13 +273,16 @@ export function InstallCommand({ item, labels }: { item: string; labels: Labels 
  * The code drawer's install tab: the npm package, or the source through the shadcn CLI. Another
  * token setup needs the owsem CLI (TK-6).
  */
-export function InstallPane({ item, labels }: { item: string; labels: Labels }) {
+export function InstallPane({ item, labels, lang }: { item: string; labels: Labels; lang: Lang }) {
   const pm = usePackageManager();
   const setup = useTokenSetup();
   if (!isDefaultSetup(setup)) {
     return (
       <div className="install-pane">
-        <Picker labels={labels} />
+        <div className="install-pane-head">
+          <Picker labels={labels} />
+          <TokenChip lang={lang} />
+        </div>
         <section>
           <h3>{labels.installCli}</h3>
           <p>{labels.installCliNote}</p>
@@ -252,7 +296,10 @@ export function InstallPane({ item, labels }: { item: string; labels: Labels }) 
   }
   return (
     <div className="install-pane">
-      <Picker labels={labels} />
+      <div className="install-pane-head">
+        <Picker labels={labels} />
+        <TokenChip lang={lang} />
+      </div>
       <section>
         <h3>{labels.installPackage}</h3>
         <p>{labels.installPackageNote}</p>

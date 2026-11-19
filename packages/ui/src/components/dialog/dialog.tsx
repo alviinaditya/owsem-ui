@@ -3,13 +3,19 @@
 import { Dialog as BaseDialog } from "@base-ui/react/dialog";
 import { useDirection } from "@base-ui/react/direction-provider";
 import {
+  createContext,
   type ForwardRefExoticComponent,
   forwardRef,
+  type JSX,
   type RefAttributes,
+  useCallback,
+  useContext,
   useImperativeHandle,
   useRef,
+  useState,
 } from "react";
 import { withClassName } from "../../core/class-name";
+import { useOpenState, useScrollLock } from "../../core/scroll-lock";
 import "./dialog.css";
 
 const cls = {
@@ -26,7 +32,23 @@ export type DialogRootProps<Payload = unknown> = BaseDialog.Root.Props<Payload>;
 export type DialogTriggerProps<Payload = unknown> = BaseDialog.Trigger.Props<Payload>;
 export type DialogCloseProps = BaseDialog.Close.Props;
 
-export const DialogRoot: typeof BaseDialog.Root = BaseDialog.Root;
+/** Whether the open dialog holds the page's scroll (modal, in the sense of Base UI's `true`). */
+const LockContext = createContext(false);
+
+/**
+ * Base UI's Root. A modal dialog (the default) works as Base UI's: focus is trapped and the page
+ * behind is inert. The page's scroll is also held by OwsemUI's lock (core/scroll-lock), which
+ * puts back the `overflow` Base UI sets on the page, so its text is not drawn again while the
+ * dialog is open. Opened by touch, Base UI's own lock stands.
+ */
+export function DialogRoot<Payload = unknown>(props: DialogRootProps<Payload>): JSX.Element {
+  const { open, onOpenChange } = useOpenState(props);
+  return (
+    <LockContext.Provider value={open && (props.modal ?? true) === true}>
+      <BaseDialog.Root {...props} onOpenChange={onOpenChange} />
+    </LockContext.Provider>
+  );
+}
 /** The button that opens the dialog; pass your button to `render`. */
 export const DialogTrigger: typeof BaseDialog.Trigger = BaseDialog.Trigger;
 /** A button that shuts the dialog; pass your button to `render`. */
@@ -107,11 +129,17 @@ export const DialogPopup: ForwardRefExoticComponent<
   ref,
 ) {
   const direction = useDirection();
-  const popup = useRef<HTMLDivElement>(null);
+  const popup = useRef<HTMLDivElement | null>(null);
+  const [self, setSelf] = useState<HTMLDivElement | null>(null);
   useImperativeHandle(ref, () => popup.current as HTMLDivElement);
+  useScrollLock(self, useContext(LockContext));
+  const setRef = useCallback((el: HTMLDivElement | null) => {
+    popup.current = el;
+    setSelf(el);
+  }, []);
   return (
     <BaseDialog.Popup
-      ref={popup}
+      ref={setRef}
       className={withClassName(cls.popup, className)}
       dir={direction}
       initialFocus={

@@ -64,7 +64,7 @@ const pinned = { open: true } as const;
 
 function tokens(cfg: Cfg) {
   return {
-    "--ow-panel": cfg.bg || undefined,
+    "--ow-raised-bg": cfg.bg || undefined,
     "--ow-fg": cfg.fg || undefined,
   } as CSSProperties;
 }
@@ -274,7 +274,12 @@ const popoverLab = defineLab({
         { value: "off", label: { id: "Tidak", en: "Off" } },
       ],
     },
-    { key: "bg", type: "color", label: { id: "Permukaan", en: "Surface" }, token: "--ow-panel" },
+    {
+      key: "bg",
+      type: "color",
+      label: { id: "Permukaan", en: "Surface" },
+      token: "--ow-raised-bg",
+    },
     { key: "fg", type: "color", label: { id: "Teks", en: "Text" }, token: "--ow-fg" },
   ],
 
@@ -291,11 +296,11 @@ const popoverLab = defineLab({
       name: "Popup",
       selector: ".ow-popover__popup",
       note: {
-        id: "Material panel dengan bayangan popup; role=dialog, dinamai oleh Title.",
-        en: "The panel material with the popup shadow; role=dialog, named by its Title.",
+        id: "Material raised dengan bayangan popup; role=dialog, dinamai oleh Title.",
+        en: "The raised material with the popup shadow; role=dialog, named by its Title.",
       },
       tokens: {
-        "--ow-panel": "--_bg",
+        "--ow-raised-bg": "--_bg",
         "--ow-popup-shadow": "--_shadow",
         "--ow-fg": "--_fg",
         "--ow-muted": "--_muted",
@@ -308,7 +313,7 @@ const popoverLab = defineLab({
         id: "Opsional: permukaan dan bayangan panel, di tepinya, tepat di atas trigger.",
         en: "Optional: the panel's surface and shadow, on its edge, over the trigger.",
       },
-      tokens: { "--ow-panel": "--_bg", "--ow-popup-shadow": "--_shadow" },
+      tokens: { "--ow-raised-bg": "--_bg", "--ow-popup-shadow": "--_shadow" },
     },
     {
       name: "Title",
@@ -379,7 +384,7 @@ const popoverLab = defineLab({
         code: [
           "/* The popup itself: popovers render in a portal, outside the trigger's subtree. */",
           ".share {",
-          ...(cfg.bg ? [`  --${setup.prefix}-panel: ${cfg.bg};`] : []),
+          ...(cfg.bg ? [`  --${setup.prefix}-raised-bg: ${cfg.bg};`] : []),
           ...(cfg.fg ? [`  --${setup.prefix}-fg: ${cfg.fg};`] : []),
           "}",
         ].join("\n"),

@@ -1,19 +1,19 @@
 @layer owsem.tokens, owsem.components;
 
 /*
- * A floating panel on the panel material with the popup shadow, and an optional arrow with the
- * same surface and edge. It grows out of its trigger in 180 ms.
+ * A floating panel on the raised fill with the popup shadow, and an optional arrow with the
+ * same surface and shadow. It grows out of its trigger in 180 ms.
  */
 @layer owsem.components {
   .ow-popover__popup {
-    --_bg: var(--ow-panel);
+    --_bg: var(--ow-raised-bg);
     --_shadow: var(--ow-popup-shadow);
     --_fg: var(--ow-fg);
     --_muted: var(--ow-muted);
     box-sizing: border-box;
     max-inline-size: var(--available-width);
     padding: 16px;
-    border-radius: calc(var(--ow-radius) + 4px);
+    border-radius: var(--ow-radius);
     /* Invisible until forced colors draw it as the edge (DP-8). */
     outline: 1px solid transparent;
     outline-offset: -1px;
@@ -63,8 +63,7 @@
 
   /*
    * A 14px box centered on the popup's edge; its outer half shows a square turned 45 degrees with
-   * the popup's surface and shadow, so its edges are the panel's (in dark, a light line inside a
-   * dark ring). The visible half reaches 1px into the popup at the middle, over the panel's inner
+   * the popup's surface and shadow, so its edges are the panel's (in dark, a light line). The visible half reaches 1px into the popup at the middle, over the panel's inner
    * line, so the arrow opens into the panel. Base UI centers it on the trigger with top or left.
    */
   .ow-popover__arrow {
@@ -162,6 +161,13 @@
   .ow-popover__positioner[dir="rtl"]
     .ow-popover__arrow:is([data-side="inline-start"], [data-side="inline-end"]) {
     transform: scaleX(-1);
+  }
+
+  /* More contrast asked for: a ring around the popup and its arrow. */
+  @media (prefers-contrast: more) {
+    .ow-popover__popup {
+      --_shadow: var(--ow-popup-shadow), 0 0 0 1px var(--ow-edge);
+    }
   }
 
   /* FR-20: it fades, without growing. */

@@ -5,10 +5,10 @@ title: Tabs
 import { Part } from "@/components/lab/lab-shell";
 import { ForMode, TokenChip } from "@/components/token-setup";
 
-Tabs menampilkan satu panel dalam satu waktu, dipilih dari sederet tab. Deretan itu berupa well datar,
-dan tombol timbul bergeser ke bawah tab aktif, dengan tampilan dan gerak yang sama seperti Toggle
-Group. Anda hanya menulis empat part; tombol timbul dan highlight hover tergambar sendiri. Gulir untuk
-mulai tur; stage mengikuti setiap bagian.
+Tabs menampilkan satu panel dalam satu waktu, dipilih dari sederet tab. Deretan itu berupa well datar
+tanpa tepi, dan tombol timbul bergeser ke bawah tab aktif, dengan tampilan dan gerak yang sama seperti
+Toggle Group. Anda hanya menulis empat part; tombol timbul dan highlight hover tergambar sendiri.
+Gulir untuk mulai tur; stage mengikuti setiap bagian.
 
 ## Tombol yang bergeser [#segmented]
 
@@ -74,8 +74,9 @@ Base UI punya `Tabs.Indicator` sendiri, yang tidak diekspor OwsemUI. Indikator i
 sama dengan thumb Toggle Group: ia diam di tempat layout menaruh tab, di piksel yang sama.
 
 Tab mengikuti geometri kontrol: padding-nya berasal dari `--py` (FR-9), dan ikon berukuran font
-ditambah 2 px, sejauh dari tepi samping seperti dari atas. Well menambah 3 px di setiap sisi, dan
-radiusnya adalah radius tab ditambah 3 px itu, sehingga sudutnya tetap konsentris.
+ditambah 2 px, sejauh dari tepi samping seperti dari atas. Well menambah 3 px di setiap sisi dan
+memakai `--ow-radius`, seperti setiap permukaan; tab, indikator, dan Glide memakainya dikurangi 3 px
+itu.
 
 ## State dan varian [#states]
 
@@ -131,15 +132,13 @@ Tabs membaca token tema berikut; pasang di root, di satu part, atau di elemen di
 
 | Token tema | Fungsi |
 | --- | --- |
-| `--ow-well-bg` | Well |
-| `--ow-well-shadow` | Tepi halus well |
-| `--ow-raised-bg` | Indikator |
-| `--ow-raised-shadow` | Tepi tegasnya |
+| `--ow-well-bg` | Well, tanpa tepi |
+| `--ow-raised-bg` | Indikator, tombol tanpa tepi dan bayangan |
 | `--ow-fg` | Label tab aktif dan yang di-hover, serta teks panel |
 | `--ow-muted` | Label lainnya |
 | `--ow-focus` | Ring fokus keyboard |
 | `--ow-hover` | Highlight hover (Glide) |
-| `--ow-radius` | Sudut tab, indikator, dan highlight; well menambah 3 px-nya |
+| `--ow-radius` | Sudut well; tab, indikator, dan highlight memakainya dikurangi 3 px |
 
 <ForMode mode="isolated">
 

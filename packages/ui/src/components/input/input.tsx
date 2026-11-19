@@ -9,6 +9,7 @@ import {
   type RefAttributes,
 } from "react";
 import { withClassName } from "../../core/class-name";
+import { useShakeGate } from "../../core/shake";
 import "./input.css";
 
 const cls = { root: "ow-input", wrapper: "ow-input__wrapper", icon: "ow-input__icon" } as const;
@@ -41,17 +42,19 @@ function forIcons(style: InputProps["style"]): CSSProperties | undefined {
 }
 
 /**
- * A text field: a flat well as tall as Button. It fills its parent. `ref`, `className`, `style`,
- * and every other prop always reach the input; icons add a wrapper that only places them.
+ * A text field: the page's fill with a 3:1 edge, as tall as Button. It fills its parent. `ref`,
+ * `className`, `style`, and every other prop always reach the input; icons add a wrapper that
+ * only places them.
  */
 export const Input: ForwardRefExoticComponent<InputProps & RefAttributes<HTMLInputElement>> =
   forwardRef<HTMLInputElement, InputProps>(function Input(
     { className, size = "md", startIcon, endIcon, ...props },
     ref,
   ) {
+    const gate = useShakeGate(ref);
     const input = (
       <BaseInput
-        ref={ref}
+        ref={gate}
         className={withClassName(cls.root, className)}
         data-size={size}
         {...props}

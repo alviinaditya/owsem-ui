@@ -26,6 +26,7 @@ import { GlideHighlight, useGlide } from "../../core/glide/use-glide";
 import { CopyButton, type CopyButtonProps } from "../copy-button/copy-button";
 import { IconMorph } from "../icon-morph/icon-morph";
 import { createThumb } from "../toggle-group/thumb";
+import { createHeightGlide, type HeightGlide } from "./height-glide";
 import "./code-block.css";
 
 const cls = {
@@ -56,14 +57,20 @@ const assignRef = <T,>(ref: Ref<T> | undefined, el: T | null) => {
   else if (ref) (ref as { current: T | null }).current = el;
 };
 
+/** The panel on show. */
+function shownPanel(root: HTMLElement | null): HTMLElement | null {
+  if (!root) return null;
+  return (
+    [...root.querySelectorAll<HTMLElement>(`.${cls.panel}`)].find(
+      (el) =>
+        el.closest(`.${cls.root}`) === root && !el.hidden && !el.hasAttribute("data-ending-style"),
+    ) ?? null
+  );
+}
+
 /** The text of the panel on show: the code to copy. */
 function shownText(root: HTMLElement | null): string {
-  if (!root) return "";
-  const panel = [...root.querySelectorAll<HTMLElement>(`.${cls.panel}`)].find(
-    (el) =>
-      el.closest(`.${cls.root}`) === root && !el.hidden && !el.hasAttribute("data-ending-style"),
-  );
-  return panel?.textContent ?? "";
+  return shownPanel(root)?.textContent ?? "";
 }
 
 /** The one leading icon: it morphs into the next when its key changes. */
@@ -78,8 +85,8 @@ function LeadingIcon({ icon }: { icon: ReactElement | null }) {
 export type CodeBlockRootProps = Omit<Tabs.Root.Props, "orientation">;
 
 /**
- * The outer card: a header, then the code in an inner card over its lower edge. With tabs it is
- * Base UI's Tabs root: `value`, `defaultValue`, and `onValueChange` pick the snippet on show.
+ * One surface: a header, then the code under it. With tabs it is Base UI's Tabs root: `value`,
+ * `defaultValue`, and `onValueChange` pick the snippet on show.
  */
 export const CodeBlockRoot: ForwardRefExoticComponent<
   CodeBlockRootProps & RefAttributes<HTMLDivElement>
@@ -96,8 +103,22 @@ export const CodeBlockRoot: ForwardRefExoticComponent<
     },
     [ref],
   );
+  const current = value === undefined ? picked : value;
+  // The height eases when another snippet comes on show; the first render does not move.
+  const glide = useRef<HeightGlide | null>(null);
+  const seen = useRef<unknown>(current);
+  useBeforePaint(() => {
+    if (!root.current) return;
+    glide.current = createHeightGlide(root.current, () => shownPanel(root.current));
+    return () => glide.current?.destroy();
+  }, []);
+  useBeforePaint(() => {
+    if (seen.current === current) return;
+    seen.current = current;
+    glide.current?.change();
+  }, [current]);
   return (
-    <RootContext.Provider value={{ root, value: value === undefined ? picked : value }}>
+    <RootContext.Provider value={{ root, value: current }}>
       <Tabs.Root
         {...props}
         ref={setRef}
@@ -185,7 +206,11 @@ export const CodeBlockList: ForwardRefExoticComponent<
   ref,
 ) {
   const { value } = useContext(RootContext);
-  const glide = useGlide<HTMLDivElement>({ items: `.${cls.tab}`, axis: "x" });
+  const glide = useGlide<HTMLDivElement>({
+    items: `.${cls.tab}`,
+    axis: "x",
+    skip: "[data-active]",
+  });
   const list = useRef<HTMLDivElement | null>(null);
   const thumb = useRef<HTMLSpanElement>(null);
   useBeforePaint(() => {
@@ -238,7 +263,7 @@ export interface CodeBlockCopyProps extends Omit<CopyButtonProps, "value"> {
   value?: CopyButtonProps["value"] | undefined;
 }
 
-/** Copy Button, at the end of the header: it copies the snippet on show. */
+/** Copy Button, icon only at the end of the header, with its Tooltip: it copies the snippet on show. */
 export const CodeBlockCopy: ForwardRefExoticComponent<
   CodeBlockCopyProps & RefAttributes<HTMLElement>
 > = forwardRef<HTMLElement, CodeBlockCopyProps>(function CodeBlockCopy(
@@ -249,7 +274,6 @@ export const CodeBlockCopy: ForwardRefExoticComponent<
   return (
     <CopyButton
       size="sm"
-      showLabel
       {...props}
       ref={ref}
       className={withClassName(cls.copy, className)}
@@ -266,8 +290,8 @@ export interface CodeBlockPanelProps extends ComponentPropsWithoutRef<"div"> {
 }
 
 /**
- * The inner card holding the code, such as a highlighted `<pre>`. It scrolls sideways for long
- * lines, and the keyboard can scroll it.
+ * The code, such as a highlighted `<pre>`, under the header on the same surface. It scrolls
+ * sideways for long lines, and the keyboard can scroll it.
  */
 export const CodeBlockPanel: ForwardRefExoticComponent<
   CodeBlockPanelProps & RefAttributes<HTMLDivElement>

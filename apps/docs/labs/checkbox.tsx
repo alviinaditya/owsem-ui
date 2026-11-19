@@ -74,7 +74,7 @@ type Theme = "light" | "dark";
 const SIZES: readonly CheckboxSize[] = ["sm", "md", "lg"];
 const THEMES: readonly Theme[] = ["light", "dark"];
 
-const initial = { size: "md", fill: "", glyph: "", edge: "" };
+const initial = { size: "md", fill: "", glyph: "", tint: "" };
 type Cfg = typeof initial;
 
 /** The controls' colors, on each box, so they leave the card's own text alone. */
@@ -82,7 +82,7 @@ const tokens = (cfg: Cfg) =>
   ({
     "--ow-accent": cfg.fill || undefined,
     "--ow-on-accent": cfg.glyph || undefined,
-    "--ow-edge": cfg.edge || undefined,
+    "--ow-fg": cfg.tint || undefined,
   }) as CSSProperties;
 
 /** A parent box over its tasks: the parent shows a minus for some and a check for all. */
@@ -304,10 +304,10 @@ const checkboxLab = defineLab({
       token: "--ow-on-accent",
     },
     {
-      key: "edge",
+      key: "tint",
       type: "color",
-      label: { id: "Tepi", en: "Edge" },
-      token: "--ow-edge",
+      label: { id: "Tint", en: "Tint" },
+      token: "--ow-fg",
     },
   ],
 
@@ -316,18 +316,15 @@ const checkboxLab = defineLab({
       name: "Root",
       selector: '[data-demo="all"]',
       note: {
-        id: "Kotaknya: span dari Base UI dengan role checkbox, dan input tersembunyi di sampingnya. Well saat mati, warna utama saat dicentang.",
-        en: "The box: Base UI's span with the checkbox role, and a hidden input beside it. The well while off, the primary material while checked.",
+        id: "Kotaknya: span dari Base UI dengan role checkbox, dan input tersembunyi di sampingnya. Isian 10% dari warna teks tanpa tepi saat mati (13% hover, 16% ditekan), warna utama saat dicentang.",
+        en: "The box: Base UI's span with the checkbox role, and a hidden input beside it. A 10% tint of the text color with no edge while off (13% on hover, 16% held), the primary material while checked.",
       },
       tokens: {
-        "--ow-well-bg": "--_well",
-        "--ow-edge": "--_edge",
         "--ow-accent": "--_accent",
         "--ow-primary-shadow": "--_accent-shadow",
         "--ow-on-accent": "--_on-accent",
         "--ow-fg": "--_fg",
         "--ow-hover": "--_hover",
-        "--ow-pressed-bg": "--_pressed-bg",
         "--ow-focus": "--_focus",
       },
     },
@@ -356,7 +353,7 @@ const checkboxLab = defineLab({
   code(cfg, setup) {
     // Any other setup comes from the owsem CLI, which copies the component into the project.
     const from = isDefaultSetup(setup) ? "owsem-ui/base" : "@/components/owsem/checkbox";
-    const custom = cfg.fill || cfg.glyph || cfg.edge;
+    const custom = cfg.fill || cfg.glyph || cfg.tint;
     const scope = custom ? ' className="task"' : "";
     const size = cfg.size === "md" ? "" : ` size="${cfg.size}"`;
     const usage = [
@@ -379,7 +376,7 @@ const checkboxLab = defineLab({
         ".task .ow-checkbox {",
         ...(cfg.fill ? [`  ${token}-accent: ${cfg.fill};`] : []),
         ...(cfg.glyph ? [`  ${token}-on-accent: ${cfg.glyph};`] : []),
-        ...(cfg.edge ? [`  ${token}-edge: ${cfg.edge};`] : []),
+        ...(cfg.tint ? [`  ${token}-fg: ${cfg.tint};`] : []),
         "}",
       ];
       files.push({ name: "task.css", code: lines.join("\n") });

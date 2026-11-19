@@ -67,13 +67,13 @@ file first; imported after `tailwindcss`, it comes too late. From the registry, 
 The same file turns the theme tokens into Tailwind theme values, for utilities such as these:
 
 ```tsx
-<div className="bg-ow-panel text-ow-muted border-ow-line rounded-ow shadow-ow-raised" />
+<div className="bg-ow-panel text-ow-muted border-ow-line rounded-ow shadow-ow-popup" />
 ```
 
 | Utilities | From the tokens |
 | --- | --- |
-| Colors: `bg-ow-*`, `text-ow-*`, `border-ow-*`, and the other color utilities | `bg`, `fg`, `muted`, `accent`, `on-accent`, `focus`, `line`, `edge`, `hover`, `good`, `warning`, `critical`, `critical-solid`, `on-critical`, `panel`, `raised`, `well`, `pressed`, `line-dark`, `line-light`, `tooltip`, `tooltip-fg`, `backdrop` |
-| `shadow-ow-*` | `panel`, `popup`, `raised`, `well`, `pressed`, `primary` |
+| Colors: `bg-ow-*`, `text-ow-*`, `border-ow-*`, and the other color utilities | `bg`, `fg`, `muted`, `accent`, `on-accent`, `focus`, `line`, `edge`, `hover`, `good`, `warning`, `critical`, `critical-solid`, `on-critical`, `panel`, `raised`, `well`, `pressed`, `tooltip`, `tooltip-fg`, `backdrop` |
+| `shadow-ow-*` | `popup`, `primary` |
 | `rounded-ow` | `--ow-radius` |
 | `ease-ow-*` | `out`, `in-out`, `drawer`, `spring-travel`, `spring-settle`, `spring-glide` |
 

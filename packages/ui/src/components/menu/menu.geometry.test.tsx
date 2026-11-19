@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
-import { concentric, insets, TOL } from "../../../test/geometry.ts";
+import { insets, nested, TOL } from "../../../test/geometry.ts";
 import { Menu, type MenuSize } from "./index";
 
 const Glyph = () => (
@@ -73,8 +73,10 @@ describe("Menu geometry (FR-9, FR-10, FR-10b)", () => {
         expect(Math.abs(side - gap.top)).toBeLessThanOrEqual(TOL);
       }
       const popup = document.querySelector(".ow-menu__popup") as HTMLElement;
-      const ring = concentric(popup, cut);
-      expect(ring.delta).toBeLessThanOrEqual(TOL);
+      // One radius outside, and the items follow it, less the padding (TK-8).
+      const ring = nested(popup, cut);
+      expect(ring.outerDelta).toBeLessThanOrEqual(TOL);
+      expect(ring.innerDelta).toBeLessThanOrEqual(TOL);
       expect(ring.insetDelta).toBeLessThanOrEqual(TOL);
     });
   }

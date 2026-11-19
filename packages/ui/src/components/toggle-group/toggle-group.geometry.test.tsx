@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
-import { concentric, insets, rect, TOL } from "../../../test/geometry.ts";
+import { insets, nested, rect, TOL } from "../../../test/geometry.ts";
 import { ToggleGroup } from "./index";
 
 const ICON = (
@@ -43,7 +43,7 @@ function Group({
 }
 
 describe("Toggle Group geometry", () => {
-  test("items are the size's control height (FR-11), 3px inside the track on every side", async () => {
+  test("items are the size's control height (FR-11), 4px inside the track on every side", async () => {
     const { groups, itemsOf } = await mount(
       <>
         <Group size="sm" />
@@ -51,17 +51,17 @@ describe("Toggle Group geometry", () => {
         <Group size="lg" />
       </>,
     );
-    for (const [i, height] of [29.25, 38.5, 48].entries()) {
+    for (const [i, height] of [24, 32, 40].entries()) {
       const group = groups[i] as HTMLElement;
       const items = itemsOf(group);
       for (const item of items) close(rect(item).height, height);
       const first = insets(group, items[0] as Element);
       const last = insets(group, items.at(-1) as Element);
-      for (const gap of [first.top, first.bottom, first.left, last.right]) close(gap, 3);
+      for (const gap of [first.top, first.bottom, first.left, last.right]) close(gap, 4);
     }
   });
 
-  test("the thumb covers the pressed item exactly, its radius concentric with the track (FR-10b)", async () => {
+  test("the thumb covers the pressed item exactly; the track takes the one radius, the items less the inset (TK-8)", async () => {
     const { groups, thumbOf, itemsOf } = await mount(
       <>
         <Group pressed="a" />
@@ -73,10 +73,11 @@ describe("Toggle Group geometry", () => {
       const pressed = itemsOf(group)[i] as HTMLElement;
       for (const side of keyGaps(pressed, thumb)) close(side, 0);
       // The first item's thumb reaches the track's start corner with the track's radius; inside
-      // its 3px clear border the key has the items' radius.
+      // its 4px clear border the key has the items' radius.
       if (i === 0) {
-        const r = concentric(group, thumb);
-        expect(r.delta).toBeLessThanOrEqual(TOL);
+        const r = nested(group, thumb);
+        expect(r.outerDelta).toBeLessThanOrEqual(TOL);
+        expect(r.innerDelta).toBeLessThanOrEqual(TOL);
         expect(r.insetDelta).toBeLessThanOrEqual(TOL);
       }
       const radius = (el: Element) => Number.parseFloat(getComputedStyle(el).borderTopLeftRadius);
@@ -133,8 +134,8 @@ describe("Toggle Group geometry", () => {
     const [first = 0, ...rest] = widths(natural);
     for (const width of rest) close(width, first);
     close(rect(stretched).width, 420);
-    // 420 less 3px padding on each side and two 2px gaps, in three.
-    for (const width of widths(stretched)) close(width, (420 - 6 - 4) / 3);
+    // 420 less 4px padding on each side and two 2px gaps, in three.
+    for (const width of widths(stretched)) close(width, (420 - 8 - 4) / 3);
   });
 
   test("right to left, the thumb is under the first item, on the right (FR-16)", async () => {
@@ -145,7 +146,25 @@ describe("Toggle Group geometry", () => {
     );
     const group = groups[0] as HTMLElement;
     const first = itemsOf(group)[0] as HTMLElement;
-    close(insets(group, first).right, 3);
+    close(insets(group, first).right, 4);
     for (const side of keyGaps(first, thumbOf(group))) close(side, 0);
+  });
+
+  test("the stretch grows from the leading edge, so the key never passes its item", async () => {
+    const { groups, thumbOf, itemsOf } = await mount(<Group pressed="c" />);
+    const group = groups[0] as HTMLElement;
+    const thumb = thumbOf(group);
+    await expect.poll(() => thumb.hasAttribute("data-visible")).toBe(true);
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    (itemsOf(group)[0] as HTMLElement).click();
+    const find = () =>
+      thumb
+        .getAnimations({ subtree: true })
+        .find((a) => (a.effect as KeyframeEffect).pseudoElement === "::before");
+    await expect.poll(find).toBeDefined();
+    // Going left, the left edge leads and stays put: the origin is on it.
+    for (const frame of ((find() as Animation).effect as KeyframeEffect).getKeyframes()) {
+      expect(String(frame.transformOrigin).startsWith("0% 50%")).toBe(true);
+    }
   });
 });

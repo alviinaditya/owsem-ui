@@ -8,30 +8,30 @@
  * property is declared, so the stage's own data-theme needs its own copy. */
 :root,
 [data-theme] {
-  --docs-bg: light-dark(#fafafa, #19191b);
-  --docs-surface: light-dark(#ffffff, #1f1f21);
+  --docs-bg: var(--ow-bg);
+  --docs-surface: var(--ow-panel);
+  /* A card's resting shadow (the library's); floating layers keep --ow-popup-shadow. */
+  --docs-shadow: var(--ow-surface-shadow);
   --docs-line-strong: light-dark(rgb(0 0 0 / 0.14), rgb(255 255 255 / 0.1));
   /* Control boundaries need 3:1 (WCAG 1.4.11). */
   --docs-control: light-dark(#82828b, #6e6e76);
   --docs-fg: light-dark(#18181b, #ededef);
   --docs-body: light-dark(#3f3f46, #b4b4bb);
   --docs-muted: light-dark(#63636b, #a1a1a8);
-  --docs-accent: light-dark(#5b4a9a, #d4cbe5);
-  --docs-on-accent: light-dark(#ffffff, #18181a);
+  --docs-accent: var(--ow-focus);
+  --docs-on-accent: var(--ow-on-accent);
   --docs-hover: light-dark(rgb(0 0 0 / 0.04), rgb(255 255 255 / 0.05));
   /* Errors in fields: 4.5:1 on surfaces and wells, light and dark. */
   --docs-critical: light-dark(#b03f2a, #f2ab96);
-  --docs-stage: light-dark(#f4f4f5, #1c1c1f);
-  /* Materials from owsem-ui's tokens (TK-7): a flat darker track and a crisp-edged thumb, so the
-   * docs and the library share one source. */
+  /* Four surfaces: well (stages, tracks), bg, surface, raised. */
+  --docs-stage: var(--ow-well-bg);
+  /* Materials from owsem-ui's tokens (TK-7): a flat darker track and a raised thumb, so the docs
+   * and the library share one source. */
   --docs-well: var(--ow-well-bg);
-  --docs-well-shadow: var(--ow-well-shadow);
   --docs-raised: var(--ow-raised-bg);
-  --docs-raised-shadow: var(--ow-raised-shadow);
-  --docs-stage-line: light-dark(rgb(0 0 0 / 0.06), rgb(255 255 255 / 0.05));
-  /* A groove: a dark line with a faint highlight under it, so it reads as one thin line. */
-  --docs-groove-dark: light-dark(rgb(0 0 0 / 0.12), rgb(0 0 0 / 0.8));
-  --docs-groove-light: light-dark(rgb(255 255 255 / 0.95), rgb(255 255 255 / 0.06));
+  --docs-stage-line: color-mix(in srgb, var(--ow-fg) 5.5%, transparent);
+  /* The one layout line: a hairline. */
+  --docs-line: light-dark(#e4e4e7, #2c2c30);
   /* Code colors (lib/code-theme.ts); each is at least 4.5:1 on every code background. */
   --tk-bg: var(--docs-surface);
   --tk-text: light-dark(#27272a, #d9d9de);
@@ -44,56 +44,32 @@
   --tk-type: light-dark(#3b6a14, #b8db94);
   --tk-attr: light-dark(#1d5e98, #9cc8e9);
   --tk-fn: light-dark(#983a87, #e9b2df);
-  --tk-flash: light-dark(rgb(91 74 154 / 0.14), rgb(212 203 229 / 0.22));
-  /*
-   * Etched layout lines, like the Separator: dark, then light (top to bottom, start to end). Both
-   * halves sit in the element's own 2px border, so no child or neighbor can cover one. Use with
-   * a 2px border on that edge: `border-block-end: 2px solid var(--docs-groove-dark)`.
-   */
-  --docs-etch-top: linear-gradient(
-      var(--docs-groove-dark) 1px,
-      var(--docs-groove-light) 1px 2px,
-      transparent 2px
-    )
-    2 0 0;
-  --docs-etch-bottom: linear-gradient(
-      to top,
-      var(--docs-groove-light) 1px,
-      var(--docs-groove-dark) 1px 2px,
-      transparent 2px
-    )
-    0 0 2;
-  --docs-etch-start: linear-gradient(
-      to right,
-      var(--docs-groove-dark) 1px,
-      var(--docs-groove-light) 1px 2px,
-      transparent 2px
-    )
-    0 0 0 2;
-  --docs-etch-end: linear-gradient(
-      to left,
-      var(--docs-groove-light) 1px,
-      var(--docs-groove-dark) 1px 2px,
-      transparent 2px
-    )
-    0 2 0 0;
+  --tk-flash: color-mix(in srgb, var(--ow-accent) 18%, transparent);
 }
 
 :root {
   /* No top bar (the sidebar holds the brand and the settings); kept for the offsets that use it. */
   --top-h: 0px;
-  /* Radius scale (TK-8): a part inside a track is the track's radius minus the 3px between them. */
-  --docs-radius-inner: 7px;
-  --docs-radius: 10px;
-  --docs-radius-box: 14px;
+  /* One radius (TK-8): every surface takes --ow-radius; a part inside a track takes it less the
+   * 3px between them. */
+  --docs-radius-inner: max(0px, var(--ow-radius) - 3px);
+  --docs-radius: var(--ow-radius);
+  --docs-radius-box: var(--ow-radius);
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
-  /* Fluid type: each size grows from a 320 px phone to a wide screen. The rem part keeps browser
-   * zoom working (WCAG 1.4.4); UI labels stay fixed, already small. */
-  --docs-text-display: clamp(1.75rem, 1.2rem + 2.75vw, 3.125rem);
-  --docs-text-title: clamp(1.25rem, 1.05rem + 1vw, 1.75rem);
-  --docs-text-subtitle: clamp(1.0625rem, 1rem + 0.3vw, 1.125rem);
-  --docs-text-lead: clamp(0.9375rem, 0.875rem + 0.35vw, 1.03125rem);
-  --docs-text-body: clamp(0.9375rem, 0.9rem + 0.15vw, 0.96875rem);
+  /* Type scale (docs/typography.md), all rem so browser zoom and font preferences work (WCAG
+   * 1.4.4). Headings grow fluidly with the width; the rest is fixed. Line heights sit next to each
+   * use: 1.1 display, 1.25 title, 1.35 subtitle, 1.55 lead, 1.65 body, 1.6 compact and code,
+   * 1.45 ui, 1.5 small, 1.4 micro. */
+  --docs-text-display: clamp(2rem, 1.7rem + 1vw, 2.5rem);
+  --docs-text-title: clamp(1.375rem, 1.3rem + 0.4vw, 1.5rem);
+  --docs-text-subtitle: 1.125rem;
+  --docs-text-lead: 1.0625rem;
+  --docs-text-body: 1rem;
+  --docs-text-body-compact: 0.9375rem;
+  --docs-text-ui: 0.875rem;
+  --docs-text-small: 0.8125rem;
+  --docs-text-micro: 0.75rem;
+  --docs-text-code: 0.8125rem;
   /* owsem-ui's mono text (Color Picker's values and fields) in the docs' mono font. */
   --ow-font-mono: var(--font-mono);
   scroll-padding-top: calc(var(--top-h) + 16px);
@@ -181,7 +157,7 @@ body {
   color: var(--docs-fg);
   font-family: var(--font-sans), system-ui, sans-serif;
   font-size: var(--docs-text-body);
-  line-height: 1.7;
+  line-height: 1.65;
 }
 
 ::selection {
@@ -219,9 +195,15 @@ body {
     font-family: var(--font-mono), ui-monospace, monospace;
   }
 
-  /* Inline code; a block's code keeps its block's size. */
+  /* Inline code: a quiet chip. A block's code keeps its block's size; components that draw their
+   * own code (.install-text, .command, chips, Kbd) reset it below. */
   :not(pre) > code {
-    font-size: 0.88em;
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+    background-color: color-mix(in oklab, var(--docs-fg) 7%, transparent);
+    box-decoration-break: clone;
+    font-size: 0.875em;
+    letter-spacing: normal;
   }
 }
 
@@ -243,6 +225,7 @@ body {
   border-radius: var(--docs-radius);
   background-color: var(--docs-accent);
   color: var(--docs-on-accent);
+  font-size: var(--docs-text-ui);
   transform: translateY(-200%);
 }
 
@@ -251,70 +234,13 @@ body {
 }
 
 /*
- * The Token setup's mode: radios in a flat track, the chosen one a raised key. The last hand-built
- * segmented choice in the docs; it becomes a Toggle Group with the Popover that replaces the panel.
- */
-.seg {
-  display: inline-flex;
-  gap: 2px;
-  margin: 0;
-  padding: 3px;
-  border: 0;
-  border-radius: var(--docs-radius);
-  background-color: var(--docs-well);
-  box-shadow: var(--docs-well-shadow);
-}
-
-.seg-item {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  min-inline-size: 28px;
-  block-size: 26px;
-  padding-inline: 10px;
-  border-radius: var(--docs-radius-inner);
-  color: var(--docs-muted);
-  font-size: 12.5px;
-  line-height: 1;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: color 0.15s ease;
-}
-
-.seg-item:hover {
-  color: var(--docs-fg);
-}
-
-.seg-item[data-selected] {
-  background-color: var(--docs-raised);
-  box-shadow: var(--docs-raised-shadow);
-  color: var(--docs-fg);
-}
-
-.seg-item input {
-  position: absolute;
-  inset: 0;
-  margin: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.seg-item:has(:focus-visible) {
-  outline: 2px solid var(--docs-accent);
-  outline-offset: 2px;
-}
-
-/*
  * Segmented choices (the theme, Lab controls, the family filter, the package manager): OwsemUI's
  * Toggle Group, a flat track with a crisp raised thumb (DP-1: no accent fill), at the docs' compact
  * size. --py on the items sets their height: 26px here, 24px in the sidebar's foot.
  */
 .docs-choice {
-  --ow-radius: var(--docs-radius-inner);
   --ow-hover: var(--docs-hover);
-  font-size: 12.5px;
+  font-size: var(--docs-text-small);
 }
 
 .docs-choice .ow-toggle-group__item {
@@ -329,7 +255,6 @@ body {
 :root[data-theme="dark"] .theme-switcher:not(:has([aria-pressed="true"])) [data-option="dark"],
 :root:not([data-theme]) .theme-switcher:not(:has([aria-pressed="true"])) [data-option="system"] {
   background-color: var(--docs-raised);
-  box-shadow: var(--docs-raised-shadow);
   color: var(--docs-fg);
 }
 
@@ -338,14 +263,12 @@ body {
  * group beside it: the same track, Glide on hover, and the current language raised.
  */
 .language-switcher {
-  --ow-radius: var(--docs-radius-inner);
   --ow-hover: var(--docs-hover);
   display: flex;
   box-sizing: border-box;
   padding: 3px;
   border-radius: var(--docs-radius);
   background-color: var(--docs-well);
-  box-shadow: var(--docs-well-shadow);
 }
 
 .language-switcher ul {
@@ -371,7 +294,7 @@ body {
   padding-inline: 8px;
   border-radius: var(--docs-radius-inner);
   color: var(--docs-muted);
-  font-size: 12.5px;
+  font-size: var(--docs-text-small);
   font-weight: 500;
   line-height: 1;
   text-decoration: none;
@@ -384,7 +307,7 @@ body {
 
 .language-switcher a[aria-current="page"] {
   background-color: var(--docs-raised);
-  box-shadow: var(--docs-raised-shadow);
+  box-shadow: var(--docs-shadow);
 }
 
 /* Plain pages */
@@ -393,7 +316,7 @@ body {
   box-sizing: border-box;
   max-inline-size: 1080px;
   margin-inline: auto;
-  padding: 40px 16px 96px;
+  padding: 48px 16px 96px;
 }
 
 @media (width >= 900px) {
@@ -417,37 +340,47 @@ body {
 @layer docs-base {
   h1 {
     margin-block: 8px 0;
+    color: var(--docs-fg);
     font-size: var(--docs-text-display);
     font-weight: 600;
-    line-height: 1.04;
-    letter-spacing: -0.04em;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
     text-wrap: balance;
   }
 
   h2 {
     margin-block: 0 12px;
+    color: var(--docs-fg);
     font-size: var(--docs-text-title);
     font-weight: 600;
-    line-height: 1.15;
-    letter-spacing: -0.03em;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  h3 {
+    margin-block: 0 8px;
+    color: var(--docs-fg);
+    font-size: var(--docs-text-subtitle);
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
     text-wrap: balance;
   }
 
   p {
-    margin-block: 0 16px;
+    margin-block: 0 1em;
+    text-wrap: pretty;
   }
 }
 
-.eyebrow,
+/* A small heading over a list, in the UI's own type: no caps, no mono (those are the stage's). */
 .toc .sidebar-heading {
   margin: 0;
-  color: var(--docs-accent);
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 11px;
+  color: var(--docs-fg);
+  font-size: var(--docs-text-ui);
   font-weight: 500;
-  letter-spacing: 0.14em;
-  line-height: 1;
-  text-transform: uppercase;
+  line-height: 1.45;
 }
 
 .page-header {
@@ -455,53 +388,151 @@ body {
 }
 
 .lead {
-  max-inline-size: 46ch;
-  margin-block: 16px;
+  max-inline-size: 52ch;
+  margin-block: 12px;
   color: var(--docs-body);
   font-size: var(--docs-text-lead);
-  line-height: 1.6;
+  line-height: 1.55;
 }
 
-/* Install commands (components/install.tsx): a Code Block in the page header, a picker and
- * copyable commands in the code drawer. */
+/* Install commands (components/install.tsx): one line in the page header (a Code Block for the
+ * CLI's steps), a picker and copyable commands in the code drawer. */
 .install {
   display: grid;
   gap: 8px;
-  margin-block-start: 32px;
+  margin-block-start: 24px;
+}
+
+/* The package manager, the command, Copy: one flat row, the code's own surface. */
+.install-line {
+  --ow-hover: var(--docs-hover);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-inline-size: 28rem;
+  margin-block-start: 24px;
+  padding: 4px;
+  border-radius: var(--ow-radius);
+  background-color: var(--docs-surface);
+  box-shadow: var(--docs-shadow);
+  font-size: var(--docs-text-code);
+}
+
+.install-pm {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  block-size: 28px;
+  padding-inline: 8px 6px;
+  border: 0;
+  border-radius: max(0px, var(--ow-radius) - 4px);
+  background: none;
+  color: var(--docs-muted);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--docs-text-small);
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.install-pm:hover,
+.install-pm[data-popup-open] {
+  background-color: var(--docs-hover);
+  color: var(--docs-fg);
+}
+
+.install-pm svg:last-child {
+  transition: rotate 0.2s var(--ow-ease-out);
+}
+
+.install-pm[data-popup-open] svg:last-child {
+  rotate: 180deg;
+}
+
+.install-pm-menu {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--docs-text-small);
+}
+
+/* A scroller inside the line. */
+.install-text {
+  --fade-size: 24px;
+  flex: 1;
+  min-inline-size: 0;
+  border-radius: 0;
+  padding-inline-start: 8px;
+}
+
+.install-text code {
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--tk-text);
+  font-size: var(--docs-text-code);
+  white-space: pre;
+}
+
+/* Nested in the line's 4px padding: the one radius less it (TK-8). */
+.install-copy {
+  --ow-radius: max(0px, var(--docs-radius) - 4px);
+  flex: none;
+}
+
+.install-pane-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+
+.install-pane-head > :where(.token-chip) {
+  margin: 0;
 }
 
 .pm-picker {
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 12px;
+  font-size: var(--docs-text-small);
 }
 
 /* pnpm until hydration, when the stored choice is pressed (install.tsx). */
 .pm-picker:not(:has([aria-pressed="true"])) [data-option="pnpm"] {
   background-color: var(--docs-raised);
-  box-shadow: var(--docs-raised-shadow);
   color: var(--docs-fg);
 }
 
 .command {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   padding: 6px 6px 6px 12px;
-  border: 1px solid var(--ow-line-dark);
   border-radius: var(--docs-radius);
-  background-color: var(--tk-bg);
-  box-shadow: inset 0 1px 0 var(--ow-line-light);
-  font-size: 12.5px;
+  background-color: var(--docs-surface);
+  font-size: var(--docs-text-code);
 }
 
 .command-text {
   --fade-size: 24px;
   flex: 1;
   min-inline-size: 0;
+  border-radius: 0;
+}
+
+/* Nested in the box's 6px padding: the one radius less it (TK-8). */
+.command .ow-copy-button {
+  --ow-radius: max(0px, var(--docs-radius) - 6px);
+}
+
+.component-preview-copy .ow-copy-button {
+  --ow-radius: max(0px, var(--docs-radius) - 4px);
 }
 
 .command code {
+  padding: 0;
+  border-radius: 0;
+  background: none;
   color: var(--tk-text);
+  font-size: var(--docs-text-code);
   white-space: pre;
 }
 
@@ -515,7 +546,7 @@ body {
 .install-note {
   margin: 0;
   color: var(--docs-muted);
-  font-size: 12.5px;
+  font-size: var(--docs-text-small);
   line-height: 1.5;
 }
 
@@ -528,21 +559,21 @@ body {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   justify-items: start;
-  gap: 20px;
-  padding: 12px 16px 20px;
+  gap: 24px;
+  padding: 12px 16px 24px;
 }
 
 .install-pane section {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 6px;
+  gap: 8px;
   justify-self: stretch;
 }
 
 .install-pane h3 {
   margin: 0;
   color: var(--docs-fg);
-  font-size: 13px;
+  font-size: var(--docs-text-ui);
   font-weight: 600;
 }
 
@@ -550,60 +581,51 @@ body {
   max-inline-size: 64ch;
   margin: 0 0 4px;
   color: var(--docs-muted);
-  font-size: 12.5px;
+  font-size: var(--docs-text-small);
   line-height: 1.5;
 }
 
-/* Badges: the dot shape shows the family (DS-1). */
-
-.badges {
+/* Family · phase · expressions as one quiet line (component-header.tsx). Only a component that
+ * has not shipped gets a badge. */
+.meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  align-items: center;
+  gap: 8px;
   margin: 16px 0 0;
-  padding: 0;
-  list-style: none;
+  color: var(--docs-muted);
+  font-size: var(--docs-text-small);
+  line-height: 1.5;
 }
 
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
   padding-inline: 8px;
-  border: 1px solid var(--docs-line-strong);
   border-radius: 999px;
+  background-color: var(--docs-well);
   color: var(--docs-muted);
-  font-size: 12px;
-  line-height: 22px;
-}
-
-.badge[data-status="available"] {
-  border-color: transparent;
-  background-color: var(--docs-accent);
-  color: var(--docs-on-accent);
-}
-
-.badge[data-family]::before {
-  content: "";
-  inline-size: 7px;
-  block-size: 7px;
-  border-radius: 1px;
-  background-color: currentColor;
-}
-
-.badge[data-family="owsem"]::before {
-  border-radius: 50%;
+  font-size: var(--docs-text-micro);
+  line-height: 1.4;
+  min-block-size: 22px;
 }
 
 /* Index */
 
-/* The family filter and the view: Toggle Groups with their names inside the track. */
+/* The family filter and the view: Toggle Groups, each named before its track. */
 .index-controls {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  gap: 12px;
-  margin-block-end: 40px;
+  gap: 12px 24px;
+  margin-block-end: 48px;
+}
+
+.index-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--docs-text-small);
 }
 
 .filter {
@@ -612,32 +634,21 @@ body {
 }
 
 .view-picker .ow-toggle-group__item {
-  gap: 6px;
+  gap: 8px;
 }
 
 /* Grid until hydration, or the list stored on <html> (component-index.tsx). */
 :root:not([data-index-view]) .view-picker:not(:has([aria-pressed="true"])) [data-option="grid"],
 :root[data-index-view="list"] .view-picker:not(:has([aria-pressed="true"])) [data-option="list"] {
   background-color: var(--docs-raised);
-  box-shadow: var(--docs-raised-shadow);
   color: var(--docs-fg);
 }
 
 .filter-legend {
-  padding-inline: 8px 4px;
   color: var(--docs-muted);
 }
 
 @media (forced-colors: active) {
-  :root,
-  [data-theme] {
-    --docs-etch-top: none;
-    --docs-etch-bottom: none;
-    --docs-etch-start: none;
-    --docs-etch-end: none;
-  }
-
-  .seg-item[data-selected],
   .language-switcher a[aria-current="page"],
   .lab-tool[aria-expanded="true"],
   .lab-scene-nav a[aria-current="true"],
@@ -648,7 +659,7 @@ body {
   }
 
   .lab-ibox[data-on] {
-    border-color: Highlight;
+    outline: 1px solid Highlight;
   }
 
   .lab-inspect-lines [data-on] path {
@@ -668,45 +679,54 @@ body {
 }
 
 .page section + section {
-  margin-block-start: 56px;
+  margin-block-start: 64px;
 }
 
 .page :where(section > h2) {
-  margin-block-end: 20px;
+  margin-block-end: 24px;
 }
 
 /* Grid: a card per component, its preview on top. */
+/* Above Glide's highlight, so the hover tint lies behind the preview and the text. */
 .component-index {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
-  gap: 20px;
+  gap: 24px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+/* No frame: a stage well, then the name and a line of text on the page. Glide's tint draws the
+ * card around them on hover. */
+/*
+ * The preview and the text share one width. The card reaches 8px past them on every side, out of
+ * its grid cell, so hover's tint frames both with room, and its corners are the preview's plus that.
+ */
 .component-card {
+  --_out: 8px;
   position: relative;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  border: 1px solid var(--ow-line-dark);
-  box-shadow: inset 0 1px 0 var(--ow-line-light);
-  border-radius: var(--docs-radius-box);
-  background-color: var(--docs-surface);
+  margin: calc(-1 * var(--_out));
+  padding: var(--_out);
+  border-radius: calc(var(--ow-radius) + var(--_out));
 }
 
 /*
- * Glide lights the card nearest the pointer with the hover tint, as in the sidebar and menus.
- * Cards are opaque, so in the grid the tint lies over the card; in the list it is under the row.
+ * Glide lights the card nearest the pointer with the hover tint, as in the sidebar and menus: in
+ * the grid it lies over the card, in the list under the row.
  */
 .component-index-glide {
   --ow-hover: var(--docs-hover);
 }
 
 :root:not([data-index-view]) .component-index-glide > .ow-glide {
-  --_radius: var(--docs-radius-box);
-  z-index: 2;
+  --_radius: calc(var(--ow-radius) + 8px);
+  /* In light the tint would match the preview's well, so it is the white surface. */
+  --ow-hover: light-dark(var(--docs-surface), var(--docs-hover));
 }
 
 .component-card:has(a:focus-visible) {
@@ -715,8 +735,16 @@ body {
 }
 
 .component-card a {
-  font-weight: 600;
+  color: var(--docs-body);
+  font-size: var(--docs-text-ui);
+  font-weight: 500;
+  line-height: 1.45;
   text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.component-card:where(:hover, :focus-within) a {
+  color: var(--docs-fg);
 }
 
 .component-card a:focus-visible {
@@ -736,28 +764,24 @@ body {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 6px;
-  padding: 16px 18px 0;
+  gap: 4px;
+  /* Inset by the radius: the text starts where the preview's corner ends. */
+  padding: 12px var(--ow-radius) 0;
 }
 
 .component-card p {
   margin: 0;
   color: var(--docs-muted);
-  font-size: 14px;
+  font-size: var(--docs-text-small);
   line-height: 1.5;
 }
 
-.component-card .badges {
-  margin: 0;
-  padding: 14px 18px 18px;
-}
-
-/* The status shows in the preview, the phase in the list. */
-:root:not([data-index-view]) .component-card .badge:is([data-status], [data-phase]) {
+/* The family and the rest show in the list only. */
+:root:not([data-index-view]) .component-card .meta {
   display: none;
 }
 
-/* The stage's canvas in small: the component at rest on a faint grid. */
+/* The stage in small: the component at rest in a flat well. */
 .component-preview {
   position: relative;
   isolation: isolate;
@@ -765,25 +789,11 @@ body {
   place-items: center;
   block-size: 152px;
   overflow: hidden;
-  border-block-end: 2px solid var(--docs-groove-dark);
-  border-image: var(--docs-etch-bottom);
-  background: radial-gradient(ellipse 75% 70% at 50% 50%, var(--docs-stage), var(--docs-surface));
+  border-radius: var(--ow-radius);
+  background-color: var(--docs-stage);
   color: var(--docs-fg);
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.component-preview::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background-image:
-    linear-gradient(var(--docs-stage-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--docs-stage-line) 1px, transparent 1px);
-  background-position: center;
-  background-size: 24px 24px;
-  mask-image: radial-gradient(ellipse 60% 55% at 50% 50%, #000 15%, transparent 75%);
+  font-size: var(--docs-text-ui);
+  line-height: 1.45;
 }
 
 .component-preview-live {
@@ -799,7 +809,7 @@ body {
 
 .component-preview-checkbox {
   display: grid;
-  gap: 6px;
+  gap: 8px;
 }
 
 .component-preview-fieldset {
@@ -808,14 +818,14 @@ body {
 
 .component-preview-form {
   inline-size: 100%;
-  gap: 10px;
+  gap: 12px;
 }
 
 .component-preview-separator {
   display: grid;
-  gap: 10px;
+  gap: 12px;
   inline-size: 180px;
-  font-size: 13px;
+  font-size: var(--docs-text-small);
 }
 
 .component-preview-separator .component-preview-row {
@@ -826,12 +836,17 @@ body {
 
 .component-preview-keys {
   display: flex;
-  gap: 6px;
-  font-size: 26px;
+  gap: 8px;
+  font-size: var(--docs-text-title);
 }
 
 .component-preview-code {
   inline-size: 220px;
+}
+
+.component-preview-copy code {
+  padding: 0;
+  background: none;
 }
 
 .component-preview-copy {
@@ -839,10 +854,9 @@ body {
   align-items: center;
   gap: 12px;
   padding: 4px 4px 4px 12px;
-  border-radius: calc(var(--docs-radius) + 2px);
+  border-radius: var(--ow-radius);
   background-color: var(--docs-well);
-  box-shadow: var(--docs-well-shadow);
-  font-size: 12.5px;
+  font-size: var(--docs-text-small);
 }
 
 .component-preview-morph {
@@ -852,12 +866,11 @@ body {
   block-size: 44px;
   border-radius: var(--docs-radius);
   background-color: var(--docs-well);
-  box-shadow: var(--docs-well-shadow);
 }
 
 .component-preview-tree {
   inline-size: 190px;
-  font-size: 13px;
+  font-size: var(--docs-text-small);
 }
 
 /* Popups portal here: out of the layout, in the preview's own box. */
@@ -940,13 +953,11 @@ body {
 
 /* A short list that scrolls. */
 .component-preview-scroll {
-  --ow-radius: var(--docs-radius);
   inline-size: 132px;
   block-size: 104px;
-  border: 1px solid var(--ow-line-dark);
   background-color: var(--docs-surface);
   color: var(--docs-control);
-  font-size: 12.5px;
+  font-size: var(--docs-text-small);
 }
 
 .component-preview-scroll ul {
@@ -966,7 +977,7 @@ body {
 .component-preview-toc {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 24px;
 }
 
 .component-preview-toc-article {
@@ -975,7 +986,6 @@ body {
   block-size: 112px;
   padding: 8px 10px;
   overflow-y: auto;
-  border: 1px solid var(--ow-line-dark);
   border-radius: var(--docs-radius);
   background-color: var(--docs-surface);
   color: var(--docs-control);
@@ -985,7 +995,7 @@ body {
 .component-preview-toc-article > div {
   display: grid;
   align-content: start;
-  gap: 6px;
+  gap: 8px;
   block-size: 56px;
 }
 
@@ -999,14 +1009,14 @@ body {
 .component-preview-toc-article span:first-child {
   inline-size: 60%;
   block-size: 6px;
-  opacity: 0.8;
+  opacity: 0.75;
 }
 
 .component-preview .ow-table-of-contents {
   --ow-accent: var(--docs-accent);
   --ow-line: var(--docs-line-strong);
   inline-size: 104px;
-  font-size: 12.5px;
+  font-size: var(--docs-text-small);
 }
 
 .component-preview-sketch {
@@ -1020,12 +1030,12 @@ body {
   inset-block-start: 10px;
   inset-inline-end: 10px;
   padding-inline: 8px;
-  border: 1px solid var(--docs-line-strong);
   border-radius: 999px;
   background-color: var(--docs-surface);
   color: var(--docs-muted);
-  font-size: 12px;
-  line-height: 22px;
+  font-size: var(--docs-text-micro);
+  line-height: 1.4;
+  min-block-size: 22px;
 }
 
 /* List: one row per component, read straight down; the columns line up across rows. */
@@ -1036,12 +1046,11 @@ body {
 
 :root[data-index-view="list"] .component-card {
   display: grid;
-  gap: 6px;
-  padding: 14px 12px;
+  gap: 8px;
+  margin: 0;
+  padding: 16px 12px;
   overflow: visible;
   border: 0;
-  border-block-end: 2px solid var(--docs-groove-dark);
-  border-image: var(--docs-etch-bottom);
   border-radius: 0;
   box-shadow: none;
   background: none;
@@ -1055,7 +1064,8 @@ body {
   display: none;
 }
 
-:root[data-index-view="list"] :is(.component-card-text, .component-card .badges) {
+:root[data-index-view="list"] :is(.component-card-text, .component-card .meta) {
+  margin: 0;
   padding: 0;
 }
 
@@ -1079,10 +1089,10 @@ body {
 /* Component pages */
 
 .coming-soon {
-  padding: 24px 28px;
-  border: 1px solid var(--ow-line-dark);
-  box-shadow: inset 0 1px 0 var(--ow-line-light);
+  padding: 24px 32px;
   border-radius: var(--docs-radius-box);
+  background-color: var(--docs-surface);
+  box-shadow: var(--docs-shadow);
   color: var(--docs-body);
 }
 
@@ -1091,11 +1101,10 @@ body {
 }
 
 /*
- * Previous and next: links styled as outline Buttons (owsem-ui), one compact line each, the arrow
- * pointing the way. A quieter edge than the default, as befits the end of a page.
+ * Previous and next: links styled as secondary Buttons (owsem-ui), one compact line each, the arrow
+ * pointing the way.
  */
 .neighbors {
-  --ow-edge: var(--docs-line-strong);
   display: flex;
   gap: 12px;
   margin-block: 56px 16px;
@@ -1171,9 +1180,7 @@ body {
   display: grid;
   flex: none;
   gap: 8px;
-  padding: 12px;
-  border-block-start: 2px solid var(--docs-groove-dark);
-  border-image: var(--docs-etch-top);
+  padding: 8px 12px 12px;
 }
 
 /* Theme and language side by side, each half the width, their items sharing it: 24px items in a
@@ -1200,8 +1207,7 @@ body {
     inset: 0 auto 0 0;
     z-index: 40;
     inline-size: min(300px, 86vw);
-    border-inline-end: 2px solid var(--docs-groove-dark);
-    border-image: var(--docs-etch-end);
+    box-shadow: 0 0 60px -12px rgb(0 0 0 / 0.5);
     visibility: hidden;
     transform: translateX(-100%);
     transition:
@@ -1245,7 +1251,6 @@ body {
   padding: 3px;
   border-radius: var(--docs-radius);
   background-color: var(--docs-well);
-  box-shadow: var(--docs-well-shadow);
 }
 
 /* The stage toolbar's size: 24 px in a 30 px track, with a taller target for a finger. */
@@ -1323,12 +1328,6 @@ body {
     border: 0;
   }
 
-  /* The etched divider between the sidebar and the page. */
-  .site-main {
-    border-inline-start: 2px solid var(--docs-groove-dark);
-    border-image: var(--docs-etch-start);
-  }
-
   .dock {
     display: none;
   }
@@ -1343,19 +1342,45 @@ body {
   --ow-fg: var(--docs-fg);
   --ow-muted: var(--docs-muted);
   --ow-focus: var(--docs-accent);
-  --ow-radius: var(--docs-radius);
   --ow-accent: var(--docs-accent);
-  --ow-line: var(--docs-line-strong);
+  /* The rails stay, as quiet hairlines; the accent trail draws the path you are on. */
+  --ow-line: var(--docs-line);
   --ow-bg: var(--docs-bg);
   --ow-hover: var(--docs-hover);
-  font-size: 14px;
+  font-size: var(--docs-text-ui);
 }
 
-/* The search above the sidebar's nav (DS-5): the library's flat trigger at full width. */
+/* The current row is marked by its text and the trail's node, without a fill. */
+.sidebar-nav .ow-tree-rail-nav__item::before {
+  content: none;
+}
+
+.sidebar-nav .ow-tree-rail-nav__item[data-current] {
+  font-weight: 500;
+}
+
+/* An open group's chevron shows on hover or focus; a closed one keeps it, to say it opens. */
+.sidebar-nav .ow-tree-rail-nav__chevron {
+  transition:
+    rotate 0.34s var(--ow-ease-out),
+    opacity 0.12s ease;
+}
+
+.sidebar-nav
+  .ow-tree-rail-nav__item[aria-expanded="true"]:not(:hover, :focus-visible)
+  .ow-tree-rail-nav__chevron {
+  opacity: 0;
+}
+
+/* The search above the sidebar's nav (DS-5): it opens the Command Menu, so a flat well with no
+ * field edge, like the Lab's color buttons. */
 .sidebar-search {
   --py: 9.25px;
+  --ow-edge: transparent;
+  background-color: var(--docs-surface);
+  box-shadow: var(--docs-shadow);
   inline-size: 100%;
-  margin-block-end: 10px;
+  margin-block-end: 12px;
   gap: 8px;
 }
 
@@ -1380,11 +1405,12 @@ body {
 
 .soon {
   padding-inline: 6px;
-  border: 1px solid var(--docs-line-strong);
   border-radius: 999px;
-  font-size: 11px;
+  background-color: var(--docs-well);
+  font-size: var(--docs-text-micro);
   font-weight: 400;
-  line-height: 18px;
+  line-height: 1.4;
+  min-block-size: 18px;
 }
 
 /* The search's results: a component's family (the dot's shape, as on the index) and status. */
@@ -1392,10 +1418,10 @@ body {
   display: inline-flex;
   flex: none;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   margin-inline-start: 4px;
   color: var(--docs-muted);
-  font-size: 12px;
+  font-size: var(--docs-text-micro);
 }
 
 .docs-search-tag::before {
@@ -1429,18 +1455,15 @@ body {
   block-size: 56px;
   box-sizing: border-box;
   padding-inline: 16px 10px;
-  border-block-end: 2px solid var(--docs-groove-dark);
-  border-image: var(--docs-etch-bottom);
 }
 
 .sidebar-brand {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
   color: var(--docs-fg);
-  font-size: 15px;
+  font-size: var(--docs-text-ui);
   font-weight: 600;
-  letter-spacing: -0.01em;
   text-decoration: none;
 }
 
@@ -1474,11 +1497,13 @@ body {
 
 .sidebar-version {
   padding-inline: 6px;
-  border: 1px solid var(--docs-line-strong);
   border-radius: 999px;
+  background-color: var(--docs-well);
+  color: var(--docs-muted);
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 11px;
-  line-height: 18px;
+  font-size: var(--docs-text-micro);
+  line-height: 1.4;
+  min-block-size: 18px;
 }
 
 .sidebar-nav .soon {
@@ -1489,7 +1514,8 @@ body {
   flex: none;
   color: var(--docs-muted);
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 10.5px;
+  font-size: var(--docs-text-micro);
+  font-variant-numeric: tabular-nums;
 }
 
 .sidebar-nav [aria-current="step"] .sidebar-scene-n {
@@ -1498,7 +1524,7 @@ body {
 
 .site-content {
   min-inline-size: 0;
-  padding: 40px 16px 96px;
+  padding: 48px 16px 96px;
 }
 
 @media (width >= 900px) {
@@ -1547,24 +1573,21 @@ body {
  * Prose rhythm: more room above a section than inside it, so each one reads as a group. Low
  * specificity, so a page's own blocks (the changelog) keep their spacing.
  */
-.with-toc article {
-  line-height: 1.75;
-}
-
 .with-toc :where(article > p, article > ul, article > ol) {
-  margin-block: 0 20px;
+  max-inline-size: 65ch;
+  margin-block: 0 1em;
 }
 
 .with-toc :where(article li + li) {
-  margin-block-start: 6px;
+  margin-block-start: 0.375rem;
 }
 
 .with-toc :where(article h2) {
-  margin-block: clamp(44px, 3vw + 32px, 64px) 16px;
+  margin-block: 3rem 0.75rem;
 }
 
 .with-toc :where(article h3) {
-  margin-block: 40px 12px;
+  margin-block: 2rem 0.5rem;
 }
 
 .with-toc .page-header {
@@ -1583,10 +1606,9 @@ body {
   --ow-fg: var(--docs-fg);
   --ow-muted: var(--docs-muted);
   --ow-focus: var(--docs-accent);
-  --ow-radius: var(--docs-radius);
   --ow-accent: var(--docs-accent);
   --ow-line: var(--docs-line-strong);
-  font-size: 14px;
+  font-size: var(--docs-text-ui);
 }
 
 /* Prose, code, and tables inside pages and Lab scenes */
@@ -1610,14 +1632,15 @@ body {
     overflow-x: auto;
     border-collapse: separate;
     border-spacing: 0;
-    font-size: 13.5px;
+    font-size: var(--docs-text-small);
+    line-height: 1.5;
+    font-variant-numeric: tabular-nums;
   }
 
   th,
   td {
     padding: 8px 12px;
-    border-block-end: 2px solid var(--docs-groove-dark);
-    border-image: var(--docs-etch-bottom);
+    border-block-end: 1px solid var(--docs-line);
     text-align: start;
   }
 
@@ -1641,6 +1664,16 @@ body {
 .lab-narrative {
   min-inline-size: 0;
   padding: 8px 16px 48px;
+  font-size: var(--docs-text-body-compact);
+  line-height: 1.6;
+}
+
+.lab-narrative :where(h2) {
+  margin-block: 0 0.75rem;
+}
+
+.lab-narrative :where(h3) {
+  margin-block: 2rem 0.5rem;
 }
 
 /* Stage */
@@ -1702,11 +1735,9 @@ body {
     flex-direction: column;
     block-size: var(--sheet-h);
     padding: 0;
-    border-radius: 18px 18px 0 0;
+    border-radius: var(--ow-radius) var(--ow-radius) 0 0;
     background-color: var(--docs-bg);
-    box-shadow:
-      inset 0 1px 0 var(--docs-line-strong),
-      0 -24px 60px -24px rgb(0 0 0 / 0.4);
+    box-shadow: 0 -24px 60px -24px rgb(0 0 0 / 0.4);
     transition: block-size 0.4s var(--ease);
   }
 
@@ -1721,7 +1752,7 @@ body {
   .lab-narrative-scroll {
     flex: 1;
     min-block-size: 0;
-    padding: 0 20px 24px;
+    padding: 0 24px 24px;
     overflow-y: auto;
     overscroll-behavior: contain;
     scroll-padding-block-start: 12px;
@@ -1750,13 +1781,20 @@ body {
     align-self: start;
     inset-block-start: var(--top-h);
     block-size: calc(100vh - var(--top-h));
-    border-inline-start: 2px solid var(--docs-groove-dark);
-    border-image: var(--docs-etch-start);
   }
 
   .lab-stage-frame,
   .lab-stage-frame > .lab-stage {
     block-size: 100%;
+  }
+
+  /* The frame sits outside the stage theme, so the margin around the well stays the page's. */
+  .lab-stage-frame {
+    background-color: var(--docs-bg);
+  }
+
+  .lab-stage-frame > .lab-stage {
+    background-color: transparent;
   }
 }
 
@@ -1775,7 +1813,7 @@ body {
   block-size: 24px;
   padding: 0;
   border: 0;
-  border-radius: 18px 18px 0 0;
+  border-radius: var(--ow-radius) var(--ow-radius) 0 0;
   background: none;
   cursor: grab;
   touch-action: none;
@@ -1785,7 +1823,7 @@ body {
   content: "";
   inline-size: 40px;
   block-size: 5px;
-  border-radius: 5px;
+  border-radius: 4px;
   background-color: var(--docs-control);
 }
 
@@ -1801,13 +1839,13 @@ body {
   justify-content: space-between;
   gap: 8px;
   block-size: 44px;
-  padding-inline: 20px 8px;
+  padding-inline: 24px 8px;
 }
 
 .lab-sheet-title {
   margin: 0;
   color: var(--docs-muted);
-  font-size: 13px;
+  font-size: var(--docs-text-ui);
   font-weight: 500;
 }
 
@@ -1832,26 +1870,25 @@ body {
 .lab-scene-nav {
   --fade-size: 28px;
   flex: none;
-  border-block-end: 2px solid var(--docs-groove-dark);
-  border-image: var(--docs-etch-bottom);
+  padding-block-end: 4px;
 }
 
 /* Positioned, so a link's offsetLeft counts from the row's start (LabShell). */
 .lab-scene-nav .ow-scroll-area__content {
   position: relative;
   display: flex;
-  gap: 20px;
-  padding-inline: 20px;
+  gap: 24px;
+  padding-inline: 24px;
 }
 
 .lab-scene-nav a {
   display: inline-flex;
   flex: none;
   align-items: baseline;
-  gap: 6px;
-  padding-block: 11px;
+  gap: 8px;
+  padding-block: 12px;
   color: var(--docs-muted);
-  font-size: 13px;
+  font-size: var(--docs-text-small);
   text-decoration: none;
   white-space: nowrap;
 }
@@ -1862,7 +1899,7 @@ body {
 
 .lab-scene-nav a span {
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 10.5px;
+  font-size: var(--docs-text-micro);
 }
 
 .lab-scene-nav a:hover {
@@ -1893,7 +1930,7 @@ body {
 }
 
 .lab-caption-inner {
-  padding: 0 20px 24px;
+  padding: 0 24px 24px;
 }
 
 .lab-caption .page-header {
@@ -1907,9 +1944,8 @@ body {
 .lab-caption .lead {
   display: -webkit-box;
   max-inline-size: 48ch;
-  margin-block: 10px 0;
+  margin-block: 0.75rem 0;
   overflow: hidden;
-  line-height: 1.55;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
 }
@@ -1937,7 +1973,7 @@ body {
   }
 }
 
-/* Scenes follow their content; an etched Separator marks where the next one starts. */
+/* Scenes follow their content; a hairline Separator marks where the next one starts. */
 /*
  * Scenes are set apart by space alone. The scene being read, the one shaping the stage, reads in
  * full; the others recede to the muted color (still AA), and fade back as they become active.
@@ -1956,11 +1992,19 @@ body {
   color: var(--docs-muted);
 }
 
+.lab-scene :is(h1, h2, h3) {
+  transition: color 0.3s ease;
+}
+
+.lab-scene:not([data-active]) :is(h1, h2, h3) {
+  color: var(--docs-body);
+}
+
 /* The scene's number, then its Play scene button: one label above the title. */
 .lab-scene-head {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   margin-block-end: 6px;
 }
 
@@ -1968,7 +2012,8 @@ body {
   margin: 0;
   color: var(--docs-muted);
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 11px;
+  font-size: var(--docs-text-micro);
+  font-variant-numeric: tabular-nums;
 }
 
 .lab-scene[data-active] .lab-scene-n {
@@ -1985,34 +2030,6 @@ body {
   margin-block-end: 40px;
 }
 
-.lab-hint {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 16px;
-  margin-block: 32px 0;
-  color: var(--docs-muted);
-  font-size: 13px;
-}
-
-.lab-hint-lead {
-  flex-basis: 100%;
-}
-
-/* The shortcuts need a keyboard. */
-@media (hover: none) {
-  .lab-hint {
-    display: none;
-  }
-}
-
-.lab-hint-key {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-}
-
 /* Focused by a click (tabIndex -1), the stage itself shows no ring. */
 .lab-stage:focus {
   outline: none;
@@ -2025,12 +2042,10 @@ body {
   flex: none;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
   block-size: 48px;
   box-sizing: border-box;
   padding-inline: 16px 8px;
-  border-block-end: 2px solid var(--docs-groove-dark);
-  border-image: var(--docs-etch-bottom);
   background-color: var(--docs-bg);
 }
 
@@ -2042,7 +2057,7 @@ body {
   margin: 0;
   color: var(--docs-body);
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 11.5px;
+  font-size: 0.6875rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -2064,15 +2079,14 @@ body {
 
 /*
  * The stage toolbar (owsem-ui Toolbar) in the docs' colors, set as theme tokens on it. Narrow, the
- * bar around it is the well; wide, the tools sit in a flat track like the site's switchers.
+ * bar around it is the well; wide, the tools are ghost buttons on the bar, with no track.
  * Toggles (Inspect, Controls, Code) keep Toggle's own look: on is the raised key.
  */
 .lab-tools {
   --ow-muted: var(--docs-muted);
   --ow-fg: var(--docs-fg);
   --ow-hover: var(--docs-hover);
-  --ow-line-dark: var(--docs-groove-dark);
-  --ow-line-light: var(--docs-groove-light);
+  --ow-line: var(--docs-line);
   flex: none;
   min-inline-size: 0;
   /* Several tools can be pressed at once; the toolbar's 4 px gap keeps neighbors apart. */
@@ -2081,29 +2095,21 @@ body {
   box-shadow: none;
 }
 
-@media (width >= 960px) {
-  .lab-tools {
-    padding: 3px;
-    border-radius: var(--docs-radius);
-    background-color: var(--docs-well);
-    box-shadow: var(--docs-well-shadow);
-  }
-}
-
 /* 24 px tall (--py 0: the 24 px floor), with the docs' own type and spacing. */
 .lab-tool {
   --py: 0px;
-  gap: 6px;
+  gap: 8px;
   block-size: 24px;
   padding-inline: 8px;
-  border-radius: var(--docs-radius-inner);
-  font-size: 12.5px;
+  /* On the bar with no track: the one radius. */
+  border-radius: var(--ow-radius);
+  font-size: var(--docs-text-small);
   font-weight: 400;
 }
 
 .lab-tool[aria-expanded="true"] {
   background-color: var(--docs-raised);
-  box-shadow: var(--docs-raised-shadow);
+  box-shadow: var(--docs-shadow);
   color: var(--docs-fg);
 }
 
@@ -2128,7 +2134,7 @@ body {
 }
 
 /*
- * The docs open from the same toolbar, set apart by an etched line, labeled while there is room.
+ * The docs open from the same toolbar, set apart by a hairline, labeled while there is room.
  * Its resting text (the toolbar's --ow-muted) is the accent.
  */
 .lab-tool-docs {
@@ -2216,7 +2222,6 @@ body {
     border: 0;
     border-radius: var(--docs-radius);
     background-color: var(--docs-well);
-    box-shadow: var(--docs-well-shadow);
   }
 
   .lab-stage-title {
@@ -2229,7 +2234,7 @@ body {
     justify-content: center;
     min-inline-size: 30px;
     block-size: 24px;
-    padding-inline: 7px;
+    padding-inline: 8px;
     border-radius: var(--docs-radius-inner);
   }
 
@@ -2247,6 +2252,12 @@ body {
 
 /* The sheet, its way in, and the caption exist only on narrow screens. */
 @media (width >= 960px) {
+  /* Beside the text the well is inset and rounded; panels sit inside it, clipped by its radius. */
+  .lab-stage-body {
+    margin: 0 8px 8px;
+    border-radius: var(--ow-radius);
+  }
+
   .lab-sheet-handle,
   .lab-sheet-head,
   .lab-scene-nav,
@@ -2258,8 +2269,7 @@ body {
 }
 
 /*
- * The page background at the edges, so the stage blends into the columns beside it, rising to
- * --docs-stage toward the middle; a fine grid fades out with it.
+ * A flat well. The grid is a measuring tool: it fades in only while Inspect is on.
  */
 .lab-stage-body {
   position: relative;
@@ -2274,14 +2284,14 @@ body {
   padding: 16px;
   /* Shut panels wait below its edge, over the caption on a narrow stage. */
   overflow: clip;
-  background: radial-gradient(ellipse 75% 70% at 50% 50%, var(--docs-stage), var(--docs-bg));
+  background-color: var(--docs-stage);
   color: var(--docs-fg);
 }
 
 /* Narrow: the whole stage is the canvas, caption included; the top leaves room for the toolbar. */
 @media (width < 960px) {
   .lab-stage {
-    background: radial-gradient(ellipse 75% 70% at 50% 45%, var(--docs-stage), var(--docs-bg));
+    background-color: var(--docs-stage);
   }
 
   .lab-stage-body {
@@ -2302,6 +2312,12 @@ body {
   background-size: 32px 32px;
   mask-image: radial-gradient(ellipse 60% 55% at 50% 50%, #000 15%, transparent 75%);
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.lab-stage-body[data-inspect]::before {
+  opacity: 1;
 }
 
 /* States and variants side by side (components/lab/matrix.tsx), without the docs' table lines. */
@@ -2323,13 +2339,13 @@ body {
 .lab-matrix th {
   color: var(--docs-muted);
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 11px;
+  font-size: var(--docs-text-micro);
   font-weight: 400;
 }
 
 .lab-matrix th[scope="row"] {
   max-inline-size: 84px;
-  padding-block-start: 14px;
+  padding-block-start: 16px;
 }
 
 .lab-fit {
@@ -2341,14 +2357,14 @@ body {
 .lab-play {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   block-size: 24px;
-  padding-inline: 7px 9px;
+  padding-inline: 8px 8px;
   border: 0;
   border-radius: 999px;
   background: none;
   color: var(--docs-muted);
-  font-size: 12px;
+  font-size: var(--docs-text-small);
 }
 
 .lab-play:hover {
@@ -2368,21 +2384,19 @@ body {
   padding-inline: 10px;
   border: 0;
   border-radius: 999px;
-  background: none;
-  box-shadow: inset 0 0 0 1px var(--docs-line-strong);
+  background-color: var(--docs-surface);
   color: var(--docs-fg);
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 12.5px;
+  font-size: var(--docs-text-small);
   white-space: nowrap;
 }
 
 .lab-part:hover {
-  background-color: var(--docs-hover);
+  background-color: color-mix(in srgb, var(--docs-fg) 6%, var(--docs-surface));
 }
 
 .lab-part[aria-pressed="true"] {
   background-color: var(--docs-raised);
-  box-shadow: var(--docs-raised-shadow);
   color: var(--docs-accent);
 }
 
@@ -2441,14 +2455,12 @@ body {
   inset-block-start: 0;
   inset-inline-start: 0;
   box-sizing: border-box;
-  border: 1px dashed color-mix(in srgb, var(--docs-accent) 34%, transparent);
   border-radius: 8px;
+  background-color: color-mix(in srgb, var(--docs-accent) 8%, transparent);
 }
 
 .lab-ibox[data-on] {
-  border-style: solid;
-  border-color: var(--docs-accent);
-  background-color: color-mix(in srgb, var(--docs-accent) 7%, transparent);
+  background-color: color-mix(in srgb, var(--docs-accent) 20%, transparent);
 }
 
 .lab-ichips {
@@ -2464,13 +2476,13 @@ body {
   inset-inline-start: 0;
   box-sizing: border-box;
   block-size: 24px;
-  padding-inline: 9px;
-  border: 1px solid var(--docs-line-strong);
+  padding-inline: 8px;
+  border: 0;
   border-radius: 999px;
   background-color: var(--docs-surface);
   color: var(--docs-body);
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 11.5px;
+  font-size: var(--docs-text-micro);
   white-space: nowrap;
   pointer-events: auto;
   transition:
@@ -2483,7 +2495,6 @@ body {
 }
 
 .lab-ichip[aria-pressed="true"] {
-  border-color: transparent;
   background-color: var(--docs-accent);
   color: var(--docs-on-accent);
 }
@@ -2497,31 +2508,29 @@ body {
   padding: 12px;
   border-radius: var(--docs-radius-box);
   background-color: var(--docs-surface);
-  box-shadow:
-    inset 0 0 0 1px var(--docs-line-strong),
-    0 16px 32px -16px rgb(0 0 0 / 0.5);
+  box-shadow: var(--ow-popup-shadow);
   pointer-events: auto;
 }
 
 .lab-part-card-name {
   margin: 0;
   color: var(--docs-fg);
-  font-size: 13px;
+  font-size: var(--docs-text-small);
   font-weight: 600;
 }
 
 .lab-part-card-note {
   margin: 4px 0 0;
   color: var(--docs-muted);
-  font-size: 12px;
-  line-height: 1.5;
+  font-size: var(--docs-text-micro);
+  line-height: 1.4;
 }
 
 /* The column holds the card's width, so a long value ends in an ellipsis. */
 .lab-part-card ul {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 6px;
+  gap: 8px;
   margin: 10px 0 0;
   padding: 0;
   list-style: none;
@@ -2534,12 +2543,15 @@ body {
   align-items: center;
   gap: 2px 8px;
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 11px;
-  line-height: 1.3;
+  font-size: var(--docs-text-micro);
+  line-height: 1.4;
 }
 
 .lab-part-card code {
+  padding: 0;
+  background: none;
   color: var(--tk-attr);
+  font-size: inherit;
 }
 
 .lab-part-card-swatch {
@@ -2594,12 +2606,10 @@ body {
   position: absolute;
   inset: auto 0 0;
   display: grid;
-  padding-block-end: 14px;
-  border-radius: 18px 18px 0 0;
+  padding-block-end: 16px;
+  border-radius: var(--ow-radius) var(--ow-radius) 0 0;
   background-color: var(--docs-surface);
-  box-shadow:
-    inset 0 1px 0 var(--docs-line-strong),
-    0 -24px 60px -24px rgb(0 0 0 / 0.4);
+  box-shadow: 0 -24px 60px -24px rgb(0 0 0 / 0.4);
   pointer-events: auto;
   transition: translate 0.35s var(--ease) 0.15s;
 }
@@ -2630,8 +2640,8 @@ body {
 .lab-inspect-dock .lab-ichips {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  padding: 14px 16px 10px;
+  gap: 8px;
+  padding: 16px 16px 10px;
 }
 
 .lab-inspect-dock .lab-ichip {
@@ -2687,20 +2697,19 @@ body {
   scale: 0.82;
 }
 
-/* Controls and code are sheets attached to the stage edges, divided by etched lines. */
+/* Controls and code are sheets attached to the stage edges, told apart by fill. */
 .lab-controls,
 .lab-drawer {
   position: absolute;
   inset: auto 0 0;
-  /* The border counts in the size, so the drawer ends where the side panel's line begins. */
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   block-size: 48%;
   overflow: hidden;
-  border-block-start: 2px solid var(--docs-groove-dark);
-  border-image: var(--docs-etch-top);
+  border-radius: var(--ow-radius) var(--ow-radius) 0 0;
   background-color: var(--docs-surface);
+  box-shadow: var(--docs-shadow);
   transform: translateY(100%);
   transition: transform 0.35s var(--ease);
 }
@@ -2737,9 +2746,7 @@ body {
     inset: 0 0 0 auto;
     inline-size: 280px;
     block-size: auto;
-    border-block-start: 0;
-    border-inline-start: 2px solid var(--docs-groove-dark);
-    border-image: var(--docs-etch-start);
+    border-radius: var(--ow-radius) 0 0 var(--ow-radius);
     transform: translateX(100%);
   }
 
@@ -2750,7 +2757,7 @@ body {
 }
 
 /* Narrow: code and controls wait for the caption to fade, and on a phone-width stage rise as
- * sheets; wider, they keep their etched edges. */
+ * sheets; wider, they sit flush. */
 @media (width < 960px) {
   .lab-stage-body[data-code=""] .lab-drawer,
   .lab-stage-body[data-controls=""] .lab-controls {
@@ -2762,19 +2769,15 @@ body {
     .lab-controls {
       border: 0;
       border-image: none;
-      border-radius: 18px 18px 0 0;
+      border-radius: var(--ow-radius) var(--ow-radius) 0 0;
     }
 
     .lab-stage-body[data-code=""] .lab-drawer {
-      box-shadow:
-        inset 0 1px 0 var(--docs-line-strong),
-        0 -24px 60px -24px rgb(0 0 0 / 0.4);
+      box-shadow: 0 -24px 60px -24px rgb(0 0 0 / 0.4);
     }
 
     .lab-stage-body[data-controls=""] .lab-controls {
-      box-shadow:
-        inset 0 1px 0 var(--docs-line-strong),
-        0 -24px 60px -24px rgb(0 0 0 / 0.4);
+      box-shadow: 0 -24px 60px -24px rgb(0 0 0 / 0.4);
     }
   }
 
@@ -2797,12 +2800,12 @@ body {
 .lab-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   min-inline-size: 0;
   margin: 0;
   padding: 0;
   border: 0;
-  font-size: 13px;
+  font-size: var(--docs-text-small);
 }
 
 .lab-field-label,
@@ -2810,7 +2813,7 @@ body {
   margin-block-end: 6px;
   padding: 0;
   color: var(--docs-muted);
-  font-size: 12px;
+  font-size: var(--docs-text-small);
 }
 
 /* Color controls (components/lab/color-field.tsx): a flat well, like the segmented track. The
@@ -2826,7 +2829,6 @@ body {
   padding: 3px;
   border-radius: var(--docs-radius);
   background-color: var(--docs-well);
-  box-shadow: var(--docs-well-shadow);
 }
 
 /* Color Picker's trigger, flat inside the well: the color as a square, then its value. */
@@ -2840,7 +2842,7 @@ body {
   border-radius: var(--docs-radius-inner);
   background: none;
   box-shadow: none;
-  font-size: 12px;
+  font-size: var(--docs-text-small);
 }
 
 .color-trigger:hover {
@@ -2890,8 +2892,7 @@ body {
   justify-content: space-between;
   gap: 8px;
   padding: 6px 8px;
-  border-block-end: 2px solid var(--docs-groove-dark);
-  border-image: var(--docs-etch-bottom);
+  background-color: var(--docs-surface);
 }
 
 /* Tabs and panel fill the drawer under its bar; the file names keep the code's font. */
@@ -2903,7 +2904,7 @@ body {
 
 .lab-drawer-files {
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 12px;
+  font-size: var(--docs-text-small);
 }
 
 .lab-drawer-panel {
@@ -2922,8 +2923,8 @@ body {
   margin: 0;
   padding-block: 12px;
   color: var(--tk-text);
-  font-size: 12.5px;
-  line-height: 1.7;
+  font-size: var(--docs-text-code);
+  line-height: 1.6;
   counter-reset: line;
 }
 
@@ -2987,16 +2988,15 @@ body {
 
 .demo-card {
   display: grid;
-  gap: 14px;
+  gap: 16px;
   inline-size: 300px;
   box-sizing: border-box;
-  padding: 18px 20px;
-  border: 1px solid var(--ow-line);
-  border-radius: 14px;
-  background-color: var(--ow-bg);
+  padding: 16px 24px;
+  border-radius: var(--ow-radius);
+  background-color: var(--docs-surface);
   color: var(--ow-fg);
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: var(--docs-text-ui);
+  line-height: 1.45;
 }
 
 /* The Tree Rail Nav Lab's demo: a sidebar panel on the stage. */
@@ -3004,9 +3004,8 @@ body {
   box-sizing: border-box;
   inline-size: 280px;
   padding: 4px 12px 8px;
-  border: 1px solid var(--ow-line);
-  border-radius: 14px;
-  background-color: var(--ow-bg);
+  border-radius: var(--ow-radius);
+  background-color: var(--docs-surface);
   color: var(--ow-fg);
 }
 
@@ -3019,9 +3018,8 @@ body {
   display: grid;
   grid-template-columns: 300px 176px;
   box-sizing: border-box;
-  border: 1px solid var(--ow-line);
-  border-radius: 14px;
-  background-color: var(--ow-bg);
+  border-radius: var(--ow-radius);
+  background-color: var(--docs-surface);
   color: var(--ow-fg);
 }
 
@@ -3039,20 +3037,20 @@ body {
   position: relative;
   box-sizing: border-box;
   block-size: 300px;
-  padding: 18px 20px 20px;
+  padding: 16px 24px 24px;
   overflow-y: auto;
   overscroll-behavior: contain;
-  border-start-start-radius: 13px;
-  border-end-start-radius: 13px;
-  font-size: 13px;
-  line-height: 1.6;
+  border-start-start-radius: var(--ow-radius);
+  border-end-start-radius: var(--ow-radius);
+  font-size: var(--docs-text-small);
+  line-height: 1.5;
   scrollbar-width: thin;
 }
 
 .demo-toc[data-compact] .demo-toc-article {
   block-size: 160px;
-  padding: 12px 14px 14px;
-  font-size: 11px;
+  padding: 12px 16px 16px;
+  font-size: var(--docs-text-micro);
 }
 
 .demo-toc-article p {
@@ -3065,7 +3063,7 @@ body {
   color: var(--ow-fg);
   font-size: 1.3em;
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.25;
 }
 
 .demo-toc-article :is(h3, h4) {
@@ -3073,7 +3071,7 @@ body {
   color: var(--ow-fg);
   font-size: 1.08em;
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.35;
   letter-spacing: normal;
 }
 
@@ -3099,23 +3097,23 @@ body {
   background-color: var(--ow-bg);
   color: var(--ow-accent);
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 10px;
+  font-size: var(--docs-text-micro);
 }
 
 .demo-toc-nav {
-  padding: 18px 16px 18px 18px;
+  padding: 16px 16px 16px 16px;
 }
 
 .demo-toc[data-compact] .demo-toc-nav {
   padding: 12px 10px 12px 12px;
-  font-size: 12px;
+  font-size: var(--docs-text-micro);
 }
 
 .demo-toc-heading {
   margin: 0 0 10px;
   color: var(--ow-muted);
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 10.5px;
+  font-size: var(--docs-text-micro);
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -3135,7 +3133,7 @@ body {
   margin: 0;
   padding-inline: 10px;
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 12px;
+  font-size: var(--docs-text-small);
   line-height: 1.5;
 }
 
@@ -3160,8 +3158,7 @@ body {
   align-items: center;
   gap: 8px;
   padding: 10px;
-  border: 1px solid var(--ow-line);
-  border-radius: 14px;
+  border-radius: var(--ow-radius);
   background-color: var(--ow-bg);
 }
 
@@ -3175,7 +3172,7 @@ body {
 
 .demo-muted {
   color: var(--ow-muted);
-  font-size: 13px;
+  font-size: var(--docs-text-small);
 }
 
 .demo-row {
@@ -3187,9 +3184,9 @@ body {
 .demo-row-item {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   block-size: 24px;
-  padding-inline-end: 14px;
+  padding-inline-end: 16px;
 }
 
 /* The Toggle Group Lab's demos: a card as wide as its group, and the matrix's surfaces. */
@@ -3211,14 +3208,13 @@ body {
 }
 
 .demo-card .demo-toggle-note {
-  font-size: 15px;
+  font-size: var(--docs-text-body-compact);
   text-decoration-thickness: 1px;
 }
 
 .demo-toggle-group-surface {
   padding: 12px;
-  border: 1px solid var(--ow-line);
-  border-radius: 14px;
+  border-radius: var(--ow-radius);
   background-color: var(--ow-bg);
   color: var(--ow-fg);
 }
@@ -3249,8 +3245,7 @@ body {
 
 .demo-tabs-surface {
   padding: 12px;
-  border: 1px solid var(--ow-line);
-  border-radius: 14px;
+  border-radius: var(--ow-radius);
   background-color: var(--ow-bg);
   color: var(--ow-fg);
 }
@@ -3269,8 +3264,7 @@ body {
 
 .demo-radio-group-surface {
   padding: 4px;
-  border: 1px solid var(--ow-line);
-  border-radius: 14px;
+  border-radius: var(--ow-radius);
   background-color: var(--ow-bg);
   color: var(--ow-fg);
 }
@@ -3280,7 +3274,7 @@ body {
   display: grid;
   grid-template-columns: repeat(3, auto);
   place-items: center;
-  gap: 18px 16px;
+  gap: 16px 16px;
 }
 
 .demo-buttons {
@@ -3288,7 +3282,7 @@ body {
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 14px;
+  gap: 16px;
   max-inline-size: 560px;
 }
 
@@ -3299,7 +3293,7 @@ body {
   max-inline-size: none;
   padding: 16px;
   border: 1px solid var(--ow-line);
-  border-radius: 14px;
+  border-radius: var(--ow-radius);
   background-color: var(--ow-bg);
 }
 
@@ -3325,7 +3319,7 @@ body {
   min-block-size: 1lh;
   color: var(--docs-muted);
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 11px;
+  font-size: var(--docs-text-micro);
   font-variant-numeric: tabular-nums;
 }
 
@@ -3360,7 +3354,7 @@ body {
   position: absolute;
   color: var(--docs-accent);
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 10px;
+  font-size: var(--docs-text-micro);
   line-height: 1;
 }
 
@@ -3389,12 +3383,11 @@ body {
   block-size: 520px;
   box-sizing: border-box;
   overflow: hidden;
-  border: 1px solid var(--ow-line);
-  border-radius: 16px;
-  background-color: var(--ow-bg);
+  border-radius: var(--ow-radius);
+  background-color: var(--docs-surface);
   color: var(--ow-fg);
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: var(--docs-text-ui);
+  line-height: 1.45;
 }
 
 .demo-command :is(.ow-command-menu__backdrop, .ow-command-menu__viewport) {
@@ -3402,7 +3395,7 @@ body {
 }
 
 .demo-command .ow-command-menu__viewport {
-  padding: 58px 28px 20px;
+  padding: 58px 32px 24px;
 }
 
 .demo-command[data-cell] {
@@ -3456,10 +3449,9 @@ body {
 }
 
 .demo-command-card {
-  padding: 12px 14px;
-  border-radius: 12px;
+  padding: 12px 16px;
+  border-radius: var(--ow-radius);
   background-color: var(--ow-panel);
-  box-shadow: var(--ow-panel-shadow);
 }
 
 .demo-command-card p {
@@ -3467,9 +3459,8 @@ body {
 }
 
 .demo-command-value {
-  font-size: 20px;
+  font-size: var(--docs-text-subtitle);
   font-weight: 600;
-  letter-spacing: -0.01em;
 }
 
 /* The chart's bars, so the glass has something to blur. */
@@ -3494,7 +3485,7 @@ body {
   inset-inline-start: 50%;
   z-index: 3;
   display: flex;
-  gap: 6px;
+  gap: 8px;
   opacity: 0;
   pointer-events: none;
   translate: -50% 0;
@@ -3510,14 +3501,13 @@ body {
   place-items: center;
   min-inline-size: 34px;
   block-size: 34px;
-  padding-inline: 9px;
+  padding-inline: 8px;
   border: 0;
   border-radius: 8px;
   background-color: var(--ow-raised-bg);
-  box-shadow: var(--ow-raised-shadow);
   color: var(--ow-fg);
   font-family: var(--font-sans), system-ui, sans-serif;
-  font-size: 15px;
+  font-size: var(--docs-text-body-compact);
   line-height: 1;
 }
 
@@ -3540,11 +3530,11 @@ body {
 
 /* The Checkbox Lab's checklist: a parent box over its tasks, each in a label of its own. */
 .demo-checkbox[data-size="sm"] {
-  font-size: 13px;
+  font-size: var(--docs-text-small);
 }
 
 .demo-checkbox[data-size="lg"] {
-  font-size: 16px;
+  font-size: var(--docs-text-body);
 }
 
 .demo-checkbox-label {
@@ -3556,7 +3546,7 @@ body {
 
 .demo-checkbox-tasks {
   display: grid;
-  gap: 10px;
+  gap: 12px;
   padding-inline-start: 1.5em;
 }
 
@@ -3634,7 +3624,7 @@ body {
 }
 
 .demo-input-custom {
-  gap: 6px;
+  gap: 8px;
 }
 
 .demo-input-custom > .demo-caption:not(:first-child) {
@@ -3658,7 +3648,7 @@ body {
   margin: 0;
   padding-block-start: 12px;
   border-block-start: 1px solid var(--ow-line);
-  font-size: 11px;
+  font-size: var(--docs-text-micro);
   line-height: 1.4;
 }
 
@@ -3689,7 +3679,7 @@ body {
 }
 
 .demo-field-custom {
-  gap: 6px;
+  gap: 8px;
 }
 
 .demo-field-custom > .demo-caption:not(:first-child) {
@@ -3789,7 +3779,7 @@ body {
 .demo-editor-text {
   margin: 0;
   color: var(--ow-fg);
-  font-size: 15px;
+  font-size: var(--docs-text-body-compact);
 }
 
 /* The Tooltip Lab: a toolbar with a tooltip per button, and room above it for the open one. */
@@ -3797,7 +3787,7 @@ body {
   position: relative;
   display: grid;
   justify-items: center;
-  gap: 14px;
+  gap: 16px;
   padding-block: 44px 8px;
 }
 
@@ -3824,8 +3814,7 @@ body {
     ". bottom .";
   gap: 16px 48px;
   padding: 48px 76px;
-  border: 1px solid var(--ow-line);
-  border-radius: 14px;
+  border-radius: var(--ow-radius);
   background-color: var(--ow-bg);
 }
 
@@ -3941,7 +3930,7 @@ body {
   display: grid;
   align-content: start;
   justify-items: center;
-  gap: 14px;
+  gap: 16px;
   inline-size: 400px;
   block-size: 290px;
 }
@@ -3953,11 +3942,11 @@ body {
 .demo-popover-link {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   margin: 12px 0;
   color: var(--ow-muted);
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 12px;
+  font-size: var(--docs-text-small);
 }
 
 .demo-popover-link svg {
@@ -3998,7 +3987,6 @@ body {
   inline-size: 100%;
   block-size: 280px;
   background-color: var(--ow-panel);
-  box-shadow: var(--ow-panel-shadow);
   color: var(--ow-fg);
 }
 
@@ -4019,7 +4007,7 @@ body {
 .demo-scroll-area-notes {
   display: grid;
   gap: 12px;
-  padding: 16px 20px;
+  padding: 16px 24px;
 }
 
 .demo-scroll-area-notes .demo-title {
@@ -4029,15 +4017,15 @@ body {
 .demo-scroll-area-note {
   margin: 2px 0 0;
   color: color-mix(in oklab, var(--ow-fg) 65%, transparent);
-  font-size: 12.5px;
+  font-size: var(--docs-text-small);
 }
 
 .demo-scroll-area-log {
   margin: 0;
-  padding: 16px 20px;
+  padding: 16px 24px;
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 12px;
-  line-height: 1.8;
+  font-size: var(--docs-text-small);
+  line-height: 1.5;
 }
 
 .demo-cell.demo-scroll-area-cell {
@@ -4063,12 +4051,11 @@ body {
   block-size: 400px;
   box-sizing: border-box;
   overflow: hidden;
-  border: 1px solid var(--ow-line);
-  border-radius: 16px;
-  background-color: var(--ow-bg);
+  border-radius: var(--ow-radius);
+  background-color: var(--docs-surface);
   color: var(--ow-fg);
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: var(--docs-text-ui);
+  line-height: 1.45;
 }
 
 .demo-dialog :is(.ow-dialog__backdrop, .ow-dialog__viewport, .ow-dialog__popup) {
@@ -4106,12 +4093,12 @@ body {
   flex: 1;
   align-content: start;
   gap: 12px;
-  padding: 20px 16px;
+  padding: 24px 16px;
 }
 
 .demo-dialog-page > * {
   block-size: 10px;
-  border-radius: 5px;
+  border-radius: 4px;
   background-color: var(--ow-line);
 }
 
@@ -4137,7 +4124,7 @@ body {
 .demo-dialog-narrow {
   inline-size: 22em;
   padding: 12px;
-  border-radius: calc(var(--ow-radius) + 12px);
+  border-radius: var(--ow-radius);
 }
 
 .demo-dialog-sheet {
@@ -4162,9 +4149,8 @@ body {
 
 /* A matrix of controls on the components' own background. */
 .demo-surface {
-  padding: 20px 24px;
-  border: 1px solid var(--ow-line);
-  border-radius: 14px;
+  padding: 24px 24px;
+  border-radius: var(--ow-radius);
   background-color: var(--ow-bg);
   color: var(--ow-fg);
 }
@@ -4176,8 +4162,7 @@ body {
   justify-content: center;
   gap: 8px;
   padding: 10px;
-  border: 1px solid var(--ow-line);
-  border-radius: 12px;
+  border-radius: var(--ow-radius);
   background-color: var(--ow-bg);
   color: var(--ow-fg);
 }
@@ -4186,7 +4171,7 @@ body {
 .demo-measured {
   display: grid;
   justify-items: start;
-  gap: 6px;
+  gap: 8px;
 }
 
 /* A small note under a demo, such as a measured size. */
@@ -4195,7 +4180,7 @@ body {
   color: var(--docs-muted);
   white-space: nowrap;
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 11px;
+  font-size: var(--docs-text-micro);
   font-variant-numeric: tabular-nums;
 }
 
@@ -4206,38 +4191,31 @@ body {
   max-block-size: var(--available-height);
   overflow: auto;
   overscroll-behavior: contain;
-  font-size: 13px;
-}
-
-.token-setup-head {
+  font-size: var(--docs-text-small);
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 4px 12px;
-  margin-block-end: 12px;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.token-setup-head h2 {
+.token-setup-title {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--docs-text-ui);
   letter-spacing: normal;
 }
 
-.token-setup-head p,
+.token-setup-mode,
+.token-setup-reset {
+  align-self: flex-start;
+}
+
 .token-setup-note {
   margin: 0;
   color: var(--docs-muted);
-  font-size: 12.5px;
-}
-
-.token-setup-note {
-  margin-block: 10px 14px;
+  font-size: var(--docs-text-small);
 }
 
 .token-setup-prefix {
-  margin-block-end: 12px;
-  font-size: 12px;
+  font-size: var(--docs-text-micro);
 }
 
 .token-setup-prefix .ow-field__label {
@@ -4252,29 +4230,8 @@ body {
 
 /* owsem.json, a Code Block: smaller code in the narrow panel. */
 .token-setup-json .ow-code-block__panel {
-  font-size: 12px;
+  font-size: var(--docs-text-code);
   line-height: 1.6;
-}
-
-.token-setup-names {
-  margin: 14px 0 6px;
-  color: var(--docs-muted);
-  font-size: 12px;
-  font-weight: 400;
-  letter-spacing: normal;
-}
-
-.token-names {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 0 0 14px;
-  padding: 0;
-  list-style: none;
-}
-
-.token-names code {
-  font-size: 12px;
 }
 
 .text-button {
@@ -4282,7 +4239,7 @@ body {
   border: 0;
   background: none;
   color: var(--docs-muted);
-  font-size: 12.5px;
+  font-size: var(--docs-text-small);
   text-decoration: underline;
   text-underline-offset: 0.2em;
 }
@@ -4299,7 +4256,7 @@ body {
   gap: 4px 8px;
   margin: 12px 0 0;
   color: var(--docs-muted);
-  font-size: 13px;
+  font-size: var(--docs-text-small);
 }
 
 /* Glide demo (components/glide-demo.tsx): items inside a box use its radius minus the padding. */
@@ -4321,21 +4278,19 @@ body {
 .glide-demo figcaption,
 .glide-demo-status {
   color: var(--docs-muted);
-  font-size: 12.5px;
+  font-size: var(--docs-text-small);
 }
 
 .glide-demo-list,
 .glide-demo-row {
   padding: 6px;
-  border: 1px solid var(--ow-line-dark);
   border-radius: var(--docs-radius-box);
   background-color: var(--docs-surface);
-  box-shadow: inset 0 1px 0 var(--ow-line-light);
 }
 
 .glide-demo-list {
   display: grid;
-  gap: 6px;
+  gap: 8px;
 }
 
 .glide-demo-row {
@@ -4351,7 +4306,7 @@ body {
   border: 0;
   border-radius: calc(var(--docs-radius-box) - 6px);
   background: none;
-  font-size: 13.5px;
+  font-size: var(--docs-text-ui);
   text-align: start;
 }
 
@@ -4390,7 +4345,7 @@ body {
   margin-block: 32px 4px;
   font-size: var(--docs-text-subtitle);
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.35;
 }
 
 .changelog h4 {
@@ -4402,7 +4357,7 @@ body {
 .changelog h5 {
   margin-block: 12px 4px;
   color: var(--docs-muted);
-  font-size: 13px;
+  font-size: var(--docs-text-ui);
   font-weight: 600;
 }
 
@@ -4412,7 +4367,7 @@ body {
   gap: 8px;
   margin-block: 0 4px;
   color: var(--docs-muted);
-  font-size: 13px;
+  font-size: var(--docs-text-small);
 }
 
 .changelog-list {
@@ -4424,10 +4379,9 @@ body {
 .changelog-list > li {
   display: grid;
   justify-items: start;
-  gap: 6px;
+  gap: 8px;
   padding-block: 12px;
-  border-block-end: 2px solid var(--docs-groove-dark);
-  border-image: var(--docs-etch-bottom);
+  border-block-end: 1px solid var(--docs-line);
 }
 
 /* Long token names wrap instead of widening the page at 390 px. */
@@ -4476,14 +4430,12 @@ body {
   padding: 0.5em 0.5em 0.5em 0.75em;
   border-radius: var(--ow-radius);
   background-color: var(--ow-well-bg);
-  box-shadow: var(--ow-well-shadow);
   color: var(--ow-muted);
 }
 
 /* A states matrix cell: a small card in its own theme. */
 .demo-kbd-cell {
-  padding: 10px 14px;
-  border: 1px solid var(--ow-line);
+  padding: 10px 16px;
   border-radius: 10px;
   background-color: var(--ow-bg);
   color: var(--ow-fg);
@@ -4507,9 +4459,8 @@ body {
   place-items: center;
   inline-size: 56px;
   block-size: 56px;
-  border-radius: 12px;
+  border-radius: var(--ow-radius);
   background-color: var(--ow-well-bg);
-  box-shadow: var(--ow-well-shadow);
   color: var(--ow-fg);
 }
 
@@ -4525,17 +4476,18 @@ body {
   align-items: center;
   gap: 8px;
   padding: 4px 4px 4px 12px;
-  border-radius: calc(var(--ow-radius) + 4px);
+  border-radius: var(--ow-radius);
   background-color: var(--ow-well-bg);
-  box-shadow: var(--ow-well-shadow);
 }
 
 .demo-copy-field code {
   flex: 1;
+  padding: 0;
+  background: none;
   min-inline-size: 0;
   overflow: hidden;
   color: var(--ow-fg);
-  font-size: 13px;
+  font-size: var(--docs-text-code);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -4561,4 +4513,28 @@ body {
   content: "$ ";
   color: var(--tk-punct);
   user-select: none;
+}
+
+/* The token table is a white card; it scrolls inside itself, so its own shadow is not clipped. */
+.token-table {
+  border-radius: var(--ow-radius);
+  background-color: var(--docs-surface);
+  box-shadow: var(--docs-shadow);
+}
+
+.token-table :is(th, td):first-child {
+  padding-inline-start: 16px;
+}
+
+.token-table :is(th, td):last-child {
+  padding-inline-end: 16px;
+}
+
+.token-table tbody tr:last-child :is(th, td) {
+  border-block-end: 0;
+}
+
+/* Token setup's blocks inside the popover. */
+.token-setup-json .ow-code-block {
+  border-radius: max(0px, var(--ow-radius) - 4px);
 }

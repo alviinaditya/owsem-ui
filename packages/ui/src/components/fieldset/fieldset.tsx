@@ -21,7 +21,7 @@ export const FieldsetRoot: ForwardRefExoticComponent<
 
 export type FieldsetLegendProps = Omit<BaseFieldset.Legend.Props, "ref">;
 
-/** Names the group, over an etched line. */
+/** Names the group, over a hairline. */
 export const FieldsetLegend: ForwardRefExoticComponent<
   FieldsetLegendProps & RefAttributes<HTMLDivElement>
 > = forwardRef<HTMLDivElement, FieldsetLegendProps>(function FieldsetLegend(

@@ -13,7 +13,7 @@ async function mount(ui: ReactNode): Promise<HTMLElement[]> {
   return [...screen.container.querySelectorAll<HTMLElement>('[role="separator"]')];
 }
 
-/** Resolves a color (e.g. `var(--ow-line-dark)`) to its computed rgb() inside `scope`. */
+/** Resolves a color (e.g. `var(--ow-line)`) to its computed rgb() inside `scope`. */
 function resolveColor(value: string, scope: Element = document.body): string {
   const probe = document.createElement("span");
   probe.style.color = value;
@@ -53,22 +53,24 @@ describe("Separator", () => {
     expect(rendered?.className).toBe("ow-separator");
   });
 
-  test("draws an etched line from the theme tokens, in light and dark", async () => {
+  test("draws one hairline in the line color, in light and dark", async () => {
     onTestFinished(() => {
       delete root.dataset.theme;
     });
     const [line] = await mount(<Separator />);
     if (!line) throw new Error("no separator");
 
+    const colors: string[] = [];
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
       const style = getComputedStyle(line);
       expect(style.borderBlockStartWidth).toBe("1px");
-      expect(style.borderBlockEndWidth).toBe("1px");
+      expect(style.borderBlockEndWidth).toBe("0px");
       expect(style.borderInlineStartWidth).toBe("0px");
-      expect(style.borderBlockStartColor).toBe(resolveColor("var(--ow-line-dark)"));
-      expect(style.borderBlockEndColor).toBe(resolveColor("var(--ow-line-light)"));
+      expect(style.borderBlockStartColor).toBe(resolveColor("var(--ow-line)"));
+      colors.push(style.borderBlockStartColor);
     }
+    expect(colors[0]).not.toBe(colors[1]);
   });
 
   test("stretches only along its length in flex and grid containers", async () => {
@@ -98,9 +100,9 @@ describe("Separator", () => {
       const { width, height } = line.getBoundingClientRect();
       return { width, height };
     });
-    expect(flexRow).toEqual({ width: 2, height: 40 });
-    expect(gridColumn?.width).toBe(2);
-    expect(gridRows).toEqual({ width: 400, height: 2 });
+    expect(flexRow).toEqual({ width: 1, height: 40 });
+    expect(gridColumn?.width).toBe(1);
+    expect(gridRows).toEqual({ width: 400, height: 1 });
     expect(flexColumn?.width).toBe(document.body.clientWidth);
   });
 
@@ -113,13 +115,14 @@ describe("Separator", () => {
     if (!line) throw new Error("no separator");
     const style = getComputedStyle(line);
     // Inline start is the right side in RTL.
-    expect(style.borderRightColor).toBe(resolveColor("var(--ow-line-dark)"));
-    expect(style.borderLeftColor).toBe(resolveColor("var(--ow-line-light)"));
+    expect(style.borderRightWidth).toBe("1px");
+    expect(style.borderRightColor).toBe(resolveColor("var(--ow-line)"));
+    expect(style.borderLeftWidth).toBe("0px");
   });
 
   test("a theme token set on it changes it alone (TK-9)", async () => {
     const [line] = await mount(
-      <Separator style={{ "--ow-line-dark": "rgb(255, 0, 0)" } as CSSProperties} />,
+      <Separator style={{ "--ow-line": "rgb(255, 0, 0)" } as CSSProperties} />,
     );
     if (!line) throw new Error("no separator");
     expect(getComputedStyle(line).borderBlockStartColor).toBe("rgb(255, 0, 0)");

@@ -226,16 +226,22 @@ describe("Tooltip", () => {
     }
   });
 
-  test("its corners and the shortcut's come from the control radius (FR-10b)", async () => {
+  test("its corners take the one radius, and the shortcut's that less its gap (TK-8)", async () => {
     await mount(<Labelled name="Bold" shortcut="B" open />);
     await expect.poll(popup).not.toBeNull();
     await settle();
     const surface = popup() as HTMLElement;
     const key = surface.querySelector("kbd") as HTMLElement;
-    expect(getComputedStyle(surface).borderRadius).toBe("6px");
-    // Concentric: the popup's radius less the shortcut's gap to its edge.
+    const radius = Number.parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue("--ow-radius"),
+    );
+    expect(getComputedStyle(surface).borderRadius).toBe(`${radius}px`);
+    // Nested: the popup's radius less the shortcut's gap to its edge, 2px at least.
     const gap = key.getBoundingClientRect().top - surface.getBoundingClientRect().top;
-    expect(Number.parseFloat(getComputedStyle(key).borderRadius)).toBeCloseTo(6 - gap, 1);
+    expect(Number.parseFloat(getComputedStyle(key).borderRadius)).toBeCloseTo(
+      Math.max(2, radius - gap),
+      1,
+    );
   });
 
   test("a shortcut at the end sits as far from the end as from the top and bottom (FR-10)", async () => {

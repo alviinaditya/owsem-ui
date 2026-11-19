@@ -180,8 +180,8 @@ const copyButtonLab = defineLab({
       name: "Root",
       selector: '[data-demo="copy"]',
       note: {
-        id: "Sebuah Button: varian, ukuran, dan materialnya dari Button. data-copied selama ia menampilkan Tersalin.",
-        en: "A Button: its variant, size, and materials are Button's. data-copied while it shows Copied.",
+        id: "Sebuah Button: varian, ukuran, dan materialnya dari Button. data-copied dan aria-disabled selama ia menampilkan Tersalin. Ikon saja, Tooltip-nya menamainya.",
+        en: "A Button: its variant, size, and materials are Button's. data-copied and aria-disabled while it shows Copied. Icon only, its Tooltip names it.",
       },
       tokens: {
         "--ow-spring-settle-duration": "--_duration",

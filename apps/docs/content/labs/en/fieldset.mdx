@@ -6,7 +6,7 @@ import { Part } from "@/components/lab/lab-shell";
 import { ForMode, TokenChip } from "@/components/token-setup";
 
 Fieldset groups related fields under one legend, and one `disabled` reaches them all. Base UI names
-the group and passes the state; OwsemUI adds even gaps and an etched line under the legend. Scroll to
+the group and passes the state; OwsemUI adds even gaps and a little room under the legend. Scroll to
 start the tour; the stage follows each part.
 
 ```tsx
@@ -37,7 +37,7 @@ Two parts. Inspect (I) outlines them on the stage.
 | Part | Element | Notes |
 | --- | --- | --- |
 | <Part name="Root" /> | `fieldset.ow-fieldset` | One column with no frame; `disabled`, and `data-disabled` while it is |
-| <Part name="Legend" /> | `div.ow-fieldset__legend` | Names the group through `aria-labelledby`; `data-disabled`. The etched line is its `::after` |
+| <Part name="Legend" /> | `div.ow-fieldset__legend` | Names the group through `aria-labelledby`; `data-disabled`. The extra 0.75em of room under it is its `::after` |
 
 ## States and variants [#states]
 
@@ -45,7 +45,7 @@ The stage sets the light and dark themes side by side.
 
 | State | What shows it |
 | --- | --- |
-| Enabled | The legend in `--ow-fg`, over the line |
+| Enabled | The legend in `--ow-fg`, with a little room under it |
 | Disabled | The legend at 45% opacity, and each control faded by its own disabled look |
 
 ## Keyboard and accessibility [#keyboard]
@@ -54,30 +54,27 @@ Fieldset takes no focus: Tab moves through its controls, and skips them all whil
 a native `<fieldset>`, so it has the `group` role, named by the legend. Give every group a legend, and
 use `render` for a heading when the page's outline needs one.
 
-Nothing moves, so reduced motion changes nothing. In forced colors (Windows High Contrast), the line
-stays, since it is two borders. Right to left, the legend sits on the right.
+Nothing moves, so reduced motion changes nothing. There is no line to lose in forced colors (Windows High Contrast). Right to left, the legend sits on the right.
 
 ## Customization [#customization]
 
-The stage shows three ways to change it. The controls are open: pick a line's color or the gap, and the
+The stage shows three ways to change it. The controls are open: pick the text color or the gap, and the
 code follows.
 
 **A token** set on the legend, on the root, or on any element around it changes the groups inside.
 
 ```css
 .billing {
-  --ow-line-dark: #a07a1c;
+  --ow-fg: #a07a1c;
 }
 ```
 
 | Theme token | Purpose |
 | --- | --- |
-| `--ow-fg` | Legend |
-| `--ow-line-dark` | Line's dark side |
-| `--ow-line-light` | Line's light side |
+| `--ow-fg` | Legend, and the text of the fields inside |
 
 **A `className`** wins over its own values, with no `!important`. `gap` is one property on one class,
-and the line is the legend's `::after`, so one rule removes it. Here, the fields sit in two columns:
+and the room under the legend is its `::after`, so one rule removes it. Here, the fields sit in two columns:
 
 ```css
 .billing {

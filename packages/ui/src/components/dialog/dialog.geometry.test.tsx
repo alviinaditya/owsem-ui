@@ -2,7 +2,7 @@ import { DirectionProvider } from "@base-ui/react/direction-provider";
 import { describe, expect, onTestFinished, test } from "vitest";
 import { page, userEvent } from "vitest/browser";
 import { render } from "vitest-browser-react";
-import { TOL } from "../../../test/geometry.ts";
+import { TOL, themeRadius } from "../../../test/geometry.ts";
 import { Button } from "../button";
 import { Dialog } from "./index";
 
@@ -141,7 +141,7 @@ describe("Dialog geometry", () => {
     expect(document.documentElement.scrollHeight).toBeLessThanOrEqual(568);
   });
 
-  test("a button in the corner has a concentric radius: popup = button + gap (FR-10b)", async () => {
+  test("the popup takes the one radius; a button 16px in keeps its own (TK-8)", async () => {
     await render(
       <Dialog.Root defaultOpen>
         <Dialog.Portal>
@@ -161,7 +161,8 @@ describe("Dialog geometry", () => {
     expectClose(box.right - inner.right, 16);
     expectClose(box.bottom - inner.bottom, 16);
     const radius = (el: Element) => Number.parseFloat(getComputedStyle(el).borderTopLeftRadius);
-    expectClose(radius(popup()), radius(button) + 16);
+    expectClose(radius(popup()), themeRadius());
+    expectClose(radius(button), themeRadius());
   });
 
   test("font-size scales the width, the padding, and the title", async () => {

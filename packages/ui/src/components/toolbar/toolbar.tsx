@@ -175,7 +175,7 @@ export const ToolbarInput: ForwardRefExoticComponent<
 
 export type ToolbarSeparatorProps = Omit<BaseToolbar.Separator.Props, "ref">;
 
-/** An etched groove between groups, across the toolbar's direction. */
+/** A hairline between groups, across the toolbar's direction. */
 export const ToolbarSeparator: ForwardRefExoticComponent<
   ToolbarSeparatorProps & RefAttributes<HTMLDivElement>
 > = forwardRef<HTMLDivElement, ToolbarSeparatorProps>(function ToolbarSeparator(

@@ -1,8 +1,8 @@
 @layer owsem.tokens, owsem.components;
 
 /*
- * A group of fields: a legend over an etched line, then even gaps. No frame and no outer margins,
- * so it sits in any layout. The line is two borders, so it stays in forced colors (DP-8).
+ * A group of fields: a legend, then even gaps. No frame, no line, and no outer margins, so it
+ * sits in any layout.
  */
 @layer owsem.components {
   .ow-fieldset {
@@ -20,8 +20,6 @@
 
   .ow-fieldset__legend {
     --_fg: var(--ow-fg);
-    --_dark: var(--ow-line-dark);
-    --_light: var(--ow-line-light);
     /* A heading passed to `render` keeps the legend's look. */
     margin: 0;
     color: var(--_fg);
@@ -29,12 +27,11 @@
     font-weight: 600;
   }
 
+  /* The legend stands a little apart from the fields, on top of their gap. */
   .ow-fieldset__legend::after {
     content: "";
     display: block;
-    margin-block-start: 0.75em;
-    border-block: 1px solid;
-    border-block-color: var(--_dark) var(--_light);
+    block-size: 0.75em;
   }
 
   .ow-fieldset__legend:where([data-disabled]) {

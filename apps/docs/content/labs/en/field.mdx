@@ -24,9 +24,9 @@ You write no ids. Base UI gives the control an `aria-labelledby` for the label, 
 reads those attributes live.
 
 The stage plays it: the pointer types an address, and while the text isn't one yet, the control's
-edge turns critical, the error appears, and it joins the description in `aria-describedby`. Both
-leave once the address is right. Nothing animates: a message comes and goes at once, since a fade
-would only delay reading it.
+tint turns critical and shakes once, the error appears, and it joins the description in
+`aria-describedby`. Both leave once the address is right. The message itself comes and goes at once,
+since a fade would only delay reading it.
 
 ## Native and custom checks [#validation]
 
@@ -64,9 +64,10 @@ error and on to a valid address.
 
 | State | What shows it |
 | --- | --- |
-| Empty | The control's well, with its placeholder |
+| Empty | The control's 6% tint, with its placeholder |
+| Hover or focus | Hover steps the tint up to 9%; focus adds the ring |
 | Filled | Text in `--ow-fg` |
-| Invalid | The control's edge in `--ow-critical`, and the error in the same tone. The label stays as it is |
+| Invalid | The control's 12% tint of `--ow-critical` and one shake, and the error in the same tone. The label stays as it is |
 | Disabled | The control and the label at 45% opacity. A computed error hides; `invalid` you set stays |
 
 ## Keyboard and accessibility [#keyboard]
@@ -78,10 +79,11 @@ error and on to a valid address.
 
 Clicking the label moves focus to the control. Screen readers read the label as its name and the
 description and the error as its description, and `aria-invalid` says it failed. Don't announce an
-error by color alone: the message is there, and the edge is its signal.
+error by color alone: the message is there, and the tint and the shake are its signal.
 
-Nothing moves, so reduced motion changes nothing. In forced colors (Windows High Contrast), messages
-take the system's text color, and the control keeps a 2px edge while invalid. Right to left, the
+The control shakes once when it becomes invalid; with reduced motion it blinks instead. With
+`prefers-contrast: more`, the control gets a 1px edge. In forced colors (Windows High Contrast),
+messages take the system's text color, and the control keeps a 2px edge while invalid. Right to left, the
 label sits on the right, over the control's start.
 
 ## Customization [#customization]
@@ -101,7 +103,7 @@ and the first field and the code follow.
 | --- | --- |
 | `--ow-fg` | Label |
 | `--ow-muted` | Description |
-| `--ow-critical` | Error, and the control's edge while invalid |
+| `--ow-critical` | Error, and the control's tint while invalid |
 
 The control reads Input's tokens too.
 

@@ -108,6 +108,17 @@ describe("Tree Rail Nav", () => {
     expect(getComputedStyle(current, "::before").opacity).toBe("1");
   });
 
+  test("with no current row left, as on a page outside the nav, no dot stays lit", async () => {
+    const { screen, tree, row } = await mount(<Nav />);
+    await expect.poll(() => markerY(tree)).toBeCloseTo(middle(tree, row("Dark mode")), 0);
+    expect(tree.querySelectorAll(".ow-tree-rail-nav__rail-node[data-lit]").length).toBe(5);
+    screen.rerender(<Nav current="none" />);
+    await expect
+      .poll(() => tree.querySelectorAll(".ow-tree-rail-nav__rail-node[data-lit]").length)
+      .toBe(0);
+    expect(tree.querySelectorAll("[data-trail]").length).toBe(0);
+  });
+
   test("until the script has drawn the rail, CSS draws its resting shape in the same place", async () => {
     const { tree, row } = await mount(<Nav />);
     await expect.poll(() => tree.hasAttribute("data-rail")).toBe(true);

@@ -6,6 +6,7 @@ import { render } from "vitest-browser-react";
 import { axeReport } from "../../../test/a11y.ts";
 import { measureIdle, settle } from "../../../test/raf-counter.ts";
 import { Button } from "../button";
+import { Select } from "../select";
 import { Dialog } from "./index";
 
 const root = document.documentElement;
@@ -74,7 +75,7 @@ function appCss(css: string) {
   onTestFinished(() => sheet.remove());
 }
 
-/** Resolves a value (e.g. `var(--ow-panel)`) of `property` to its computed form in `scope`. */
+/** Resolves a value (e.g. `var(--ow-raised-bg)`) of `property` to its computed form in `scope`. */
 function resolve(property: "color" | "box-shadow", value: string, scope: Element = document.body) {
   const probe = document.createElement("span");
   probe.style.setProperty(property, value);
@@ -83,6 +84,16 @@ function resolve(property: "color" | "box-shadow", value: string, scope: Element
   probe.remove();
   return computed;
 }
+
+/** Whether a wheel turned over `target` was held back. */
+const held = (target: Element = document.body) =>
+  !target.dispatchEvent(new WheelEvent("wheel", { deltaY: 100, bubbles: true, cancelable: true }));
+/** The page's own style attributes, which the lock leaves alone. */
+const pageStyle = () => [root.style.cssText, document.body.style.cssText];
+/** Frames to let Base UI write its page lock (it does in a timeout) before looking. */
+const frames = async (n = 6) => {
+  for (let i = 0; i < n; i++) await new Promise((r) => requestAnimationFrame(r));
+};
 
 describe("Dialog", () => {
   test("is Base UI's dialog: named, it takes focus and gives it back", async () => {
@@ -127,13 +138,13 @@ describe("Dialog", () => {
       await userEvent.keyboard("{Tab}");
       expect(dialog.contains(document.activeElement)).toBe(true);
     }
-    // On the element that scrolls the page, which is the html or the body.
-    const locked = () =>
-      [root, document.body].some((el) => getComputedStyle(el).overflowY === "hidden");
-    expect(locked()).toBe(true);
+    // OwsemUI's lock holds the page; Base UI's `overflow` is put back before it is drawn.
+    await frames();
+    expect(held()).toBe(true);
+    expect(getComputedStyle(root).overflowY).toBe("visible");
     await userEvent.keyboard("{Escape}");
     await gone();
-    await expect.poll(locked).toBe(false);
+    await expect.poll(() => held()).toBe(false);
   });
 
   test("opens from a trigger placed elsewhere, or from code, through a handle", async () => {
@@ -549,7 +560,7 @@ describe("Dialog", () => {
     expect(refs.close.current?.className).toContain("c");
   });
 
-  test("sits on the panel material over the scrim, light and dark", async () => {
+  test("sits on the raised fill over the scrim, light and dark", async () => {
     onTestFinished(() => {
       delete root.dataset.theme;
     });
@@ -560,7 +571,7 @@ describe("Dialog", () => {
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
       const style = getComputedStyle(surface);
-      expect(style.backgroundColor).toBe(resolve("color", "var(--ow-panel)"));
+      expect(style.backgroundColor).toBe(resolve("color", "var(--ow-raised-bg)"));
       expect(style.boxShadow).toBe(resolve("box-shadow", "var(--ow-popup-shadow)"));
       expect(style.color).toBe(resolve("color", "var(--ow-fg)"));
       expect(
@@ -573,7 +584,7 @@ describe("Dialog", () => {
   describe("customizing", () => {
     test("a theme token set on the popup changes it alone (TK-9)", async () => {
       const tokens = {
-        "--ow-panel": "rgb(1, 2, 3)",
+        "--ow-raised-bg": "rgb(1, 2, 3)",
         "--ow-popup-shadow": "none",
         "--ow-fg": "rgb(4, 5, 6)",
         "--ow-muted": "rgb(7, 8, 9)",
@@ -591,7 +602,8 @@ describe("Dialog", () => {
       expect(style.backgroundColor).toBe("rgb(1, 2, 3)");
       expect(style.boxShadow).toBe("none");
       expect(style.color).toBe("rgb(4, 5, 6)");
-      expect(Number.parseFloat(style.borderRadius)).toBeCloseTo(17, 1);
+      // The one radius, as set (TK-8).
+      expect(Number.parseFloat(style.borderRadius)).toBeCloseTo(1, 1);
       expect(
         getComputedStyle(document.querySelector(".ow-dialog__description") as Element).color,
       ).toBe("rgb(7, 8, 9)");
@@ -606,7 +618,7 @@ describe("Dialog", () => {
 
     test("tokens on the Portal reach the scrim and the popup", async () => {
       const tokens = {
-        "--ow-panel": "rgb(1, 2, 3)",
+        "--ow-raised-bg": "rgb(1, 2, 3)",
         "--ow-backdrop": "rgb(10, 11, 12)",
       } as CSSProperties;
       await render(
@@ -640,8 +652,8 @@ describe("Dialog", () => {
       await expect.poll(popup).not.toBeNull();
       const portal = popup()?.parentElement as HTMLElement;
       expect(portal.dataset.theme).toBe("dark");
-      const dark = resolve("color", "var(--ow-panel)", portal);
-      expect(dark).not.toBe(resolve("color", "var(--ow-panel)"));
+      const dark = resolve("color", "var(--ow-raised-bg)", portal);
+      expect(dark).not.toBe(resolve("color", "var(--ow-raised-bg)"));
       expect(getComputedStyle(popup() as HTMLElement).backgroundColor).toBe(dark);
     });
 
@@ -678,6 +690,17 @@ describe("Dialog", () => {
       expect(text.color).toBe("rgb(7, 8, 9)");
       expect(text.marginBlockEnd).toBe("3px");
     });
+  });
+
+  test("more contrast adds a 1px --ow-edge ring to the dialog popup", async () => {
+    onTestFinished(() => commands.setContrast("no-preference"));
+    await render(<Share open />);
+    await expect.poll(popup).not.toBeNull();
+    const surface = popup() as HTMLElement;
+    const shadow = getComputedStyle(surface).boxShadow;
+    await commands.setContrast("more");
+    const ring = resolve("box-shadow", "0 0 0 1px var(--ow-edge)");
+    expect(getComputedStyle(surface).boxShadow).toBe(`${shadow}, ${ring}`);
   });
 
   test("keeps its edge in forced colors (DP-8)", async () => {
@@ -768,5 +791,94 @@ describe("Dialog", () => {
     await expect.poll(popup).not.toBeNull();
     await settle();
     expect(await measureIdle()).toEqual({ rafCalls: 0, runningAnimations: [] });
+  });
+
+  test("holds the page without styling it; a wheel inside a scrollable body still scrolls", async () => {
+    const before = pageStyle();
+    await render(
+      <>
+        <Dialog.Root defaultOpen>
+          <Dialog.Portal>
+            <Dialog.Popup>
+              <Dialog.Title>Terms</Dialog.Title>
+              <div data-testid="body" style={{ maxBlockSize: 80, overflowY: "auto" }}>
+                <div style={{ blockSize: 800 }} />
+              </div>
+            </Dialog.Popup>
+          </Dialog.Portal>
+        </Dialog.Root>
+        <div style={{ blockSize: 3000 }} />
+      </>,
+    );
+    await expect.poll(popup).not.toBeNull();
+    await frames();
+    expect(pageStyle()).toEqual(before);
+    expect(held()).toBe(true);
+    expect(held(byId("body") as HTMLElement)).toBe(false);
+    await userEvent.keyboard("{Escape}");
+    await gone();
+    await frames();
+    expect(held()).toBe(false);
+    expect(pageStyle()).toEqual(before);
+  });
+
+  test("modal={false} does not hold the page; a kept-mounted dialog holds it only while open", async () => {
+    await render(
+      <Dialog.Root modal={false} defaultOpen>
+        <Dialog.Portal>
+          <Dialog.Popup>
+            <Dialog.Title>Tip</Dialog.Title>
+          </Dialog.Popup>
+        </Dialog.Portal>
+      </Dialog.Root>,
+    );
+    await expect.poll(popup).not.toBeNull();
+    await frames();
+    expect(held()).toBe(false);
+  });
+
+  test("a Select inside it works, and the page stays held until both have shut", async () => {
+    const before = pageStyle();
+    await render(
+      <Dialog.Root defaultOpen>
+        <Dialog.Portal>
+          <Dialog.Popup>
+            <Dialog.Title>Plan</Dialog.Title>
+            <Select.Root defaultValue="a">
+              <Select.Trigger aria-label="Plan">
+                <Select.Value />
+              </Select.Trigger>
+              <Select.Portal>
+                <Select.Positioner>
+                  <Select.Popup>
+                    <Select.Item value="a">Alpha</Select.Item>
+                    <Select.Item value="b">Beta</Select.Item>
+                  </Select.Popup>
+                </Select.Positioner>
+              </Select.Portal>
+            </Select.Root>
+          </Dialog.Popup>
+        </Dialog.Portal>
+      </Dialog.Root>,
+    );
+    await expect.poll(popup).not.toBeNull();
+    await userEvent.click(document.querySelector('[aria-label="Plan"]') as HTMLElement);
+    // A shut select may keep its parts mounted, hidden.
+    const beta = () =>
+      [...document.querySelectorAll<HTMLElement>('[role="option"]')].find(
+        (o) => o.textContent?.includes("Beta") && o.closest("[hidden]") === null,
+      );
+    await expect.poll(beta).toBeDefined();
+    await frames();
+    expect(held()).toBe(true);
+    await userEvent.click(beta() as HTMLElement);
+    await expect.poll(beta).toBeUndefined();
+    expect(popup()).not.toBeNull();
+    expect(held()).toBe(true);
+    await userEvent.keyboard("{Escape}");
+    await gone();
+    await frames();
+    expect(held()).toBe(false);
+    expect(pageStyle()).toEqual(before);
   });
 });

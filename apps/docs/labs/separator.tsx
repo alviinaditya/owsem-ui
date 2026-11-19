@@ -23,7 +23,7 @@ const TEXT = {
   },
 };
 
-const initial = { orientation: "horizontal", dark: "", light: "" };
+const initial = { orientation: "horizontal", line: "" };
 
 const separatorLab = defineLab({
   initial,
@@ -38,16 +38,10 @@ const separatorLab = defineLab({
       ],
     },
     {
-      key: "dark",
+      key: "line",
       type: "color",
-      label: { id: "Garis gelap", en: "Dark line" },
-      token: "--ow-line-dark",
-    },
-    {
-      key: "light",
-      type: "color",
-      label: { id: "Garis terang", en: "Light line" },
-      token: "--ow-line-light",
+      label: { id: "Garis", en: "Line" },
+      token: "--ow-line",
     },
   ],
 
@@ -56,28 +50,23 @@ const separatorLab = defineLab({
       name: "Root",
       selector: ".ow-separator",
       note: {
-        id: "Garis gelap dan terang, digambar sebagai border. Base UI memberinya role separator.",
-        en: "The dark and light lines, drawn as borders. Base UI gives it the separator role.",
+        id: "Satu garis tipis dari warna garis, digambar sebagai border. Base UI memberinya role separator.",
+        en: "One hairline in the line color, drawn as a border. Base UI gives it the separator role.",
       },
-      tokens: {
-        "--ow-line-dark": "--_dark",
-        "--ow-line-light": "--_light",
-      },
+      tokens: { "--ow-line": "--ow-line" },
     },
   ],
 
   demo(cfg, lang) {
     const t = TEXT[lang];
-    const style = {
-      "--ow-line-dark": cfg.dark || undefined,
-      "--ow-line-light": cfg.light || undefined,
-    } as CSSProperties;
+    // On each Separator: the card's own border reads --ow-line too.
+    const style = { "--ow-line": cfg.line || undefined } as CSSProperties;
     if (cfg.orientation === "vertical") {
       return (
-        <div className="demo-card demo-row" style={style}>
+        <div className="demo-card demo-row">
           {t.states.map((label, i) => (
             <span key={label} className="demo-row-item">
-              {i > 0 ? <Separator orientation="vertical" /> : null}
+              {i > 0 ? <Separator orientation="vertical" style={style} /> : null}
               {label}
             </span>
           ))}
@@ -85,12 +74,12 @@ const separatorLab = defineLab({
       );
     }
     return (
-      <div className="demo-card" style={style}>
+      <div className="demo-card">
         <div>
           <p className="demo-title">{t.profile}</p>
           <p className="demo-muted">{t.profileBody}</p>
         </div>
-        <Separator />
+        <Separator style={style} />
         <div>
           <p className="demo-title">{t.security}</p>
           <p className="demo-muted">{t.securityBody}</p>
@@ -100,7 +89,7 @@ const separatorLab = defineLab({
   },
 
   code(cfg, setup) {
-    const custom = cfg.dark || cfg.light;
+    const custom = cfg.line;
     const scope = custom ? ' className="settings"' : "";
     // Any other setup comes from the owsem CLI, which copies the component into the project.
     const from = isDefaultSetup(setup) ? "owsem-ui/base" : "@/components/owsem/separator";
@@ -140,8 +129,7 @@ const separatorLab = defineLab({
       const lines = [
         "/* Every Separator inside .settings */",
         setup.mode === "isolated" ? ".settings .ow-separator {" : ".settings {",
-        ...(cfg.dark ? [`  ${token}-dark: ${cfg.dark};`] : []),
-        ...(cfg.light ? [`  ${token}-light: ${cfg.light};`] : []),
+        `  ${token}: ${cfg.line};`,
         "}",
       ];
       files.push({ name: "settings.css", code: lines.join("\n") });

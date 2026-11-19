@@ -74,8 +74,8 @@ nilai mengubah semua komponen yang memakainya.
 | Jenis | Contoh | Diatur oleh |
 | --- | --- | --- |
 | Semantic | `--ow-bg`, `--ow-fg`, `--ow-muted`, `--ow-line`, `--ow-accent`, `--ow-hover` | App, sekali untuk semua komponen |
-| Material depth | `--ow-panel`, `--ow-raised-bg`, `--ow-line-dark`, `--ow-line-light` | OwsemUI per tema; app boleh menimpanya |
-| Bentuk dan motion | `--ow-radius`, `--ow-motion-scale` | App |
+| Material | `--ow-panel`, `--ow-raised-bg`, `--ow-well-bg`, `--ow-pressed-bg`, `--ow-popup-shadow`, `--ow-primary-shadow` | OwsemUI per tema; app boleh menimpanya |
+| Bentuk dan motion | `--ow-radius` (sudut setiap permukaan, bawaannya 10px), `--ow-motion-scale` | App |
 
 Pasang token tema di `:root` untuk mengganti warna semua komponen, atau di elemen mana pun untuk
 isinya saja:
@@ -90,10 +90,10 @@ isinya saja:
 }
 ```
 
-Separator membaca `--ow-line-dark` dan `--ow-line-light`. Tree Rail Nav membaca `--ow-fg`,
+Separator membaca `--ow-line`. Tree Rail Nav membaca `--ow-fg`,
 `--ow-muted`, `--ow-line`, `--ow-bg`, dan `--ow-accent` untuk jejaknya. Command Menu membaca
-`--ow-fg`, `--ow-muted`, `--ow-focus`, `--ow-edge`, `--ow-hover`, dan `--ow-backdrop`, beserta
-material panel, well, dan raised. Token semantic lainnya mulai berpengaruh begitu komponen yang memakainya tersedia.
+`--ow-fg`, `--ow-muted`, `--ow-line`, `--ow-focus`, `--ow-hover`, dan `--ow-backdrop`, beserta
+material raised dan bayangan popup. Token semantic lainnya mulai berpengaruh begitu komponen yang memakainya tersedia.
 
 Token yang dipasang di `:root` berlaku untuk kedua tema. Itu pas untuk accent yang terbaca di kedua
 latar. `--ow-accent` bawaan justru punya nilai per tema: lilac yang lebih tua di tema terang dan
@@ -117,9 +117,17 @@ selector yang sama dengan `tokens.css`:
 }
 ```
 
-Token material depth ditulis lengkap untuk setiap tema, bukan diturunkan dari token lain. Kalau
-Anda mengganti warna netral seperti `--ow-bg`, ganti juga `--ow-line-dark` dan `--ow-line-light`
-di setiap tema supaya garis terukir tetap terlihat.
+Token material ditulis lengkap untuk setiap tema, bukan diturunkan dari token lain. Kalau
+Anda mengganti warna netral seperti `--ow-bg`, ganti juga `--ow-line` dan isian material
+(`--ow-panel`, `--ow-raised-bg`, `--ow-well-bg`, `--ow-pressed-bg`) di setiap tema supaya garis tipis
+dan permukaan tetap terlihat.
+
+Material dibedakan lewat tone, bukan tepi: permukaan berada satu tingkat tone dari yang ada di
+bawahnya, dan field, tuts, serta track adalah tint dari `--ow-fg` (`color-mix(in oklab, var(--ow-fg) 6%, transparent)`
+untuk field). Jadi mengganti `--ow-fg` ikut mengganti warna mereka. `--ow-edge` adalah warna batas
+yang disimpan untuk `@media (prefers-contrast: more)`, saat field, Checkbox, Radio, Switch, dan popup
+menggambar tepi 1px dengannya. Token bayangan panel, raised, dan ditekan sudah dihapus:
+`--ow-panel-shadow`, `--ow-raised-shadow`, dan `--ow-pressed-shadow`.
 
 ## Mengubah satu komponen
 
@@ -127,9 +135,9 @@ Token yang sama mengubah satu komponen, atau satu instance-nya: pasang di kompon
 elemen di sekitarnya.
 
 ```css
-/* Semua separator di halaman pengaturan */
+/* Semua garis di halaman pengaturan, termasuk separator */
 .settings {
-  --ow-line-dark: #b9b0d0;
+  --ow-line: #b9b0d0;
 }
 ```
 
@@ -137,14 +145,15 @@ Dengan Tailwind, arbitrary property memasang token di satu part, atau di elemen 
 part (lihat [Tailwind CSS v4](/id/docs#tailwind-css-v4)):
 
 ```tsx
-<Separator className="[--ow-line-dark:var(--color-zinc-400)]" />
+<Separator className="[--ow-line:var(--color-zinc-400)]" />
 <aside className="bg-ow-panel [--ow-panel:var(--color-zinc-900)]">{children}</aside>
 ```
 
-Nilai yang tidak punya token sendiri diambil dari token tema: sudut bagian dalam dari `--ow-radius`
-(setiap lapisan menambahkan padding-nya), warna tipis dari `--ow-fg` atau `--ow-accent` lewat
-`color-mix()`, dan highlight Glide dari `--ow-hover`. Nama yang diawali `--_` bersifat privat dan
-bisa berubah.
+Nilai yang tidak punya token sendiri diambil dari token tema: warna tipis dari `--ow-fg` atau
+`--ow-accent` lewat `color-mix()`, dan highlight Glide dari `--ow-hover`. Sudut berasal dari satu
+token: setiap permukaan memakai `--ow-radius`, dan bagian yang bersarang di dalam permukaan
+berpadding, seperti item menu atau thumb segmented, memakainya dikurangi padding itu
+(`max(0px, var(--ow-radius) - <padding>)`). Nama yang diawali `--_` bersifat privat dan bisa berubah.
 
 Untuk hal yang tidak dicakup token, beri style langsung ke part-nya. Setiap part punya class:
 `.ow-<komponen>` di root dan `.ow-<komponen>__<part>` di part lain, misalnya
@@ -193,7 +202,7 @@ dan nilai di elemen induk tidak sampai kepadanya. Atur nilainya di komponen itu 
 
 ```css
 .settings .ow-separator {
-  --acme-line-dark: #b9b0d0;
+  --acme-line: #b9b0d0;
 }
 ```
 

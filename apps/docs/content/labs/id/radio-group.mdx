@@ -27,11 +27,12 @@ Gulir untuk mulai tur; stage mengikuti setiap bagian.
 
 ## Memilih [#choosing]
 
-Saat mati, radio berupa well dengan tepi 1 px yang tegas berkontras 3:1, jadi tetap terlihat di
-permukaan apa pun. Saat aktif, isinya memakai warna utama dengan tepi yang sama seperti tombol
-primary, ditambah titik yang membesar. Isiannya berganti seketika, bersama state-nya. Hanya titik yang
-bergerak, dengan spring settle (`--ow-spring-settle`), dari setengah ukurannya, dan ia pergi bersama
-isiannya: titik terang tidak cocok di atas well.
+Saat mati, radio berupa tint 10% dari warna teks tanpa tepi, 13% di bawah pointer halus, di radio atau
+barisnya, dan 16% saat ditahan, jadi radio yang dituju menonjol di permukaan apa pun. Saat aktif,
+isinya memakai warna utama dengan sorot atas yang sama seperti tombol primary, ditambah titik yang
+membesar. Isiannya berganti seketika, bersama state-nya. Hanya titik yang bergerak, dengan spring
+settle (`--ow-spring-settle`), dari setengah ukurannya, dan ia pergi bersama isiannya: titik terang
+tidak cocok di atas tint.
 
 Stage memutarnya: sebuah pointer memilih setiap opsi bergantian, dan catatan di bawahnya mengikuti
 nilainya. Render pertama tidak beranimasi, jadi nilai yang sudah ada langsung tampil.
@@ -95,10 +96,10 @@ memilih opsi kedua di grup `md` setiap tema, lalu opsi pertama lagi.
 
 | State | Penandanya |
 | --- | --- |
-| Mati | Well, dengan tepi 1 px berkontras 3:1 |
-| Aktif | Warna utama dengan tepi primary, dan titik |
-| Hover | Highlight Glide di baris |
-| Ditahan | Lingkaran mengecil ke 0,97; yang mati memakai isian ditekan dan tepinya tetap, yang aktif menggelap |
+| Mati | Tint 10% dari `--ow-fg`, tanpa tepi |
+| Aktif | Warna utama dengan sorot primary, dan titik |
+| Hover | Highlight Glide di baris, dan tint lingkaran 13% |
+| Ditahan | Lingkaran mengecil ke 0,97; yang mati memakai tint 16%, yang aktif menggelap |
 | Disabled | Lingkaran pudar dan label redup; tombol panah dan Glide melewatinya |
 | Read-only | Tampil seperti biasa dan mengabaikan tekanan; Glide melewatinya |
 | Fokus keyboard | Ring 2 px, berjarak 2 px, di sekeliling lingkaran |
@@ -120,13 +121,13 @@ pointer memindahkan fokus ke radio tanpa menampilkan ring. Di dalam `<form>`, `n
 lewat input tersembunyi dari Base UI.
 
 Dengan `prefers-reduced-motion`, tidak ada yang bergerak: lingkaran yang ditahan hanya berganti isian,
-dan titiknya memudar masuk. Di forced colors (Windows High Contrast), lingkaran tetap punya tepi yang
+dan titiknya memudar masuk. Dengan `prefers-contrast: more`, lingkaran mendapat tepi 1 px `--ow-edge`. Di forced colors (Windows High Contrast), lingkaran tetap punya tepi yang
 terlihat, dan yang aktif diisi `Highlight` dengan titik `HighlightText`. Di RTL, lingkaran berada di
 kanan.
 
 ## Kustomisasi [#customization]
 
-Kontrol stage terbuka: ukuran, tata letak, tanda, serta warna aktif dan well. Begitu kamu mengubah tata
+Kontrol stage terbuka: ukuran, tata letak, tanda, serta warna aktif dan tint. Begitu kamu mengubah tata
 letak atau memilih warna, CSS-nya ada di tab tersendiri pada laci kode. Ada tiga jalan masuk, dan
 semuanya bisa digabung.
 
@@ -135,13 +136,10 @@ seperti `.settings`.
 
 | Token tema | Fungsi |
 | --- | --- |
-| `--ow-well-bg` | Lingkaran saat mati |
-| `--ow-edge` | Tepi 1 px-nya saat mati |
+| `--ow-fg` | Label, dan tint lingkaran saat mati: 10%, 13% saat hover, 16% saat ditahan |
 | `--ow-accent` | Lingkaran saat aktif |
-| `--ow-primary-shadow` | Tepinya saat aktif |
+| `--ow-primary-shadow` | Sorot atasnya saat aktif |
 | `--ow-on-accent` | Titik, atau glyph milikmu |
-| `--ow-pressed-bg` | Lingkaran mati saat ditahan |
-| `--ow-fg` | Label |
 | `--ow-muted` | Label disabled |
 | `--ow-focus` | Ring fokus keyboard |
 | `--ow-hover` | Highlight hover (Glide) |

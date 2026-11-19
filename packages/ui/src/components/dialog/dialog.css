@@ -1,7 +1,7 @@
 @layer owsem.tokens, owsem.components;
 
 /*
- * A modal window centered on the screen: the panel material with the popup shadow, over a scrim.
+ * A modal window centered on the screen: the raised fill with the popup shadow, over a scrim.
  * It fades in and grows from its own middle in 250 ms, without a translate to keep it there. Each
  * rule weighs one class, so a class of yours sets the width or the padding, or makes it a sheet.
  */
@@ -53,11 +53,10 @@
 
   /*
    * Auto margins center it, in either text direction, and leave the transform to the motion. It
-   * stays 16px inside the screen and scrolls inside itself. The radius is a button's plus the
-   * padding around it (FR-10b).
+   * stays 16px inside the screen and scrolls inside itself. Its radius is the one radius (TK-8).
    */
   .ow-dialog__popup {
-    --_bg: var(--ow-panel);
+    --_bg: var(--ow-raised-bg);
     --_shadow: var(--ow-popup-shadow);
     --_fg: var(--ow-fg);
     --_muted: var(--ow-muted);
@@ -71,7 +70,7 @@
     max-block-size: calc(100% - 32px);
     margin: auto;
     padding: var(--_p);
-    border-radius: calc(var(--ow-radius) + var(--_p));
+    border-radius: var(--ow-radius);
     /* Invisible until forced colors draw it as the edge (DP-8). */
     outline: 1px solid transparent;
     outline-offset: -1px;
@@ -139,6 +138,13 @@
 
   .ow-dialog__description:where(:not(:last-child)) {
     margin-block-end: var(--_p);
+  }
+
+  /* More contrast asked for: a ring around the popup. */
+  @media (prefers-contrast: more) {
+    .ow-dialog__popup {
+      --_shadow: var(--ow-popup-shadow), 0 0 0 1px var(--ow-edge);
+    }
   }
 
   /* FR-20: it fades, without growing or stepping back. */

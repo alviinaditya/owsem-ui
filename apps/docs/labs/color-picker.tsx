@@ -225,8 +225,8 @@ const colorPickerLab = defineLab({
       name: "Root",
       selector: ".ow-color-picker",
       note: {
-        id: "Panel datar dengan tepi tegas. Token tema yang dipasang di sini hanya berlaku untuknya.",
-        en: "The panel: a flat fill with a crisp edge. Theme tokens set here apply to it alone.",
+        id: "Panel datar tanpa tepi dan bayangan. Token tema yang dipasang di sini hanya berlaku untuknya.",
+        en: "The panel: a flat fill with no edge or shadow. Theme tokens set here apply to it alone.",
       },
       tokens: {
         "--ow-panel": "--_bg",
@@ -247,8 +247,8 @@ const colorPickerLab = defineLab({
       name: "Thumb",
       selector: ".ow-color-picker__area .ow-color-picker__thumb",
       note: {
-        id: "Cincin warna bertepi gelap 1px; memadat saat ditekan, memantul saat dilepas.",
-        en: "A ring with a 1px dark edge around the color; compacts when pressed, springs back.",
+        id: "Cincin warna dengan garis gelap 1px agar terbaca di atas warna apa pun; memadat saat ditekan, memantul saat dilepas.",
+        en: "A ring with a 1px dark line so it reads on any color; compacts when pressed, springs back.",
       },
     },
     {
@@ -271,10 +271,10 @@ const colorPickerLab = defineLab({
       name: "EyeDropper",
       selector: ".ow-color-picker__tool",
       note: {
-        id: "Mengambil warna dari layar; hanya muncul di browser yang punya EyeDropper API.",
-        en: "Picks a color off the screen; shown only where the browser has the EyeDropper API.",
+        id: "Mengambil warna dari layar, dengan tint tuts yang sama dengan Format; hanya muncul di browser yang punya EyeDropper API.",
+        en: "Picks a color off the screen, with the same key tint as Format; shown only where the browser has the EyeDropper API.",
       },
-      tokens: { "--ow-raised-bg": "--_key" },
+      tokens: { "--ow-fg": "--_key" },
     },
     {
       name: "Preview",
@@ -288,26 +288,26 @@ const colorPickerLab = defineLab({
       name: "Format",
       selector: ".ow-color-picker__format",
       note: {
-        id: "Berganti antara kolom HEX, RGB, dan HSL.",
-        en: "Switches between the HEX, RGB, and HSL fields.",
+        id: "Berganti antara kolom HEX, RGB, dan HSL. Tint 9% dari warna teks, naik saat hover dan ditekan.",
+        en: "Switches between the HEX, RGB, and HSL fields. A 9% tint of the text color, stepping up on hover and press.",
       },
-      tokens: { "--ow-raised-bg": "--_key" },
+      tokens: { "--ow-fg": "--_key" },
     },
     {
       name: "Field",
       selector: ".ow-color-picker__field",
       note: {
-        id: "Kolom datar bertepi 3:1. Angka berlaku saat diketik; hex saat Enter atau blur.",
-        en: "A flat field with a 3:1 edge. Numbers apply as you type; hex on Enter or blur.",
+        id: "Kolom dengan isian 6% dari warna teks tanpa tepi, 9% saat hover. Angka berlaku saat diketik; hex saat Enter atau blur.",
+        en: "A field with a 6% tint of the text color and no edge, 9% on hover. Numbers apply as you type; hex on Enter or blur.",
       },
-      tokens: { "--ow-well-bg": "--_well", "--ow-edge": "--_edge" },
+      tokens: { "--ow-fg": "--_field" },
     },
     {
       name: "Swatches",
       selector: ".ow-color-picker__swatches",
       note: {
-        id: "Toggle Group dari Base UI di bawah garis terukir; yang cocok diberi centang.",
-        en: "A Base UI Toggle Group under an etched line; the match carries a check.",
+        id: "Toggle Group dari Base UI di bawah satu garis tipis; yang cocok diberi centang.",
+        en: "A Base UI Toggle Group under a hairline; the match carries a check.",
       },
     },
   ],

@@ -12,11 +12,11 @@ Gulir untuk mulai tur; stage mengikuti setiap bagian.
 
 ## Menyalin [#copying]
 
-Berikan teksnya sebagai `value`, atau fungsi yang mengembalikannya, yang dibaca saat tombol
-ditekan: `value={() => editor.getValue()}`. Tekanan menulisnya dengan Clipboard API; begitu browser
+Berikan teksnya sebagai `value`, atau fungsi yang mengembalikannya, yang dibaca saat tombol ditekan:
+`value={() => editor.getValue()}`. Tekanan menulisnya dengan Clipboard API; begitu browser
 mengonfirmasi, ikon salin berubah jadi centang (Icon Morph), centangnya menggambar garisnya, dan
-`onCopy` menerima teksnya. Setelah `timeout` (1600 ms) ia kembali. Tekanan berikutnya memulai
-waktunya dari awal.
+`onCopy` menerima teksnya. Setelah `timeout` (1600 ms) ia kembali. Sampai saat itu ia sibuk: ia
+membawa `aria-disabled="true"`, tanpa tampilan disabled, dan tekanan berikutnya tidak menyalin lagi.
 
 Kalau browser menolak, atau tidak punya Clipboard API (di luar secure context, misalnya `http`
 biasa), tombolnya tidak menampilkan apa pun dan `onError` menerima alasannya, jadi Anda bisa
@@ -29,10 +29,13 @@ untuk menyalin link-nya.
 
 ## Ikon atau label [#label]
 
-Sendirian ia berupa ikon, dinamai oleh labelnya (`aria-label="Copy"`), sepersegi IconButton.
-`showLabel` menaruh katanya di samping ikon: Salin, lalu Tersalin. Kedua kata berbagi satu sel, jadi
-lebar tombolnya tetap dan tidak ada yang bergeser di sekitarnya; kata yang tersembunyi tidak dibaca.
-`labels` menerjemahkan keduanya, seperti yang dilakukan docs ini dalam bahasa Indonesia.
+Sendirian ia berupa ikon, dinamai oleh labelnya (`aria-label="Copy"`), sepersegi IconButton, dengan
+Tooltip dari pustaka ini: ia berkata Salin di bawah pointer dan saat fokus keyboard, berganti
+menjadi Tersalin saat ditekan, tetap terbuka selama centangnya tampil, dan tertutup saat ikonnya
+kembali. `showLabel` justru menaruh katanya di samping ikon, tanpa Tooltip: Salin, lalu Tersalin.
+Kedua kata berbagi satu sel, jadi lebar tombolnya tetap dan tidak ada yang bergeser di sekitarnya;
+kata yang tersembunyi tidak dibaca. `labels` menerjemahkan keduanya, seperti yang dilakukan docs ini
+dalam bahasa Indonesia.
 
 Stage menampilkan labelnya, di tombol outline, lalu menyalin lagi.
 
@@ -44,10 +47,11 @@ token-nya.
 
 | Bagian | Elemen | Catatan |
 | --- | --- | --- |
-| <Part name="Root" /> | `button.ow-button.ow-copy-button` | Sebuah Button: `data-variant`, `data-size`, `data-icon-only` tanpa label, dan `data-copied` selama menampilkan Tersalin. Ref diteruskan ke sini |
+| <Part name="Root" /> | `button.ow-button.ow-copy-button` | Sebuah Button: `data-variant`, `data-size`, `data-icon-only` tanpa label, serta `data-copied` dan `aria-disabled="true"` selama menampilkan Tersalin. Ref diteruskan ke sini |
 | <Part name="Icon" /> | `svg.ow-copy-button__icon` | Salin, atau centang (`.ow-copy-button__check`), di slot ikon Button, ditukar oleh Icon Morph |
 | <Part name="Label" /> | `span.ow-copy-button__label` | Dengan `showLabel`: kedua kata (`__label-text`), yang tampil dengan `data-visible` |
 | Status | `span.ow-copy-button__status` | `role="status"` setelah tombol, tersembunyi secara visual: berisi Tersalin selama tampil |
+| Tooltip | `div.ow-tooltip__popup` | Ikon saja: popup Tooltip, di dalam portal. Salin, lalu Tersalin selama tampil |
 
 ## State dan varian [#states]
 
@@ -56,18 +60,21 @@ tombol outline, masing-masing siap dan tersalin.
 
 | State | Yang menandainya |
 | --- | --- |
-| Siap | Ikon salin, dan Salin kalau labelnya tampil |
-| Tersalin | Centang, Tersalin, `data-copied`, dan teks region status, selama `timeout` |
+| Siap | Ikon salin, dan Salin kalau labelnya tampil; ikon saja, Tooltip berkata Salin saat hover dan fokus |
+| Tersalin | Centang, Tersalin (di Tooltip, bila ikon saja), `data-copied`, `aria-disabled="true"`, dan teks region status, selama `timeout`; tekanan tidak berpengaruh |
 | Ditolak | Tidak ada yang berubah; `onError` menerima alasannya |
 
 Copy Button adalah komponen Owsem (Kinetic): ikonnya bertukar dengan spring settle, dan centangnya
-juga tergambar dengannya. Tanpa glow, dan tidak ada yang berjalan di antara dua salinan.
+juga tergambar dengannya; `duration` mengatur lama keduanya. Tanpa glow, dan tidak ada yang berjalan
+di antara dua salinan.
 
 ## Keyboard dan aksesibilitas [#keyboard]
 
 Ia `button` native: Tab mencapainya, dan Enter atau Spasi menyalin. Namanya tetap sama selama
 menampilkan Tersalin; region status yang mengumumkan salinannya, jadi pembaca layar mendengarnya
-sekali. Dengan label, namanya adalah kata yang tampil. Ikon-ikonnya `aria-hidden`.
+sekali. Dengan label, namanya adalah kata yang tampil. Ikon-ikonnya `aria-hidden`. Selama
+menampilkan Tersalin ia `aria-disabled`, jadi terbaca tidak tersedia sampai siap lagi, dan fokusnya
+tetap. Tooltip hanya mengulang nama dan status, jadi tidak ada yang bergantung padanya.
 
 Dengan `prefers-reduced-motion`, ikonnya hanya crossfade dan centangnya langsung ada. Di forced
 colors (Windows High Contrast), Button menggambar tepinya dan ikonnya memakai warna teksnya.
@@ -80,7 +87,8 @@ Copy Button menerima semua prop Button kecuali ikon dan children, dan membaca to
 
 | Token tema | Fungsi |
 | --- | --- |
-| `--ow-spring-settle`, `--ow-spring-settle-duration` | Pertukaran ikon dan centang yang tergambar |
+| `--ow-spring-settle`, `--ow-spring-settle-duration` | Pertukaran ikon dan centang yang tergambar; `duration` mengatur lamanya di satu tombol |
+| `--ow-tooltip-bg`, `--ow-tooltip-fg` | Tooltip, bila ikon saja |
 | `--ow-motion-scale` | Seberapa jauh ikon mengecil dan memburam saat bertukar |
 | `--ow-ease-out` | Crossfade saat reduced motion |
 
@@ -104,10 +112,11 @@ berubah akan menyala.
 | `timeout` | `number`, dalam ms | `1600` |
 | `labels` | `{ copy?: string; copied?: string }` | `{ copy: "Copy", copied: "Copied" }` |
 | `showLabel` | `boolean` | `false` |
+| `duration` | `string`, waktu CSS seperti `"300ms"` | Milik spring settle |
 | `onCopy` | `(text: string) => void` | |
 | `onError` | `(error: unknown) => void` | |
 | `variant` | seperti Button | `"ghost"` |
 
 `size`, `disabled`, `className`, `style`, `onClick`, dan prop Button lainnya diteruskan, begitu juga
 ref. Impor dari `owsem-ui/owsem`. Di registry, item-nya bernama `copy-button`, yang ikut memasang
-Button dan Icon Morph.
+Button, Icon Morph, dan Tooltip.

@@ -5,7 +5,7 @@
 @layer theme, base, owsem, components, utilities;
 
 /*
- * The theme tokens as Tailwind theme variables, for bg-ow-panel, shadow-ow-raised, rounded-ow, or
+ * The theme tokens as Tailwind theme variables, for bg-ow-panel, shadow-ow-popup, rounded-ow, or
  * ease-ow-out. `inline` makes each utility read var(--ow-*) itself, so data-theme and a token set
  * on an element still apply. Tailwind writes its own theme variables where it meets the first
  * @theme, hence @layer theme. Not mapped, as no documented Tailwind namespace takes them:
@@ -32,17 +32,12 @@
     --color-ow-raised: var(--ow-raised-bg);
     --color-ow-well: var(--ow-well-bg);
     --color-ow-pressed: var(--ow-pressed-bg);
-    --color-ow-line-dark: var(--ow-line-dark);
-    --color-ow-line-light: var(--ow-line-light);
     --color-ow-tooltip: var(--ow-tooltip-bg);
     --color-ow-tooltip-fg: var(--ow-tooltip-fg);
     --color-ow-backdrop: var(--ow-backdrop);
 
-    --shadow-ow-panel: var(--ow-panel-shadow);
+    --shadow-ow-surface: var(--ow-surface-shadow);
     --shadow-ow-popup: var(--ow-popup-shadow);
-    --shadow-ow-raised: var(--ow-raised-shadow);
-    --shadow-ow-well: var(--ow-well-shadow);
-    --shadow-ow-pressed: var(--ow-pressed-shadow);
     --shadow-ow-primary: var(--ow-primary-shadow);
 
     --radius-ow: var(--ow-radius);

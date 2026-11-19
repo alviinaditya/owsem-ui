@@ -1,6 +1,6 @@
 "use client";
 
-import { Kbd, ScrollArea } from "owsem-ui/base";
+import { ScrollArea } from "owsem-ui/base";
 import {
   type CSSProperties,
   createContext,
@@ -572,6 +572,7 @@ export function LabShell({
               state={state}
               item={item}
               caption={caption}
+              sideBySide={sideBySide}
               docs={{
                 open: sheet !== "closed",
                 toggle: toggleSheet,
@@ -682,32 +683,6 @@ export function Scene({
       )}
       {children}
     </section>
-  );
-}
-
-/**
- * The stage's shortcuts, each with its name, in the page header: only the ones this Lab has (R
- * needs a scene with an animation). They work while focus is in the stage (WCAG 2.1.4), and a
- * click anywhere on the stage puts it there.
- */
-export function StageShortcuts() {
-  const { labels, parts, playable } = useLab();
-  const keys = [
-    ...(parts.length ? [["I", labels.inspect]] : []),
-    ["T", labels.theme],
-    ["P", labels.controls],
-    ["C", labels.code],
-    ...(playable.size ? [["R", labels.replay]] : []),
-  ];
-  return (
-    <p className="lab-hint">
-      <span className="lab-hint-lead">{labels.shortcuts}</span>
-      {keys.map(([key, name]) => (
-        <span key={key} className="lab-hint-key">
-          <Kbd>{key}</Kbd> {name}
-        </span>
-      ))}
-    </p>
   );
 }
 

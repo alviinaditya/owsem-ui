@@ -16,7 +16,7 @@ const Glyph = () => (
   </svg>
 );
 
-/** A formatting toolbar: two toggles, a groove, a button, a disabled button, a link, a field. */
+/** A formatting toolbar: two toggles, a separator, a button, a disabled button, a link, a field. */
 function Editor(props: Partial<Toolbar.ToolbarRootProps>) {
   return (
     <Toolbar.Root aria-label="Formatting" {...props}>
@@ -66,6 +66,13 @@ async function pointerAway() {
   spot.remove();
 }
 
+/** The field's tint at rest and hovered, an on Toggle's tints, and the wrapper's surface shadow. */
+const REST = "color-mix(in oklab, var(--ow-fg) 6%, transparent)";
+const HOVER = "color-mix(in oklab, var(--ow-fg) 9%, transparent)";
+const ON = "color-mix(in oklab, var(--ow-accent) 14%, transparent)";
+const ON_HOVER = "color-mix(in oklab, var(--ow-accent) 18%, transparent)";
+const SURFACE = "var(--ow-surface-shadow)";
+
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const focused = () => document.activeElement?.textContent || document.activeElement?.ariaLabel;
 
@@ -77,9 +84,9 @@ describe("Toolbar", () => {
     expect(bar.getAttribute("aria-orientation")).toBe("horizontal");
     expect(bar.getAttribute("aria-label")).toBe("Formatting");
     expect(q(".ow-toolbar__group").getAttribute("role")).toBe("group");
-    const groove = q(".ow-toolbar__separator");
-    expect(groove.getAttribute("role")).toBe("separator");
-    expect(groove.getAttribute("aria-orientation")).toBe("vertical");
+    const line = q(".ow-toolbar__separator");
+    expect(line.getAttribute("role")).toBe("separator");
+    expect(line.getAttribute("aria-orientation")).toBe("vertical");
     expect(q(".ow-toolbar__link").tagName).toBe("A");
     expect(q(".ow-toolbar__input").tagName).toBe("INPUT");
     expect(screen.container.querySelectorAll('[aria-pressed="true"]').length).toBe(1);
@@ -109,7 +116,7 @@ describe("Toolbar", () => {
     expect(document.activeElement?.getAttribute("aria-label")).toBe("Search");
   });
 
-  test("a vertical toolbar moves with Up and Down, its grooves across it", async () => {
+  test("a vertical toolbar moves with Up and Down, its separators across it", async () => {
     const { q } = await mount(<Editor orientation="vertical" />);
     expect(q(".ow-toolbar__separator").getAttribute("aria-orientation")).toBe("horizontal");
     expect(getComputedStyle(q(".ow-toolbar")).flexDirection).toBe("column");
@@ -128,16 +135,12 @@ describe("Toolbar", () => {
     expect(bold.hasAttribute("data-icon-only")).toBe(true);
     await userEvent.click(bold);
     expect(bold.getAttribute("aria-pressed")).toBe("true");
-    // Clicked, it is still under the pointer: the raised key, tinted, never the item's hover tint.
+    // Clicked, it is still under the pointer: its on tint, never the item's hover tint.
     const style = getComputedStyle(bold);
-    expect(style.backgroundColor).toBe(
-      resolve("color", "color-mix(in oklab, var(--ow-raised-bg), var(--ow-fg) 12%)"),
-    );
-    expect(style.boxShadow).toBe(resolve("box-shadow", "var(--ow-raised-shadow)"));
+    expect(style.backgroundColor).toBe(resolve("color", ON_HOVER));
+    expect(style.boxShadow).toBe("none");
     await pointerAway();
-    expect(getComputedStyle(bold).backgroundColor).toBe(
-      resolve("color", "color-mix(in oklab, var(--ow-raised-bg), var(--ow-fg) 8%)"),
-    );
+    expect(getComputedStyle(bold).backgroundColor).toBe(resolve("color", ON));
   });
 
   test("items take the toolbar's size unless they set their own (FR-3)", async () => {
@@ -199,31 +202,44 @@ describe("Toolbar", () => {
     const bar = q(".ow-toolbar");
     const share = q<HTMLButtonElement>(".ow-toolbar__button:not(.ow-toggle)");
     const field = q(".ow-toolbar__input");
-    const groove = q(".ow-toolbar__separator");
+    const line = q(".ow-toolbar__separator");
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
       expect(getComputedStyle(bar).backgroundColor).toBe(resolve("color", "var(--ow-panel)"));
-      expect(getComputedStyle(bar).boxShadow).toBe(resolve("box-shadow", "var(--ow-panel-shadow)"));
+      expect(getComputedStyle(bar).boxShadow).toBe(resolve("box-shadow", SURFACE));
       expect(getComputedStyle(share).backgroundColor).toBe("rgba(0, 0, 0, 0)");
       expect(getComputedStyle(share).color).toBe(resolve("color", "var(--ow-muted)"));
-      expect(getComputedStyle(field).backgroundColor).toBe(resolve("color", "var(--ow-well-bg)"));
-      // A flat well with a crisp 3:1 edge (DP-6).
-      expect(getComputedStyle(field).boxShadow).toBe(
-        resolve("box-shadow", "inset 0 0 0 1px var(--ow-edge), var(--ow-well-shadow)"),
+      // A tint of the text color, with no shadow or edge.
+      expect(getComputedStyle(field).backgroundColor).toBe(resolve("color", REST));
+      expect(getComputedStyle(field).boxShadow).toBe("none");
+      // One hairline between groups.
+      expect(getComputedStyle(line).borderInlineStartWidth).toBe("1px");
+      expect(getComputedStyle(line).borderInlineStartColor).toBe(
+        resolve("color", "var(--ow-line)"),
       );
-      expect(getComputedStyle(groove).borderInlineStartColor).toBe(
-        resolve("color", "var(--ow-line-dark)"),
-      );
-      expect(getComputedStyle(groove).borderInlineEndColor).toBe(
-        resolve("color", "var(--ow-line-light)"),
-      );
+      expect(getComputedStyle(line).borderInlineEndWidth).toBe("0px");
     }
     await userEvent.hover(share);
     expect(getComputedStyle(share).backgroundColor).toBe(resolve("color", "var(--ow-hover)"));
     expect(getComputedStyle(share).color).toBe(resolve("color", "var(--ow-fg)"));
   });
 
-  test("a press goes in to 0.97 in the pressed material, then lets go (DP-4)", async () => {
+  test("hover tints the field's fill, and more contrast draws its edge", async () => {
+    onTestFinished(() => commands.setContrast("no-preference"));
+    const { q } = await mount();
+    const field = q<HTMLInputElement>(".ow-toolbar__input");
+    await pointerAway();
+    expect(getComputedStyle(field).backgroundColor).toBe(resolve("color", REST));
+    await userEvent.hover(field);
+    expect(getComputedStyle(field).backgroundColor).toBe(resolve("color", HOVER));
+    await pointerAway();
+    await commands.setContrast("more");
+    expect(getComputedStyle(field).boxShadow).toBe(
+      resolve("box-shadow", "inset 0 0 0 1px var(--ow-edge)"),
+    );
+  });
+
+  test("a press goes in to 0.97 on the pressed fill, then lets go (DP-4)", async () => {
     const { q } = await mount();
     const share = q<HTMLButtonElement>(".ow-toolbar__button:not(.ow-toggle)");
     await userEvent.hover(share);
@@ -231,9 +247,7 @@ describe("Toolbar", () => {
     await wait(150);
     expect(getComputedStyle(share).transform).toBe("matrix(0.97, 0, 0, 0.97, 0, 0)");
     expect(getComputedStyle(share).backgroundColor).toBe(resolve("color", "var(--ow-pressed-bg)"));
-    expect(getComputedStyle(share).boxShadow).toBe(
-      resolve("box-shadow", "var(--ow-pressed-shadow)"),
-    );
+    expect(getComputedStyle(share).boxShadow).toBe("none");
     await commands.mouse("up");
     expect(getComputedStyle(share).transitionDuration).toBe("0.573s");
     await settle();
@@ -285,23 +299,24 @@ describe("Toolbar", () => {
   test("a theme token set on it changes it alone (TK-9)", async () => {
     const tokens = {
       "--ow-panel": "rgb(1, 2, 3)",
-      "--ow-panel-shadow": "none",
       "--ow-muted": "rgb(4, 5, 6)",
-      "--ow-well-bg": "rgb(7, 8, 9)",
-      "--ow-line-dark": "rgb(255, 0, 0)",
+      "--ow-fg": "rgb(7, 8, 9)",
+      "--ow-line": "rgb(255, 0, 0)",
     } as CSSProperties;
     const { q } = await mount(<Editor style={tokens} />);
     await pointerAway();
     expect(getComputedStyle(q(".ow-toolbar")).backgroundColor).toBe("rgb(1, 2, 3)");
-    expect(getComputedStyle(q(".ow-toolbar")).boxShadow).toBe("none");
+    expect(getComputedStyle(q(".ow-toolbar")).boxShadow).toBe(resolve("box-shadow", SURFACE));
     expect(getComputedStyle(q(".ow-toolbar__button:not(.ow-toggle)")).color).toBe("rgb(4, 5, 6)");
-    expect(getComputedStyle(q(".ow-toolbar__input")).backgroundColor).toBe("rgb(7, 8, 9)");
+    expect(getComputedStyle(q(".ow-toolbar__input")).backgroundColor).toBe(
+      resolve("color", REST, q(".ow-toolbar")),
+    );
     expect(getComputedStyle(q(".ow-toolbar__separator")).borderInlineStartColor).toBe(
       "rgb(255, 0, 0)",
     );
   });
 
-  test("keeps its edges, items, and grooves in forced colors (DP-8)", async () => {
+  test("keeps its edges, items, and separators in forced colors (DP-8)", async () => {
     onTestFinished(() => commands.setForcedColors("none"));
     const { q } = await mount();
     await commands.setForcedColors("active");
@@ -315,9 +330,9 @@ describe("Toolbar", () => {
       expect(style.outlineWidth, selector).toBe("1px");
       expect(style.outlineColor, selector).not.toBe("rgba(0, 0, 0, 0)");
     }
-    const groove = getComputedStyle(q(".ow-toolbar__separator"));
-    expect(groove.borderInlineStartWidth).toBe("1px");
-    expect(groove.borderInlineStartColor).not.toBe(getComputedStyle(document.body).backgroundColor);
+    const line = getComputedStyle(q(".ow-toolbar__separator"));
+    expect(line.borderInlineStartWidth).toBe("1px");
+    expect(line.borderInlineStartColor).not.toBe(getComputedStyle(document.body).backgroundColor);
   });
 
   test("follows the text direction (FR-16)", async () => {

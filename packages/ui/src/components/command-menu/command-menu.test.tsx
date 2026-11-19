@@ -113,6 +113,11 @@ async function open() {
   await expect.poll(() => input() !== null && document.activeElement === input()).toBe(true);
 }
 
+/** The trigger's tint of the text color, at rest and hovered; a keycap's. */
+const REST = "color-mix(in oklab, var(--ow-fg) 6%, transparent)";
+const HOVER = "color-mix(in oklab, var(--ow-fg) 9%, transparent)";
+const KEY = "color-mix(in oklab, var(--ow-fg) 8%, transparent)";
+
 /** Resolves a color to its computed rgb() inside `scope`. */
 function resolveColor(value: string, scope: Element = document.body): string {
   const probe = document.createElement("span");
@@ -159,6 +164,16 @@ function contrast(a: number[], b: number[]): number {
 const listGroups = () => [...document.querySelectorAll('[role="listbox"] [role="group"]')];
 const type = async (text: string) => {
   await userEvent.keyboard(text);
+};
+
+/** Whether a wheel turned over `target` was held back. */
+const held = (target: Element = document.body) =>
+  !target.dispatchEvent(new WheelEvent("wheel", { deltaY: 100, bubbles: true, cancelable: true }));
+/** The page's own style attributes, which the lock leaves alone. */
+const pageStyle = () => [root.style.cssText, document.body.style.cssText];
+/** Frames to let Base UI write its page lock (it does in a timeout) before looking. */
+const frames = async (n = 6) => {
+  for (let i = 0; i < n; i++) await new Promise((r) => requestAnimationFrame(r));
 };
 
 describe("Command Menu", () => {
@@ -492,7 +507,7 @@ describe("Command Menu", () => {
     expect(refs.shortcut.current?.tagName).toBe("KBD");
   });
 
-  test("crisp-edged glass, a flat well trigger, and crisp keys, in light and dark", async () => {
+  test("raised glass with the popup shadow, a tinted trigger and keys with no shadow, in light and dark", async () => {
     onTestFinished(() => {
       delete root.dataset.theme;
     });
@@ -505,21 +520,45 @@ describe("Command Menu", () => {
       root.dataset.theme = theme;
       const style = getComputedStyle(panel);
       expect(style.backgroundColor).toBe(
-        resolveColor("color-mix(in oklab, var(--ow-panel) 80%, transparent)"),
+        resolveColor("color-mix(in oklab, var(--ow-raised-bg) 80%, transparent)"),
       );
       expect(style.backdropFilter).toBe("blur(24px) saturate(1.6)");
-      // The popup material's crisp edge and drop shadow, nothing softer on top.
+      // The popup shadow, nothing softer on top.
       expect(style.boxShadow).toBe(resolveShadow("var(--ow-popup-shadow)"));
       expect(getComputedStyle(panel, "::before").content).toBe("none");
       expect(getComputedStyle(panel, "::after").content).toBe("none");
       expect(style.color).toBe(resolveColor("var(--ow-fg)"));
-      expect(getComputedStyle(trigger).backgroundColor).toBe(resolveColor("var(--ow-well-bg)"));
-      expect(getComputedStyle(trigger).boxShadow).toBe(
-        resolveShadow("inset 0 0 0 1px var(--ow-edge), var(--ow-well-shadow)"),
-      );
-      expect(getComputedStyle(key).backgroundColor).toBe(resolveColor("var(--ow-raised-bg)"));
-      expect(getComputedStyle(key).boxShadow).toBe(resolveShadow("var(--ow-raised-shadow)"));
+      expect(getComputedStyle(trigger).backgroundColor).toBe(resolveColor(REST));
+      expect(getComputedStyle(trigger).boxShadow).toBe("none");
+      // The shortcut is a Kbd: a small tinted key.
+      expect(getComputedStyle(key).backgroundColor).toBe(resolveColor(KEY));
+      expect(getComputedStyle(key).boxShadow).toBe("none");
     }
+  });
+
+  test("hover tints the trigger's fill, focus adds the ring, and more contrast draws the edge", async () => {
+    onTestFinished(() => commands.setContrast("no-preference"));
+    const screen = await render(
+      <>
+        <Menu />
+        <p>Away</p>
+      </>,
+    );
+    const trigger = document.querySelector(".ow-command-menu__trigger") as HTMLElement;
+    await userEvent.hover(screen.getByText("Away"));
+    expect(getComputedStyle(trigger).backgroundColor).toBe(resolveColor(REST));
+    await userEvent.hover(trigger);
+    expect(getComputedStyle(trigger).backgroundColor).toBe(resolveColor(HOVER));
+    await userEvent.hover(screen.getByText("Away"));
+    await userEvent.tab();
+    expect(document.activeElement).toBe(trigger);
+    expect(getComputedStyle(trigger).boxShadow).toBe("none");
+    expect(getComputedStyle(trigger).outlineWidth).toBe("2px");
+    expect(getComputedStyle(trigger).outlineColor).toBe(resolveColor("var(--ow-focus)"));
+    await commands.setContrast("more");
+    expect(getComputedStyle(trigger).boxShadow).toBe(
+      resolveShadow("inset 0 0 0 1px var(--ow-edge)"),
+    );
   });
 
   test("the glass turns opaque under prefers-reduced-transparency", async () => {
@@ -529,7 +568,7 @@ describe("Command Menu", () => {
     await render(<Menu defaultOpen />);
     await expect.poll(popup).not.toBeNull();
     const style = getComputedStyle(popup() as Element);
-    expect(style.backgroundColor).toBe(resolveColor("var(--ow-panel)"));
+    expect(style.backgroundColor).toBe(resolveColor("var(--ow-raised-bg)"));
     expect(style.backdropFilter).toBe("none");
     expect(style.boxShadow).toBe(resolveShadow("var(--ow-popup-shadow)"));
   });
@@ -540,7 +579,7 @@ describe("Command Menu", () => {
         defaultOpen
         popupStyle={
           {
-            "--ow-panel": "rgb(255, 0, 0)",
+            "--ow-raised-bg": "rgb(255, 0, 0)",
             "--ow-popup-shadow": "none",
             "--ow-radius": "2px",
             inlineSize: "400px",
@@ -552,14 +591,16 @@ describe("Command Menu", () => {
     const style = getComputedStyle(popup() as Element);
     expect(style.backgroundColor).toBe(resolveColor("color-mix(in oklab, red 80%, transparent)"));
     expect(style.boxShadow).toBe("none");
-    // Items take the radius, and the panel adds its 6px padding.
-    expect(style.borderTopLeftRadius).toBe("8px");
-    expect(getComputedStyle(option("New file")).borderTopLeftRadius).toBe("2px");
+    // The panel takes the radius, and its items that less the 6px padding, here none (TK-8).
+    expect(style.borderTopLeftRadius).toBe("2px");
+    expect(getComputedStyle(option("New file")).borderTopLeftRadius).toBe("0px");
     // The width is the Popup's own inline-size.
     expect((popup() as HTMLElement).getBoundingClientRect().width).toBe(400);
     // The Trigger, outside the Popup, keeps the theme's.
     const trigger = document.querySelector(".ow-command-menu__trigger") as Element;
-    expect(getComputedStyle(trigger).borderTopLeftRadius).toBe("8px");
+    expect(getComputedStyle(trigger).borderTopLeftRadius).toBe(
+      getComputedStyle(document.documentElement).getPropertyValue("--ow-radius").trim(),
+    );
   });
 
   test("the scrim is the theme's backdrop, and a key's corners half the radius", async () => {
@@ -573,7 +614,8 @@ describe("Command Menu", () => {
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
       expect(getComputedStyle(backdrop).backgroundColor).toBe(resolveColor("var(--ow-backdrop)"));
-      expect(getComputedStyle(key).borderTopLeftRadius).toBe("4px");
+      const radius = getComputedStyle(document.documentElement).getPropertyValue("--ow-radius");
+      expect(getComputedStyle(key).borderTopLeftRadius).toBe(`${Number.parseFloat(radius) / 2}px`);
     }
   });
 
@@ -590,14 +632,20 @@ describe("Command Menu", () => {
     expect(getComputedStyle(scrim()).backdropFilter).toBe("none");
   });
 
-  test("the search row's line is the footer's etched line, while the input has focus too", async () => {
+  test("the search row's line is the footer's hairline, while the input has focus too", async () => {
     await render(<Menu />);
     await open();
     const field = getComputedStyle(document.querySelector(".ow-command-menu__field") as Element);
     const footer = getComputedStyle(document.querySelector(".ow-command-menu__footer") as Element);
-    expect(field.borderBottomColor).toBe(resolveColor("var(--ow-line-dark)"));
-    expect(field.borderBottomColor).toBe(footer.borderTopColor);
-    expect(field.boxShadow).toBe(resolveShadow("0 1px 0 var(--ow-line-light)"));
+    expect(field.borderBottomWidth).toBe("1px");
+    expect(field.borderBottomColor).toBe(resolveColor("var(--ow-line)"));
+    expect([footer.borderTopWidth, footer.borderTopColor]).toEqual([
+      "1px",
+      field.borderBottomColor,
+    ]);
+    // One line each, with no second line drawn beside it.
+    expect(field.boxShadow).toBe("none");
+    expect(footer.boxShadow).toBe("none");
   });
 
   test("an edge of the list fades while there is more that way, as far as it has scrolled", async () => {
@@ -738,5 +786,20 @@ describe("Command Menu", () => {
     await render(<Menu defaultOpen />);
     await expect.poll(() => glide()?.hasAttribute("data-visible")).toBe(true);
     expect(getComputedStyle(glide() as Element).transitionProperty).toBe("opacity");
+  });
+
+  test("open, it holds the page without styling it; shut, it lets go", async () => {
+    const before = pageStyle();
+    await render(<Menu />);
+    await userEvent.keyboard("{Control>}k{/Control}");
+    await expect.poll(() => document.querySelector(".ow-command-menu__popup")).not.toBeNull();
+    await frames();
+    expect(pageStyle()).toEqual(before);
+    expect(held()).toBe(true);
+    await userEvent.keyboard("{Escape}");
+    await expect.poll(() => document.querySelector(".ow-command-menu__popup")).toBeNull();
+    await frames();
+    expect(held()).toBe(false);
+    expect(pageStyle()).toEqual(before);
   });
 });

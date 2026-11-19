@@ -74,6 +74,8 @@ function Cards({
   const glide = useGlide<HTMLDivElement>({
     items: ".component-card",
     axis: view === "list" ? "y" : "xy",
+    // Only across the 8px between two cards' hover boxes; an empty grid cell lights nothing.
+    maxDistance: 8,
     gapClick: false,
   });
   return (
@@ -116,39 +118,43 @@ export function ComponentIndex({
   const shown = (family: Family) => filter === "all" || family === filter;
   return (
     <>
-      {/* Each group's name sits inside its track, before the choices. */}
+      {/* Each group's name sits before its track. */}
       <div className="index-controls">
-        <ToggleGroup.Root
-          aria-labelledby={legend}
-          className="docs-choice filter"
-          value={[filter]}
-          onValueChange={([next]) => next && setFilter(next)}
-        >
+        <div className="index-control">
           <span id={legend} className="filter-legend">
             {labels.legend}
           </span>
-          {FILTERS.map((value) => (
-            <ToggleGroup.Item key={value} value={value}>
-              {labels[value]}
-            </ToggleGroup.Item>
-          ))}
-        </ToggleGroup.Root>
-        <ToggleGroup.Root
-          aria-labelledby={viewLegend}
-          className="docs-choice filter view-picker"
-          value={view ? [view] : []}
-          onValueChange={([next]) => next && chooseView(next)}
-        >
+          <ToggleGroup.Root
+            aria-labelledby={legend}
+            className="docs-choice filter"
+            value={[filter]}
+            onValueChange={([next]) => next && setFilter(next)}
+          >
+            {FILTERS.map((value) => (
+              <ToggleGroup.Item key={value} value={value}>
+                {labels[value]}
+              </ToggleGroup.Item>
+            ))}
+          </ToggleGroup.Root>
+        </div>
+        <div className="index-control">
           <span id={viewLegend} className="filter-legend">
             {labels.view}
           </span>
-          {VIEWS.map((value) => (
-            <ToggleGroup.Item key={value} value={value} data-option={value}>
-              <Icon name={value === "grid" ? "layout-grid" : "list"} size={14} />
-              {labels[value]}
-            </ToggleGroup.Item>
-          ))}
-        </ToggleGroup.Root>
+          <ToggleGroup.Root
+            aria-labelledby={viewLegend}
+            className="docs-choice filter view-picker"
+            value={view ? [view] : []}
+            onValueChange={([next]) => next && chooseView(next)}
+          >
+            {VIEWS.map((value) => (
+              <ToggleGroup.Item key={value} value={value} data-option={value}>
+                <Icon name={value === "grid" ? "layout-grid" : "list"} size={14} />
+                {labels[value]}
+              </ToggleGroup.Item>
+            ))}
+          </ToggleGroup.Root>
+        </div>
       </div>
       {groups.map((group) => {
         const items = group.items.filter((item) => shown(item.family));

@@ -20,8 +20,8 @@ const VARIANTS: ButtonVariant[] = [
 ];
 // FR-11: font size and height per size, at line-height 1.25.
 const SIZES: [ButtonSize, number, number][] = [
-  ["sm", 13, 29.25],
-  ["md", 14, 38.5],
+  ["sm", 13, 32],
+  ["md", 14, 40],
   ["lg", 16, 48],
 ];
 

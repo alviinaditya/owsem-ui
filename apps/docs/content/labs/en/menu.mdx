@@ -6,8 +6,7 @@ import { Part } from "@/components/lab/lab-shell";
 import { ForMode, TokenChip } from "@/components/token-setup";
 
 Menu opens a list of actions from a button: items with icons and shortcuts, checks and choices,
-and submenus, on the panel material with the popup shadow: a crisp 1px edge (in dark, a light line
-inside a dark ring) and a drop shadow, since it floats. Glide lights the item under the pointer.
+and submenus, on the raised material with the popup shadow and no edge, since it floats. Glide lights the item under the pointer.
 Scroll to start the tour; the stage follows each part.
 
 ## Lit by Glide [#glide]
@@ -57,14 +56,15 @@ outlines the other parts on the stage; pick a name, here or on the stage, to see
 | Part | Element | Notes |
 | --- | --- | --- |
 | <Part name="Trigger" /> | Your button | Passed to `render`; `aria-haspopup="menu"` and `aria-expanded` |
-| Positioner | `div.ow-menu__positioner` | 6px from the trigger; a submenu beside its item, first rows in line |
+| Backdrop | `div.ow-menu__backdrop` | A modal menu's, drawn by its Portal: clear, over the whole window, under the popup |
+| Positioner | `div.ow-menu__positioner` | 6px from the trigger's resting box, so a press does not shift the menu; a submenu beside its item, first rows in line |
 | <Part name="Popup" /> | `div.ow-menu__popup` | `role="menu"`, `data-size`, `data-instant` when it skips the animation, and the Glide highlight inside |
 | <Part name="Item" /> | `div.ow-menu__item` | `role="menuitem"` and `data-disabled`; an `svg` first is sized as its icon |
 | <Part name="Shortcut" /> | `kbd` | Last in an item, at its end |
 | <Part name="GroupLabel" /> | `div.ow-menu__group-label` | Names its `Menu.Group` or `Menu.RadioGroup` |
 | <Part name="CheckboxItem" /> | `div.ow-menu__item` | `role="menuitemcheckbox"`, `aria-checked` |
 | <Part name="Indicator" /> | `span.ow-menu__indicator` | A check, or a dot in a RadioItem; `data-checked` or `data-unchecked` |
-| <Part name="Separator" /> | `div.ow-menu__separator` | `role="separator"`, an etched groove |
+| <Part name="Separator" /> | `div.ow-menu__separator` | `role="separator"`, a hairline |
 | <Part name="SubmenuTrigger" /> | `div.ow-menu__item` | `aria-haspopup`, `data-popup-open`, and a chevron |
 | Chevron | `span.ow-menu__chevron` | At a SubmenuTrigger's end, mirrored for right-to-left text |
 
@@ -73,8 +73,8 @@ outlines the other parts on the stage; pick a name, here or on the stage, to see
 ## States and variants [#states]
 
 The stage sets each size in both themes, each menu with an item and its shortcut, a disabled item,
-and a checked one. Items follow Button's `--py` rule with `--py: 0.5em`; the popup's 4px padding
-keeps its corners concentric with theirs.
+and a checked one. Items follow Button's `--py` rule with `--py: 0.5em`. The popup takes
+`--ow-radius`, as every surface does, and its items and Glide take it less the popup's 4px padding.
 
 | Size | Font | Item height | Icon |
 | --- | --- | --- | --- |
@@ -103,11 +103,17 @@ keeps its corners concentric with theirs.
 | A letter | The next item that starts with it |
 
 Screen readers announce the menu, each item's role and state, and the groups by their labels.
-`modal` (true by default) keeps the rest of the page out of reach while the menu is open.
+
+`modal` (true by default) keeps the rest of the page out of reach while the menu is open. A clear
+backdrop takes a press outside, so that press only shuts the menu, and the page holds its scroll.
+OwsemUI holds it without setting `overflow` on the page, which would make the browser draw the
+page's text again while the menu is open: the wheel and the scroll keys still work inside the menu,
+and are held back outside it. Opened by touch, as in Base UI, the page still scrolls; a menu opened
+by hover, and a submenu, are never modal.
 
 With `prefers-reduced-motion`, the menu fades without growing, and Glide fades instead of sliding.
-In forced colors (Windows High Contrast), the popup keeps a 1px edge in the system color, the
-grooves stay, the highlight is an outline in `Highlight`, and the checks follow the text color.
+With `prefers-contrast: more`, the popup gains a 1px ring in `--ow-edge`. In forced colors (Windows High Contrast), the popup keeps a 1px edge in the system color, the
+separators stay, the highlight is an outline in `Highlight`, and the checks follow the text color.
 
 ## Customization [#customization]
 
@@ -119,14 +125,14 @@ the trigger's subtree.
 
 | Theme token | Purpose |
 | --- | --- |
-| `--ow-panel` | Surface |
-| `--ow-popup-shadow` | Edge and shadow |
+| `--ow-raised-bg` | Surface |
+| `--ow-popup-shadow` | Shadow |
+| `--ow-edge` | The ring under `prefers-contrast: more` |
 | `--ow-fg` | Item text |
 | `--ow-muted` | Group labels, shortcuts, and chevrons |
 | `--ow-hover` | The highlight (Glide) |
-| `--ow-line-dark` | Groove's dark line |
-| `--ow-line-light` | Groove's light line |
-| `--ow-radius` | Item corners; the popup's add its 4px padding |
+| `--ow-line` | Separators |
+| `--ow-radius` | The popup's corners; items and Glide take it less the 4px padding |
 | `--ow-focus` | Focus ring |
 
 <ForMode mode="isolated">

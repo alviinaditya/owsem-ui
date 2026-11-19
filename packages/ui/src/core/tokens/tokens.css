@@ -3,15 +3,20 @@
 /*
  * Theme tokens (TK-5). Without data-theme the system theme applies; data-theme="light" or "dark"
  * forces a theme on any subtree. The dark set appears twice and must stay identical (tested).
- * Materials (TK-7) are written in full per theme, never derived from the accent: flat fills with
- * crisp 1px edges drawn as inset shadows (so they add no size), never soft or sunken shadows.
+ * Materials (TK-7) are written in full per theme, never derived from the accent. The look is soft:
+ * a light grey page, with shadow only on wrappers, the containers that hold other content (Toolbar,
+ * Code Block, the Color Picker panel; floating layers use --ow-popup-shadow). A single control has
+ * no shadow: a field, a secondary button, a key, a check, a switch track, or the track of a segmented
+ * control is a tint of the text color, so it reads on the page and on a white card alike. The selected
+ * state is a tint of the accent with accent text; the primary fill has no drop shadow, only a thin
+ * light line inside its top. In dark, a hairline top highlight stands in for a wrapper's shadow.
  * These are the only public tokens (TK-9): components read them without fallbacks, and setting
  * one on any element themes that element and what is inside it.
  */
 @layer owsem.tokens {
-  /* The same in both themes: the control radius (TK-8), motion intensity, and easings. */
+  /* The same in both themes: the surface radius (TK-8), motion intensity, and easings. */
   :root {
-    --ow-radius: 8px;
+    --ow-radius: 16px;
     --ow-motion-scale: 1;
     --ow-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
     --ow-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
@@ -124,41 +129,33 @@
   :root,
   [data-theme="light"] {
     color-scheme: light;
-    --ow-bg: #fafafa;
+    --ow-bg: #f3f4f6;
     --ow-fg: #18181b;
     --ow-muted: #63636b;
-    --ow-accent: #7c6ab8;
+    --ow-accent: #2563eb;
     --ow-on-accent: #ffffff;
-    --ow-focus: #5b4a9a;
-    --ow-line: #e4e4e7;
-    /* A control's boundary where it needs 3:1 (DP-6), such as a field or a checkbox. */
+    --ow-focus: #1d4ed8;
+    --ow-line: #e3e5ea;
+    /* A control's boundary at 3:1, drawn only when more contrast is requested (prefers-contrast). */
     --ow-edge: #82828b;
     /* Hover on quiet controls, and the lit item of a list (Glide). */
-    --ow-hover: rgb(0 0 0 / 0.06);
+    --ow-hover: rgb(0 0 0 / 0.05);
     --ow-good: #1f7a4d;
     --ow-warning: #8a5a00;
     --ow-critical: #b03f2a;
     /* A solid critical fill (the destructive button) and its text; --ow-critical is the text tone. */
     --ow-critical-solid: #b03f2a;
     --ow-on-critical: #ffffff;
-    /* Materials (DP-3): a 1px edge darker than the fill; solid fills add a thin light line inside
-     * their top edge. */
+    /* Materials (DP-3): a surface is a fill with the resting shadow below, no edge; a popup floats
+     * higher, with the larger shadow. */
     --ow-panel: #ffffff;
-    --ow-panel-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.08), 0 1px 2px rgb(0 0 0 / 0.04);
-    --ow-popup-shadow:
-      0 0 0 1px rgb(0 0 0 / 0.08), 0 4px 8px -2px rgb(0 0 0 / 0.06),
-      0 16px 32px -8px rgb(0 0 0 / 0.14);
     --ow-raised-bg: #ffffff;
-    --ow-raised-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.14), 0 1px 0 rgb(0 0 0 / 0.04);
-    --ow-well-bg: #f0f0f2;
-    --ow-well-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.04);
-    --ow-pressed-bg: #f4f4f5;
-    --ow-pressed-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.16);
-    /* The edge of a solid fill: the accent (primary) or the solid critical fill (destructive). */
-    --ow-primary-shadow:
-      inset 0 0 0 1px rgb(0 0 0 / 0.28), inset 0 1.5px 0.75px rgb(255 255 255 / 0.3);
-    --ow-line-dark: #e2e2e6;
-    --ow-line-light: #ffffff;
+    --ow-surface-shadow: 0 1px 2px rgb(0 0 0 / 0.05), 0 4px 14px -4px rgb(0 0 0 / 0.1);
+    --ow-popup-shadow: 0 2px 6px -2px rgb(0 0 0 / 0.08), 0 16px 40px -10px rgb(0 0 0 / 0.2);
+    --ow-well-bg: #e6e8ec;
+    --ow-pressed-bg: #e1e3e8;
+    /* A solid fill (primary, destructive, a checked box): only a thin light line inside its top, no drop. */
+    --ow-primary-shadow: inset 0 1px 0 rgb(255 255 255 / 0.25);
     --ow-tooltip-bg: #18181b;
     --ow-tooltip-fg: #fafafa;
     /* The scrim behind a modal layer. */
@@ -168,39 +165,30 @@
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       color-scheme: dark;
-      --ow-bg: #19191b;
+      --ow-bg: #111113;
       --ow-fg: #ededef;
       --ow-muted: #a1a1a8;
-      --ow-accent: #7a66c4;
+      --ow-accent: #2f6fe8;
       --ow-on-accent: #ffffff;
-      --ow-focus: #d4cbe5;
-      --ow-line: #2e2e32;
+      --ow-focus: #8ab4fa;
+      --ow-line: #2a2a2f;
       --ow-edge: #6e6e76;
-      --ow-hover: rgb(255 255 255 / 0.07);
+      --ow-hover: rgb(255 255 255 / 0.06);
       --ow-good: #8fd9b6;
       --ow-warning: #e8c27a;
       --ow-critical: #f2ab96;
       --ow-critical-solid: #c4473a;
       --ow-on-critical: #ffffff;
-      --ow-panel: #222224;
-      --ow-panel-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07), 0 1px 2px rgb(0 0 0 / 0.3);
+      --ow-panel: #1b1b1f;
       --ow-popup-shadow:
-        inset 0 0 0 1px rgb(255 255 255 / 0.07), 0 0 0 1px rgb(0 0 0 / 0.7),
-        0 16px 32px -8px rgb(0 0 0 / 0.6);
-      --ow-raised-bg: #36363a;
-      --ow-raised-shadow:
-        inset 0 0 0 1px rgb(0 0 0 / 0.8), inset 0 0 0 2px rgb(255 255 255 / 0.06),
-        inset 0 2px 0.75px rgb(255 255 255 / 0.08);
-      --ow-well-bg: #121214;
-      --ow-well-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.03);
-      --ow-pressed-bg: #2c2c2f;
-      --ow-pressed-shadow:
-        inset 0 0 0 1px rgb(0 0 0 / 0.8), inset 0 0 0 2px rgb(255 255 255 / 0.03);
-      --ow-primary-shadow:
-        inset 0 0 0 1px rgb(0 0 0 / 0.35), inset 0 1.5px 0.75px rgb(255 255 255 / 0.6);
-      --ow-line-dark: #0b0b0c;
-      --ow-line-light: #2a2a2d;
-      --ow-tooltip-bg: #36363a;
+        inset 0 1px 0 rgb(255 255 255 / 0.07), 0 2px 6px rgb(0 0 0 / 0.4),
+        0 16px 40px -10px rgb(0 0 0 / 0.7);
+      --ow-raised-bg: #232328;
+      --ow-surface-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 1px 2px rgb(0 0 0 / 0.4);
+      --ow-well-bg: #0c0c0e;
+      --ow-pressed-bg: #2b2b30;
+      --ow-primary-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18);
+      --ow-tooltip-bg: #2b2b30;
       --ow-tooltip-fg: #f4f4f5;
       --ow-backdrop: rgb(0 0 0 / 0.5);
     }
@@ -208,38 +196,30 @@
 
   [data-theme="dark"] {
     color-scheme: dark;
-    --ow-bg: #19191b;
+    --ow-bg: #111113;
     --ow-fg: #ededef;
     --ow-muted: #a1a1a8;
-    --ow-accent: #7a66c4;
+    --ow-accent: #2f6fe8;
     --ow-on-accent: #ffffff;
-    --ow-focus: #d4cbe5;
-    --ow-line: #2e2e32;
+    --ow-focus: #8ab4fa;
+    --ow-line: #2a2a2f;
     --ow-edge: #6e6e76;
-    --ow-hover: rgb(255 255 255 / 0.07);
+    --ow-hover: rgb(255 255 255 / 0.06);
     --ow-good: #8fd9b6;
     --ow-warning: #e8c27a;
     --ow-critical: #f2ab96;
     --ow-critical-solid: #c4473a;
     --ow-on-critical: #ffffff;
-    --ow-panel: #222224;
-    --ow-panel-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07), 0 1px 2px rgb(0 0 0 / 0.3);
+    --ow-panel: #1b1b1f;
     --ow-popup-shadow:
-      inset 0 0 0 1px rgb(255 255 255 / 0.07), 0 0 0 1px rgb(0 0 0 / 0.7),
-      0 16px 32px -8px rgb(0 0 0 / 0.6);
-    --ow-raised-bg: #36363a;
-    --ow-raised-shadow:
-      inset 0 0 0 1px rgb(0 0 0 / 0.8), inset 0 0 0 2px rgb(255 255 255 / 0.06),
-      inset 0 2px 0.75px rgb(255 255 255 / 0.08);
-    --ow-well-bg: #121214;
-    --ow-well-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.03);
-    --ow-pressed-bg: #2c2c2f;
-    --ow-pressed-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.8), inset 0 0 0 2px rgb(255 255 255 / 0.03);
-    --ow-primary-shadow:
-      inset 0 0 0 1px rgb(0 0 0 / 0.35), inset 0 1.5px 0.75px rgb(255 255 255 / 0.6);
-    --ow-line-dark: #0b0b0c;
-    --ow-line-light: #2a2a2d;
-    --ow-tooltip-bg: #36363a;
+      inset 0 1px 0 rgb(255 255 255 / 0.07), 0 2px 6px rgb(0 0 0 / 0.4),
+      0 16px 40px -10px rgb(0 0 0 / 0.7);
+    --ow-raised-bg: #232328;
+    --ow-surface-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 1px 2px rgb(0 0 0 / 0.4);
+    --ow-well-bg: #0c0c0e;
+    --ow-pressed-bg: #2b2b30;
+    --ow-primary-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18);
+    --ow-tooltip-bg: #2b2b30;
     --ow-tooltip-fg: #f4f4f5;
     --ow-backdrop: rgb(0 0 0 / 0.5);
   }

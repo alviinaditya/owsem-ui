@@ -1,28 +1,24 @@
 @layer owsem.tokens, owsem.components;
 
 /*
- * Etched line (depth material): a dark line with a light line beside it. Borders rather than
- * backgrounds, so the line stays visible in forced colors (DP-8).
+ * A hairline in the line color. A border rather than a background, so the line stays visible in
+ * forced colors (DP-8).
  */
 @layer owsem.components {
-  /* Zero thickness keeps the two borders together; flex and grid stretch only the length. */
+  /* Zero thickness; flex and grid stretch only the length. */
   .ow-separator {
-    --_dark: var(--ow-line-dark);
-    --_light: var(--ow-line-light);
     flex: none;
     align-self: stretch;
-    border: 0 solid;
+    border: 0 solid var(--ow-line);
   }
 
   .ow-separator[data-orientation="horizontal"] {
     block-size: 0;
-    border-block-width: 1px;
-    border-block-color: var(--_dark) var(--_light);
+    border-block-start-width: 1px;
   }
 
   .ow-separator[data-orientation="vertical"] {
     inline-size: 0;
-    border-inline-width: 1px;
-    border-inline-color: var(--_dark) var(--_light);
+    border-inline-start-width: 1px;
   }
 }

@@ -52,7 +52,7 @@ stage; pilih sebuah nama, di sini atau di stage, untuk melihat tokennya.
 | --- | --- | --- |
 | <Part name="Root" /> | `div.ow-color-picker` | Panelnya; token tema yang dipasang di sini hanya berlaku untuknya; `data-disabled` |
 | <Part name="Area" /> | `div.ow-color-picker__area` | `role="slider"` dua dimensi, dengan tombolnya sendiri; `data-dragging` selama diseret |
-| <Part name="Thumb" /> | `span.ow-color-picker__thumb` | Cincin berisi warnanya dengan tepi gelap 1px, juga di setiap slider (sebuah `div` dengan `data-dragging`) |
+| <Part name="Thumb" /> | `span.ow-color-picker__thumb` | Cincin berisi warnanya dengan garis gelap 1px, juga di setiap slider (sebuah `div` dengan `data-dragging`) |
 | <Part name="Hue" /> | `div.ow-color-picker__slider` | `Slider` dari Base UI, `data-channel="hue"`; `div.ow-color-picker__control`-nya memuat `div.ow-color-picker__track` |
 | <Part name="Alpha" /> | `div.ow-color-picker__slider` | `Slider` dari Base UI di atas papan catur, `data-channel="alpha"` |
 | <Part name="EyeDropper" /> | `button.ow-color-picker__tool` | Hanya di browser yang punya EyeDropper API |
@@ -65,11 +65,13 @@ stage; pilih sebuah nama, di sini atau di stage, untuk melihat tokennya.
 `div.ow-color-picker__sliders`), dan preview; `div.ow-color-picker__inputs` memuat tombol format dan
 kolom-kolomnya. Ikonnya `svg.ow-color-picker__icon`.
 
-`ColorPickerPopover` menambah trigger, `button.ow-color-picker__trigger` (`Popover.Trigger` dari Base
-UI, dengan `data-size` dan `data-variant`), yang menampilkan `span.ow-color-picker__chip`
+`ColorPickerPopover` menambah trigger, `button.ow-color-picker__trigger` (`Popover.Trigger` dari
+Base UI, dengan `data-size` dan `data-variant`), yang menampilkan `span.ow-color-picker__chip`
 (`data-alpha` bila transparan) dan `span.ow-color-picker__value`, dan popup,
 `div.ow-color-picker__popup` (`Popover.Popup`, sebuah dialog, di dalam
-`div.ow-color-picker__positioner`), yang memuat panelnya.
+`div.ow-color-picker__positioner`), yang memuat panelnya. Popup berjangkar ke kotak trigger saat
+diam, bukan saat ditekan, jadi ia tidak melompat satu piksel perangkat selama trigger memantul
+kembali.
 
 ## State dan varian [#states]
 
@@ -83,6 +85,7 @@ langsung tampil.
 | State | Yang menandainya |
 | --- | --- |
 | Ditekan | Thumb memadat selama digeser lalu memantul kembali; tombol dan contoh warna sedikit mengecil |
+| Kolom | Tint 6% dari warna teks tanpa tepi; 9% saat hover |
 | Fokus keyboard | Cincin 2 px dari `--ow-focus` di sekeliling area, thumb, kolom, atau contoh warna |
 | Contoh warna aktif | Tanda centang, gelap atau terang mengikuti warnanya |
 | Transparan | Papan catur di bawah pratinjau, contoh warna, dan warna di trigger |
@@ -90,8 +93,9 @@ langsung tampil.
 
 Ukurannya mengikuti aturan `--py`: tinggi trigger 29,25, 38,5, atau 48 px, dan jarak warnanya ke
 tepi sama dengan jaraknya ke atas dan bawah. Color Picker adalah komponen Owsem (Tactile): thumb dan
-contoh warna tertekan dengan spring, dan tidak ada yang berpendar. Setiap bagiannya bertepi 1px yang
-tegas, tanpa bayangan lembut atau cekung; hanya popover yang melayang.
+contoh warna tertekan dengan spring, dan tidak ada yang berpendar. Bagian dikenali dari isiannya, tanpa tepi;
+area, track, dan pratinjau menyimpan garis tipis 1px agar terbaca di atas warna apa pun. Hanya popover
+yang melayang.
 
 ## Keyboard dan aksesibilitas [#keyboard]
 
@@ -117,7 +121,7 @@ Indonesia. Huruf format dan kanal (HEX, R, G, B, H, S, L, A) adalah notasi dan t
 Dengan `prefers-reduced-motion`, popover tetap memudar, dan thumb, tombol, serta
 contoh warna tidak mengecil. Di forced colors (Windows High Contrast), area, track, dan contoh warna
 tetap memakai warnanya sendiri di dalam outline warna sistem, fokus memakai `Highlight`, dan contoh
-warna aktif diberi outline `Highlight`. Dari kanan ke kiri, saturasi, rona, dan opasitas naik ke
+warna aktif diberi outline `Highlight`. Dengan `prefers-contrast: more`, kolom mendapat tepi 1px dalam `--ow-edge` dan popover mendapat cincin dengannya. Dari kanan ke kiri, saturasi, rona, dan opasitas naik ke
 arah kiri.
 
 ## Kustomisasi [#customization]
@@ -128,16 +132,12 @@ Picker membaca token tema berikut; pasang di picker, atau di elemen yang membung
 
 | Token tema | Fungsi |
 | --- | --- |
-| `--ow-panel` | Panel, sekaligus kotak terang papan catur |
-| `--ow-line` | Kotak gelap papan catur |
-| `--ow-panel-shadow` | Tepi panel; di popover, `--ow-popup-shadow` |
-| `--ow-well-bg`, `--ow-edge` | Kolom: well datar dengan tepi 3:1 |
-| `--ow-well-shadow` | Trigger: well yang sama tanpa tepi, karena ia tombol |
-| `--ow-raised-bg`, `--ow-raised-shadow` | Eye dropper dan tombol format, sebagai tombol timbul |
-| `--ow-pressed-bg`, `--ow-pressed-shadow` | Kedua tombol itu selama ditekan |
-| `--ow-line-dark`, `--ow-line-light` | Garis terukir di atas contoh warna |
-| `--ow-fg`, `--ow-muted`, `--ow-focus` | Teks, label, dan cincin fokus |
-| `--ow-radius` | Sudut area, kolom, dan tombol; sudut panel dan contoh warna mengikutinya |
+| `--ow-panel` | Panel, tanpa tepi dan bayangan, sekaligus kotak terang papan catur |
+| `--ow-line` | Kotak gelap papan catur, dan garis tipis di atas contoh warna |
+| `--ow-raised-bg`, `--ow-popup-shadow` | Isian dan bayangan popover |
+| `--ow-well-bg` | Trigger: well datar, karena ia tombol |
+| `--ow-fg`, `--ow-muted`, `--ow-focus` | Teks, label, dan cincin fokus; `--ow-fg` juga mewarnai kolom (6%, 9% saat hover) dan tombol eye dropper dan format (9%, 12% saat hover, 15% saat ditahan) |
+| `--ow-radius` | Sudut panel, area, kolom, dan tombol; contoh warna 2px lebih kecil, warna di trigger setengahnya |
 
 <ForMode mode="isolated">
 
@@ -148,7 +148,7 @@ Di mode isolated, nilainya ada di root setiap picker, jadi atur di picker itu se
 
 Lebar (256 px) dan tinggi area (160 px) adalah layout: atur `inline-size` di picker lewat
 `className` atau `style`, dan `block-size` di `.ow-color-picker__area`-nya. Gradien, spektrum rona,
-cincin putih thumb dengan tepi gelapnya, dan centang di contoh warna sama di setiap tema, sehingga
+cincin putih thumb dengan garis gelapnya, dan centang di contoh warna sama di setiap tema, sehingga
 terbaca di warna apa pun. Panel popover di-portal ke body, jadi pasang tokennya di tempat yang
 terbaca oleh popup, misalnya `:root` atau `.ow-color-picker`; tema dan arah trigger-nya ikut
 terbawa dengan sendirinya.

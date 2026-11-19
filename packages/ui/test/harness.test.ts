@@ -134,9 +134,13 @@ describe("light, dark, and system themes (TK-5)", () => {
 
   test("the depth materials and springs are valid CSS (TK-7, FR-21)", () => {
     const tokens = themeOf(root);
-    for (const material of ["panel", "raised", "well", "pressed", "primary"]) {
+    for (const material of ["popup", "primary"]) {
       const shadow = tokens[`--ow-${material}-shadow`] ?? "";
       expect(CSS.supports("box-shadow", shadow), material).toBe(true);
+    }
+    // Lines only separate content: no panel, raised, or pressed edge is left to draw.
+    for (const material of ["panel", "raised", "pressed"]) {
+      expect(tokens[`--ow-${material}-shadow`], material).toBeUndefined();
     }
     for (const spring of ["travel", "settle", "glide"]) {
       const easing = tokens[`--ow-spring-${spring}`] ?? "";

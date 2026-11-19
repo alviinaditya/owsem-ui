@@ -43,6 +43,12 @@ function resolve(value: string, scope: Element = document.body, property = "colo
   return computed;
 }
 
+/** The fields' and keys' tints of the text color. */
+const FIELD = "color-mix(in oklab, var(--ow-fg) 6%, transparent)";
+const KEY = FIELD;
+const SURFACE = "var(--ow-surface-shadow)";
+const NO_SHADOW = "none";
+
 const resolveColor = (value: string, scope?: Element) => resolve(value, scope);
 const resolveShadow = (value: string) => resolve(value, document.body, "box-shadow");
 
@@ -249,7 +255,7 @@ describe("ColorPicker", () => {
     );
     const [token, named] =
       screen.container.querySelectorAll<HTMLInputElement>('[aria-label="Hex"]');
-    await expect.poll(() => token?.value).toBe("7C6AB8");
+    await expect.poll(() => token?.value).toBe("2563EB");
     expect(named?.value).toBe("663399");
   });
 
@@ -396,19 +402,19 @@ describe("ColorPicker", () => {
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
       expect(getComputedStyle(picker()).backgroundColor).toBe(resolveColor("var(--ow-panel)"));
-      expect(getComputedStyle(field("Hex")).backgroundColor).toBe(
-        resolveColor("var(--ow-well-bg)"),
-      );
+      // Fields and keys are tints with no shadow; the panel is a wrapper with the surface shadow.
+      expect(getComputedStyle(field("Hex")).backgroundColor).toBe(resolveColor(FIELD));
       expect(getComputedStyle(q(".ow-color-picker__format")).backgroundColor).toBe(
-        resolveColor("var(--ow-raised-bg)"),
+        resolveColor(KEY),
       );
-      expect(getComputedStyle(picker()).boxShadow).toBe(resolveShadow("var(--ow-panel-shadow)"));
-      expect(getComputedStyle(q(".ow-color-picker__format")).boxShadow).toBe(
-        resolveShadow("var(--ow-raised-shadow)"),
-      );
+      expect(getComputedStyle(picker()).boxShadow).toBe(resolveShadow(SURFACE));
+      expect(getComputedStyle(field("Hex")).boxShadow).toBe(NO_SHADOW);
+      expect(getComputedStyle(q(".ow-color-picker__format")).boxShadow).toBe(NO_SHADOW);
+      // The swatches sit under one hairline.
       expect(getComputedStyle(q(".ow-color-picker__swatches")).borderBlockStartColor).toBe(
-        resolveColor("var(--ow-line-dark)"),
+        resolveColor("var(--ow-line)"),
       );
+      expect(getComputedStyle(q(".ow-color-picker__swatches")).boxShadow).toBe("none");
       // The thumb ring must read on any color, so it is white in both themes.
       expect(getComputedStyle(q(".ow-color-picker__thumb")).borderTopColor).toBe(
         "rgb(255, 255, 255)",
@@ -421,7 +427,7 @@ describe("ColorPicker", () => {
     }
   });
 
-  test("draws crisp edges: no part sinks or casts a soft shadow, in light and dark", async () => {
+  test("draws crisp edges: the colors have a 1px edge and no soft shadow, the controls no shadow, in light and dark", async () => {
     onTestFinished(() => {
       delete root.dataset.theme;
     });
@@ -439,8 +445,10 @@ describe("ColorPicker", () => {
     expect(parts.length).toBeGreaterThan(20);
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
-      // A key's top light line may soften by under 1px; nothing else blurs.
-      for (const part of parts) expect(maxBlur(part), part.className).toBeLessThanOrEqual(1);
+      // The painted parts never blur; a control has no shadow.
+      for (const part of parts) {
+        expect(maxBlur(part), part.className).toBeLessThanOrEqual(1);
+      }
       // The area and the tracks share the swatches' 1px edge.
       const edge = getComputedStyle(q(".ow-color-picker__swatch")).boxShadow;
       expect(edge).toMatch(/ 0px 0px 0px 1px inset$/);
@@ -449,14 +457,35 @@ describe("ColorPicker", () => {
     }
   });
 
-  test("a raised key's hover tints its fill and keeps its edge", async () => {
+  test("a field is a tint with no shadow or edge, deeper on hover; more contrast draws the edge", async () => {
+    onTestFinished(() => commands.setContrast("no-preference"));
+    const { q } = await mount(
+      <>
+        <ColorPicker defaultValue="#336699" />
+        <p>Away</p>
+      </>,
+    );
+    const input = q<HTMLInputElement>(".ow-color-picker__input");
+    const away = q("p");
+    await userEvent.hover(away);
+    expect(getComputedStyle(input).backgroundColor).toBe(resolveColor(FIELD));
+    expect(getComputedStyle(input).boxShadow).toBe(NO_SHADOW);
+    await userEvent.hover(input);
+    expect(getComputedStyle(input).backgroundColor).toBe(
+      resolveColor("color-mix(in oklab, var(--ow-fg) 9%, transparent)"),
+    );
+    await userEvent.hover(away);
+    await commands.setContrast("more");
+    expect(getComputedStyle(input).boxShadow).toBe(resolveShadow("inset 0 0 0 1px var(--ow-edge)"));
+  });
+
+  test("a key's hover tints its fill, with no shadow or edge", async () => {
     const { q } = await mount(<ColorPicker />);
     const format = q(".ow-color-picker__format");
     const fill = getComputedStyle(format).backgroundColor;
-    const edge = getComputedStyle(format).boxShadow;
     await userEvent.hover(format);
     await expect.poll(() => getComputedStyle(format).backgroundColor).not.toBe(fill);
-    expect(getComputedStyle(format).boxShadow).toBe(edge);
+    expect(getComputedStyle(format).boxShadow).toBe(NO_SHADOW);
   });
 
   test("a theme token set on it changes it alone (TK-9)", async () => {
@@ -710,8 +739,12 @@ describe("ColorPickerPopover", () => {
     const positioner = popup()?.parentElement;
     expect(positioner?.getAttribute("data-theme")).toBe("dark");
     expect(positioner?.getAttribute("dir")).toBe("rtl");
+    // A popup is a panel, with the popup shadow.
     expect(getComputedStyle(q('[role="dialog"] .ow-color-picker')).backgroundColor).toBe(
       resolveColor("var(--ow-panel)", q('[data-theme="dark"]')),
+    );
+    expect(getComputedStyle(q('[role="dialog"] .ow-color-picker')).boxShadow).toBe(
+      resolve("var(--ow-popup-shadow)", q('[data-theme="dark"]'), "box-shadow"),
     );
     // The picker opens on the token's color, read beside the trigger.
     const accent = getComputedStyle(dark).getPropertyValue("--ow-accent").trim();

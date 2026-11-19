@@ -22,10 +22,10 @@ tur; stage mengikuti setiap bagian.
 Anda tidak menulis id. Base UI memberi kontrol `aria-labelledby` untuk label, dan `aria-describedby`
 untuk deskripsi dan untuk error selama tampil. Daftar di bawah field membaca atribut itu secara langsung.
 
-Stage memutarnya: pointer mengetik sebuah alamat, dan selama teksnya belum berupa alamat, tepi kontrol
-menjadi warna kritis, error muncul, dan ikut masuk bersama deskripsi di `aria-describedby`. Keduanya
-pergi setelah alamatnya benar. Tidak ada animasi: pesan datang dan pergi seketika, karena fade hanya
-menunda membacanya.
+Stage memutarnya: pointer mengetik sebuah alamat, dan selama teksnya belum berupa alamat, tint kontrol
+menjadi kritis dan bergetar sekali, error muncul, dan ikut masuk bersama deskripsi di
+`aria-describedby`. Keduanya pergi setelah alamatnya benar. Pesannya sendiri datang dan pergi
+seketika, karena fade hanya menunda membacanya.
 
 ## Pengecekan native dan kustom [#validation]
 
@@ -65,9 +65,10 @@ ke alamat yang valid.
 
 | State | Tandanya |
 | --- | --- |
-| Kosong | Well kontrol, dengan placeholder-nya |
+| Kosong | Tint 6% kontrol, dengan placeholder-nya |
+| Hover atau fokus | Hover menaikkan tint ke 9%; fokus menambahkan ring |
 | Terisi | Teks `--ow-fg` |
-| Invalid | Tepi kontrol `--ow-critical`, dan error dengan warna yang sama. Labelnya tetap |
+| Invalid | Tint 12% `--ow-critical` pada kontrol dan satu getar, dan error dengan warna yang sama. Labelnya tetap |
 | Disabled | Kontrol dan label dengan opacity 45%. Error hasil pengecekan hilang; `invalid` yang Anda pasang tetap |
 
 ## Keyboard dan aksesibilitas [#keyboard]
@@ -79,9 +80,10 @@ ke alamat yang valid.
 
 Klik pada label memindahkan fokus ke kontrol. Screen reader membaca label sebagai namanya, deskripsi dan
 error sebagai deskripsinya, dan `aria-invalid` menyatakan ia gagal. Jangan mengabarkan error hanya lewat
-warna: pesannya ada, dan tepinya adalah penandanya.
+warna: pesannya ada, dan tint serta getarnya adalah penandanya.
 
-Tidak ada yang bergerak, jadi reduced motion tidak mengubah apa pun. Di mode forced colors (Windows High
+Kontrol bergetar sekali saat menjadi invalid; dengan reduced motion ia berkedip. Dengan
+`prefers-contrast: more`, kontrol mendapat tepi 1px. Di mode forced colors (Windows High
 Contrast), pesan memakai warna teks sistem, dan kontrol mempertahankan tepi 2px saat invalid. Dari kanan
 ke kiri, label berada di kanan, di atas awal kontrol.
 
@@ -103,7 +105,7 @@ bagian di dalamnya.
 | --- | --- |
 | `--ow-fg` | Label |
 | `--ow-muted` | Deskripsi |
-| `--ow-critical` | Error, dan tepi kontrol saat invalid |
+| `--ow-critical` | Error, dan tint kontrol saat invalid |
 
 Kontrolnya juga membaca token Input.
 

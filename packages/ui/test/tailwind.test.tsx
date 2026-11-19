@@ -20,7 +20,7 @@ const CLASSES = [
   "border-[rgb(0,0,255)]",
   "data-panel-open:text-[rgb(0,128,0)]",
   "data-current:text-[rgb(255,0,0)]",
-  "[--ow-line-dark:rgb(255,0,0)]",
+  "[--ow-line:rgb(255,0,0)]",
 ];
 
 const comment = /\/\*[\s\S]*?\*\//g;
@@ -183,7 +183,7 @@ describe("Tailwind CSS v4 (FR-8)", () => {
         <div data-theme="dark">
           <div className="bg-ow-panel" />
         </div>
-        <Separator className="[--ow-line-dark:rgb(255,0,0)]" />
+        <Separator className="[--ow-line:rgb(255,0,0)]" />
       </>,
     );
     const [own, dark, line] = screen.container.querySelectorAll<HTMLElement>(

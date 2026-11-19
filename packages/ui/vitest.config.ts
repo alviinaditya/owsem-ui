@@ -4,6 +4,7 @@ import {
   compileTailwind,
   mouse,
   setColorScheme,
+  setContrast,
   setForcedColors,
   setReducedMotion,
   setReducedTransparency,
@@ -37,6 +38,7 @@ export default defineConfig({
       commands: {
         setColorScheme,
         setForcedColors,
+        setContrast,
         setReducedMotion,
         setReducedTransparency,
         mouse,

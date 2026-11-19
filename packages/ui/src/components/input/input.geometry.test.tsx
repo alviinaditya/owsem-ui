@@ -28,8 +28,8 @@ const q = (scope: Element, selector: string) => {
 
 // FR-11: font 13/14/16 px, height 2 × --py + 1lh at line-height 1.25, icon font + 2 px.
 const SIZES: [InputSize, number, number, number][] = [
-  ["sm", 13, 29.25, 7.125],
-  ["md", 14, 38.5, 11.25],
+  ["sm", 13, 32, 8.5],
+  ["md", 14, 40, 12],
   ["lg", 16, 48, 15],
 ];
 

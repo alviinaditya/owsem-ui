@@ -2,12 +2,26 @@
 
 import { useDirection } from "@base-ui/react/direction-provider";
 import { Menu as BaseMenu } from "@base-ui/react/menu";
-import { type ForwardRefExoticComponent, forwardRef, type RefAttributes, useCallback } from "react";
+import {
+  createContext,
+  type ForwardRefExoticComponent,
+  forwardRef,
+  type JSX,
+  type RefAttributes,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { withClassName } from "../../core/class-name";
 import { GlideHighlight, useGlide } from "../../core/glide/use-glide";
+import { useRestingAnchor } from "../../core/resting-anchor";
+import { trackPointerType, useScrollLock } from "../../core/scroll-lock";
 import "./menu.css";
 
 const cls = {
+  backdrop: "ow-menu__backdrop",
   positioner: "ow-menu__positioner",
   popup: "ow-menu__popup",
   item: "ow-menu__item",
@@ -31,13 +45,71 @@ export type MenuGroupProps = BaseMenu.Group.Props;
 export type MenuRadioGroupProps = BaseMenu.RadioGroup.Props;
 export type MenuSubmenuRootProps = BaseMenu.SubmenuRoot.Props;
 
-export const MenuRoot: typeof BaseMenu.Root = BaseMenu.Root;
+/** Whether the open menu is modal: a backdrop takes outside presses, and the page's scroll is locked. */
+const ModalContext = createContext({ modal: false, hover: false, open: false });
+const NOT_MODAL = { modal: false, hover: false, open: false };
+
+/**
+ * Base UI's Root. `modal` (default true) works as Base UI's: a press outside only shuts the menu,
+ * and the page does not scroll. The lock is OwsemUI's (core/scroll-lock), which leaves the page's
+ * overflow alone, so its text is not drawn again while the menu is open. A menu opened by hover is
+ * never modal.
+ */
+export function MenuRoot<Payload = unknown>({
+  modal = true,
+  onOpenChange,
+  ...props
+}: MenuRootProps<Payload>): JSX.Element {
+  const [hover, setHover] = useState(false);
+  // A kept-mounted popup outlives the menu's opening, so the lock follows `open`.
+  const [opened, setOpened] = useState(props.defaultOpen ?? false);
+  const open = props.open ?? opened;
+  useEffect(trackPointerType, []);
+  const value = useMemo(() => ({ modal, hover, open }), [modal, hover, open]);
+  return (
+    <ModalContext.Provider value={value}>
+      <BaseMenu.Root
+        {...props}
+        modal={false}
+        onOpenChange={(next, details) => {
+          setHover(details.reason === "trigger-hover");
+          onOpenChange?.(next, details);
+          if (!details.isCanceled) setOpened(next);
+        }}
+      />
+    </ModalContext.Provider>
+  );
+}
+
+/** A submenu: never modal of its own, as in Base UI; the menu it belongs to holds the page. */
+export function MenuSubmenuRoot(props: MenuSubmenuRootProps): JSX.Element {
+  return (
+    <ModalContext.Provider value={NOT_MODAL}>
+      <BaseMenu.SubmenuRoot {...props} />
+    </ModalContext.Provider>
+  );
+}
+
 /** The button that opens the menu; pass your button to `render`. */
 export const MenuTrigger: typeof BaseMenu.Trigger = BaseMenu.Trigger;
-export const MenuPortal: typeof BaseMenu.Portal = BaseMenu.Portal;
+
+/** Base UI's Portal; for a modal menu it puts a clear backdrop under the popup for outside presses. */
+export const MenuPortal: ForwardRefExoticComponent<
+  Omit<MenuPortalProps, "ref"> & RefAttributes<HTMLDivElement>
+> = forwardRef<HTMLDivElement, Omit<MenuPortalProps, "ref">>(function MenuPortal(
+  { children, ...props },
+  ref,
+) {
+  const { modal } = useContext(ModalContext);
+  return (
+    <BaseMenu.Portal ref={ref} {...props}>
+      {modal ? <BaseMenu.Backdrop className={cls.backdrop} /> : null}
+      {children}
+    </BaseMenu.Portal>
+  );
+});
 export const MenuGroup: typeof BaseMenu.Group = BaseMenu.Group;
 export const MenuRadioGroup: typeof BaseMenu.RadioGroup = BaseMenu.RadioGroup;
-export const MenuSubmenuRoot: typeof BaseMenu.SubmenuRoot = BaseMenu.SubmenuRoot;
 export const MenuViewport: typeof BaseMenu.Viewport = BaseMenu.Viewport;
 /** Links a Root to triggers placed elsewhere (detached triggers). */
 export const createMenuHandle: typeof BaseMenu.createHandle = BaseMenu.createHandle;
@@ -54,17 +126,21 @@ export type MenuPositionerProps = Omit<BaseMenu.Positioner.Props, "ref">;
 /**
  * Places the menu 6px from its trigger; a submenu beside its item, first items in line. It takes
  * the text direction from DirectionProvider, since the portal leaves the subtree that sets `dir`.
+ * It anchors to the trigger's resting box, not its pressed one; a context menu's Positioner must
+ * not, since its anchor is the pointer.
  */
 export const MenuPositioner: ForwardRefExoticComponent<
   MenuPositionerProps & RefAttributes<HTMLDivElement>
 > = forwardRef<HTMLDivElement, MenuPositionerProps>(function MenuPositioner(
   { className, sideOffset = 6, alignOffset = lineUp, ...props },
-  ref,
+  forwarded,
 ) {
   const direction = useDirection();
+  const { ref, anchor } = useRestingAnchor(forwarded);
   return (
     <BaseMenu.Positioner
       ref={ref}
+      anchor={anchor}
       className={withClassName(cls.positioner, className)}
       sideOffset={sideOffset}
       alignOffset={alignOffset}
@@ -90,9 +166,13 @@ export const MenuPopup: ForwardRefExoticComponent<MenuPopupProps & RefAttributes
   ) {
     const glide = useGlide<HTMLDivElement>({ axis: "y", items: ITEMS });
     const { ref: glideRef, setActive } = glide;
+    const { modal, hover, open } = useContext(ModalContext);
+    const [self, setSelf] = useState<HTMLDivElement | null>(null);
+    useScrollLock(self, modal && !hover && open);
     const setRef = useCallback(
       (el: HTMLDivElement | null) => {
         glideRef(el);
+        setSelf(el);
         if (typeof ref === "function") ref(el);
         else if (ref) ref.current = el;
       },
@@ -260,7 +340,7 @@ export const MenuGroupLabel: ForwardRefExoticComponent<
 
 export type MenuSeparatorProps = Omit<BaseMenu.Separator.Props, "ref">;
 
-/** An etched groove between groups. */
+/** A hairline between groups. */
 export const MenuSeparator: ForwardRefExoticComponent<
   MenuSeparatorProps & RefAttributes<HTMLDivElement>
 > = forwardRef<HTMLDivElement, MenuSeparatorProps>(function MenuSeparator(

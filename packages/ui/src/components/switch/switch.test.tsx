@@ -38,6 +38,19 @@ function resolve(property: "color" | "box-shadow", value: string, scope: Element
   return computed;
 }
 
+/** The off track: a tint of the text color, one step up on hover. */
+const REST = "color-mix(in oklab, var(--ow-fg) 10%, transparent)";
+const HOVER = "color-mix(in oklab, var(--ow-fg) 13%, transparent)";
+
+/** Parks the pointer in the bottom corner, off any switch an earlier test left it over. */
+async function pointerAway() {
+  const spot = document.createElement("span");
+  spot.style.cssText = "position:fixed;inset:auto 0 0 auto;inline-size:4px;block-size:4px";
+  document.body.append(spot);
+  await userEvent.hover(spot);
+  spot.remove();
+}
+
 /** An unlayered stylesheet for one test, as an app's own CSS would be. */
 function unlayered(css: string) {
   const sheet = document.createElement("style");
@@ -51,6 +64,16 @@ const shift = (track: HTMLElement) =>
   thumbOf(track).getBoundingClientRect().left -
   track.getBoundingClientRect().left -
   thumbOf(track).offsetLeft;
+
+/** Where the thumb is from the track's start, without its stretch, which is not the position. */
+const placed = (thumb: HTMLElement) => {
+  thumb.style.scale = "none";
+  const left =
+    thumb.getBoundingClientRect().left -
+    (thumb.closest(".ow-switch") as HTMLElement).getBoundingClientRect().left;
+  thumb.style.removeProperty("scale");
+  return left;
+};
 
 const running = (el: Element) =>
   el.getAnimations().map((animation) => (animation as CSSTransition).transitionProperty);
@@ -213,7 +236,7 @@ describe("Switch", () => {
     expect(lg?.dataset.size).toBe("lg");
   });
 
-  test("off is the well with an edge, on the accent; the thumb is the key in both", async () => {
+  test("off is a tint with no edge, on the accent; the thumb is a white key with the surface shadow in both", async () => {
     onTestFinished(() => {
       delete root.dataset.theme;
     });
@@ -224,25 +247,58 @@ describe("Switch", () => {
       </>,
     );
     if (!off || !on) throw new Error("no switches");
+    await pointerAway();
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
-      expect(getComputedStyle(off).backgroundColor).toBe(resolve("color", "var(--ow-well-bg)"));
-      expect(getComputedStyle(off).boxShadow).toBe(
-        resolve("box-shadow", "inset 0 0 0 1px var(--ow-edge)"),
-      );
+      expect(getComputedStyle(off).backgroundColor).toBe(resolve("color", REST));
+      expect(getComputedStyle(off).boxShadow).toBe("none");
       expect(getComputedStyle(on).backgroundColor).toBe(resolve("color", "var(--ow-accent)"));
       expect(getComputedStyle(on).boxShadow).toBe(
         resolve("box-shadow", "var(--ow-primary-shadow)"),
       );
       for (const track of [off, on]) {
         const thumb = getComputedStyle(thumbOf(track));
-        expect(thumb.backgroundColor).toBe(resolve("color", "var(--ow-raised-bg)"));
-        expect(thumb.boxShadow).toBe(resolve("box-shadow", "var(--ow-raised-shadow)"));
+        expect(thumb.backgroundColor).toBe(resolve("color", "var(--ow-on-accent)"));
+        expect(thumb.boxShadow).toBe("none");
+        // The shadow is on the key inside the clear border, not on the border.
+        expect(getComputedStyle(thumbOf(track), "::before").boxShadow).toBe(
+          resolve("box-shadow", "var(--ow-surface-shadow)"),
+        );
       }
     }
   });
 
-  test("its edge and fill have 3:1 against the page and a panel, in both themes (DP-6)", async () => {
+  test("hover, on it or its label, steps the track up; focus adds the ring and no edge", async () => {
+    const screen = await render(
+      <label>
+        <Switch.Root /> <span>Wi-Fi</span>
+      </label>,
+    );
+    const track = screen.getByRole("switch").element() as HTMLElement;
+    await pointerAway();
+    expect(getComputedStyle(track).backgroundColor).toBe(resolve("color", REST));
+    await userEvent.hover(track);
+    expect(getComputedStyle(track).backgroundColor).toBe(resolve("color", HOVER));
+    await pointerAway();
+    await userEvent.hover(screen.getByText("Wi-Fi"));
+    expect(getComputedStyle(track).backgroundColor).toBe(resolve("color", HOVER));
+    await pointerAway();
+    await userEvent.tab();
+    expect(document.activeElement).toBe(track);
+    expect(getComputedStyle(track).boxShadow).toBe("none");
+    expect(getComputedStyle(track).outlineWidth).toBe("2px");
+  });
+
+  test("more contrast draws the edge in --ow-edge", async () => {
+    onTestFinished(() => commands.setContrast("no-preference"));
+    const track = await one(<Switch.Root aria-label="Wi-Fi" />);
+    await commands.setContrast("more");
+    expect(getComputedStyle(track).boxShadow).toBe(
+      resolve("box-shadow", "inset 0 0 0 1px var(--ow-edge)"),
+    );
+  });
+
+  test("the on fill and the focus ring have 3:1 against the page and a panel, in both themes (DP-6)", async () => {
     onTestFinished(() => {
       delete root.dataset.theme;
     });
@@ -250,7 +306,7 @@ describe("Switch", () => {
       root.dataset.theme = theme;
       for (const surface of ["var(--ow-bg)", "var(--ow-panel)"]) {
         const behind = composite(resolve("color", surface));
-        for (const state of ["var(--ow-edge)", "var(--ow-accent)"]) {
+        for (const state of ["var(--ow-focus)", "var(--ow-accent)"]) {
           expect(contrast(composite(resolve("color", state)), behind)).toBeGreaterThanOrEqual(3);
         }
       }
@@ -271,8 +327,8 @@ describe("Switch", () => {
     if (!travel) throw new Error("no travel");
     travel.pause();
     travel.currentTime = 0;
-    expect(thumb.offsetLeft).toBe(16);
-    expect(shift(track)).toBe(-16);
+    expect(thumb.offsetLeft).toBe(20);
+    expect(shift(track)).toBe(-20);
     travel.finish();
     expect(shift(track)).toBe(0);
   });
@@ -287,33 +343,52 @@ describe("Switch", () => {
     if (!there) throw new Error("no travel");
     there.pause();
     there.currentTime = 200;
-    const at = thumb.getBoundingClientRect().left - track.getBoundingClientRect().left;
+    const at = placed(thumb);
     expect(at).toBeGreaterThan(0);
-    expect(at).toBeLessThan(16);
+    expect(at).toBeLessThan(20);
     track.click();
     await expect.poll(() => track.getAttribute("aria-checked")).toBe("false");
     const [back] = thumb.getAnimations();
     if (!back) throw new Error("no travel back");
     back.pause();
     back.currentTime = 0;
-    const from = thumb.getBoundingClientRect().left - track.getBoundingClientRect().left;
+    const from = placed(thumb);
     expect(Math.abs(from - at)).toBeLessThanOrEqual(0.5);
     back.finish();
     expect(shift(track)).toBe(0);
   });
 
-  test("a held press squashes the thumb toward its travel, and lets go on the settle spring", async () => {
+  test("mid-travel the thumb stretches along its path from its leading edge, and rests at its own size", async () => {
+    const track = await one(<Switch.Root aria-label="Wi-Fi" />);
+    const thumb = thumbOf(track);
+    const rest = thumb.getBoundingClientRect();
+    track.click();
+    await expect.poll(() => running(thumb)).toContain("--_switch-travel");
+    const [travel] = thumb.getAnimations();
+    if (!travel) throw new Error("no travel");
+    travel.pause();
+    travel.currentTime = 200;
+    const stretched = thumb.getBoundingClientRect().width / rest.width;
+    expect(stretched).toBeGreaterThan(1.1);
+    expect(stretched).toBeLessThanOrEqual(1.3);
+    // Going toward the end, it grows from its end edge: that edge never passes its place.
+    expect(Number.parseFloat(getComputedStyle(thumb).transformOrigin)).toBeCloseTo(rest.width, 0);
+    travel.finish();
+    expect(thumb.getBoundingClientRect().width).toBe(rest.width);
+  });
+
+  test("a held press widens the thumb toward its travel and squashes its height, and lets go on the settle spring", async () => {
     const track = await one(<Switch.Root aria-label="Wi-Fi" />);
     const thumb = thumbOf(track);
     const rest = thumb.getBoundingClientRect();
     await userEvent.hover(track);
     await commands.mouse("down");
     onTestFinished(() => commands.mouse("up"));
-    await expect.poll(() => thumb.getBoundingClientRect().width).toBeLessThan(rest.width - 1);
+    await expect.poll(() => thumb.getBoundingClientRect().width).toBeGreaterThan(rest.width + 1);
     const held = thumb.getBoundingClientRect();
-    // On the axis it travels only, its leading edge in place.
-    expect(held.height).toBe(rest.height);
-    expect(Math.abs(held.right - rest.right)).toBeLessThanOrEqual(0.5);
+    // It grows toward where it will go, from its start edge, and is a little shorter.
+    expect(held.height).toBeLessThan(rest.height);
+    expect(Math.abs(held.left - rest.left)).toBeLessThanOrEqual(0.5);
     expect(getComputedStyle(thumb).transitionDuration.split(",")[1]?.trim()).toBe("0.09s");
     await commands.mouse("up");
     await expect.poll(() => track.getAttribute("aria-checked")).toBe("true");
@@ -372,26 +447,27 @@ describe("Switch", () => {
 
   test("a theme token set on a part changes it alone (TK-9)", async () => {
     const tokens = {
-      "--ow-well-bg": "rgb(1, 2, 3)",
-      "--ow-edge": "rgb(4, 5, 6)",
+      "--ow-fg": "rgb(1, 2, 3)",
       "--ow-accent": "rgb(7, 8, 9)",
     } as CSSProperties;
     const [off, on, other] = await mount(
       <>
         <Switch.Root aria-label="Off" style={tokens} />
         <Switch.Root aria-label="On" defaultChecked style={tokens}>
-          <Switch.Thumb style={{ "--ow-raised-bg": "rgb(255, 0, 0)" } as CSSProperties} />
+          <Switch.Thumb style={{ "--ow-on-accent": "rgb(255, 0, 0)" } as CSSProperties} />
         </Switch.Root>
         <Switch.Root aria-label="Other" defaultChecked />
       </>,
     );
     if (!off || !on || !other) throw new Error("no switches");
-    expect(getComputedStyle(off).backgroundColor).toBe("rgb(1, 2, 3)");
-    expect(getComputedStyle(off).boxShadow).toContain("rgb(4, 5, 6)");
+    await pointerAway();
+    // Its track follows the text color it sets, not the page's.
+    expect(getComputedStyle(off).backgroundColor).toBe(resolve("color", REST, off));
+    expect(getComputedStyle(off).backgroundColor).not.toBe(resolve("color", REST));
     expect(getComputedStyle(on).backgroundColor).toBe("rgb(7, 8, 9)");
     expect(getComputedStyle(thumbOf(on)).backgroundColor).toBe("rgb(255, 0, 0)");
     expect(getComputedStyle(thumbOf(off)).backgroundColor).toBe(
-      resolve("color", "var(--ow-raised-bg)"),
+      resolve("color", "var(--ow-on-accent)"),
     );
     expect(getComputedStyle(other).backgroundColor).toBe(resolve("color", "var(--ow-accent)"));
   });
@@ -399,7 +475,7 @@ describe("Switch", () => {
   test("a theme token on an ancestor reaches both parts", async () => {
     const screen = await render(
       <div
-        style={{ "--ow-accent": "rgb(7, 8, 9)", "--ow-raised-bg": "rgb(1, 2, 3)" } as CSSProperties}
+        style={{ "--ow-accent": "rgb(7, 8, 9)", "--ow-on-accent": "rgb(1, 2, 3)" } as CSSProperties}
       >
         <Switch.Root aria-label="On" defaultChecked />
       </div>,

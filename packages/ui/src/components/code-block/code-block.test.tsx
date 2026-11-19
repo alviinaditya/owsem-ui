@@ -4,6 +4,7 @@ import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { commands, userEvent } from "vitest/browser";
 import { render } from "vitest-browser-react";
 import { axeReport } from "../../../test/a11y.ts";
+import { composite, contrast } from "../../../test/contrast.ts";
 import { measureIdle, settle } from "../../../test/raf-counter.ts";
 import { CodeBlock } from "./index";
 
@@ -131,7 +132,7 @@ function resolve(property: string, value: string, scope: Element = document.body
 }
 
 describe("Code Block", () => {
-  test("a single snippet: the icon, its title, Copy, and the code in the inner card", async () => {
+  test("a single snippet: the icon, its title, Copy as an icon, and the code under them", async () => {
     const screen = await render(<Single />);
     const { get, icon } = parts(screen.container);
     const rootEl = get(".ow-code-block");
@@ -143,7 +144,10 @@ describe("Code Block", () => {
     const copy = get(".ow-code-block__copy");
     expect(copy.className).toBe("ow-button ow-copy-button ow-code-block__copy");
     expect([copy.dataset.variant, copy.dataset.size]).toEqual(["ghost", "sm"]);
-    expect(copy.textContent).toContain("Copy");
+    // Icon only, named by its label.
+    expect(copy.hasAttribute("data-icon-only")).toBe(true);
+    expect(copy.getAttribute("aria-label")).toBe("Copy");
+    expect(copy.querySelector(".ow-copy-button__label")).toBeNull();
     expect(get(".ow-code-block__panel").parentElement).toBe(rootEl);
     expect(get(".ow-code-block__panel pre").textContent).toBe(GREET);
   });
@@ -348,7 +352,7 @@ describe("Code Block", () => {
     expect(over(thumb, tab("yarn"))).toBe(true);
   });
 
-  test("reads the theme tokens in light and dark: a well, a flat panel inside it, and a raised thumb", async () => {
+  test("reads the theme tokens in light and dark: one panel surface with the surface shadow, and an accent-tint thumb", async () => {
     onTestFinished(() => {
       delete root.dataset.theme;
     });
@@ -361,21 +365,26 @@ describe("Code Block", () => {
       const color = (el: Element) => getComputedStyle(el).backgroundColor;
       const shadow = (el: Element) => getComputedStyle(el).boxShadow;
       expect(color(get(".ow-code-block")), theme).toBe(
-        resolve("background-color", "var(--ow-well-bg)"),
-      );
-      expect(shadow(get(".ow-code-block")), theme).toBe(
-        resolve("box-shadow", "var(--ow-well-shadow)"),
-      );
-      expect(color(get(".ow-code-block__panel")), theme).toBe(
         resolve("background-color", "var(--ow-panel)"),
       );
+      expect(shadow(get(".ow-code-block")), theme).toBe(
+        resolve("box-shadow", "var(--ow-surface-shadow)"),
+      );
+      // The code sits on the same surface: no fill or edge of its own.
+      expect(color(get(".ow-code-block__panel")), theme).toBe("rgba(0, 0, 0, 0)");
       expect(shadow(get(".ow-code-block__panel")), theme).toBe("none");
+      expect(color(get(".ow-code-block__header")), theme).toBe("rgba(0, 0, 0, 0)");
       const thumb = get(".ow-code-block__thumb");
-      expect(color(thumb), theme).toBe(resolve("background-color", "var(--ow-raised-bg)"));
-      expect(shadow(thumb), theme).toBe(resolve("box-shadow", "var(--ow-raised-shadow)"));
+      // The key is the thumb's ::before: the accent over the panel.
+      expect(getComputedStyle(thumb, "::before").backgroundColor, theme).toBe(
+        resolve("background-color", "color-mix(in oklab, var(--ow-accent) 14%, var(--ow-panel))"),
+      );
+      expect(shadow(thumb), theme).toBe("none");
       const active = get('.ow-code-block__tab[aria-selected="true"]');
       expect(color(active), theme).toBe("rgba(0, 0, 0, 0)");
-      expect(getComputedStyle(active).color, theme).toBe(resolve("color", "var(--ow-fg)"));
+      expect(getComputedStyle(active).color, theme).toBe(
+        resolve("color", "color-mix(in oklab, var(--ow-accent) 70%, var(--ow-fg))"),
+      );
       const other = get('.ow-code-block__tab[aria-selected="false"]');
       expect(getComputedStyle(other).color, theme).toBe(resolve("color", "var(--ow-muted)"));
     }
@@ -387,8 +396,8 @@ describe("Code Block", () => {
         <Single style={{ "--ow-panel": "rgb(255, 0, 0)" } as CSSProperties} />
       </div>,
     );
-    const panel = parts(screen.container).get(".ow-code-block__panel");
-    expect(getComputedStyle(panel).backgroundColor).toBe("rgb(255, 0, 0)");
+    const block = parts(screen.container).get(".ow-code-block");
+    expect(getComputedStyle(block).backgroundColor).toBe("rgb(255, 0, 0)");
     expect(resolve("background-color", "var(--ow-panel)", screen.container)).not.toBe(
       "rgb(255, 0, 0)",
     );
@@ -420,6 +429,40 @@ describe("Code Block", () => {
     expect(screen.container.querySelector(".ow-code-block__list > .ow-glide")).not.toBeNull();
   });
 
+  test("Copy is an icon with a tooltip, on show whether or not the block is hovered", async () => {
+    clipboard();
+    const screen = await render(
+      <>
+        <Single />
+        <p>Away</p>
+      </>,
+    );
+    const copy = parts(screen.container).get(".ow-code-block__copy");
+    const tip = () =>
+      document.querySelector(".ow-tooltip__popup .ow-copy-button__tip-text[data-visible]")
+        ?.textContent ?? null;
+    // The pointer may still rest where an earlier test left it.
+    await userEvent.hover(screen.getByText("Away"));
+    await expect.poll(tip, { timeout: 1000 }).toBeNull();
+    expect(getComputedStyle(copy).opacity).toBe("1");
+    expect(getComputedStyle(copy).visibility).toBe("visible");
+    await userEvent.hover(copy);
+    await expect.poll(tip, { timeout: 2000 }).toBe("Copy");
+    await userEvent.click(copy);
+    await expect.poll(tip).toBe("Copied");
+    // The word on show, when asked for.
+    const labelled = await render(
+      <CodeBlock.Root>
+        <CodeBlock.Header>
+          <CodeBlock.Copy showLabel value="x" />
+        </CodeBlock.Header>
+      </CodeBlock.Root>,
+    );
+    const word = parts(labelled.container).get(".ow-code-block__copy");
+    expect(word.hasAttribute("data-icon-only")).toBe(false);
+    expect(word.textContent).toContain("Copy");
+  });
+
   test("right to left, Copy is at the start of the line, on the left", async () => {
     const screen = await render(
       <div dir="rtl">
@@ -441,7 +484,7 @@ describe("Code Block", () => {
     await settle();
     const { get } = parts(screen.container);
     const active = get('.ow-code-block__tab[aria-selected="true"]');
-    expect(getComputedStyle(get(".ow-code-block__thumb")).backgroundColor).toBe(
+    expect(getComputedStyle(get(".ow-code-block__thumb"), "::before").backgroundColor).toBe(
       resolve("color", "Highlight"),
     );
     expect(getComputedStyle(active).color).toBe(resolve("color", "HighlightText"));
@@ -465,12 +508,19 @@ describe("Code Block", () => {
       await settle();
       const { violations, contrastUnknown } = await axeReport(screen.container);
       expect(violations, theme).toEqual([]);
-      // axe cannot see the Copy Button's face (a pseudo-element); Button's tests check it.
       for (const target of contrastUnknown) {
-        expect(
-          screen.container.querySelector(target)?.closest(".ow-button"),
-          target,
-        ).not.toBeNull();
+        const el = screen.container.querySelector(target);
+        // axe cannot see the Copy Button's face (a pseudo-element); Button's tests check it.
+        if (el?.closest(".ow-button")) continue;
+        // A long line runs past the block, which does not scroll itself (its panel does), so axe
+        // gives up on the code; it reads on the block's fill.
+        const block = el?.closest(".ow-code-block");
+        expect(el?.closest(".ow-code-block__panel"), target).not.toBeNull();
+        if (!el || !block) throw new Error(`no ${target}`);
+        const page = getComputedStyle(document.body).backgroundColor;
+        const fill = composite(page, getComputedStyle(block).backgroundColor);
+        const text = composite(page, getComputedStyle(el).color);
+        expect(contrast(text, fill), `${theme} ${target}`).toBeGreaterThanOrEqual(4.5);
       }
     }
   });
@@ -483,5 +533,134 @@ describe("Code Block", () => {
     await userEvent.unhover(screen.getByRole("tab", { name: "npm" }));
     await settle();
     expect(await measureIdle()).toEqual({ rafCalls: 0, runningAnimations: [] });
+  });
+
+  describe("height between snippets", () => {
+    const LINES = {
+      short: "one",
+      tall: "one\ntwo\nthree\nfour\nfive\nsix",
+      mid: "one\ntwo\nthree",
+    };
+    type Key = keyof typeof LINES;
+
+    function Heights({ style }: { style?: CSSProperties }) {
+      return (
+        <CodeBlock.Root defaultValue="short" style={{ inlineSize: 420, ...style }}>
+          <CodeBlock.Header>
+            <CodeBlock.List aria-label="Size">
+              {(Object.keys(LINES) as Key[]).map((key) => (
+                <CodeBlock.Tab key={key} value={key}>
+                  {key}
+                </CodeBlock.Tab>
+              ))}
+            </CodeBlock.List>
+          </CodeBlock.Header>
+          {(Object.keys(LINES) as Key[]).map((key) => (
+            <CodeBlock.Panel key={key} value={key}>
+              <pre>
+                <code>{LINES[key]}</code>
+              </pre>
+            </CodeBlock.Panel>
+          ))}
+        </CodeBlock.Root>
+      );
+    }
+
+    const block = (screen: { container: HTMLElement }) => {
+      const el = screen.container.querySelector<HTMLElement>(".ow-code-block");
+      if (!el) throw new Error("not mounted");
+      return el;
+    };
+    const keyframes = (animation: Animation | undefined) => {
+      if (!(animation?.effect instanceof KeyframeEffect)) throw new Error("no animation");
+      return animation.effect.getKeyframes();
+    };
+    const fadeOf = (el: HTMLElement) =>
+      el
+        .querySelector<HTMLElement>(".ow-code-block__panel:not([hidden])")
+        ?.getAnimations()
+        .find((a) => a.effect instanceof KeyframeEffect);
+    /** The height animation on the block, if one runs. */
+    const heightAnimation = (el: HTMLElement) =>
+      el
+        .getAnimations()
+        .find(
+          (animation) =>
+            animation.effect instanceof KeyframeEffect &&
+            animation.effect.target === el &&
+            animation.effect.getKeyframes().some((frame) => "height" in frame),
+        );
+
+    test("the first render does not animate", async () => {
+      const screen = await render(<Heights />);
+      await settle();
+      const el = block(screen);
+      expect(el.getAnimations({ subtree: true }).filter((a) => a.playState === "running")).toEqual(
+        [],
+      );
+    });
+
+    test("another snippet eases the height from the old to the new, clipped, and fades the code in", async () => {
+      const screen = await render(<Heights />);
+      await settle();
+      const el = block(screen);
+      const from = el.getBoundingClientRect().height;
+      await userEvent.click(screen.getByRole("tab", { name: "tall" }));
+      const animation = heightAnimation(el);
+      expect(animation).toBeDefined();
+      const frames = keyframes(animation);
+      expect(Number.parseFloat(String(frames[0]?.height))).toBeCloseTo(from, 0);
+      expect(Number.parseFloat(String(frames[1]?.height))).toBeGreaterThan(from + 20);
+      expect(getComputedStyle(el).overflow).toBe("clip");
+      const fade = fadeOf(el);
+      expect(fade).toBeDefined();
+      expect(keyframes(fade).map((f) => f.opacity)).toEqual(["0", "1"]);
+      await animation?.finished;
+      // At rest nothing is left over: the height is the layout's again.
+      expect(el.getAnimations()).toEqual([]);
+      expect(el.getBoundingClientRect().height).toBeGreaterThan(from + 20);
+      expect(getComputedStyle(el).overflow).toBe("visible");
+    });
+
+    test("rapid switching ends at the height of the last snippet", async () => {
+      const screen = await render(<Heights />);
+      await settle();
+      const el = block(screen);
+      for (const name of ["tall", "mid", "short", "tall"]) {
+        await userEvent.click(screen.getByRole("tab", { name }));
+      }
+      await expect.poll(() => el.getAnimations().length, { timeout: 2000 }).toBe(0);
+      const header = el.querySelector<HTMLElement>(".ow-code-block__header");
+      const panel = el.querySelector<HTMLElement>(".ow-code-block__panel:not([hidden])");
+      if (!header || !panel) throw new Error("missing");
+      expect(el.getBoundingClientRect().height).toBeCloseTo(
+        header.getBoundingClientRect().height + panel.getBoundingClientRect().height,
+        0,
+      );
+    });
+
+    test("with reduced motion the height jumps and the code only fades", async () => {
+      onTestFinished(() => commands.setReducedMotion("no-preference"));
+      await commands.setReducedMotion("reduce");
+      const screen = await render(<Heights />);
+      await settle();
+      const el = block(screen);
+      await userEvent.click(screen.getByRole("tab", { name: "tall" }));
+      expect(heightAnimation(el)).toBeUndefined();
+      // No rise: the same place at both ends.
+      expect(keyframes(fadeOf(el)).map((f) => f.transform)).toEqual([
+        "translateY(0px)",
+        "translateY(0px)",
+      ]);
+    });
+
+    test("with the motion scale at 0 nothing animates", async () => {
+      const screen = await render(<Heights style={{ "--ow-motion-scale": 0 } as CSSProperties} />);
+      await settle();
+      const el = block(screen);
+      await userEvent.click(screen.getByRole("tab", { name: "tall" }));
+      expect(heightAnimation(el)).toBeUndefined();
+      expect(fadeOf(el)).toBeUndefined();
+    });
   });
 });

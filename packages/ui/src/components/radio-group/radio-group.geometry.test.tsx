@@ -31,7 +31,7 @@ const close = (actual: number, expected: number) =>
   expect(Math.abs(actual - expected)).toBeLessThanOrEqual(TOL);
 
 describe("Radio Group geometry", () => {
-  test("the circle is the font size plus 2px (FR-10), round, and a row is Button's height (FR-11)", async () => {
+  test("the circle is the font size plus 6px, round, and a row is Button's height (FR-11)", async () => {
     const { groups, rowsOf, radioOf } = await mount(
       <>
         <Options size="sm" />
@@ -40,9 +40,9 @@ describe("Radio Group geometry", () => {
       </>,
     );
     for (const [i, [circle, height]] of [
-      [15, 29.25],
-      [16, 38.5],
-      [18, 48],
+      [19, 32],
+      [20, 40],
+      [22, 48],
     ].entries()) {
       for (const row of rowsOf(groups[i] as Element)) {
         const radio = radioOf(row);
@@ -113,7 +113,7 @@ describe("Radio Group geometry", () => {
     const [group] = groups as [HTMLElement];
     const radio = radioOf(group);
     const box = rect(radio);
-    expect(document.elementFromPoint(box.left - 3, box.top - 3)).toBe(radio);
+    expect(document.elementFromPoint(box.left - 2, box.top - 2)).toBe(radio);
   });
 
   test("font-size scales it all, and --py and --icon can be set through style (FR-11)", async () => {
@@ -131,8 +131,8 @@ describe("Radio Group geometry", () => {
     );
     const [scaled, dense, own] = groups as [HTMLElement, HTMLElement, HTMLElement];
     const [row] = rowsOf(scaled) as [HTMLElement];
-    close(rect(radioOf(row)).width, 26);
-    close(rect(row).height, 2 * 0.75 * 24 + 1.25 * 24);
+    close(rect(radioOf(row)).width, 30);
+    close(rect(row).height, 2 * 0.8036 * 24 + 1.25 * 24);
     // The block padding never drops a row below a 24px target.
     close(rect(rowsOf(dense)[0] as Element).height, 24);
     const [ownRow] = rowsOf(own) as [HTMLElement];

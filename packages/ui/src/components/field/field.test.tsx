@@ -139,7 +139,7 @@ describe("Field", () => {
     expect(q("input").getAttribute("aria-invalid")).toBe("true");
   });
 
-  test("native validation shows the browser's message and the invalid edge", async () => {
+  test("native validation shows the browser's message and the critical tint, with no edge", async () => {
     const { q, screen } = await mount(
       <Field.Root validationMode="onChange">
         <Field.Label>Email</Field.Label>
@@ -150,7 +150,11 @@ describe("Field", () => {
     await userEvent.type(screen.getByRole("textbox", { name: "Email" }), "nope");
     await expect.poll(() => q("input").hasAttribute("data-invalid")).toBe(true);
     expect(q(".ow-field__error").textContent).toBe(q<HTMLInputElement>("input").validationMessage);
-    expect(getComputedStyle(q("input")).boxShadow).toContain(resolveColor("var(--ow-critical)"));
+    expect(getComputedStyle(q("input")).backgroundColor).toBe(
+      resolveColor("color-mix(in oklab, var(--ow-critical) 14%, transparent)"),
+    );
+    // The surface shadow stays; nothing draws an edge.
+    expect(getComputedStyle(q("input")).boxShadow).not.toContain("inset");
   });
 
   test("validate gives a custom message, listed when there are several; Validity reads the state", async () => {
@@ -265,7 +269,7 @@ describe("Field", () => {
     expect(getComputedStyle(q(".ow-field__label")).color).toBe("rgb(9, 8, 7)");
   });
 
-  test("forced colors keep the text and the control's thick invalid edge (DP-8)", async () => {
+  test("forced colors keep the text and the control's thick invalid outline (DP-8)", async () => {
     onTestFinished(() => commands.setForcedColors("none"));
     const { q } = await mount(
       <Field.Root invalid>

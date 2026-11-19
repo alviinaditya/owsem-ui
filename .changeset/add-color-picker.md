@@ -13,9 +13,9 @@ Use it controlled (`value`) or not (`defaultValue`); `onChange` follows every mo
 `onChangeComplete` arrives when a drag, key, edit, or swatch is done. Values can be any CSS color
 the browser reads, tokens such as `var(--ow-accent)` included; `format` sets the string you get
 back. Every label is in `labels` for translation. Thumbs compact when pressed and spring back
-(Tactile). Every part has a crisp 1px edge, with no soft or sunken shadow; only the popover floats.
+(Tactile). Every part is a flat fill with no edge or shadow; only the popover floats.
 It reads the theme tokens and has none of its own: `--ow-panel` and `--ow-line` paint the panel
-and the checkerboard behind translucent colors, and the materials paint its keys, fields, and
+and the checkerboard behind translucent colors, and tints of `--ow-fg` paint its keys and fields, `--ow-raised-bg` the
 popover. Set a token on the picker to restyle it alone; its width and the area's height are layout,
 set with `className` or `style`. The color utilities are exported too: `parseColor`, `formatColor`,
 and conversions between hex, RGB, HSL, and HSV.

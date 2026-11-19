@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { describe, expect, onTestFinished, test } from "vitest";
 import { render } from "vitest-browser-react";
-import { insets, rect, TOL, usedRadius } from "../../../test/geometry.ts";
+import { insets, rect, TOL, themeRadius, usedRadius } from "../../../test/geometry.ts";
 import { Switch, type SwitchSize } from "./index";
 
 async function mount(ui: ReactNode): Promise<HTMLElement[]> {
@@ -39,16 +39,16 @@ function land(track: Element) {
   for (const animation of thumbOf(track).getAnimations()) animation.finish();
 }
 
-// Button's fonts (13, 14, 16 px): whole pixels, two keys wide and one tall inside the 2 px inset.
+// Button's fonts (13, 14, 16 px): whole pixels, two keys wide and one tall inside the 3 px inset.
 const SIZES: Record<SwitchSize, { width: number; height: number; key: number }> = {
-  sm: { width: 34, height: 19, key: 15 },
-  md: { width: 36, height: 20, key: 16 },
-  lg: { width: 40, height: 22, key: 18 },
+  sm: { width: 46, height: 27, key: 21 },
+  md: { width: 48, height: 28, key: 22 },
+  lg: { width: 52, height: 30, key: 24 },
 };
 
 describe("Switch geometry", () => {
   for (const [size, expected] of Object.entries(SIZES) as [SwitchSize, typeof SIZES.md][]) {
-    test(`${size}: ${expected.width} × ${expected.height}, a ${expected.key} px key 2 px inside at both ends`, async () => {
+    test(`${size}: ${expected.width} × ${expected.height}, a ${expected.key} px key 3 px inside at both ends`, async () => {
       const [off, on] = await mount(
         <>
           <Switch.Root aria-label="Off" size={size} />
@@ -61,14 +61,14 @@ describe("Switch geometry", () => {
         close(rect(track).height, expected.height);
       }
       const offGaps = keyGaps(off);
-      close(offGaps.left, 2);
-      close(offGaps.top, 2);
-      close(offGaps.bottom, 2);
+      close(offGaps.left, 3);
+      close(offGaps.top, 3);
+      close(offGaps.bottom, 3);
       close(rect(off).width - offGaps.left - offGaps.right, expected.key);
       const onGaps = keyGaps(on);
-      close(onGaps.right, 2);
-      close(onGaps.top, 2);
-      close(onGaps.bottom, 2);
+      close(onGaps.right, 3);
+      close(onGaps.top, 3);
+      close(onGaps.bottom, 3);
       close(rect(on).width - onGaps.left - onGaps.right, expected.key);
     });
   }
@@ -84,7 +84,7 @@ describe("Switch geometry", () => {
       if (!track) throw new Error("no switch");
       close(rect(thumbOf(track)).left - rect(track).left, thumbOf(track).offsetLeft);
     }
-    expect(thumbOf(on as HTMLElement).offsetLeft).toBe(16);
+    expect(thumbOf(on as HTMLElement).offsetLeft).toBe(20);
     expect(thumbOf(off as HTMLElement).offsetLeft).toBe(0);
   });
 
@@ -94,22 +94,23 @@ describe("Switch geometry", () => {
     track.click();
     await expect.poll(() => track.getAttribute("aria-checked")).toBe("true");
     land(track);
-    close(keyGaps(track).right, 2);
+    close(keyGaps(track).right, 3);
     track.click();
     await expect.poll(() => track.getAttribute("aria-checked")).toBe("false");
     land(track);
-    close(keyGaps(track).left, 2);
+    close(keyGaps(track).left, 3);
   });
 
-  test("radii are concentric: the key's, plus the inset (FR-10b)", async () => {
+  test("the track takes the one radius, and the key that less the inset (TK-8)", async () => {
     const [track] = await mount(
       <Switch.Root aria-label="Square-ish" style={{ "--ow-radius": "4px" } as CSSProperties} />,
     );
     if (!track) throw new Error("no switch");
-    expect(usedRadius(track)).toBe(6);
-    expect(usedRadius(thumbOf(track))).toBe(6);
+    expect(usedRadius(track)).toBe(themeRadius(track));
+    // The thumb reaches the track's edges, so its 2px clear border holds the inset.
+    expect(usedRadius(thumbOf(track))).toBe(themeRadius(track));
     const border = Number.parseFloat(getComputedStyle(thumbOf(track)).borderTopWidth);
-    close(usedRadius(thumbOf(track)) - border, 4);
+    close(usedRadius(thumbOf(track)) - border, themeRadius(track) - border);
   });
 
   test("the press target is at least 24 px each way (FR-14)", async () => {
@@ -133,12 +134,12 @@ describe("Switch geometry", () => {
       <Switch.Root aria-label="Big" style={{ fontSize: 40 }} defaultChecked />,
     );
     if (!track) throw new Error("no switch");
-    close(rect(track).width, 88);
-    close(rect(track).height, 46);
+    close(rect(track).width, 100);
+    close(rect(track).height, 54);
     const gaps = keyGaps(track);
-    close(gaps.right, 2);
-    close(gaps.top, 2);
-    close(gaps.bottom, 2);
+    close(gaps.right, 3);
+    close(gaps.top, 3);
+    close(gaps.bottom, 3);
   });
 
   test("a track resized through CSS keeps the thumb at its ends, and travels the new distance", async () => {
@@ -148,7 +149,7 @@ describe("Switch geometry", () => {
     close(rect(track).width, 77);
     close(rect(track).height, 31);
     close(rect(thumbOf(track)).width, 31);
-    close(keyGaps(track).left, 2);
+    close(keyGaps(track).left, 3);
     track.click();
     await expect.poll(() => track.getAttribute("aria-checked")).toBe("true");
     // The first frame of the travel starts from the far side: 77 less the thumb's 31.
@@ -159,7 +160,7 @@ describe("Switch geometry", () => {
     close(rect(thumbOf(track)).left - rect(track).left, 0);
     travel.finish();
     close(rect(thumbOf(track)).left - rect(track).left, 46);
-    close(keyGaps(track).right, 2);
+    close(keyGaps(track).right, 3);
   });
 
   test("an icon in the thumb is centered, 2 px inside the key", async () => {
@@ -187,12 +188,12 @@ describe("Switch geometry", () => {
       </div>,
     );
     if (!off || !on) throw new Error("no switches");
-    close(keyGaps(off).right, 2);
-    close(keyGaps(on).left, 2);
+    close(keyGaps(off).right, 3);
+    close(keyGaps(on).left, 3);
     on.click();
     await expect.poll(() => on.getAttribute("aria-checked")).toBe("false");
     land(on);
-    close(keyGaps(on).right, 2);
+    close(keyGaps(on).right, 3);
   });
 
   test("it sets no outer margin, and stretches when given a width", async () => {
@@ -205,6 +206,6 @@ describe("Switch geometry", () => {
     const track = screen.container.querySelector(".ow-switch") as HTMLElement;
     expect(getComputedStyle(track).marginLeft).toBe("0px");
     close(rect(track).width, 200);
-    close(keyGaps(track).right, 2);
+    close(keyGaps(track).right, 3);
   });
 });

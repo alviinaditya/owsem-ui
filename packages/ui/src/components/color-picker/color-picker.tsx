@@ -19,10 +19,12 @@ import {
   useContext,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
 import { withClassName } from "../../core/class-name";
+import { restingRect } from "../../core/resting-anchor";
 import {
   type ColorFormat,
   type ColorResult,
@@ -795,6 +797,15 @@ export const ColorPickerPopover: ForwardRefExoticComponent<
   const [trigger, setTrigger] = useState<HTMLButtonElement | null>(null);
   const direction = useDirection();
   const parsed = parseColor(current);
+  // The trigger compacts when pressed (Tactile): anchor to its resting box, so the popup does not
+  // jump as it grows back.
+  const anchor = useMemo(
+    () =>
+      trigger
+        ? { getBoundingClientRect: () => restingRect(trigger), contextElement: trigger }
+        : null,
+    [trigger],
+  );
 
   const setRef = useCallback(
     (el: HTMLButtonElement | null) => {
@@ -842,6 +853,7 @@ export const ColorPickerPopover: ForwardRefExoticComponent<
           align={align}
           sideOffset={sideOffset}
           collisionPadding={8}
+          anchor={anchor}
           // Portaled to the body: keep the trigger's direction (FR-16) and theme.
           dir={direction}
           data-theme={trigger?.closest("[data-theme]")?.getAttribute("data-theme") ?? undefined}

@@ -520,6 +520,9 @@ export function createTreeRail(tree: HTMLElement, svg: SVGSVGElement): TreeRail 
         if (!hidden) land();
       }
       wasHidden = hidden;
+    } else {
+      // No current row, so no trail: no dot stays lit from the last one.
+      for (const n of lit) n.dot.removeAttribute("data-lit");
     }
   }
 

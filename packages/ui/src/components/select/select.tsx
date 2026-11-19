@@ -14,14 +14,18 @@ import {
   type RefAttributes,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
 import { withClassName } from "../../core/class-name";
 import { GlideHighlight, useGlide } from "../../core/glide/use-glide";
+import { trackPointerType, useScrollLock } from "../../core/scroll-lock";
+import { useShakeGate } from "../../core/shake";
 import "./select.css";
 
 const cls = {
+  backdrop: "ow-select__backdrop",
   label: "ow-select__label",
   trigger: "ow-select__trigger",
   value: "ow-select__value",
@@ -75,9 +79,18 @@ const holds = (children: ReactNode, ...parts: unknown[]): boolean =>
   );
 
 /** What the trigger and the popup share, the popup being in a portal. */
-const SelectContext = createContext({ size: "md" as SelectSize, multiple: false, instant: false });
-/** Inside a Positioner; a Popup outside one draws its own. */
-const PlacedContext = createContext(false);
+const SelectContext = createContext({
+  size: "md" as SelectSize,
+  multiple: false,
+  instant: false,
+  modal: false,
+  open: false,
+});
+/**
+ * Inside a Positioner, and whether it lays the popup over the trigger; a Popup outside one draws
+ * its own.
+ */
+const PlacedContext = createContext<false | { overlay: boolean }>(false);
 
 // Parts without a look of their own come straight from Base UI.
 
@@ -86,7 +99,21 @@ export type SelectBackdropProps = BaseSelect.Backdrop.Props;
 export type SelectArrowProps = BaseSelect.Arrow.Props;
 export type SelectGroupProps = BaseSelect.Group.Props;
 
-export const SelectPortal: typeof BaseSelect.Portal = BaseSelect.Portal;
+/** Base UI's Portal; for a modal select it puts a clear backdrop under the popup for outside presses. */
+export const SelectPortal: ForwardRefExoticComponent<
+  Omit<SelectPortalProps, "ref"> & RefAttributes<HTMLDivElement>
+> = forwardRef<HTMLDivElement, Omit<SelectPortalProps, "ref">>(function SelectPortal(
+  { children, ...props },
+  ref,
+) {
+  const { modal } = useContext(SelectContext);
+  return (
+    <BaseSelect.Portal ref={ref} {...props}>
+      {modal ? <BaseSelect.Backdrop className={cls.backdrop} /> : null}
+      {children}
+    </BaseSelect.Portal>
+  );
+});
 export const SelectBackdrop: typeof BaseSelect.Backdrop = BaseSelect.Backdrop;
 export const SelectArrow: typeof BaseSelect.Arrow = BaseSelect.Arrow;
 export const SelectGroup: typeof BaseSelect.Group = BaseSelect.Group;
@@ -106,22 +133,35 @@ const fromKeyboard = (event: Event) =>
 /**
  * Base UI's Root, with one `size` for the trigger and the popup, so the selected item's text lands
  * on the trigger's. Base UI's Select has no `data-instant`, so it sets that for the Popup here.
+ * `modal` (default true) works as Base UI's: a press outside only shuts the popup, and the page
+ * does not scroll. The lock is OwsemUI's (core/scroll-lock), which leaves the page's overflow
+ * alone, so its text is not drawn again while the popup is open.
  */
 export function SelectRoot<Value, Multiple extends boolean | undefined = false>({
   size = "md",
+  modal = true,
   onOpenChange,
   ...props
 }: SelectRootProps<Value, Multiple>): JSX.Element {
   const [instant, setInstant] = useState(false);
+  // Base UI mounts the popup ahead, on the trigger's focus, so the lock follows `open`.
+  const [opened, setOpened] = useState(props.defaultOpen ?? false);
+  const open = props.open ?? opened;
+  useEffect(trackPointerType, []);
   const multiple = Boolean(props.multiple);
-  const shared = useMemo(() => ({ size, multiple, instant }), [size, multiple, instant]);
+  const shared = useMemo(
+    () => ({ size, multiple, instant, modal, open }),
+    [size, multiple, instant, modal, open],
+  );
   return (
     <SelectContext.Provider value={shared}>
       <BaseSelect.Root
         {...(props as BaseSelect.Root.Props<Value, Multiple>)}
-        onOpenChange={(open, details) => {
+        modal={false}
+        onOpenChange={(next, details) => {
           setInstant(fromKeyboard(details.event));
-          onOpenChange?.(open, details);
+          onOpenChange?.(next, details);
+          if (!details.isCanceled) setOpened(next);
         }}
       />
     </SelectContext.Provider>
@@ -181,9 +221,10 @@ export const SelectTrigger: ForwardRefExoticComponent<
   ref,
 ) {
   const { size } = useContext(SelectContext);
+  const gate = useShakeGate(ref);
   return (
     <BaseSelect.Trigger
-      ref={ref}
+      ref={gate}
       className={withClassName(cls.trigger, className)}
       data-size={size}
       {...props}
@@ -201,10 +242,11 @@ export const SelectTrigger: ForwardRefExoticComponent<
 export type SelectPositionerProps = Omit<BaseSelect.Positioner.Props, "ref">;
 
 /**
- * Lays the selected item's text over the trigger's, as Base UI does. Where that cannot work, on
- * touch and near the screen's edges, the popup hangs 6px from the trigger's start instead. With
- * `multiple` it always does, so the trigger stays in view as it adds up the picks. It takes the
- * text direction from DirectionProvider, since the portal leaves the subtree that sets `dir`.
+ * Lays the selected item's text over the trigger's, as Base UI does, so the popup covers the
+ * trigger at its width. Where that cannot work, on touch and near the screen's edges, the popup
+ * hangs 6px from the trigger's start instead. With `multiple` it always does, so the trigger stays
+ * in view as it adds up the picks. It takes the text direction from DirectionProvider, since the
+ * portal leaves the subtree that sets `dir`.
  */
 export const SelectPositioner: ForwardRefExoticComponent<
   SelectPositionerProps & RefAttributes<HTMLDivElement>
@@ -214,17 +256,19 @@ export const SelectPositioner: ForwardRefExoticComponent<
 ) {
   const direction = useDirection();
   const { multiple } = useContext(SelectContext);
+  const overlay = alignItemWithTrigger ?? !multiple;
+  const placed = useMemo(() => ({ overlay }), [overlay]);
   return (
     <BaseSelect.Positioner
       ref={ref}
       className={withClassName(cls.positioner, className)}
       sideOffset={sideOffset}
       align={align}
-      alignItemWithTrigger={alignItemWithTrigger ?? !multiple}
+      alignItemWithTrigger={overlay}
       dir={direction}
       {...props}
     >
-      <PlacedContext.Provider value={true}>{children}</PlacedContext.Provider>
+      <PlacedContext.Provider value={placed}>{children}</PlacedContext.Provider>
     </BaseSelect.Positioner>
   );
 });
@@ -322,11 +366,24 @@ export const SelectPopup: ForwardRefExoticComponent<
   { className, children, ...props },
   ref,
 ) {
-  const { size, instant } = useContext(SelectContext);
+  const { size, instant, modal, open, multiple } = useContext(SelectContext);
   const placed = useContext(PlacedContext);
+  const [self, setSelf] = useState<HTMLDivElement | null>(null);
+  // Over its trigger Base UI locks the page even when not modal, since the popup cannot follow a
+  // scroll; this lock takes that over, so the page is not drawn again.
+  const overlay = placed ? placed.overlay : !multiple;
+  useScrollLock(self, open && (modal || overlay));
+  const setRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      setSelf(el);
+      if (typeof ref === "function") ref(el);
+      else if (ref) ref.current = el;
+    },
+    [ref],
+  );
   const popup = (
     <BaseSelect.Popup
-      ref={ref}
+      ref={setRef}
       className={withClassName(cls.popup, className)}
       data-size={size}
       data-instant={instant ? "" : undefined}
@@ -388,7 +445,10 @@ export const SelectItemIndicator: ForwardRefExoticComponent<
 
 export type SelectItemProps = Omit<BaseSelect.Item.Props, "ref">;
 
-/** An option. Plain children go in an ItemText after an ItemIndicator; explicit parts stay. */
+/**
+ * An option. Plain children go in an ItemText, then an ItemIndicator at the end, where the
+ * trigger's icon is; explicit parts stay in your order.
+ */
 export const SelectItem: ForwardRefExoticComponent<SelectItemProps & RefAttributes<HTMLElement>> =
   forwardRef<HTMLElement, SelectItemProps>(function SelectItem(
     { className, children, ...props },
@@ -400,8 +460,8 @@ export const SelectItem: ForwardRefExoticComponent<SelectItemProps & RefAttribut
           children
         ) : (
           <>
-            <SelectItemIndicator />
             <SelectItemText>{children}</SelectItemText>
+            <SelectItemIndicator />
           </>
         )}
       </BaseSelect.Item>
@@ -428,7 +488,7 @@ export const SelectGroupLabel: ForwardRefExoticComponent<
 
 export type SelectSeparatorProps = Omit<BaseSelect.Separator.Props, "ref">;
 
-/** An etched groove between groups. */
+/** A hairline between groups. */
 export const SelectSeparator: ForwardRefExoticComponent<
   SelectSeparatorProps & RefAttributes<HTMLDivElement>
 > = forwardRef<HTMLDivElement, SelectSeparatorProps>(function SelectSeparator(

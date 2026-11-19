@@ -152,7 +152,9 @@ describe("Glide", () => {
     const sx = Number(highlight.style.getPropertyValue("--_sx"));
     expect(sx).toBeCloseTo(three.width / one.width);
     const radius = Number.parseFloat(getComputedStyle(highlight).borderTopLeftRadius);
-    expect(radius * sx).toBeCloseTo(8);
+    // The one radius by default (TK-8), divided by the scale so it lands whole.
+    const theme = Number.parseFloat(getComputedStyle(list).getPropertyValue("--ow-radius"));
+    expect(radius * sx).toBeCloseTo(theme);
   });
 
   test("forwards a click in a gap to the lit item, without moving focus", async () => {

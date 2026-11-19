@@ -75,6 +75,7 @@ export const TabsList: ForwardRefExoticComponent<TabsListProps & RefAttributes<H
     const orientation = useContext(OrientationContext);
     const glide = useGlide<HTMLDivElement>({
       items: TAB,
+      skip: "[data-active]",
       axis: orientation === "vertical" ? "y" : "x",
     });
     const list = useRef<HTMLDivElement | null>(null);

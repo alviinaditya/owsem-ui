@@ -9,8 +9,9 @@ import { Button, ButtonIcon, buttonStyles, IconButton } from "./index";
 
 const root = document.documentElement;
 
-// Secondary's fill, and outline's line: both from the text color.
-const NEUTRAL = "color-mix(in oklab, var(--ow-fg) 75%, var(--ow-bg))";
+// Secondary's tint (held down, a little deeper), and outline's line: all from the text color.
+const NEUTRAL = "color-mix(in oklab, var(--ow-fg) 8%, transparent)";
+const NEUTRAL_PRESSED = "color-mix(in oklab, var(--ow-fg) 16%, transparent)";
 const OUTLINE = "inset 0 0 0 1px color-mix(in oklab, var(--ow-fg) 16%, transparent)";
 
 const Plus = () => (
@@ -253,14 +254,14 @@ describe("Button", () => {
     }
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
-      // A neutral solid: the text color a little toward the page, with the page's color as text.
+      // A tint of the text color with no shadow, and the text color.
       expect(face(secondary).backgroundColor).toBe(resolveColor(NEUTRAL));
-      expect(face(secondary).boxShadow).toBe(resolveShadow("var(--ow-primary-shadow)"));
-      expect(getComputedStyle(secondary).color).toBe(resolveColor("var(--ow-bg)"));
+      expect(face(secondary).boxShadow).toBe("none");
+      expect(getComputedStyle(secondary).color).toBe(resolveColor("var(--ow-fg)"));
       expect(face(primary).backgroundColor).toBe(resolveColor("var(--ow-accent)"));
       expect(face(primary).boxShadow).toBe(resolveShadow("var(--ow-primary-shadow)"));
       expect(getComputedStyle(primary).color).toBe(resolveColor("var(--ow-on-accent)"));
-      // The critical solid with the primary's crisp edges, and its own text color.
+      // The critical solid with the same thin light line as primary, and its own text.
       expect(face(destructive).backgroundColor).toBe(resolveColor("var(--ow-critical-solid)"));
       expect(face(destructive).boxShadow).toBe(resolveShadow("var(--ow-primary-shadow)"));
       expect(getComputedStyle(destructive).color).toBe(resolveColor("var(--ow-on-critical)"));
@@ -307,7 +308,7 @@ describe("Button", () => {
   test("hover tints the face with --ow-hover, and leaves its edges alone", async () => {
     const screen = await render(
       <>
-        <Button variant="secondary">Secondary</Button>
+        <Button variant="primary">Primary</Button>
         <p>Away</p>
       </>,
     );
@@ -328,7 +329,7 @@ describe("Button", () => {
     pointer("pointerdown", button, box.left + 10, box.top + 10);
     expect(button.hasAttribute("data-held")).toBe(true);
     expect(face(button).backgroundColor).toBe(resolveColor("var(--ow-pressed-bg)"));
-    expect(face(button).boxShadow).toBe(resolveShadow("var(--ow-pressed-shadow)"));
+    expect(face(button).boxShadow).toBe("none");
     // In within 90 ms.
     expect(getComputedStyle(button).transitionDuration).toBe("0.09s");
     await expect.poll(() => scaleOf(getComputedStyle(button).transform)).toBeCloseTo(0.97, 3);
@@ -340,7 +341,7 @@ describe("Button", () => {
     expect(style.transitionTimingFunction).toContain("linear(");
   });
 
-  test("held down, ghost takes the pressed pair, and solid fills keep their edges", async () => {
+  test("held down, ghost takes the pressed pair, secondary deepens, solid fills keep their shadow", async () => {
     const [ghost, outline, primary, secondary, destructive] = await mount(
       <>
         <Button variant="ghost">Ghost</Button>
@@ -356,7 +357,7 @@ describe("Button", () => {
       pointer("pointerdown", button, box.left + 5, box.top + 5);
     }
     expect(face(ghost).backgroundColor).toBe(resolveColor("var(--ow-pressed-bg)"));
-    expect(face(ghost).boxShadow).toBe(resolveShadow("var(--ow-pressed-shadow)"));
+    expect(face(ghost).boxShadow).toBe("none");
     // Outline keeps its line over the pressed fill.
     expect(face(outline).backgroundColor).toBe(resolveColor("var(--ow-pressed-bg)"));
     expect(face(outline).boxShadow).toBe(resolveShadow(OUTLINE));
@@ -364,7 +365,9 @@ describe("Button", () => {
     const darker = (fill: string) => resolveColor(`color-mix(in oklab, ${fill}, black 10%)`);
     expect(face(primary).backgroundColor).toBe(darker("var(--ow-accent)"));
     expect(face(primary).boxShadow).toBe(resolveShadow("var(--ow-primary-shadow)"));
-    expect(face(secondary).backgroundColor).toBe(darker(NEUTRAL));
+    // Secondary deepens its tint, still with no shadow.
+    expect(face(secondary).backgroundColor).toBe(resolveColor(NEUTRAL_PRESSED));
+    expect(face(secondary).boxShadow).toBe("none");
     expect(face(destructive).backgroundColor).toBe(darker("var(--ow-critical-solid)"));
     expect(face(destructive).boxShadow).toBe(resolveShadow("var(--ow-primary-shadow)"));
     for (const button of [ghost, outline, primary, secondary, destructive]) {

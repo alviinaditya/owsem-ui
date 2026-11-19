@@ -2,13 +2,14 @@ import type { CSSProperties, ReactNode } from "react";
 import { describe, expect, test } from "vitest";
 import { userEvent } from "vitest/browser";
 import { render } from "vitest-browser-react";
-import { TOL } from "../../../test/geometry.ts";
+import { TOL, themeRadius } from "../../../test/geometry.ts";
 import { ScrollArea } from "./index";
 
-// 16px type: a 6px pill, 4px from the edge. --ow-radius is 8px: the ends stay 5px from the corners.
+// 16px type: a 6px pill, 4px from the edge. Its ends stay clear of the corners: the radius less
+// half the pill, or the gap if that is more.
 const SIZE = 6;
 const GAP = 4;
-const CLEAR = 5;
+const clear = () => Math.max(GAP, themeRadius() - SIZE / 2);
 const frame = { inlineSize: 240, blockSize: 160, fontSize: 16 } satisfies CSSProperties;
 
 async function mount(ui: ReactNode) {
@@ -37,8 +38,8 @@ describe("ScrollArea geometry", () => {
     const thumb = box(one("__thumb"));
     expect(thumb.width).toBeCloseTo(SIZE, 1);
     expect(area.right - track.right).toBeCloseTo(GAP, 1);
-    expect(track.top - area.top).toBeCloseTo(CLEAR, 1);
-    expect(area.bottom - track.bottom).toBeCloseTo(CLEAR, 1);
+    expect(track.top - area.top).toBeCloseTo(clear(), 1);
+    expect(area.bottom - track.bottom).toBeCloseTo(clear(), 1);
     expect(Math.abs(thumb.left - track.left)).toBeLessThanOrEqual(TOL);
     expect(Math.abs(thumb.top - track.top)).toBeLessThanOrEqual(TOL);
     // A pill: both ends fully round.
@@ -94,7 +95,7 @@ describe("ScrollArea geometry", () => {
     const horizontal = box(one(bar("horizontal")));
     expect(horizontal.height).toBeCloseTo(SIZE, 1);
     expect(box(one("")).bottom - horizontal.bottom).toBeCloseTo(GAP, 1);
-    expect(horizontal.left - box(one("")).left).toBeCloseTo(CLEAR, 1);
+    expect(horizontal.left - box(one("")).left).toBeCloseTo(clear(), 1);
     expect(vertical.bottom).toBeLessThanOrEqual(horizontal.top + TOL);
     expect(horizontal.right).toBeLessThanOrEqual(vertical.left + TOL);
   });

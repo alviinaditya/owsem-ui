@@ -24,7 +24,7 @@ function resolveColor(value: string, scope: Element = document.body): string {
 }
 
 /** Resolves a shadow token to its computed value. */
-function resolveShadow(value: string): string {
+function _resolveShadow(value: string): string {
   const probe = document.createElement("span");
   probe.style.boxShadow = value;
   document.body.append(probe);
@@ -32,6 +32,8 @@ function resolveShadow(value: string): string {
   probe.remove();
   return shadow;
 }
+
+const KEY = "color-mix(in oklab, var(--ow-fg) 8%, transparent)";
 
 describe("Kbd", () => {
   test("renders a kbd with its text", async () => {
@@ -58,7 +60,7 @@ describe("Kbd", () => {
     expect(rendered?.className).toBe("ow-kbd");
   });
 
-  test("draws a raised keycap from the theme tokens, in light and dark", async () => {
+  test("draws a keycap as a small key, a tint of the text color with no shadow, in light and dark", async () => {
     onTestFinished(() => {
       delete root.dataset.theme;
     });
@@ -67,9 +69,11 @@ describe("Kbd", () => {
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
       const style = getComputedStyle(key);
-      expect(style.backgroundColor).toBe(resolveColor("var(--ow-raised-bg)"));
-      expect(style.boxShadow).toBe(resolveShadow("var(--ow-raised-shadow)"));
-      expect(style.color).toBe(resolveColor("var(--ow-muted)"));
+      expect(style.backgroundColor).toBe(resolveColor(KEY));
+      expect(style.boxShadow).toBe("none");
+      expect(style.color).toBe(
+        resolveColor("color-mix(in oklab, var(--ow-muted) 70%, var(--ow-fg))"),
+      );
     }
   });
 
@@ -95,10 +99,10 @@ describe("Kbd", () => {
 
   test("a theme token set on it changes it alone (TK-9)", async () => {
     const [key] = await mount(
-      <Kbd style={{ "--ow-raised-bg": "rgb(255, 0, 0)" } as CSSProperties}>K</Kbd>,
+      <Kbd style={{ "--ow-fg": "rgb(255, 0, 0)" } as CSSProperties}>K</Kbd>,
     );
     if (!key) throw new Error("no key");
-    expect(getComputedStyle(key).backgroundColor).toBe("rgb(255, 0, 0)");
+    expect(getComputedStyle(key).backgroundColor).not.toBe(resolveColor(KEY));
   });
 
   test("keeps its edge in forced colors (DP-8)", async () => {

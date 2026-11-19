@@ -27,6 +27,11 @@ export interface IconMorphProps extends Omit<ComponentPropsWithoutRef<"span">, "
    * same place. Nothing animates on the first render; `null` shows none.
    */
   children?: ReactElement | null | false | undefined;
+  /**
+   * The swap's length, as a CSS time such as `"300ms"`; the spring's curve keeps its shape.
+   * @default the settle spring's, `--ow-spring-settle-duration`
+   */
+  duration?: string | undefined;
 }
 
 interface Leaving {
@@ -56,10 +61,11 @@ const keyOf = (child: unknown): string | null =>
  */
 export const IconMorph: ForwardRefExoticComponent<IconMorphProps & RefAttributes<HTMLSpanElement>> =
   forwardRef<HTMLSpanElement, IconMorphProps>(function IconMorph(
-    { children, className, ...props },
+    { children, className, duration, style, ...props },
     ref,
   ) {
     const icon = isValidElement(children) ? children : null;
+    const timing = duration ? ({ ...style, "--_duration": duration } as typeof style) : style;
     const key = keyOf(icon);
     const root = useRef<HTMLSpanElement | null>(null);
     // The icon last committed, which becomes the leaving one when the key changes.
@@ -150,7 +156,12 @@ export const IconMorph: ForwardRefExoticComponent<IconMorphProps & RefAttributes
     const leaving = state.leaving ? item(state.leaving.key, state.leaving.element, true) : null;
 
     return (
-      <span ref={setRef} className={className ? `${cls.root} ${className}` : cls.root} {...props}>
+      <span
+        ref={setRef}
+        className={className ? `${cls.root} ${className}` : cls.root}
+        style={timing}
+        {...props}
+      >
         {state.leavingFirst ? leaving : current}
         {state.leavingFirst ? current : leaving}
       </span>

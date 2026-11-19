@@ -9,12 +9,13 @@
  * on the Popup itself through className or style.
  */
 @layer owsem.components {
-  /* The trigger: a search field on the well (a flat darker fill), as tall as controls (FR-9). */
+  /* The trigger: a search field, a tint of the text color, as tall as controls (FR-9). */
   .ow-command-menu__trigger {
-    --py: 0.75em;
+    --py: 0.8036em;
     --_py: max(var(--py), (24px - 1lh) / 2);
     --px: calc(var(--_py) + (1lh - 1cap) / 2);
     --icon: calc(1em + 2px);
+    --_bg: color-mix(in oklab, var(--ow-fg) 6%, transparent);
     display: inline-flex;
     align-items: center;
     gap: 0.5em;
@@ -24,14 +25,10 @@
     overflow: hidden;
     border: 0;
     border-radius: var(--ow-radius);
-    /* DP-8: invisible until forced colors drop the shadows. */
+    /* DP-8: invisible until forced colors draw it as the edge. */
     outline: 1px solid transparent;
     outline-offset: -1px;
-    background-color: var(--ow-well-bg);
-    /* A crisp 1px edge at 3:1 (DP-6), over the well's own. */
-    box-shadow:
-      inset 0 0 0 1px var(--ow-edge),
-      var(--ow-well-shadow);
+    background-color: var(--_bg);
     color: var(--ow-muted);
     font: inherit;
     font-size: 14px;
@@ -43,7 +40,7 @@
   }
 
   .ow-command-menu__trigger[data-size="sm"] {
-    --py: 0.5em;
+    --py: 0.6058em;
     font-size: 13px;
   }
 
@@ -52,8 +49,10 @@
     font-size: 16px;
   }
 
+  /* Hover deepens the tint. */
   @media (hover: hover) and (pointer: fine) {
     .ow-command-menu__trigger:hover {
+      --_bg: color-mix(in oklab, var(--ow-fg) 9%, transparent);
       color: var(--ow-fg);
     }
   }
@@ -98,16 +97,16 @@
   }
 
   /*
-   * The glass panel (Surface): the panel material at 80% over a blur of the page, with the popup's
-   * crisp edge and drop shadow. The radius is the items' plus the padding around them (FR-10b).
+   * The glass panel (Surface): the raised fill at 80% over a blur of the page, with the popup's
+   * shadow. One radius outside (TK-8); the items follow its curve, less --_p.
    * The width is a default: set inline-size on the Popup to change it.
    */
   .ow-command-menu__popup {
     /* Item --py in em, per size (FR-11); the field and labels line up with the items from it. */
-    --_n: 0.75;
+    --_n: 0.8036;
     --_p: 6px;
-    --_radius: var(--ow-radius);
-    --_solid: var(--ow-panel);
+    --_radius: max(0px, var(--ow-radius) - var(--_p));
+    --_solid: var(--ow-raised-bg);
     --_glass: color-mix(in oklab, var(--_solid) 80%, transparent);
     --_blur: 24px;
     --_shadow: var(--ow-popup-shadow);
@@ -117,7 +116,7 @@
     inline-size: min(100%, 560px);
     max-block-size: min(100%, 32rem);
     box-sizing: border-box;
-    border-radius: calc(var(--_radius) + var(--_p));
+    border-radius: var(--ow-radius);
     outline: 1px solid transparent;
     outline-offset: -1px;
     background-color: var(--_solid);
@@ -128,7 +127,7 @@
   }
 
   .ow-command-menu__popup[data-size="sm"] {
-    --_n: 0.5;
+    --_n: 0.6058;
     font-size: 13px;
   }
 
@@ -176,15 +175,14 @@
   }
 
   /*
-   * The search row, its icon and text in line with the items' (FR-10). An etched line under it, as
+   * The search row, its icon and text in line with the items' (FR-10). A hairline under it, as
    * over the footer; the input always has focus while the menu is open, so its caret shows it.
    */
   .ow-command-menu__field {
     --icon: calc(1em + 2px);
     gap: 0.5em;
     padding-inline: calc(var(--_p) + max(var(--_n) * 1em, (24px - 1lh) / 2) + (1lh - 1cap) / 2);
-    border-block-end: 1px solid var(--ow-line-dark);
-    box-shadow: 0 1px 0 var(--ow-line-light);
+    border-block-end: 1px solid var(--ow-line);
   }
 
   /* One line tall: Firefox can make a text field taller, from the font's rounded metrics. */
@@ -204,6 +202,11 @@
   .ow-command-menu__input::placeholder {
     color: var(--ow-muted);
     opacity: 1;
+  }
+
+  /* Glide's highlight takes the items' corners. */
+  .ow-command-menu__popup .ow-glide {
+    --_radius: max(0px, var(--ow-radius) - 6px);
   }
 
   /* Shown only while focused: the way out for touch screen readers. */
@@ -376,20 +379,18 @@
     color: var(--ow-muted);
   }
 
-  /* Keys as small keycaps: the raised material, a flat fill with a crisp edge. */
   /* Shortcuts are Kbd keycaps (components/kbd), at the end of the trigger or the item. */
   .ow-command-menu__trigger > .ow-command-menu__shortcut,
   .ow-command-menu__item > .ow-command-menu__shortcut {
     margin-inline-start: auto;
   }
 
-  /* Past an etched groove: a dark line, then a light one. Its hints start where group names do. */
+  /* Past a hairline. Its hints start where group names do. */
   .ow-command-menu__footer {
     flex-wrap: wrap;
     gap: 0.5em 1em;
     padding-inline: calc(var(--_p) + (var(--_n) + 0.125) * 1em - 1px);
-    border-block-start: 1px solid var(--ow-line-dark);
-    box-shadow: inset 0 1px 0 var(--ow-line-light);
+    border-block-start: 1px solid var(--ow-line);
   }
 
   .ow-command-menu__footer > * {
@@ -413,6 +414,17 @@
     .ow-command-menu__trigger:focus-visible,
     .ow-command-menu__close:focus-visible {
       outline-color: Highlight;
+    }
+  }
+
+  /* More contrast asked for: the trigger's edge comes back at 3:1, and the popup gets a ring. */
+  @media (prefers-contrast: more) {
+    .ow-command-menu__trigger {
+      box-shadow: inset 0 0 0 1px var(--ow-edge);
+    }
+
+    .ow-command-menu__popup {
+      --_shadow: var(--ow-popup-shadow), 0 0 0 1px var(--ow-edge);
     }
   }
 }

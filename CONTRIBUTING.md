@@ -70,8 +70,11 @@ and applies it from an inline `<head>` script before first paint.
 
 The theme tokens are the only public tokens (TK-9). Component CSS reads them directly: no
 component tokens such as `--ow-menu-bg`, and no fallbacks such as `var(--ow-panel, #fff)`, since
-`tokens.css` always ships with the components. A value without a token is derived from one:
-inner radii from `--ow-radius` (FR-10b), tints with `color-mix()` from `--ow-fg` or `--ow-accent`.
+`tokens.css` always ships with the components. A value without a token is derived from one: tints
+with `color-mix()` from `--ow-fg` or `--ow-accent`, and corners from `--ow-radius`. Every outer
+surface (a control, a popup, a track, a panel) takes `--ow-radius` itself; a part nested tightly
+inside a padded one takes `max(0px, var(--ow-radius) - <padding>)`, as menu items, a segmented
+thumb, and a switch's key do. Do not add the padding to the outer radius instead.
 Add a theme token only for a theming value (color, radius, shadow, font, motion) that no token
 gives and that more than one component needs. `test/theming.test.ts` fails on any other `--ow-*`
 name, a fallback, or a literal color, radius, or font. A literal that is not theming, such as a
@@ -160,7 +163,7 @@ To build one, use Separator as the reference:
 
 ### Docs stand-ins
 
-Until a component exists, the docs build its job by hand, in the same depth material (flat
+Until a component exists, the docs build its job by hand, in the same materials (flat
 `--docs-well`, raised `--docs-raised`, the `--docs-radius*` scale), so the swap is markup and
 deleted CSS:
 
@@ -180,7 +183,7 @@ this page", Scroll Area scrolls the sidebar, the Lab's controls and code drawer,
 and the install commands, and Color Picker opens from the swatch of every Lab color control, in place of the
 browser's `<input type="color">`.
 
-The docs' `--docs-well`, `--docs-raised`, and their shadows point at the library's depth
+The docs' `--docs-well` and `--docs-raised` point at the library's
 materials (TK-7), so the docs and the library share one source.
 
 Items in a list (menus, selects, tabs, toggle groups) are lit with Glide from
@@ -193,14 +196,31 @@ that leave the folder: Core to `@/lib/owsem/...` and other components to
 
 ### Materials and motion
 
-Surfaces come from the materials in `tokens.css` (TK-7): `--ow-panel` and `--ow-popup-shadow` for
-panels and popups, `--ow-raised-*` for buttons, thumbs, and on states, `--ow-well-*` for tracks and
-fields, `--ow-pressed-*` while a control is held down, `--ow-accent` with `--ow-on-accent` and
-`--ow-primary-shadow` for the primary button, and `--ow-critical-solid` with `--ow-on-critical`
-for the destructive one (`--ow-critical` is the critical text tone).
-Depth comes from flat fills and crisp 1px edges, drawn as inset shadows so they add no size; never
-use soft, blurred, or sunken (inset blur) shadows, which read as neumorphism. Separators and layout
-lines stay etched grooves (`--ow-line-dark` over `--ow-line-light`). Base never glows (DP-1).
+Lines only separate content; they never draw a shape. A control or container is known by its fill,
+one tone step from what it sits on, and a state changes the tone (or shows the 2px focus ring),
+never an edge. Surfaces come from the materials in `tokens.css` (TK-7): `--ow-panel` for panels,
+`--ow-raised-bg` for keys, thumbs, and popups (with `--ow-popup-shadow`, the only shadow besides the
+primary highlight), `--ow-well-bg` for tracks, `--ow-pressed-bg` while a control is held down,
+`--ow-accent` with `--ow-on-accent` and `--ow-primary-shadow` (a top highlight, no ring) for the
+primary button, and `--ow-critical-solid` with `--ow-on-critical` for the destructive one
+(`--ow-critical` is the critical text tone). The tokens `--ow-panel-shadow`, `--ow-raised-shadow`,
+and `--ow-pressed-shadow` are gone.
+
+Fields, keys, and tracks are tints of the text color held in private vars:
+`color-mix(in oklab, var(--ow-fg) 6%, transparent)` for a field (9% on hover under
+`@media (hover: hover) and (pointer: fine)`), with the rules for the raised step after the resting
+one (in `:where()` the later rule wins). A control has no edge by default (DP-6): the fill, the
+focus ring, and the state indicators carry the boundary. `@media (prefers-contrast: more)` gives
+fields, Checkbox, Radio, and Switch an `inset 0 0 0 1px var(--ow-edge)` edge and popups an extra
+`0 0 0 1px var(--ow-edge)`; `--ow-edge` is used nowhere else. Button `outline` is the only bordered
+variant. Never use soft, blurred, or sunken (inset blur) shadows, which read as neumorphism. The
+only lines that stay are hairlines in `--ow-line` (Separator, and the dividers in Menu, Select,
+Toolbar, Command Menu, and Color Picker). Base never glows (DP-1).
+
+Invalid is a tint, a message, and motion, not color alone: an Input or Select trigger with
+`[data-invalid]` or `[aria-invalid="true"]` takes a 12% `--ow-critical` tint and shakes once (320 ms,
+amplitude times `--ow-motion-scale`; under reduced motion, an opacity blink). A Form shakes the first
+invalid field again on a submit that still fails, by toggling `data-shake="off"`.
 
 Motion explains a state change (principle 4), with these rules:
 

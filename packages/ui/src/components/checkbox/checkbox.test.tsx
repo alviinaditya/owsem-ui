@@ -41,6 +41,11 @@ function resolve(property: "color" | "box-shadow", value: string, scope: Element
 /** A token's value as an opaque rgb triplet. */
 const tone = (token: string) => composite(resolve("color", `var(${token})`));
 
+/** The box off: a tint of the text color, one step up on hover, and one more while held. */
+const REST = "color-mix(in oklab, var(--ow-fg) 10%, transparent)";
+const HOVER = "color-mix(in oklab, var(--ow-fg) 13%, transparent)";
+const HELD = "color-mix(in oklab, var(--ow-fg) 16%, transparent)";
+
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /** Parks the pointer in the bottom corner, off any box an earlier test left it over. */
@@ -256,7 +261,7 @@ describe("Checkbox", () => {
     expect(lg?.dataset.size).toBe("lg");
   });
 
-  test("off is the well with its edge, on the primary material, in light and dark", async () => {
+  test("off is a tint with no edge, on the primary material, in light and dark", async () => {
     onTestFinished(() => {
       delete root.dataset.theme;
     });
@@ -271,10 +276,8 @@ describe("Checkbox", () => {
     await pointerAway();
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
-      expect(getComputedStyle(off).backgroundColor).toBe(resolve("color", "var(--ow-well-bg)"));
-      expect(getComputedStyle(off).boxShadow).toBe(
-        resolve("box-shadow", "inset 0 0 0 1px var(--ow-edge)"),
-      );
+      expect(getComputedStyle(off).backgroundColor).toBe(resolve("color", REST));
+      expect(getComputedStyle(off).boxShadow).toBe("none");
       for (const box of [on, mixed]) {
         expect(getComputedStyle(box).backgroundColor).toBe(resolve("color", "var(--ow-accent)"));
         expect(getComputedStyle(box).boxShadow).toBe(
@@ -288,19 +291,48 @@ describe("Checkbox", () => {
     }
   });
 
-  test("its edge, fill, and glyph hold 3:1 in light and dark (DP-6)", async () => {
+  test("hover, on the box or its label, steps the fill up; focus adds the ring and no edge", async () => {
+    const screen = await render(
+      <label>
+        <Checkbox.Root /> <span>Run</span>
+      </label>,
+    );
+    const box = screen.getByRole("checkbox").element() as HTMLElement;
+    await pointerAway();
+    expect(getComputedStyle(box).backgroundColor).toBe(resolve("color", REST));
+    await userEvent.hover(box);
+    expect(getComputedStyle(box).backgroundColor).toBe(resolve("color", HOVER));
+    await pointerAway();
+    await userEvent.hover(screen.getByText("Run"));
+    expect(getComputedStyle(box).backgroundColor).toBe(resolve("color", HOVER));
+    await pointerAway();
+    await userEvent.tab();
+    expect(document.activeElement).toBe(box);
+    expect(getComputedStyle(box).boxShadow).toBe("none");
+    expect(getComputedStyle(box).outlineWidth).toBe("2px");
+    expect(getComputedStyle(box).outlineColor).toBe(resolve("color", "var(--ow-focus)"));
+  });
+
+  test("more contrast draws the edge in --ow-edge", async () => {
+    onTestFinished(() => commands.setContrast("no-preference"));
+    const box = await one(<Checkbox.Root aria-label="Run" />);
+    await commands.setContrast("more");
+    expect(getComputedStyle(box).boxShadow).toBe(
+      resolve("box-shadow", "inset 0 0 0 1px var(--ow-edge)"),
+    );
+  });
+
+  test("the checked fill, its glyph, and the focus ring hold 3:1, in light and dark (DP-6)", async () => {
     onTestFinished(() => {
       delete root.dataset.theme;
     });
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
-      const edge = tone("--ow-edge");
       const accent = tone("--ow-accent");
-      for (const surface of ["--ow-bg", "--ow-panel", "--ow-well-bg"]) {
-        expect(contrast(edge, tone(surface)), `${theme} edge on ${surface}`).toBeGreaterThan(3);
-      }
+      const focus = tone("--ow-focus");
       for (const surface of ["--ow-bg", "--ow-panel"]) {
         expect(contrast(accent, tone(surface)), `${theme} fill on ${surface}`).toBeGreaterThan(3);
+        expect(contrast(focus, tone(surface)), `${theme} ring on ${surface}`).toBeGreaterThan(3);
       }
       expect(contrast(tone("--ow-on-accent"), accent), `${theme} glyph`).toBeGreaterThan(3);
     }
@@ -315,7 +347,7 @@ describe("Checkbox", () => {
     expect(getComputedStyle(box).backgroundColor).toBe(resolve("color", "var(--ow-accent)"));
   });
 
-  test("the glyphs crossfade with a small scale on the settle spring", async () => {
+  test("the glyphs crossfade on the settle spring: the minus grows from its middle", async () => {
     function Parent() {
       const [mixed, setMixed] = useState(false);
       return (
@@ -334,27 +366,56 @@ describe("Checkbox", () => {
     expect(getComputedStyle(check).opacity).toBe("1");
     expect(getComputedStyle(check).transform).toBe("none");
     expect(getComputedStyle(minus).opacity).toBe("0");
-    expect(getComputedStyle(minus).transform).toBe("matrix(0.8, 0, 0, 0.8, 0, 0)");
+    // Out, the minus has no width: it grows to its own.
+    expect(getComputedStyle(minus).transform).toBe("matrix(0, 0, 0, 1, 0, 0)");
     expect(getComputedStyle(minus).transitionDuration).toBe("0.12s, 0.573s");
 
+    const path = check.querySelector("path") as SVGPathElement;
     await userEvent.click(screen.getByRole("button"));
     expect(box.getAttribute("aria-checked")).toBe("mixed");
+    // The check fades whole, and is reset to draw in again only once it is gone.
+    expect(getComputedStyle(path).strokeDashoffset).toBe("0px");
     await expect.poll(() => getComputedStyle(minus).opacity).toBe("1");
     await expect.poll(() => getComputedStyle(minus).transform).toBe("none");
     await expect.poll(() => getComputedStyle(check).opacity).toBe("0");
     await expect.poll(() => getComputedStyle(check).transform).toBe("matrix(0.8, 0, 0, 0.8, 0, 0)");
+    await expect.poll(() => getComputedStyle(path).strokeDashoffset).toBe("-1px");
+    await userEvent.click(screen.getByRole("button"));
+    await expect.poll(() => getComputedStyle(check).opacity).toBe("1");
+    await expect.poll(() => getComputedStyle(path).strokeDashoffset).toBe("0px");
   });
 
-  test("the glyph comes in from the small scale, and the Indicator leaves when off", async () => {
+  test("the check draws itself in as it comes, and the Indicator leaves when off", async () => {
+    const draws: { frames: Keyframe[]; timing: EffectTiming }[] = [];
+    const onRun = (event: TransitionEvent) => {
+      if (event.propertyName !== "stroke-dashoffset") return;
+      const transition = (event.target as Element)
+        .getAnimations()
+        .find((a) => (a as CSSTransition).transitionProperty === "stroke-dashoffset");
+      const effect = transition?.effect as KeyframeEffect | undefined;
+      if (effect) draws.push({ frames: effect.getKeyframes(), timing: effect.getTiming() });
+    };
+    document.addEventListener("transitionrun", onRun);
+    onTestFinished(() => document.removeEventListener("transitionrun", onRun));
     const box = await one(<Checkbox.Root aria-label="Run" />);
     box.click();
     await expect.poll(() => indicator(box)).not.toBeNull();
     const check = glyph(box, "check");
+    const path = check.querySelector("path") as SVGPathElement;
+    // One dash the path's length: from fully off to fully on.
+    expect(path.getAttribute("pathLength")).toBe("1");
+    await expect.poll(() => draws.length).toBe(1);
+    const [draw] = draws;
+    expect(draw?.frames.map((frame) => frame.strokeDashoffset)).toEqual(["-1px", "0px"]);
+    expect([draw?.timing.duration, draw?.timing.delay]).toEqual([260, 30]);
     await expect.poll(() => getComputedStyle(check).opacity).toBe("1");
     await expect.poll(() => getComputedStyle(check).transform).toBe("none");
+    await expect.poll(() => getComputedStyle(path).strokeDashoffset).toBe("0px");
     box.click();
     await expect.poll(() => indicator(box)).toBeNull();
     expect(box.getAttribute("aria-checked")).toBe("false");
+    // Leaving, it only faded.
+    expect(draws).toHaveLength(1);
   });
 
   test("a load with the box checked does not animate", async () => {
@@ -373,21 +434,30 @@ describe("Checkbox", () => {
     await pointerAway();
     expect(getComputedStyle(box).backgroundImage).toBe("none");
     await userEvent.hover(screen.getByText("Run"));
-    expect(getComputedStyle(box).backgroundImage).toContain("linear-gradient");
+    expect(getComputedStyle(box).backgroundColor).toBe(resolve("color", HOVER));
     await pointerAway();
     await userEvent.hover(box);
-    expect(getComputedStyle(box).backgroundImage).toContain("linear-gradient");
+    expect(getComputedStyle(box).backgroundColor).toBe(resolve("color", HOVER));
   });
 
-  test("a press goes in to 0.97, keeps its edge, and lets go on the settle spring (DP-4)", async () => {
+  test("a checked box is tinted under the pointer too, over its accent", async () => {
+    const box = await one(<Checkbox.Root aria-label="Run" defaultChecked />);
+    await pointerAway();
+    expect(getComputedStyle(box).backgroundImage).toBe("none");
+    await userEvent.hover(box);
+    expect(getComputedStyle(box).backgroundImage).toContain("linear-gradient");
+    expect(getComputedStyle(box).backgroundColor).toBe(resolve("color", "var(--ow-accent)"));
+  });
+
+  test("a press goes in to 0.97 on a deeper fill, and lets go on the settle spring (DP-4)", async () => {
     const box = await one(<Checkbox.Root aria-label="Run" />);
     await userEvent.hover(box);
     await commands.mouse("down");
     await wait(150);
     const held = getComputedStyle(box);
     expect(held.transform).toBe("matrix(0.97, 0, 0, 0.97, 0, 0)");
-    expect(held.backgroundColor).toBe(resolve("color", "var(--ow-pressed-bg)"));
-    expect(held.boxShadow).toBe(resolve("box-shadow", "inset 0 0 0 1px var(--ow-edge)"));
+    expect(held.backgroundColor).toBe(resolve("color", HELD));
+    expect(held.boxShadow).toBe("none");
     expect(held.transitionDuration).toBe("0.09s");
     await commands.mouse("up");
     expect(box.getAttribute("aria-checked")).toBe("true");
@@ -412,12 +482,18 @@ describe("Checkbox", () => {
     await commands.mouse("up");
   });
 
-  test("under reduced motion the fills change and nothing moves (FR-20)", async () => {
+  test("under reduced motion the fills change and nothing moves or draws (FR-20)", async () => {
     onTestFinished(() => commands.setReducedMotion("no-preference"));
     await commands.setReducedMotion("reduce");
     const box = await one(<Checkbox.Root aria-label="Run" defaultChecked />);
     expect(getComputedStyle(glyph(box, "minus")).transform).toBe("matrix(1, 0, 0, 1, 0, 0)");
     expect(getComputedStyle(glyph(box, "minus")).opacity).toBe("0");
+    const off = await one(<Checkbox.Root aria-label="Off" />);
+    off.click();
+    await expect.poll(() => indicator(off)).not.toBeNull();
+    const path = glyph(off, "check").querySelector("path") as SVGPathElement;
+    expect(getComputedStyle(path).strokeDashoffset).toBe("0px");
+    expect(path.getAnimations()).toEqual([]);
     await userEvent.hover(box);
     await commands.mouse("down");
     await wait(150);
@@ -444,8 +520,7 @@ describe("Checkbox", () => {
       "--ow-accent": "rgb(255, 0, 0)",
       "--ow-primary-shadow": "none",
       "--ow-on-accent": "rgb(0, 0, 255)",
-      "--ow-well-bg": "rgb(0, 128, 0)",
-      "--ow-edge": "rgb(1, 2, 3)",
+      "--ow-fg": "rgb(0, 128, 0)",
       "--ow-radius": "20px",
     } as CSSProperties;
     const [off, on, inside, other] = await mount(
@@ -460,8 +535,9 @@ describe("Checkbox", () => {
     );
     if (!off || !on || !inside || !other) throw new Error("no checkboxes");
     await pointerAway();
-    expect(getComputedStyle(off).backgroundColor).toBe("rgb(0, 128, 0)");
-    expect(getComputedStyle(off).boxShadow).toBe("rgb(1, 2, 3) 0px 0px 0px 1px inset");
+    // Its tint follows the text color it sets, not the page's.
+    expect(getComputedStyle(off).backgroundColor).toBe(resolve("color", REST, off));
+    expect(getComputedStyle(off).backgroundColor).not.toBe(resolve("color", REST));
     expect(getComputedStyle(off).borderTopLeftRadius).toBe("10px");
     expect(getComputedStyle(on).backgroundColor).toBe("rgb(255, 0, 0)");
     expect(getComputedStyle(on).boxShadow).toBe("none");

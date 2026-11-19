@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
-import { concentric, insets, rect, TOL } from "../../../test/geometry.ts";
+import { insets, rect, TOL, themeRadius, usedRadius } from "../../../test/geometry.ts";
 import { ColorPicker, ColorPickerPopover } from "./index";
 
 const all = (scope: ParentNode, selector: string) => [
@@ -20,7 +20,7 @@ describe("Color Picker geometry", () => {
       </div>,
     );
     const heights = all(screen.container, ".ow-color-picker__trigger").map((t) => rect(t).height);
-    for (const [i, expected] of [29.25, 38.5, 48, 29.25, 38.5, 48].entries()) {
+    for (const [i, expected] of [32, 40, 48, 32, 40, 48].entries()) {
       expect(heights[i]).toBeCloseTo(expected, 1);
     }
     for (const swatch of all(screen.container, '[data-variant="swatch"]')) {
@@ -49,14 +49,15 @@ describe("Color Picker geometry", () => {
     }
   });
 
-  test("the panel is concentric with the area (FR-10b)", async () => {
+  test("the panel takes the one radius, and the area keeps it past the wide padding (TK-8)", async () => {
     const screen = await render(<ColorPicker />);
     const panel = screen.container.querySelector(".ow-color-picker");
     const area = screen.container.querySelector(".ow-color-picker__area");
     if (!panel || !area) throw new Error("no panel");
-    const { delta, insetDelta } = concentric(panel, area);
-    expect(delta).toBeLessThan(TOL);
-    expect(insetDelta).toBeLessThan(TOL);
+    expect(Math.abs(usedRadius(panel) - themeRadius())).toBeLessThan(TOL);
+    expect(Math.abs(usedRadius(area) - themeRadius())).toBeLessThan(TOL);
+    const gap = insets(panel, area);
+    expect(Math.abs(gap.top - gap.left)).toBeLessThan(TOL);
   });
 
   test("fields and the format switch line up, and every target is 24px or more (FR-14)", async () => {
@@ -65,10 +66,10 @@ describe("Color Picker geometry", () => {
     const format = scope.querySelector<HTMLElement>(".ow-color-picker__format");
     if (!format) throw new Error("no format switch");
     for (const input of all(scope, ".ow-color-picker__input")) {
-      expect(rect(input).height).toBeCloseTo(29.25, 1);
+      expect(rect(input).height).toBeCloseTo(32, 1);
       expect(rect(input).top).toBeCloseTo(rect(format).top, 1);
     }
-    expect(rect(format).height).toBeCloseTo(29.25, 1);
+    expect(rect(format).height).toBeCloseTo(32, 1);
     const targets = [
       ...all(scope, ".ow-color-picker__swatch"),
       ...all(scope, ".ow-color-picker__control"),

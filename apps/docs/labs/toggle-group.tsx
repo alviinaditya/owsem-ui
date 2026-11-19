@@ -329,12 +329,11 @@ const toggleGroupLab = defineLab({
       name: "Root",
       selector: ".ow-toggle-group",
       note: {
-        id: "Track datar dengan role group. Memuat item, thumb, dan highlight hover (Glide).",
-        en: "The flat track, with the group role. Holds the items, the thumb, and Glide's hover highlight.",
+        id: "Track datar tanpa tepi, dengan role group. Memuat item, thumb, dan highlight hover (Glide).",
+        en: "The flat well track with no edge, with the group role. Holds the items, the thumb, and Glide's hover highlight.",
       },
       tokens: {
         "--ow-well-bg": "--_track",
-        "--ow-well-shadow": "--_track-shadow",
         "--ow-fg": "--_fg",
         "--ow-muted": "--_muted",
         "--ow-radius": "--_radius",
@@ -352,12 +351,11 @@ const toggleGroupLab = defineLab({
       name: "Thumb",
       selector: ".ow-toggle-group__thumb",
       note: {
-        id: "Tombol timbul bertepi tegas di bawah item yang ditekan. Dekoratif; hanya di pilihan tunggal.",
-        en: "The raised key with crisp edges, under the pressed item. Decorative; single selection only.",
+        id: "Tombol raised tanpa tepi dan bayangan di bawah item yang ditekan. Dekoratif; hanya di pilihan tunggal.",
+        en: "The raised key with no edge or shadow, under the pressed item. Decorative; single selection only.",
       },
       tokens: {
         "--ow-raised-bg": "--_thumb",
-        "--ow-raised-shadow": "--_thumb-shadow",
       },
     },
   ],

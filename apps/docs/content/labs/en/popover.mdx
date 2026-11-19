@@ -5,7 +5,7 @@ title: Popover
 import { Part } from "@/components/lab/lab-shell";
 import { ForMode, TokenChip } from "@/components/token-setup";
 
-Popover opens a small panel from a button: a title, a line or two, and controls, on the panel
+Popover opens a small panel from a button: a title, a line or two, and controls, on the raised
 material with the popup shadow, with an optional arrow toward the button. Base UI places it and
 handles focus. Scroll to start the tour; the stage follows each part.
 
@@ -25,10 +25,11 @@ shuts it from the button. Play scene runs it again.
 ## Placed and pointed [#placement]
 
 Base UI places the panel on the `side` you ask for, `bottom` by default, 10px from its button, and
-flips it to the other side when it would leave the screen. The arrow sits on the panel's edge
-with its surface and shadow, so its edges are the panel's (in dark, a light line inside a dark
-ring) and open into it. It points at the button's middle even when the panel slides along to stay
-on screen, and keeps clear of the rounded corners.
+flips it to the other side when it would leave the screen. The arrow sits on the panel's edge with
+its surface and shadow, so it reads as part of the panel. It points at the button's
+middle even when the panel slides along to stay on screen, and keeps clear of the rounded corners.
+The panel measures from the button's resting box, so a button still springing back from its press
+does not move it a device pixel after it opens.
 
 The panel is pinned open on the stage: pick a side or turn the arrow off in the controls.
 
@@ -51,7 +52,7 @@ the stage; pick a name, here or on the stage, to see its tokens.
 | Part | Element | Notes |
 | --- | --- | --- |
 | <Part name="Trigger" /> | Your button | Passed to `render`; `aria-expanded`, and `data-popup-open` while open |
-| Positioner | `div.ow-popover__positioner` | `side`, `align`, `sideOffset` (10), `arrowPadding` (12), and `dir` |
+| Positioner | `div.ow-popover__positioner` | `side`, `align`, `sideOffset` (10), `arrowPadding` (12), and `dir`; anchored to the trigger's resting box |
 | <Part name="Popup" /> | `div.ow-popover__popup` | `role="dialog"`, `data-side`, and `data-instant` when it skips the animation |
 | <Part name="Arrow" /> | `div.ow-popover__arrow` | Optional and `aria-hidden`, with `data-side`; a turned square, half of it showing |
 | <Part name="Title" /> | `h2.ow-popover__title` | Names the dialog |
@@ -60,8 +61,8 @@ the stage; pick a name, here or on the stage, to see its tokens.
 
 ## States and variants [#states]
 
-The stage sets the panel in both themes, with and without the arrow. The surface is the panel
-material in both, with the popup shadow, and the arrow shares its surface and edge.
+The stage sets the panel in both themes, with and without the arrow. The surface is the raised
+material in both, with the popup shadow and no edge, and the arrow shares its surface.
 
 | State | What shows it |
 | --- | --- |
@@ -80,9 +81,10 @@ material in both, with the popup shadow, and the arrow shares its surface and ed
 
 Screen readers announce a dialog named by the title and described by the description. `modal`
 is false by default, so the page stays usable while the panel is open; set it to `true` or
-`"trap-focus"` to keep focus inside. `initialFocus` and `finalFocus` pick where focus goes.
+`"trap-focus"` to keep focus inside. With `true`, the page's scroll is held without an `overflow`
+style. `initialFocus` and `finalFocus` pick where focus goes.
 
-With `prefers-reduced-motion`, the panel fades without growing. In forced colors (Windows High
+With `prefers-reduced-motion`, the panel fades without growing. With `prefers-contrast: more`, the panel gains a 1px ring in `--ow-edge`. In forced colors (Windows High
 Contrast), the panel keeps a 1px edge in the system color, and so does the arrow.
 
 ## Customization [#customization]
@@ -96,11 +98,12 @@ outside the trigger's subtree.
 
 | Theme token | Purpose |
 | --- | --- |
-| `--ow-panel` | Surface, the arrow's too |
-| `--ow-popup-shadow` | Edge and shadow, the arrow's too |
+| `--ow-raised-bg` | Surface, the arrow's too |
+| `--ow-popup-shadow` | Shadow, the arrow's too |
+| `--ow-edge` | The ring under `prefers-contrast: more` |
 | `--ow-fg` | Text |
 | `--ow-muted` | The description |
-| `--ow-radius` | Corners, plus 4px as a menu's |
+| `--ow-radius` | Corners |
 
 <ForMode mode="isolated">
 

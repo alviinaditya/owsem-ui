@@ -40,12 +40,18 @@ fokus menyusul bersama komponen pertama yang bisa difokus.
 Targetnya, di light dan dark:
 
 - Teks: minimal 4,5:1 terhadap latarnya.
-- Batas kontrol dan indikator state, seperti tanda centang, Switch yang menyala, atau ring fokus:
-  minimal 3:1 terhadap warna di sebelahnya. Kontrol disabled dikecualikan, sesuai WCAG 1.4.11.
+- Indikator state, seperti tanda centang, Switch yang menyala, atau ring fokus: minimal 3:1
+  terhadap warna di sebelahnya.
+- Batas kontrol (DP-6): secara bawaan kontrol tidak punya tepi. Field, kotak yang belum dicentang,
+  dan track adalah isian yang berbeda satu tingkat tone dari yang ada di bawahnya, jadi batasnya
+  adalah isian itu, ring fokus 2px, dan indikator state. Di mode bawaan ini sengaja tidak memenuhi
+  WCAG 1.4.11 untuk batas. Di bawah `@media (prefers-contrast: more)`, field (Input, trigger Select,
+  field Toolbar, trigger Command Menu, kolom Color Picker), Checkbox, Radio, dan Switch menggambar
+  `--ow-edge` 1px, dan popup mendapat cincin 1px tambahan dengannya.
+- Invalid tidak pernah hanya warna: ada tint critical, pesan error, dan getaran sekali (kedipan
+  opasitas saat gerak dikurangi).
 
-Saat ini axe mengecek kontras teks di halaman test Separator untuk kedua tema. Pengecekan batas
-kontrol menyusul bersama kontrol pertama: kontrasnya dihitung dari nilai token, dan bayangan
-semi-transparan dikomposit dulu ke permukaan di belakangnya.
+Saat ini axe mengecek kontras teks di halaman test Separator untuk kedua tema.
 
 ## Target pointer
 
@@ -58,14 +64,15 @@ area tekan yang lebih besar lewat padding atau pseudo-element. axe sudah berjala
 
 Aturannya: animasi hanya menggerakkan `transform` dan `opacity`, ditambah `clip-path` bila perlu,
 dan setiap animasi punya versi `prefers-reduced-motion` tanpa perpindahan, cukup perubahan opacity
-atau warna. Aturan ini juga berlaku untuk efek Owsem yang lebih kaya. Separator tidak beranimasi,
-jadi belum ada yang perlu dikurangi.
+atau warna. Aturan ini juga berlaku untuk efek Owsem yang lebih kaya: getaran invalid pada Input dan trigger
+Select menjadi kedipan opasitas singkat, dan Form yang gagal submit menggetarkan lagi field invalid
+pertama dengan cara yang sama. Separator tidak beranimasi.
 
 ## Forced colors
 
 Di mode forced colors (Windows High Contrast), browser membuang `box-shadow` dan gradien latar, lalu
-mewarnai latar dengan warna sistem `Canvas`. Material depth akan hilang. Separator menggambar garis
-terukirnya dengan border, bukan background, dan test-nya memastikan garis tetap 1 px dengan warna
+mewarnai latar dengan warna sistem `Canvas`. Isian yang membedakan material akan hilang. Separator menggambar garis
+tipisnya dengan border, bukan background, dan test-nya memastikan garis tetap 1 px dengan warna
 teks sistem. Kontrol mengikuti dua aturan:
 
 - Setiap kontrol memakai `outline: 1px solid transparent; outline-offset: -1px`. Outline ini tidak

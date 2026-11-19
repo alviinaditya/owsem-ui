@@ -5,7 +5,7 @@ title: Kbd
 import { Part } from "@/components/lab/lab-shell";
 import { ForMode, TokenChip } from "@/components/token-setup";
 
-Kbd shows a key on the keyboard as a small raised keycap, with the same crisp edge as a button. It
+Kbd shows a key on the keyboard as a small keycap: a flat tint of the text color with no edge. It
 takes its size from the text around it, so one Kbd fits a sentence, a search field, or the end of a
 list row. Scroll to start the tour; the stage follows each part.
 
@@ -28,20 +28,19 @@ proportions at every size, since everything in it is measured in `em`.
 Kbd is not focusable. Screen readers read its text, so write keys as people say them, or hide a
 purely visual hint with `aria-hidden` when the control already names its shortcut with
 `aria-keyshortcuts`, as the docs' search does. In forced colors (Windows High Contrast), the
-keycap's edge is drawn in the system color.
+keycap is outlined in the system color.
 
 ## Customization [#customization]
 
-The stage controls are open; once you change the keycap color, its CSS is in the `settings.css`
+The stage controls are open; once you change the ink, its CSS is in the `settings.css`
 tab.
 
 Kbd reads these theme tokens. Set one on an element to change the keys inside it.
 
 | Theme token | Purpose |
 | --- | --- |
-| `--ow-raised-bg` | The keycap's fill |
-| `--ow-raised-shadow` | Its crisp edge |
-| `--ow-muted` | The key's text |
+| `--ow-fg` | The keycap's fill, a 9% tint of it, and 30% of the key's text |
+| `--ow-muted` | The key's text, 70% of it |
 | `--ow-radius` | Halved, the keycap's corners |
 
 <ForMode mode="isolated">

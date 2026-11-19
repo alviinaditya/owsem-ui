@@ -6,14 +6,14 @@ import { Part } from "@/components/lab/lab-shell";
 import { ForMode, TokenChip } from "@/components/token-setup";
 
 Toggle Group adalah sederet tombol toggle yang bekerja sebagai satu kesatuan. Dengan satu pilihan
-dalam satu waktu, komponen ini menjadi segmented control: track datar dengan thumb bertepi tegas
-yang bergeser ke item yang ditekan. Dengan `multiple`, setiap item menyala dan padam sendiri. Gulir
-untuk mulai tur; stage mengikuti setiap bagian.
+dalam satu waktu, komponen ini menjadi segmented control: track datar, dan thumb, isian raised tanpa tepi,
+yang bergeser ke item yang ditekan. Dengan `multiple`, setiap item menyala dan padam sendiri.
+Gulir untuk mulai tur; stage mengikuti setiap bagian.
 
 ## Segmented control [#segmented]
 
-Hanya satu item yang ditekan dalam satu waktu, dan thumb berada di bawahnya: tombol timbul berupa
-isian datar dengan tepi 1 px yang tegas. Pilih item lain, dan thumb bergeser ke sana dengan spring
+Hanya satu item yang ditekan dalam satu waktu, dan thumb berada di bawahnya: tombol raised berupa
+isian datar tanpa tepi dan bayangan. Pilih item lain, dan thumb bergeser ke sana dengan spring
 travel (`--ow-spring-travel`); label yang ditinggalkan meredup, dan label yang dituju menyala.
 Pointer menyalakan item terdekat dengan Glide di sumbu x, jadi highlight tidak pernah padam di
 celah, dan klik di celah diteruskan ke item yang menyala.
@@ -51,7 +51,7 @@ Kalau lebar item berbeda, thumb ikut menyesuaikan lebarnya di perjalanan, diskal
 Dengan `multiple`, setiap item menyala dan padam sendiri, dan tidak ada thumb: setiap item yang
 ditekan menjadi tombol tersendiri, dengan material yang sama seperti thumb, seperti setiap toggle
 yang menyala. Arahkan pointer ke tombol itu, dan isiannya bergeser 3% ke arah warna label, karena
-klik akan memadamkannya; tepinya tetap. Stage menyalakan Miring dan Garis bawah, lalu memadamkannya
+klik akan memadamkannya; isiannya hanya bergeser. Stage menyalakan Miring dan Garis bawah, lalu memadamkannya
 lagi.
 
 ## Anatomi [#anatomy]
@@ -66,10 +66,10 @@ hover-nya adalah Glide dari `owsem-ui/core`.
 | <Part name="Item" /> | `button.ow-toggle-group__item` | `Toggle` dari Base UI, dengan `aria-pressed` dan `data-pressed`; `data-disabled`, dan `data-held` selama ditahan. Teksnya dibungkus `span.ow-toggle-group__label`, jadi item yang hanya berisi ikon tetap persegi |
 | <Part name="Thumb" /> | `span.ow-toggle-group__thumb` | Dekoratif (`aria-hidden`): ditempatkan oleh skrip, digerakkan oleh CSS. `data-visible` selama berada di bawah item yang ditekan, `data-held` selama item itu ditahan |
 
-Item mengikuti geometri kontrol: padding-nya dari `--py` (FR-9), dan ikon seukuran font ditambah
-2 px, sama jauhnya dari tepi samping dan dari tepi atas. Track menambah 3 px di setiap sisi, dan
-radiusnya adalah radius item ditambah 3 px itu, jadi sudutnya tetap konsentris. `--ow-radius`
-mengatur radius item; tidak ada radius kedua yang perlu disamakan.
+Item mengikuti geometri kontrol: padding-nya dari `--py` (FR-9), dan ikon seukuran font ditambah 2
+px, sama jauhnya dari tepi samping dan dari tepi atas. Track menambah 3 px di setiap sisi dan
+memakai `--ow-radius`, seperti setiap permukaan; item, thumb, dan Glide memakainya dikurangi 3 px
+itu. Tidak ada radius kedua yang perlu disamakan.
 
 ## State dan varian [#states]
 
@@ -124,15 +124,13 @@ Toggle Group membaca token tema berikut; pasang di grup, atau di elemen di sekit
 
 | Token tema | Fungsi |
 | --- | --- |
-| `--ow-well-bg` | Track |
-| `--ow-well-shadow` | Tepi tipis track |
+| `--ow-well-bg` | Track, tanpa tepi |
 | `--ow-raised-bg` | Thumb, dan item yang ditekan pada banyak pilihan |
-| `--ow-raised-shadow` | Tepi tegasnya |
 | `--ow-fg` | Label item yang ditekan dan di-hover |
 | `--ow-muted` | Label lainnya |
 | `--ow-focus` | Cincin fokus keyboard |
 | `--ow-hover` | Highlight hover (Glide) |
-| `--ow-radius` | Sudut item, thumb, dan highlight; track menambah 3 px-nya |
+| `--ow-radius` | Sudut track; item, thumb, dan highlight memakainya dikurangi 3 px |
 
 <ForMode mode="isolated">
 

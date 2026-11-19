@@ -87,6 +87,10 @@ mengatur waktu tekanan tombol.
 | `--ow-spring-settle-duration` | Lama satu pergantian |
 | `--ow-ease-out` | Crossfade saat reduced motion |
 
+**Prop `duration`** mengatur pergantian satu Icon Morph, sebagai waktu CSS seperti `"300ms"`, dan
+spring-nya tetap memakai kurvanya. Nilainya masuk sebagai `--_duration` di style inline root, jadi
+tombol di sekitarnya tetap memakai tekanannya sendiri. Copy Button meneruskan `duration`-nya ke sini.
+
 <ForMode mode="isolated">
 
 Di mode isolated nilainya ada di root setiap komponen, jadi `.like .ow-icon-morph` tetap berlaku
@@ -104,9 +108,11 @@ baris yang berubah menyala.
 | Prop | Tipe | Bawaan |
 | --- | --- | --- |
 | `children` | `ReactElement \| null \| false` | |
+| `duration` | `string`, waktu CSS seperti `"300ms"` | Milik spring settle, `--ow-spring-settle-duration` |
 
-`children` adalah satu elemen ikon dengan `key`. Root adalah `span`; `className`, `style`, prop
-lain, dan ref diteruskan ke sana. Di luar slot, ikon mempertahankan ukurannya sendiri, jadi atur
-ukurannya seperti biasa; di slot ikon, slot yang mengaturnya.
+`children` adalah satu elemen ikon dengan `key`. Root adalah `span`; `className`, `style` (dengan
+`duration` ditambahkan ke dalamnya), prop lain, dan ref diteruskan ke sana. Di luar slot, ikon
+mempertahankan ukurannya sendiri, jadi atur ukurannya seperti biasa; di slot ikon, slot yang
+mengaturnya.
 
 Impor dari `owsem-ui/owsem`. Di registry, item-nya bernama `icon-morph`.

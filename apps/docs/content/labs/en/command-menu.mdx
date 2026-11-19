@@ -68,7 +68,7 @@ stage; pick a name, here or on the stage, to see its tokens.
 | <Part name="ItemDescription" /> | `span.ow-command-menu__item-description` | Muted, on the same line; gives way first |
 | <Part name="Shortcut" /> | `kbd.ow-kbd.ow-command-menu__shortcut` | A [Kbd](/en/kbd) keycap, at an item's end, in the Trigger, or in the Footer |
 | Empty | `div.ow-command-menu__empty` | Shown when nothing matches, and announced politely |
-| <Part name="Footer" /> | `div.ow-command-menu__footer` | Key hints, past an etched line |
+| <Part name="Footer" /> | `div.ow-command-menu__footer` | Key hints, past a hairline |
 
 Popup also renders a close button, `button.ow-command-menu__close`, hidden until it has focus: touch
 screen readers have no Escape key. `closeLabel` names it.
@@ -84,6 +84,7 @@ nothing found.
 | Disabled | Muted text; Enter does nothing |
 | Nothing matches | Empty's text, announced politely, and the list hides |
 | Input focused | The caret: the field has focus all the while the menu is open |
+| Trigger hovered | Its text in `--ow-fg`, and its tint steps up from 6% to 9% |
 | Trigger focused | A 2px ring in the focus color, 2px out |
 
 Three sizes, `sm`, `md` (the default), and `lg`, set on Popup and Trigger: 13, 14, and 16px text.
@@ -92,9 +93,9 @@ icon as far from the side as from the top; the search row and the Footer are a l
 and as tall as each other. Try them in the controls (P).
 
 Command Menu is an Owsem component, Kinetic and Surface: the highlight glides, and the panel is
-glass, the panel material over a blur of the page, with the popup's crisp 1px edge and drop shadow.
-The rest is flat: the Trigger is a well, a flat darker fill, and the keycaps are flat keys with a
-1px edge. It has no grain and no glow.
+glass, the raised material at 80% over a blur of the page, with the popup shadow and no edge.
+The rest is flat: the Trigger is a 6% tint of the text color, 9% under the pointer, and the keycaps
+are 9% tints with no edge. It has no grain and no glow.
 
 ## Keyboard and accessibility [#keyboard]
 
@@ -106,14 +107,15 @@ The rest is flat: the Trigger is a well, a flat darker fill, and the keycaps are
 | Escape | Closes the menu; focus goes back where it was |
 | Tab | To the close button, shown while it has focus |
 
-The menu is a modal dialog: focus stays inside while it is open, and returns when it closes. The
+The menu is a modal dialog: focus stays inside while it is open, and returns when it closes, and the
+page's scroll is held without an `overflow` style. The
 field is a combobox whose `aria-activedescendant` is the highlighted item; each group is labelled
 by its GroupLabel, and disabled items have `aria-disabled`. Empty is a polite live region.
 
 With `prefers-reduced-motion`, the highlight fades from item to item instead of sliding; nothing
 else moves. With `prefers-reduced-transparency`, the panel is opaque and the page is not blurred. In
 forced colors (Windows High Contrast), the panel, the Trigger, and the keycaps keep an outline, and
-the highlight is a `Highlight` outline. Right to left, the layout mirrors: the Popup renders in the
+the highlight is a `Highlight` outline. With `prefers-contrast: more`, the Trigger gets a 1px edge in `--ow-edge` and the panel a ring in it. Right to left, the layout mirrors: the Popup renders in the
 body, so it takes its direction from Base UI's `DirectionProvider`.
 
 Every text is yours to translate: the Input's label and placeholder, Empty, the group names, the
@@ -129,22 +131,21 @@ them on `:root`, or on the Popup itself through `className` or `style`.
 
 | Theme token | Purpose |
 | --- | --- |
-| `--ow-panel` | The glass, at 80% over a blur of the page, and the opaque panel |
-| `--ow-popup-shadow` | The panel's crisp edge and drop shadow |
+| `--ow-raised-bg` | The glass, at 80% over a blur of the page, and the opaque panel |
+| `--ow-popup-shadow` | The panel's shadow |
 | `--ow-backdrop` | The scrim over the page, which `backdrop="blur"` also blurs |
 | `--ow-fg` | Text, and the lit item's icon |
 | `--ow-muted` | The Trigger's text, group names, descriptions, icons, keys, and disabled items |
 | `--ow-focus` | The Trigger's ring |
 | `--ow-hover` | The highlight (Glide) |
-| `--ow-radius` | Items' corners; the panel adds its padding, and keys take half |
-| `--ow-well-bg`, `--ow-well-shadow`, `--ow-edge` | The Trigger, a flat field with a 3:1 edge |
-| `--ow-raised-bg`, `--ow-raised-shadow` | The keycaps |
-| `--ow-line-dark`, `--ow-line-light` | The etched lines under the search row and over the footer |
+| `--ow-radius` | The panel's and the Trigger's corners; items, the close button, and Glide take it less 6px, and keys half |
+| `--ow-fg` | Also the Trigger's tint, 6% (9% on hover), and the keycaps' 9% |
+| `--ow-line` | The hairlines under the search row and over the footer |
 
 The scrim sits outside the Popup, so set `--ow-backdrop` on `:root`, where it dims every modal
 layer. The panel is at most 560px wide: to change that, set the Popup's `inline-size` through
 `className` or `style`, such as `min(100%, 720px)`. For an opaque panel, as the Solid surface
-does, give it `background-color: var(--ow-panel)` and `backdrop-filter: none`.
+does, give it `background-color: var(--ow-raised-bg)` and `backdrop-filter: none`.
 
 <ForMode mode="isolated">
 

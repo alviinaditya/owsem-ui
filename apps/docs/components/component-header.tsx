@@ -8,27 +8,24 @@ const EXPRESSION_LABELS = {
   surface: "Surface",
 };
 
-/** Status, family, phase, and Owsem expression labels for a component. */
-export function ComponentBadges({ entry, dict }: { entry: CatalogEntry; dict: Dictionary }) {
-  const available = isAvailable(entry);
+/**
+ * The same facts as one quiet line: family · phase · expressions. Only a component that has not
+ * shipped gets a badge, its status.
+ */
+export function ComponentMeta({ entry, dict }: { entry: CatalogEntry; dict: Dictionary }) {
+  const parts = [
+    dict.catalog.families[entry.family],
+    entry.phase ? format(dict.catalog.phase, { phase: entry.phase }) : null,
+    ...(entry.expressions?.map((expression) => EXPRESSION_LABELS[expression]) ?? []),
+  ].filter(Boolean);
   return (
-    <ul className="badges">
-      <li className="badge" data-status={available ? "available" : "planned"}>
-        {available ? dict.catalog.available : dict.catalog.comingSoon}
-      </li>
-      <li className="badge" data-family={entry.family}>
-        {dict.catalog.families[entry.family]}
-      </li>
-      {entry.phase ? (
-        <li className="badge" data-phase={entry.phase}>
-          {format(dict.catalog.phase, { phase: entry.phase })}
-        </li>
-      ) : null}
-      {entry.expressions?.map((expression) => (
-        <li key={expression} className="badge" data-expression={expression}>
-          {EXPRESSION_LABELS[expression]}
-        </li>
-      ))}
-    </ul>
+    <p className="meta" data-family={entry.family}>
+      {isAvailable(entry) ? null : (
+        <span className="badge" data-status="planned">
+          {dict.catalog.comingSoon}
+        </span>
+      )}
+      <span className="meta-text">{parts.join(" · ")}</span>
+    </p>
   );
 }

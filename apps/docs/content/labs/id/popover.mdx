@@ -6,7 +6,7 @@ import { Part } from "@/components/lab/lab-shell";
 import { ForMode, TokenChip } from "@/components/token-setup";
 
 Popover membuka panel kecil dari sebuah tombol: judul, satu atau dua baris teks, dan kontrol, di
-atas material panel dengan bayangan popup, dengan panah opsional ke arah tombol. Base UI yang
+atas material raised dengan bayangan popup, dengan panah opsional ke arah tombol. Base UI yang
 menaruhnya dan mengatur fokus. Gulir untuk mulai tur; stage mengikuti setiap bagian.
 
 ## Panel dari trigger-nya [#panel]
@@ -27,9 +27,10 @@ menutupnya dari tombol. Putar scene memutarnya lagi.
 
 Base UI menaruh panel di `side` yang diminta, bawaannya `bottom`, 10px dari tombolnya, dan
 membaliknya ke sisi seberang bila panel akan keluar layar. Panah berada di tepi panel dengan
-permukaan dan bayangan yang sama, jadi tepinya adalah tepi panel (di tema gelap, garis terang di
-dalam cincin gelap) dan terbuka ke dalamnya. Panah menunjuk tengah tombol meski panel bergeser
-agar tetap di layar, dan menjauh dari sudut yang membulat.
+permukaan dan bayangan yang sama, jadi terbaca sebagai bagian panel. Panah
+menunjuk tengah tombol meski panel bergeser agar tetap di layar, dan menjauh dari sudut yang
+membulat. Panel mengukur dari kotak tombol saat diam, jadi tombol yang masih memantul kembali dari
+tekanannya tidak menggeser panel satu piksel perangkat setelah terbuka.
 
 Panel disematkan terbuka di stage: pilih sisi atau matikan panah di kontrol.
 
@@ -52,7 +53,7 @@ pilih sebuah nama, di sini atau di stage, untuk melihat tokennya.
 | Bagian | Elemen | Catatan |
 | --- | --- | --- |
 | <Part name="Trigger" /> | Tombol Anda | Diberikan lewat `render`; `aria-expanded`, dan `data-popup-open` selama terbuka |
-| Positioner | `div.ow-popover__positioner` | `side`, `align`, `sideOffset` (10), `arrowPadding` (12), dan `dir` |
+| Positioner | `div.ow-popover__positioner` | `side`, `align`, `sideOffset` (10), `arrowPadding` (12), dan `dir`; berjangkar ke kotak trigger saat diam |
 | <Part name="Popup" /> | `div.ow-popover__popup` | `role="dialog"`, `data-side`, dan `data-instant` saat melewati animasi |
 | <Part name="Arrow" /> | `div.ow-popover__arrow` | Opsional dan `aria-hidden`, dengan `data-side`; persegi yang diputar, separuhnya tampil |
 | <Part name="Title" /> | `h2.ow-popover__title` | Menamai dialog |
@@ -61,8 +62,8 @@ pilih sebuah nama, di sini atau di stage, untuk melihat tokennya.
 
 ## State dan varian [#states]
 
-Stage menampilkan panel di kedua tema, dengan dan tanpa panah. Permukaannya material panel di
-keduanya, dengan bayangan popup, dan panah memakai permukaan serta tepi yang sama.
+Stage menampilkan panel di kedua tema, dengan dan tanpa panah. Permukaannya material raised di
+keduanya, dengan bayangan popup dan tanpa tepi, dan panah memakai permukaan yang sama.
 
 | State | Tandanya |
 | --- | --- |
@@ -81,10 +82,11 @@ keduanya, dengan bayangan popup, dan panah memakai permukaan serta tepi yang sam
 
 Screen reader mengumumkan dialog yang dinamai oleh judul dan dideskripsikan oleh deskripsinya.
 `modal` bawaannya false, jadi halaman tetap bisa dipakai selama panel terbuka; pasang `true` atau
-`"trap-focus"` untuk menahan fokus di dalam. `initialFocus` dan `finalFocus` menentukan ke mana
+`"trap-focus"` untuk menahan fokus di dalam. Dengan `true`, gulir halaman
+ditahan tanpa style `overflow`. `initialFocus` dan `finalFocus` menentukan ke mana
 fokus pergi.
 
-Dengan `prefers-reduced-motion`, panel memudar tanpa tumbuh. Di forced colors (Windows High
+Dengan `prefers-reduced-motion`, panel memudar tanpa tumbuh. Dengan `prefers-contrast: more`, panel mendapat ring 1px berwarna `--ow-edge`. Di forced colors (Windows High
 Contrast), panel tetap punya tepi 1px dengan warna sistem, begitu pula panahnya.
 
 ## Kustomisasi [#customization]
@@ -97,11 +99,12 @@ subtree trigger-nya.
 
 | Token tema | Fungsi |
 | --- | --- |
-| `--ow-panel` | Permukaan, juga untuk panah |
-| `--ow-popup-shadow` | Tepi dan bayangan, juga untuk panah |
+| `--ow-raised-bg` | Permukaan, juga untuk panah |
+| `--ow-popup-shadow` | Bayangan, juga untuk panah |
+| `--ow-edge` | Ring di bawah `prefers-contrast: more` |
 | `--ow-fg` | Teks |
 | `--ow-muted` | Deskripsi |
-| `--ow-radius` | Sudut, ditambah 4px seperti menu |
+| `--ow-radius` | Sudut |
 
 <ForMode mode="isolated">
 

@@ -18,10 +18,11 @@ follows each part.
 </label>
 ```
 
-Off, the track is the well with a crisp edge at 3:1. On, it is the accent with the primary button's
-edges. The fill changes at once with the state. The thumb is the same raised key in both, and it is
-what moves: `translate`, on the travel spring. Change your mind halfway and it turns back from where
-it is, since the motion is a CSS transition.
+Off, the track is a 10% tint of the text color with no edge, 13% under a fine pointer, on the
+switch or its label. On, it is the accent with the primary button's top highlight. The fill changes
+at once with the state. The thumb is the same raised key in both, with no shadow, and it
+is what moves: `translate`, on the travel spring. Change your
+mind halfway and it turns back from where it is, since the motion is a CSS transition.
 
 The stage plays it: the pointer turns Push and the digest on, then off again, and the line under
 them counts. Play scene runs it again; press them yourself to feel it. Under reduced motion the
@@ -78,7 +79,8 @@ icon. The pointer turns the off switch on and off in each theme.
 
 | State | What shows it |
 | --- | --- |
-| Off | `--ow-well-bg`, with a 1px `--ow-edge` edge |
+| Off | A 10% tint of `--ow-fg`, with no edge |
+| Hover, on the switch or its label | Off: the tint at 13% |
 | On | `--ow-accent`, with `--ow-primary-shadow` |
 | Held | The thumb squashes to 0.875 toward its travel, within 90 ms |
 | Keyboard focus | A 2px ring 2px out, in `--ow-focus` |
@@ -97,7 +99,8 @@ Screen readers announce a switch and its state through `aria-checked`. Name it w
 A wrapping label also makes its text a target. An icon in the thumb is decorative, so give it
 `aria-hidden`.
 
-With `prefers-reduced-motion`, the thumb goes to its place with no travel and no squash. In forced
+With `prefers-reduced-motion`, the thumb goes to its place with no travel and no squash. With
+`prefers-contrast: more`, the track gets a 1px edge in `--ow-edge`. In forced
 colors (Windows High Contrast), the track keeps a 1px edge in the system color and is filled with
 `Highlight` while on, and the key is drawn solid in `CanvasText` or `HighlightText`. Right to left,
 off is on the right.
@@ -111,14 +114,11 @@ what is inside.
 
 | Theme token | Purpose |
 | --- | --- |
-| `--ow-well-bg` | Track while off |
-| `--ow-edge` | Track's edge while off |
+| `--ow-fg` | Track tint while off (10%, 13% on hover), and an icon in the thumb |
 | `--ow-accent` | Track while on |
-| `--ow-primary-shadow` | Track's edges while on |
+| `--ow-primary-shadow` | Track's top highlight while on |
 | `--ow-raised-bg` | Thumb |
-| `--ow-raised-shadow` | Thumb's edges |
-| `--ow-fg` | An icon in the thumb |
-| `--ow-radius` | The key's corners; the track adds the inset |
+| `--ow-radius` | The track's corners; the key takes it less the 2px inset |
 | `--ow-motion-scale` | How far a press goes in |
 | `--ow-focus` | Focus ring |
 

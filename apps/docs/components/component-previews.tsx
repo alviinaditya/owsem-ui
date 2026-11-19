@@ -131,6 +131,14 @@ function usePortal() {
   return { container, box: <div ref={setContainer} className="component-preview-portal" /> };
 }
 
+/**
+ * Opened without a pointer, Base UI scrolls the highlighted item into view, and with it the page:
+ * the index would slide down to this preview on every load. Its items never scroll anything.
+ */
+const stayPut = (el: HTMLElement | null) => {
+  if (el) el.scrollIntoView = () => {};
+};
+
 // Pinned open without taking focus or the page's scroll (Base UI's undocumented `initialFocus`).
 const pinned = { open: true, modal: false } as const;
 const keepFocus = { initialFocus: false } as object;
@@ -140,7 +148,9 @@ function PopoverPreview({ t }: { t: Text }) {
   return (
     <>
       <Popover.Root {...pinned}>
-        <Popover.Trigger render={<Button size="sm" variant="outline" />}>{t.share}</Popover.Trigger>
+        <Popover.Trigger render={<Button size="sm" variant="secondary" />}>
+          {t.share}
+        </Popover.Trigger>
         <Popover.Portal container={portal.container}>
           <Popover.Positioner side="bottom">
             <Popover.Popup {...keepFocus}>
@@ -202,7 +212,7 @@ function MenuPreview({ t }: { t: Text }) {
   return (
     <>
       <Menu.Root {...pinned}>
-        <Menu.Trigger render={<Button size="sm" variant="outline" />}>{t.edit}</Menu.Trigger>
+        <Menu.Trigger render={<Button size="sm" variant="secondary" />}>{t.edit}</Menu.Trigger>
         <Menu.Portal container={portal.container}>
           <Menu.Positioner side="inline-end" align="start">
             <Menu.Popup size="sm" {...keepFocus}>
@@ -240,9 +250,15 @@ function SelectPreview({ t }: { t: Text }) {
           <Select.Positioner alignItemWithTrigger={false}>
             {/* Inert, so the open list leaves focus with the page. */}
             <Select.Popup inert>
-              <Select.Item value={t.day}>{t.day}</Select.Item>
-              <Select.Item value={t.week}>{t.week}</Select.Item>
-              <Select.Item value={t.month}>{t.month}</Select.Item>
+              <Select.Item ref={stayPut} value={t.day}>
+                {t.day}
+              </Select.Item>
+              <Select.Item ref={stayPut} value={t.week}>
+                {t.week}
+              </Select.Item>
+              <Select.Item ref={stayPut} value={t.month}>
+                {t.month}
+              </Select.Item>
             </Select.Popup>
           </Select.Positioner>
         </Select.Portal>
@@ -515,7 +531,7 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
             app.css
           </CodeBlock.Tab>
         </CodeBlock.List>
-        <CodeBlock.Copy labels={{ copy: t.copy }} showLabel={false} />
+        <CodeBlock.Copy labels={{ copy: t.copy }} />
       </CodeBlock.Header>
       <CodeBlock.Panel value="tsx">
         <pre>

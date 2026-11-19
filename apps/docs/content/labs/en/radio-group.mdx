@@ -27,10 +27,11 @@ Scroll to start the tour; the stage follows each part.
 
 ## Choosing [#choosing]
 
-Off, a radio is the well with a crisp 1 px edge at 3:1, so it stays visible on any surface. On, it
-takes the accent, with the same edges as the primary button, and a dot that scales in. The fill
-changes at once, with the state. Only the dot moves, on the settle spring (`--ow-spring-settle`),
-from half its size, and it leaves with the fill: a light dot does not belong on the well.
+Off, a radio is a 10% tint of the text color with no edge, 13% under a fine pointer, on the radio or
+its row, and 16% held, so the one you reach for stands out on any surface. On, it takes the accent,
+with the same top highlight as the primary button, and a dot that scales in. The fill changes at
+once, with the state. Only the dot moves, on the settle spring (`--ow-spring-settle`), from half its
+size, and it leaves with the fill: a light dot does not belong on the tint.
 
 The stage plays it: a pointer picks each option in turn, and the note below follows the value. A
 first render does not animate, so a value that is already set simply shows.
@@ -93,10 +94,10 @@ pointer picks the second option in each theme's `md` group, then the first again
 
 | State | What marks it |
 | --- | --- |
-| Off | The well, with a 1 px edge at 3:1 |
-| On | The accent with the primary edges, and the dot |
-| Hover | Glide's highlight on the row |
-| Held | The circle scales to 0.97; off takes the pressed fill and keeps its edge, on darkens |
+| Off | A 10% tint of `--ow-fg`, with no edge |
+| On | The accent with the primary highlight, and the dot |
+| Hover | Glide's highlight on the row, and the circle's tint at 13% |
+| Held | The circle scales to 0.97; off takes a 16% tint, on darkens |
 | Disabled | A faded circle and a dimmed label; the arrows and Glide skip it |
 | Read-only | It looks as usual and ignores presses; Glide skips it |
 | Keyboard focus | A 2 px ring, 2 px out, around the circle |
@@ -118,12 +119,12 @@ moves focus to the radio without showing the ring. In a `<form>`, `name` submits
 Base UI's hidden input.
 
 With `prefers-reduced-motion`, nothing moves: a held circle only changes its fill, and the dot fades
-in. In forced colors (Windows High Contrast), the circle keeps a visible edge, and a checked one is
+in. With `prefers-contrast: more`, the circle gets a 1 px edge in `--ow-edge`. In forced colors (Windows High Contrast), the circle keeps a visible edge, and a checked one is
 filled with `Highlight` behind a `HighlightText` dot. Right to left, the circle sits on the right.
 
 ## Customization [#customization]
 
-The stage controls are open: size, layout, the mark, and the colors of the accent and the well.
+The stage controls are open: size, layout, the mark, and the colors of the accent and the tint.
 Once you change the layout or pick a color, its CSS is in its own tab of the code drawer. There are
 three ways in, and you can mix them.
 
@@ -132,13 +133,10 @@ around it such as `.settings`.
 
 | Theme token | Purpose |
 | --- | --- |
-| `--ow-well-bg` | The circle while off |
-| `--ow-edge` | Its 1 px edge while off |
+| `--ow-fg` | Labels, and the circle's tint while off: 10%, 13% on hover, 16% held |
 | `--ow-accent` | The circle while on |
-| `--ow-primary-shadow` | Its edges while on |
+| `--ow-primary-shadow` | Its top highlight while on |
 | `--ow-on-accent` | The dot, or a glyph of your own |
-| `--ow-pressed-bg` | The circle while held, off |
-| `--ow-fg` | Labels |
 | `--ow-muted` | Disabled labels |
 | `--ow-focus` | The keyboard focus ring |
 | `--ow-hover` | The hover highlight (Glide) |

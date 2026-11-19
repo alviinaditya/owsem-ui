@@ -5,8 +5,8 @@ title: Kbd
 import { Part } from "@/components/lab/lab-shell";
 import { ForMode, TokenChip } from "@/components/token-setup";
 
-Kbd menampilkan tombol keyboard sebagai tuts kecil yang timbul, dengan tepi tegas yang sama seperti
-tombol. Ukurannya mengikuti teks di sekitarnya, jadi satu Kbd pas di dalam kalimat, field pencarian,
+Kbd menampilkan tombol keyboard sebagai tuts kecil: tint datar dari warna teks tanpa tepi.
+Ukurannya mengikuti teks di sekitarnya, jadi satu Kbd pas di dalam kalimat, field pencarian,
 atau di ujung baris daftar. Gulir untuk mulai tur; stage mengikuti setiap bagian.
 
 ## Anatomi [#anatomy]
@@ -29,20 +29,19 @@ tetap di setiap ukuran, karena semua ukurannya dalam `em`.
 Kbd tidak bisa difokus. Screen reader membaca teksnya, jadi tulis tombol seperti orang
 menyebutnya, atau sembunyikan petunjuk yang hanya visual dengan `aria-hidden` bila kontrolnya sudah
 menyebut shortcut-nya lewat `aria-keyshortcuts`, seperti pencarian di docs. Dalam forced colors
-(Windows High Contrast), tepi tuts digambar dengan warna sistem.
+(Windows High Contrast), tuts diberi garis luar warna sistem.
 
 ## Kustomisasi [#customization]
 
-Kontrol stage terbuka; begitu warna tuts diubah, CSS-nya ada di tab `settings.css`.
+Kontrol stage terbuka; begitu tinta diubah, CSS-nya ada di tab `settings.css`.
 
 Kbd membaca token tema berikut. Pasang salah satunya di sebuah elemen untuk mengubah tombol di
 dalamnya.
 
 | Token tema | Fungsi |
 | --- | --- |
-| `--ow-raised-bg` | Isian tuts |
-| `--ow-raised-shadow` | Tepi tegasnya |
-| `--ow-muted` | Teks tombol |
+| `--ow-fg` | Isian tuts, tint 9% darinya, dan 30% teks tombol |
+| `--ow-muted` | Teks tombol, 70% darinya |
 | `--ow-radius` | Dibagi dua, sudut tuts |
 
 <ForMode mode="isolated">

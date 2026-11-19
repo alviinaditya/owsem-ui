@@ -136,7 +136,10 @@ const BARS = [38, 52, 44, 70, 58, 84, 66, 92, 74, 60, 80, 96];
 type Backdrop = NonNullable<CommandMenuPopupProps["backdrop"]>;
 
 // An opaque panel: no token covers it, so the Popup is styled itself.
-const solidStyle: CSSProperties = { backgroundColor: "var(--ow-panel)", backdropFilter: "none" };
+const solidStyle: CSSProperties = {
+  backgroundColor: "var(--ow-raised-bg)",
+  backdropFilter: "none",
+};
 
 /** The menu's panel and list, shared by the demo and the states matrix. */
 function Palette({
@@ -484,19 +487,19 @@ const commandMenuLab = defineLab({
       name: "Trigger",
       selector: ".ow-command-menu__trigger",
       note: {
-        id: "Tombol berupa kolom cari yang datar. Shortcut Root diumumkan lewat aria-keyshortcuts.",
-        en: "A button shaped like a flat search field. Root's shortcut is announced with aria-keyshortcuts.",
+        id: "Tombol berupa kolom cari yang datar: isian 6% dari warna teks tanpa tepi, 9% saat hover. Shortcut Root diumumkan lewat aria-keyshortcuts.",
+        en: "A button shaped like a flat search field: a 6% tint of the text color with no edge, 9% on hover. Root's shortcut is announced with aria-keyshortcuts.",
       },
     },
     {
       name: "Popup",
       selector: ".ow-command-menu__popup",
       note: {
-        id: "Panel kaca: Dialog Base UI di atas backdrop, berisi Autocomplete yang menyaring daftar.",
-        en: "The glass panel: a Base UI Dialog over a backdrop, holding the Autocomplete that filters the list.",
+        id: "Panel kaca di atas material raised: Dialog Base UI di atas backdrop, berisi Autocomplete yang menyaring daftar.",
+        en: "The glass panel on the raised material: a Base UI Dialog over a backdrop, holding the Autocomplete that filters the list.",
       },
       tokens: {
-        "--ow-panel": "--_solid",
+        "--ow-raised-bg": "--_solid",
         "--ow-popup-shadow": "--_shadow",
         "--ow-radius": "--_radius",
       },
@@ -569,8 +572,8 @@ const commandMenuLab = defineLab({
       name: "Footer",
       selector: ".ow-command-menu__footer",
       note: {
-        id: "Baris di bawah daftar, setelah garis terukir, untuk petunjuk tombol.",
-        en: "A row under the list, past an etched line, for key hints.",
+        id: "Baris di bawah daftar, setelah satu garis tipis, untuk petunjuk tombol.",
+        en: "A row under the list, past a hairline, for key hints.",
       },
     },
   ],
@@ -637,11 +640,11 @@ const commandMenuLab = defineLab({
     ];
     const files = [{ name: "commands.tsx", code: usage.join("\n") }];
     if (solid) {
-      // No token covers the glass, so the Popup itself takes the panel color.
+      // No token covers the glass, so the Popup itself takes the raised color.
       const lines = [
         "/* An opaque panel instead of glass. */",
         ".commands {",
-        `  background-color: var(--${setup.prefix}-panel);`,
+        `  background-color: var(--${setup.prefix}-raised-bg);`,
         "  backdrop-filter: none;",
         "}",
       ];

@@ -6,8 +6,8 @@ import { Part } from "@/components/lab/lab-shell";
 import { ForMode, TokenChip } from "@/components/token-setup";
 
 Fieldset mengelompokkan field yang berkaitan di bawah satu legend, dan satu `disabled` sampai ke
-semuanya. Base UI menamai grupnya dan meneruskan state-nya; OwsemUI menambahkan jarak yang rata dan garis
-terukir di bawah legend. Gulir untuk mulai tur; stage mengikuti setiap bagian.
+semuanya. Base UI menamai grupnya dan meneruskan state-nya; OwsemUI menambahkan jarak yang rata dan sedikit
+ruang di bawah legend. Gulir untuk mulai tur; stage mengikuti setiap bagian.
 
 ```tsx
 <Fieldset.Root>
@@ -37,7 +37,7 @@ Dua bagian. Inspeksi (I) menandainya di stage.
 | Bagian | Elemen | Catatan |
 | --- | --- | --- |
 | <Part name="Root" /> | `fieldset.ow-fieldset` | Satu kolom tanpa bingkai; `disabled`, dan `data-disabled` selama disabled |
-| <Part name="Legend" /> | `div.ow-fieldset__legend` | Menamai grup lewat `aria-labelledby`; `data-disabled`. Garis terukirnya adalah `::after` miliknya |
+| <Part name="Legend" /> | `div.ow-fieldset__legend` | Menamai grup lewat `aria-labelledby`; `data-disabled`. Ruang 0,75em di bawahnya adalah `::after` miliknya |
 
 ## State dan varian [#states]
 
@@ -45,7 +45,7 @@ Stage menampilkan tema terang dan gelap berdampingan.
 
 | State | Tandanya |
 | --- | --- |
-| Aktif | Legend `--ow-fg`, di atas garis |
+| Aktif | Legend `--ow-fg`, dengan sedikit ruang di bawahnya |
 | Disabled | Legend dengan opacity 45%, dan setiap kontrol memudar dengan tampilan disabled-nya sendiri |
 
 ## Keyboard dan aksesibilitas [#keyboard]
@@ -54,30 +54,28 @@ Fieldset tidak menerima fokus: Tab melewati kontrol-kontrolnya, dan melompati se
 `<fieldset>` native, jadi perannya `group`, dinamai oleh legend. Beri legend pada setiap grup, dan pakai
 `render` untuk heading bila kerangka halaman membutuhkannya.
 
-Tidak ada yang bergerak, jadi reduced motion tidak mengubah apa pun. Di mode forced colors (Windows High
-Contrast), garisnya tetap ada, karena berupa dua border. Dari kanan ke kiri, legend berada di kanan.
+Tidak ada yang bergerak, jadi reduced motion tidak mengubah apa pun. Tidak ada garis yang hilang di mode forced colors (Windows High
+Contrast). Dari kanan ke kiri, legend berada di kanan.
 
 ## Kustomisasi [#customization]
 
-Stage menampilkan tiga cara mengubahnya. Kontrolnya terbuka: pilih warna garis atau jaraknya, dan kodenya
+Stage menampilkan tiga cara mengubahnya. Kontrolnya terbuka: pilih warna teks atau jaraknya, dan kodenya
 mengikuti.
 
 **Token** yang dipasang di legend, di root, atau di elemen apa pun di sekitarnya mengubah grup di dalamnya.
 
 ```css
 .billing {
-  --ow-line-dark: #a07a1c;
+  --ow-fg: #a07a1c;
 }
 ```
 
 | Token tema | Fungsi |
 | --- | --- |
-| `--ow-fg` | Legend |
-| `--ow-line-dark` | Sisi gelap garis |
-| `--ow-line-light` | Sisi terang garis |
+| `--ow-fg` | Legend, dan teks field di dalamnya |
 
 **`className`** mengalahkan nilainya sendiri, tanpa `!important`. `gap` adalah satu properti di satu class,
-dan garisnya adalah `::after` milik legend, jadi satu aturan menghapusnya. Di sini, field-nya duduk dalam dua
+dan ruang di bawah legend adalah `::after` miliknya, jadi satu aturan menghapusnya. Di sini, field-nya duduk dalam dua
 kolom:
 
 ```css

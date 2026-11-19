@@ -85,6 +85,10 @@ settle spring also times a button's press.
 | `--ow-spring-settle-duration` | How long a swap takes |
 | `--ow-ease-out` | The crossfade under reduced motion |
 
+**The `duration` prop** sets one Icon Morph's swap, as a CSS time such as `"300ms"`, and the spring
+keeps its curve. It lands as `--_duration` in the root's inline style, so the button around it keeps
+its own press. Copy Button passes its own `duration` here.
+
 <ForMode mode="isolated">
 
 In isolated mode the values sit on each component's root, so `.like .ow-icon-morph` keeps working
@@ -102,9 +106,10 @@ the lines that moved light up.
 | Prop | Type | Default |
 | --- | --- | --- |
 | `children` | `ReactElement \| null \| false` | |
+| `duration` | `string`, a CSS time such as `"300ms"` | The settle spring's, `--ow-spring-settle-duration` |
 
-`children` is one icon element with a `key`. Root is a `span`; `className`, `style`, other props,
-and the ref pass through to it. Icons keep their own size on their own, so size them as you would
-anywhere; in an icon slot the slot sizes them.
+`children` is one icon element with a `key`. Root is a `span`; `className`, `style` (with `duration`
+added to it), other props, and the ref pass through to it. Icons keep their own size on their own,
+so size them as you would anywhere; in an icon slot the slot sizes them.
 
 Import it from `owsem-ui/owsem`. In the registry, it is the `icon-morph` item.

@@ -6,17 +6,17 @@ import { Part } from "@/components/lab/lab-shell";
 import { ForMode, TokenChip } from "@/components/token-setup";
 
 Button menjalankan sebuah aksi. Base UI memberinya semantik tombol, keyboard, dan state loading
-yang tetap memegang fokus; OwsemUI menambahkan isi datar dengan tepi yang tegas, satu angka untuk
+yang tetap memegang fokus; OwsemUI menambahkan isi datar tanpa tepi, satu angka untuk
 semua ukuran, tekanan dengan riak dari titik tekan, dan spinner yang tidak pernah mengubah lebar.
 Gulir untuk mulai tur; stage mengikuti setiap bagian.
 
 ## Tekan dan riak [#press]
 
-Saat ditekan, tombol mengecil ke 0,97 dalam 90 ms. Selama ditahan, secondary dan ghost memakai
-material ditekan, outline terisi material itu dan garisnya tetap, sedangkan primary dan destructive
-mempertahankan tepinya dan isinya sedikit menggelap. Saat dilepas, ia kembali dengan spring settle
-dari Core. Riak tumbuh dari titik yang ditekan, terpotong mengikuti permukaan tombol, lalu memudar
-saat dilepas.
+Saat ditekan, tombol mengecil ke 0,97 dalam 90 ms. Selama ditahan, ghost memakai material
+ditekan, outline terisi material itu dan garisnya tetap, warna tipis secondary makin pekat,
+sedangkan primary dan destructive mempertahankan sorot atasnya dan isinya sedikit menggelap. Saat
+dilepas, ia kembali dengan spring settle dari Core. Riak tumbuh dari titik yang ditekan, terpotong
+mengikuti permukaan tombol, lalu memudar saat dilepas.
 
 Stage memutarnya: sebuah pointer menekan empat varian bergantian. Tekan tombol mana saja untuk
 mencobanya sendiri. Kedua efek hanya menggerakkan `transform` dan `opacity` lewat transisi CSS,
@@ -56,7 +56,7 @@ baris. Pasang `--py` di tombolnya sendiri untuk membuat ukuran lain, misalnya
 ## Anatomi [#anatomy]
 
 Base UI merender `<button>`; OwsemUI menambahkan class `ow-button` dan menggambar permukaannya
-sebagai pseudo-element, sehingga tombol tetap satu elemen. Tepinya berupa inset shadow, jadi tidak
+sebagai pseudo-element, sehingga tombol tetap satu elemen. Garis outline berupa inset shadow, jadi tidak
 menambah ukuran. Inspeksi (I) menandai setiap bagian di stage, beserta tokennya.
 
 | Bagian | Elemen | Catatan |
@@ -74,21 +74,21 @@ ukuran, lalu disabled dan loading.
 
 | Varian | Material |
 | --- | --- |
-| `primary` (bawaan) | Isi primary: tepi 1px yang lebih gelap dari isinya, dan garis terang tipis di dalam tepi atasnya |
-| `secondary` | Isi netral solid, abu-abu di tema terang dan perak di tema gelap, dengan tepi seperti primary |
-| `outline` | Transparan, dengan garis 1px yang halus dari warna teks, lebih tegas saat hover |
+| `primary` (bawaan) | Isi primary, dengan sorot terang tipis di dalam sisi atasnya dan tanpa ring |
+| `secondary` | Warna tipis 12% yang datar dari warna teks, tanpa tepi, dengan teks berwarna teks |
+| `outline` | Transparan, dengan garis 1px yang halus dari warna teks, lebih tegas saat hover. Satu-satunya varian yang bertepi |
 | `ghost` | Datar; berwarna hanya saat hover |
 | `link` | Teks; bergaris bawah saat hover |
-| `destructive` | Isi critical solid, dengan tepi seperti primary |
+| `destructive` | Isi critical solid, dengan sorot seperti primary |
 
 `soft` mengubah `primary`, `secondary`, dan `destructive` menjadi warna tipis dari nadanya yang
 datar, dengan teks bernada sama dan tanpa tepi. Tidak ada yang memberi bayangan dan Base tidak pernah bercahaya:
-hierarki dibangun dari isi dan tepi, dan semua varian dalam satu ukuran sama tingginya.
+hierarki dibangun dari isi, dan semua varian dalam satu ukuran sama tingginya.
 
 | State | Yang menandainya |
 | --- | --- |
-| Hover | `--ow-hover` di atas permukaan, hanya untuk mouse atau pena; tepinya tetap |
-| Ditekan | `data-held` (atau `:active`); mengecil ke 0,97, material ditekan (isi solid sedikit menggelap), dan riak |
+| Hover | `--ow-hover` di atas permukaan, hanya untuk mouse atau pena |
+| Ditekan | `data-held` (atau `:active`); mengecil ke 0,97, material ditekan (warna tipis secondary makin pekat, isi solid sedikit menggelap), dan riak |
 | Fokus keyboard | Ring 2px, 2px di luar tombol |
 | Disabled | `data-disabled`; meredup dan keluar dari urutan Tab |
 | Loading | `data-loading` dan `aria-busy`; spinner, fokus tetap |
@@ -130,11 +130,11 @@ misalnya `.actions`.
 | `--ow-critical-solid` | Isi destructive |
 | `--ow-on-critical` | Teks di atas isi destructive |
 | `--ow-critical` | Warna tipis dan teks destructive soft |
-| `--ow-primary-shadow` | Tepi primary, secondary, dan destructive |
-| `--ow-fg`, `--ow-bg` | Isi secondary (warna teks 75% ke arah latar halaman) dan teksnya |
-| `--ow-pressed-bg`, `--ow-pressed-shadow` | Permukaan saat ditekan |
+| `--ow-primary-shadow` | Sorot atas primary dan destructive |
+| `--ow-fg` | Warna tipis secondary: warna teks 12%, 16% saat ditahan |
+| `--ow-pressed-bg` | Ghost dan outline saat ditahan |
 | `--ow-hover` | Warna hover |
-| `--ow-fg` | Teks outline dan ghost, serta garis outline (16%, 28% saat hover) |
+| `--ow-fg` | Teks secondary, outline, dan ghost, serta garis outline (16%, 28% saat hover) |
 | `--ow-focus` | Ring fokus |
 
 <ForMode mode="isolated">

@@ -6,12 +6,16 @@ const narrative = (page: Page) => page.locator(".lab-narrative");
 test("the token setup rewrites a Lab's code and install steps (DS-4)", async ({ page }) => {
   await page.goto("/en/separator");
   await openSheet(page);
-  // The intro's line; Customization has the same one.
+  // Customization's line; the code drawer's install pane has the same one.
   const chip = page.getByRole("button", { name: "Change Token setup" }).first();
   const panel = page.getByRole("dialog", { name: "Token setup" });
   await chip.click();
   await expect(panel).toBeVisible();
-  await expect(panel.getByRole("radio", { name: "Theme tokens" })).toBeFocused();
+  await expect(panel.getByRole("button", { name: "Theme tokens" })).toBeFocused();
+  await expect(panel.getByRole("button", { name: "Theme tokens" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
   // A Popover beside the chip that opened it: under it, or above when there is no room.
   const chipBox = await chip.boundingBox();
   const panelBox = await panel.boundingBox();
@@ -20,7 +24,7 @@ test("the token setup rewrites a Lab's code and install steps (DS-4)", async ({ 
   const above = chipBox.y - (panelBox.y + panelBox.height);
   expect(Math.min(Math.abs(below - 8), Math.abs(above - 8))).toBeLessThan(1);
 
-  await panel.getByRole("radio", { name: "Isolated tokens" }).check();
+  await panel.getByRole("button", { name: "Isolated tokens" }).click();
   const prefix = panel.getByLabel("Prefix");
   // TK-1: a bad prefix is explained and not applied.
   await prefix.fill("9x");
@@ -35,10 +39,16 @@ test("the token setup rewrites a Lab's code and install steps (DS-4)", async ({ 
   await page.keyboard.press("Escape");
   await expect(panel).toBeHidden();
   await expect(chip).toBeFocused();
+  // Back to the top: the Customization scene the chip sits in opens the code beside the stage.
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+  await expect(stage(page).getByRole("button", { name: "Code" })).toHaveAttribute(
+    "aria-pressed",
+    "false",
+  );
 
   // The narrative's code, the intro, and the stage follow the setup.
-  await expect(narrative(page)).toContainText("--acme-line-dark");
-  await expect(narrative(page)).not.toContainText("--ow-line-dark");
+  await expect(narrative(page)).toContainText("--acme-line");
+  await expect(narrative(page)).not.toContainText("--ow-line");
   await expect(narrative(page)).toContainText("Isolated tokens · --acme-*");
   const intro = page.locator(".install").first();
   await expect(intro).toContainText("pnpm dlx owsem@latest init --tokens isolated --prefix acme");
@@ -50,24 +60,25 @@ test("the token setup rewrites a Lab's code and install steps (DS-4)", async ({ 
     "In isolated mode the values sit on each Separator's root",
   );
   await stage(page).getByRole("button", { name: "Controls" }).click();
-  await pickColor(page, "Dark line", "#ff0000");
+  await pickColor(page, "Line", "#ff0000");
   await stage(page).getByRole("button", { name: "Code" }).click();
   const code = stage(page).getByRole("tabpanel");
   await expect(code).toContainText('import { Separator } from "@/components/owsem/separator";');
   await stage(page).getByRole("tab", { name: "settings.css" }).click();
   await expect(code).toContainText(".settings .ow-separator {");
-  await expect(code).toContainText("--acme-line-dark: #ff0000;");
+  await expect(code).toContainText("--acme-line: #ff0000;");
   await stage(page).getByRole("tab", { name: "Install" }).click();
   await expect(code).toContainText("pnpm dlx owsem@latest init --tokens isolated --prefix acme");
 
   // Kept for the next visit, until reset.
   await page.reload();
-  await expect(narrative(page)).toContainText("--acme-line-dark");
+  await expect(narrative(page)).toContainText("--acme-line");
   await openSheet(page);
   await chip.click();
   await panel.getByRole("button", { name: "Reset to theme tokens, --ow" }).click();
-  await expect(narrative(page)).toContainText("--ow-line-dark");
-  await expect(page.locator(".install").first()).toContainText("pnpm add owsem-ui");
+  await expect(narrative(page)).toContainText("--ow-line");
+  // The default setup's install is one line again.
+  await expect(page.locator(".install-line")).toContainText("pnpm add owsem-ui");
   expect(await page.evaluate(() => localStorage.getItem("owsem-token-setup"))).toBeNull();
 });
 
@@ -76,7 +87,7 @@ test("the Theming page's code stays literal whatever the token setup", async ({ 
   await stageTool(page, "Tokens", "Token setup");
   const panel = page.getByRole("dialog", { name: "Token setup" });
   await expect(panel).toBeVisible();
-  await panel.getByRole("radio", { name: "Isolated tokens" }).check();
+  await panel.getByRole("button", { name: "Isolated tokens" }).click();
   await panel.getByLabel("Prefix").fill("acme");
   await page.keyboard.press("Escape");
   // The Theming page explains the default, so its code keeps --ow.

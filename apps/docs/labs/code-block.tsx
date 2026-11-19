@@ -52,7 +52,7 @@ const SNIPPETS = [
     value: "css",
     name: "theme.css",
     icon: "palette",
-    code: [":root {", "  --ow-accent: #7c6ab8;", "  --ow-radius: 8px;", "}"].join("\n"),
+    code: [":root {", "  --ow-accent: #7c6ab8;", "  --ow-radius: 10px;", "}"].join("\n"),
   },
   {
     value: "sh",
@@ -62,7 +62,7 @@ const SNIPPETS = [
   },
 ] as const satisfies readonly { value: string; name: string; icon: IconName; code: string }[];
 
-const initial = { tabs: "on", label: "on", long: "", well: "", panel: "" };
+const initial = { tabs: "on", label: "", long: "", panel: "" };
 type Cfg = typeof initial;
 
 /**
@@ -112,13 +112,16 @@ function Demo({
   useEffect(() => {
     if (copied) copy.current?.click();
   }, [copied]);
-  const style = {
-    "--ow-well-bg": cfg.well || undefined,
-    "--ow-panel": cfg.panel || undefined,
-  } as CSSProperties;
+  const style = { "--ow-panel": cfg.panel || undefined } as CSSProperties;
   const [first] = SNIPPETS;
   return (
-    <CodeBlock.Root className="demo-code" style={style} defaultValue={tabs ? "tsx" : undefined}>
+    // A new Root when tabs come or go: its default tab is read once, on mount.
+    <CodeBlock.Root
+      key={tabs ? "tabs" : "single"}
+      className="demo-code"
+      style={style}
+      defaultValue={tabs ? "tsx" : undefined}
+    >
       <CodeBlock.Header>
         {tabs ? (
           <CodeBlock.List aria-label={t.files}>
@@ -233,8 +236,8 @@ const codeBlockLab = defineLab({
       type: "choice",
       label: { id: "Label Salin", en: "Copy label" },
       options: [
-        { value: "on", label: { id: "Tampil", en: "Shown" } },
         { value: "", label: { id: "Ikon saja", en: "Icon only" } },
+        { value: "on", label: { id: "Tampil", en: "Shown" } },
       ],
     },
     {
@@ -247,15 +250,9 @@ const codeBlockLab = defineLab({
       ],
     },
     {
-      key: "well",
-      type: "color",
-      label: { id: "Kartu luar", en: "Outer card" },
-      token: "--ow-well-bg",
-    },
-    {
       key: "panel",
       type: "color",
-      label: { id: "Kartu dalam", en: "Inner card" },
+      label: { id: "Permukaan", en: "Surface" },
       token: "--ow-panel",
     },
   ],
@@ -265,12 +262,11 @@ const codeBlockLab = defineLab({
       name: "Root",
       selector: ".ow-code-block",
       note: {
-        id: "Kartu luar: well datar dengan tepi tajam. Dengan tab, ia root Tabs Base UI.",
-        en: "The outer card: a flat well with a crisp edge. With tabs, Base UI's Tabs root.",
+        id: "Satu permukaan: isian panel tanpa tepi. Dengan tab, ia root Tabs Base UI.",
+        en: "One surface: the panel fill with no edge. With tabs, Base UI's Tabs root.",
       },
       tokens: {
-        "--ow-well-bg": "--_well",
-        "--ow-well-shadow": "--_well-edge",
+        "--ow-panel": "--_panel",
         "--ow-radius": "--_radius",
         "--ow-fg": "--_fg",
         "--ow-muted": "--_muted",
@@ -313,27 +309,26 @@ const codeBlockLab = defineLab({
       name: "Thumb",
       selector: ".ow-code-block__thumb",
       note: {
-        id: "Tombol timbul bertepi tegas yang bergeser ke tab yang aktif, seperti di Toggle Group. Dekoratif.",
-        en: "The raised key with crisp edges that slides to the active tab, as in Toggle Group. Decorative.",
+        id: "Tint 9% dari warna teks yang bergeser ke tab yang aktif. Dekoratif.",
+        en: "A 9% tint of the text color that slides to the active tab. Decorative.",
       },
-      tokens: { "--ow-raised-bg": "--_key", "--ow-raised-shadow": "--_key-edge" },
+      tokens: { "--ow-fg": "--_key" },
     },
     {
       name: "Copy",
       selector: ".ow-code-block__copy",
       note: {
-        id: "Copy Button: menyalin snippet yang tampil, atau value-nya sendiri.",
-        en: "Copy Button: copies the snippet on show, or its own value.",
+        id: "Copy Button: menyalin snippet yang tampil, atau value-nya sendiri. Ikon yang selalu terlihat, dinamai Tooltip-nya.",
+        en: "Copy Button: copies the snippet on show, or its own value. An icon, always in view, named by its Tooltip.",
       },
     },
     {
       name: "Panel",
       selector: ".ow-code-block__panel",
       note: {
-        id: "Kartu dalam: isian panel yang datar, menumpuk 10px di atas header. Kodenya bergulir di dalamnya.",
-        en: "The inner card: the flat panel fill, 10px over the header. Its code scrolls inside it.",
+        id: "Kodenya, di bawah header pada permukaan yang sama, tanpa isian sendiri. Ia bergulir ke samping di dalamnya.",
+        en: "The code, under the header on the same surface, with no fill of its own. It scrolls sideways inside.",
       },
-      tokens: { "--ow-panel": "--_panel" },
     },
   ],
 
@@ -344,9 +339,9 @@ const codeBlockLab = defineLab({
   code(cfg, setup) {
     // Any other token setup comes from the owsem CLI, which copies the component into the project.
     const from = isDefaultSetup(setup) ? "owsem-ui/owsem" : "@/components/owsem/code-block";
-    const custom = cfg.well || cfg.panel;
+    const custom = cfg.panel;
     const scope = custom ? ' className="snippets"' : "";
-    const copy = cfg.label === "on" ? "<CodeBlock.Copy />" : "<CodeBlock.Copy showLabel={false} />";
+    const copy = cfg.label === "on" ? "<CodeBlock.Copy showLabel />" : "<CodeBlock.Copy />";
     const tabs = cfg.tabs === "on";
     const usage = tabs
       ? [
@@ -400,7 +395,6 @@ const codeBlockLab = defineLab({
       const token = `--${setup.prefix}`;
       const lines = [
         setup.mode === "isolated" ? ".snippets.ow-code-block {" : ".snippets {",
-        ...(cfg.well ? [`  ${token}-well-bg: ${cfg.well};`] : []),
         ...(cfg.panel ? [`  ${token}-panel: ${cfg.panel};`] : []),
         "}",
       ];

@@ -47,7 +47,7 @@ const initial = {
   layout: "column",
   mark: "dot",
   accent: "",
-  well: "",
+  tint: "",
 };
 type Cfg = typeof initial;
 
@@ -214,10 +214,10 @@ const radioGroupLab = defineLab({
       token: "--ow-accent",
     },
     {
-      key: "well",
+      key: "tint",
       type: "color",
-      label: { id: "Well", en: "Well" },
-      token: "--ow-well-bg",
+      label: { id: "Tint", en: "Tint" },
+      token: "--ow-fg",
     },
   ],
 
@@ -250,11 +250,8 @@ const radioGroupLab = defineLab({
         en: "The circle, the font size plus 2 px, with a 24 px press target. Without children it draws its Indicator.",
       },
       tokens: {
-        "--ow-well-bg": "--_well",
-        "--ow-edge": "--_edge",
         "--ow-accent": "--_accent",
         "--ow-primary-shadow": "--_accent-shadow",
-        "--ow-pressed-bg": "--_pressed",
         "--ow-focus": "--_focus",
       },
     },
@@ -274,7 +271,7 @@ const radioGroupLab = defineLab({
   demo(cfg, lang) {
     const style = {
       "--ow-accent": cfg.accent || undefined,
-      "--ow-well-bg": cfg.well || undefined,
+      "--ow-fg": cfg.tint || undefined,
     } as CSSProperties;
     return <Delivery cfg={cfg} lang={lang} style={style} />;
   },
@@ -284,7 +281,7 @@ const radioGroupLab = defineLab({
     const from = isDefaultSetup(setup) ? "owsem-ui/base" : "@/components/owsem/radio-group";
     const across = cfg.layout === "row";
     const check = cfg.mark === "check";
-    const scoped = across || cfg.accent || cfg.well;
+    const scoped = across || cfg.accent || cfg.tint;
     const rootProps = [
       'aria-label="Delivery"',
       'defaultValue="standard"',
@@ -322,12 +319,12 @@ const radioGroupLab = defineLab({
     if (scoped) {
       const token = `--${setup.prefix}`;
       // Isolated values sit on each group's root, so set them there too.
-      const isolated = setup.mode === "isolated" && (cfg.accent || cfg.well);
+      const isolated = setup.mode === "isolated" && (cfg.accent || cfg.tint);
       const lines = [
         isolated ? ".delivery.ow-radio-group {" : ".delivery {",
         ...(across ? ["  flex-flow: row wrap;"] : []),
         ...(cfg.accent ? [`  ${token}-accent: ${cfg.accent};`] : []),
-        ...(cfg.well ? [`  ${token}-well-bg: ${cfg.well};`] : []),
+        ...(cfg.tint ? [`  ${token}-fg: ${cfg.tint};`] : []),
         "}",
       ];
       files.push({ name: "delivery.css", code: lines.join("\n") });

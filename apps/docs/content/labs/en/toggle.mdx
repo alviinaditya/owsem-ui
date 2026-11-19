@@ -6,20 +6,18 @@ import { Part } from "@/components/lab/lab-shell";
 import { ForMode, TokenChip } from "@/components/token-setup";
 
 Toggle is a button with two states, on and off. Off, it is flat and tinted under the pointer; on,
-it is a raised key with crisp edges. Its sizes and spacing are Button's. Scroll to start the tour;
+it is a 12% tint of the text color. Its sizes and spacing are Button's. Scroll to start the tour;
 the stage follows each part.
 
-## A key that stays up [#pressing]
+## A tint that stays [#pressing]
 
-On is a material, not a color. An on toggle is the raised key: a flat fill with a 1px edge darker
-than the fill and a light line inside it, like a selected segment. Its fill leans 8% toward the
-text, so it stands apart from a surface of the key's own color, such as a white panel in the light
-theme. Off, it is flat like a ghost button: muted text, and a faint tint under the pointer. Text
-turns from muted to full strength.
+On is a tone, not a line. An on toggle is a 12% tint of the text color, `--ow-fg`, with no edge, like
+a selected segment, so it reads on any surface. Off, it is flat like a ghost
+button: muted text
 
-Every press goes in first. While held, the toggle shrinks to 0.97 and takes the pressed material
-within 90 ms, then lets go on the settle spring, with a small overshoot, and comes up raised or
-flat. Under reduced motion it changes material without moving.
+Every press goes in first. While held, the toggle shrinks to 0.97 and takes a 15% tint
+within 90 ms, then lets go on the settle spring, with a small overshoot, and comes up tinted or
+flat. Under reduced motion it changes tone without moving.
 
 The stage plays it: the pointer turns Italic and Underline on, then off again, and the note's text
 follows them. Play scene runs it again; press the toggles yourself to feel the press.
@@ -64,13 +62,13 @@ rests on the off toggle in each theme, then turns it on and off.
 | --- | --- |
 | Off | Flat, with muted text |
 | Hover, while off | The `--ow-hover` tint, and text at full strength |
-| Pressing | Scaled to 0.97 within 90 ms, in the pressed material: `--ow-pressed-bg` and `--ow-pressed-shadow` |
-| On | The raised key: `--ow-raised-bg` 8% toward `--ow-fg`, `--ow-raised-shadow`, text in `--ow-fg` |
-| Hover, while on | The fill tints 4% toward the text; the edges stay |
+| Pressing | Scaled to 0.97 within 90 ms, in a 15% tint of `--ow-fg` |
+| On | A 12% tint of `--ow-fg`, with text in `--ow-fg` |
+| Hover, while on | The tint steps up to 14% |
 | Keyboard focus | A 2px ring 2px out, in `--ow-focus` |
 | Disabled | 45% opacity, and presses do nothing |
 
-An on toggle keeps its edges under the pointer, so hovering never looks like turning it off.
+An on toggle only deepens under the pointer, so hovering never looks like turning it off.
 
 ## Keyboard and accessibility [#keyboard]
 
@@ -83,14 +81,15 @@ Screen readers announce a toggle button and its state through `aria-pressed`. Ke
 same in both states, such as "Bold": the state is what changes. A toggle without children needs an
 `aria-label`; its icons are `aria-hidden`.
 
-With `prefers-reduced-motion`, a press changes material without shrinking. In forced colors
+With `prefers-reduced-motion`, a press changes tone without shrinking. With `prefers-contrast: more`, the toggle gets no new
+edge; the tint and the focus ring carry it. In forced colors
 (Windows High Contrast), the toggle keeps a 1px edge in the system color, an on toggle is filled
 with `Highlight`, and the focus ring is `Highlight` too. Right to left, `startIcon` sits on the
 right.
 
 ## Customization [#customization]
 
-The stage controls are open: pick the on surface or its text, and the code follows.
+The stage controls are open: pick the text and tint, and the code follows.
 
 Toggle reads these theme tokens. Set one on an element to change the toggles inside it. `note.css`
 sets them on the toggles themselves, so `--ow-fg` leaves the note's own text alone.
@@ -99,11 +98,7 @@ sets them on the toggles themselves, so `--ow-fg` leaves the note's own text alo
 | --- | --- |
 | `--ow-muted` | Text while off |
 | `--ow-hover` | Tint under the pointer while off |
-| `--ow-fg` | Text under the pointer, while on, or held down |
-| `--ow-raised-bg` | Fill while on |
-| `--ow-raised-shadow` | Edges while on |
-| `--ow-pressed-bg` | Fill while held down |
-| `--ow-pressed-shadow` | Edges while held down |
+| `--ow-fg` | Text under the pointer, while on, or held down, and the on tint: 12%, 14% on hover, 15% held |
 | `--ow-radius` | Corners |
 | `--ow-focus` | Focus ring |
 

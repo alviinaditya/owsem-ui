@@ -75,7 +75,7 @@ const keepFocus = { initialFocus: false } as object;
 
 function tokens(cfg: Cfg) {
   return {
-    "--ow-panel": cfg.bg || undefined,
+    "--ow-raised-bg": cfg.bg || undefined,
     "--ow-fg": cfg.fg || undefined,
   } as CSSProperties;
 }
@@ -353,7 +353,12 @@ const menuLab = defineLab({
       label: { id: "Ukuran", en: "Size" },
       options: SIZES.map((size) => ({ value: size, label: { id: size, en: size } })),
     },
-    { key: "bg", type: "color", label: { id: "Permukaan", en: "Surface" }, token: "--ow-panel" },
+    {
+      key: "bg",
+      type: "color",
+      label: { id: "Permukaan", en: "Surface" },
+      token: "--ow-raised-bg",
+    },
     { key: "fg", type: "color", label: { id: "Teks", en: "Text" }, token: "--ow-fg" },
   ],
 
@@ -370,11 +375,11 @@ const menuLab = defineLab({
       name: "Popup",
       selector: ".ow-menu__popup",
       note: {
-        id: "Material panel dengan bayangan popup: tepi 1px yang tegas. Radiusnya radius item ditambah padding 4px.",
-        en: "The panel material with the popup shadow: a crisp 1px edge. Its radius is the item's plus the 4px padding.",
+        id: "Material raised dengan bayangan popup, tanpa tepi. Radiusnya --ow-radius; item memakainya dikurangi padding 4px.",
+        en: "The raised material with the popup shadow, with no edge. Its radius is --ow-radius; items take it less the 4px padding.",
       },
       tokens: {
-        "--ow-panel": "--_bg",
+        "--ow-raised-bg": "--_bg",
         "--ow-popup-shadow": "--_shadow",
         "--ow-fg": "--_fg",
         "--ow-muted": "--_muted",
@@ -425,10 +430,10 @@ const menuLab = defineLab({
       name: "Separator",
       selector: ".ow-menu__separator",
       note: {
-        id: "Alur terukir di antara grup.",
-        en: "An etched groove between groups.",
+        id: "Garis tipis di antara grup.",
+        en: "A hairline between groups.",
       },
-      tokens: { "--ow-line-dark": "--_dark", "--ow-line-light": "--_light" },
+      tokens: { "--ow-line": "--ow-line" },
     },
     {
       name: "SubmenuTrigger",
@@ -566,7 +571,7 @@ const menuLab = defineLab({
         code: [
           "/* The popups themselves: menus render in a portal, outside the trigger's subtree. */",
           ".menu {",
-          ...(cfg.bg ? [`  --${setup.prefix}-panel: ${cfg.bg};`] : []),
+          ...(cfg.bg ? [`  --${setup.prefix}-raised-bg: ${cfg.bg};`] : []),
           ...(cfg.fg ? [`  --${setup.prefix}-fg: ${cfg.fg};`] : []),
           "}",
         ].join("\n"),

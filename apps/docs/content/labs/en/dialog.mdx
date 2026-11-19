@@ -6,7 +6,7 @@ import { Part } from "@/components/lab/lab-shell";
 import { ForMode, TokenChip } from "@/components/token-setup";
 
 Dialog opens a window over the page: a title, a line or two, and whatever the task needs, centered
-on the panel material over a scrim. Base UI keeps focus inside, locks the page's scroll, and handles
+on the raised material over a scrim. Base UI keeps focus inside, locks the page's scroll, and handles
 the keyboard. Scroll to start the tour; the stage follows each part.
 
 ## A window over the page [#window]
@@ -67,7 +67,7 @@ Inspect (I) outlines the parts on the stage; pick a name, here or on the stage, 
 ## States and variants [#states]
 
 The stage sets the panel in both themes, open and stepped back behind a nested dialog. The surface
-is the panel material in both, with the popup shadow.
+is the raised material in both, with the popup shadow and no edge.
 
 | State | What shows it |
 | --- | --- |
@@ -89,10 +89,11 @@ Screen readers announce a dialog named by the title and described by the descrip
 page is inert while it is modal, so always give it a `Dialog.Title` and a `Dialog.Close`. `modal` is
 `true` by default; `"trap-focus"` keeps focus inside and leaves the page's scroll and pointer alone,
 and `false` leaves the page usable (add `backdrop={false}` on the Portal, since a scrim covers the
-page). `initialFocus` and `finalFocus` pick where focus goes.
+page). `initialFocus` and `finalFocus` pick where focus goes. A modal dialog holds the page's scroll
+without an `overflow` style, so its text is not drawn again; opened by touch, Base UI's lock stands.
 
 With `prefers-reduced-motion`, the panel fades without growing, and a parent stays in place behind a
-nested dialog. In forced colors (Windows High Contrast), the panel keeps a 1px edge in the system
+nested dialog. With `prefers-contrast: more`, the panel gains a 1px ring in `--ow-edge`. In forced colors (Windows High Contrast), it keeps a 1px edge in the system
 color. Dialog ships no text of its own, so there is nothing to translate but yours.
 
 ## Customization [#customization]
@@ -122,11 +123,12 @@ renders in a portal, outside the trigger's subtree.
 | Theme token | Purpose |
 | --- | --- |
 | `--ow-backdrop` | The scrim |
-| `--ow-panel` | Surface |
-| `--ow-popup-shadow` | Edge and shadow |
+| `--ow-raised-bg` | Surface |
+| `--ow-popup-shadow` | Shadow |
+| `--ow-edge` | The ring under `prefers-contrast: more` |
 | `--ow-fg` | Text |
 | `--ow-muted` | The description |
-| `--ow-radius` | Corners, plus the padding around a button (FR-10b) |
+| `--ow-radius` | Corners, the one radius of every surface |
 | `--ow-focus` | The ring, when the panel itself takes focus |
 | `--ow-ease-out` | Entering and leaving |
 

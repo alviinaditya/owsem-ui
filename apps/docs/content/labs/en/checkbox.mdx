@@ -16,17 +16,19 @@ which draws its own Indicator and glyphs. Scroll to start the tour; the stage fo
 
 ## A fill that changes, a glyph that moves [#marking]
 
-Off, the box is the well: a flat, darker fill with a 1px edge in `--ow-edge`, which holds 3:1 against
-the fill and the surface around it. Checked or indeterminate, it is the primary material: the accent
-fill and its edge, with the glyph in `--ow-on-accent`.
+Off, the box is a 10% tint of the text color, `--ow-fg`, with no edge. Under a fine pointer, on the
+box or its label, the tint steps up to 13%, and held it is 16%. Checked or indeterminate, it is the
+primary material: the accent fill with a thin highlight at its top, and the glyph in
+`--ow-on-accent`.
 
 The fill changes at once, because it states the answer. The glyph is what moves: it fades in within
-120 ms, growing from 0.8 on the settle spring. Between check and minus, the two glyphs sit in one
-cell and crossfade the same way, so a parent box never jumps while its tasks fill up. Under reduced
-motion, the glyphs only fade.
+120 ms, growing from 0.8 on the settle spring, and the check draws its stroke in from the short end
+over 260 ms, as a hand writes it. The minus grows from its middle to its width instead. The two
+glyphs sit in one cell, so a parent box never jumps while its tasks fill up. Leaving, a glyph only
+fades. Under reduced motion, nothing draws or grows: the glyphs only fade.
 
 Every press goes in first: while held, the box shrinks to 0.97 within 90 ms and its fill changes,
-then it lets go on the settle spring. Its edge stays.
+then it lets go on the settle spring.
 
 The stage plays it: the pointer finishes the list and takes it back, and the parent's minus turns
 into a check and back. The parent is your own code: `checked` when all are done, `indeterminate`
@@ -86,11 +88,11 @@ off box in each theme, then checks and unchecks it.
 
 | State | What shows it |
 | --- | --- |
-| Off | `--ow-well-bg`, and a 1px inset edge in `--ow-edge` |
-| Hover, on the box or its label | The `--ow-hover` tint over the fill |
-| Pressing, on the box or its label | Scaled to 0.97 within 90 ms; `--ow-pressed-bg` while off, the accent 10% darker while on; the edge stays |
-| Checked | `--ow-accent`, `--ow-primary-shadow`, and the check in `--ow-on-accent` |
-| Indeterminate | The same material, with the minus |
+| Off | A 10% tint of `--ow-fg`, with no edge |
+| Hover, on the box or its label | Off: the tint at 13%. On: the `--ow-hover` tint over the accent |
+| Pressing, on the box or its label | Scaled to 0.97 within 90 ms; the tint at 16% while off, the accent 10% darker while on |
+| Checked | `--ow-accent`, `--ow-primary-shadow`, and the check in `--ow-on-accent`, drawn in |
+| Indeterminate | The same material, with the minus grown in |
 | Keyboard focus | A 2px ring 2px out, in `--ow-focus` |
 | Read-only | As it is, and presses do nothing |
 | Disabled | 50% opacity, and presses do nothing |
@@ -106,28 +108,26 @@ off box in each theme, then checks and unchecks it.
 Screen readers announce a checkbox and its state through `aria-checked`, with `mixed` while
 indeterminate. Its name comes from the label or an `aria-label`; the glyphs are `aria-hidden`.
 
-With `prefers-reduced-motion`, the fills change and the glyphs fade, and nothing moves. In forced
-colors (Windows High Contrast), the box keeps a 1px edge in the system color, a checked box is filled
-with `Highlight`, and the glyph follows as `HighlightText`. Right to left, the label puts the box on
-the right, and the check is not mirrored.
+With `prefers-reduced-motion`, the fills change and the glyphs fade, and nothing moves or draws. With
+`prefers-contrast: more`, the box gets a 1px edge in `--ow-edge`. In
+forced colors (Windows High Contrast), the box keeps a 1px edge in the system color, a checked box
+is filled with `Highlight`, and the glyph follows as `HighlightText`. Right to left, the label puts
+the box on the right, and the check is not mirrored.
 
 ## Customization [#customization]
 
-The stage controls are open: pick the fill, the glyph, or the edge, and the code follows. The stage
+The stage controls are open: pick the fill, the glyph, or the tint, and the code follows. The stage
 shows the four ways in.
 
 **Theme tokens.** Checkbox reads these. Set one on the box, or on any element around it.
 
 | Theme token | Purpose |
 | --- | --- |
-| `--ow-well-bg` | Fill while off |
-| `--ow-edge` | Edge while off |
-| `--ow-fg` | The glyph on its way out |
+| `--ow-fg` | Tint while off (10%, 13% on hover, 16% held), and the glyph on its way out |
 | `--ow-accent` | Fill while checked or indeterminate |
-| `--ow-primary-shadow` | Edges while checked or indeterminate |
+| `--ow-primary-shadow` | Top highlight while checked or indeterminate |
 | `--ow-on-accent` | Glyph |
 | `--ow-hover` | Tint under the pointer |
-| `--ow-pressed-bg` | Fill while held down and off |
 | `--ow-radius` | Corners, at half its value |
 | `--ow-focus` | Focus ring |
 | `--ow-motion-scale` | How far the press and the glyphs move |

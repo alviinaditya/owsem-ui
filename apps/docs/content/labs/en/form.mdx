@@ -64,7 +64,7 @@ dark themes side by side.
 | State | What shows it |
 | --- | --- |
 | Untouched | Nothing yet; with the default `onSubmit`, checks wait for the first submit |
-| Native error | The Field's critical edge, and the browser's message or yours |
+| Native error | The Field's critical tint and shake, and the browser's message or yours |
 | Server error | The same, with your server's words, until the field is edited |
 
 ## Keyboard and accessibility [#keyboard]
@@ -77,7 +77,9 @@ dark themes side by side.
 Focus going to the first failed field means a keyboard or screen reader user lands on the problem, and
 hears its name and its error, with no hunting. Give a form an `aria-label` when it should be a landmark.
 
-Nothing moves, so reduced motion changes nothing, and forced colors have nothing to redraw.
+A submit that still fails shakes the first invalid field again, though it never stopped being
+invalid; typing does not. With reduced motion it blinks instead. Forced colors have nothing to redraw
+beyond the Field's own.
 
 ## Customization [#customization]
 

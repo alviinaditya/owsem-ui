@@ -68,7 +68,7 @@ function Editor({ cfg, lang, stop }: { cfg: Cfg; lang: Lang; stop?: boolean }) {
   const [tabStop, setTabStop] = useState(t.bold);
   const style = {
     "--ow-panel": cfg.bg || undefined,
-    "--ow-line-dark": cfg.line || undefined,
+    "--ow-line": cfg.line || undefined,
   } as CSSProperties;
   const onFocus = (event: FocusEvent<HTMLDivElement>) => {
     const item = event.target;
@@ -132,7 +132,7 @@ function Editor({ cfg, lang, stop }: { cfg: Cfg; lang: Lang; stop?: boolean }) {
   );
 }
 
-/** Each size in both themes: on, off, and disabled items, and a groove. */
+/** Each size in both themes: on, off, and disabled items, and a separator. */
 function States({ lang }: { lang: Lang }) {
   const t = TEXT[lang];
   return (
@@ -211,8 +211,8 @@ const toolbarLab = defineLab({
     {
       key: "line",
       type: "color",
-      label: { id: "Garis gelap alur", en: "Groove dark line" },
-      token: "--ow-line-dark",
+      label: { id: "Garis pemisah", en: "Separator line" },
+      token: "--ow-line",
     },
   ],
 
@@ -221,10 +221,10 @@ const toolbarLab = defineLab({
       name: "Root",
       selector: ".ow-toolbar",
       note: {
-        id: "div role=toolbar di atas material panel: satu perhentian Tab, lalu tombol panah.",
-        en: "A div with role=toolbar on the panel material: one Tab stop, then arrow keys.",
+        id: "div role=toolbar di atas material panel, tanpa bayangan: satu perhentian Tab, lalu tombol panah.",
+        en: "A div with role=toolbar on the panel material with no shadow: one Tab stop, then arrow keys.",
       },
-      tokens: { "--ow-panel": "--_bg", "--ow-panel-shadow": "--_shadow" },
+      tokens: { "--ow-panel": "--_bg" },
     },
     {
       name: "Group",
@@ -254,7 +254,6 @@ const toolbarLab = defineLab({
         "--ow-fg": "--_fg",
         "--ow-hover": "--_hover",
         "--ow-pressed-bg": "--_pressed-bg",
-        "--ow-pressed-shadow": "--_pressed-shadow",
       },
     },
     {
@@ -269,10 +268,10 @@ const toolbarLab = defineLab({
       name: "Separator",
       selector: ".ow-toolbar__separator",
       note: {
-        id: "Alur terukir di antara grup, melintang arah toolbar.",
-        en: "An etched groove between groups, across the toolbar's direction.",
+        id: "Garis tipis di antara grup, melintang arah toolbar.",
+        en: "A hairline between groups, across the toolbar's direction.",
       },
-      tokens: { "--ow-line-dark": "--_dark", "--ow-line-light": "--_light" },
+      tokens: { "--ow-line": "--ow-line" },
     },
     {
       name: "Link",
@@ -286,14 +285,10 @@ const toolbarLab = defineLab({
       name: "Input",
       selector: ".ow-toolbar__input",
       note: {
-        id: "Field datar bertepi 3:1, setinggi tombol. Panah menggeser caret dulu, jadi letakkan di akhir.",
-        en: "A flat field with a 3:1 edge, as tall as the buttons. Arrows move the caret first, so put it last.",
+        id: "Field dengan isian 6% dari warna teks tanpa tepi (9% saat hover), setinggi tombol. Panah menggeser caret dulu, jadi letakkan di akhir.",
+        en: "A field with a 6% tint of the text color and no edge (9% on hover), as tall as the buttons. Arrows move the caret first, so put it last.",
       },
-      tokens: {
-        "--ow-well-bg": "--_bg",
-        "--ow-well-shadow": "--_shadow",
-        "--ow-edge": "--_edge",
-      },
+      tokens: { "--ow-fg": "--_bg" },
     },
   ],
 
@@ -359,7 +354,7 @@ const toolbarLab = defineLab({
         '/* The toolbar with className="editor" */',
         ".editor {",
         ...(cfg.bg ? [`  ${token}-panel: ${cfg.bg};`] : []),
-        ...(cfg.line ? [`  ${token}-line-dark: ${cfg.line};`] : []),
+        ...(cfg.line ? [`  ${token}-line: ${cfg.line};`] : []),
         "}",
       ];
       files.push({ name: "editor.css", code: lines.join("\n") });

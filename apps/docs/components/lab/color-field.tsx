@@ -19,7 +19,7 @@ export function ColorField({
 }: {
   label: string;
   value: string;
-  /** The token used while the value is empty, such as --ow-line-dark. */
+  /** The token used while the value is empty, such as --ow-line. */
   token: string;
   labels: Dictionary["lab"];
   onChange: (value: string) => void;

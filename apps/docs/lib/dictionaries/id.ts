@@ -119,7 +119,6 @@ export const id = {
       lightness: "Luminositas",
       swatches: "Contoh warna",
     },
-    shortcuts: "Klik stage atau Tab ke dalamnya, lalu tekan:",
     previous: "Sebelumnya",
     next: "Berikutnya",
     component: "Komponen",
@@ -138,33 +137,28 @@ export const id = {
   },
   tokens: {
     title: "Pengaturan token",
-    scope: "Berlaku untuk kode di setiap Lab",
     mode: "Mode token",
     theme: "Mode theme",
     isolated: "Mode isolated",
-    themeNote:
-      "Semua komponen membaca satu set token bersama. Ubah accent sekali, semua komponen ikut. Cocok untuk app dengan satu design system.",
-    isolatedNote:
-      "Token yang sama, dengan nilainya di elemen root setiap komponen, bukan di root halaman, sehingga tidak ada yang dibagi. Pakai untuk memberi satu komponen tema tersendiri, atau menambah komponen ke app dengan design system lain.",
+    themeNote: "Nilai di root halaman, dipakai bersama oleh semua komponen.",
+    isolatedNote: "Nilai di root setiap komponen; tidak ada yang dibagi.",
     prefix: "Prefix",
-    prefixHelp:
-      "Diawali huruf; huruf kecil, angka, dan tanda hubung tunggal; maksimal 16 karakter.",
     prefixError:
       "“{prefix}” tidak bisa dipakai sebagai prefix. Awali dengan huruf, lalu pakai huruf kecil, angka, dan tanda hubung tunggal, maksimal 16 karakter.",
-    names: "Nama yang akan Anda tulis",
-    cli: "Prefix khusus dan mode isolated dipasang lewat CLI owsem, yang belum dirilis.",
+    cli: "CLI owsem, yang belum dirilis, memasang pengaturan ini.",
     reset: "Kembali ke mode theme, --ow",
     change: "Ubah",
   },
   components: {
     button:
       "Tombol aksi bertepi tegas, dengan riak saat ditekan, ikon, dan state loading yang tidak mengubah lebar.",
-    separator: "Garis terukir pemisah antarbagian, horizontal atau vertikal.",
+    separator: "Garis tipis pemisah antarbagian, horizontal atau vertikal.",
     field: "Label, deskripsi, dan pesan error yang terhubung ke kontrolnya.",
     fieldset: "Grup field dengan legend dan jarak yang konsisten.",
     form: "Validasi native dan dari server, dengan fokus ke field pertama yang error.",
     input: "Input teks yang sejajar dengan Button, dengan ikon di depan atau belakang.",
-    checkbox: "Kotak centang yang centangnya memudar menjadi minus saat indeterminate.",
+    checkbox:
+      "Kotak centang yang centangnya tergambar sendiri, dan berganti menjadi minus saat indeterminate.",
     "radio-group": "Satu pilihan dari beberapa opsi, dengan indikator ber-spring.",
     switch: "Saklar on/off dengan thumb yang bergerak dengan spring.",
     select: "Pilihan dari daftar dalam popup, dengan trigger setinggi kontrol lain.",
@@ -209,7 +203,7 @@ export const id = {
     "table-of-contents":
       "Daftar “Di halaman ini” yang menandai bagian yang sedang dibaca, dengan penanda yang meluncur di sepanjang rail-nya.",
     "code-block":
-      "Kode di dalam kartu bersarang: satu ikon, judul atau tab, dan tombol Salin di header.",
+      "Kode di satu permukaan: satu ikon, judul atau tab, dan tombol Salin bertooltip di header.",
     "copy-button":
       "Tombol yang menyalin teks: ikon salinnya berubah jadi centang yang tergambar, lalu kembali.",
     "icon-morph":

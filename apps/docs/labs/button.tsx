@@ -371,13 +371,12 @@ const buttonLab = defineLab({
       name: "Root",
       selector: ".ow-button",
       note: {
-        id: "Button dari Base UI. Permukaannya (::before) digambar dari material: isi datar dengan tepi inset shadow yang tidak menambah ukuran.",
-        en: "Base UI's button. Its face (::before) is drawn from the materials: a flat fill with inset-shadow edges that add no size.",
+        id: "Button dari Base UI. Permukaannya (::before) digambar dari isi, bukan garis: primary dan destructive datar dengan sorot tipis di atas, secondary tint 12% dari warna teks, ghost transparan. Hanya outline yang bertepi, dengan inset shadow yang tidak menambah ukuran.",
+        en: "Base UI's button. Its face (::before) is drawn from fill, not lines: primary and destructive are flat with a thin top highlight, secondary is a 12% tint of the text color, ghost is clear. Only outline has an edge, an inset shadow that adds no size.",
       },
       tokens: {
         "--ow-radius": "--_radius",
         "--ow-fg": "--_ink",
-        "--ow-bg": "--_page",
         "--ow-pressed-bg": "--_pressed-bg",
         "--ow-accent": "--_primary-bg",
         "--ow-on-accent": "--_on-primary",

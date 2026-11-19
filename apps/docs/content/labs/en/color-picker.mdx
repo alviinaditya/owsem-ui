@@ -49,7 +49,7 @@ on the stage, to see its tokens.
 | --- | --- | --- |
 | <Part name="Root" /> | `div.ow-color-picker` | The panel; theme tokens set here apply to it alone; `data-disabled` |
 | <Part name="Area" /> | `div.ow-color-picker__area` | `role="slider"` in two dimensions, with its own keys; `data-dragging` while dragged |
-| <Part name="Thumb" /> | `span.ow-color-picker__thumb` | A ring around the color with a 1px dark edge, on each slider too (a `div` with `data-dragging`) |
+| <Part name="Thumb" /> | `span.ow-color-picker__thumb` | A ring around the color with a 1px dark line, on each slider too (a `div` with `data-dragging`) |
 | <Part name="Hue" /> | `div.ow-color-picker__slider` | A Base UI `Slider`, `data-channel="hue"`; its `div.ow-color-picker__control` holds the `div.ow-color-picker__track` |
 | <Part name="Alpha" /> | `div.ow-color-picker__slider` | A Base UI `Slider` over the checkerboard, `data-channel="alpha"` |
 | <Part name="EyeDropper" /> | `button.ow-color-picker__tool` | Only where the browser has the EyeDropper API |
@@ -65,7 +65,9 @@ and the preview; `div.ow-color-picker__inputs` holds the format switch and the f
 `ColorPickerPopover` adds a trigger, `button.ow-color-picker__trigger` (Base UI `Popover.Trigger`,
 with `data-size` and `data-variant`), that shows `span.ow-color-picker__chip` (`data-alpha` when
 translucent) and `span.ow-color-picker__value`, and a popup, `div.ow-color-picker__popup`
-(`Popover.Popup`, a dialog, in `div.ow-color-picker__positioner`), that holds the panel.
+(`Popover.Popup`, a dialog, in `div.ow-color-picker__positioner`), that holds the panel. The popup
+anchors to the trigger's resting box, not its pressed one, so it does not jump a device pixel while
+the trigger springs back.
 
 ## States and variants [#states]
 
@@ -78,6 +80,7 @@ enough to read as a shift. Opened from the keyboard, it appears at once.
 | State | What shows it |
 | --- | --- |
 | Pressed | A thumb compacts while dragged and springs back; buttons and swatches shrink a little |
+| Field | A 6% tint of the text color with no edge; 9% on hover |
 | Keyboard focus | A 2 px ring in `--ow-focus` around the area, a thumb, a field, or a swatch |
 | Current swatch | A check, dark or light to suit the swatch |
 | Translucent | The checkerboard under the preview, the swatches, and the trigger's color |
@@ -85,8 +88,9 @@ enough to read as a shift. Opened from the keyboard, it appears at once.
 
 Sizes follow the `--py` rule: the trigger is 29.25, 38.5, or 48 px tall, and its color sits as far
 from the edge as from the top and bottom. Color Picker is an Owsem component (Tactile): thumbs and
-swatches press with a spring, and nothing glows. Every part has a crisp 1px edge, with no soft or
-sunken shadow; only the popover floats.
+swatches press with a spring, and nothing glows. Parts are known by their fill, with no edge; the
+area, the tracks, and the preview keep a faint 1px line so they read on any color. Only the popover
+floats.
 
 ## Keyboard and accessibility [#keyboard]
 
@@ -113,7 +117,7 @@ Indonesian ones. The format and channel letters (HEX, R, G, B, H, S, L, A) are n
 With `prefers-reduced-motion`, the popover still fades, and thumbs, buttons, and swatches
 keep their size. In forced colors (Windows High Contrast), the area, the tracks, and the swatches
 keep their own colors inside a system-color outline, focus uses `Highlight`, and the current swatch
-gets a `Highlight` outline. Right to left, saturation, hue, and opacity grow toward the left.
+gets a `Highlight` outline. With `prefers-contrast: more`, the fields get a 1px edge in `--ow-edge` and the popover a ring in it. Right to left, saturation, hue, and opacity grow toward the left.
 
 ## Customization [#customization]
 
@@ -123,16 +127,12 @@ reads these theme tokens; set them on the picker, or on an element around it suc
 
 | Theme token | Purpose |
 | --- | --- |
-| `--ow-panel` | The panel, and the light squares of the checkerboard |
-| `--ow-line` | The dark squares of the checkerboard |
-| `--ow-panel-shadow` | The panel's edge; in the popover, `--ow-popup-shadow` |
-| `--ow-well-bg`, `--ow-edge` | Fields: a flat well inside a 3:1 edge |
-| `--ow-well-shadow` | The trigger: the same well, without the edge, since it is a button |
-| `--ow-raised-bg`, `--ow-raised-shadow` | The eye dropper and the format switch, as raised keys |
-| `--ow-pressed-bg`, `--ow-pressed-shadow` | Those keys while held |
-| `--ow-line-dark`, `--ow-line-light` | The etched line over the swatches |
-| `--ow-fg`, `--ow-muted`, `--ow-focus` | Text, labels, and focus rings |
-| `--ow-radius` | Corners of the area, fields, and keys; the panel's and the swatches' follow |
+| `--ow-panel` | The panel, with no edge or shadow, and the light squares of the checkerboard |
+| `--ow-line` | The dark squares of the checkerboard, and the hairline over the swatches |
+| `--ow-raised-bg`, `--ow-popup-shadow` | The popover's fill and shadow |
+| `--ow-well-bg` | The trigger: a flat well, since it is a button |
+| `--ow-fg`, `--ow-muted`, `--ow-focus` | Text, labels, and focus rings; `--ow-fg` also tints the fields (6%, 9% on hover) and the eye dropper and format keys (9%, 12% on hover, 15% held) |
+| `--ow-radius` | Corners of the panel, the area, the fields, and the keys; swatches take 2px less, the trigger's color half |
 
 <ForMode mode="isolated">
 
@@ -143,7 +143,7 @@ In isolated mode the values sit on each picker's root, so set yours on the picke
 
 The width (256 px) and the area's height (160 px) are layout: set `inline-size` on the picker with
 `className` or `style`, and `block-size` on its `.ow-color-picker__area`. The gradients, the hue
-spectrum, the thumbs' white ring with its dark edges, and the check on a swatch stay the same in
+spectrum, the thumbs' white ring with its dark line, and the check on a swatch stay the same in
 every theme, so they read on any color. The popover's panel is portaled to the body, so set its
 tokens where the popup can read them, such as `:root` or `.ow-color-picker`; it carries its
 trigger's theme and direction itself.

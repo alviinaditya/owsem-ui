@@ -18,17 +18,22 @@ const Glyph = () => (
 /** An Edit menu: actions with shortcuts, a disabled one, a checkbox, a radio group, a submenu. */
 function Edit({
   open,
+  modal,
   size,
   onCut,
   popupStyle,
 }: {
   open?: boolean;
+  modal?: boolean;
   size?: MenuSize;
   onCut?: () => void;
   popupStyle?: CSSProperties;
 }) {
   return (
-    <Menu.Root {...(open === undefined ? {} : { defaultOpen: open })}>
+    <Menu.Root
+      {...(open === undefined ? {} : { defaultOpen: open })}
+      {...(modal === undefined ? {} : { modal })}
+    >
       <Menu.Trigger style={{ margin: 40 }}>Edit</Menu.Trigger>
       <Menu.Portal>
         <Menu.Positioner>
@@ -99,7 +104,7 @@ const item = (name: string) => {
 const trigger = () => document.querySelector<HTMLElement>("button") as HTMLElement;
 const lit = () => document.querySelector("[data-glide-active]")?.textContent?.replace(/⌘./, "");
 
-/** Resolves a value (e.g. `var(--ow-panel)`) of `property` to its computed form in `scope`. */
+/** Resolves a value (e.g. `var(--ow-raised-bg)`) of `property` to its computed form in `scope`. */
 function resolve(property: "color" | "box-shadow", value: string, scope: Element = document.body) {
   const probe = document.createElement("span");
   probe.style.setProperty(property, value);
@@ -110,6 +115,31 @@ function resolve(property: "color" | "box-shadow", value: string, scope: Element
 }
 
 const gone = () => expect.poll(() => popups().length, { timeout: 1000 }).toBe(0);
+
+const backdrops = () => [...document.querySelectorAll<HTMLElement>(".ow-menu__backdrop")];
+/** Whether a wheel turned over `target` was held back. */
+const held = (target: Element = document.body) =>
+  !target.dispatchEvent(new WheelEvent("wheel", { deltaY: 100, bubbles: true, cancelable: true }));
+/** The page's own style attributes, which the lock leaves alone. */
+const pageStyle = () => [root.getAttribute("style"), document.body.getAttribute("style")];
+
+/** A button away from the menu, in the window's corner. */
+function Behind({ onClick }: { onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} style={{ position: "fixed", right: 20, bottom: 20 }}>
+      Behind
+    </button>
+  );
+}
+
+/** Presses the page where `el` is, whatever lies over it. */
+async function pressAt(el: Element) {
+  const box = el.getBoundingClientRect();
+  const page = document.body.getBoundingClientRect();
+  await userEvent.click(document.body, {
+    position: { x: box.left + box.width / 2 - page.left, y: box.top + box.height / 2 - page.top },
+  });
+}
 
 describe("Menu", () => {
   test("is Base UI's menu: it opens, moves, picks, and shuts with the keyboard", async () => {
@@ -179,11 +209,11 @@ describe("Menu", () => {
     const glow = highlight?.getBoundingClientRect();
     expect(glow?.top).toBeCloseTo(box.top, 0);
     expect(glow?.height).toBeCloseTo(box.height, 0);
-    expect(
-      getComputedStyle(highlight as HTMLElement)
-        .getPropertyValue("--_radius")
-        .trim(),
-    ).toBe("8px");
+    // The one radius less the popup's 4px padding (TK-8).
+    const radius = getComputedStyle(document.documentElement).getPropertyValue("--ow-radius");
+    const corner = `${Math.max(0, Number.parseFloat(radius) - 4)}px`;
+    expect(getComputedStyle(item("Word wrap")).borderTopLeftRadius).toBe(corner);
+    expect(getComputedStyle(highlight as HTMLElement).borderTopLeftRadius).toBe(corner);
   });
 
   test("checkbox and radio items show their state, keeping their room while off", async () => {
@@ -378,34 +408,34 @@ describe("Menu", () => {
     expect(refs.separator.current?.className).toBe("ow-menu__separator s");
   });
 
-  test("sits on the panel material with the popup shadow, in light and dark", async () => {
+  test("sits on the raised fill with the popup shadow, in light and dark", async () => {
     onTestFinished(() => {
       delete root.dataset.theme;
     });
     await render(<Edit open />);
     await expect.poll(popup).not.toBeNull();
     const surface = popup() as HTMLElement;
-    const groove = document.querySelector(".ow-menu__separator") as HTMLElement;
+    const line = document.querySelector(".ow-menu__separator") as HTMLElement;
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
       const style = getComputedStyle(surface);
-      expect(style.backgroundColor).toBe(resolve("color", "var(--ow-panel)"));
+      expect(style.backgroundColor).toBe(resolve("color", "var(--ow-raised-bg)"));
       expect(style.boxShadow).toBe(resolve("box-shadow", "var(--ow-popup-shadow)"));
       expect(getComputedStyle(item("Cut")).color).toBe(resolve("color", "var(--ow-fg)"));
-      expect(getComputedStyle(groove).borderTopColor).toBe(resolve("color", "var(--ow-line-dark)"));
-      expect(getComputedStyle(groove).borderBottomColor).toBe(
-        resolve("color", "var(--ow-line-light)"),
-      );
+      // The separator is one hairline.
+      expect(getComputedStyle(line).borderTopWidth).toBe("1px");
+      expect(getComputedStyle(line).borderTopColor).toBe(resolve("color", "var(--ow-line)"));
+      expect(getComputedStyle(line).borderBottomWidth).toBe("0px");
     }
   });
 
   test("a theme token set on it changes it alone (TK-9)", async () => {
     const tokens = {
-      "--ow-panel": "rgb(1, 2, 3)",
+      "--ow-raised-bg": "rgb(1, 2, 3)",
       "--ow-popup-shadow": "none",
       "--ow-fg": "rgb(4, 5, 6)",
       "--ow-muted": "rgb(7, 8, 9)",
-      "--ow-line-dark": "rgb(255, 0, 0)",
+      "--ow-line": "rgb(255, 0, 0)",
       "--ow-hover": "rgb(0, 128, 0)",
     } as CSSProperties;
     await render(<Edit open popupStyle={tokens} />);
@@ -427,7 +457,18 @@ describe("Menu", () => {
     expect(getComputedStyle(highlight).backgroundColor).toBe("rgb(0, 128, 0)");
   });
 
-  test("keeps its edge, grooves, checks, and focus in forced colors (DP-8)", async () => {
+  test("more contrast adds a 1px --ow-edge ring to the menu popup", async () => {
+    onTestFinished(() => commands.setContrast("no-preference"));
+    await render(<Edit open />);
+    await expect.poll(popup).not.toBeNull();
+    const surface = popup() as HTMLElement;
+    const shadow = getComputedStyle(surface).boxShadow;
+    await commands.setContrast("more");
+    const ring = resolve("box-shadow", "0 0 0 1px var(--ow-edge)");
+    expect(getComputedStyle(surface).boxShadow).toBe(`${shadow}, ${ring}`);
+  });
+
+  test("keeps its edge, separators, checks, and focus in forced colors (DP-8)", async () => {
     onTestFinished(() => commands.setForcedColors("none"));
     await render(<Edit />);
     trigger().focus();
@@ -437,8 +478,8 @@ describe("Menu", () => {
     const style = getComputedStyle(popup() as HTMLElement);
     expect(style.outlineStyle).toBe("solid");
     expect(style.outlineColor).not.toBe("rgba(0, 0, 0, 0)");
-    const groove = getComputedStyle(document.querySelector(".ow-menu__separator") as HTMLElement);
-    expect(groove.borderTopWidth).toBe("1px");
+    const line = getComputedStyle(document.querySelector(".ow-menu__separator") as HTMLElement);
+    expect(line.borderTopWidth).toBe("1px");
     const check = item("Word wrap").querySelector("svg") as SVGElement;
     expect(getComputedStyle(check).stroke).not.toBe("none");
     const ring = getComputedStyle(item("Cut"));
@@ -470,6 +511,121 @@ describe("Menu", () => {
     expect((popups()[1] as HTMLElement).getBoundingClientRect().right).toBeLessThanOrEqual(
       (popup() as HTMLElement).getBoundingClientRect().left,
     );
+  });
+
+  test("modal by default: a clear backdrop takes an outside press, and the page holds still", async () => {
+    const before = pageStyle();
+    let behind = 0;
+    const screen = await render(
+      <>
+        <Edit />
+        <Behind onClick={() => behind++} />
+      </>,
+    );
+    await userEvent.click(trigger());
+    await expect.poll(popup).not.toBeNull();
+    expect(backdrops()).toHaveLength(1);
+    const backdrop = backdrops()[0] as HTMLElement;
+    expect(getComputedStyle(backdrop).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+    const box = backdrop.getBoundingClientRect();
+    expect([box.left, box.top, box.width, box.height]).toEqual([
+      0,
+      0,
+      root.clientWidth,
+      root.clientHeight,
+    ]);
+    // The page's scroll is held without a style on it, so it is not drawn again.
+    await expect.poll(() => held()).toBe(true);
+    expect(pageStyle()).toEqual(before);
+    expect(getComputedStyle(root).overflow).toBe("visible");
+    expect(getComputedStyle(document.body).overflow).toBe("visible");
+    // A press on Behind lands on the backdrop: it only shuts the menu.
+    const button = screen.getByText("Behind").element();
+    await pressAt(button);
+    await gone();
+    expect(behind).toBe(0);
+    expect(backdrops()).toHaveLength(0);
+    expect(held()).toBe(false);
+    expect(pageStyle()).toEqual(before);
+    await userEvent.click(button);
+    expect(behind).toBe(1);
+  });
+
+  test("modal={false}: no backdrop and no lock; an outside press reaches what it hits", async () => {
+    let behind = 0;
+    const screen = await render(
+      <>
+        <Edit modal={false} />
+        <Behind onClick={() => behind++} />
+      </>,
+    );
+    await userEvent.click(trigger());
+    await expect.poll(popup).not.toBeNull();
+    await settle();
+    expect(backdrops()).toHaveLength(0);
+    expect(held()).toBe(false);
+    await userEvent.click(screen.getByText("Behind"));
+    await gone();
+    expect(behind).toBe(1);
+  });
+
+  test("a submenu adds no backdrop of its own; the lock holds until the menu shuts", async () => {
+    await render(<Edit />);
+    await userEvent.click(trigger());
+    await expect.poll(popup).not.toBeNull();
+    await userEvent.hover(item("Share"));
+    await expect.poll(() => popups().length).toBe(2);
+    expect(backdrops()).toHaveLength(1);
+    expect(held()).toBe(true);
+    await userEvent.click(document.body, { position: { x: 5, y: 5 } });
+    await gone();
+    expect(held()).toBe(false);
+  });
+
+  test("opened by hover, it holds neither the page nor a press", async () => {
+    await render(
+      <Menu.Root>
+        <Menu.Trigger openOnHover delay={0} style={{ margin: 40 }}>
+          File
+        </Menu.Trigger>
+        <Menu.Portal>
+          <Menu.Positioner>
+            <Menu.Popup>
+              <Menu.Item>New</Menu.Item>
+            </Menu.Popup>
+          </Menu.Positioner>
+        </Menu.Portal>
+      </Menu.Root>,
+    );
+    await userEvent.hover(trigger());
+    await expect.poll(popup).not.toBeNull();
+    await settle();
+    expect(held()).toBe(false);
+    for (const backdrop of backdrops()) {
+      expect(getComputedStyle(backdrop).pointerEvents).toBe("none");
+    }
+  });
+
+  test("kept mounted while shut, it does not hold the page", async () => {
+    await render(
+      <Menu.Root>
+        <Menu.Trigger>File</Menu.Trigger>
+        <Menu.Portal keepMounted>
+          <Menu.Positioner>
+            <Menu.Popup>
+              <Menu.Item>New</Menu.Item>
+            </Menu.Popup>
+          </Menu.Positioner>
+        </Menu.Portal>
+      </Menu.Root>,
+    );
+    expect(popup()).not.toBeNull();
+    await settle();
+    expect(held()).toBe(false);
+    await userEvent.click(trigger());
+    await expect.poll(() => held()).toBe(true);
+    await userEvent.keyboard("{Escape}");
+    await expect.poll(() => held()).toBe(false);
   });
 
   test("has no axe violations in light and dark", async () => {

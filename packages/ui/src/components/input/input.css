@@ -1,15 +1,14 @@
 @layer owsem.tokens, owsem.components;
 
 /*
- * A text field: a flat well with a 3:1 edge (DP-6), and focus adds the ring (FR-13). Button's
- * geometry (FR-9 to FR-11): --py is the only input. The input is the well with or without icons,
- * so className, style, and every state stay on one element; the wrapper only places the icons.
+ * A text field: a tint of the text color with no edge or shadow, so it reads on the page and on a card; hover deepens the tint, focus adds the ring (FR-13), and invalid turns it critical and shakes it once.
+ * Button's geometry (FR-9 to FR-11): --py is the only input. The input is the field with or
+ * without icons, so className, style, and every state stay on one element; the wrapper only
+ * places the icons.
  */
 @layer owsem.components {
   .ow-input {
-    --_bg: var(--ow-well-bg);
-    --_shadow: var(--ow-well-shadow);
-    --_edge: var(--ow-edge);
+    --_bg: color-mix(in oklab, var(--ow-fg) 6%, transparent);
     --_fg: var(--ow-fg);
     --_muted: var(--ow-muted);
     --_focus: var(--ow-focus);
@@ -24,9 +23,6 @@
     outline: 1px solid transparent;
     outline-offset: -1px;
     background-color: var(--_bg);
-    box-shadow:
-      inset 0 0 0 1px var(--_edge),
-      var(--_shadow);
     color: var(--_fg);
     font: inherit;
   }
@@ -34,7 +30,7 @@
   /* --py is the one input; the icons need it too, and they measure in the same font. */
   .ow-input,
   .ow-input__wrapper {
-    --py: 0.75em;
+    --py: 0.8036em;
     --_py: max(var(--py), (24px - 1lh) / 2);
     --px: calc(var(--_py) + (1lh - 1cap) / 2);
     --icon: calc(1em + 2px);
@@ -46,7 +42,7 @@
 
   .ow-input:where([data-size="sm"]),
   .ow-input__wrapper:where([data-size="sm"]) {
-    --py: 0.5em;
+    --py: 0.6058em;
     font-size: 0.8125rem;
   }
 
@@ -75,8 +71,51 @@
     opacity: 1;
   }
 
+  /* The tint deepens on hover. */
+  @media (hover: hover) and (pointer: fine) {
+    .ow-input:where(:hover):where(:not([data-disabled], :disabled)) {
+      --_bg: color-mix(in oklab, var(--ow-fg) 9%, transparent);
+    }
+  }
+
   .ow-input:where([data-invalid], [aria-invalid="true"]) {
-    --_edge: var(--ow-critical);
+    --_bg: color-mix(in oklab, var(--ow-critical) 14%, transparent);
+  }
+
+  /*
+   * Rejects once when it becomes invalid. data-armed is set while it is valid (core/shake.ts), so a
+   * field invalid from the start stays still; a Form re-plays it with data-shake="off" (a reflow).
+   */
+  .ow-input:where([data-invalid], [aria-invalid="true"])[data-armed]:not([data-shake="off"]) {
+    will-change: transform;
+    animation: ow-input-shake 320ms var(--ow-ease-out);
+  }
+
+  @keyframes ow-input-shake {
+    20% {
+      transform: translateX(calc(-4px * var(--ow-motion-scale)));
+    }
+    40% {
+      transform: translateX(calc(4px * var(--ow-motion-scale)));
+    }
+    60% {
+      transform: translateX(calc(-2px * var(--ow-motion-scale)));
+    }
+    80% {
+      transform: translateX(calc(2px * var(--ow-motion-scale)));
+    }
+  }
+
+  @keyframes ow-input-blink {
+    from {
+      opacity: 0.6;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ow-input:where([data-invalid], [aria-invalid="true"])[data-armed]:not([data-shake="off"]) {
+      animation: ow-input-blink 160ms var(--ow-ease-out);
+    }
   }
 
   .ow-input:focus-visible {
@@ -133,6 +172,13 @@
 
   .ow-input__wrapper:where(:has(> :is([data-disabled], :disabled))) > .ow-input__icon {
     opacity: 0.45;
+  }
+
+  /* More contrast asked for: the edge comes back at 3:1. */
+  @media (prefers-contrast: more) {
+    .ow-input {
+      box-shadow: inset 0 0 0 1px var(--ow-edge);
+    }
   }
 
   /* DP-8: the transparent outline is the edge; invalid thickens it, since its color is gone. */

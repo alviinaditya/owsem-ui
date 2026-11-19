@@ -42,7 +42,7 @@ const arrow = () => document.querySelector<HTMLElement>(".ow-popover__arrow") as
 const trigger = () => document.querySelector<HTMLElement>("button") as HTMLElement;
 const gone = () => expect.poll(popup, { timeout: 1000 }).toBeNull();
 
-/** Resolves a value (e.g. `var(--ow-panel)`) of `property` to its computed form in `scope`. */
+/** Resolves a value (e.g. `var(--ow-raised-bg)`) of `property` to its computed form in `scope`. */
 function resolve(property: "color" | "box-shadow", value: string, scope: Element = document.body) {
   const probe = document.createElement("span");
   probe.style.setProperty(property, value);
@@ -51,6 +51,16 @@ function resolve(property: "color" | "box-shadow", value: string, scope: Element
   probe.remove();
   return computed;
 }
+
+/** Whether a wheel turned over `target` was held back. */
+const held = (target: Element = document.body) =>
+  !target.dispatchEvent(new WheelEvent("wheel", { deltaY: 100, bubbles: true, cancelable: true }));
+/** The page's own style attributes, which the lock leaves alone. */
+const pageStyle = () => [root.style.cssText, document.body.style.cssText];
+/** Frames to let Base UI write its page lock (it does in a timeout) before looking. */
+const frames = async (n = 6) => {
+  for (let i = 0; i < n; i++) await new Promise((r) => requestAnimationFrame(r));
+};
 
 describe("Popover", () => {
   test("is Base UI's popover: a named dialog that opens, takes focus, and gives it back", async () => {
@@ -192,7 +202,7 @@ describe("Popover", () => {
     expect(refs.description.current?.className).toBe("ow-popover__description d");
   });
 
-  test("sits on the panel material with the popup shadow; its arrow matches, light and dark", async () => {
+  test("sits on the raised fill with the popup shadow; its arrow matches, light and dark", async () => {
     onTestFinished(() => {
       delete root.dataset.theme;
     });
@@ -202,7 +212,7 @@ describe("Popover", () => {
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
       const style = getComputedStyle(surface);
-      expect(style.backgroundColor).toBe(resolve("color", "var(--ow-panel)"));
+      expect(style.backgroundColor).toBe(resolve("color", "var(--ow-raised-bg)"));
       expect(style.boxShadow).toBe(resolve("box-shadow", "var(--ow-popup-shadow)"));
       expect(style.color).toBe(resolve("color", "var(--ow-fg)"));
       expect(
@@ -210,14 +220,14 @@ describe("Popover", () => {
       ).toBe(resolve("color", "var(--ow-muted)"));
       // The arrow wears the popup's surface and shadow, so its edges are the panel's.
       const tip = getComputedStyle(arrow(), "::before");
-      expect(tip.backgroundColor).toBe(resolve("color", "var(--ow-panel)"));
+      expect(tip.backgroundColor).toBe(resolve("color", "var(--ow-raised-bg)"));
       expect(tip.boxShadow).toBe(resolve("box-shadow", "var(--ow-popup-shadow)"));
     }
   });
 
   test("a theme token set on it changes it alone (TK-9)", async () => {
     const tokens = {
-      "--ow-panel": "rgb(1, 2, 3)",
+      "--ow-raised-bg": "rgb(1, 2, 3)",
       "--ow-popup-shadow": "none",
       "--ow-fg": "rgb(4, 5, 6)",
       "--ow-muted": "rgb(7, 8, 9)",
@@ -234,6 +244,17 @@ describe("Popover", () => {
     const tip = getComputedStyle(arrow(), "::before");
     expect(tip.backgroundColor).toBe("rgb(1, 2, 3)");
     expect(tip.boxShadow).toBe("none");
+  });
+
+  test("more contrast adds a 1px --ow-edge ring to the popover popup", async () => {
+    onTestFinished(() => commands.setContrast("no-preference"));
+    await render(<Share open />);
+    await expect.poll(popup).not.toBeNull();
+    const surface = popup() as HTMLElement;
+    const shadow = getComputedStyle(surface).boxShadow;
+    await commands.setContrast("more");
+    const ring = resolve("box-shadow", "0 0 0 1px var(--ow-edge)");
+    expect(getComputedStyle(surface).boxShadow).toBe(`${shadow}, ${ring}`);
   });
 
   test("keeps its edge and its arrow's in forced colors (DP-8)", async () => {
@@ -290,5 +311,38 @@ describe("Popover", () => {
     await expect.poll(popup).not.toBeNull();
     await settle();
     expect(await measureIdle()).toEqual({ rafCalls: 0, runningAnimations: [] });
+  });
+
+  test("not modal by default: the page is not held", async () => {
+    await render(<Share open />);
+    await expect.poll(popup).not.toBeNull();
+    await frames();
+    expect(held()).toBe(false);
+  });
+
+  test("modal holds the page without styling it, until it shuts", async () => {
+    const before = pageStyle();
+    await render(
+      <Popover.Root modal defaultOpen>
+        <Popover.Trigger>Open</Popover.Trigger>
+        <Popover.Portal>
+          <Popover.Positioner>
+            <Popover.Popup>
+              <Popover.Title>Setup</Popover.Title>
+              <Popover.Close>Done</Popover.Close>
+            </Popover.Popup>
+          </Popover.Positioner>
+        </Popover.Portal>
+      </Popover.Root>,
+    );
+    await expect.poll(popup).not.toBeNull();
+    await frames();
+    expect(pageStyle()).toEqual(before);
+    expect(held()).toBe(true);
+    await userEvent.keyboard("{Escape}");
+    await gone();
+    await frames();
+    expect(held()).toBe(false);
+    expect(pageStyle()).toEqual(before);
   });
 });

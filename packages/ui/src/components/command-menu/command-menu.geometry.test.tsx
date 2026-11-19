@@ -1,12 +1,12 @@
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
-import { insets, TOL, usedRadius } from "../../../test/geometry.ts";
+import { insets, TOL, themeRadius, usedRadius } from "../../../test/geometry.ts";
 import { CommandMenu, type CommandMenuSize } from "./index";
 
 // FR-11: height 2 × --_py + 1lh, icon font + 2px, and the icon as far from the edge on every side.
 const SIZES: Record<CommandMenuSize, { height: number; icon: number; edge: number }> = {
-  sm: { height: 29.25, icon: 15, edge: 7.125 },
-  md: { height: 38.5, icon: 16, edge: 11.25 },
+  sm: { height: 32, icon: 15, edge: 8.5 },
+  md: { height: 40, icon: 16, edge: 12 },
   lg: { height: 48, icon: 18, edge: 15 },
 };
 
@@ -81,14 +81,17 @@ describe.each(Object.keys(SIZES) as CommandMenuSize[])("Command Menu geometry, %
     for (const edge of iconEdges(trigger, svg)) expect(edge).toBeCloseTo(expected.edge, 0);
   });
 
-  test("the panel's radius is the item's plus the padding between them (FR-10b)", async () => {
+  test("the panel takes the one radius, and its items that less the padding (TK-8)", async () => {
     const { get } = await mount(size);
     const popup = get(".ow-command-menu__popup");
     const list = get(".ow-command-menu__list");
     const item = get(".ow-command-menu__item");
     const pad = insets(list, item).left;
     expect(insets(popup, item).left).toBeCloseTo(pad, 1);
-    expect(Math.abs(usedRadius(popup) - (usedRadius(item) + pad))).toBeLessThanOrEqual(TOL);
+    // Under the search row, so measured from the side.
+    const radius = themeRadius(popup);
+    expect(Math.abs(usedRadius(popup) - radius)).toBeLessThanOrEqual(TOL);
+    expect(Math.abs(usedRadius(item) - Math.max(0, radius - pad))).toBeLessThanOrEqual(TOL);
   });
 
   test("the footer stands as tall as the search row", async () => {

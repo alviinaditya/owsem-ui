@@ -5,29 +5,35 @@ import { type ForwardRefExoticComponent, forwardRef, type RefAttributes } from "
 import { withClassName } from "../../core/class-name";
 import "./checkbox.css";
 
-const cls = { root: "ow-checkbox", indicator: "ow-checkbox__indicator" } as const;
+const cls = {
+  root: "ow-checkbox",
+  indicator: "ow-checkbox__indicator",
+  stroke: "ow-checkbox__stroke",
+} as const;
 
-// Icons from Lucide (https://lucide.dev), ISC License: check and minus.
+// Icons from Lucide (https://lucide.dev), ISC License: check and minus. The viewBox is padded so
+// the glyph is about 62% of the box.
 const glyph = (name: "check" | "minus", path: string) => (
   <svg
     data-glyph={name}
-    viewBox="0 0 24 24"
+    viewBox="-4 -4 32 32"
     fill="none"
     stroke="currentColor"
-    strokeWidth="2.5"
+    strokeWidth="3.25"
     strokeLinecap="round"
     strokeLinejoin="round"
     aria-hidden="true"
     focusable="false"
   >
-    <path d={path} />
+    {/* Length 1, so CSS draws the check in with one dash (checkbox.css). */}
+    <path className={cls.stroke} d={path} pathLength={1} />
   </svg>
 );
 
 const GLYPHS = (
   <>
     {glyph("check", "M20 6 9 17l-5-5")}
-    {glyph("minus", "M5 12h14")}
+    {glyph("minus", "M4 12h16")}
   </>
 );
 

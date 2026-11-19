@@ -56,6 +56,15 @@ function resolve(property: string, value: string): string {
   return computed;
 }
 
+const popup = () => document.querySelector<HTMLElement>(".ow-tooltip__popup");
+
+/** The Tooltip's words on show while it is open, else null; the leaving word is hidden. */
+const tip = () => {
+  const el = popup();
+  if (!el) return null;
+  return el.querySelector(".ow-copy-button__tip-text[data-visible]")?.textContent ?? null;
+};
+
 const nameOf = (el: Element) =>
   el.getAttribute("aria-label") ??
   [...el.querySelectorAll(".ow-copy-button__label-text")]
@@ -104,16 +113,125 @@ describe("Copy Button", () => {
     expect(writeText).toHaveBeenCalledWith("second");
   });
 
-  test("another copy while it shows Copied starts the time over", async () => {
-    clipboard();
-    const { button, icons } = await mount({ timeout: 400 });
+  test("while it shows Copied it is busy: aria-disabled, and a click does not copy again", async () => {
+    const writeText = clipboard();
+    const onCopy = vi.fn();
+    const { button, icons } = await mount({ timeout: 400, onCopy });
+    expect(button.hasAttribute("aria-disabled")).toBe(false);
     await userEvent.click(button);
     await expect.poll(icons).toEqual(["check"]);
-    await new Promise((resolve) => setTimeout(resolve, 250));
-    await userEvent.click(button);
-    await new Promise((resolve) => setTimeout(resolve, 250));
-    expect(icons()).toEqual(["check"]);
+    expect(button.getAttribute("aria-disabled")).toBe("true");
+    // Busy, not disabled: it keeps its focus and its look.
+    expect(button.hasAttribute("data-disabled")).toBe(false);
+    expect(document.activeElement).toBe(button);
+    button.click();
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(writeText).toHaveBeenCalledTimes(1);
+    expect(onCopy).toHaveBeenCalledTimes(1);
+    // The time does not start over: the icon comes back on the first copy's clock.
     await expect.poll(icons, { timeout: 1000 }).toEqual(["copy"]);
+    expect(button.hasAttribute("aria-disabled")).toBe(false);
+    await userEvent.click(button);
+    expect(writeText).toHaveBeenCalledTimes(2);
+  });
+
+  test("icon only, its Tooltip says Copy on hover and turns to Copied in place, then back while the pointer stays", async () => {
+    clipboard();
+    const { screen, button, icons } = await mount({ timeout: 400 });
+    // The pointer may still rest where an earlier test left it.
+    await userEvent.unhover(button);
+    await expect.poll(tip, { timeout: 1000 }).toBeNull();
+    await userEvent.hover(button);
+    await expect.poll(tip, { timeout: 2000 }).toBe("Copy");
+    // The Tooltip names nothing new: the button keeps its own name.
+    expect(screen.getByRole("button", { name: "Copy" }).element()).toBe(button);
+    const before = popup();
+    await userEvent.click(button);
+    await expect.poll(tip).toBe("Copied");
+    await expect.poll(icons).toEqual(["check"]);
+    // The same popup: it never closed on the press, and it stays open while copied.
+    expect(popup()).toBe(before);
+    expect(before?.hasAttribute("data-ending-style")).toBe(false);
+    expect(before?.hasAttribute("data-open")).toBe(true);
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    expect(popup()).toBe(before);
+    // The icon comes back: the words turn back in the same popup, as the pointer is still there.
+    await expect.poll(icons, { timeout: 1000 }).toEqual(["copy"]);
+    await expect.poll(tip, { timeout: 1000 }).toBe("Copy");
+    expect(popup()).toBe(before);
+  });
+
+  test("the Tooltip holds both words, only the one on show is read, and it takes the popup's width", async () => {
+    clipboard();
+    const { button, icons } = await mount({ timeout: 400 });
+    await userEvent.unhover(button);
+    await userEvent.hover(button);
+    await expect.poll(tip, { timeout: 2000 }).toBe("Copy");
+    const words = () => [...document.querySelectorAll(".ow-copy-button__tip-text")];
+    expect(words().map((word) => word.getAttribute("aria-hidden"))).toEqual([null, "true"]);
+    await userEvent.click(button);
+    await expect.poll(icons).toEqual(["check"]);
+    expect(words().map((word) => word.getAttribute("aria-hidden"))).toEqual(["true", null]);
+    // The cell is sized to the word on show, so the popup eases to it.
+    const tipEl = document.querySelector<HTMLElement>(".ow-copy-button__tip");
+    const shown = document.querySelector(".ow-copy-button__tip-text[data-visible]");
+    expect(Number.parseFloat(tipEl?.style.inlineSize ?? "")).toBeCloseTo(
+      shown?.getBoundingClientRect().width ?? 0,
+      0,
+    );
+  });
+
+  test("each word sits centered in the popup, the longer one too, in both directions", async () => {
+    clipboard();
+    const { button, icons } = await mount({
+      timeout: 500,
+      labels: { copy: "Salin", copied: "Tersalin" },
+    });
+    await userEvent.unhover(button);
+    await userEvent.hover(button);
+    await expect.poll(tip, { timeout: 2000 }).toBe("Salin");
+    const gaps = () => {
+      const pop = popup()?.getBoundingClientRect();
+      const word = document
+        .querySelector(".ow-copy-button__tip-text[data-visible]")
+        ?.getBoundingClientRect();
+      if (!pop || !word) throw new Error("missing");
+      return [word.left - pop.left, pop.right - word.right];
+    };
+    const even = () => {
+      const [left, right] = gaps();
+      expect(Math.abs((left as number) - (right as number))).toBeLessThanOrEqual(0.5);
+    };
+    // Let the width ease settle before measuring.
+    const rest = () => new Promise((resolve) => setTimeout(resolve, 400));
+    await rest();
+    even();
+    await userEvent.click(button);
+    await expect.poll(tip).toBe("Tersalin");
+    await rest();
+    even();
+    await expect.poll(icons, { timeout: 1500 }).toEqual(["copy"]);
+    await expect.poll(tip, { timeout: 1000 }).toBe("Salin");
+    await rest();
+    even();
+  });
+
+  test("the Tooltip still closes when the pointer leaves", async () => {
+    clipboard();
+    const { button } = await mount({ timeout: 300 });
+    await userEvent.hover(button);
+    await expect.poll(tip, { timeout: 2000 }).toBe("Copy");
+    await userEvent.unhover(button);
+    await expect.poll(tip, { timeout: 1500 }).toBeNull();
+  });
+
+  test("from the keyboard, the Tooltip shows Copied too", async () => {
+    clipboard();
+    const { button } = await mount({ timeout: 300 });
+    button.focus();
+    await userEvent.keyboard("{Enter}");
+    await expect.poll(tip).toBe("Copied");
+    await expect.poll(tip, { timeout: 1500 }).toBeNull();
   });
 
   test("a refused copy calls onError and shows nothing copied", async () => {
@@ -159,6 +277,24 @@ describe("Copy Button", () => {
     await expect.poll(icons).toEqual(["check"]);
     expect(nameOf(button)).toBe("Tersalin");
     expect(button.offsetWidth).toBe(width);
+    // The words are on show, so no Tooltip repeats them.
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    expect(tip()).toBeNull();
+  });
+
+  test("duration sets the length of the icon's swap and the check's draw", async () => {
+    clipboard();
+    const { button } = await mount({ duration: "300ms" });
+    const morph = button.querySelector(".ow-icon-morph") as HTMLElement;
+    expect(button.style.getPropertyValue("--_duration")).toBe("300ms");
+    expect(morph.style.getPropertyValue("--_duration")).toBe("300ms");
+    await userEvent.click(button);
+    await expect.poll(() => button.querySelector(".ow-copy-button__check path")).toBeTruthy();
+    const path = button.querySelector(".ow-copy-button__check path") as Element;
+    expect(getComputedStyle(path).animationDuration).toBe("0.3s");
+    // Without it, both keep the settle spring's.
+    const plain = await mount();
+    expect(plain.button.style.getPropertyValue("--_duration")).toBe("");
   });
 
   test("passes the Button's props, className, and ref through", async () => {

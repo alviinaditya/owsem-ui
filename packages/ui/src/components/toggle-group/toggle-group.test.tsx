@@ -71,15 +71,14 @@ function resolveColor(value: string, scope: Element = document.body): string {
   return color;
 }
 
-/** Resolves a shadow token to its computed value. */
-function resolveShadow(value: string): string {
-  const probe = document.createElement("span");
-  probe.style.boxShadow = value;
-  document.body.append(probe);
-  const shadow = getComputedStyle(probe).boxShadow;
-  probe.remove();
-  return shadow;
-}
+/** The accent tint of the thumb, and of a pressed key, over the raised fill. */
+const TRACK = "color-mix(in oklab, var(--ow-fg) 6%, transparent)";
+const TINT = "color-mix(in oklab, var(--ow-accent) 14%, var(--ow-raised-bg))";
+/** The pressed item's text: the accent, leaning toward the text color. */
+const ON = "color-mix(in oklab, var(--ow-accent) 70%, var(--ow-fg))";
+
+/** The thumb's key: its ::before, which thumb.ts stretches. */
+const keyOf = (thumb: Element) => getComputedStyle(thumb, "::before");
 
 describe("Toggle Group", () => {
   test("renders Base UI's toggle group: one pressed item, or several with multiple", async () => {
@@ -138,7 +137,7 @@ describe("Toggle Group", () => {
     expect(span?.textContent).toBe("Right");
   });
 
-  test("draws a flat track and a raised thumb from the theme tokens, in light and dark", async () => {
+  test("draws a tinted track and an accent-tint thumb from the theme tokens, in light and dark", async () => {
     onTestFinished(() => {
       delete root.dataset.theme;
     });
@@ -146,15 +145,16 @@ describe("Toggle Group", () => {
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
       const track = getComputedStyle(group);
-      expect(track.backgroundColor, theme).toBe(resolveColor("var(--ow-well-bg)"));
-      expect(track.boxShadow, theme).toBe(resolveShadow("var(--ow-well-shadow)"));
-      const raised = getComputedStyle(thumb);
-      expect(raised.backgroundColor, theme).toBe(resolveColor("var(--ow-raised-bg)"));
-      expect(raised.boxShadow, theme).toBe(resolveShadow("var(--ow-raised-shadow)"));
-      // Labels change color with a short transition.
+      expect(track.backgroundColor, theme).toBe(resolveColor(TRACK));
+      // The track is a tint of the text color with no shadow; the thumb is a tint, with no edge.
+      expect(track.boxShadow, theme).toBe("none");
+      expect(getComputedStyle(thumb).boxShadow, theme).toBe("none");
+      expect(keyOf(thumb).content, theme).toBe('""');
+      expect(keyOf(thumb).backgroundColor, theme).toBe(resolveColor(TINT));
+      // Labels change color with a short transition; the pressed one takes the accent.
       await expect
         .poll(() => getComputedStyle(item("Week")).color, { message: theme })
-        .toBe(resolveColor("var(--ow-fg)"));
+        .toBe(resolveColor(ON));
       await expect
         .poll(() => getComputedStyle(item("Day")).color, { message: theme })
         .toBe(resolveColor("var(--ow-muted)"));
@@ -166,19 +166,19 @@ describe("Toggle Group", () => {
       <Views
         style={
           {
-            "--ow-well-bg": "rgb(1, 2, 3)",
+            "--ow-accent": "rgb(1, 2, 3)",
             "--ow-raised-bg": "rgb(4, 5, 6)",
-            "--ow-raised-shadow": "none",
             "--ow-fg": "rgb(7, 8, 9)",
             "--ow-muted": "rgb(10, 11, 12)",
           } as CSSProperties
         }
       />,
     );
-    expect(getComputedStyle(group).backgroundColor).toBe("rgb(1, 2, 3)");
-    expect(getComputedStyle(thumb).backgroundColor).toBe("rgb(4, 5, 6)");
+    expect(getComputedStyle(group).backgroundColor).toBe(resolveColor(TRACK, group));
+    expect(getComputedStyle(group).backgroundColor).not.toBe(resolveColor(TRACK));
+    expect(keyOf(thumb).backgroundColor).toBe(resolveColor(TINT, group));
     expect(getComputedStyle(thumb).boxShadow).toBe("none");
-    expect(getComputedStyle(item("Week")).color).toBe("rgb(7, 8, 9)");
+    expect(getComputedStyle(item("Week")).color).toBe(resolveColor(ON, group));
     expect(getComputedStyle(item("Day")).color).toBe("rgb(10, 11, 12)");
   });
 
@@ -207,6 +207,46 @@ describe("Toggle Group", () => {
     expect(over(thumb, item("Month"))).toBe(true);
   });
 
+  test("stretches the key along the way, from its leading edge, and settles back to rest", async () => {
+    const { thumb, item } = await mount(<Views />);
+    const stretches = () =>
+      thumb
+        .getAnimations({ subtree: true })
+        .filter((a) => (a.effect as KeyframeEffect | null)?.pseudoElement === "::before");
+    expect(stretches()).toEqual([]);
+    item("Month").click();
+    await expect.poll(() => stretches().length).toBe(1);
+    const effect = stretches()[0]?.effect as KeyframeEffect;
+    const frames = effect.getKeyframes();
+    // Moving toward the end, it grows from its end edge, the leading one, and only transform animates.
+    expect(frames.every((f) => f.transformOrigin === "100% 50%")).toBe(true);
+    expect(frames.map((f) => f.transform)).toEqual([
+      "scale(1, 1)",
+      expect.stringMatching(/^scale\(1\.[1-3]\d*, 1\)$/),
+      // Back to its size, and it stays: no squash below 1, no rebound.
+      "scale(1, 1)",
+      "scale(1, 1)",
+    ]);
+    await expect.poll(() => stretches().length).toBe(0);
+    expect(keyOf(thumb).transform).toBe("none");
+  });
+
+  test("with reduced motion, the key does not stretch (FR-20)", async () => {
+    onTestFinished(() => commands.setReducedMotion("no-preference"));
+    await commands.setReducedMotion("reduce");
+    const { thumb, item } = await mount(<Views />);
+    item("Month").click();
+    await expect.poll(() => over(thumb, item("Month"))).toBe(true);
+    expect(thumb.getAnimations({ subtree: true }).filter((a) => a instanceof CSSAnimation)).toEqual(
+      [],
+    );
+    expect(
+      thumb
+        .getAnimations({ subtree: true })
+        .some((a) => (a.effect as KeyframeEffect | null)?.pseudoElement === "::before"),
+    ).toBe(false);
+  });
+
   test("snaps, without sliding, when the items resize", async () => {
     const { group, thumb, item } = await mount(<Views />);
     group.style.fontSize = "20px";
@@ -229,7 +269,8 @@ describe("Toggle Group", () => {
     const style = getComputedStyle(thumb);
     expect(style.borderTopWidth).toBe(getComputedStyle(group).paddingTop);
     expect(style.borderBottomWidth).toBe(style.borderTopWidth);
-    expect(style.backgroundClip).toBe("padding-box");
+    // The key is the ::before, inside the clear border.
+    expect(getComputedStyle(thumb, "::before").position).toBe("absolute");
     expect([style.translate, style.transform]).toEqual(["0px", "matrix(1, 0, 0, 1, 0, 0)"]);
   });
 
@@ -255,18 +296,18 @@ describe("Toggle Group", () => {
     window.dispatchEvent(new PointerEvent("pointerup", { button: 0 }));
   });
 
-  test("with multiple selection, each pressed item is raised and there is no thumb", async () => {
+  test("with multiple selection, each pressed item is a tinted key and there is no thumb", async () => {
     const { thumb, item } = await mount(<Views multiple defaultValue={["day", "month"]} />);
     expect(getComputedStyle(thumb).opacity).toBe("0");
     const raised = (name: string) =>
-      getComputedStyle(item(name)).backgroundColor === resolveColor("var(--ow-raised-bg)");
+      getComputedStyle(item(name)).backgroundColor === resolveColor(TINT);
     expect(raised("Day")).toBe(true);
     expect(raised("Month")).toBe(true);
     expect(raised("Week")).toBe(false);
-    expect(getComputedStyle(item("Day")).boxShadow).toBe(resolveShadow("var(--ow-raised-shadow)"));
+    expect(getComputedStyle(item("Day")).boxShadow).toBe("none");
   });
 
-  test("a hovered key shifts its fill a little and keeps its edge; the thumb does not", async () => {
+  test("a hovered key shifts its fill a little; the thumb does not", async () => {
     const hover = (group: Element, el: Element) => {
       const r = el.getBoundingClientRect();
       group.dispatchEvent(
@@ -278,19 +319,18 @@ describe("Toggle Group", () => {
         }),
       );
     };
-    const raised = resolveColor("var(--ow-raised-bg)");
-    const edge = resolveShadow("var(--ow-raised-shadow)");
+    const raised = resolveColor(TINT);
 
     // The selected segment is not an action.
     const single = await mount(<Views />);
     hover(single.group, single.item("Week"));
     expect(single.item("Week").hasAttribute("data-glide-active")).toBe(true);
-    expect(getComputedStyle(single.thumb).backgroundColor).toBe(raised);
+    expect(keyOf(single.thumb).backgroundColor).toBe(raised);
 
     const multiple = await mount(<Views multiple defaultValue={["day", "month"]} />);
     hover(multiple.group, multiple.item("Month"));
     expect(getComputedStyle(multiple.item("Month")).backgroundColor).not.toBe(raised);
-    expect(getComputedStyle(multiple.item("Month")).boxShadow).toBe(edge);
+    expect(getComputedStyle(multiple.item("Month")).boxShadow).toBe("none");
     expect(getComputedStyle(multiple.item("Day")).backgroundColor).toBe(raised);
   });
 
@@ -300,7 +340,7 @@ describe("Toggle Group", () => {
     expect(background()).toBe("rgba(0, 0, 0, 0)");
     // As in server-rendered HTML before hydration.
     group.removeAttribute("data-thumb");
-    expect(background()).toBe(resolveColor("var(--ow-raised-bg)"));
+    expect(background()).toBe(resolveColor(TINT));
   });
 
   test("keyboard: Tab enters, arrows, Home, and End move focus, Space and Enter press (FR-15)", async () => {
@@ -363,7 +403,7 @@ describe("Toggle Group", () => {
     const { group, thumb, item } = await mount(<Views />);
     await commands.setForcedColors("active");
     expect(matchMedia("(forced-colors: active)").matches).toBe(true);
-    expect(getComputedStyle(thumb).backgroundColor).toBe(resolveColor("Highlight"));
+    expect(keyOf(thumb).backgroundColor).toBe(resolveColor("Highlight"));
     await expect
       .poll(() => getComputedStyle(item("Week")).color)
       .toBe(resolveColor("HighlightText"));

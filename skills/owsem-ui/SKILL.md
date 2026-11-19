@@ -86,7 +86,8 @@ body { position: relative; } /* backdrops in iOS Safari 26 and later */
   or `data-theme="dark"` on `<html>` or any element forces a theme for that subtree.
 - **Theme tokens**: every color, material, radius, and spring is an `--ow-*` theme token, such as
   `--ow-bg`, `--ow-fg`, `--ow-accent`, `--ow-hover`, `--ow-panel`, `--ow-raised-bg`, and
-  `--ow-radius`; read `tokens.css` for the current names. They are the only tokens: components
+  `--ow-radius`; read `tokens.css` for the current names. `--ow-panel-shadow`,
+  `--ow-raised-shadow`, and `--ow-pressed-shadow` are removed. They are the only tokens: components
   have none of their own. A token that differs by theme must be set for every case `tokens.css`
   covers, or the override leaks into the other theme:
 
@@ -98,10 +99,24 @@ body { position: relative; } /* backdrops in iOS Safari 26 and later */
   :root { --ow-accent: #c9b8f0; } /* one value for both themes */
   ```
 
-  `--ow-line-dark` and `--ow-line-light` are not derived from other tokens: when changing
-  neutrals such as `--ow-bg`, set them per theme too, so etched lines stay visible.
+  `--ow-line` is not derived from other tokens: when changing neutrals such as `--ow-bg`, set it
+  per theme too, so hairlines stay visible.
+- **Materials**: lines only separate content, they never draw a shape. A control or container is
+  known by its fill, one tone step from what it sits on; fields, keys, and tracks are tints of
+  `--ow-fg` (`color-mix(in oklab, var(--ow-fg) 6%, transparent)` for a field, 9% on hover). A state
+  changes the tone, or shows the 2px focus ring, never an edge. A control has no edge by default
+  (DP-6); `--ow-edge` is used only under `@media (prefers-contrast: more)`, where fields, Checkbox,
+  Radio, and Switch get an inset 1px edge and popups an extra 1px ring. Popups use
+  `--ow-raised-bg` with `--ow-popup-shadow`; only hairlines (`--ow-line`) stay.
+- **Invalid**: a tint (`--ow-critical` 12%), the message, and one shake when an Input or Select
+  trigger becomes invalid (a short opacity blink under reduced motion). Form shakes the first
+  invalid field again on a submit that still fails.
+- **Corners**: `--ow-radius` (10px by default) is the radius of every surface: controls, popups,
+  tracks, panels. A part nested inside a padded one (a menu item, a segmented thumb, a switch's
+  key) takes it less that padding, and Checkbox and Kbd take half. Set only `--ow-radius`; do not
+  give inner parts a radius of their own or add the padding to the outer one.
 - **One component**: set a theme token on the component, or on an element around it, to restyle
-  only what is inside: `.sidebar { --ow-line-dark: #b8b8c4; }`. For what no token covers, style the
+  only what is inside: `.sidebar { --ow-line: #b8b8c4; }`. For what no token covers, style the
   part with `className`, or in CSS by its class and data attributes.
 - **Class names**: the root part is `.ow-<component>` and every other part
   `.ow-<component>__<part>` (BEM elements), such as `.ow-tree-rail-nav__label`. Variants and states
@@ -124,7 +139,7 @@ body { position: relative; } /* backdrops in iOS Safari 26 and later */
   preflight and below utilities, so utilities in `className` win; imported after `tailwindcss` it
   comes too late. It maps the theme tokens to utilities that read `var(--ow-*)`: colors
   (`bg-ow-panel`, `text-ow-muted`, `border-ow-line`, `bg-ow-raised` for `--ow-raised-bg`),
-  `shadow-ow-raised` (and panel, popup, well, pressed, primary), `rounded-ow`, and `ease-ow-out`
+  `shadow-ow-popup` (and primary), `rounded-ow`, and `ease-ow-out`
   (and in-out, drawer, spring-travel, spring-settle, spring-glide); spring durations go through
   `duration-(--ow-spring-glide-duration)`. Style states with data attribute variants such as
   `data-panel-open:` or `data-[orientation=vertical]:`, with no plugin. Set a token on one element
@@ -196,11 +211,11 @@ import { Button, ButtonIcon, buttonStyles, IconButton } from "owsem-ui/base"; //
   Keep the label the same while loading. Use a boolean (`loading={saving}`) on buttons that can
   load, so the spinner fades in.
 - `IconButton`: `icon` and a required `aria-label`; square; `ghost` by default.
-- Look: flat fills with crisp 1px edges drawn as inset shadows, so every variant of a size is the
-  same height. `primary`, `secondary` (a neutral: grey in light, silver in dark), and
-  `destructive` are solid fills with an edge darker than the fill, `outline` is a quiet 1px line
-  from the text color, `ghost` is flat until hovered, and `soft` is a tint with no edge. There is
-  no drop shadow and no socket; do not add a `box-shadow` around a button.
+- Look: flat fills, so every variant of a size is the same height. `primary` and `destructive` are
+  solid fills with a thin light line inside the top and no ring, `secondary` is a 12% tint of the
+  text color (16% held), `ghost` is clear until hovered (`--ow-pressed-bg` held), and `soft` is a
+  tint of the variant's tone. `outline` is the only variant with an edge, a quiet 1px line from the
+  text color. There is no drop shadow and no socket; do not add a `box-shadow` around a button.
 - Links: never render a link through Button. Spread `buttonStyles({ variant, size, soft,
   className })` on the `<a>` or router `Link`, and wrap icons in `ButtonIcon` (`side`). Pass icons
   as elements; their size is the font size plus 2px, so do not size them.
@@ -208,8 +223,8 @@ import { Button, ButtonIcon, buttonStyles, IconButton } from "owsem-ui/base"; //
   button itself: `style={{ "--py": "0.6em" }}`. Do not set `height` or `padding`.
 - Reads `--ow-accent` with `--ow-on-accent` (primary; the link mixes the accent toward `--ow-fg`),
   `--ow-critical-solid` with `--ow-on-critical` (destructive; soft uses `--ow-critical`),
-  `--ow-fg` and `--ow-bg` (secondary's fill and text, outline's line), `--ow-primary-shadow` (the
-  solid fills' edges), `--ow-pressed-*` (held down), `--ow-hover`, `--ow-focus`, `--ow-radius`,
+  `--ow-fg` (secondary's tint and text, outline's line), `--ow-primary-shadow` (the solid fills'
+  top highlight), `--ow-pressed-bg` (held down), `--ow-hover`, `--ow-focus`, `--ow-radius`,
   and `--ow-motion-scale`.
 
 ### Checkbox
@@ -233,8 +248,9 @@ import { Checkbox } from "owsem-ui/base"; // or "@/components/owsem/checkbox"
 - It needs a name: a plain `<label>` around it is all it takes, and that label toggles, tints, and
   presses it. Otherwise, an `aria-label`. Space toggles it; Enter submits the form. Do not build a
   wrapper for the label, and use no Field for this.
-- Without children, `Root` draws its `Indicator`, and the `Indicator` draws a check and a minus that
-  crossfade. Children replace either, with any node, and an svg fills the box. Mark a pair with
+- Without children, `Root` draws its `Indicator`, and the `Indicator` draws a check that draws its
+  stroke in and a minus that grows from its middle; they crossfade, and leaving they only fade.
+  Children replace either, with any node, and an svg fills the box. Mark a pair with
   `data-glyph="check"` and `data-glyph="minus"` to keep the crossfade.
 - Props: `size` (`"sm"`, `"md"` default, `"lg"`: Button's fonts), plus Base UI's. The box is an icon,
   the font size plus 2px (15, 16, 18 px), in `em`: `font-size` on it scales the box and its glyphs,
@@ -242,10 +258,10 @@ import { Checkbox } from "owsem-ui/base"; // or "@/components/owsem/checkbox"
   layout, so do not pad it. It has no margin.
 - A parent box is your own state for now (`checked` for all, `indeterminate` for some); Checkbox Group
   is a later component.
-- Off is the well with a 3:1 edge; on is the primary material, and the fill changes at once. Reads
-  `--ow-well-bg`, `--ow-edge`, `--ow-fg`, `--ow-accent`, `--ow-primary-shadow`, `--ow-on-accent`,
-  `--ow-hover`, `--ow-pressed-bg`, `--ow-focus`, `--ow-radius` (half of it), and `--ow-motion-scale`.
-  One class of yours beats any of its states; write `[data-checked]` on it to style one.
+- Off is a 6% tint of the text color with no edge (9% on hover of the box or its label, 12% held);
+  on is the primary material, and the fill changes at once. Reads `--ow-fg`, `--ow-accent`,
+  `--ow-primary-shadow`, `--ow-on-accent`, `--ow-hover`, `--ow-edge` (high contrast), `--ow-focus`, `--ow-radius` (half of it), and `--ow-motion-scale`. One class of
+  yours beats any of its states; write `[data-checked]` on it to style one.
 
 ### Field
 
@@ -307,15 +323,16 @@ import { Field, Fieldset } from "owsem-ui/base"; // or "@/components/owsem/field
   through `aria-labelledby`). Both take `className`, `style`, `render`, and `ref`. Any control works
   inside; Field is the usual one, and Fieldset does not import it.
 - The space between its children is `gap` on the root (`1.25em`), one property on one class.
-- An etched line sits under the legend, as its `::after`: `.my-legend::after { content: none; }`
+- A hairline sits under the legend, as its `::after`: `.my-legend::after { content: none; }`
   removes it.
-- Reads `--ow-fg` (legend), `--ow-line-dark`, and `--ow-line-light`. A token on the legend or an
+- Reads `--ow-fg` (legend) and `--ow-line`. A token on the legend or an
   ancestor wins, and so does unlayered CSS on a `className`.
 
 ### Form
 
 A native `<form>` that checks its Fields before it submits, takes server errors, and moves focus to the
-first invalid field. It draws only the gap between fields. Registry item: `form`.
+first invalid field. A submit that still fails shakes that field again. It draws only the gap
+between fields. Registry item: `form`.
 
 ```tsx
 import { Button, Field, Form } from "owsem-ui/base"; // or "@/components/owsem/form", ...
@@ -344,8 +361,9 @@ import { Button, Field, Form } from "owsem-ui/base"; // or "@/components/owsem/f
 
 ### Input
 
-A one-line text field: a flat well with a 3:1 edge, Button's heights, and a focus ring. A name is all
-it needs, and it fills its parent. Registry item: `input`.
+A one-line text field: a 6% tint of the text color with no edge (9% on hover), Button's heights,
+and a focus ring. A name is all it needs, and it fills its parent. Registry
+item: `input`.
 
 ```tsx
 import { Input } from "owsem-ui/base"; // or "@/components/owsem/input"
@@ -362,16 +380,17 @@ import { Input } from "owsem-ui/base"; // or "@/components/owsem/input"
   so set `inline-size` for a width), `startIcon` and `endIcon` (any node; sized to the font plus 2px,
   decorative), plus Base UI's `disabled`, `className`, `style`, and `render`.
 - **`ref`, `className`, `style`, and every other prop always reach the `<input>`, with or without
-  icons.** The input is always the well. An icon adds `span.ow-input__wrapper`, which has no look and
+  icons.** The input is always the field. An icon adds `span.ow-input__wrapper`, which has no look and
   only places it; custom properties and `fontSize` in `style` reach it too. Passing the first icon
   later remounts the input, so choose at the first render, and swap icons rather than passing `null`.
 - It has no margins. It fills its parent; a width on the input narrows it. In a flex row, an Input
   with icons keeps its wrapper at the full width, so size `.ow-input__wrapper` or the parent there.
-- A plain `aria-invalid` draws the invalid edge. `render={<textarea rows={3} />}` keeps the look
+- A plain `aria-invalid` draws the invalid tint (`--ow-critical` 12%) and shakes it once, or blinks
+  under reduced motion; a field invalid on first render stays still. `render={<textarea rows={3} />}` keeps the look
   and grows past one line.
 - Height comes from `--py` (set it in `style`, never under a 24 px target), and `font-size` scales it.
-- Reads `--ow-well-bg`, `--ow-well-shadow`, `--ow-edge`, `--ow-critical` (invalid edge), `--ow-fg`,
-  `--ow-muted` (placeholder and icons), `--ow-radius`, and `--ow-focus`. A token on the input or an
+- Reads `--ow-fg` (text and tint), `--ow-critical` (invalid tint), `--ow-muted` (placeholder and
+  icons), `--ow-radius`, `--ow-focus`, and `--ow-edge` (high contrast). A token on the input or an
   ancestor wins, and so does any unlayered CSS or Tailwind utility on its `className`.
 
 ### Menu
@@ -426,12 +445,17 @@ import { Menu } from "owsem-ui/base"; // or "@/components/owsem/menu"
 - `Menu.CheckboxItemIndicator` and `Menu.RadioItemIndicator` draw a check and a dot by default and
   keep their room while off (`keepMounted`); put them first. Checkbox and radio items keep the menu
   open unless `closeOnClick`.
+- `modal` (default `true`): the Portal draws a clear backdrop (`.ow-menu__backdrop`), so an outside
+  press only shuts the menu, and the page's scroll is held without an `overflow` style, so its text
+  is not drawn again. Wheel and scroll keys work inside the menu. Touch opens, hover opens, and
+  submenus never lock. Do not add a backdrop or a scroll lock of your own; `modal={false}` for none.
 - `Popup` takes `size` (`"sm"`, `"md"` default, `"lg"`), also on a submenu's Popup. `Positioner`
-  sits 6px from the trigger (`side`, `align`, `sideOffset`); a submenu lines its first item up with
-  its trigger. The menu renders in a portal: set tokens on the Popup's class or on `:root`, and
-  `data-theme` on the Positioner when the trigger sits in a themed subtree.
-- Reads `--ow-panel`, `--ow-popup-shadow`, `--ow-fg`, `--ow-muted`, `--ow-hover` (Glide),
-  `--ow-line-dark` and `--ow-line-light` (grooves), `--ow-radius`, and `--ow-focus`.
+  sits 6px from the trigger's resting box (`side`, `align`, `sideOffset`), so a press does not shift
+  it; a submenu lines its first item up with its trigger. The menu renders in a portal: set tokens
+  on the Popup's class or on `:root`, and `data-theme` on the Positioner when the trigger sits in a
+  themed subtree.
+- Reads `--ow-raised-bg`, `--ow-popup-shadow`, `--ow-fg`, `--ow-muted`, `--ow-hover` (Glide),
+  `--ow-line` (separators), `--ow-radius`, and `--ow-focus`.
 
 ### Dialog
 
@@ -457,6 +481,8 @@ import { Button, Dialog } from "owsem-ui/base"; // or "@/components/owsem/dialog
 - `Portal` draws the scrim. Write a `Dialog.Backdrop` as its first child only to change it (it
   replaces the drawn one), and set `backdrop={false}` for none, as with `modal={false}`, where a scrim
   would cover the page you meant to keep usable. `container` picks where it renders.
+- A modal dialog holds the page's scroll without an `overflow` style, so its text is not drawn
+  again; opened by touch, Base UI's own lock stands. Do not add a scroll lock of your own.
 - Long content scrolls inside the Popup, which stays 16px inside the screen; wrapped in
   `Dialog.Viewport`, the Popup keeps its full height and the Viewport scrolls. A dialog too long to
   show whole takes focus itself, so it opens at its start, unless `initialFocus` says otherwise.
@@ -469,7 +495,7 @@ import { Button, Dialog } from "owsem-ui/base"; // or "@/components/owsem/dialog
 - The dialog renders in a portal: set tokens on `:root`, on the Popup's class, or on the Portal's
   class to reach the scrim too, and `data-theme` on the Portal when the trigger sits in a themed
   subtree.
-- Reads `--ow-backdrop`, `--ow-panel`, `--ow-popup-shadow`, `--ow-fg`, `--ow-muted`, `--ow-radius`,
+- Reads `--ow-backdrop`, `--ow-raised-bg`, `--ow-popup-shadow`, `--ow-fg`, `--ow-muted`, `--ow-radius`,
   `--ow-focus`, and `--ow-ease-out`.
 
 ### Select
@@ -492,8 +518,9 @@ default:
 
 - `Trigger` without children draws `Value` and `Icon` (its `placeholder` reaches that `Value`).
   `Icon` draws chevrons and `ItemIndicator` a check; children replace them.
-- `Item` with plain children wraps them in `ItemText` after an `ItemIndicator`. Write either part
-  to arrange the row yourself, such as an icon before `ItemText` or the check last.
+- `Item` with plain children wraps them in `ItemText`, then an `ItemIndicator` at the row's end, in
+  line with the trigger's chevron. Write either part to arrange the row yourself, such as an icon
+  before `ItemText` or the check first; written parts keep your order.
 - `Popup` without a `List` directly inside draws one, with `ScrollUpArrow` and `ScrollDownArrow`.
   Without a `Positioner` around it, it draws `Portal` and `Positioner`. Write those to set
   `container`, `side`, or `alignItemWithTrigger`.
@@ -505,19 +532,28 @@ Details:
   a `Select.Label`.
 - `size` on the Root (`"sm"`, `"md"` default, `"lg"`) sets the trigger and the popup together. The
   trigger has no width of its own and no margin: it fits its value, and `inline-size` stretches it.
-- The popup opens with the selected text on the trigger's text, ending where the trigger ends. Touch,
-  the screen's edges, and `multiple` hang it 6px below instead. It needs the screen's coordinates,
-  so with a transformed ancestor set `alignItemWithTrigger={false}`.
+- The popup opens over the trigger at its width, with the selected text on the trigger's text and
+  the check at the row's end; it grows only for an item that would not fit, and item text stays on
+  one line. Touch, the screen's edges, and `multiple` hang it 6px below instead, at least as wide as
+  the trigger. It needs the screen's coordinates, so with a transformed ancestor set
+  `alignItemWithTrigger={false}`. A pick's check fades and scales in, and the popup leaves after a
+  60 ms beat.
+- The trigger is a 6% tint of the text color with no edge, 9% on hover and while the popup is open.
 - `multiple` on the Root is Base UI's: pass an array, and the trigger adds up the labels. `name`
-  submits in a plain `<form>`. `aria-invalid` or Base UI's `Field` turns the edge `--ow-critical`.
+  submits in a plain `<form>`. `aria-invalid` or Base UI's `Field` gives it the critical tint and one shake.
 - Keyboard, focus, typeahead, and ARIA come from Base UI; do not add handlers. Do not style item
   hover or `data-highlighted`: Glide lights items (recolor it with `--ow-hover`).
+- `modal` (default `true`): the Portal draws a clear `Select.Backdrop` (`.ow-select__backdrop`), so
+  an outside press only shuts the popup, and the page's scroll is held without an `overflow` style;
+  the list still scrolls. Touch opens do not lock. Over the trigger the page is held even with
+  `modal={false}` (the popup cannot follow a scroll there), still without an `overflow` style. Do
+  not add a Backdrop of your own; `modal={false}` for none.
 - A plain rule on a `className` wins over the component's own. The popup renders in a portal: set
   tokens on the Popup's class or on `:root`, and `data-theme` on the Positioner when the trigger
   sits in a themed subtree.
-- Reads `--ow-well-bg`, `--ow-well-shadow`, `--ow-edge`, `--ow-critical`, `--ow-panel`,
-  `--ow-popup-shadow`, `--ow-fg`, `--ow-muted`, `--ow-hover` (Glide), `--ow-line-dark` and
-  `--ow-line-light` (grooves), `--ow-radius`, and `--ow-focus`.
+- Reads `--ow-fg` (the trigger's text and tint), `--ow-critical`, `--ow-raised-bg`,
+  `--ow-popup-shadow`, `--ow-muted`, `--ow-hover` (Glide), `--ow-line` (separators),
+  `--ow-radius`, and `--ow-focus`.
 
 ### Popover
 
@@ -545,15 +581,17 @@ import { Popover } from "owsem-ui/base"; // or "@/components/owsem/popover"
 - Focus, Escape, outside clicks, and ARIA come from Base UI; always give the popup a
   `Popover.Title`. Use a Popover, not a Tooltip, for anything people must read or act on.
 - `Positioner`: `side` (`"bottom"` default), `align`, `sideOffset` (10 by default, room for the
-  arrow); `Arrow` is optional. `Popup`: `initialFocus` and `finalFocus`; `Root`: `modal` (`false`
-  default), `open`, `onOpenChange`.
+  arrow); it measures from the trigger's resting box, so a pressed trigger springing back does not
+  move it. `Arrow` is optional. `Popup`: `initialFocus` and `finalFocus`; `Root`: `modal` (`false`
+  default), `open`, `onOpenChange`. With `modal` (`true`) the page's scroll is held without an
+  `overflow` style; do not add a scroll lock of your own.
 - One panel for several triggers: `const handle = Popover.createHandle()`, then
   `<Popover.Root handle={handle}>` and `<Popover.Trigger handle={handle} payload={...}>` anywhere;
   `handle.open(triggerId)` and `handle.close()` work from code.
 - The panel renders in a portal: set tokens on the Popup's class or on `:root`, and `data-theme` on
   the Positioner when the trigger sits in a themed subtree. Long content scrolls in a container
   inside the popup (the popup itself has no overflow, so the arrow shows).
-- Reads `--ow-panel` and `--ow-popup-shadow` (the arrow takes both), `--ow-fg`, `--ow-muted`, and
+- Reads `--ow-raised-bg` and `--ow-popup-shadow` (the arrow takes both), `--ow-fg`, `--ow-muted`, and
   `--ow-radius`.
 
 ### Scroll Area
@@ -631,8 +669,9 @@ import { Radio, RadioGroup } from "owsem-ui/base"; // or "@/components/owsem/rad
   Indicator; `data-size` and `data-disabled` on the group; `data-glide-active` on the lit row.
 - Sizes are in `em`, so `font-size` scales it all. `--py` sets the rows' height, on the group or a
   row, and `--icon` the circle, on the radio, through `style`.
-- Reads `--ow-well-bg` and `--ow-edge` (off), `--ow-accent` and `--ow-primary-shadow` (on),
-  `--ow-on-accent` (the dot), `--ow-pressed-bg` (held), `--ow-fg`, `--ow-muted`, `--ow-focus`,
+- Off is a 6% tint of the text color (9% on hover, 12% held), with no edge.
+- Reads `--ow-fg` (the tint), `--ow-accent` and `--ow-primary-shadow` (on), `--ow-on-accent` (the
+  dot), `--ow-muted`, `--ow-focus`, `--ow-edge` (high contrast),
   `--ow-hover` and `--ow-radius` (Glide).
 
 ### Separator
@@ -644,12 +683,12 @@ import { Separator } from "owsem-ui/base"; // or "@/components/owsem/separator"
 ```
 
 - Renders `<div role="separator">` with `aria-orientation`, `data-orientation`, and the
-  `ow-separator` class: an etched line, a dark 1 px border with a light one beside it. Not
+  `ow-separator` class: one 1 px hairline, a border in the line color. Not
   focusable, with no keyboard interaction. Use it instead of `<hr>` or a bordered `div`.
 - Props: `orientation` (`"horizontal"`, the default, or `"vertical"`), `className` (a string or
   `(state) => string`), `style`, and `render`. Other props pass through to Base UI. The ref goes
   to the `div`.
-- Reads `--ow-line-dark` and `--ow-line-light`.
+- Reads `--ow-line`.
 
 ### Kbd
 
@@ -658,19 +697,19 @@ import { Kbd } from "owsem-ui/base"; // or "@/components/owsem/kbd"
 <p>Press <Kbd>⌘K</Kbd> to search.</p>
 ```
 
-- Renders `<kbd class="ow-kbd">`: a small raised keycap with a crisp edge, 0.75 of the
+- Renders `<kbd class="ow-kbd">`: a small keycap, a 9% tint of the text color with no edge, 0.75 of the
   surrounding text size, so it fits a sentence, a field, or the end of a list row. Not focusable.
   Use it for any key or shortcut shown to people, instead of a styled `<kbd>`.
 - Props: `className`, `style`, and `render`; other props pass through to the `kbd`, which gets the
   ref.
 - Hide a purely visual hint with `aria-hidden` when the control names its shortcut with
   `aria-keyshortcuts`.
-- Reads `--ow-raised-bg`, `--ow-raised-shadow`, `--ow-muted`, and `--ow-radius`.
+- Reads `--ow-fg` (the tint), `--ow-muted`, and `--ow-radius`.
 
 ### Tabs
 
-One panel at a time, picked from a row of tabs: a flat well, with a raised key (the same as Toggle
-Group's thumb) that slides under the active tab. Registry item: `tabs`.
+One panel at a time, picked from a row of tabs: a flat well with no edge, with a raised key (no edge or
+shadow, the same as Toggle Group's thumb) that slides under the active tab. Registry item: `tabs`.
 
 ```tsx
 import { Tabs } from "owsem-ui/base"; // or "@/components/owsem/tabs"
@@ -700,15 +739,15 @@ import { Tabs } from "owsem-ui/base"; // or "@/components/owsem/tabs"
 - `Panel` has no padding or margin. Do not set `display` on a panel's own class, which would beat the
   `hidden` attribute that hides it: put your grid or flex on a child. It is a tab stop for scrolling;
   give it `tabIndex={-1}` if it starts with something focusable.
-- Reads `--ow-well-bg` and `--ow-well-shadow` (the list), `--ow-raised-bg` and `--ow-raised-shadow`
-  (the indicator), `--ow-fg`, `--ow-muted`, `--ow-focus`, `--ow-hover` (Glide), and `--ow-radius`. Set
+- Reads `--ow-well-bg` (the list), `--ow-raised-bg` (the indicator),
+  `--ow-fg`, `--ow-muted`, `--ow-focus`, `--ow-hover` (Glide), and `--ow-radius`. Set
   them on the root, on one part, or around it. A tab's height is its own `--py`.
 
 ### Switch
 
-An on/off setting that applies right away: the well with a 3:1 edge while off, the accent while on,
-and the raised key as its thumb, which moves on a spring and squashes while held. Registry item:
-`switch`.
+An on/off setting that applies right away: a 10% tint of the text color while off (13% on hover),
+the accent while on, and the raised key as its thumb, which moves on a spring and
+squashes while held. Registry item: `switch`.
 
 ```tsx
 import { Switch } from "owsem-ui/base"; // or "@/components/owsem/switch"
@@ -730,14 +769,14 @@ import { Switch } from "owsem-ui/base"; // or "@/components/owsem/switch"
   px. Sizes come from `em`, so `font-size` on the switch scales all of it. `inline-size` and
   `block-size` set with plain CSS or a utility also work: the thumb's size and travel follow the
   track. The press target stays at least 24 px.
-- Reads `--ow-well-bg` and `--ow-edge` (off), `--ow-accent` and `--ow-primary-shadow` (on),
-  `--ow-raised-bg` and `--ow-raised-shadow` (the thumb), `--ow-fg` (its icon), `--ow-radius`,
+- Reads `--ow-fg` (the off track and the icon), `--ow-accent` and `--ow-primary-shadow` (on),
+  `--ow-raised-bg` (the thumb, with no shadow), `--ow-edge` (high contrast), `--ow-radius`,
   `--ow-motion-scale`, and `--ow-focus`.
 
 ### Toggle
 
-A two-state button: flat with muted text while off, the raised key tinted 8% toward its text while
-on (so it shows on a white panel too), and the pressed material only while held down. Registry
+A two-state button: flat with muted text while off, a 12% tint of the text color while on (14% on
+hover, 15% held). Registry
 item: `toggle`.
 
 ```tsx
@@ -755,14 +794,13 @@ import { Toggle } from "owsem-ui/base"; // or "@/components/owsem/toggle"
   `value`, `className`, `style`, and `render`. Without children it is a square icon button: give
   it an `aria-label`. The ref goes to the `button`.
 - Height comes from `--py` (set it in `style` on the toggle, never under a 24 px target).
-- Reads `--ow-muted` (text while off), `--ow-hover`, `--ow-fg`, `--ow-raised-bg` and
-  `--ow-raised-shadow` (on), `--ow-pressed-bg` and `--ow-pressed-shadow` (held down),
+- Reads `--ow-muted` (text while off), `--ow-hover`, `--ow-fg` (text, and the tint while on),
   `--ow-radius`, and `--ow-focus`.
 
 ### Toggle Group
 
 Toggle buttons that work as one, and the segmented control: a flat track, with a thumb (the raised
-key: a flat fill with crisp edges) that slides to the pressed item. Registry item: `toggle-group`.
+key: a flat fill) that slides to the pressed item. Registry item: `toggle-group`.
 
 ```tsx
 import { ToggleGroup } from "owsem-ui/base"; // or "@/components/owsem/toggle-group"
@@ -789,8 +827,7 @@ const [view, setView] = useState("list");
   hydration, so the thumb appears in place instead of sliding from a default.
 - Name the group with `aria-label` or `aria-labelledby`. Arrows, Home, and End move focus, Space
   and Enter press; do not add your own.
-- Reads `--ow-well-bg` and `--ow-well-shadow` (the track), `--ow-raised-bg` and
-  `--ow-raised-shadow` (the thumb, and pressed items with `multiple`), `--ow-fg`, `--ow-muted`,
+- Reads `--ow-well-bg` (the track, which has no edge), `--ow-raised-bg` (the thumb, and pressed items with `multiple`), `--ow-fg`, `--ow-muted`,
   `--ow-focus`, `--ow-hover` (Glide), and `--ow-radius`. An item's height is its own `--py`.
 
 ### Toolbar
@@ -817,17 +854,15 @@ import { Toggle, Toolbar } from "owsem-ui/base"; // or "@/components/owsem/toolb
   Give it an `aria-label`. `size` (`"sm"`, `"md"` default, `"lg"`) sets every item's size.
 - `Button` and `Link` are quiet ghost buttons with `size`, `startIcon`, and `endIcon`; without a
   label they are square and need an `aria-label`. A disabled `Button` stays focusable. A Toggle
-  passed to `render` keeps its own look: the raised key while on.
+  passed to `render` keeps its own look: a 12% tint while on.
 - On/off items: pass a Toggle to `render` (`render={<Toggle pressed={on} onPressedChange={setOn} />}`)
   and keep the item's other props on `Toolbar.Button`. A Base UI popup trigger goes the same way
   (`render={<Menu.Trigger />}`).
-- `Input` is a flat well with a 3:1 edge, as tall as the buttons; put at most one, last, since
-  arrows move its caret. Its `size` is the type scale, not a width: set `inline-size` in CSS.
-- `Separator` is an etched groove across the toolbar's direction; `Group` takes an `aria-label`.
-- Reads `--ow-panel` and `--ow-panel-shadow` (the bar), `--ow-muted`, `--ow-fg`, `--ow-hover`,
-  `--ow-pressed-bg`, and `--ow-pressed-shadow` (buttons and links), `--ow-well-bg`,
-  `--ow-well-shadow`, and `--ow-edge` (the field), `--ow-line-dark` and `--ow-line-light` (grooves),
-  `--ow-radius`, and `--ow-focus`.
+- `Input` is a 6% tint of the text color with no edge (9% on hover), as tall as the buttons; put at most one, last, since arrows move its caret. Its `size` is the type scale, not a
+  width: set `inline-size` in CSS.
+- `Separator` is a hairline across the toolbar's direction; `Group` takes an `aria-label`.
+- Reads `--ow-panel` (the bar, with no shadow), `--ow-muted`, `--ow-fg` (text, and the field's
+  tint), `--ow-hover`, `--ow-pressed-bg` (held buttons and links), `--ow-line` (separators), `--ow-radius`, and `--ow-focus`.
 
 ### Tooltip
 
@@ -925,11 +960,10 @@ import { ColorPicker, ColorPickerPopover } from "owsem-ui/owsem"; // or "@/compo
   `aria-label`.
 - Do not wrap it in another popover or add keyboard handling: the area, sliders, fields, and
   swatches have their own.
-- Reads `--ow-panel` (the panel, and the checkerboard behind translucent colors with `--ow-line`),
-  `--ow-panel-shadow` (`--ow-popup-shadow` in the popover), `--ow-well-bg` (fields and the trigger)
-  with `--ow-edge` (fields) and `--ow-well-shadow` (the trigger), `--ow-raised-*` and
-  `--ow-pressed-*` (the eye dropper and format keys), `--ow-line-dark` and `--ow-line-light` (over
-  the swatches), `--ow-fg`, `--ow-muted`, `--ow-focus`, and `--ow-radius`. The popover's panel is
+- Reads `--ow-panel` (the panel, with no shadow, and the checkerboard behind translucent colors
+  with `--ow-line`), `--ow-raised-bg` and `--ow-popup-shadow` (the popover), `--ow-well-bg` (the
+  trigger), `--ow-fg` (the fields' and keys' tints, 6% and 9%), `--ow-edge` (high contrast), `--ow-line` (over the swatches), `--ow-fg`, `--ow-muted`, `--ow-focus`, and
+  `--ow-radius`. The popover's panel is
   portaled to the body: set its tokens on `:root` or `.ow-color-picker`, not on the trigger's
   parent.
 - Width (256px) and area height (160px) are layout: set `inline-size` on the picker with
@@ -971,7 +1005,8 @@ import { CommandMenu } from "owsem-ui/owsem"; // or "@/components/owsem/command-
 
 - Items are `{ value, label }` objects (Base UI matches the label), in groups of
   `{ value, items }` or a flat array. `filteredItems` takes your own ranking; `value` and
-  `onValueChange` hold the query. Root also takes Dialog's `open`, `onOpenChange`, and `modal`.
+  `onValueChange` hold the query. Root also takes Dialog's `open`, `onOpenChange`, and `modal`. While
+  it is open the page's scroll is held without an `overflow` style; do not add a scroll lock of your own.
 - `shortcut`: the ⌘/Ctrl key, `"k"` by default; `false` for a second menu on the page. It skips
   keys something else already handled (`preventDefault`).
 - `Item`: `onClick` runs on click and on Enter, then the menu closes (`closeOnClick={false}` keeps
@@ -982,13 +1017,12 @@ import { CommandMenu } from "owsem-ui/owsem"; // or "@/components/owsem/command-
   (translate it). `Trigger` also takes `size`; outside Root, give it the Root's `handle` from
   `CommandMenu.createHandle()`.
 - No open or close animation, by design: do not add one.
-- Reads `--ow-panel` (the glass, at 80%), `--ow-popup-shadow`, `--ow-backdrop` (the scrim),
+- Reads `--ow-raised-bg` (the glass, at 80%), `--ow-popup-shadow`, `--ow-backdrop` (the scrim),
   `--ow-fg`, `--ow-muted`, `--ow-focus`, `--ow-hover` (the highlight), `--ow-radius`,
-  `--ow-well-bg`, `--ow-well-shadow`, and `--ow-edge` (the Trigger), `--ow-raised-bg` and
-  `--ow-raised-shadow` (keys), and `--ow-line-dark` with `--ow-line-light`. The Popup renders in
+  `--ow-fg` (the Trigger's tint), and `--ow-line` (the hairlines over and under the list). The Popup renders in
   the body: set them on `:root` or on the Popup. Its width is `min(100%, 560px)`; set
-  `inline-size` on the Popup to change it. The panel is glass with the popup's crisp edge, the
-  Trigger a flat well, the shortcuts crisp keys; do not add soft shadows, inset blurs, or glow.
+  `inline-size` on the Popup to change it. The panel is glass with the popup shadow and no edge, the
+  Trigger a flat tint; do not add edges, inset blurs, or glow.
 
 ### Table of Contents
 
@@ -1031,8 +1065,8 @@ import { TableOfContents } from "owsem-ui/owsem"; // or "@/components/owsem/tabl
 
 ### Code Block
 
-Code in nested cards: a header with one icon, a title or tabs, and Copy, over an inner card that
-holds the code. Registry item: `code-block` (installs Copy Button, Button, and Icon Morph too).
+Code on one surface: a header with one icon, a title or tabs, and Copy, over the code. Registry
+item: `code-block` (installs Copy Button, Button, Icon Morph, and Tooltip too).
 
 ```tsx
 import { CodeBlock } from "owsem-ui/owsem"; // or "@/components/owsem/code-block"
@@ -1065,20 +1099,21 @@ import { CodeBlock } from "owsem-ui/owsem"; // or "@/components/owsem/code-block
 - One leading icon: `Title`'s `icon`, or the active `Tab`'s `icon`, which morphs into the next
   tab's (Icon Morph). Tabs whose icons share a `key` keep one icon still. Do not add icons inside
   the tabs.
-- `Copy` is a Copy Button (`size="sm"`, `showLabel` by default) that copies the Panel on show; pass
-  `value` for other text, such as a command without its prompt.
+- `Copy` is a Copy Button (`size="sm"`, icon only, always in view, named by its Tooltip) that copies
+  the Panel on show; pass `value` for other text, such as a command without its prompt, and
+  `showLabel` for the word beside the icon.
 - Long lines scroll inside the Panel, never the page; a single Panel that overflows becomes a
   focusable region named by the Title. Code reads left to right on any page. Tabs that do not fit
   scroll sideways in the header.
-- A raised thumb slides under the active tab, as in Toggle Group; the inner card is a flat fill.
-- Reads `--ow-well-bg` and `--ow-well-shadow` (the outer card), `--ow-panel` (the inner card),
-  `--ow-raised-bg` and `--ow-raised-shadow` (the thumb), `--ow-radius` (tabs; the cards are 6px
-  more), `--ow-fg`, `--ow-muted`, `--ow-hover`, `--ow-focus`, and `--ow-font-mono` for the code.
+- A thumb (a 9% tint of the text color) slides under the active tab; the Panel has no fill of its
+  own.
+- Reads `--ow-panel` (the surface, with no edge), `--ow-fg` (the thumb's tint), `--ow-radius` (the block; tabs, the thumb, and Glide take it
+  less 4px), `--ow-fg`, `--ow-muted`, `--ow-hover`, `--ow-focus`, and `--ow-font-mono` for the code.
 
 ### Copy Button
 
 A Button that copies text: its copy icon morphs into a check that draws itself in, then back.
-Registry item: `copy-button` (installs Button and Icon Morph too).
+Registry item: `copy-button` (installs Button, Icon Morph, and Tooltip too).
 
 ```tsx
 import { CopyButton } from "owsem-ui/owsem"; // or "@/components/owsem/copy-button"
@@ -1087,19 +1122,23 @@ import { CopyButton } from "owsem-ui/owsem"; // or "@/components/owsem/copy-butt
 <CopyButton value={token} labels={{ copy: "Salin", copied: "Tersalin" }} onError={showFallback} />
 ```
 
-- `value` (a string, or a function read at the moment of the press), `timeout` (ms the check
-  shows, 1600), `labels` (`copy`, `copied`; translate them), `showLabel` (the word beside the
-  icon; both words hold the width), `onCopy(text)`, `onError(error)`. Every Button prop passes
-  through except `startIcon`, `endIcon`, `children`, and `loading`; `variant` defaults to
-  `"ghost"`.
-- Icon only by default, named by `labels.copy` through `aria-label`. A visually hidden
-  `role="status"` after the button announces `labels.copied`; do not add a toast or change the
-  name yourself. It sets `data-copied` while it shows the check.
+- `value` (a string, or a function read at the moment of the press), `timeout` (ms the check shows,
+  1600), `labels` (`copy`, `copied`; translate them), `showLabel` (the word beside the icon; both
+  words hold the width), `duration` (a CSS time such as `"300ms"` for the icon swap and the check
+  drawing in), `onCopy(text)`, `onError(error)`. Every Button prop passes through except
+  `startIcon`, `endIcon`, `children`, and `loading`; `variant` defaults to `"ghost"`.
+- Icon only by default, named by `labels.copy` through `aria-label`, inside OwsemUI's Tooltip: it
+  says `labels.copy` on hover and keyboard focus, `labels.copied` after a press, stays open while
+  the check shows, and closes when the icon is back. Do not wrap it in another Tooltip. A visually
+  hidden `role="status"` after the button announces `labels.copied`; do not add a toast or change
+  the name yourself. While it shows the check it sets `data-copied` and `aria-disabled="true"`, and
+  a press does not copy again until `timeout` ends.
 - It writes with `navigator.clipboard.writeText` and shows the check only once that succeeds. A
   refusal, or no Clipboard API (not a secure context), calls `onError` and shows nothing; there is
   no `execCommand` fallback. `preventDefault()` in `onClick` skips the copy.
 - Reads the Button's tokens, plus `--ow-spring-settle` and its duration (the swap and the check
-  drawing in) and `--ow-motion-scale`.
+  drawing in; `duration` overrides it for one button), `--ow-motion-scale`, and the Tooltip's
+  `--ow-tooltip-bg` and `--ow-tooltip-fg`.
 
 ### Icon Morph
 
@@ -1120,15 +1159,18 @@ import { IconMorph } from "owsem-ui/owsem"; // or "@/components/owsem/icon-morph
   place; `null` shows none. Nothing animates on the first render. Do not wrap the icons in
   `AnimatePresence` or add transitions: CSS transitions are built in, a change mid-swap turns
   around, and nothing runs at rest.
+- `duration` sets one swap's length as a CSS time, such as `"300ms"` (the spring keeps its curve);
+  it lands as `--_duration` in the root's inline style, so the button around it keeps its press.
 - Root is a `span` (`className`, `style`, ref, and other props pass through). In the icon slot of a
   Button, Toggle, or Toolbar item it fills the slot, so do not size the icons there; elsewhere each
   icon keeps its own size.
 - It adds no role or name. Name the control after what it does now, or keep one name with
   `aria-pressed`; the leaving icon is `aria-hidden`. Announce a change such as a copy in a status
   region.
-- Reads `--ow-motion-scale` (how far icons shrink and blur; 0 only fades), `--ow-spring-settle`
-  and `--ow-spring-settle-duration` (the swap), and `--ow-ease-out` (the crossfade under reduced
-  motion). Set them on `.ow-icon-morph` itself: the settle spring also times button presses.
+- Reads `--ow-motion-scale` (how far icons shrink and blur; 0 only fades), `--ow-spring-settle` and
+  `--ow-spring-settle-duration` (the swap), and `--ow-ease-out` (the crossfade under reduced
+  motion). Set them on `.ow-icon-morph` itself, or use `duration`: the settle spring also times
+  button presses.
 
 ## Rules
 
@@ -1143,6 +1185,7 @@ import { IconMorph } from "owsem-ui/owsem"; // or "@/components/owsem/icon-morph
 4. **Keep focus rings and reduced motion.** Never remove focus outlines. Added motion animates only
    `transform` and `opacity`, plus `clip-path` when needed, with a `prefers-reduced-motion` version.
 5. **Keep forced colors working.** Separator draws its lines as borders so they stay visible in
-   forced colors. Do not replace borders with backgrounds or shadows.
+   forced colors. Do not replace borders with backgrounds or shadows. Controls have no edge by default; keep
+   the `prefers-contrast: more` edges and the transparent outline that forced colors draws.
 6. **Do not use what is not built.** The `owsem` CLI (`init`, `add`, `diff`), isolated token mode,
    and custom token prefixes are planned, not released. Registry copies keep the `--ow-` prefix.

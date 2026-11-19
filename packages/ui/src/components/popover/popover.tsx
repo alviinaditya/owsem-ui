@@ -2,8 +2,19 @@
 
 import { useDirection } from "@base-ui/react/direction-provider";
 import { Popover as BasePopover } from "@base-ui/react/popover";
-import { type ForwardRefExoticComponent, forwardRef, type RefAttributes } from "react";
+import {
+  createContext,
+  type ForwardRefExoticComponent,
+  forwardRef,
+  type JSX,
+  type RefAttributes,
+  useCallback,
+  useContext,
+  useState,
+} from "react";
 import { withClassName } from "../../core/class-name";
+import { useRestingAnchor } from "../../core/resting-anchor";
+import { useOpenState, useScrollLock } from "../../core/scroll-lock";
 import "./popover.css";
 
 const cls = {
@@ -22,7 +33,30 @@ export type PopoverPortalProps = BasePopover.Portal.Props;
 export type PopoverBackdropProps = BasePopover.Backdrop.Props;
 export type PopoverCloseProps = BasePopover.Close.Props;
 
-export const PopoverRoot: typeof BasePopover.Root = BasePopover.Root;
+/** Whether the open popover holds the page's scroll. */
+const LockContext = createContext(false);
+
+/**
+ * Base UI's Root. Not modal by default. With `modal` (`true`, as Base UI locks the page's scroll
+ * for that value only), the page's scroll is held by OwsemUI's lock (core/scroll-lock), which
+ * puts back the `overflow` Base UI sets on the page, so its text is not drawn again while the
+ * popover is open. Opened by hover or by touch, Base UI's own rules stand.
+ */
+export function PopoverRoot<Payload = unknown>(props: PopoverRootProps<Payload>): JSX.Element {
+  const [hover, setHover] = useState(false);
+  const { open, onOpenChange } = useOpenState(props);
+  return (
+    <LockContext.Provider value={open && !hover && props.modal === true}>
+      <BasePopover.Root
+        {...props}
+        onOpenChange={(next, details) => {
+          setHover(details.reason === "trigger-hover");
+          onOpenChange(next, details);
+        }}
+      />
+    </LockContext.Provider>
+  );
+}
 /** The button that opens the popover; pass your button to `render`. */
 export const PopoverTrigger: typeof BasePopover.Trigger = BasePopover.Trigger;
 export const PopoverPortal: typeof BasePopover.Portal = BasePopover.Portal;
@@ -38,15 +72,16 @@ export type PopoverPositionerProps = Omit<BasePopover.Positioner.Props, "ref">;
 /**
  * Places the popover 10px from its trigger, room for the arrow, and keeps the arrow off the
  * rounded corners. It takes the text direction from DirectionProvider, since the portal leaves
- * the subtree that sets `dir` (FR-16).
+ * the subtree that sets `dir` (FR-16), and anchors to the trigger's resting box, not its pressed one.
  */
 export const PopoverPositioner: ForwardRefExoticComponent<
   PopoverPositionerProps & RefAttributes<HTMLDivElement>
 > = forwardRef<HTMLDivElement, PopoverPositionerProps>(function PopoverPositioner(
   { className, sideOffset = 10, arrowPadding = 12, ...props },
-  ref,
+  forwarded,
 ) {
   const direction = useDirection();
+  const { ref, anchor } = useRestingAnchor(forwarded);
   return (
     <BasePopover.Positioner
       ref={ref}
@@ -54,6 +89,7 @@ export const PopoverPositioner: ForwardRefExoticComponent<
       sideOffset={sideOffset}
       arrowPadding={arrowPadding}
       dir={direction}
+      anchor={anchor}
       {...props}
     />
   );
@@ -68,7 +104,19 @@ export const PopoverPopup: ForwardRefExoticComponent<
   { className, ...props },
   ref,
 ) {
-  return <BasePopover.Popup ref={ref} className={withClassName(cls.popup, className)} {...props} />;
+  const [self, setSelf] = useState<HTMLDivElement | null>(null);
+  useScrollLock(self, useContext(LockContext));
+  const setRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      setSelf(el);
+      if (typeof ref === "function") ref(el);
+      else if (ref) ref.current = el;
+    },
+    [ref],
+  );
+  return (
+    <BasePopover.Popup ref={setRef} className={withClassName(cls.popup, className)} {...props} />
+  );
 });
 
 export type PopoverArrowProps = Omit<BasePopover.Arrow.Props, "ref">;

@@ -1,16 +1,17 @@
 @layer owsem.tokens, owsem.components;
 
 /*
- * Button. Geometry comes from one number, --py (FR-9 to FR-11). Materials (DP-7): primary, secondary,
- * and destructive are solid fills with the primary material's edges (the accent, a neutral, and the
- * critical solid); outline has a quiet line, ghost is flat until hovered, and link is text. Edges
+ * Button. Geometry comes from one number, --py (FR-9 to FR-11). Materials (DP-7): each variant
+ * differs by one property. Primary is the accent fill with the primary material (a thin light line
+ * inside its top, no drop shadow); destructive is the critical solid with the same; secondary is a tint of the text
+ * color, with no shadow; outline is a quiet line, the one bordered variant; ghost is flat until hovered; link is text. Edges
  * are inset shadows, so they add no size. Only transform and opacity move: the press (DP-4), the
  * ripple (Tactile), and the loading swap.
  */
 @layer owsem.components {
   .ow-button {
     /* The one input; override it with style. The block padding never drops a target below 24px. */
-    --py: 0.75em;
+    --py: 0.8036em;
     --_py: max(var(--py), (24px - 1lh) / 2);
     --px: calc(var(--_py) + (1lh - 1cap) / 2);
     --icon: calc(1em + 2px);
@@ -21,20 +22,16 @@
     --_ink: var(--ow-fg);
     --_hover: var(--ow-hover);
     --_focus: var(--ow-focus);
-    --_page: var(--ow-bg);
     --_pressed-bg: var(--ow-pressed-bg);
-    --_pressed-shadow: var(--ow-pressed-shadow);
     --_primary-bg: var(--ow-accent);
-    /* A 1px edge darker than the fill and a thin light line inside its top; no drop shadow, which
-     * would make the button look taller than its neighbors. */
+    /* The thin light line inside the top edge; shadows add no size. */
     --_primary-shadow: var(--ow-primary-shadow);
     --_on-primary: var(--ow-on-accent);
     --_critical: var(--ow-critical-solid);
     --_on-critical: var(--ow-on-critical);
-    /* Secondary: the text color a little toward the page, grey in light and silver in dark, with
-     * the page's color as its text. */
-    --_neutral: color-mix(in oklab, var(--_ink) 75%, var(--_page));
-    --_on-neutral: var(--_page);
+    /* Secondary: a tint of the text color, a step deeper when held. */
+    --_neutral: color-mix(in oklab, var(--_ink) 8%, transparent);
+    --_neutral-pressed: color-mix(in oklab, var(--_ink) 16%, transparent);
     /* Text needs 4.5:1, more than the accent's 3:1, so the link leans toward the text color. */
     --_link: color-mix(in oklab, var(--ow-accent) 70%, var(--_ink));
     --_ripple: currentColor;
@@ -45,7 +42,7 @@
     --_bg: transparent;
     --_shadow: none;
     --_bg-pressed: var(--_pressed-bg);
-    --_shadow-pressed: var(--_pressed-shadow);
+    --_shadow-pressed: none;
     --_tint: transparent;
 
     position: relative;
@@ -79,7 +76,7 @@
   }
 
   .ow-button[data-size="sm"] {
-    --py: 0.5em;
+    --py: 0.6058em;
     font-size: 0.8125rem;
   }
 
@@ -100,12 +97,8 @@
     pointer-events: none;
   }
 
-  /* Solid fills keep their edges while held, and the fill darkens a little in both themes. */
-  .ow-button:is(
-    [data-variant="primary"],
-    [data-variant="secondary"],
-    [data-variant="destructive"]
-  ) {
+  /* Solid fills keep their highlight while held, and the fill darkens a little in both themes. */
+  .ow-button:is([data-variant="primary"], [data-variant="destructive"]) {
     --_bg: var(--_primary-bg);
     --_shadow: var(--_primary-shadow);
     /* literal: black darkens any fill */
@@ -118,8 +111,8 @@
   }
 
   .ow-button[data-variant="secondary"] {
-    --_fg: var(--_on-neutral);
     --_bg: var(--_neutral);
+    --_bg-pressed: var(--_neutral-pressed);
   }
 
   .ow-button[data-variant="destructive"] {

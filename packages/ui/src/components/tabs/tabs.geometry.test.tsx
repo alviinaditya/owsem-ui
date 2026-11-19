@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import { describe, expect, test } from "vitest";
+import { userEvent } from "vitest/browser";
 import { render } from "vitest-browser-react";
-import { concentric, insets, rect, TOL } from "../../../test/geometry.ts";
+import { insets, nested, rect, TOL } from "../../../test/geometry.ts";
 import { Tabs } from "./index";
 
 const ICON = (
@@ -51,7 +52,7 @@ function Sample({
 }
 
 describe("Tabs geometry", () => {
-  test("tabs are the size's control height (FR-11), 3px inside the well on every side", async () => {
+  test("tabs are the size's control height (FR-11), 4px inside the well on every side", async () => {
     const { lists, tabsOf } = await mount(
       <>
         <Sample size="sm" />
@@ -59,17 +60,17 @@ describe("Tabs geometry", () => {
         <Sample size="lg" />
       </>,
     );
-    for (const [i, height] of [29.25, 38.5, 48].entries()) {
+    for (const [i, height] of [24, 32, 40].entries()) {
       const list = lists[i] as HTMLElement;
       const tabs = tabsOf(list);
       for (const tab of tabs) close(rect(tab).height, height);
       const first = insets(list, tabs[0] as Element);
       const last = insets(list, tabs.at(-1) as Element);
-      for (const gap of [first.top, first.bottom, first.left, last.right]) close(gap, 3);
+      for (const gap of [first.top, first.bottom, first.left, last.right]) close(gap, 4);
     }
   });
 
-  test("the indicator covers the active tab exactly, its radius concentric with the well (FR-10b)", async () => {
+  test("the indicator covers the active tab exactly; the well takes the one radius, the tabs less the inset (TK-8)", async () => {
     const { lists, thumbOf, tabsOf } = await mount(
       <>
         <Sample active="a" />
@@ -81,10 +82,11 @@ describe("Tabs geometry", () => {
       const active = tabsOf(list)[i] as HTMLElement;
       for (const side of keyGaps(active, thumb)) close(side, 0);
       // The first tab's indicator reaches the well's start corner with the well's radius; inside
-      // its 3px clear border the key has the tabs' radius.
+      // its 4px clear border the key has the tabs' radius.
       if (i === 0) {
-        const r = concentric(list, thumb);
-        expect(r.delta).toBeLessThanOrEqual(TOL);
+        const r = nested(list, thumb);
+        expect(r.outerDelta).toBeLessThanOrEqual(TOL);
+        expect(r.innerDelta).toBeLessThanOrEqual(TOL);
         expect(r.insetDelta).toBeLessThanOrEqual(TOL);
       }
       const radius = (el: Element) => Number.parseFloat(getComputedStyle(el).borderTopLeftRadius);
@@ -138,8 +140,8 @@ describe("Tabs geometry", () => {
     const list = lists[0] as HTMLElement;
     const tabs = tabsOf(list);
     const well = rect(list);
-    for (const tab of tabs) close(rect(tab).width, well.width - 6);
-    close(well.height, tabs.reduce((sum, tab) => sum + rect(tab).height, 0) + 2 * 2 + 6);
+    for (const tab of tabs) close(rect(tab).width, well.width - 8);
+    close(well.height, tabs.reduce((sum, tab) => sum + rect(tab).height, 0) + 2 * 2 + 8);
     for (const side of keyGaps(tabs[1] as Element, thumbOf(list))) close(side, 0);
     const panel = rect(screen.container.querySelector(".ow-tabs__panel") as Element);
     expect(panel.left).toBeGreaterThan(well.right);
@@ -177,7 +179,7 @@ describe("Tabs geometry", () => {
         </Tabs.Panel>
       </Tabs.Root>,
     );
-    close(rect(lists[0] as Element).height, 44.5);
+    close(rect(lists[0] as Element).height, 40);
     expect(rect(screen.container.querySelector(".ow-tabs__panel") as Element).height).toBeCloseTo(
       400,
       0,
@@ -192,7 +194,93 @@ describe("Tabs geometry", () => {
     );
     const list = lists[0] as HTMLElement;
     const first = tabsOf(list)[0] as HTMLElement;
-    close(insets(list, first).right, 3);
+    close(insets(list, first).right, 4);
     for (const side of keyGaps(first, thumbOf(list))) close(side, 0);
+  });
+
+  test("hovering another tab while the indicator travels never moves it or restarts its stretch", async () => {
+    const { lists, thumbOf, tabsOf } = await mount(<Sample active="c" />);
+    const list = lists[0] as HTMLElement;
+    const thumb = thumbOf(list);
+    const [first, , third] = tabsOf(list) as [HTMLElement, HTMLElement, HTMLElement];
+    await userEvent.unhover(first);
+    await expect.poll(() => thumb.hasAttribute("data-visible")).toBe(true);
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    const centers: number[] = [];
+    let sampling = true;
+    const sample = () => {
+      const box = thumb.getBoundingClientRect();
+      centers.push(box.left + box.width / 2);
+      if (sampling) requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+    await userEvent.click(first);
+    const stretch = () =>
+      thumb
+        .getAnimations({ subtree: true })
+        .find((a) => (a.effect as KeyframeEffect).pseudoElement === "::before");
+    const key = stretch();
+    expect(key?.playState).toBe("running");
+    const style = thumb.getAttribute("style");
+    // The pointer moves onto the tab the indicator is leaving.
+    await userEvent.hover(third);
+    expect(thumb.getAttribute("style")).toBe(style);
+    expect(stretch()).toBe(key);
+    expect(key?.playState).toBe("running");
+    await new Promise((resolve) => setTimeout(resolve, 900));
+    sampling = false;
+    // Travelling left, it never steps back to the right (the press release may breathe a pixel).
+    for (let i = 1; i < centers.length; i++) {
+      expect(centers[i] as number).toBeLessThanOrEqual((centers[i - 1] as number) + 0.5);
+    }
+    // The thumb reaches out by the well's padding, 4px, around its key.
+    close(rect(thumb).left + 4, rect(first).left);
+  });
+
+  test("the stretch grows from the leading edge: the key never passes its tab or the well", async () => {
+    const { lists, thumbOf, tabsOf } = await mount(<Sample active="c" />);
+    const list = lists[0] as HTMLElement;
+    const thumb = thumbOf(list);
+    const [first] = tabsOf(list) as [HTMLElement];
+    await expect.poll(() => thumb.hasAttribute("data-visible")).toBe(true);
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    const key = () => {
+      const box = thumb.getBoundingClientRect();
+      const border = Number.parseFloat(getComputedStyle(thumb).borderTopWidth);
+      const style = getComputedStyle(thumb, "::before");
+      const scale = new DOMMatrixReadOnly(style.transform).a;
+      const origin = Number.parseFloat(style.transformOrigin);
+      const left = box.left + border + origin - origin * scale;
+      return { left, right: left + (box.width - 2 * border) * scale };
+    };
+    let passed = 0;
+    let outside = 0;
+    let sampling = true;
+    const sample = () => {
+      const { left } = key();
+      passed = Math.max(passed, first.getBoundingClientRect().left - left);
+      outside = Math.max(outside, list.getBoundingClientRect().left - left);
+      if (sampling) requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+    first.click();
+    await expect
+      .poll(() =>
+        thumb
+          .getAnimations({ subtree: true })
+          .find((a) => (a.effect as KeyframeEffect).pseudoElement === "::before"),
+      )
+      .toBeDefined();
+    const stretch = thumb
+      .getAnimations({ subtree: true })
+      .find((a) => (a.effect as KeyframeEffect).pseudoElement === "::before");
+    // Going left, the left edge leads and stays put: the origin is on it.
+    for (const frame of ((stretch as Animation).effect as KeyframeEffect).getKeyframes()) {
+      expect(String(frame.transformOrigin).startsWith("0% 50%")).toBe(true);
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    sampling = false;
+    expect(passed).toBeLessThanOrEqual(0.5);
+    expect(outside).toBeLessThanOrEqual(0.5);
   });
 });

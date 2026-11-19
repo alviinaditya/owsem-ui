@@ -57,6 +57,11 @@ function resolve(
 
 const edge = (color = "var(--ow-edge)") => `inset 0 0 0 1px ${color}`;
 
+/** The radio off: a tint of the text color, one step up on hover, and one more while held. */
+const REST = "color-mix(in oklab, var(--ow-fg) 10%, transparent)";
+const HOVER = "color-mix(in oklab, var(--ow-fg) 13%, transparent)";
+const HELD = "color-mix(in oklab, var(--ow-fg) 16%, transparent)";
+
 /** Parks the pointer in the bottom corner, off any row an earlier test left it over. */
 async function pointerAway() {
   const spot = document.createElement("span");
@@ -267,7 +272,7 @@ describe("Radio Group", () => {
     expect(button.className).toBe("ow-radio-group__radio");
   });
 
-  test("off is the well with a crisp edge, and on the accent with a dot, in light and dark", async () => {
+  test("off is a tint with no edge, and on the accent with a dot, in light and dark", async () => {
     onTestFinished(() => {
       delete root.dataset.theme;
     });
@@ -276,8 +281,8 @@ describe("Radio Group", () => {
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
       const off = getComputedStyle(radio("Standard"));
-      expect(off.backgroundColor).toBe(resolve("background-color", "var(--ow-well-bg)"));
-      expect(off.boxShadow).toBe(resolve("box-shadow", edge()));
+      expect(off.backgroundColor).toBe(resolve("background-color", REST));
+      expect(off.boxShadow).toBe("none");
       const on = getComputedStyle(radio("Express"));
       expect(on.backgroundColor).toBe(resolve("background-color", "var(--ow-accent)"));
       expect(on.boxShadow).toBe(resolve("box-shadow", "var(--ow-primary-shadow)"));
@@ -287,7 +292,39 @@ describe("Radio Group", () => {
     }
   });
 
-  test("the edge, the fill, and the dot keep 3:1 in light and dark (DP-6)", async () => {
+  test("hover, on the radio or its row, steps the fill up; focus adds the ring and no edge", async () => {
+    const { radio, row } = await mount(<Options defaultValue={undefined} />);
+    const standard = radio("Standard");
+    await pointerAway();
+    expect(getComputedStyle(standard).backgroundColor).toBe(resolve("background-color", REST));
+    await userEvent.hover(standard);
+    expect(getComputedStyle(standard).backgroundColor).toBe(resolve("background-color", HOVER));
+    await pointerAway();
+    await userEvent.hover(row("Standard"));
+    expect(getComputedStyle(standard).backgroundColor).toBe(resolve("background-color", HOVER));
+    await pointerAway();
+    await userEvent.tab();
+    expect(document.activeElement).toBe(standard);
+    expect(getComputedStyle(standard).boxShadow).toBe("none");
+    expect(getComputedStyle(standard).outlineWidth).toBe("2px");
+  });
+
+  test("a checked radio does not change its fill on hover", async () => {
+    const { radio } = await mount(<Options />);
+    await userEvent.hover(radio("Express"));
+    expect(getComputedStyle(radio("Express")).backgroundColor).toBe(
+      resolve("background-color", "var(--ow-accent)"),
+    );
+  });
+
+  test("more contrast draws the edge in --ow-edge", async () => {
+    onTestFinished(() => commands.setContrast("no-preference"));
+    const { radio } = await mount(<Options />);
+    await commands.setContrast("more");
+    expect(getComputedStyle(radio("Standard")).boxShadow).toBe(resolve("box-shadow", edge()));
+  });
+
+  test("the fill, the dot, and the focus ring keep 3:1, in light and dark (DP-6)", async () => {
     onTestFinished(() => {
       delete root.dataset.theme;
     });
@@ -296,10 +333,9 @@ describe("Radio Group", () => {
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
       for (const surface of ["--ow-bg", "--ow-panel"]) {
-        expect(contrast(color("--ow-edge"), color(surface))).toBeGreaterThanOrEqual(3);
         expect(contrast(color("--ow-accent"), color(surface))).toBeGreaterThanOrEqual(3);
+        expect(contrast(color("--ow-focus"), color(surface))).toBeGreaterThanOrEqual(3);
       }
-      expect(contrast(color("--ow-edge"), color("--ow-well-bg"))).toBeGreaterThanOrEqual(3);
       expect(contrast(color("--ow-on-accent"), color("--ow-accent"))).toBeGreaterThanOrEqual(3);
     }
   });
@@ -448,23 +484,21 @@ describe("Radio Group", () => {
     expect(row("Nested").hasAttribute("data-glide-active")).toBe(true);
   });
 
-  test("holding a row goes in to 0.97 with the pressed fill, and the edge stays (DP-4)", async () => {
+  test("holding a row goes in to 0.97 on a deeper fill (DP-4)", async () => {
     const { row, radio } = await mount(<Options />);
     await userEvent.hover(row("Standard"));
     await commands.mouse("down");
     const off = radio("Standard");
     await expect.poll(() => getComputedStyle(off).transform).toBe("matrix(0.97, 0, 0, 0.97, 0, 0)");
-    expect(getComputedStyle(off).backgroundColor).toBe(
-      resolve("background-color", "var(--ow-pressed-bg)"),
-    );
-    expect(getComputedStyle(off).boxShadow).toBe(resolve("box-shadow", edge()));
+    expect(getComputedStyle(off).backgroundColor).toBe(resolve("background-color", HELD));
+    expect(getComputedStyle(off).boxShadow).toBe("none");
     expect(getComputedStyle(off).transitionDuration).toBe("0.09s");
     await commands.mouse("up");
     expect(getComputedStyle(off).transitionDuration).toBe("0.573s");
     await expect.poll(() => getComputedStyle(off).transform).toBe("none");
     expect(checked(off)).toBe(true);
 
-    // A checked radio keeps its edges, and its fill darkens.
+    // A checked radio keeps its highlight, and its fill darkens.
     await userEvent.hover(off);
     await commands.mouse("down");
     await expect.poll(() => getComputedStyle(off).transform).toBe("matrix(0.97, 0, 0, 0.97, 0, 0)");
@@ -500,8 +534,7 @@ describe("Radio Group", () => {
 
   test("a theme token set on it changes it alone (TK-9)", async () => {
     const tokens = {
-      "--ow-well-bg": "rgb(1, 2, 3)",
-      "--ow-edge": "rgb(4, 5, 6)",
+      "--ow-fg": "rgb(1, 2, 3)",
       "--ow-accent": "rgb(255, 0, 0)",
       "--ow-primary-shadow": "none",
       "--ow-on-accent": "rgb(0, 0, 255)",
@@ -516,8 +549,10 @@ describe("Radio Group", () => {
     );
     const [on, off, other] = group.querySelectorAll<HTMLElement>(".ow-radio-group__radio");
     if (!on || !off || !other) throw new Error("no radios");
-    expect(getComputedStyle(off).backgroundColor).toBe("rgb(1, 2, 3)");
-    expect(getComputedStyle(off).boxShadow).toBe("rgb(4, 5, 6) 0px 0px 0px 1px inset");
+    await pointerAway();
+    // Its tint follows the text color it sets, not the page's.
+    expect(getComputedStyle(off).backgroundColor).toBe(resolve("background-color", REST, off));
+    expect(getComputedStyle(off).backgroundColor).not.toBe(resolve("background-color", REST));
     expect(getComputedStyle(on).backgroundColor).toBe("rgb(255, 0, 0)");
     expect(getComputedStyle(on).boxShadow).toBe("none");
     expect(getComputedStyle(on.querySelector("span") as Element).backgroundColor).toBe(
@@ -537,12 +572,14 @@ describe("Radio Group", () => {
   test("a token set around the group, on the group, or on the Indicator reaches its parts", async () => {
     const { group, radio, dot } = await mount(
       <div style={{ "--ow-accent": "rgb(255, 0, 0)", "--ow-fg": "rgb(1, 2, 3)" } as CSSProperties}>
-        <Options style={{ "--ow-well-bg": "rgb(0, 255, 0)" } as CSSProperties} />
+        <Options style={{ "--ow-radius": "3px" } as CSSProperties} />
       </div>,
     );
     expect(getComputedStyle(group).color).toBe("rgb(1, 2, 3)");
     expect(getComputedStyle(radio("Express")).backgroundColor).toBe("rgb(255, 0, 0)");
-    expect(getComputedStyle(radio("Standard")).backgroundColor).toBe("rgb(0, 255, 0)");
+    expect(getComputedStyle(radio("Standard")).backgroundColor).toBe(
+      resolve("background-color", REST, group),
+    );
     expect(dot("Express")).not.toBeNull();
 
     const own = await mount(
@@ -625,7 +662,7 @@ describe("Radio Group", () => {
     await commands.mouse("down");
     await expect
       .poll(() => getComputedStyle(radio("Express")).backgroundColor)
-      .toBe(resolve("background-color", "var(--ow-pressed-bg)"));
+      .toBe(resolve("background-color", HELD));
     expect(getComputedStyle(radio("Express")).transform).toBe("matrix(1, 0, 0, 1, 0, 0)");
     await commands.mouse("up");
   });

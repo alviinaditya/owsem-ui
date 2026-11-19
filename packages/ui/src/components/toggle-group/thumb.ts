@@ -7,6 +7,9 @@
  *   (toggle-group.css), which end at none, so it costs no frames once it lands.
  * - Its first placement after mount is instant: nothing sweeps in on load or hydration. After
  *   that, a new pressed item slides it there (FLIP); a resize snaps it.
+ * - It is gooey: when it travels, its key (the ::before) stretches along the axis from its leading
+ *   edge, which arrives with the box and never passes it, while the tail lags and catches up, then
+ *   settles back to its size with no squash and no rebound. Only transform animates, and a new move picks up from the current stretch.
  * - While the pointer holds an item, the item presses in, and the thumb with it when the item is
  *   the one it sits under. Keys press without it: a keyboard change needs no motion to be felt.
  */
@@ -25,6 +28,11 @@ interface Box {
 const DISABLED = ':disabled, [aria-disabled="true"], [data-disabled]';
 // A quick tap still shows the whole press (DP-4).
 const PRESS_MS = 90;
+
+// The stretch: 1.15 up to 1.35 by distance (in sizes of the thumb), then back to 1.
+const STRETCH_MIN = 0.15;
+const STRETCH_MAX = 0.35;
+const STRETCH_MS = 520;
 
 const px = (n: number) => `${n}px`;
 const same = (a: Box, b: Box) =>
@@ -88,6 +96,58 @@ export function createThumb(
     style.setProperty("--_sy", String(look.h / box.h));
   }
 
+  let blob: Animation | null = null;
+  let blobOrigin = "";
+
+  /** The key's current stretch along x or y, read from its running animation. */
+  function currentScale(axis: "x" | "y"): number {
+    if (!blob) return 1;
+    const matrix = getComputedStyle(thumb, "::before").transform;
+    if (!matrix || matrix === "none") return 1;
+    const m = new DOMMatrixReadOnly(matrix);
+    return axis === "x" ? m.a : m.d;
+  }
+
+  /** Stretches the key along the way from `from` to `to`, scaled from its leading edge. */
+  function stretch(from: Box, to: Box): void {
+    if (typeof thumb.animate !== "function") return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const scale = Number.parseFloat(getComputedStyle(thumb).getPropertyValue("--ow-motion-scale"));
+    const motion = Number.isFinite(scale) ? scale : 1;
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const x = Math.abs(dx) >= Math.abs(dy);
+    const distance = x ? Math.abs(dx) : Math.abs(dy);
+    if (distance < 1 || motion <= 0) return;
+    const size = x ? to.w : to.h;
+    const amount =
+      (STRETCH_MIN + (STRETCH_MAX - STRETCH_MIN) * Math.min(1, distance / (size * 3))) * motion;
+    // The leading edge (toward the destination) is the fixed side: it arrives with the box and
+    // never passes it, and the tail stretches behind it and catches up.
+    const origin = x ? (dx > 0 ? "100% 50%" : "0% 50%") : dy > 0 ? "50% 100%" : "50% 0%";
+    const along = (n: number) => (x ? `scale(${n}, 1)` : `scale(1, ${n})`);
+    // Interrupted mid-stretch, it carries on from where it is, unless it now grows from the other
+    // edge.
+    const start = blob && origin === blobOrigin ? currentScale(x ? "x" : "y") : 1;
+    blob?.cancel();
+    blobOrigin = origin;
+    blob = thumb.animate(
+      [
+        // Slow to start, so the tail stays within the track the key leaves.
+        { transform: along(start), offset: 0, easing: "cubic-bezier(0.7, 0, 0.84, 0)" },
+        { transform: along(1 + amount), offset: 0.3, easing: "cubic-bezier(0.25, 0, 0.35, 1)" },
+        // Back to its size well before the slide lands, and it stays there: no squash, no rebound.
+        { transform: along(1), offset: 0.6, easing: "ease-out" },
+        { transform: along(1), offset: 1 },
+      ].map((frame) => ({ ...frame, transformOrigin: origin })),
+      { duration: STRETCH_MS, pseudoElement: "::before" },
+    );
+    const mine = blob;
+    mine.onfinish = () => {
+      if (blob === mine) blob = null;
+    };
+  }
+
   function updateHeld(): void {
     thumb.toggleAttribute("data-held", heldThumb && held === on);
   }
@@ -117,7 +177,10 @@ export function createThumb(
     // Commit the start before transitions come back.
     void thumb.offsetWidth;
     thumb.removeAttribute("data-instant");
-    if (from) draw(to, to);
+    if (from) {
+      draw(to, to);
+      stretch(from, to);
+    }
     // Shown again after none was pressed: it fades in where it is.
     thumb.setAttribute("data-visible", "");
     placed = true;
@@ -180,6 +243,7 @@ export function createThumb(
   return {
     destroy() {
       clearTimeout(releaseTimer);
+      blob?.cancel();
       mutations.disconnect();
       sizes.disconnect();
       root.removeEventListener("pointerdown", onPointerDown);

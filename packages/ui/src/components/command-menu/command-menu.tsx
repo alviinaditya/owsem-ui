@@ -21,6 +21,7 @@ import {
 import { withClassName } from "../../core/class-name";
 import { createGlide } from "../../core/glide/glide";
 import { GlideHighlight } from "../../core/glide/use-glide";
+import { useOpenState, useScrollLock } from "../../core/scroll-lock";
 import { Kbd } from "../kbd/kbd";
 import "./command-menu.css";
 
@@ -85,6 +86,8 @@ interface RootContextValue {
   /** The shortcut's key, for the Trigger's aria-keyshortcuts. */
   shortcut: string | undefined;
   close: () => void;
+  /** Whether the open menu holds the page's scroll. */
+  lock: boolean;
 }
 
 const RootContext = createContext<RootContextValue | null>(null);
@@ -133,6 +136,7 @@ export function CommandMenuRoot({
   children,
   ...props
 }: CommandMenuRootProps<unknown>): JSX.Element {
+  const { open, onOpenChange } = useOpenState(props);
   const [ownHandle] = useState(() => Dialog.createHandle());
   const dialog = handle ?? ownHandle;
   const key = shortcut ? shortcut.toLowerCase() : undefined;
@@ -167,8 +171,10 @@ export function CommandMenuRoot({
   };
 
   return (
-    <RootContext.Provider value={{ list, shortcut: key, close }}>
-      <Dialog.Root handle={dialog} {...props}>
+    <RootContext.Provider
+      value={{ list, shortcut: key, close, lock: open && (props.modal ?? true) === true }}
+    >
+      <Dialog.Root handle={dialog} {...props} onOpenChange={onOpenChange}>
         {children}
       </Dialog.Root>
     </RootContext.Provider>
@@ -228,7 +234,17 @@ export const CommandMenuPopup: ForwardRefExoticComponent<
   { className, size = "md", backdrop = "dim", container, closeLabel = "Close", children, ...props },
   ref,
 ) {
-  const { list } = useRootContext("Popup");
+  const { list, lock } = useRootContext("Popup");
+  const [self, setSelf] = useState<HTMLDivElement | null>(null);
+  useScrollLock(self, lock);
+  const setRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      setSelf(el);
+      if (typeof ref === "function") ref(el);
+      else if (ref) ref.current = el;
+    },
+    [ref],
+  );
   // Portaled to the body: the text direction comes from Base UI's DirectionProvider (FR-16).
   const direction = useDirection();
   return (
@@ -236,7 +252,7 @@ export const CommandMenuPopup: ForwardRefExoticComponent<
       <Dialog.Backdrop className={cls.backdrop} data-blur={backdrop === "blur" ? "" : undefined} />
       <Dialog.Viewport className={cls.viewport} dir={direction}>
         <Dialog.Popup
-          ref={ref}
+          ref={setRef}
           className={withClassName(cls.popup, className)}
           data-size={size}
           {...props}
@@ -485,7 +501,7 @@ export const CommandMenuShortcut: ForwardRefExoticComponent<
 
 export type CommandMenuFooterProps = ComponentPropsWithoutRef<"div">;
 
-/** A row under the list, past an etched line, for hints such as which key does what. */
+/** A row under the list, past a hairline, for hints such as which key does what. */
 export const CommandMenuFooter: ForwardRefExoticComponent<
   CommandMenuFooterProps & RefAttributes<HTMLDivElement>
 > = forwardRef<HTMLDivElement, CommandMenuFooterProps>(function CommandMenuFooter(

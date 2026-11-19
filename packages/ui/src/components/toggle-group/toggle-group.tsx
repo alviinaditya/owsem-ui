@@ -58,6 +58,7 @@ export const ToggleGroupRoot: ToggleGroupRootComponent = forwardRef<
 >(function ToggleGroupRoot({ className, size = "md", equal, children, ...props }, ref) {
   const glide = useGlide<HTMLDivElement>({
     items: ITEM,
+    skip: "[data-pressed]",
     axis: props.orientation === "vertical" ? "y" : "x",
   });
   const root = useRef<HTMLDivElement | null>(null);

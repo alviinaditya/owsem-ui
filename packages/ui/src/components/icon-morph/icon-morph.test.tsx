@@ -287,4 +287,19 @@ describe("Icon Morph", () => {
     await show("check");
     expect(getComputedStyle(item("copy")).transitionDuration).toBe("0.4s, 0.4s, 0.4s");
   });
+
+  test("duration sets the swap's length, on the spring's curve, beside a style of its own", async () => {
+    const props = { duration: "250ms", style: { color: "red" } };
+    const { root, item, show } = await mount("copy", props);
+    expect(root.style.getPropertyValue("--_duration")).toBe("250ms");
+    expect(root.style.color).toBe("red");
+    await show("check", props);
+    const leaving = getComputedStyle(item("copy"));
+    const spring = resolve("transition-timing-function", "var(--ow-spring-settle)");
+    expect(leaving.transitionDuration).toBe("0.25s, 0.25s, 0.25s");
+    expect(leaving.transitionTimingFunction).toBe([spring, spring, spring].join(", "));
+    // Without it, no inline length.
+    const plain = await mount();
+    expect(plain.root.style.getPropertyValue("--_duration")).toBe("");
+  });
 });

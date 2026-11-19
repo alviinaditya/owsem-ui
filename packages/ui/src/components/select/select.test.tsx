@@ -86,7 +86,7 @@ const item = (name: string) => {
 };
 const lit = () => document.querySelector("[data-glide-active]")?.textContent;
 
-/** Resolves a value (e.g. `var(--ow-panel)`) of `property` to its computed form in `scope`. */
+/** Resolves a value (e.g. `var(--ow-raised-bg)`) of `property` to its computed form in `scope`. */
 function resolve(property: "color" | "box-shadow", value: string, scope: Element = document.body) {
   const probe = document.createElement("span");
   probe.style.setProperty(property, value);
@@ -96,8 +96,43 @@ function resolve(property: "color" | "box-shadow", value: string, scope: Element
   return computed;
 }
 
+/** The trigger's tints: at rest, hovered or open, and invalid (the critical tone). */
+const REST = "color-mix(in oklab, var(--ow-fg) 6%, transparent)";
+const HOVER = "color-mix(in oklab, var(--ow-fg) 9%, transparent)";
+const INVALID = "color-mix(in oklab, var(--ow-critical) 14%, transparent)";
+const NO_SHADOW = "none";
+
 const opened = () => expect.poll(shown).not.toBeNull();
 const gone = () => expect.poll(shown, { timeout: 1000 }).toBeNull();
+
+/** Backdrops on show; a shut select may keep its parts mounted, hidden. */
+const backdrops = () =>
+  [...document.querySelectorAll<HTMLElement>(".ow-select__backdrop")].filter(
+    (el) => el.closest("[hidden]") === null,
+  );
+/** Whether a wheel turned over `target` was held back. */
+const held = (target: Element = document.body) =>
+  !target.dispatchEvent(new WheelEvent("wheel", { deltaY: 100, bubbles: true, cancelable: true }));
+/** The page's own style attributes, which the lock leaves alone. */
+const pageStyle = () => [root.getAttribute("style"), document.body.getAttribute("style")];
+
+/** A button away from the select, in the window's corner. */
+function Behind({ onClick }: { onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} style={{ position: "fixed", right: 20, bottom: 20 }}>
+      Behind
+    </button>
+  );
+}
+
+/** Presses the page where `el` is, whatever lies over it. */
+async function pressAt(el: Element) {
+  const box = el.getBoundingClientRect();
+  const page = document.body.getBoundingClientRect();
+  await userEvent.click(document.body, {
+    position: { x: box.left + box.width / 2 - page.left, y: box.top + box.height / 2 - page.top },
+  });
+}
 
 describe("Select", () => {
   test("the shortest usage draws the rest: value, icon, list, indicator, and check", async () => {
@@ -120,6 +155,11 @@ describe("Select", () => {
     expect(cherry.getAttribute("aria-selected")).toBe("true");
     expect(cherry.querySelector(".ow-select__item-text")?.textContent).toBe("Cherry");
     expect(cherry.querySelector(".ow-select__item-indicator svg")).not.toBeNull();
+    // The text first, the check at the end, where the trigger's icon is.
+    expect([...cherry.children].map((part) => part.className)).toEqual([
+      "ow-select__item-text",
+      "ow-select__item-indicator",
+    ]);
     await userEvent.click(item("Mango"));
     await gone();
     expect(trigger().textContent).toBe("Mango");
@@ -315,7 +355,7 @@ describe("Select", () => {
     expect(getComputedStyle(value).color).toBe(resolve("color", "var(--ow-fg)"));
   });
 
-  test("disabled does not open, and invalid takes the critical edge", async () => {
+  test("disabled does not open, and invalid takes the critical tint with no edge", async () => {
     await render(
       <>
         <Fruits disabled defaultValue="apple" />
@@ -341,15 +381,66 @@ describe("Select", () => {
     await userEvent.click(trigger(), { force: true });
     await settle();
     expect(shown()).toBeNull();
-    const edge = (id: string) =>
-      getComputedStyle(document.querySelector(`[data-testid="${id}"]`) as HTMLElement).boxShadow;
-    const critical = resolve("color", "var(--ow-critical)");
+    const style = (id: string) =>
+      getComputedStyle(document.querySelector(`[data-testid="${id}"]`) as HTMLElement);
+    const critical = resolve("color", INVALID);
     expect(document.querySelector('[data-testid="field"]')?.hasAttribute("data-invalid")).toBe(
       true,
     );
-    expect(edge("field")).toContain(critical);
-    expect(edge("alone")).toContain(critical);
-    expect(getComputedStyle(trigger()).boxShadow).not.toContain(critical);
+    for (const id of ["field", "alone"]) {
+      expect(style(id).backgroundColor).toBe(critical);
+      expect(style(id).boxShadow).toBe(NO_SHADOW);
+    }
+    expect(getComputedStyle(trigger()).backgroundColor).not.toBe(critical);
+  });
+
+  test("a trigger that becomes invalid shakes once, and blinks instead under reduced motion", async () => {
+    onTestFinished(() => commands.setReducedMotion("no-preference"));
+    const Pick = ({ invalid }: { invalid?: boolean }) => (
+      <Select.Root defaultValue="a">
+        <Select.Trigger aria-label="Pick" aria-invalid={invalid || undefined} />
+        <Select.Popup>
+          <Select.Item value="a">A</Select.Item>
+        </Select.Popup>
+      </Select.Root>
+    );
+    const screen = await render(<Pick />);
+    const el = screen.getByRole("combobox").element() as HTMLElement;
+    expect(getComputedStyle(el).animationName).toBe("none");
+    await screen.rerender(<Pick invalid />);
+    const style = getComputedStyle(el);
+    expect(style.animationName).toBe("ow-select-shake");
+    expect(style.animationDuration).toBe("0.32s");
+    expect(style.willChange).toBe("transform");
+    const shake = el.getAnimations()[0] as Animation;
+    shake.pause();
+    const x = (ms: number) => {
+      shake.currentTime = ms;
+      return new DOMMatrix(getComputedStyle(el).transform).m41;
+    };
+    expect([0, 64, 128, 192, 256, 320].map(x)).toEqual([0, -4, 4, -2, 2, 0]);
+    shake.cancel();
+    await commands.setReducedMotion("reduce");
+    await screen.rerender(<Pick />);
+    await screen.rerender(<Pick invalid />);
+    expect(getComputedStyle(el).animationName).toBe("ow-select-blink");
+    expect(getComputedStyle(el).animationDuration).toBe("0.16s");
+    expect(getComputedStyle(el).transform).toBe("none");
+  });
+
+  test("a trigger invalid on first render stays still", async () => {
+    const screen = await render(
+      <Select.Root defaultValue="a">
+        <Select.Trigger aria-label="Pick" aria-invalid="true" />
+        <Select.Popup>
+          <Select.Item value="a">A</Select.Item>
+        </Select.Popup>
+      </Select.Root>,
+    );
+    const el = screen.getByRole("combobox").element() as HTMLElement;
+    await settle();
+    expect(getComputedStyle(el).animationName).toBe("none");
+    expect(el.getAnimations()).toEqual([]);
   });
 
   test("multiple: picks add up, the popup stays open beside the trigger, checks show", async () => {
@@ -375,11 +466,11 @@ describe("Select", () => {
     expect(trigger().textContent).toBe("Apple, Mango");
     expect(shown()).not.toBeNull();
     const check = (name: string) =>
-      getComputedStyle(item(name).querySelector(".ow-select__item-indicator") as HTMLElement)
-        .visibility;
-    expect(check("Apple")).toBe("visible");
-    expect(check("Mango")).toBe("visible");
-    expect(check("Cherry")).toBe("hidden");
+      getComputedStyle(item(name).querySelector(".ow-select__item-indicator > svg") as Element)
+        .opacity;
+    expect(check("Apple")).toBe("1");
+    await expect.poll(() => check("Mango")).toBe("1");
+    expect(check("Cherry")).toBe("0");
     await userEvent.click(item("Apple"));
     expect(trigger().textContent).toBe("Mango");
     await userEvent.keyboard("{Escape}");
@@ -408,7 +499,7 @@ describe("Select", () => {
   });
 
   test("beside its trigger it grows: 0.96 and transparent to full, 180 ms ease-out", async () => {
-    const runs: { property: string; frames: Keyframe[] }[] = [];
+    const runs: { property: string; frames: Keyframe[]; timing: string }[] = [];
     const onRun = (event: TransitionEvent) => {
       const target = event.target as HTMLElement;
       if (!target.classList.contains("ow-select__popup")) return;
@@ -416,7 +507,12 @@ describe("Select", () => {
         .getAnimations()
         .find((a) => (a as CSSTransition).transitionProperty === event.propertyName);
       const effect = transition?.effect as KeyframeEffect | undefined;
-      runs.push({ property: event.propertyName, frames: effect?.getKeyframes() ?? [] });
+      const { transitionDuration, transitionDelay } = getComputedStyle(target);
+      runs.push({
+        property: event.propertyName,
+        frames: effect?.getKeyframes() ?? [],
+        timing: `${transitionDuration} after ${transitionDelay}`,
+      });
     };
     document.addEventListener("transitionrun", onRun);
     onTestFinished(() => document.removeEventListener("transitionrun", onRun));
@@ -436,6 +532,52 @@ describe("Select", () => {
     runs.length = 0;
     await userEvent.click(document.body, { position: { x: 5, y: 5 } });
     await expect.poll(() => runs.length).toBe(2);
+    // Leaving is quicker, after a beat that lets a pick's check land.
+    expect(runs.map((run) => run.timing)).toEqual(["0.14s after 0.06s", "0.14s after 0.06s"]);
+    await gone();
+  });
+
+  test("a pick's check fades and scales in on the settle spring", async () => {
+    const runs: string[] = [];
+    const onRun = (event: TransitionEvent) => {
+      if (
+        (event.target as Element).parentElement?.classList.contains("ow-select__item-indicator")
+      ) {
+        runs.push(event.propertyName);
+      }
+    };
+    document.addEventListener("transitionrun", onRun);
+    onTestFinished(() => document.removeEventListener("transitionrun", onRun));
+    // Multiple, so the popup stays open to show the pick.
+    await render(
+      <Select.Root items={FRUITS} multiple defaultValue={["apple"]}>
+        <Select.Trigger aria-label="Fruits" />
+        <Select.Popup>
+          {FRUITS.map((fruit) => (
+            <Select.Item key={fruit.value} value={fruit.value}>
+              {fruit.label}
+            </Select.Item>
+          ))}
+        </Select.Popup>
+      </Select.Root>,
+    );
+    await userEvent.click(trigger());
+    await opened();
+    const check = (name: string) =>
+      getComputedStyle(item(name).querySelector(".ow-select__item-indicator > svg") as Element);
+    // Unpicked, it keeps its room, so the labels stay in line.
+    expect(check("Cherry").opacity).toBe("0");
+    expect(check("Cherry").transform).toBe("matrix(0.6, 0, 0, 0.6, 0, 0)");
+    expect(check("Cherry").transitionDuration).toBe("0.12s, 0.573s");
+    expect(check("Apple").opacity).toBe("1");
+    expect(check("Apple").transform).toBe("none");
+    await settle();
+    runs.length = 0;
+    await userEvent.click(item("Cherry"));
+    await expect.poll(() => check("Cherry").opacity).toBe("1");
+    await expect.poll(() => check("Cherry").transform).toBe("none");
+    expect(runs.sort()).toEqual(["opacity", "transform"]);
+    await userEvent.keyboard("{Escape}");
     await gone();
   });
 
@@ -571,15 +713,16 @@ describe("Select", () => {
     expect(refs.separator.current?.className).toBe("ow-select__separator e");
   });
 
-  test("the field is a well with a 3:1 edge, the popup the panel, in light and dark", async () => {
+  test("the field is a tint of the text color with no shadow or edge, deeper while open; the popup is raised, in light and dark", async () => {
     onTestFinished(() => {
       delete root.dataset.theme;
     });
-    await render(
+    const screen = await render(
       <>
         <Fruits defaultValue="apple" />
+        <p>Away</p>
         <Select.Root open modal={false} defaultValue="a">
-          <Select.Trigger aria-label="Open" />
+          <Select.Trigger aria-label="Open" data-testid="open" />
           <Select.Portal>
             <Select.Positioner alignItemWithTrigger={false}>
               <Select.Popup>
@@ -593,25 +736,57 @@ describe("Select", () => {
       </>,
     );
     await opened();
-    const groove = document.querySelector(".ow-select__separator") as HTMLElement;
+    // The pointer may still rest where an earlier test left it, over the trigger.
+    await userEvent.hover(screen.getByText("Away"));
+    const open = document.querySelector('[data-testid="open"]') as HTMLElement;
+    const line = document.querySelector(".ow-select__separator") as HTMLElement;
     const a = item("A");
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
       const field = getComputedStyle(trigger());
-      expect(field.backgroundColor).toBe(resolve("color", "var(--ow-well-bg)"));
-      expect(field.boxShadow).toBe(
-        resolve("box-shadow", "inset 0 0 0 1px var(--ow-edge), var(--ow-well-shadow)"),
-      );
+      expect(field.backgroundColor).toBe(resolve("color", REST));
+      expect(field.boxShadow).toBe(NO_SHADOW);
       expect(field.color).toBe(resolve("color", "var(--ow-fg)"));
+      // Its popup open, a deeper tint, still with no shadow or edge.
+      expect(open.hasAttribute("data-popup-open")).toBe(true);
+      expect(getComputedStyle(open).backgroundColor).toBe(resolve("color", HOVER));
+      expect(getComputedStyle(open).boxShadow).toBe(NO_SHADOW);
       const surface = getComputedStyle(shown() as HTMLElement);
-      expect(surface.backgroundColor).toBe(resolve("color", "var(--ow-panel)"));
+      expect(surface.backgroundColor).toBe(resolve("color", "var(--ow-raised-bg)"));
       expect(surface.boxShadow).toBe(resolve("box-shadow", "var(--ow-popup-shadow)"));
       expect(getComputedStyle(a).color).toBe(resolve("color", "var(--ow-fg)"));
-      expect(getComputedStyle(groove).borderTopColor).toBe(resolve("color", "var(--ow-line-dark)"));
-      expect(getComputedStyle(groove).borderBottomColor).toBe(
-        resolve("color", "var(--ow-line-light)"),
-      );
+      // The separator is one hairline.
+      expect(getComputedStyle(line).borderTopWidth).toBe("1px");
+      expect(getComputedStyle(line).borderTopColor).toBe(resolve("color", "var(--ow-line)"));
+      expect(getComputedStyle(line).borderBottomWidth).toBe("0px");
     }
+  });
+
+  test("hover steps the fill up, keyboard focus adds the ring, and more contrast draws the edge", async () => {
+    onTestFinished(() => commands.setContrast("no-preference"));
+    const screen = await render(
+      <>
+        <button type="button">Before</button>
+        <Fruits defaultValue="apple" />
+        <p>Away</p>
+      </>,
+    );
+    const away = screen.getByText("Away");
+    await userEvent.hover(away);
+    expect(getComputedStyle(trigger()).backgroundColor).toBe(resolve("color", REST));
+    await userEvent.hover(trigger());
+    expect(getComputedStyle(trigger()).backgroundColor).toBe(resolve("color", HOVER));
+    await userEvent.hover(away);
+    screen.getByRole("button", { name: "Before" }).element().focus();
+    await userEvent.tab();
+    expect(document.activeElement).toBe(trigger());
+    expect(getComputedStyle(trigger()).boxShadow).toBe(NO_SHADOW);
+    expect(getComputedStyle(trigger()).outlineWidth).toBe("2px");
+    expect(getComputedStyle(trigger()).outlineColor).toBe(resolve("color", "var(--ow-focus)"));
+    await commands.setContrast("more");
+    expect(getComputedStyle(trigger()).boxShadow).toBe(
+      resolve("box-shadow", "inset 0 0 0 1px var(--ow-edge)"),
+    );
   });
 
   test("a theme token set on a part changes that part alone (TK-9)", async () => {
@@ -620,14 +795,13 @@ describe("Select", () => {
         defaultValue="apple"
         triggerStyle={
           {
-            "--ow-well-bg": "rgb(1, 2, 3)",
-            "--ow-edge": "rgb(4, 5, 6)",
             "--ow-fg": "rgb(7, 8, 9)",
+            "--ow-raised-bg": "rgb(1, 2, 3)",
           } as CSSProperties
         }
         popupStyle={
           {
-            "--ow-panel": "rgb(10, 11, 12)",
+            "--ow-raised-bg": "rgb(10, 11, 12)",
             "--ow-popup-shadow": "none",
             "--ow-fg": "rgb(13, 14, 15)",
             "--ow-hover": "rgb(0, 128, 0)",
@@ -635,12 +809,15 @@ describe("Select", () => {
         }
       />,
     );
+    await userEvent.hover(document.body, { position: { x: 2, y: 2 } });
     const field = getComputedStyle(trigger());
-    expect(field.backgroundColor).toBe("rgb(1, 2, 3)");
-    expect(field.boxShadow).toContain("rgb(4, 5, 6)");
+    // Its fill follows the surface color set here, and its text the text color.
+    expect(field.backgroundColor).toBe(resolve("color", REST, trigger()));
+    expect(field.backgroundColor).not.toBe(resolve("color", REST));
     expect(field.color).toBe("rgb(7, 8, 9)");
     await userEvent.click(trigger());
     await opened();
+    expect(field.backgroundColor).toBe(resolve("color", HOVER, trigger()));
     const style = getComputedStyle(shown() as HTMLElement);
     expect(style.backgroundColor).toBe("rgb(10, 11, 12)");
     expect(style.boxShadow).toBe("none");
@@ -651,7 +828,7 @@ describe("Select", () => {
     expect(getComputedStyle(highlight).backgroundColor).toBe("rgb(0, 128, 0)");
     // The trigger's tokens did not reach the popup, nor the popup's the trigger.
     expect(style.color).toBe("rgb(13, 14, 15)");
-    expect(field.backgroundColor).toBe("rgb(1, 2, 3)");
+    expect(field.backgroundColor).toBe(resolve("color", HOVER, trigger()));
     await userEvent.keyboard("{Escape}");
     await gone();
   });
@@ -751,14 +928,129 @@ describe("Select", () => {
     await userEvent.click(field);
     await opened();
     expect(document.querySelector(".ow-select__positioner")?.getAttribute("dir")).toBe("rtl");
+    // The check is at the line's end too: the left, as the trigger's icon.
     const cherry = item("Cherry");
     expect(
       cherry.querySelector(".ow-select__item-indicator")?.getBoundingClientRect().left,
-    ).toBeGreaterThan(
+    ).toBeLessThan(
       (cherry.querySelector(".ow-select__item-text") as HTMLElement).getBoundingClientRect().left,
     );
     await userEvent.keyboard("{Escape}");
     await gone();
+  });
+
+  test("modal by default: a clear backdrop takes an outside press, and the page holds still", async () => {
+    let behind = 0;
+    const screen = await render(
+      <>
+        <Fruits defaultValue="apple" />
+        <Behind onClick={() => behind++} />
+      </>,
+    );
+    // Focused but shut, Base UI mounts the popup ahead; that holds nothing.
+    trigger().focus();
+    await settle();
+    expect(held()).toBe(false);
+    await userEvent.click(trigger());
+    await opened();
+    expect(backdrops()).toHaveLength(1);
+    const backdrop = backdrops()[0] as HTMLElement;
+    expect(getComputedStyle(backdrop).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+    const box = backdrop.getBoundingClientRect();
+    expect([box.left, box.top, box.width, box.height]).toEqual([
+      0,
+      0,
+      root.clientWidth,
+      root.clientHeight,
+    ]);
+    await expect.poll(() => held()).toBe(true);
+    expect(held(list())).toBe(true);
+    // A press on Behind lands on the backdrop: it only shuts the popup.
+    const button = screen.getByText("Behind").element();
+    await pressAt(button);
+    await gone();
+    expect(behind).toBe(0);
+    expect(trigger().textContent).toBe("Apple");
+    expect(backdrops()).toHaveLength(0);
+    await expect.poll(() => held()).toBe(false);
+    await userEvent.click(button);
+    expect(behind).toBe(1);
+  });
+
+  test("beside its trigger, the page holds still with no style on it", async () => {
+    const before = pageStyle();
+    await render(<Beside />);
+    await userEvent.click(trigger());
+    await opened();
+    await expect.poll(() => held()).toBe(true);
+    await settle();
+    expect(pageStyle()).toEqual(before);
+    expect(getComputedStyle(root).overflow).toBe("visible");
+    expect(getComputedStyle(document.body).overflow).toBe("visible");
+    await userEvent.keyboard("{Escape}");
+    await gone();
+    expect(held()).toBe(false);
+    expect(pageStyle()).toEqual(before);
+  });
+
+  test("over its trigger, Base UI's own page lock is put back: the page holds with no style", async () => {
+    // Base UI locks the page with `overflow` over the trigger, modal or not, since the popup
+    // cannot follow a scroll there; OwsemUI's lock holds the page instead and keeps its style.
+    const before = pageStyle();
+    await render(<Fruits defaultValue="cherry" modal={false} />);
+    await userEvent.click(trigger());
+    await opened();
+    await expect.poll(() => popup()?.getAttribute("data-side")).toBe("none");
+    await expect.poll(() => held()).toBe(true);
+    await settle();
+    expect(pageStyle()).toEqual(before);
+    expect(getComputedStyle(document.body).overflow).toBe("visible");
+    await userEvent.keyboard("{Escape}");
+    await gone();
+    await settle();
+    expect(held()).toBe(false);
+    expect(pageStyle()).toEqual(before);
+  });
+
+  test("a long list takes the wheel while it can scroll; the page never does", async () => {
+    await render(<Fruits items={MANY} defaultValue="v0" />);
+    await userEvent.click(trigger());
+    await opened();
+    await expect.poll(() => held()).toBe(true);
+    const option = item("Option 1");
+    list().scrollTop = 0;
+    expect(held(option)).toBe(false);
+    list().scrollTop = list().scrollHeight;
+    expect(held(option)).toBe(true);
+  });
+
+  test("modal={false}: no backdrop and no lock; an outside press reaches what it hits", async () => {
+    let behind = 0;
+    // Beside its trigger: over it, the page is held even when not modal (above).
+    const screen = await render(
+      <>
+        <Select.Root defaultValue="a" modal={false}>
+          <Select.Trigger aria-label="Letter" style={{ margin: 80 }} />
+          <Select.Portal>
+            <Select.Positioner alignItemWithTrigger={false}>
+              <Select.Popup>
+                <Select.Item value="a">A</Select.Item>
+                <Select.Item value="b">B</Select.Item>
+              </Select.Popup>
+            </Select.Positioner>
+          </Select.Portal>
+        </Select.Root>
+        <Behind onClick={() => behind++} />
+      </>,
+    );
+    await userEvent.click(trigger());
+    await opened();
+    await settle();
+    expect(document.querySelector(".ow-select__backdrop")).toBeNull();
+    expect(held()).toBe(false);
+    await userEvent.click(screen.getByText("Behind"));
+    await gone();
+    expect(behind).toBe(1);
   });
 
   test("has no axe violations in light and dark", async () => {

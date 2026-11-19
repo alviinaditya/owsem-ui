@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
-import { rect, TOL, usedRadius } from "../../../test/geometry.ts";
+import { rect, TOL, themeRadius, usedRadius } from "../../../test/geometry.ts";
 import { Checkbox, type CheckboxSize } from "./index";
 
 async function mount(ui: ReactNode): Promise<HTMLElement[]> {
@@ -13,9 +13,9 @@ const hit = (x: number, y: number) => document.elementFromPoint(x, y);
 
 // FR-10, FR-11: the box is an icon of Button's fonts, the font size plus 2 px.
 const SIZES: [CheckboxSize, number][] = [
-  ["sm", 15],
-  ["md", 16],
-  ["lg", 18],
+  ["sm", 19],
+  ["md", 20],
+  ["lg", 22],
 ];
 
 describe("Checkbox geometry", () => {
@@ -72,12 +72,12 @@ describe("Checkbox geometry", () => {
       <Checkbox.Root aria-label="Run" defaultChecked style={{ fontSize: 30 }} />,
     );
     if (!box) throw new Error("no checkbox");
-    expect(rect(box).width).toBeCloseTo(32, 1);
-    expect(rect(box).height).toBeCloseTo(32, 1);
+    expect(rect(box).width).toBeCloseTo(36, 1);
+    expect(rect(box).height).toBeCloseTo(36, 1);
     const glyph = box.querySelector('[data-glyph="check"]');
     if (!glyph) throw new Error("no glyph");
-    expect(rect(glyph).width).toBeCloseTo(32, 1);
-    expect(rect({ el: box, pseudo: "::after" }).width).toBeCloseTo(32, 1);
+    expect(rect(glyph).width).toBeCloseTo(36, 1);
+    expect(rect({ el: box, pseudo: "::after" }).width).toBeCloseTo(36, 1);
   });
 
   test("--icon or a width set on it resizes the box, and a target never drops under 24 px", async () => {
@@ -102,10 +102,10 @@ describe("Checkbox geometry", () => {
     }
   });
 
-  test("its corners are half the control radius, so a small box stays square (FR-10b)", async () => {
+  test("its corners are half the control radius, so a small box stays square (TK-8)", async () => {
     const [box] = await mount(<Checkbox.Root aria-label="Run" />);
     if (!box) throw new Error("no checkbox");
-    expect(usedRadius(box)).toBeCloseTo(4, 1);
+    expect(usedRadius(box)).toBeCloseTo(themeRadius() / 2, 1);
   });
 
   test("checking it moves nothing around it, in a plain label", async () => {

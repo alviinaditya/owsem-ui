@@ -23,8 +23,8 @@ const iconOf = (toggle: HTMLElement | undefined) => {
 
 // FR-11: font 13/14/16 px, height 2 × --py + 1lh at line-height 1.25, icon font + 2 px.
 const SIZES: Record<ToggleSize, { height: number; icon: number; inset: number }> = {
-  sm: { height: 29.25, icon: 15, inset: 7.125 },
-  md: { height: 38.5, icon: 16, inset: 11.25 },
+  sm: { height: 32, icon: 15, inset: 8.5 },
+  md: { height: 40, icon: 16, inset: 12 },
   lg: { height: 48, icon: 18, inset: 15 },
 };
 

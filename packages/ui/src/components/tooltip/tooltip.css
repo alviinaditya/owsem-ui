@@ -11,7 +11,7 @@
     /* One line is 24px tall. */
     --_py: calc((24px - 1lh) / 2);
     --_px: 8px;
-    --_radius: calc(var(--ow-radius) - 2px);
+    --_radius: var(--ow-radius);
     box-sizing: border-box;
     max-inline-size: min(20rem, var(--available-width, 20rem));
     padding: var(--_py) var(--_px);

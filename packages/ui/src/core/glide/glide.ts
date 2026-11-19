@@ -16,6 +16,11 @@ export interface GlideOptions {
   axis?: GlideAxis | undefined;
   /** Beyond this many px from every item, nothing is lit. Default: anywhere in the container. */
   maxDistance?: number | undefined;
+  /**
+   * Items matching this selector are never lit: over one the highlight fades out where it is, and
+   * from one it fades in at the next item, so it never slides out from under a key. Default none.
+   */
+  skip?: string | undefined;
   /** Px the lit item keeps winning by in a gap, so the highlight does not flicker. Default `2`. */
   hysteresis?: number | undefined;
   /** Ms before the highlight fades once the pointer leaves. Default `70`. */
@@ -146,7 +151,21 @@ export function createGlide(
     }
   }
 
+  // The item the highlight sits on while it shows.
+  let shown: HTMLElement | null = null;
+
+  /** An item that became skipped (picked) under the highlight: it fades out where it is. */
+  function dropSkipped(): void {
+    const skip = read().skip;
+    if (visible && shown && skip && shown.matches(skip)) {
+      visible = false;
+      highlight.removeAttribute("data-visible");
+      highlight.removeAttribute("data-held");
+    }
+  }
+
   function light(hit: Hit | null): void {
+    dropSkipped();
     const item = hit?.item ?? null;
     if (item !== active) {
       active?.removeAttribute(ACTIVE_ATTR);
@@ -154,9 +173,12 @@ export function createGlide(
     }
     const changed = item !== active;
     active = item;
-    if (hit) {
+    // A skipped item keeps the active mark but shows no highlight: it fades out in place.
+    const skip = read().skip;
+    if (hit && !(skip && hit.item.matches(skip))) {
       // First appearance: in place, fading in. After that: glide.
       place(hit.rect, !visible);
+      shown = hit.item;
       if (!visible) highlight.setAttribute("data-visible", "");
       visible = true;
     } else if (visible) {
@@ -207,6 +229,8 @@ export function createGlide(
     clearTimeout(pressTimer);
     highlight.setAttribute("data-held", "");
   };
+  // A click may pick the lit item: its highlight then fades out under the arriving key.
+  const onPicked = () => window.setTimeout(dropSkipped, 0);
   const onUp = () => {
     clearTimeout(pressTimer);
     pressTimer = window.setTimeout(() => highlight.removeAttribute("data-held"), 90);
@@ -230,6 +254,7 @@ export function createGlide(
   container.addEventListener("pointerleave", onLeave);
   container.addEventListener("pointerdown", onDown);
   container.addEventListener("click", onClick);
+  container.addEventListener("click", onPicked);
   // Scrolling moves items under a still pointer: the container's own, or a scroller around it.
   window.addEventListener("scroll", refresh, { passive: true, capture: true });
   window.addEventListener("pointerup", onUp);
@@ -253,6 +278,7 @@ export function createGlide(
       container.removeEventListener("pointerleave", onLeave);
       container.removeEventListener("pointerdown", onDown);
       container.removeEventListener("click", onClick);
+      container.removeEventListener("click", onPicked);
       window.removeEventListener("scroll", refresh, { capture: true });
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("pointercancel", onUp);

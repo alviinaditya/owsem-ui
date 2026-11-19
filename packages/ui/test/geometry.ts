@@ -63,7 +63,29 @@ export function usedRadius(surface: Surface): number {
   return tl * f;
 }
 
-/** FR-10b: outer radius = inner radius + the padding between them (top and left must match). */
+/** The theme's one radius (TK-8), as `el` reads it, in px. */
+export function themeRadius(el: Element = document.documentElement): number {
+  return Number.parseFloat(getComputedStyle(el).getPropertyValue("--ow-radius"));
+}
+
+/**
+ * TK-8: the outer surface takes the one radius, `--ow-radius`, and a part nested in its padding
+ * takes that less the gap between them, never under 0. Top and left gaps must match.
+ */
+export function nested(
+  outer: Surface,
+  inner: Surface,
+): { outerDelta: number; innerDelta: number; insetDelta: number } {
+  const gap = insets(outer, inner);
+  const radius = themeRadius(parts(outer).el);
+  return {
+    outerDelta: Math.abs(usedRadius(outer) - radius),
+    innerDelta: Math.abs(usedRadius(inner) - Math.max(0, radius - gap.top)),
+    insetDelta: Math.abs(gap.top - gap.left),
+  };
+}
+
+/** Outer radius = inner radius + the padding between them (top and left must match). */
 export function concentric(
   outer: Surface,
   inner: Surface,

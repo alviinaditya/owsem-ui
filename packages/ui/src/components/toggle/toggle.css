@@ -1,8 +1,8 @@
 @layer owsem.tokens, owsem.components;
 
 /*
- * A ghost button that stays up while on: flat and tinted on hover while off, the raised key while
- * on, and the pressed material only while held down (DP-4). Button's geometry (FR-9 to FR-11):
+ * A ghost button that stays up while on: flat and tinted on hover while off, a tint of the accent
+ * with accent text while on, and a deeper tint only while held down (DP-4). Button's geometry (FR-9 to FR-11):
  * --py is the only input.
  */
 @layer owsem.components {
@@ -10,11 +10,12 @@
     --_muted: var(--ow-muted);
     --_fg: var(--ow-fg);
     --_hover: var(--ow-hover);
-    --_raised-bg: var(--ow-raised-bg);
-    --_raised-shadow: var(--ow-raised-shadow);
-    --_pressed-bg: var(--ow-pressed-bg);
-    --_pressed-shadow: var(--ow-pressed-shadow);
-    --py: 0.75em;
+    /* The accent text leans toward the text color, to read on its own tint in both themes. */
+    --_on-fg: color-mix(in oklab, var(--ow-accent) 70%, var(--ow-fg));
+    --_on-bg: color-mix(in oklab, var(--ow-accent) 14%, transparent);
+    --_on-hover-bg: color-mix(in oklab, var(--ow-accent) 18%, transparent);
+    --_held-bg: color-mix(in oklab, var(--ow-accent) 22%, transparent);
+    --py: 0.8036em;
     --_py: max(var(--py), (24px - 1lh) / 2);
     --px: calc(var(--_py) + (1lh - 1cap) / 2);
     --icon: calc(1em + 2px);
@@ -47,7 +48,7 @@
   }
 
   .ow-toggle[data-size="sm"] {
-    --py: 0.5em;
+    --py: 0.6058em;
     font-size: 0.8125rem;
   }
 
@@ -87,14 +88,10 @@
     margin: 0;
   }
 
-  /*
-   * On: the raised key, a flat fill with crisp edges, tinted toward its text. The tint keeps it
-   * apart from a surface of the key's own color, such as a white panel in the light theme.
-   */
+  /* On: a tint of the accent with accent text; no edge. */
   .ow-toggle[data-pressed] {
-    background-color: color-mix(in oklab, var(--_raised-bg), var(--_fg) 8%);
-    box-shadow: var(--_raised-shadow);
-    color: var(--_fg);
+    background-color: var(--_on-bg);
+    color: var(--_on-fg);
   }
 
   @media (hover: hover) {
@@ -103,17 +100,16 @@
       color: var(--_fg);
     }
 
-    /* The key tints a few percent further toward its text; its edges stay. */
+    /* On, the tint steps up a little. */
     .ow-toggle[data-pressed]:hover:not(:active, [data-disabled]) {
-      background-color: color-mix(in oklab, var(--_raised-bg), var(--_fg) 12%);
+      background-color: var(--_on-hover-bg);
     }
   }
 
-  /* Held down, on or off: the pressed material, going in to 0.97 within 90 ms (DP-4). */
+  /* Held down, on or off: the deepest tint, going in to 0.97 within 90 ms (DP-4). */
   .ow-toggle:active:not([data-disabled]) {
-    background-color: var(--_pressed-bg);
-    box-shadow: var(--_pressed-shadow);
-    color: var(--_fg);
+    background-color: var(--_held-bg);
+    color: var(--_on-fg);
     transform: scale(0.97);
     transition-duration: 90ms;
     transition-timing-function: var(--ow-ease-out);
@@ -136,7 +132,7 @@
     }
   }
 
-  /* DP-8: the raised key is gone, so on is the system's highlight. */
+  /* DP-8: the tint is gone, so on is the system's highlight. */
   @media (forced-colors: active) {
     .ow-toggle[data-pressed] {
       background-color: Highlight;

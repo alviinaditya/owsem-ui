@@ -1,11 +1,11 @@
 @layer owsem.tokens, owsem.components;
 
 /*
- * Color Picker, an Owsem component (Tactile): flat fills with crisp 1px edges (TK-7). The area,
+ * Color Picker, an Owsem component (Tactile): soft surfaces with no edges (TK-7). The area,
  * tracks, and swatches are colors inside a 1px edge, the thumbs are rings that compact when
- * pressed, the buttons are raised keys, the fields are wells, and the popover is a popup panel
- * that scales out of its trigger. The colors being picked are painted inline; the rest are theme
- * tokens (TK-9), apart from the literals that must read on any color.
+ * pressed, the buttons and fields are tints of the text color with no shadow, and the popover is a
+ * panel with the popup shadow that scales out of its trigger. The colors being picked are painted inline; the
+ * rest are theme tokens (TK-9), apart from the literals that must read on any color.
  */
 @layer owsem.components {
   .ow-color-picker,
@@ -13,11 +13,10 @@
     --_fg: var(--ow-fg);
     --_muted: var(--ow-muted);
     --_focus: var(--ow-focus);
-    --_edge: var(--ow-edge);
     --_radius: var(--ow-radius);
-    --_well: var(--ow-well-bg);
-    --_well-shadow: var(--ow-well-shadow);
+    --_surface: color-mix(in oklab, var(--ow-fg) 6%, transparent);
     --_bg: var(--ow-panel);
+    --_panel-shadow: var(--ow-surface-shadow);
     /* literal: a color's own 1px edge, darker than the color under it in any theme */
     --_color-edge: inset 0 0 0 1px rgb(0 0 0 / 0.2);
     /* Translucent colors sit on a checkerboard of the panel and the line color. */
@@ -45,14 +44,14 @@
     inline-size: 256px;
     max-inline-size: 100%;
     padding: var(--_pad);
-    /* Concentric with the area (FR-10b). */
-    border-radius: calc(var(--_radius) + var(--_pad));
+    /* One radius outside (TK-8); the controls inside keep theirs, past a wide padding. */
+    border-radius: var(--_radius);
     background-color: var(--_bg);
-    box-shadow: var(--ow-panel-shadow);
+    box-shadow: var(--_panel-shadow);
     color: var(--_fg);
     font-size: 13px;
     line-height: 1.25;
-    /* DP-8: the shadow edge is gone in forced colors; this outline takes its place. */
+    /* DP-8: an outline is the edge in forced colors. */
     outline: 1px solid transparent;
     outline-offset: -1px;
   }
@@ -244,10 +243,12 @@
     stroke-linejoin: round;
   }
 
-  /* Raised keys: a flat fill with a crisp edge, the pressed material while held (DP-4). */
+  /* Keys: tints of the text color; a deeper tint on hover, deeper while held (DP-4). */
   .ow-color-picker__tool,
   .ow-color-picker__format {
-    --_key: var(--ow-raised-bg);
+    --_key: var(--_surface);
+    --_key-hover: color-mix(in oklab, var(--ow-fg) 9%, transparent);
+    --_key-held: color-mix(in oklab, var(--ow-fg) 13%, transparent);
     display: inline-flex;
     flex: none;
     align-items: center;
@@ -257,7 +258,6 @@
     border: 0;
     border-radius: var(--_radius);
     background-color: var(--_key);
-    box-shadow: var(--ow-raised-shadow);
     color: var(--_fg);
     font: inherit;
     cursor: pointer;
@@ -273,16 +273,15 @@
     padding: 0;
   }
 
-  /* Hover tints the fill a little toward the text; the edge stays. */
+  /* Hover steps the fill up. */
   @media (hover: hover) and (pointer: fine) {
     :is(.ow-color-picker__tool, .ow-color-picker__format):hover:not(:disabled) {
-      background-color: color-mix(in oklab, var(--_key), var(--_fg) 4%);
+      background-color: var(--_key-hover);
     }
   }
 
   :is(.ow-color-picker__tool, .ow-color-picker__format):active:not(:disabled) {
-    background-color: var(--ow-pressed-bg);
-    box-shadow: var(--ow-pressed-shadow);
+    background-color: var(--_key-held);
     scale: 0.97;
     transition: scale 90ms var(--_ease-out);
   }
@@ -296,7 +295,7 @@
 
   .ow-color-picker__format,
   .ow-color-picker__input {
-    --py: 0.5em;
+    --py: 0.6058em;
     --_py: max(var(--py), (24px - 1lh) / 2);
     --px: calc(var(--_py) + (1lh - 1cap) / 2);
     box-sizing: border-box;
@@ -332,6 +331,7 @@
   }
 
   .ow-color-picker__input {
+    --_field: var(--_surface);
     box-sizing: border-box;
     inline-size: 100%;
     min-inline-size: 0;
@@ -339,14 +339,20 @@
     padding-inline: 2px;
     border: 0;
     border-radius: var(--_radius);
-    /* A flat well; a field's edge needs 3:1 (DP-6). */
-    background-color: var(--_well);
-    box-shadow: inset 0 0 0 1px var(--_edge);
+    /* A tint of the text color, with no edge or shadow. */
+    background-color: var(--_field);
     color: var(--_fg);
     font-variant-numeric: tabular-nums;
     text-align: center;
     outline: 1px solid transparent;
     outline-offset: -1px;
+  }
+
+  /* The fill takes a faint tint on hover. */
+  @media (hover: hover) and (pointer: fine) {
+    .ow-color-picker__input:where(:hover):where(:not(:disabled)) {
+      --_field: color-mix(in oklab, var(--ow-fg) 9%, transparent);
+    }
   }
 
   .ow-color-picker__label {
@@ -362,14 +368,13 @@
     outline-offset: 2px;
   }
 
-  /* Swatches under an etched line: a dark line, and a light one inside it. */
+  /* Swatches under a hairline. */
   .ow-color-picker__swatches {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(24px, 1fr));
     gap: 6px;
     padding-block-start: var(--_pad);
-    border-block-start: 1px solid var(--ow-line-dark);
-    box-shadow: inset 0 1px 0 var(--ow-line-light);
+    border-block-start: 1px solid var(--ow-line);
   }
 
   .ow-color-picker__swatch {
@@ -403,10 +408,9 @@
     visibility: hidden;
   }
 
-  /* The trigger: a flat well that shows the color and its value, or a square of the color. A
-   * button named by its text needs no 3:1 edge, unlike a field you type in (DP-6). */
+  /* The trigger: a tint that shows the color and its value, or a square of the color. */
   .ow-color-picker__trigger {
-    --py: 0.75em;
+    --py: 0.8036em;
     --_py: max(var(--py), (24px - 1lh) / 2);
     --px: calc(var(--_py) + (1lh - 1cap) / 2);
     --icon: calc(1em + 2px);
@@ -418,8 +422,7 @@
     padding: var(--_py) var(--px);
     border: 0;
     border-radius: var(--_radius);
-    background-color: var(--_well);
-    box-shadow: var(--_well-shadow);
+    background-color: var(--_surface);
     color: var(--_fg);
     font: inherit;
     font-size: 14px;
@@ -432,7 +435,7 @@
   }
 
   .ow-color-picker__trigger[data-size="sm"] {
-    --py: 0.5em;
+    --py: 0.6058em;
     font-size: 13px;
   }
 
@@ -510,7 +513,7 @@
   }
 
   .ow-color-picker__popup > .ow-color-picker {
-    box-shadow: var(--ow-popup-shadow);
+    --_panel-shadow: var(--ow-popup-shadow);
   }
 
   /* FR-20: no compacting; the popover still fades. */
@@ -523,6 +526,19 @@
     .ow-color-picker__swatch:active:not(:disabled),
     .ow-color-picker__trigger:active:not(:disabled) {
       scale: none;
+    }
+  }
+
+  /* More contrast asked for: the fields' edge comes back at 3:1, and the popup gets a ring. */
+  @media (prefers-contrast: more) {
+    .ow-color-picker__input {
+      box-shadow: inset 0 0 0 1px var(--ow-edge);
+    }
+
+    .ow-color-picker__popup > .ow-color-picker {
+      box-shadow:
+        var(--ow-popup-shadow),
+        0 0 0 1px var(--ow-edge);
     }
   }
 

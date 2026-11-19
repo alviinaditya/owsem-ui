@@ -1,5 +1,5 @@
 import { describe, expect, onTestFinished, test } from "vitest";
-import { concentric, insets, TOL, usedRadius } from "./geometry.ts";
+import { concentric, insets, nested, TOL, usedRadius } from "./geometry.ts";
 
 // Self-tests for the geometry helpers in every engine of the geometry project.
 function mount(html: string): HTMLElement {
@@ -41,6 +41,19 @@ describe("geometry helpers", () => {
     const r = concentric(host.querySelector("#o") as Element, host.querySelector("#i") as Element);
     expect(r.delta).toBeLessThanOrEqual(TOL);
     expect(r.insetDelta).toBeLessThanOrEqual(TOL);
+  });
+
+  test("nested: the outer box takes --ow-radius, the inner one that less the gap (TK-8)", () => {
+    const host = mount(
+      '<div id="o" style="--ow-radius:12px;box-sizing:border-box;inline-size:120px;padding:4px;border-radius:12px"><div id="i" style="block-size:30px;border-radius:8px"></div></div>',
+    );
+    const outer = host.querySelector("#o") as HTMLElement;
+    const r = nested(outer, host.querySelector("#i") as Element);
+    expect([r.outerDelta, r.innerDelta, r.insetDelta]).toEqual([0, 0, 0]);
+    // Past the radius, the inner corner is square.
+    outer.style.setProperty("--ow-radius", "3px");
+    outer.style.borderRadius = "3px";
+    expect(nested(outer, host.querySelector("#i") as Element).innerDelta).toBe(8);
   });
 
   test("concentric measures pseudo-elements", () => {

@@ -6,13 +6,13 @@ import { Part } from "@/components/lab/lab-shell";
 import { ForMode, TokenChip } from "@/components/token-setup";
 
 Toggle Group is a row of toggle buttons that work as one. With one choice at a time it is the
-segmented control: a flat track, and a thumb with crisp edges that slides to the pressed item. With
+segmented control: a flat track, and a thumb, a raised fill with no edge, that slides to the pressed item. With
 `multiple`, each item toggles on its own. Scroll to start the tour; the stage follows each part.
 
 ## The segmented control [#segmented]
 
-One item is pressed at a time, and the thumb sits under it: the raised key, a flat fill with a crisp
-1 px edge. Pick another and the thumb slides there with the travel spring (`--ow-spring-travel`);
+One item is pressed at a time, and the thumb sits under it: the raised key, a flat fill with no
+edge or shadow. Pick another and the thumb slides there with the travel spring (`--ow-spring-travel`);
 the label it leaves dims, and the one it reaches lights up. The pointer lights the nearest item with
 Glide along the x axis, so the highlight never blinks out in the gaps, and a click in a gap goes to
 the lit item.
@@ -48,7 +48,7 @@ in width, the thumb takes the new width on the way, scaled from its centre.
 
 With `multiple`, each item toggles on its own and there is no thumb: every pressed item is a key of
 its own, in the thumb's material, like any toggle that is on. Hover a key and its fill moves 3%
-toward the label color, since a click turns it off; its edge stays as it is. The stage turns Italic
+toward the label color, since a click turns it off; its fill only shifts. The stage turns Italic
 and Underline on, then off again.
 
 ## Anatomy [#anatomy]
@@ -64,9 +64,9 @@ pick a name, here or on the stage, to see its tokens. The hover highlight is Gli
 | <Part name="Thumb" /> | `span.ow-toggle-group__thumb` | Decorative (`aria-hidden`): placed by a script, moved by CSS. `data-visible` while it sits under a pressed item, `data-held` while that item is held |
 
 Items follow the control geometry: their padding comes from `--py` (FR-9), and an icon is the font
-size plus 2 px, as far from the edge as from the top. The track adds 3 px on every side, and its
-radius is the items' radius plus those 3 px, so the corners stay concentric. `--ow-radius` sets
-the items' radius; there is no second radius to keep in sync.
+size plus 2 px, as far from the edge as from the top. The track adds 3 px on every side and takes
+`--ow-radius`, as every surface does; the items, the thumb, and Glide take it less those 3 px. There
+is no second radius to keep in sync.
 
 ## States and variants [#states]
 
@@ -121,15 +121,13 @@ Toggle Group reads these theme tokens; set them on the group, or on an element a
 
 | Theme token | Purpose |
 | --- | --- |
-| `--ow-well-bg` | Track |
-| `--ow-well-shadow` | The track's faint edge |
+| `--ow-well-bg` | Track, with no edge |
 | `--ow-raised-bg` | Thumb, and pressed items with multiple selection |
-| `--ow-raised-shadow` | Their crisp edge |
 | `--ow-fg` | Labels of pressed and hovered items |
 | `--ow-muted` | Other labels |
 | `--ow-focus` | The keyboard focus ring |
 | `--ow-hover` | The hover highlight (Glide) |
-| `--ow-radius` | The items', the thumb's, and the highlight's corners; the track adds its 3 px |
+| `--ow-radius` | The track's corners; the items, the thumb, and the highlight take it less 3 px |
 
 <ForMode mode="isolated">
 

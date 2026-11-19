@@ -291,12 +291,11 @@ const tabsLab = defineLab({
       name: "List",
       selector: ".ow-tabs__list",
       note: {
-        id: "Well datar dengan role tablist, selebar tab-nya. Menggambar indikator dan Glide sendiri.",
-        en: "The flat well, with the tablist role, as wide as its tabs. Draws the indicator and Glide itself.",
+        id: "Well datar tanpa tepi, dengan role tablist, selebar tab-nya. Menggambar indikator dan Glide sendiri.",
+        en: "The flat well with no edge, with the tablist role, as wide as its tabs. Draws the indicator and Glide itself.",
       },
       tokens: {
         "--ow-well-bg": "--_well",
-        "--ow-well-shadow": "--_well-edge",
         "--ow-radius": "--_radius",
       },
     },
@@ -317,12 +316,11 @@ const tabsLab = defineLab({
       name: "Indicator",
       selector: ".ow-tabs__indicator",
       note: {
-        id: "Tombol timbul bertepi tegas di bawah tab aktif. Dekoratif, digambar oleh List.",
-        en: "The raised key with crisp edges, under the active tab. Decorative, drawn by List.",
+        id: "Tombol raised tanpa tepi dan bayangan di bawah tab aktif. Dekoratif, digambar oleh List.",
+        en: "The raised key with no edge or shadow, under the active tab. Decorative, drawn by List.",
       },
       tokens: {
         "--ow-raised-bg": "--_key",
-        "--ow-raised-shadow": "--_key-edge",
       },
     },
     {

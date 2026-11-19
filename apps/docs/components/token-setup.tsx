@@ -1,12 +1,11 @@
 "use client";
 
-import { Field, Popover } from "owsem-ui/base";
+import { Button, Field, Popover, ToggleGroup } from "owsem-ui/base";
 import { CodeBlock, type CopyButtonLabels } from "owsem-ui/owsem";
 import {
   type ReactNode,
   type RefObject,
   useEffect,
-  useId,
   useMemo,
   useRef,
   useState,
@@ -173,9 +172,7 @@ function PrefixField({ setup, labels }: { setup: TokenSetup; labels: Labels }) {
         }}
       />
       <div aria-live="polite">
-        {valid ? (
-          <Field.Description>{labels.prefixHelp}</Field.Description>
-        ) : (
+        {valid ? null : (
           <Field.Error match>{format(labels.prefixError, { prefix: draft })}</Field.Error>
         )}
       </div>
@@ -195,11 +192,10 @@ export function TokenSetupPanel({
   copyLabels: CopyButtonLabels;
 }) {
   const setup = useTokenSetup();
-  const modes = useId();
   const popup = useRef<HTMLDivElement>(null);
-  const names = ["accent", "bg", "line-dark"];
   return (
-    <Popover.Root handle={tokenSetupHandle}>
+    // Modal: the page behind is held (no scroll) while it is open; an outside press closes it.
+    <Popover.Root handle={tokenSetupHandle} modal>
       {({ payload }) => (
         <Popover.Portal>
           <Popover.Positioner
@@ -216,56 +212,42 @@ export function TokenSetupPanel({
               ref={popup}
               className="token-setup"
               initialFocus={() =>
-                popup.current?.querySelector<HTMLElement>("input:checked") ?? true
+                popup.current?.querySelector<HTMLElement>('[aria-pressed="true"]') ?? true
               }
               finalFocus={payload?.finalFocus ?? true}
             >
-              <div className="token-setup-head">
-                <Popover.Title>{labels.title}</Popover.Title>
-                <Popover.Description>{labels.scope}</Popover.Description>
-              </div>
-              <fieldset className="seg">
-                <legend className="visually-hidden">{labels.mode}</legend>
+              <Popover.Title className="token-setup-title">{labels.title}</Popover.Title>
+              <ToggleGroup.Root
+                aria-label={labels.mode}
+                className="docs-choice token-setup-mode"
+                equal
+                value={[setup.mode]}
+                onValueChange={([mode]) => mode && setTokenSetup({ ...setup, mode })}
+              >
                 {TOKEN_MODES.map((mode) => (
-                  <label
-                    key={mode}
-                    className="seg-item"
-                    data-selected={setup.mode === mode ? "" : undefined}
-                  >
-                    <input
-                      type="radio"
-                      name={modes}
-                      value={mode}
-                      checked={setup.mode === mode}
-                      onChange={() => setTokenSetup({ ...setup, mode })}
-                    />
+                  <ToggleGroup.Item key={mode} value={mode}>
                     {labels[mode]}
-                  </label>
+                  </ToggleGroup.Item>
                 ))}
-              </fieldset>
+              </ToggleGroup.Root>
               <p className="token-setup-note">
                 {setup.mode === "theme" ? labels.themeNote : labels.isolatedNote}
               </p>
               <PrefixField setup={setup} labels={labels} />
               <OwsemJson setup={setup} labels={copyLabels} />
-              <h3 className="token-setup-names">{labels.names}</h3>
-              <ul className="token-names">
-                {names.map((name) => (
-                  <li key={name}>
-                    <code>
-                      --{setup.prefix}-{name}
-                    </code>
-                  </li>
-                ))}
-              </ul>
-              {isDefaultSetup(setup) ? null : <p className="token-setup-note">{labels.cli}</p>}
-              <button
-                type="button"
-                className="text-button"
-                onClick={() => setTokenSetup(DEFAULT_TOKEN_SETUP)}
-              >
-                {labels.reset}
-              </button>
+              {isDefaultSetup(setup) ? null : (
+                <>
+                  <p className="token-setup-note">{labels.cli}</p>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="token-setup-reset"
+                    onClick={() => setTokenSetup(DEFAULT_TOKEN_SETUP)}
+                  >
+                    {labels.reset}
+                  </Button>
+                </>
+              )}
             </Popover.Popup>
           </Popover.Positioner>
         </Popover.Portal>

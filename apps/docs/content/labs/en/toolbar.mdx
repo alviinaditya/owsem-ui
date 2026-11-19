@@ -5,15 +5,14 @@ title: Toolbar
 import { Part } from "@/components/lab/lab-shell";
 import { ForMode, TokenChip } from "@/components/token-setup";
 
-Toolbar holds buttons, toggles, links, and a field in one row, on the panel material, with etched
-grooves between groups. It is one stop for Tab, and arrow keys move within it. Scroll to start the
+Toolbar holds buttons, toggles, links, and a field in one row, on the panel fill with no edge or shadow, with
+hairlines between groups. It is one stop for Tab, and arrow keys move within it. Scroll to start the
 tour; the stage follows each part.
 
 ## Buttons and toggles together [#together]
 
 A toolbar mixes kinds of items. Buttons act once; toggles stay on. Both are quiet: flat and muted
-until the pointer is over them, with Button's sizes and spacing. An on toggle is the raised key, a
-flat fill with crisp edges. While held, either takes the pressed material and goes in to 0.97, then
+until the pointer is over them, with Button's sizes and spacing. An on toggle is a flat 12% tint of the text color. While held, either takes the pressed material and goes in to 0.97, then
 lets go on the settle spring.
 
 A toggle is a `Toolbar.Button` that renders a Toggle: `render={<Toggle />}`. The toolbar gives it
@@ -49,23 +48,23 @@ a name, here or on the stage, to see its tokens.
 | <Part name="Icon" /> | `span.ow-toolbar__icon` | Decorative (`aria-hidden`): `startIcon` or `endIcon`, the font size plus 2px; `data-side="start"` or `"end"` |
 | <Part name="Separator" /> | `div.ow-toolbar__separator` | `role="separator"` and `data-orientation`, across the toolbar's direction |
 | <Part name="Link" /> | `a.ow-toolbar__link` | Looks like a button; `render` swaps in a router link |
-| <Part name="Input" /> | `input.ow-toolbar__input` | A flat well with a 3:1 edge, as tall as the buttons |
+| <Part name="Input" /> | `input.ow-toolbar__input` | A 6% tint of the text color with no edge, 9% on hover, as tall as the buttons |
 
 ## States and variants [#states]
 
-The stage sets each size in both themes, each toolbar with an on toggle, an off one, a groove, a
+The stage sets each size in both themes, each toolbar with an on toggle, an off one, a separator, a
 button, and a disabled button. The pointer turns Italic on and off in each theme.
 
 | State | What shows it |
 | --- | --- |
 | Idle | Flat, with muted text |
-| Hover | The `--ow-hover` tint, and text at full strength |
+| Hover | The `--ow-hover` tint, and text at full strength; the field's tint steps up to 9% |
 | Pressing | Scaled to 0.97 within 90 ms, in the pressed material |
-| On, for a toggle | The raised key, as on its own |
+| On, for a toggle | A 12% tint of the text color, as on its own |
 | Keyboard focus | A 2px ring 2px out, in `--ow-focus` |
 | Disabled | 45% opacity, still focusable |
 
-`orientation="vertical"` stacks the items, Up and Down move between them, and the grooves turn
+`orientation="vertical"` stacks the items, Up and Down move between them, and the separators turn
 across. Pick it in the controls.
 
 ## Keyboard and accessibility [#keyboard]
@@ -77,16 +76,16 @@ across. Pick it in the controls.
 | Space, Enter | Presses the button or turns the toggle on or off |
 
 Right to left, Arrow Left moves on. Screen readers announce the toolbar by its name, each group by
-its own, toggles with their state, and the grooves as separators. `loopFocus={false}` stops the
+its own, toggles with their state, and the hairlines as separators. `loopFocus={false}` stops the
 wrapping.
 
 With `prefers-reduced-motion`, a press changes material without shrinking. In forced colors
 (Windows High Contrast), the toolbar, its items, and its field keep a 1px edge in the system
-color, the grooves stay, and the focus ring is `Highlight`.
+color, the separators stay, and the focus ring is `Highlight`. With `prefers-contrast: more`, the field gets a 1px edge in `--ow-edge`.
 
 ## Customization [#customization]
 
-The stage controls are open: pick the surface or the grooves' dark line, and the code follows.
+The stage controls are open: pick the surface or the separators' line, and the code follows.
 
 Toolbar reads these theme tokens. Set one on the toolbar, as `editor.css` does with `.editor`, or
 on an element around it, to change the toolbars inside.
@@ -94,18 +93,12 @@ on an element around it, to change the toolbars inside.
 | Theme token | Purpose |
 | --- | --- |
 | `--ow-panel` | Surface |
-| `--ow-panel-shadow` | Edge and shadow |
 | `--ow-muted` | Button and link text, and the field's placeholder |
 | `--ow-hover` | Tint under the pointer |
-| `--ow-fg` | Text under the pointer or held down, and the field's text |
+| `--ow-fg` | Text under the pointer or held down, and the field's text; its 6% tint (9% on hover) is mixed from it |
 | `--ow-pressed-bg` | Fill while held down |
-| `--ow-pressed-shadow` | Edges while held down |
-| `--ow-well-bg` | Field fill |
-| `--ow-well-shadow` | Field's inner line, under its edge |
-| `--ow-edge` | Field edge, at 3:1 |
-| `--ow-line-dark` | Groove's dark line |
-| `--ow-line-light` | Groove's light line |
-| `--ow-radius` | Item corners; the toolbar's add its 4px padding, so they stay concentric |
+| `--ow-line` | Separators |
+| `--ow-radius` | The toolbar's corners; its items take it less the 4px padding |
 | `--ow-focus` | Focus ring |
 
 <ForMode mode="isolated">

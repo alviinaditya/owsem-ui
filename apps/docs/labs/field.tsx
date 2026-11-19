@@ -335,12 +335,10 @@ const fieldLab = defineLab({
       name: "Control",
       selector: ".ow-input",
       note: {
-        id: "Input itu sendiri, dengan size dan ikonnya. render menaruh kontrol lain di sini.",
-        en: "Input itself, with its size and icons. render puts another control here.",
+        id: "Input itu sendiri, dengan size dan ikonnya. Saat field invalid ia jadi tint critical dan bergetar sekali. render menaruh kontrol lain di sini.",
+        en: "Input itself, with its size and icons. While the field is invalid it takes the critical tint and shakes once. render puts another control here.",
       },
       tokens: {
-        "--ow-well-bg": "--_bg",
-        "--ow-edge": "--_edge",
         "--ow-fg": "--_fg",
         "--ow-muted": "--_muted",
         "--ow-focus": "--_focus",

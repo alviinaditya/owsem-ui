@@ -95,7 +95,7 @@ test("controls rewrite the code", async ({ page }) => {
   await page.goto("/en/separator");
   await stage(page).getByRole("button", { name: "Controls" }).click();
   await stage(page).getByRole("button", { name: "Vertical" }).click();
-  await pickColor(page, "Dark line", "#ff0000");
+  await pickColor(page, "Line", "#ff0000");
   await expect(demo(page).getByRole("separator").first()).toHaveCSS(
     "border-inline-start-color",
     "rgb(255, 0, 0)",
@@ -106,17 +106,17 @@ test("controls rewrite the code", async ({ page }) => {
   const code = stage(page).getByRole("tabpanel");
   await expect(code).toContainText('<Separator orientation="vertical" />');
   await stage(page).getByRole("tab", { name: "settings.css" }).click();
-  await expect(code).toContainText("--ow-line-dark: #ff0000;");
+  await expect(code).toContainText("--ow-line: #ff0000;");
 });
 
 test("a color is picked in Color Picker, and goes back to the theme's own", async ({ page }) => {
   await page.goto("/en/separator");
   await stage(page).getByRole("button", { name: "Controls" }).click();
   // One button, named by its label and its value.
-  const control = stage(page).getByRole("button", { name: /^Dark line / });
-  const picker = page.getByRole("dialog", { name: "Dark line" });
+  const control = stage(page).getByRole("button", { name: /^Line / });
+  const picker = page.getByRole("dialog", { name: "Line" });
   const area = picker.getByRole("slider", { name: "Saturation and brightness" });
-  await expect(control).toHaveAccessibleName("Dark line Theme default");
+  await expect(control).toHaveAccessibleName("Line Theme default");
 
   // It opens the picker with focus on the area; the Hex field takes a typed color.
   await control.click();
@@ -124,24 +124,24 @@ test("a color is picked in Color Picker, and goes back to the theme's own", asyn
   const hex = picker.getByRole("textbox", { name: "Hex" });
   await hex.fill("FF0000");
   await hex.press("Enter");
-  await expect(control).toHaveAccessibleName("Dark line #ff0000");
+  await expect(control).toHaveAccessibleName("Line #ff0000");
   await expect(control.locator(".ow-color-picker__chip")).toHaveCSS(
     "background-color",
     "rgb(255, 0, 0)",
   );
   await area.focus();
   await page.keyboard.press("ArrowDown");
-  await expect(control).toHaveAccessibleName("Dark line #fc0000");
+  await expect(control).toHaveAccessibleName("Line #fc0000");
   await page.keyboard.press("Escape");
   await expect(picker).toBeHidden();
   await expect(control).toBeFocused();
 
-  await stage(page).getByRole("button", { name: "Dark line: Use the theme default" }).click();
-  await expect(control).toHaveAccessibleName("Dark line Theme default");
+  await stage(page).getByRole("button", { name: "Line: Use the theme default" }).click();
+  await expect(control).toHaveAccessibleName("Line Theme default");
   await expect(control).toBeFocused();
   // Empty, the chip paints the theme's token, and the picker opens on it.
   const token = await stageBody(page).evaluate((el) =>
-    getComputedStyle(el).getPropertyValue("--ow-line-dark").trim(),
+    getComputedStyle(el).getPropertyValue("--ow-line").trim(),
   );
   await control.click();
   await expect(picker.getByRole("textbox", { name: "Hex" })).toHaveValue(
@@ -159,7 +159,9 @@ test("the code is highlighted, tags apart from text", async ({ page }) => {
   expect(await tag.evaluate(color)).not.toBe(await code.evaluate(color));
 });
 
-test("the install tab follows the chosen package manager, the header too", async ({ page }) => {
+test("the install tab follows the chosen package manager, the header's line too", async ({
+  page,
+}) => {
   await page.goto("/en/separator");
   await stage(page).getByRole("button", { name: "Code" }).click();
   await stage(page).getByRole("tab", { name: "Install" }).click();
@@ -169,8 +171,9 @@ test("the install tab follows the chosen package manager, the header too", async
   await pane.getByRole("button", { name: "npm", exact: true }).click();
   await expect(pane).toContainText("npm install owsem-ui");
   await expect(pane).toContainText("npx shadcn add @owsem/separator");
-  const header = page.locator(".install");
+  const header = page.locator(".install-line");
   await expect(header).toContainText("npm install owsem-ui");
+  await expect(header.locator(".install-pm")).toContainText("npm");
 
   // Kept for the next visit.
   await page.reload();
@@ -215,41 +218,55 @@ test("stage shortcuts work only with focus on the stage (WCAG 2.1.4)", async ({ 
   await expect(stageBody(page)).not.toHaveAttribute("data-code");
 });
 
-test("the header names each stage shortcut this Lab has", async ({ page }) => {
-  const hint = page.locator(".lab-hint");
+test("each stage tool announces its own shortcut, with no list of them in the header", async ({
+  page,
+}) => {
   await page.goto("/en/separator");
-  await expect(hint).toContainText("I Inspect");
-  await expect(hint).toContainText("C Code");
-  await expect(hint).not.toContainText("Replay");
-  await page.goto("/en/tree-rail-nav");
-  await expect(hint).toContainText("R Replay");
+  const keys = () =>
+    stage(page)
+      .getByRole("toolbar", { name: "Stage tools" })
+      .locator("[aria-keyshortcuts]")
+      .evaluateAll((els) => els.map((el) => el.getAttribute("aria-keyshortcuts")));
+  // Replay joins them only on a scene with an animation.
+  await expect.poll(keys).toEqual(["I", "T", "P", "C"]);
+  await openSheet(page);
+  await expect(page.locator(".page-header kbd")).toHaveCount(0);
 });
 
-test("the stage theme changes the whole stage, and the stage only (DS-12)", async ({ page }) => {
+test("the stage theme changes the stage, and the stage only (DS-12)", async ({
+  page,
+}, testInfo) => {
+  const narrow = testInfo.project.name === "mobile-390";
   await page.emulateMedia({ colorScheme: "dark" });
   await page.goto("/en/separator");
-  // The stage background is a gradient between its own color and the page's, on the body beside
-  // the narrative and on the whole stage below 960 px.
+  // The stage's own fill, on the body beside the narrative and on the whole stage below 960 px.
   const background = () =>
-    page
-      .locator(".lab-stage")
-      .evaluate(
-        (el) =>
-          getComputedStyle(el).backgroundImage +
-          getComputedStyle(el.querySelector(".lab-stage-body") ?? el).backgroundImage,
-      );
-  const bar = () =>
-    page.locator(".lab-stage-bar").evaluate((el) => getComputedStyle(el).backgroundColor);
+    page.locator(".lab-stage").evaluate((el) =>
+      [el, el.querySelector(".lab-stage-body") ?? el]
+        .map((part) => {
+          const style = getComputedStyle(part);
+          return `${style.backgroundColor} ${style.backgroundImage}`;
+        })
+        .join(),
+    );
+  const barColors = () =>
+    page.locator(".lab-stage-bar").evaluate((el) => {
+      const title = el.querySelector(".lab-stage-title-text") ?? el;
+      return `${getComputedStyle(el).backgroundColor} ${getComputedStyle(title).color}`;
+    });
+  // The theme sits on the stage below 960 px, and on the well beside the narrative.
+  const themed = narrow ? stage(page) : stageBody(page);
   // Without a choice the stage follows the site, server render included.
-  await expect(stage(page)).not.toHaveAttribute("data-theme");
+  await expect(themed).not.toHaveAttribute("data-theme");
   const dark = await background();
-  const darkBar = await bar();
+  const darkBar = await barColors();
 
   await stageTool(page, "Stage theme", "Light");
-  await expect(stage(page)).toHaveAttribute("data-theme", "light");
+  await expect(themed).toHaveAttribute("data-theme", "light");
   expect(await background()).not.toBe(dark);
-  // The toolbar goes light with the stage.
-  expect(await bar()).not.toBe(darkBar);
+  // The toolbar goes light with a narrow stage, and keeps the page's colors beside the text.
+  if (narrow) expect(await barColors()).not.toBe(darkBar);
+  else expect(await barColors()).toBe(darkBar);
   await expect(page.locator(".lab-drawer")).not.toHaveCSS(
     "background-color",
     await page.locator("body").evaluate((el) => getComputedStyle(el).backgroundColor),
@@ -719,7 +736,9 @@ test("the Switch Lab's first scene plays its rows, and a pressed row's thumb lan
   ).toBeLessThanOrEqual(0.5);
 });
 
-test("the Input Lab's first scene types an address, and the edge follows", async ({ page }) => {
+test("the Input Lab's first scene types an address, and the field turns invalid", async ({
+  page,
+}) => {
   await page.goto("/en/input");
   const email = demo(page).getByRole("textbox", { name: "Email" });
   await expect(email).toHaveValue("");
@@ -1072,16 +1091,15 @@ test("the stage tools name themselves and their key in a tooltip, not a title", 
   await tools.getByRole("button", { name: "Controls", exact: true }).hover();
   await expect(tip).toHaveText("ControlsP");
   await expect(tip).toHaveAttribute("data-instant", "delay");
-  // The tooltip takes the stage's theme, and leaves the button's name alone.
+  // The tooltip takes the page's theme, and leaves the button's name alone.
   await page.keyboard.press("Escape");
   await page.mouse.move(0, 0);
   await stage(page).click({ position: { x: 20, y: 200 } });
   await page.keyboard.press("t");
   await tools.getByRole("button", { name: "Inspect", exact: true }).hover();
-  await expect(page.locator(".ow-tooltip__positioner")).toHaveAttribute(
-    "data-theme",
-    (await stage(page).getAttribute("data-theme")) ?? "",
-  );
+  // Beside the text the toolbar keeps the page's theme, whatever the stage's.
+  await expect(stageBody(page)).toHaveAttribute("data-theme", /light|dark/);
+  await expect(page.locator(".ow-tooltip__positioner")).not.toHaveAttribute("data-theme");
   await expect(tools.getByRole("button", { name: "Inspect", exact: true })).toBeVisible();
 });
 
@@ -1179,6 +1197,9 @@ test("the Select Lab lands the selected text on the trigger's, and adds up sever
       })
       .toBeLessThan(1);
   }
+  // The list over its trigger holds the page, a script's scroll included: shut it to move on.
+  await page.keyboard.press("Escape");
+  await expect(popup).toBeHidden();
   await scene(page, "multiple");
   // Opening beside the trigger leaves the page, and so the scene, where it is.
   await expect(demo(page).locator(".ow-select__value")).toHaveText(/Cherry, Mango/);

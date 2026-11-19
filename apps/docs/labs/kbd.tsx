@@ -96,8 +96,8 @@ const kbdLab = defineLab({
     {
       key: "bg",
       type: "color",
-      label: { id: "Tuts", en: "Keycap" },
-      token: "--ow-raised-bg",
+      label: { id: "Tinta", en: "Ink" },
+      token: "--ow-fg",
     },
   ],
 
@@ -106,12 +106,11 @@ const kbdLab = defineLab({
       name: "Root",
       selector: ".ow-kbd",
       note: {
-        id: "Tuts timbul: isian dan tepi dari material raised, ukurannya dari teks di sekitarnya.",
-        en: "A raised keycap: its fill and edge from the raised material, its size from the text around it.",
+        id: "Tuts: isian 9% dari warna teks tanpa tepi, teksnya campuran muted dan teks; ukurannya dari teks di sekitarnya.",
+        en: "A keycap: a 9% tint of the text color with no edge, its text a mix of muted and text; its size from the text around it.",
       },
       tokens: {
-        "--ow-raised-bg": "--_bg",
-        "--ow-raised-shadow": "--_edge",
+        "--ow-fg": "--_bg",
         "--ow-muted": "--_fg",
         "--ow-radius": "--_radius",
       },
@@ -121,7 +120,7 @@ const kbdLab = defineLab({
   demo(cfg, lang) {
     const style = {
       fontSize: `${cfg.size}px`,
-      "--ow-raised-bg": cfg.bg || undefined,
+      "--ow-fg": cfg.bg || undefined,
     } as CSSProperties;
     return (
       <div className="demo-card" style={style}>
@@ -151,7 +150,7 @@ const kbdLab = defineLab({
       const lines = [
         "/* Every Kbd inside .settings */",
         setup.mode === "isolated" ? ".settings .ow-kbd {" : ".settings {",
-        `  --${setup.prefix}-raised-bg: ${cfg.bg};`,
+        `  --${setup.prefix}-fg: ${cfg.bg};`,
         "}",
       ];
       files.push({ name: "settings.css", code: lines.join("\n") });

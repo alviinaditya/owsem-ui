@@ -278,8 +278,8 @@ const formLab = defineLab({
       name: "Root",
       selector: ".ow-form",
       note: {
-        id: "form dari Base UI. Ia hanya menggambar jarak antar-field, tanpa token sendiri.",
-        en: "Base UI's form. It draws only the gap between fields, and has no token of its own.",
+        id: "form dari Base UI. Ia menggambar jarak antar-field, tanpa token sendiri; submit yang masih gagal menggetarkan lagi field invalid pertama.",
+        en: "Base UI's form. It draws the gap between fields and has no token of its own; a submit that still fails shakes the first invalid field again.",
       },
     },
   ],

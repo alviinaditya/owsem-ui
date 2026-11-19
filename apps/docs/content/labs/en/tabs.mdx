@@ -5,9 +5,10 @@ title: Tabs
 import { Part } from "@/components/lab/lab-shell";
 import { ForMode, TokenChip } from "@/components/token-setup";
 
-Tabs show one panel at a time, picked from a row of tabs. The row is a flat well, and a raised key
-slides under the active tab, the same look and motion as Toggle Group. You write four parts; the key
-and the hover highlight draw themselves. Scroll to start the tour; the stage follows each part.
+Tabs show one panel at a time, picked from a row of tabs. The row is a flat well with no edge, and
+a raised key slides under the active tab, the same look and motion as Toggle Group. You write four
+parts; the key and the hover highlight draw themselves. Scroll to start the tour; the stage follows
+each part.
 
 ## The sliding key [#segmented]
 
@@ -71,8 +72,8 @@ Base UI has a `Tabs.Indicator` of its own, which OwsemUI does not export. It pla
 Toggle Group's thumb uses: it rests where layout puts the tab, on the same pixels.
 
 Tabs follow the control geometry: their padding comes from `--py` (FR-9), and an icon is the font
-size plus 2 px, as far from the edge as from the top. The well adds 3 px on every side, and its
-radius is the tabs' radius plus those 3 px, so the corners stay concentric.
+size plus 2 px, as far from the edge as from the top. The well adds 3 px on every side and takes
+`--ow-radius`, as every surface does; the tabs, the indicator, and Glide take it less those 3 px.
 
 ## States and variants [#states]
 
@@ -128,15 +129,13 @@ Tabs read these theme tokens; set them on the root, on one part, or on an elemen
 
 | Theme token | Purpose |
 | --- | --- |
-| `--ow-well-bg` | The well |
-| `--ow-well-shadow` | The well's faint edge |
-| `--ow-raised-bg` | The indicator |
-| `--ow-raised-shadow` | Its crisp edge |
+| `--ow-well-bg` | The well, with no edge |
+| `--ow-raised-bg` | The indicator, a key with no edge or shadow |
 | `--ow-fg` | Labels of active and hovered tabs, and the panel's text |
 | `--ow-muted` | Other labels |
 | `--ow-focus` | The keyboard focus ring |
 | `--ow-hover` | The hover highlight (Glide) |
-| `--ow-radius` | The tabs', the indicator's, and the highlight's corners; the well adds its 3 px |
+| `--ow-radius` | The well's corners; the tabs, the indicator, and the highlight take it less 3 px |
 
 <ForMode mode="isolated">
 

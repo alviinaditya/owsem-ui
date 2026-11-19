@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ComponentBadges } from "@/components/component-header";
+import { ComponentMeta } from "@/components/component-header";
 import { ComponentIndex } from "@/components/component-index";
 import { PageMain } from "@/components/page-main";
 import { CATEGORIES, catalog, isAvailable } from "@/lib/catalog";
@@ -28,13 +28,12 @@ export default async function IndexPage(props: PageProps<"/[lang]">) {
         title: entry.title,
         description: dict.components[entry.name],
         family: entry.family,
-        badges: <ComponentBadges entry={entry} dict={dict} />,
+        badges: <ComponentMeta entry={entry} dict={dict} />,
       })),
   }));
   return (
     <PageMain className="page">
       <header className="page-header">
-        <p className="eyebrow">{dict.nav.components}</p>
         <h1>OwsemUI</h1>
         <p className="lead">{dict.site.description}</p>
         <p>

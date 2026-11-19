@@ -53,7 +53,7 @@ type Theme = "light" | "dark";
 const SIZES: readonly SwitchSize[] = ["sm", "md", "lg"];
 const THEMES: readonly Theme[] = ["light", "dark"];
 
-const initial = { size: "md", thumb: "plain", width: "fit", accent: "", key: "", well: "" };
+const initial = { size: "md", thumb: "plain", width: "fit", accent: "", key: "", tint: "" };
 type Cfg = typeof initial;
 
 /** A switch whose thumb holds a sun or a moon, following its own state. */
@@ -75,7 +75,7 @@ function Demo({ cfg, lang }: { cfg: Cfg; lang: Lang }) {
   const style = {
     "--ow-accent": cfg.accent || undefined,
     "--ow-raised-bg": cfg.key || undefined,
-    "--ow-well-bg": cfg.well || undefined,
+    "--ow-fg": cfg.tint || undefined,
   } as CSSProperties;
   const props = {
     size: cfg.size as SwitchSize,
@@ -293,10 +293,10 @@ const switchLab = defineLab({
       token: "--ow-raised-bg",
     },
     {
-      key: "well",
+      key: "tint",
       type: "color",
       label: { id: "Track mati", en: "Off track" },
-      token: "--ow-well-bg",
+      token: "--ow-fg",
     },
   ],
 
@@ -305,12 +305,10 @@ const switchLab = defineLab({
       name: "Root",
       selector: '[data-demo="email"]',
       note: {
-        id: "Track dengan role switch dan aria-checked. Input tersembunyi di sebelahnya yang masuk ke form.",
-        en: "The track, with the switch role and aria-checked. A hidden input beside it goes to the form.",
+        id: "Track dengan role switch dan aria-checked: 10% dari warna teks saat mati (13% hover), warna utama saat menyala. Input tersembunyi di sebelahnya yang masuk ke form.",
+        en: "The track, with the switch role and aria-checked: a 10% tint of the text color while off (13% on hover), the primary material while on. A hidden input beside it goes to the form.",
       },
       tokens: {
-        "--ow-well-bg": "--_well",
-        "--ow-edge": "--_edge",
         "--ow-accent": "--_accent",
         "--ow-primary-shadow": "--_accent-shadow",
         "--ow-focus": "--_focus",
@@ -321,12 +319,11 @@ const switchLab = defineLab({
       name: "Thumb",
       selector: '[data-demo="email"] .ow-switch__thumb',
       note: {
-        id: "Tombol timbul yang bergerak. Tergambar sendiri bila Root tanpa children, dan bisa memuat ikon.",
-        en: "The raised key that moves. Root draws it without children, and it can hold an icon.",
+        id: "Tombol raised yang bergerak, tanpa bayangan. Tergambar sendiri bila Root tanpa children, dan bisa memuat ikon.",
+        en: "The raised key that moves, with no shadow. Root draws it without children, and it can hold an icon.",
       },
       tokens: {
         "--ow-raised-bg": "--_key",
-        "--ow-raised-shadow": "--_key-shadow",
         "--ow-fg": "--_ink",
       },
     },
@@ -340,7 +337,7 @@ const switchLab = defineLab({
     // Any other setup comes from the owsem CLI, which copies the component into the project.
     const from = isDefaultSetup(setup) ? "owsem-ui/base" : "@/components/owsem/switch";
     const icon = cfg.thumb === "icon";
-    const tokens = cfg.accent || cfg.key || cfg.well;
+    const tokens = cfg.accent || cfg.key || cfg.tint;
     const wide = cfg.width === "wide";
     const classes = [...(wide ? ["wide"] : []), ...(tokens ? ["alerts"] : [])].join(" ");
     const props = [
@@ -388,7 +385,7 @@ const switchLab = defineLab({
               ".alerts {",
               ...(cfg.accent ? [`  ${token}-accent: ${cfg.accent};`] : []),
               ...(cfg.key ? [`  ${token}-raised-bg: ${cfg.key};`] : []),
-              ...(cfg.well ? [`  ${token}-well-bg: ${cfg.well};`] : []),
+              ...(cfg.tint ? [`  ${token}-fg: ${cfg.tint};`] : []),
               "}",
             ]
           : []),

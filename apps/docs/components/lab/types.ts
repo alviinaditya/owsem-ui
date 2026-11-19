@@ -18,7 +18,7 @@ export type Control<C extends Config> =
       key: keyof C & string;
       type: "color";
       label: Localized;
-      /** The theme token the component uses until a color is chosen, such as --ow-line-dark. */
+      /** The theme token the component uses until a color is chosen, such as --ow-line. */
       token: string;
     };
 

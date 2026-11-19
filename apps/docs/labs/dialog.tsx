@@ -76,7 +76,7 @@ const LAYOUT_CLASS: Record<string, string | undefined> = {
 /** The panel's tokens go on the Portal, which holds the scrim and the popup. */
 function tokens(cfg: Cfg) {
   return {
-    "--ow-panel": cfg.bg || undefined,
+    "--ow-raised-bg": cfg.bg || undefined,
     "--ow-fg": cfg.fg || undefined,
   } as CSSProperties;
 }
@@ -291,12 +291,11 @@ const stack: SceneScript = async (stage) => {
 };
 
 const LAYOUT_CSS: Record<string, (prefix: string) => string[]> = {
-  narrow: (prefix) => [
-    "/* Narrower, with less padding; the radius follows it (FR-10b). */",
+  narrow: () => [
+    "/* Narrower, with less padding; the corners stay the one radius. */",
     ".narrow {",
     "  inline-size: 22em;",
     "  padding: 12px;",
-    `  border-radius: calc(var(--${prefix}-radius) + 12px);`,
     "}",
   ],
   sheet: () => [
@@ -357,7 +356,12 @@ const dialogLab = defineLab({
         { value: "full", label: { id: "Penuh", en: "Full" } },
       ],
     },
-    { key: "bg", type: "color", label: { id: "Permukaan", en: "Surface" }, token: "--ow-panel" },
+    {
+      key: "bg",
+      type: "color",
+      label: { id: "Permukaan", en: "Surface" },
+      token: "--ow-raised-bg",
+    },
     { key: "fg", type: "color", label: { id: "Teks", en: "Text" }, token: "--ow-fg" },
   ],
 
@@ -383,11 +387,11 @@ const dialogLab = defineLab({
       name: "Popup",
       selector: ".ow-dialog__popup",
       note: {
-        id: "Material panel dengan bayangan popup; role=dialog, dinamai oleh Title.",
-        en: "The panel material with the popup shadow; role=dialog, named by its Title.",
+        id: "Material raised dengan bayangan popup; role=dialog, dinamai oleh Title.",
+        en: "The raised material with the popup shadow; role=dialog, named by its Title.",
       },
       tokens: {
-        "--ow-panel": "--_bg",
+        "--ow-raised-bg": "--_bg",
         "--ow-popup-shadow": "--_shadow",
         "--ow-fg": "--_fg",
         "--ow-muted": "--_muted",
@@ -466,7 +470,7 @@ const dialogLab = defineLab({
           ? [
               "/* On the Portal: dialogs render in a portal, outside the trigger's subtree. */",
               ".share {",
-              ...(cfg.bg ? [`  --${setup.prefix}-panel: ${cfg.bg};`] : []),
+              ...(cfg.bg ? [`  --${setup.prefix}-raised-bg: ${cfg.bg};`] : []),
               ...(cfg.fg ? [`  --${setup.prefix}-fg: ${cfg.fg};`] : []),
               "}",
             ]

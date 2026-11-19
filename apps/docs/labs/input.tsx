@@ -73,18 +73,17 @@ type Theme = "light" | "dark";
 const SIZES: readonly InputSize[] = ["sm", "md", "lg"];
 const THEMES: readonly Theme[] = ["light", "dark"];
 
-const initial = { size: "md", icons: "none", well: "", edge: "" };
+const initial = { size: "md", icons: "none", ink: "" };
 type Cfg = typeof initial;
 
 const tokens = (cfg: Cfg) =>
   ({
-    "--ow-well-bg": cfg.well || undefined,
-    "--ow-edge": cfg.edge || undefined,
+    "--ow-fg": cfg.ink || undefined,
   }) as CSSProperties;
 
 const looksLikeEmail = (value: string) => value === "" || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value);
 
-/** An invite box: the field beside a Button, and an edge that follows what is typed. */
+/** An invite box: the field beside a Button, and a tint that follows what is typed. */
 function Demo({ cfg, lang }: { cfg: Cfg; lang: Lang }) {
   const t = TEXT[lang];
   const size = cfg.size as InputSize;
@@ -232,7 +231,7 @@ function Customized({ cfg, lang }: { cfg: Cfg; lang: Lang }) {
   );
 }
 
-// Types an address: the edge turns critical while it isn't one, and back once it is.
+// Types an address: the field turns critical and shakes once while it isn't one, and back once it is.
 const typing: SceneScript = async (stage) => {
   const email = stage.get('[data-demo="email"]');
   await stage.click(email);
@@ -278,16 +277,10 @@ const inputLab = defineLab({
       ],
     },
     {
-      key: "well",
+      key: "ink",
       type: "color",
-      label: { id: "Isian", en: "Fill" },
-      token: "--ow-well-bg",
-    },
-    {
-      key: "edge",
-      type: "color",
-      label: { id: "Tepi", en: "Edge" },
-      token: "--ow-edge",
+      label: { id: "Tinta", en: "Ink" },
+      token: "--ow-fg",
     },
   ],
 
@@ -296,13 +289,10 @@ const inputLab = defineLab({
       name: "Root",
       selector: '[data-demo="email"]',
       note: {
-        id: "input dari Base UI, selalu berupa well-nya. ref, className, style, dan props native sampai ke sini.",
-        en: "Base UI's input, always the well itself. ref, className, style, and native props land here.",
+        id: "input dari Base UI, selalu berupa field-nya sendiri: isian 6% dari warna teks, tanpa tepi; hover 9%. Invalid mewarnainya critical 12% dan menggetarkannya sekali (kedip saat gerak dikurangi). ref, className, style, dan props native sampai ke sini.",
+        en: "Base UI's input, always the field itself: a 6% tint of the text color with no edge, 9% on hover. Invalid turns it a 12% critical tint and shakes it once (a blink under reduced motion). ref, className, style, and native props land here.",
       },
       tokens: {
-        "--ow-well-bg": "--_bg",
-        "--ow-well-shadow": "--_shadow",
-        "--ow-edge": "--_edge",
         "--ow-fg": "--_fg",
         "--ow-muted": "--_muted",
         "--ow-focus": "--_focus",
@@ -334,7 +324,7 @@ const inputLab = defineLab({
   code(cfg, setup) {
     // Any other setup comes from the owsem CLI, which copies the component into the project.
     const from = isDefaultSetup(setup) ? "owsem-ui/base" : "@/components/owsem/input";
-    const custom = cfg.well || cfg.edge;
+    const custom = cfg.ink;
     const start = cfg.icons === "start" || cfg.icons === "both";
     const end = cfg.icons === "end" || cfg.icons === "both";
     const icons = [start ? "Mail" : "", end ? "UserPlus" : ""].filter(Boolean);
@@ -368,8 +358,7 @@ const inputLab = defineLab({
       const lines = [
         "/* Every Input inside .invite */",
         setup.mode === "isolated" ? ".invite .ow-input {" : ".invite {",
-        ...(cfg.well ? [`  ${token}-well-bg: ${cfg.well};`] : []),
-        ...(cfg.edge ? [`  ${token}-edge: ${cfg.edge};`] : []),
+        ...(cfg.ink ? [`  ${token}-fg: ${cfg.ink};`] : []),
         "}",
       ];
       files.push({ name: "invite.css", code: lines.join("\n") });

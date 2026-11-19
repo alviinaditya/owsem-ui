@@ -46,14 +46,10 @@ type Theme = "light" | "dark";
 
 const THEMES: readonly Theme[] = ["light", "dark"];
 
-const initial = { gap: "default", dark: "", light: "" };
+const initial = { gap: "default", ink: "" };
 type Cfg = typeof initial;
 
-const tokens = (cfg: Cfg) =>
-  ({
-    "--ow-line-dark": cfg.dark || undefined,
-    "--ow-line-light": cfg.light || undefined,
-  }) as CSSProperties;
+const tokens = (cfg: Cfg) => ({ "--ow-fg": cfg.ink || undefined }) as CSSProperties;
 
 const GAPS: Record<string, string | undefined> = {
   default: undefined,
@@ -186,16 +182,10 @@ const fieldsetLab = defineLab({
       ],
     },
     {
-      key: "dark",
+      key: "ink",
       type: "color",
-      label: { id: "Garis gelap", en: "Dark line" },
-      token: "--ow-line-dark",
-    },
-    {
-      key: "light",
-      type: "color",
-      label: { id: "Garis terang", en: "Light line" },
-      token: "--ow-line-light",
+      label: { id: "Teks", en: "Text" },
+      token: "--ow-fg",
     },
   ],
 
@@ -212,14 +202,10 @@ const fieldsetLab = defineLab({
       name: "Legend",
       selector: ".ow-fieldset__legend",
       note: {
-        id: "Menamai grup lewat aria-labelledby, di atas garis terukir.",
-        en: "Names the group through aria-labelledby, over an etched line.",
+        id: "Menamai grup lewat aria-labelledby, dengan jarak 0.75em ke field pertama; tanpa garis.",
+        en: "Names the group through aria-labelledby, with a 0.75em gap before the first field; no line.",
       },
-      tokens: {
-        "--ow-fg": "--_fg",
-        "--ow-line-dark": "--_dark",
-        "--ow-line-light": "--_light",
-      },
+      tokens: { "--ow-fg": "--_fg" },
     },
   ],
 
@@ -231,7 +217,7 @@ const fieldsetLab = defineLab({
     // Any other setup comes from the owsem CLI, which copies the component into the project.
     const from = isDefaultSetup(setup) ? "owsem-ui/base" : "@/components/owsem/fieldset";
     const fieldFrom = isDefaultSetup(setup) ? "owsem-ui/base" : "@/components/owsem/field";
-    const custom = cfg.dark || cfg.light || cfg.gap !== "default";
+    const custom = cfg.ink || cfg.gap !== "default";
     const imports = isDefaultSetup(setup)
       ? [`import { Field, Fieldset } from "${from}";`]
       : [`import { Fieldset } from "${from}";`, `import { Field } from "${fieldFrom}";`];
@@ -256,14 +242,13 @@ const fieldsetLab = defineLab({
     ];
     const files = [{ name: "billing.tsx", code: usage.join("\n") }];
     if (custom) {
-      const token = `--${setup.prefix}-line`;
+      const token = `--${setup.prefix}-fg`;
       const lines = [
         "/* Unlayered, so it beats the Fieldset's own values */",
         ".billing {",
         ...(cfg.gap === "tight" ? ["  gap: 0.5em;"] : []),
         ...(cfg.gap === "roomy" ? ["  gap: 2em;"] : []),
-        ...(cfg.dark ? [`  ${token}-dark: ${cfg.dark};`] : []),
-        ...(cfg.light ? [`  ${token}-light: ${cfg.light};`] : []),
+        ...(cfg.ink ? [`  ${token}: ${cfg.ink};`] : []),
         "}",
       ];
       files.push({ name: "billing.css", code: lines.join("\n") });

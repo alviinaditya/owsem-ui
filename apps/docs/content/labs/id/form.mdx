@@ -65,7 +65,7 @@ tema terang dan gelap berdampingan.
 | State | Tandanya |
 | --- | --- |
 | Belum disentuh | Belum ada apa-apa; dengan `onSubmit` bawaan, pengecekan menunggu submit pertama |
-| Error native | Tepi kritis Field, dan pesan browser atau pesan Anda |
+| Error native | Tint kritis dan getar Field, dan pesan browser atau pesan Anda |
 | Error server | Sama, dengan kata-kata server Anda, sampai field-nya diedit |
 
 ## Keyboard dan aksesibilitas [#keyboard]
@@ -79,8 +79,9 @@ Fokus yang pindah ke field pertama yang gagal berarti pengguna keyboard atau scr
 masalahnya, dan mendengar nama serta error-nya, tanpa harus mencari. Beri form `aria-label` bila ia perlu
 menjadi landmark.
 
-Tidak ada yang bergerak, jadi reduced motion tidak mengubah apa pun, dan forced colors tidak punya apa pun
-untuk digambar ulang.
+Submit yang masih gagal menggetarkan lagi field invalid pertama, meski ia tidak pernah berhenti
+invalid; mengetik tidak. Dengan reduced motion ia berkedip. Forced colors tidak punya apa pun untuk
+digambar ulang selain milik Field.
 
 ## Kustomisasi [#customization]
 

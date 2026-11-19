@@ -95,6 +95,8 @@ interface StageProps {
   caption: ReactNode;
   /** The narrow screen's documentation sheet, opened from the toolbar. */
   docs: { open: boolean; toggle: () => void; sheetId: string; buttonId: string };
+  /** Whether the stage sits beside the narrative (SIDE_BY_SIDE), its well inset below the toolbar. */
+  sideBySide: boolean;
 }
 
 interface Shortcut {
@@ -104,8 +106,20 @@ interface Shortcut {
   focus?: HTMLElement | null | undefined;
 }
 
-export function Stage({ lab, lang, labels, title, state, item, caption, docs }: StageProps) {
+export function Stage({
+  lab,
+  lang,
+  labels,
+  title,
+  state,
+  item,
+  caption,
+  docs,
+  sideBySide,
+}: StageProps) {
   const id = useId();
+  // Beside the narrative the toolbar keeps the page's theme, so its popups take none of their own.
+  const barTheme = sideBySide ? undefined : state.theme;
   const stageRef = useRef<HTMLElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const fitRef = useRef<HTMLDivElement>(null);
@@ -290,6 +304,38 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
     };
   }, [playToken]);
 
+  // The demo is anchored where its height at that moment centers it, so content that comes and
+  // goes afterwards grows downward instead of re-centering it. It re-anchors when the demo is
+  // swapped or the controls change, when the stage resizes, and while the new demo settles.
+  const cfgKey = JSON.stringify(state.cfg);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the keys re-anchor on a new demo
+  useLayoutEffect(() => {
+    const body = bodyRef.current;
+    const fit = fitRef.current;
+    const demo = demoRef.current;
+    if (!body || !fit || !demo) return;
+    const anchor = () => {
+      fit.style.alignSelf = "";
+      fit.style.marginBlockStart = "";
+      const top = fit.offsetTop - Number.parseFloat(getComputedStyle(body).paddingBlockStart);
+      fit.style.alignSelf = "start";
+      fit.style.marginBlockStart = `${Math.max(0, top)}px`;
+    };
+    anchor();
+    const settleUntil = performance.now() + 400;
+    const onDemo = () => {
+      if (performance.now() < settleUntil) anchor();
+    };
+    const demoObserver = new ResizeObserver(onDemo);
+    demoObserver.observe(demo);
+    const bodyObserver = new ResizeObserver(anchor);
+    bodyObserver.observe(body);
+    return () => {
+      demoObserver.disconnect();
+      bodyObserver.disconnect();
+    };
+  }, [state.view, mount, cfgKey, lang]);
+
   const setup = useTokenSetup();
   const files = lab.code(state.cfg, setup);
   // The token setup opens under the toolbar, from its Token button or, on a narrow stage where
@@ -355,13 +401,14 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
   return (
     // tabIndex -1: a click anywhere on the stage focuses it, so its shortcuts work right away;
     // it stays out of the tab order.
-    // The stage theme covers the whole preview: its toolbar, controls, and code too.
+    // The stage theme covers the whole stage when it fills the screen, and only the well beside
+    // the narrative (its demo, controls, and code); the toolbar then keeps the page's theme.
     <section
       ref={stageRef}
       className="lab-stage"
       aria-label={labels.stage}
       tabIndex={-1}
-      data-theme={state.theme}
+      data-theme={sideBySide ? undefined : state.theme}
     >
       <div ref={barRef} className="lab-stage-bar">
         <p className="lab-stage-title">
@@ -403,7 +450,7 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
                   trigger={button}
                   label={tool.label}
                   shortcut={tool.key}
-                  theme={state.theme}
+                  theme={barTheme}
                 />
               );
             })}
@@ -421,9 +468,9 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
                 </Toolbar.Button>
               }
               label={labels.tokenSetup}
-              theme={state.theme}
+              theme={barTheme}
             />
-            {/* Narrow screens: the documentation sheet opens from here, set apart by a groove. */}
+            {/* Narrow screens: the documentation sheet opens from here, set apart by a hairline. */}
             <Toolbar.Separator className="lab-tool-sep" />
             <Tip
               trigger={
@@ -441,7 +488,7 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
                 </Toolbar.Button>
               }
               label={labels.docs}
-              theme={state.theme}
+              theme={barTheme}
               // Only while the stage is too narrow for the label, visually hidden to 1px then.
               onOpenChange={(open, details) => {
                 if (open && (docsLabelRef.current?.offsetWidth ?? 0) > 1) details.cancel();
@@ -467,15 +514,10 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
                   </Toolbar.Button>
                 }
                 label={labels.more}
-                theme={state.theme}
+                theme={barTheme}
               />
               <Menu.Portal>
-                <Menu.Positioner
-                  anchor={barRef}
-                  align="end"
-                  sideOffset={8}
-                  data-theme={state.theme}
-                >
+                <Menu.Positioner anchor={barRef} align="end" sideOffset={8} data-theme={barTheme}>
                   <Menu.Popup className="lab-more">
                     <Menu.Group>
                       <Menu.GroupLabel className="lab-more-label">
@@ -505,6 +547,8 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
       <div
         ref={bodyRef}
         className="lab-stage-body"
+        data-theme={sideBySide ? state.theme : undefined}
+        data-inspect={inspect ? "" : undefined}
         data-code={code ? (state.codeFromScene ? "scene" : "") : undefined}
         data-controls={controls ? (state.controlsFromScene ? "scene" : "") : undefined}
       >
@@ -573,7 +617,7 @@ export function Stage({ lab, lang, labels, title, state, item, caption, docs }: 
           aria-label={labels.code}
           inert={!code}
         >
-          <CodeDrawer files={files} item={item} labels={labels} />
+          <CodeDrawer files={files} item={item} labels={labels} lang={lang} />
         </section>
       </div>
       {/* Two boxes, so the caption's room can fold away (globals.css). */}
@@ -657,7 +701,7 @@ function ControlsPanel({
           />
         ),
       )}
-      <Button variant="outline" size="sm" onClick={state.reset}>
+      <Button variant="secondary" size="sm" onClick={state.reset}>
         {labels.reset}
       </Button>
     </div>
@@ -675,10 +719,12 @@ function CodeDrawer({
   files,
   item,
   labels,
+  lang,
 }: {
   files: CodeFile[];
   item: string;
   labels: Dictionary["lab"];
+  lang: Lang;
 }) {
   // The code files, then how to install the component.
   const all: DrawerTab[] = [
@@ -705,7 +751,7 @@ function CodeDrawer({
             value={current.file.code}
             labels={labels}
             showLabel
-            variant="outline"
+            variant="secondary"
             size="sm"
           />
         ) : null}
@@ -718,7 +764,7 @@ function CodeDrawer({
             {current.file ? (
               <LiveCode file={current.file} />
             ) : (
-              <InstallPane item={item} labels={labels} />
+              <InstallPane item={item} labels={labels} lang={lang} />
             )}
           </ScrollArea.Viewport>
           <ScrollArea.Scrollbar />

@@ -2,13 +2,12 @@ import type { Metadata, Route } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ButtonIcon, buttonStyles } from "owsem-ui/base";
-import { ComponentBadges } from "@/components/component-header";
+import { ComponentMeta } from "@/components/component-header";
 import { Icon } from "@/components/icons/icon";
 import { InstallCommand } from "@/components/install";
-import { Scene, StageShortcuts } from "@/components/lab/lab-shell";
+import { Scene } from "@/components/lab/lab-shell";
 import { getMDXComponents } from "@/components/mdx";
 import { PageMain } from "@/components/page-main";
-import { TokenChip } from "@/components/token-setup";
 import { labs } from "@/labs";
 import {
   baseUiUrl,
@@ -79,26 +78,13 @@ interface PageArgs {
   dict: Dictionary;
 }
 
-function Intro({
-  lang,
-  entry,
-  dict,
-  install,
-  shortcuts,
-}: PageArgs & { install?: boolean; shortcuts?: boolean }) {
+function Intro({ entry, dict, install }: PageArgs & { install?: boolean }) {
   return (
     <header className="page-header">
-      <p className="eyebrow">{dict.catalog.categories[entry.category]}</p>
       <h1>{entry.title}</h1>
       <p className="lead">{describe(entry, dict)}</p>
-      <ComponentBadges entry={entry} dict={dict} />
-      {install ? (
-        <>
-          <InstallCommand item={entry.name} labels={dict.lab} />
-          <TokenChip lang={lang} />
-        </>
-      ) : null}
-      {shortcuts ? <StageShortcuts /> : null}
+      <ComponentMeta entry={entry} dict={dict} />
+      {install ? <InstallCommand item={entry.name} labels={dict.lab} /> : null}
     </header>
   );
 }
@@ -126,7 +112,7 @@ function Neighbors({ lang, entry, dict }: PageArgs) {
             href={`/${lang}/${target.name}` as Route}
             rel={rel}
             data-rel={rel}
-            {...buttonStyles({ variant: "outline" })}
+            {...buttonStyles({ variant: "secondary" })}
           >
             {rel === "prev" ? arrow : null}
             <span className="visually-hidden">{label}: </span>
@@ -151,7 +137,7 @@ function LabPage({ lang, entry, dict }: PageArgs) {
         title={entry.title}
         lang={lang}
         scenes={scenes}
-        intro={<Intro lang={lang} entry={entry} dict={dict} install shortcuts />}
+        intro={<Intro lang={lang} entry={entry} dict={dict} install />}
         caption={<Intro lang={lang} entry={entry} dict={dict} />}
         footer={<Neighbors lang={lang} entry={entry} dict={dict} />}
         labels={dict.lab}

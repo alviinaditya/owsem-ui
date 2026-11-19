@@ -5,15 +5,15 @@ title: Toolbar
 import { Part } from "@/components/lab/lab-shell";
 import { ForMode, TokenChip } from "@/components/token-setup";
 
-Toolbar menampung tombol, toggle, link, dan sebuah field dalam satu baris, di atas material panel,
-dengan alur terukir di antara grupnya. Toolbar hanya satu perhentian Tab, dan tombol panah
+Toolbar menampung tombol, toggle, link, dan sebuah field dalam satu baris, di atas isian panel tanpa tepi dan bayangan,
+dengan garis tipis di antara grupnya. Toolbar hanya satu perhentian Tab, dan tombol panah
 berpindah di dalamnya. Gulir untuk mulai tur; stage mengikuti setiap bagian.
 
 ## Tombol dan toggle bersama [#together]
 
 Satu toolbar memuat beberapa jenis item. Tombol bekerja sekali; toggle tetap menyala. Keduanya
 tenang: datar dan muted sampai pointer berada di atasnya, dengan ukuran dan spacing Button. Toggle
-yang menyala menjadi tombol timbul, isian datar dengan tepi tegas. Selama ditahan, keduanya memakai
+yang menyala menjadi tint datar 12% dari warna teks. Selama ditahan, keduanya memakai
 material ditekan dan masuk ke 0,97, lalu dilepas dengan spring settle.
 
 Toggle di toolbar adalah `Toolbar.Button` yang merender Toggle: `render={<Toggle />}`. Toolbar
@@ -50,25 +50,25 @@ pilih sebuah nama, di sini atau di stage, untuk melihat tokennya.
 | <Part name="Icon" /> | `span.ow-toolbar__icon` | Dekoratif (`aria-hidden`): `startIcon` atau `endIcon`, ukuran font ditambah 2px; `data-side="start"` atau `"end"` |
 | <Part name="Separator" /> | `div.ow-toolbar__separator` | `role="separator"` dan `data-orientation`, melintang arah toolbar |
 | <Part name="Link" /> | `a.ow-toolbar__link` | Tampil seperti tombol; `render` menggantinya dengan link router |
-| <Part name="Input" /> | `input.ow-toolbar__input` | Well datar dengan tepi 3:1, setinggi tombol |
+| <Part name="Input" /> | `input.ow-toolbar__input` | Tint 6% dari warna teks tanpa tepi, 9% saat hover, setinggi tombol |
 
 ## State dan varian [#states]
 
 Stage menampilkan setiap ukuran di kedua tema, masing-masing toolbar dengan toggle yang menyala,
-toggle yang mati, sebuah alur, sebuah tombol, dan tombol yang disabled. Pointer menyalakan dan
+toggle yang mati, sebuah separator, sebuah tombol, dan tombol yang disabled. Pointer menyalakan dan
 mematikan Miring di setiap tema.
 
 | State | Tandanya |
 | --- | --- |
 | Diam | Datar, dengan teks muted |
-| Hover | Warna `--ow-hover`, dan teks dengan kontras penuh |
+| Hover | Warna `--ow-hover`, dan teks dengan kontras penuh; tint field naik ke 9% |
 | Sedang ditekan | Mengecil ke 0,97 dalam 90 ms, dengan material ditekan |
-| Menyala, untuk toggle | Tombol timbul, sama seperti Toggle sendiri |
+| Menyala, untuk toggle | Tint 12% dari warna teks, sama seperti Toggle sendiri |
 | Fokus keyboard | Ring 2px dengan jarak 2px, warna `--ow-focus` |
 | Disabled | Opacity 45%, tetap bisa difokus |
 
 `orientation="vertical"` menyusun item ke bawah, panah atas dan bawah berpindah antar item, dan
-alurnya berbalik melintang. Pilih di kontrol.
+separatornya berbalik melintang. Pilih di kontrol.
 
 ## Keyboard dan aksesibilitas [#keyboard]
 
@@ -79,16 +79,16 @@ alurnya berbalik melintang. Pilih di kontrol.
 | Space, Enter | Menekan tombol, atau menyalakan dan mematikan toggle |
 
 Dari kanan ke kiri, panah kiri yang maju. Screen reader mengumumkan toolbar dengan namanya, setiap
-grup dengan namanya sendiri, toggle beserta state-nya, dan alur sebagai pemisah.
+grup dengan namanya sendiri, toggle beserta state-nya, dan garis tipis sebagai pemisah.
 `loopFocus={false}` menghentikan perputaran di ujung.
 
 Dengan `prefers-reduced-motion`, tekanan mengganti material tanpa mengecil. Di mode forced colors
-(Windows High Contrast), toolbar, item, dan field-nya tetap punya tepi 1px berwarna sistem, alurnya
-tetap terlihat, dan ring fokusnya `Highlight`.
+(Windows High Contrast), toolbar, item, dan field-nya tetap punya tepi 1px berwarna sistem, separatornya
+tetap terlihat, dan ring fokusnya `Highlight`. Dengan `prefers-contrast: more`, field mendapat tepi 1px dalam `--ow-edge`.
 
 ## Kustomisasi [#customization]
 
-Kontrol di stage terbuka: pilih warna permukaan atau garis gelap alur, dan kodenya mengikuti.
+Kontrol di stage terbuka: pilih warna permukaan atau garis separator, dan kodenya mengikuti.
 
 Toolbar membaca token tema berikut. Pasang di toolbar itu sendiri, seperti `editor.css` dengan
 `.editor`, atau di elemen di sekitarnya, untuk mengubah toolbar di dalamnya.
@@ -96,18 +96,12 @@ Toolbar membaca token tema berikut. Pasang di toolbar itu sendiri, seperti `edit
 | Token tema | Fungsi |
 | --- | --- |
 | `--ow-panel` | Permukaan |
-| `--ow-panel-shadow` | Tepi dan bayangan |
 | `--ow-muted` | Teks tombol dan link, serta placeholder field |
 | `--ow-hover` | Warna di bawah pointer |
-| `--ow-fg` | Teks di bawah pointer atau saat ditahan, serta teks field |
+| `--ow-fg` | Teks di bawah pointer atau saat ditahan, serta teks field; tint 6% (9% saat hover) dicampur darinya |
 | `--ow-pressed-bg` | Isian saat ditahan |
-| `--ow-pressed-shadow` | Tepi saat ditahan |
-| `--ow-well-bg` | Isian field |
-| `--ow-well-shadow` | Garis dalam field, di bawah tepinya |
-| `--ow-edge` | Tepi field, dengan kontras 3:1 |
-| `--ow-line-dark` | Garis gelap alur |
-| `--ow-line-light` | Garis terang alur |
-| `--ow-radius` | Sudut item; sudut toolbar menambahkan padding 4px-nya, sehingga tetap konsentris |
+| `--ow-line` | Separator |
+| `--ow-radius` | Sudut toolbar; item-nya memakainya dikurangi padding 4px |
 | `--ow-focus` | Ring fokus |
 
 <ForMode mode="isolated">

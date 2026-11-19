@@ -17,17 +17,20 @@ stage mengikuti setiap bagian.
 
 ## Isian yang berganti, glyph yang bergerak [#marking]
 
-Saat mati, kotaknya berupa well: isian datar yang lebih gelap dengan tepi 1px `--ow-edge`, yang
-kontrasnya 3:1 terhadap isian dan permukaan di sekitarnya. Saat dicentang atau indeterminate, ia
-memakai material primary: isian warna utama beserta tepinya, dengan glyph `--ow-on-accent`.
+Saat mati, kotaknya tint 10% dari warna teks, `--ow-fg`, tanpa tepi. Di bawah pointer halus, di kotak
+atau labelnya, tint naik menjadi 13%, dan saat ditahan 16%. Saat dicentang atau indeterminate, ia
+memakai material primary: isian warna utama dengan sorot tipis di atasnya, dan glyph
+`--ow-on-accent`.
 
 Isiannya berganti seketika, karena itulah jawabannya. Yang bergerak adalah glyph: ia memudar masuk
-dalam 120 ms dan membesar dari 0,8 dengan spring settle. Antara centang dan minus, kedua glyph berada
-di satu sel dan saling memudar dengan cara yang sama, sehingga kotak induk tidak pernah melompat saat
-tugasnya terisi. Dengan reduced motion, glyph hanya memudar.
+dalam 120 ms dan membesar dari 0,8 dengan spring settle, dan centangnya menggambar goresannya dari
+ujung yang pendek dalam 260 ms, seperti tangan menulisnya. Minus justru tumbuh dari tengah sampai
+selebar dirinya. Kedua glyph berada di satu sel, sehingga kotak induk tidak pernah melompat saat
+tugasnya terisi. Saat pergi, glyph hanya memudar. Dengan reduced motion, tidak ada yang tergambar
+atau tumbuh: glyph hanya memudar.
 
 Setiap tekanan masuk lebih dulu: selama ditahan, kotak mengecil ke 0,97 dalam 90 ms dan isiannya
-berganti, lalu dilepas dengan spring settle. Tepinya tetap.
+berganti, lalu dilepas dengan spring settle.
 
 Stage memutarnya: pointer menyelesaikan daftar lalu membatalkannya lagi, dan minus di kotak induk
 berubah menjadi centang lalu kembali. Kotak induknya adalah kode Anda sendiri: `checked` bila semua
@@ -88,11 +91,11 @@ yang mati di setiap tema, lalu mencentang dan melepasnya.
 
 | State | Tandanya |
 | --- | --- |
-| Mati | `--ow-well-bg`, dan tepi inset 1px `--ow-edge` |
-| Hover, di kotak atau labelnya | Warna `--ow-hover` di atas isian |
-| Sedang ditekan, di kotak atau labelnya | Mengecil ke 0,97 dalam 90 ms; `--ow-pressed-bg` saat mati, warna utama 10% lebih gelap saat menyala; tepinya tetap |
-| Dicentang | `--ow-accent`, `--ow-primary-shadow`, dan centang `--ow-on-accent` |
-| Indeterminate | Material yang sama, dengan minus |
+| Mati | Tint 10% dari `--ow-fg`, tanpa tepi |
+| Hover, di kotak atau labelnya | Mati: tint 13%. Menyala: warna `--ow-hover` di atas warna utama |
+| Sedang ditekan, di kotak atau labelnya | Mengecil ke 0,97 dalam 90 ms; tint 16% saat mati, warna utama 10% lebih gelap saat menyala |
+| Dicentang | `--ow-accent`, `--ow-primary-shadow`, dan centang `--ow-on-accent` yang tergambar masuk |
+| Indeterminate | Material yang sama, dengan minus yang tumbuh masuk |
 | Fokus keyboard | Ring 2px dengan jarak 2px, warna `--ow-focus` |
 | Read-only | Tetap seperti adanya, dan tekanan tidak berpengaruh |
 | Disabled | Opacity 50%, dan tekanan tidak berpengaruh |
@@ -108,14 +111,14 @@ yang mati di setiap tema, lalu mencentang dan melepasnya.
 Screen reader mengenalinya sebagai checkbox beserta state-nya lewat `aria-checked`, dengan `mixed`
 saat indeterminate. Namanya berasal dari label atau `aria-label`; glyph-nya `aria-hidden`.
 
-Dengan `prefers-reduced-motion`, isian berganti dan glyph memudar, dan tidak ada yang bergerak. Di
-mode forced colors (Windows High Contrast), kotak tetap punya tepi 1px berwarna sistem, kotak yang
-dicentang diisi `Highlight`, dan glyph mengikuti sebagai `HighlightText`. Dari kanan ke kiri, label
-menaruh kotak di kanan, dan centangnya tidak dicerminkan.
+Dengan `prefers-reduced-motion`, isian berganti dan glyph memudar, dan tidak ada yang bergerak atau
+tergambar. Dengan `prefers-contrast: more`, kotak mendapat tepi 1px `--ow-edge`. Di mode forced colors (Windows High Contrast), kotak tetap punya tepi 1px berwarna
+sistem, kotak yang dicentang diisi `Highlight`, dan glyph mengikuti sebagai `HighlightText`. Dari
+kanan ke kiri, label menaruh kotak di kanan, dan centangnya tidak dicerminkan.
 
 ## Kustomisasi [#customization]
 
-Kontrol di stage terbuka: pilih isian, glyph, atau tepi, dan kodenya mengikuti. Stage menunjukkan
+Kontrol di stage terbuka: pilih isian, glyph, atau tint, dan kodenya mengikuti. Stage menunjukkan
 keempat caranya.
 
 **Token tema.** Checkbox membaca token berikut. Pasang di kotak, atau di elemen apa pun di
@@ -123,14 +126,11 @@ sekelilingnya.
 
 | Token tema | Fungsi |
 | --- | --- |
-| `--ow-well-bg` | Isian saat mati |
-| `--ow-edge` | Tepi saat mati |
-| `--ow-fg` | Glyph saat keluar |
+| `--ow-fg` | Tint saat mati (10%, 13% saat hover, 16% saat ditahan), dan glyph saat keluar |
 | `--ow-accent` | Isian saat dicentang atau indeterminate |
-| `--ow-primary-shadow` | Tepi saat dicentang atau indeterminate |
+| `--ow-primary-shadow` | Sorot atas saat dicentang atau indeterminate |
 | `--ow-on-accent` | Glyph |
 | `--ow-hover` | Warna di bawah pointer |
-| `--ow-pressed-bg` | Isian saat ditahan dan mati |
 | `--ow-radius` | Sudut, setengah dari nilainya |
 | `--ow-focus` | Ring fokus |
 | `--ow-motion-scale` | Seberapa jauh tekanan dan glyph bergerak |

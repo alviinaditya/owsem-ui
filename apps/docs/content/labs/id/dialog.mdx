@@ -6,7 +6,7 @@ import { Part } from "@/components/lab/lab-shell";
 import { ForMode, TokenChip } from "@/components/token-setup";
 
 Dialog membuka jendela di atas halaman: judul, satu atau dua baris teks, dan apa pun yang dibutuhkan
-tugasnya, di tengah layar pada material panel, di atas scrim. Base UI menahan fokus di dalam,
+tugasnya, di tengah layar pada material raised, di atas scrim. Base UI menahan fokus di dalam,
 mengunci gulir halaman, dan mengatur keyboard. Gulir untuk mulai tur; stage mengikuti setiap bagian.
 
 ## Jendela di atas halaman [#window]
@@ -70,7 +70,7 @@ tokennya.
 ## State dan varian [#states]
 
 Stage menampilkan panel di kedua tema, terbuka dan mundur di belakang dialog bersarang. Permukaannya
-material panel di keduanya, dengan bayangan popup.
+material raised di keduanya, dengan bayangan popup dan tanpa tepi.
 
 | State | Tandanya |
 | --- | --- |
@@ -92,10 +92,12 @@ Screen reader mengumumkan dialog yang dinamai oleh judul dan dideskripsikan oleh
 halaman lainnya inert selama modal, jadi selalu beri `Dialog.Title` dan `Dialog.Close`. `modal` bawaannya
 `true`; `"trap-focus"` menahan fokus di dalam dan membiarkan gulir serta pointer halaman, dan `false`
 membuat halaman tetap bisa dipakai (tambahkan `backdrop={false}` di Portal, karena scrim menutupi
-halaman). `initialFocus` dan `finalFocus` menentukan ke mana fokus pergi.
+halaman). `initialFocus` dan `finalFocus` menentukan ke mana fokus pergi. Dialog modal menahan gulir
+halaman tanpa style `overflow`, jadi teksnya tidak digambar ulang; dibuka dengan sentuhan, kunci Base UI
+yang berlaku.
 
 Dengan `prefers-reduced-motion`, panel memudar tanpa tumbuh, dan induk tetap di tempatnya di belakang
-dialog bersarang. Di forced colors (Windows High Contrast), panel tetap punya tepi 1px dengan warna
+dialog bersarang. Dengan `prefers-contrast: more`, panel mendapat ring 1px berwarna `--ow-edge`. Di forced colors (Windows High Contrast), panel tetap punya tepi 1px dengan warna
 sistem. Dialog tidak membawa teks sendiri, jadi tidak ada yang perlu diterjemahkan selain teks Anda.
 
 ## Kustomisasi [#customization]
@@ -125,11 +127,12 @@ di luar subtree trigger-nya.
 | Token tema | Fungsi |
 | --- | --- |
 | `--ow-backdrop` | Scrim |
-| `--ow-panel` | Permukaan |
-| `--ow-popup-shadow` | Tepi dan bayangan |
+| `--ow-raised-bg` | Permukaan |
+| `--ow-popup-shadow` | Bayangan |
+| `--ow-edge` | Ring di bawah `prefers-contrast: more` |
 | `--ow-fg` | Teks |
 | `--ow-muted` | Deskripsi |
-| `--ow-radius` | Sudut, ditambah padding di sekitar tombol (FR-10b) |
+| `--ow-radius` | Sudut, satu radius untuk setiap permukaan |
 | `--ow-focus` | Cincin fokus, saat panel sendiri yang menerima fokus |
 | `--ow-ease-out` | Masuk dan keluar |
 

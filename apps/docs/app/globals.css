@@ -111,41 +111,20 @@
 }
 
 /*
- * Page changes (components/page-main.tsx): a navigation is a view transition. The old page leaves
- * quickly, then the new one fades in and rises a little, so a change of layout (a page to a component page)
- * reads as one move. The sidebar is its own layer and stays live: its trail animates as usual. Clicks pass through while it runs.
+ * Page changes (components/page-main.tsx, DS-16): a page a navigation brings in fades in and rises
+ * a little, so a change of layout (a page to a component page) reads as one move. CSS only: a view
+ * transition froze the whole screen, the sidebar's motion included, while it captured the pages.
  */
-.site-sidebar {
-  view-transition-name: site-sidebar;
-}
-
-::view-transition {
-  pointer-events: none;
-}
-
-::view-transition-group(site-sidebar),
-::view-transition-new(site-sidebar) {
-  animation: none;
-}
-
-::view-transition-old(site-sidebar) {
-  display: none;
-}
-
-::view-transition-old(.page-out) {
-  animation: 100ms ease-in both page-fade reverse;
-}
-
-::view-transition-new(.page-in) {
-  animation: 220ms var(--ease) 80ms both page-fade;
+.page-enter[data-enter] {
+  animation: 220ms var(--ease) both page-fade;
 }
 
 /* Reduced motion keeps the fade, without the rise. */
 @media (prefers-reduced-motion: no-preference) {
-  ::view-transition-new(.page-in) {
+  .page-enter[data-enter] {
     animation:
-      220ms var(--ease) 80ms both page-fade,
-      320ms var(--ease) 80ms both page-rise;
+      220ms var(--ease) both page-fade,
+      320ms var(--ease) both page-rise;
   }
 }
 
@@ -1153,6 +1132,9 @@ body {
 
 .site-main {
   min-inline-size: 0;
+  /* A page fading in rises 8px: clipped, so it never makes the document scroll for a moment.
+   * clip, not hidden: no scroll container, so sticky parts inside keep the viewport. */
+  overflow: clip;
 }
 
 .site-sidebar {
@@ -1173,8 +1155,6 @@ body {
   align-self: start;
   block-size: 100dvh;
   background-color: var(--docs-bg);
-  /* Pages change under it without a view transition of its own. */
-  view-transition-name: site-sidebar;
 }
 
 .site-sidebar[data-mobile] {

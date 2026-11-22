@@ -235,31 +235,35 @@ test("no top bar: the language is a menu at the top right, and a button opens th
   }
 });
 
-test("a navigation fades between pages, and the sidebar stays put", async ({ page }, testInfo) => {
+test("a navigation fades the new page in, with no view transition to freeze the sidebar", async ({
+  page,
+}, testInfo) => {
   test.skip(testInfo.project.name === "mobile-390", "the sidebar is a drawer below 768 px");
   await page.goto("/en/docs/glide");
   await expect(page.locator(".site")).toHaveAttribute("data-mounted", "");
-  // Records the animations of the next view transition once it is ready.
+  // The page the server sent does not fade in.
+  await expect(page.locator("main.page-enter")).not.toHaveAttribute("data-enter");
+  // Counts view transitions on <html>, where the test can read it back.
   await page.evaluate(() => {
-    const start = document.startViewTransition.bind(document);
-    document.startViewTransition = (update) => {
-      const transition = start(update);
-      transition.ready.then(() => {
-        document.documentElement.dataset.animations = document
-          .getAnimations()
-          .flatMap((animation) =>
-            animation instanceof CSSAnimation ? animation.animationName : [],
-          )
-          .join(" ");
-      });
-      return transition;
-    };
+    const root = document.documentElement;
+    const start = document.startViewTransition?.bind(document);
+    root.dataset.viewTransitions = "0";
+    if (start) {
+      document.startViewTransition = (update) => {
+        root.dataset.viewTransitions = String(Number(root.dataset.viewTransitions) + 1);
+        return start(update);
+      };
+    }
   });
-  const sidebar = sidebarOf(page);
-  await sidebar.getByRole("link", { name: "Button", exact: true }).click();
+  await sidebarOf(page).getByRole("link", { name: "Button", exact: true }).click();
   await expect(page).toHaveURL(/\/en\/button$/);
-  await expect(page.locator("html")).toHaveAttribute("data-animations", /page-fade.*page-rise/);
-  await expect(page.locator(".site-sidebar")).toHaveCSS("view-transition-name", "site-sidebar");
+  const main = page.locator("main.page-enter");
+  await expect(main).toHaveAttribute("data-enter", "");
+  const names = await main.evaluate((el) =>
+    el.getAnimations().flatMap((a) => (a instanceof CSSAnimation ? a.animationName : [])),
+  );
+  expect(names).toEqual(expect.arrayContaining(["page-fade", "page-rise"]));
+  await expect(page.locator("html")).toHaveAttribute("data-view-transitions", "0");
 });
 
 test("the drawer has the brand and the search; Escape and the scrim shut it", async ({

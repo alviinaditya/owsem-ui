@@ -1,0 +1,149 @@
+---
+title: Toggle Group
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Untuk menyalin kode sumbernya ke project Anda, pakai item
+`toggle-group` dari registry.
+
+## Penggunaan [#usage]
+
+```tsx
+import { useState } from "react";
+import { ToggleGroup } from "owsem-ui/base";
+
+export function ViewSwitcher() {
+  const [view, setView] = useState("list");
+  return (
+    <ToggleGroup.Root
+      aria-label="Tampilan"
+      value={[view]}
+      onValueChange={([next]) => next && setView(next)}
+    >
+      <ToggleGroup.Item value="list">Daftar</ToggleGroup.Item>
+      <ToggleGroup.Item value="board">Papan</ToggleGroup.Item>
+    </ToggleGroup.Root>
+  );
+}
+```
+
+Sebaris tombol toggle yang bekerja sebagai satu. Dengan satu pilihan sekaligus, ia menjadi kontrol
+tersegmentasi: track dan thumb yang meluncur ke item yang ditekan. Dengan `multiple`, tiap item
+menyala sendiri. Base UI membolehkan item yang ditekan ditekan lagi hingga tak ada yang dipilih;
+kontrol tersegmentasi menjaga satu pilihan, jadi abaikan nilai kosong seperti di atas.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Tiga bagian, dua di antaranya Anda tulis sendiri: Root dan Item. Highlight hover adalah Glide, dari
+`owsem-ui/core`.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-toggle-group` | `ToggleGroup` dari Base UI dengan `role="group"`: track-nya |
+| <Part name="Item" /> | `button.ow-toggle-group__item` | `Toggle` dari Base UI dengan `aria-pressed`; teksnya dibungkus `span.ow-toggle-group__label`, jadi item berisi ikon saja berbentuk persegi |
+| <Part name="Thumb" /> | `span.ow-toggle-group__thumb` | Dekoratif (`aria-hidden`): ditempatkan skrip, digerakkan CSS; hanya di pilihan tunggal |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### ToggleGroup.Root
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Ukuran font dan padding item. Grup setinggi 32, 40, atau 48px, seperti Button seukuran itu; itemnya 8px lebih pendek |
+| `equal` | `boolean` | `false` | Tiap item selebar yang terlebar, atau bagian yang sama dari grup yang direntangkan |
+
+#### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-size` | Selalu: `sm`, `md`, atau `lg` |
+| `data-equal` | `equal` diatur |
+
+### ToggleGroup.Item
+
+#### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-held` | Saat ditahan |
+
+Item adalah Toggle milik Base UI, jadi prop dan atribut datanya mengikuti Toggle. Thumb tidak menerima prop; ia punya `data-visible` saat berada di bawah item yang ditekan dan `data-held` saat item itu ditahan. Ref menuju `div` atau `button`.
+
+Nilai yang disimpan di storage baru diketahui setelah hidrasi. Render kosong di server (`value={[]}`) dan nilai tersimpan sesudahnya: thumb lalu muncul di tempatnya, bukan meluncur dari nilai bawaan.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-toggle-group` | Root |
+| `ow-toggle-group__item` | Item |
+| `ow-toggle-group__label` | Teks item |
+| `ow-toggle-group__thumb` | Thumb |
+
+## Aksesibilitas [#accessibility]
+
+Grup adalah satu perhentian Tab; keyboard-nya berasal dari Base UI.
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab, Shift+Tab | Masuk ke grup, dan keluar lagi |
+| Panah Kanan, Panah Kiri | Item berikut atau sebelumnya, terbalik pada kanan ke kiri; berputar dan melewati item nonaktif |
+| Home, End | Item pertama atau terakhir |
+| Space, Enter | Menekan atau melepas item yang difokus |
+
+- Dengan `orientation="vertical"`, Panah Bawah dan Panah Atas yang berpindah.
+- Screen reader mengumumkan tiap item sebagai tombol toggle dengan statusnya. Beri nama grup dengan
+  `aria-label` atau `aria-labelledby`, dan item berisi ikon saja dengan `aria-label`.
+- Dengan `prefers-reduced-motion`, thumb langsung pindah dan tidak ada yang menyusut saat ditahan.
+- Pada forced colors, item yang ditekan diisi `Highlight` dan track tetap punya tepi yang terlihat.
+
+## Tema [#theming]
+
+Toggle Group membaca token tema ini. Setel pada grup, atau pada elemen di sekitarnya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-fg` | Label item yang di-hover, tint 6% track, dan dasar teks aksen |
+| `--ow-muted` | Label lainnya |
+| `--ow-accent` | Thumb (14% di atas `--ow-raised-bg`) dan label yang ditekan |
+| `--ow-raised-bg` | Yang diberi tint oleh thumb, dan item yang ditekan pada `multiple` |
+| `--ow-hover` | Highlight hover (Glide) |
+| `--ow-radius` | Sudut track; item, thumb, dan highlight memakainya dikurangi 4px |
+| `--ow-focus` | Cincin fokus keyboard |
+
+<ForMode mode="isolated">
+
+Pada mode isolated, nilainya ada di root tiap grup, jadi setel pada grupnya sendiri.
+
+</ForMode>
+
+Padding item adalah `--py` miliknya: setel pada item, bukan pada grup.
+
+## Gerak [#motion]
+
+Thumb bersifat gooey: pilih item lain dan ia meluncur ke sana dengan spring travel, tombolnya
+memanjang dari sisi depan sepanjang jalan lalu mengendap pada lebar baru. Berubah pikiran di tengah
+jalan, ia berbalik dari posisinya. Pada render pertama, dan saat nilai baru tiba setelah hidrasi, ia
+muncul di tempatnya. Glide menyalakan item terdekat sepanjang sumbu, jadi sorotnya tidak pernah
+padam di celah.
+
+Saat ditahan, item dan thumb menyusut ke 0,97 dalam 90 ms dan kembali dengan spring saat dilepas.
+Dengan `prefers-reduced-motion`, thumb hanya memudar dan thumb yang ditahan meredup.

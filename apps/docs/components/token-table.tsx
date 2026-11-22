@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { Table } from "owsem-ui/owsem";
 import type { Lang } from "@/lib/i18n";
 import { isColor, parseTokens } from "@/lib/tokens";
 
@@ -27,29 +28,29 @@ export function TokenTable({ lang }: { lang: Lang }) {
   const t = TEXT[lang];
   const tokens = parseTokens(readFileSync(TOKENS_CSS, "utf8"));
   return (
-    <table className="token-table">
-      <thead>
-        <tr>
-          <th scope="col">{t.token}</th>
-          <th scope="col">{t.light}</th>
-          <th scope="col">{t.dark}</th>
-        </tr>
-      </thead>
-      <tbody>
+    <Table.Root className="token-table" layout="table" aria-label={t.token}>
+      <Table.Header>
+        <Table.Row>
+          <Table.Head>{t.token}</Table.Head>
+          <Table.Head>{t.light}</Table.Head>
+          <Table.Head>{t.dark}</Table.Head>
+        </Table.Row>
+      </Table.Header>
+      <Table.Body>
         {tokens.map((token) => (
-          <tr key={token.name}>
-            <td>
+          <Table.Row key={token.name}>
+            <Table.Cell>
               <code>{token.name}</code>
-            </td>
-            <td>
+            </Table.Cell>
+            <Table.Cell>
               <Value value={token.light} />
-            </td>
-            <td>
+            </Table.Cell>
+            <Table.Cell>
               <Value value={token.dark} />
-            </td>
-          </tr>
+            </Table.Cell>
+          </Table.Row>
         ))}
-      </tbody>
-    </table>
+      </Table.Body>
+    </Table.Root>
   );
 }

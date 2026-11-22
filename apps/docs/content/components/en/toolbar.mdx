@@ -1,0 +1,169 @@
+---
+title: Toolbar
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. To copy the source into your project instead, use the `toolbar`
+item of the registry; toggles in it need the `toggle` item too.
+
+## Usage [#usage]
+
+```tsx
+import { Toggle, Toolbar } from "owsem-ui/base";
+import { Bold, Undo2 } from "lucide-react";
+
+export function EditorToolbar() {
+  return (
+    <Toolbar.Root aria-label="Formatting">
+      <Toolbar.Button render={<Toggle />} aria-label="Bold" startIcon={<Bold />} />
+      <Toolbar.Separator />
+      <Toolbar.Button aria-label="Undo" startIcon={<Undo2 />} />
+    </Toolbar.Root>
+  );
+}
+```
+
+A toolbar holds buttons, toggles, links, and a field in one row, with hairlines between groups. It is
+one stop for Tab, and arrow keys move within it. A toggle is a `Toolbar.Button` that renders a
+Toggle: the toolbar gives it its place in the arrow-key order, and the Toggle gives it the on state.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Base UI renders the roles and the roving focus; OwsemUI adds the `ow-toolbar` and `ow-toolbar__*`
+classes, the sizes, and the icons.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-toolbar` | `role="toolbar"`, `aria-orientation`, `data-orientation`, and `data-size`; the panel |
+| <Part name="Group" /> | `div.ow-toolbar__group` | `role="group"`; name it with `aria-label` |
+| <Part name="Toggle" /> | `button.ow-toggle.ow-toolbar__button` | A Button with `render={<Toggle />}`, so `aria-pressed` and `data-pressed` while on |
+| <Part name="Button" /> | `button.ow-toolbar__button` | `data-size`, and `data-icon-only` without a label |
+| <Part name="Icon" /> | `span.ow-toolbar__icon` | Decorative (`aria-hidden`), with `data-side="start"` or `"end"` |
+| <Part name="Separator" /> | `div.ow-toolbar__separator` | `role="separator"` and `data-orientation`, across the toolbar's direction |
+| <Part name="Link" /> | `a.ow-toolbar__link` | Looks like a button; `render` swaps in a router link |
+| <Part name="Input" /> | `input.ow-toolbar__input` | A 6% tint of the text color with no edge, 9% on hover, as tall as the buttons (8px shorter than the bar) |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### Toolbar.Root
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | The font size of every item that does not set its own. The bar is 32, 40, or 48px tall, as a Button of that size; its items are 8px shorter |
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-size` | Always: `sm`, `md`, or `lg` |
+
+### Toolbar.Button and Toolbar.Link
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | The toolbar's | Button's sizes |
+| `startIcon`, `endIcon` | `ReactNode` | | An icon before or after the label, the font size plus 2px; decorative, so the item needs a name |
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-size` | Always: `sm`, `md`, or `lg` |
+| `data-icon-only` | An icon and no children |
+
+### Toolbar.Input
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | The toolbar's | The type scale, not a width in characters: set `inline-size` instead |
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-size` | Always: `sm`, `md`, or `lg` |
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-toolbar` | Root |
+| `ow-toolbar__group` | Group |
+| `ow-toolbar__button` | Button, and a Toggle in it |
+| `ow-toolbar__icon` | Icon |
+| `ow-toolbar__separator` | Separator |
+| `ow-toolbar__link` | Link |
+| `ow-toolbar__input` | Input |
+
+## Accessibility [#accessibility]
+
+However many items it holds, a toolbar is a single stop in the Tab order. Coming back lands on the
+item used last.
+
+| Key | Action |
+| --- | --- |
+| Tab, Shift+Tab | Into and out of the toolbar, at the item used last |
+| Arrow Right, Arrow Left | The next or previous item, wrapping around (Arrow Down and Arrow Up when vertical) |
+| Space, Enter | Presses the button or turns the toggle on or off |
+
+- Right to left, Arrow Left moves on. `loopFocus={false}` stops the wrapping.
+- Screen readers announce the toolbar by its name, each group by its own, toggles with their state,
+  and the hairlines as separators.
+- Disabled buttons stay focusable, so they can be found and announced as unavailable.
+- In the field, arrows move the caret and hand over at its ends: use one field at most, and put it
+  last.
+- With `prefers-contrast: more`, the field gets a 1px edge in `--ow-edge`. In forced colors, the
+  toolbar, its items, and its field keep a 1px edge in the system color.
+
+## Theming [#theming]
+
+Toolbar reads these theme tokens. Set one on the toolbar, or on an element around it.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-panel` | Surface |
+| `--ow-surface-shadow` | The toolbar's shadow |
+| `--ow-muted` | Button and link text, and the field's placeholder |
+| `--ow-hover` | Tint under the pointer |
+| `--ow-fg` | Text under the pointer or held down, and the field's text; its 6% tint (9% on hover) is mixed from it |
+| `--ow-pressed-bg` | Fill while held down |
+| `--ow-line` | Separators |
+| `--ow-radius` | The toolbar's corners; its items take it less the 4px padding |
+| `--ow-focus` | Focus ring |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Toolbar's root, so set yours on the toolbar itself. A Toggle
+in it has its own root: set its values on the toggle.
+
+</ForMode>
+
+Toggles in a toolbar keep Toggle's own look, from the same theme tokens.
+
+## Motion [#motion]
+
+Buttons, links, and toggles press in: held, an item scales to 0.97 and takes the pressed material
+within 90 ms, then lets go on the settle spring. Toggles change tone as they turn on; nothing slides.
+With `prefers-reduced-motion`, the material still changes and nothing scales.

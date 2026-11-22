@@ -21,16 +21,19 @@ for (const [acceptLanguage, lang] of [
   });
 }
 
-test("renders each language with its own lang, text, and hreflang links", async ({
-  page,
-}, testInfo) => {
-  // Below 1100 px the language switcher lives in the sidebar, which the dock's Menu opens.
-  const menu = page.getByRole("button", { name: "Menu", exact: true });
-  const mobile = testInfo.project.name === "mobile-390";
+test("renders each language with its own lang, text, and hreflang links", async ({ page }) => {
   await page.goto("/en/docs");
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
-  if (mobile) await menu.click();
-  await expect(page.getByRole("navigation", { name: "Language" })).toBeVisible();
+  // The trigger names the current language; the menu lists each as a link.
+  const trigger = page.getByRole("button", { name: "Language: English" });
+  await trigger.click();
+  const toId = page.getByRole("menuitem", { name: "Bahasa Indonesia" });
+  await expect(toId).toBeVisible();
+  await expect(toId).toHaveAttribute("hreflang", "id");
+  await expect(page.getByRole("menuitem", { name: "English" })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
   await expect(page.locator('link[rel="alternate"][hreflang="id"]')).toHaveAttribute(
     "href",
     /\/id\/docs$/,
@@ -40,11 +43,11 @@ test("renders each language with its own lang, text, and hreflang links", async 
     /\/docs$/,
   );
 
-  await page.getByRole("link", { name: "Bahasa Indonesia" }).click();
+  await toId.click();
   await expect(page).toHaveURL(/\/id\/docs$/);
   await expect(page.locator("html")).toHaveAttribute("lang", "id");
-  if (mobile) await menu.click();
-  await expect(page.getByRole("navigation", { name: "Bahasa" })).toBeVisible();
+  await page.getByRole("button", { name: "Bahasa: Bahasa Indonesia" }).click();
+  await expect(page.getByRole("menuitem", { name: "English" })).toHaveAttribute("hreflang", "en");
 });
 
 test("unknown pages return 404", async ({ request }) => {

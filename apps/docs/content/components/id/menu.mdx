@@ -1,0 +1,187 @@
+---
+title: Menu
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Di registry, itemnya `menu`; tombol pada contoh juga butuh `button`.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Button, Menu } from "owsem-ui/base";
+
+export function EditMenu() {
+  return (
+    <Menu.Root>
+      <Menu.Trigger render={<Button variant="outline" />}>Edit</Menu.Trigger>
+      <Menu.Portal>
+        <Menu.Positioner>
+          <Menu.Popup>
+            <Menu.Item onClick={cut}>Potong</Menu.Item>
+            <Menu.Item onClick={copy}>Salin</Menu.Item>
+          </Menu.Popup>
+        </Menu.Positioner>
+      </Menu.Portal>
+    </Menu.Root>
+  );
+}
+```
+
+Menu membuka daftar aksi dari sebuah tombol: item dengan ikon dan shortcut, centang dan pilihan, serta
+submenu, pada material raised dengan bayangan popup dan tanpa tepi, karena ia melayang. Item tidak
+punya warna hover sendiri: satu sorotan, Glide, meluncur ke item di bawah pointer, sehingga bergerak
+turun di menu terasa sebagai satu gerakan. Keyboard menggerakkan sorotan yang sama, jadi pointer dan
+tombol tidak pernah menampilkan dua. Item nonaktif dilewati.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Base UI merender bagian, role, dan keyboard-nya. OwsemUI menatanya, menambah Glide, centang dan titik
+bawaan indikator, chevron, ukuran, dan membawa arah teks ke portal. Root, Portal, Group, RadioGroup,
+dan SubmenuRoot tidak menambah tampilan sendiri. Root tidak merender elemen, jadi di Inspect ia adalah
+kotak yang memuat trigger dan menunya.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | tidak ada | Hanya state: `open`, `modal`, dan `loopFocus` |
+| <Part name="Trigger" /> | Tombol Anda | Diteruskan ke `render`; `aria-haspopup="menu"` dan `aria-expanded` |
+| Backdrop | `div.ow-menu__backdrop` | Milik menu modal, digambar Portal-nya: bening, menutupi seluruh jendela, di bawah popup |
+| Positioner | `div.ow-menu__positioner` | 6px dari kotak diam trigger, agar tekanan tidak menggeser menu; submenu di samping itemnya, baris pertama sejajar |
+| <Part name="Popup" /> | `div.ow-menu__popup` | `role="menu"`, `data-size`, `data-instant` saat melewati animasi |
+| Viewport | `div.ow-menu__viewport` | Menggulir item saat menu lebih tinggi dari layar, agar Popup tetap bersudut bulat; sorotan Glide ada di dalamnya |
+| <Part name="Item" /> | `div.ow-menu__item` | `role="menuitem"` dan `data-disabled`; `svg` pertama diukur sebagai ikonnya |
+| Shortcut | `kbd` | Terakhir di item, di ujungnya, muted |
+| <Part name="GroupLabel" /> | `div.ow-menu__group-label` | Menamai `Menu.Group` atau `Menu.RadioGroup`-nya |
+| <Part name="CheckboxItem" /> | `div.ow-menu__item` | `role="menuitemcheckbox"`, `aria-checked` |
+| Indicator | `span.ow-menu__indicator` | Centang, atau titik pada RadioItem; `data-checked` atau `data-unchecked`; tetap menyimpan tempatnya saat mati |
+| <Part name="Separator" /> | `div.ow-menu__separator` | `role="separator"`, garis tipis |
+| <Part name="SubmenuTrigger" /> | `div.ow-menu__item` | `aria-haspopup`, `data-popup-open`, dan chevron |
+| Chevron | `span.ow-menu__chevron` | Di ujung SubmenuTrigger, dicerminkan untuk teks kanan-ke-kiri |
+
+`Menu.LinkItem` adalah item yang berupa tautan; `render` menukarnya dengan tautan router.
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### Menu.Positioner
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `sideOffset` | `number \| function` | `6` | Jarak ke trigger. Default Base UI adalah `0` |
+| `alignOffset` | `number \| function` | Baris pertama submenu sejajar | Geseran sepanjang trigger. Default Base UI adalah `0` |
+
+### Menu.Popup
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Skala huruf item |
+
+| Ukuran | Font | Tinggi item | Ikon |
+| --- | --- | --- | --- |
+| `sm` | 13px | 29,25px | 15px |
+| `md` | 14px | 31,5px | 16px |
+| `lg` | 16px | 36px | 18px |
+
+Item mengikuti aturan `--py` milik Button dengan `--py: 0.5em`.
+
+#### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-size` | Selalu: `sm`, `md`, atau `lg` |
+
+### Menu.CheckboxItemIndicator dan Menu.RadioItemIndicator
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `keepMounted` | `boolean` | `true` | Tetap memakai ruangnya saat tidak dicentang, sehingga label tetap sejajar. Default Base UI adalah `false` |
+| `children` | `ReactNode` | Centang, atau titik untuk radio | Glyph seukuran ikon |
+
+Menu modal (bawaan) menahan gulir halaman lewat kunci milik OwsemUI, yang membiarkan `overflow` halaman; menu yang dibuka dengan hover tidak pernah modal.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-menu__backdrop` | Backdrop |
+| `ow-menu__positioner` | Positioner |
+| `ow-menu__popup` | Popup |
+| `ow-menu__viewport` | Di dalam Popup, menggulir itemnya |
+| `ow-menu__item` | Item, CheckboxItem, RadioItem, SubmenuTrigger |
+| `ow-menu__indicator` | Indikator |
+| `ow-menu__chevron` | Chevron SubmenuTrigger |
+| `ow-menu__group-label` | GroupLabel |
+| `ow-menu__separator` | Separator |
+
+## Aksesibilitas [#accessibility]
+
+| Tombol | Aksi |
+| --- | --- |
+| Enter, Spasi, Panah Bawah | Pada trigger: membuka menu di item pertamanya |
+| Panah Bawah, Panah Atas | Item berikutnya atau sebelumnya, berputar |
+| Home, End | Item pertama atau terakhir |
+| Enter, Spasi | Memilih item |
+| Panah Kanan, Panah Kiri | Membuka submenu, atau kembali darinya (dicerminkan kanan-ke-kiri) |
+| Escape | Menutup menu; fokus kembali ke trigger |
+| Sebuah huruf | Item berikutnya yang diawali huruf itu |
+
+- Pembaca layar mengumumkan menu, role dan state tiap item, dan grup menurut labelnya.
+- `modal` (true secara default) menjaga sisa halaman tak terjangkau selama menu terbuka: backdrop bening
+  menerima tekanan di luar, sehingga tekanan itu hanya menutup menu, dan halaman menahan gulirnya.
+  OwsemUI menahannya tanpa menyetel `overflow` pada halaman, yang akan membuat browser menggambar ulang
+  teks halaman: roda dan tombol gulir tetap bekerja di dalam menu. Saat dibuka lewat sentuhan, seperti
+  di Base UI, halaman tetap menggulir; menu yang dibuka lewat hover, dan submenu, tidak pernah modal.
+- Item nonaktif diredupkan ke 45%; keyboard tetap menjangkaunya, dan Glide melewatinya.
+- Dengan `prefers-contrast: more`, popup mendapat cincin 1px dalam `--ow-edge`. Pada forced colors ia
+  tetap bertepi 1px dalam warna sistem, separator tetap ada, sorotan berupa outline `Highlight`, dan
+  centang mengikuti warna teks.
+
+## Tema [#theming]
+
+Menu membaca token tema ini. Setel pada Popup dengan sebuah kelas, atau pada `:root` untuk semua menu.
+Kelas di sekitar trigger tidak menjangkaunya: menu dirender dalam portal, di luar subpohon trigger.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-raised-bg` | Permukaan |
+| `--ow-popup-shadow` | Bayangan |
+| `--ow-edge` | Cincin pada `prefers-contrast: more` |
+| `--ow-fg` | Teks item |
+| `--ow-muted` | Label grup, shortcut, dan chevron |
+| `--ow-hover` | Sorotan (Glide) |
+| `--ow-line` | Separator |
+| `--ow-radius` | Sudut popup; item dan Glide memakainya dikurangi padding 4px |
+| `--ow-focus` | Cincin fokus |
+
+<ForMode mode="isolated">
+
+Pada mode isolated, nilainya ada di tiap Popup, jadi setel pada Popup dengan sebuah kelas.
+
+</ForMode>
+
+## Gerak [#motion]
+
+Menu tumbuh dari triggernya dalam 180 ms, dari 0,96 dan transparan, dan keluar dalam 120 ms; saat
+dibuka dari keyboard, ia muncul seketika. Glide meluncurkan satu sorotan antar item, dan di celah antar
+item yang menyala bertahan. Dengan `prefers-reduced-motion`, menu memudar tanpa tumbuh, dan Glide
+memudar alih-alih meluncur.

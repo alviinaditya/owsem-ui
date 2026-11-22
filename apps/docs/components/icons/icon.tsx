@@ -91,6 +91,16 @@ const ICONS = {
       <circle cx="5" cy="12" r="1" />
     </>
   ),
+  languages: (
+    <>
+      <path d="m5 8 6 6" />
+      <path d="m4 14 6-6 2-3" />
+      <path d="M2 5h12" />
+      <path d="M7 2h1" />
+      <path d="m22 22-5-10-5 10" />
+      <path d="M14 18h6" />
+    </>
+  ),
   "file-code": (
     <>
       <path d="M10 12.5 8 15l2 2.5" />
@@ -214,6 +224,12 @@ const ICONS = {
       <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" />
       <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" />
       <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" />
+    </>
+  ),
+  "panel-left": (
+    <>
+      <rect width="18" height="18" x="3" y="3" rx="2" />
+      <path d="M9 3v18" />
     </>
   ),
   pause: (

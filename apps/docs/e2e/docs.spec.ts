@@ -2,17 +2,16 @@ import { readdirSync, readFileSync } from "node:fs";
 import { expect, type Page, test } from "@playwright/test";
 import { isChangesetFile, readChangesets } from "../lib/changelog.ts";
 import { isColor, parseTokens } from "../lib/tokens.ts";
+import { showSidebar } from "./helpers.ts";
 
 const main = (page: Page) => page.getByRole("main");
 const repo = (path: string) => new URL(`../../../${path}`, import.meta.url);
 
 test("the sidebar lists the docs pages in order", async ({ page }, testInfo) => {
   await page.goto("/id/docs/theming");
-  if (testInfo.project.name === "mobile-390") {
-    await page.getByRole("button", { name: "Menu", exact: true }).click();
-  }
-  await expect(page.getByRole("list", { name: "Dokumentasi" }).getByRole("link")).toHaveText([
-    "Getting Started",
+  if (testInfo.project.name === "mobile-390") await showSidebar(page, "Navigasi dokumentasi");
+  await expect(page.getByRole("group", { name: "Mulai" }).getByRole("link")).toHaveText([
+    "Pengenalan",
     "Tema",
     "Glide",
     "Aksesibilitas",
@@ -24,7 +23,7 @@ test("the sidebar lists the docs pages in order", async ({ page }, testInfo) => 
 test("the theming page lists every theme token with its light and dark value", async ({ page }) => {
   const tokens = parseTokens(readFileSync(repo("packages/ui/src/core/tokens/tokens.css"), "utf8"));
   await page.goto("/en/docs/theming");
-  const table = page.locator("table.token-table");
+  const table = page.locator(".token-table");
   await expect(table.getByRole("columnheader")).toHaveText(["Token", "Light", "Dark"]);
   await expect(table.locator("tbody tr")).toHaveCount(tokens.length);
   for (const token of tokens) {
@@ -75,11 +74,11 @@ test("On this page marks the section being read, and the link picked", async ({
   await expect(current).toHaveText("Token modes and prefix");
 });
 
-test("docs links open a Lab on the scene they name", async ({ page }) => {
+test("docs links open a component page on the section they name", async ({ page }) => {
   await page.goto("/en/docs/theming");
   await main(page).getByRole("link", { name: "Separator", exact: true }).click();
-  await expect(page).toHaveURL(/\/en\/separator#scene-customization$/);
-  await expect(page.locator("#scene-customization")).toHaveAttribute("data-active", "");
+  await expect(page).toHaveURL(/\/en\/separator#theming$/);
+  await expect(page.locator("#theming")).toBeAttached();
 });
 
 test("the changelog shows the changesets waiting for release", async ({ page }) => {

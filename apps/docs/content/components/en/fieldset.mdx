@@ -1,0 +1,96 @@
+---
+title: Fieldset
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. In the registry it is the `fieldset` item. It needs no other
+component: Field is what you will usually put in it, and any control works.
+
+## Usage [#usage]
+
+```tsx
+import { Field, Fieldset } from "owsem-ui/base";
+
+export function Billing() {
+  return (
+    <Fieldset.Root>
+      <Fieldset.Legend>Billing address</Fieldset.Legend>
+      <Field.Root>
+        <Field.Label>Street</Field.Label>
+        <Field.Control />
+      </Field.Root>
+    </Fieldset.Root>
+  );
+}
+```
+
+Fieldset groups related fields under one legend, and one `disabled` reaches them all. Base UI names
+the group and passes the state; OwsemUI adds even gaps and a little room under the legend. Give every
+group a legend.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `fieldset.ow-fieldset` | One column with no frame; `disabled`, and `data-disabled` while it is |
+| <Part name="Legend" /> | `div.ow-fieldset__legend` | Names the group through `aria-labelledby`; the 0.75em of room under it is its `::after` |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+Everything in the group sits one gap apart, under the legend and between fields: `1.25em`. It has no
+outer margins and fills its parent, so a Form or your own layout sets the space around it. One rule with
+`content: none` on the legend's `::after` removes the room under it.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-fieldset` | Root |
+| `ow-fieldset__legend` | Legend |
+
+## Accessibility [#accessibility]
+
+Fieldset takes no focus: Tab moves through its controls, and skips them all while it is disabled.
+
+- It is a native `<fieldset>`, so it has the `group` role, named by the legend.
+- `render` makes the legend a heading when the page's outline needs one; it still names the group.
+- Disabled dims the legend and each control to 45%.
+- There is no line to lose in forced colors. Right to left, the legend sits on the right.
+
+## Theming [#theming]
+
+Fieldset reads one theme token. Set it on the legend, the root, or anything around it.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-fg` | Legend, and the text of the fields inside |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each part's root, so set yours on the legend itself.
+
+</ForMode>
+
+A `className` wins over its own values with no `!important`: `gap` is one property on one class, and
+a grid on the root lays the fields in columns.
+
+## Motion [#motion]
+
+Nothing moves. Disabled changes its opacity with the controls' own short fade, and with
+`prefers-reduced-motion` there is nothing to change.

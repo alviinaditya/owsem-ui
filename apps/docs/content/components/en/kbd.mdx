@@ -1,0 +1,96 @@
+---
+title: Kbd
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. To copy the source into your project instead, use the `kbd` item of
+the registry.
+
+## Usage [#usage]
+
+```tsx
+import { Kbd } from "owsem-ui/base";
+
+export function SearchHint() {
+  return (
+    <p>
+      Press <Kbd>⌘K</Kbd> to search.
+    </p>
+  );
+}
+```
+
+Kbd shows a key as a small keycap: a flat tint of the text color with no edge. It takes its size
+from the text around it, so one Kbd fits a sentence, a search field, or the end of a list row. Put a
+whole shortcut in one Kbd (`⌘K`, `Ctrl K`), or one key per Kbd side by side.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+A single part: a `<kbd>` with the `ow-kbd` class.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `kbd.ow-kbd` | The keycap; 0.75 of the surrounding text size, half the control radius |
+
+## API reference [#api]
+
+### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | | Added to `ow-kbd` |
+| `style` | `CSSProperties` | | Inline styles |
+| `render` | `ReactElement \| (props) => ReactElement` | | Replaces the element |
+
+The ref goes to the `kbd`; other props pass through to it as they are. It has no data attributes, since it has no states.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-kbd` | Root |
+
+## Accessibility [#accessibility]
+
+Kbd is not focusable and has no keyboard interaction.
+
+- Screen readers read its text, so write keys as people say them.
+- When the control already names its shortcut with `aria-keyshortcuts`, hide a purely visual hint
+  with `aria-hidden`, as the docs' search does.
+- In forced colors, the keycap is outlined in the system color.
+
+## Theming [#theming]
+
+Kbd reads these theme tokens. Set one on a Kbd, or on anything around it.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-fg` | The keycap's fill, an 8% tint of it, and 30% of the key's text |
+| `--ow-muted` | The key's text, 70% of it |
+| `--ow-radius` | Halved, the keycap's corners |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Kbd's root, so set yours on the Kbd itself.
+
+</ForMode>
+
+Everything is measured in `em`, so the keycap keeps its proportions at any text size.
+
+## Motion [#motion]
+
+Kbd does not move: it has no states and no transitions, so `prefers-reduced-motion` changes nothing.

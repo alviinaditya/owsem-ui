@@ -1,0 +1,135 @@
+---
+title: Button
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. To copy the source into your project instead, use the `button` item
+of the registry.
+
+## Usage [#usage]
+
+```tsx
+import { Button } from "owsem-ui/base";
+
+export function Save() {
+  return <Button onClick={save}>Save</Button>;
+}
+```
+
+Button is a native `<button type="button">` with Base UI's behavior. Pick a look with `variant`,
+`size`, and `soft`; add `startIcon`, `endIcon`, or `loading`. For an icon with no text, use
+`IconButton`.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Base UI renders a `<button>`; OwsemUI adds the `ow-button` class and draws the face as a
+pseudo-element, so the button stays one element.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `button.ow-button` | The face, the state attributes, and the press |
+| <Part name="Icon" /> | `span.ow-button__icon` | `startIcon` or `endIcon`; decorative |
+| <Part name="Label" /> | `span.ow-button__label` | The children |
+| <Part name="Spinner" /> | `span.ow-button__spinner` | Only with a `loading` prop |
+| <Part name="Ripple" /> | `span.ow-button__layer` | Clips the ripple to the face; not on `link` |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `variant` | `"primary" \| "secondary" \| "outline" \| "ghost" \| "link" \| "destructive"` | `"primary"` | The look |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Font and padding; every variant of a size has one height |
+| `soft` | `boolean` | `false` | A flat tint of the tone, for primary, secondary, and destructive |
+| `loading` | `boolean` | | Shows a spinner, keeps the width and focus, and ignores presses |
+| `startIcon`, `endIcon` | `ReactNode` | | An icon at one end |
+
+### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-variant`, `data-size` | Always; the chosen values |
+| `data-soft` | `soft` is set |
+| `data-held` | The button is held down |
+| `data-loading` | `loading` is true |
+| `data-icon-only` | An `IconButton` |
+
+### IconButton
+
+Takes the same props, except the icons and children, plus `icon` and a required `aria-label`. Its
+variant defaults to `ghost`.
+
+### buttonStyles and ButtonIcon
+
+`buttonStyles({ variant, size, soft, className })` returns the class and data attributes for a
+link, such as `<a {...buttonStyles()}>`. `ButtonIcon` (`side`: `"start"` or `"end"`) sizes an icon
+inside it. A link keeps the look, hover, and press, but has no ripple.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-button` | Root |
+| `ow-button__icon`, `ow-button__glyph` | The icon and the box around it |
+| `ow-button__label` | The text |
+| `ow-button__spinner` | The spinner |
+| `ow-button__layer`, `ow-button__ripple` | The clip and the ripple |
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| Tab | Moves focus to the button, unless it is disabled |
+| Enter, Space | Activates it |
+
+- A native `<button>`, so forms and screen readers work as for any button.
+- `IconButton` has no visible text: `aria-label` is required.
+- While loading, the button keeps focus and has `aria-busy`. Keep its label the same.
+- In forced colors, each button keeps a system-color outline, and the focus ring uses `Highlight`.
+
+## Theming [#theming]
+
+Button reads these theme tokens. Set one on an element to change the buttons inside it.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-radius` | Corner radius |
+| `--ow-accent`, `--ow-on-accent` | Primary fill and its text; the link's text |
+| `--ow-critical-solid`, `--ow-on-critical` | Destructive fill and its text |
+| `--ow-critical` | Soft destructive's tint and text |
+| `--ow-primary-shadow` | Primary and destructive top highlight |
+| `--ow-fg` | Text, secondary's tint, and outline's line |
+| `--ow-pressed-bg`, `--ow-hover` | Pressed and hover material |
+| `--ow-focus` | Focus ring |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Button's root, so set yours on the button itself.
+
+</ForMode>
+
+`--py` is not a color: it is the padding above and below the text, and sets every size.
+
+## Motion [#motion]
+
+A press scales the button to 0.97 within 90 ms and settles back on the Core settle spring. The
+ripple grows from the press point and fades on release. Both move only `transform` and `opacity`,
+and follow `--ow-motion-scale`. With `prefers-reduced-motion`, a press only changes the material
+and there is no ripple.

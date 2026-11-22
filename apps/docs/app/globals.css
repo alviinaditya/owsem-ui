@@ -1,16 +1,29 @@
 /*
- * Docs chrome, after the owner's Lab prototype. Unlayered on purpose, so it always beats
+ * Docs chrome, after the owner's prototype. Unlayered on purpose, so it always beats
  * @layer owsem.* (FR-8); only element defaults sit under it, in @layer docs-base. Colors use
- * light-dark(): owsem-ui's tokens set color-scheme per theme, so the site theme and the stage's
+ * light-dark(): owsem-ui's tokens set color-scheme per theme, so the site theme and a preview's
  * own data-theme pick the right value. Docs only; the library stays on Baseline 2023 (NF-1).
  */
 /* Re-declared on every theme root: the light-dark() fallback Next emits resolves where the
- * property is declared, so the stage's own data-theme needs its own copy. */
+ * property is declared, so a preview's own data-theme needs its own copy. */
+/* The page's side gutter (the sidebar's start edge, the preview's end edge) and the sidebar. */
+:root {
+  --docs-page-x: 16px;
+  --docs-sidebar-w: 256px;
+}
+
+@media (width >= 768px) {
+  :root {
+    --docs-page-x: 24px;
+  }
+}
+
 :root,
 [data-theme] {
   --docs-bg: var(--ow-bg);
   --docs-surface: var(--ow-panel);
-  /* A card's resting shadow (the library's); floating layers keep --ow-popup-shadow. */
+  /* A card's resting shadow (the library's, with its hairline in light); floating layers keep
+   * --ow-popup-shadow. */
   --docs-shadow: var(--ow-surface-shadow);
   --docs-line-strong: light-dark(rgb(0 0 0 / 0.14), rgb(255 255 255 / 0.1));
   /* Control boundaries need 3:1 (WCAG 1.4.11). */
@@ -24,14 +37,21 @@
   /* Errors in fields: 4.5:1 on surfaces and wells, light and dark. */
   --docs-critical: light-dark(#b03f2a, #f2ab96);
   /* Four surfaces: well (stages, tracks), bg, surface, raised. */
-  --docs-stage: var(--ow-well-bg);
+  --docs-stage: light-dark(var(--ow-panel), var(--ow-well-bg));
   /* Materials from owsem-ui's tokens (TK-7): a flat darker track and a raised thumb, so the docs
    * and the library share one source. */
   --docs-well: var(--ow-well-bg);
   --docs-raised: var(--ow-raised-bg);
-  --docs-stage-line: color-mix(in srgb, var(--ow-fg) 5.5%, transparent);
   /* The one layout line: a hairline. */
   --docs-line: light-dark(#e4e4e7, #2c2c30);
+  /* Anatomy spec sheet (Inspect): outlines, padding, gap, measures, sizes, names. */
+  --docs-spec-line: light-dark(rgb(24 24 27 / 0.62), rgb(237 237 239 / 0.62));
+  --docs-spec-padding: light-dark(#c2255c, #ff8fb3);
+  --docs-spec-gap: light-dark(#17803d, #6ee79a);
+  --docs-spec-measure: light-dark(#1d5fd1, #8ab4ff);
+  --docs-spec-size: light-dark(#965a00, #ffc766);
+  --docs-spec-label: light-dark(#18181b, #ededef);
+  --docs-spec-tag: light-dark(rgb(255 255 255 / 0.92), rgb(24 24 27 / 0.88));
   /* Code colors (lib/code-theme.ts); each is at least 4.5:1 on every code background. */
   --tk-bg: var(--docs-surface);
   --tk-text: light-dark(#27272a, #d9d9de);
@@ -44,7 +64,6 @@
   --tk-type: light-dark(#3b6a14, #b8db94);
   --tk-attr: light-dark(#1d5e98, #9cc8e9);
   --tk-fn: light-dark(#983a87, #e9b2df);
-  --tk-flash: color-mix(in srgb, var(--ow-accent) 18%, transparent);
 }
 
 :root {
@@ -87,16 +106,11 @@
 
 /*
  * Page changes (components/page-main.tsx): a navigation is a view transition. The old page leaves
- * quickly, then the new one fades in and rises a little, so a change of layout (a page to a Lab)
- * reads as one move. The sidebar and the dock are their own layers and stay live: their trail and
- * scene list animate as usual. Clicks pass through while it runs.
+ * quickly, then the new one fades in and rises a little, so a change of layout (a page to a component page)
+ * reads as one move. The sidebar is its own layer and stays live: its trail animates as usual. Clicks pass through while it runs.
  */
 .site-sidebar {
   view-transition-name: site-sidebar;
-}
-
-.dock {
-  view-transition-name: site-dock;
 }
 
 ::view-transition {
@@ -104,14 +118,11 @@
 }
 
 ::view-transition-group(site-sidebar),
-::view-transition-group(site-dock),
-::view-transition-new(site-sidebar),
-::view-transition-new(site-dock) {
+::view-transition-new(site-sidebar) {
   animation: none;
 }
 
-::view-transition-old(site-sidebar),
-::view-transition-old(site-dock) {
+::view-transition-old(site-sidebar) {
   display: none;
 }
 
@@ -234,7 +245,7 @@ body {
 }
 
 /*
- * Segmented choices (the theme, Lab controls, the family filter, the package manager): OwsemUI's
+ * Segmented choices (the theme, the family filter, the package manager): OwsemUI's
  * Toggle Group, a flat track with a crisp raised thumb (DP-1: no accent fill), at the docs' compact
  * size. --py on the items sets their height: 26px here, 24px in the sidebar's foot.
  */
@@ -245,69 +256,6 @@ body {
 
 .docs-choice .ow-toggle-group__item {
   --py: calc((26px - 1lh) / 2);
-}
-
-/*
- * Light, dark, system. Nothing is pressed until hydration (theme-switcher.tsx), so the theme in
- * use is raised here from <html data-theme>, like the thumb that then takes its place.
- */
-:root[data-theme="light"] .theme-switcher:not(:has([aria-pressed="true"])) [data-option="light"],
-:root[data-theme="dark"] .theme-switcher:not(:has([aria-pressed="true"])) [data-option="dark"],
-:root:not([data-theme]) .theme-switcher:not(:has([aria-pressed="true"])) [data-option="system"] {
-  background-color: var(--docs-raised);
-  color: var(--docs-fg);
-}
-
-/*
- * The language switcher is navigation, so links, not a Toggle Group; it is drawn like the theme's
- * group beside it: the same track, Glide on hover, and the current language raised.
- */
-.language-switcher {
-  --ow-hover: var(--docs-hover);
-  display: flex;
-  box-sizing: border-box;
-  padding: 3px;
-  border-radius: var(--docs-radius);
-  background-color: var(--docs-well);
-}
-
-.language-switcher ul {
-  display: flex;
-  flex: 1;
-  gap: 2px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.language-switcher li {
-  display: flex;
-  flex: 1;
-}
-
-.language-switcher a {
-  display: inline-flex;
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-  block-size: 24px;
-  padding-inline: 8px;
-  border-radius: var(--docs-radius-inner);
-  color: var(--docs-muted);
-  font-size: var(--docs-text-small);
-  font-weight: 500;
-  line-height: 1;
-  text-decoration: none;
-  transition: color 0.15s ease;
-}
-
-.language-switcher a:is([data-glide-active], [aria-current="page"]) {
-  color: var(--docs-fg);
-}
-
-.language-switcher a[aria-current="page"] {
-  background-color: var(--docs-raised);
-  box-shadow: var(--docs-shadow);
 }
 
 /* Plain pages */
@@ -649,32 +597,9 @@ body {
 }
 
 @media (forced-colors: active) {
-  .language-switcher a[aria-current="page"],
-  .lab-tool[aria-expanded="true"],
-  .lab-scene-nav a[aria-current="true"],
-  .lab-ichip[aria-pressed="true"],
-  .lab-part[aria-pressed="true"] {
+  .cp-part[aria-pressed="true"] {
     outline: 2px solid Highlight;
     outline-offset: -2px;
-  }
-
-  .lab-ibox[data-on] {
-    outline: 1px solid Highlight;
-  }
-
-  .lab-inspect-lines [data-on] path {
-    stroke: Highlight;
-  }
-
-  .lab-inspect-lines [data-on] circle {
-    fill: Highlight;
-  }
-
-  /* The well's shadow is gone: a transparent outline turns into the field's edge. Color
-   * Picker's swatch keeps its own color. */
-  .color-field {
-    outline: 1px solid transparent;
-    outline-offset: -1px;
   }
 }
 
@@ -725,8 +650,6 @@ body {
 
 :root:not([data-index-view]) .component-index-glide > .ow-glide {
   --_radius: calc(var(--ow-radius) + 8px);
-  /* In light the tint would match the preview's well, so it is the white surface. */
-  --ow-hover: light-dark(var(--docs-surface), var(--docs-hover));
 }
 
 .component-card:has(a:focus-visible) {
@@ -790,7 +713,7 @@ body {
   block-size: 152px;
   overflow: hidden;
   border-radius: var(--ow-radius);
-  background-color: var(--docs-stage);
+  background-color: var(--docs-well);
   color: var(--docs-fg);
   font-size: var(--docs-text-ui);
   line-height: 1.45;
@@ -1140,20 +1063,86 @@ body {
 }
 
 /* The docs' scrollers (Scroll Area) stop at their ends instead of moving the page. */
-:is(.site-sidebar-scroll, .lab-sheet-scroll, .command-text, .lab-scene-nav .ow-scroll-area)
-> .ow-scroll-area__viewport {
+.command-text > .ow-scroll-area__viewport {
   overscroll-behavior: contain;
 }
 
 /*
- * Site layout: the sidebar beside every page, and no top bar. From 1100 px the sidebar is a sticky
- * column; below, a panel over the page, opened from the dock (<html data-sidebar="open">). Its
- * tree scrolls, and its foot keeps the site's settings in view.
+ * Site layout: the library's Sidebar (the .site Provider) beside every page, and no top bar. From
+ * 768 px the sidebar is a column that folds away (the page reclaims its width); below, a drawer
+ * from the Sidebar, opened from the page's top left button. The Provider's data attributes carry
+ * its state.
  */
-
 .site {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: var(--docs-sidebar-w) minmax(0, 1fr);
+  /* The folded sidebar keeps its box, translated out of sight. */
+  overflow-x: clip;
+}
+
+.site[data-mounted] {
+  transition: grid-template-columns 0.3s var(--ow-ease-drawer, var(--ease));
+}
+
+.site[data-sidebar-state="closed"]:not([data-sidebar-mobile]),
+:root[data-sidebar-hidden] .site:not([data-mounted]) {
+  grid-template-columns: 0 minmax(0, 1fr);
+}
+
+/* A folded sidebar before hydration: out of sight, without sliding there on load. */
+:root[data-sidebar-hidden] .site:not([data-mounted]) .site-sidebar {
+  translate: -100% 0;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.site:not([data-mounted]) .site-sidebar {
+  transition: none;
+}
+
+/* A component page's open Docs panel, below 1280 px: the sidebar steps aside (the Provider's
+ * mobileQuery, sidebar-toggle.tsx), the page's own column folds away like a hidden sidebar. Before
+ * hydration the attribute alone says so, so a reload does not flash the column. */
+@media (768px <= width < 1280px) {
+  :root[data-docs-open] .site:has(.cp) {
+    grid-template-columns: 0 minmax(0, 1fr);
+  }
+
+  /* The sidebar's cell stays empty and folds to nothing (the drawer is a portal). */
+  :root[data-docs-open] .site:has(.cp) .site-main {
+    grid-column: 2;
+  }
+
+  :root[data-docs-open] .site:has(.cp):not([data-mounted]) .site-sidebar:not([data-mobile]) {
+    translate: -100% 0;
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  /* With the sidebar away, the preview meets the window on both sides. */
+  :root[data-docs-open] .site:has(.cp) .cp-preview {
+    margin-inline-start: var(--docs-page-x);
+  }
+}
+
+/* The column coming back (Docs closed) slides in rather than appearing. */
+@starting-style {
+  .site[data-mounted] .site-sidebar:not([data-mobile]) {
+    translate: -100% 0;
+    opacity: 0;
+  }
+}
+
+/* Small screens render the desktop markup before they know they are small; the drawer is a
+ * portal, so this hides only that first one. */
+@media (width < 768px) {
+  .site {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .site-sidebar:not([data-mobile]) {
+    display: none;
+  }
 }
 
 .site-main {
@@ -1161,224 +1150,131 @@ body {
 }
 
 .site-sidebar {
-  display: none;
-  flex-direction: column;
+  --ow-fg: var(--docs-fg);
+  --ow-muted: var(--docs-muted);
+  --ow-focus: var(--docs-accent);
+  --ow-hover: var(--docs-hover);
+  /* The list ends where the preview card does, clear of the window's edge. */
+  padding-block-end: 16px;
+  font-size: var(--docs-text-ui);
+}
+
+.site-sidebar:not([data-mobile]) {
+  /* As wide as its column, so nothing but the preview's margin sits between them. */
+  inline-size: var(--docs-sidebar-w);
+  position: sticky;
+  inset-block-start: 0;
+  align-self: start;
+  block-size: 100dvh;
+  background-color: var(--docs-bg);
+  /* Pages change under it without a view transition of its own. */
+  view-transition-name: site-sidebar;
+}
+
+.site-sidebar[data-mobile] {
   background-color: var(--docs-bg);
 }
 
-.site-sidebar-scroll {
-  --fade-size: 48px;
-  flex: 1;
-  min-block-size: 0;
-}
-
-.site-sidebar-scroll .ow-scroll-area__content {
-  padding: 8px 12px 24px;
-}
-
-.site-sidebar-foot {
+/* One left edge: the logo, the search field and the group labels; the items sit in the gutter. */
+.site-sidebar-head {
   display: grid;
-  flex: none;
-  gap: 8px;
-  padding: 8px 12px 12px;
+  gap: 20px;
+  padding: 20px 16px 32px var(--docs-page-x);
 }
 
-/* Theme and language side by side, each half the width, their items sharing it: 24px items in a
- * 30px track. */
-.site-sidebar-switchers {
+.site-sidebar-brand {
   display: flex;
-  gap: 8px;
-}
-
-.site-sidebar-switchers > * {
-  flex: 1;
-  min-inline-size: 0;
-}
-
-.site-sidebar-switchers .ow-toggle-group__item {
-  --py: 0px;
-}
-
-/* Below 1100 px the sidebar slides in from the left over a scrim; a tap on the scrim shuts it. */
-@media (width < 1100px) {
-  .site-sidebar {
-    display: flex;
-    position: fixed;
-    inset: 0 auto 0 0;
-    z-index: 40;
-    inline-size: min(300px, 86vw);
-    box-shadow: 0 0 60px -12px rgb(0 0 0 / 0.5);
-    visibility: hidden;
-    transform: translateX(-100%);
-    transition:
-      transform 0.35s var(--ease),
-      visibility 0s 0.35s;
-  }
-
-  :root[data-sidebar="open"] .site-sidebar {
-    visibility: visible;
-    transform: none;
-    transition: transform 0.35s var(--ease);
-  }
-
-  .site::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 35;
-    background-color: light-dark(rgb(0 0 0 / 0.25), rgb(0 0 0 / 0.5));
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.35s var(--ease);
-  }
-
-  :root[data-sidebar="open"] .site::before {
-    opacity: 1;
-    pointer-events: auto;
-  }
-}
-
-/*
- * Below 1100 px: the dock at the top left opens the sidebar on every page, a well of icon buttons
- * like a narrow Lab's stage toolbar. Pages leave room for it above their text.
- */
-.dock {
-  position: fixed;
-  inset: 12px auto auto 12px;
-  z-index: 50;
-  display: flex;
-  gap: 2px;
-  padding: 3px;
-  border-radius: var(--docs-radius);
-  background-color: var(--docs-well);
-}
-
-/* The stage toolbar's size: 24 px in a 30 px track, with a taller target for a finger. */
-.dock-button {
-  position: relative;
-  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  min-inline-size: 30px;
-  block-size: 24px;
-  padding: 0;
-  border: 0;
-  border-radius: var(--docs-radius-inner);
-  background: none;
-  color: var(--docs-muted);
+  gap: 8px;
+  min-block-size: 40px;
 }
 
-.dock-button::after {
-  content: "";
-  position: absolute;
-  inset: -5px -2px;
+.site-sidebar .ow-sidebar__content {
+  padding-block-start: 0;
+  padding-inline: var(--docs-page-x) 16px;
 }
 
-.dock-button svg {
-  inline-size: 16px;
-  block-size: 16px;
+.site-sidebar .ow-sidebar__group:where(.ow-sidebar__group ~ .ow-sidebar__group) {
+  margin-block-start: 28px;
 }
 
-.dock-button:hover {
-  background-color: var(--docs-hover);
-  color: var(--docs-fg);
+.site-sidebar .ow-sidebar__group-label {
+  padding-block-end: 6px;
 }
 
-/* Icons only; the label names the button. */
-.dock-label {
-  position: absolute;
-  inline-size: 1px;
-  block-size: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
+.site-sidebar-head .sidebar-search {
+  margin-block-end: 0;
 }
 
-@media (width < 1100px) {
-  /* Open, the panel has its own close button; the dock steps aside under the scrim. */
-  .dock {
-    transition:
-      opacity 0.2s ease,
-      visibility 0s;
-  }
-
-  :root[data-sidebar="open"] .dock {
-    visibility: hidden;
-    opacity: 0;
-    transition:
-      opacity 0.2s ease,
-      visibility 0s 0.2s;
-  }
+.sidebar-collapse {
+  margin-inline-start: auto;
 }
 
-@media (width >= 1100px) {
-  .site {
-    grid-template-columns: 248px minmax(0, 1fr);
-  }
-
-  .site-sidebar,
-  :root[data-sidebar="open"] .site-sidebar {
-    display: flex;
-    position: sticky;
-    inset: 0 auto auto;
-    z-index: 1;
-    align-self: start;
-    inline-size: auto;
-    block-size: 100vh;
-    border: 0;
-  }
-
-  .dock {
+/* The buttons that open the sidebar from a page: only while it is folded, or a drawer. */
+@media (width >= 768px) {
+  .site[data-sidebar-state="open"]:not([data-sidebar-mobile]) .sidebar-open {
     display: none;
   }
 }
 
-/*
- * The sidebar is a Tree Rail Nav (owsem-ui, DS-14) in the docs' colors, set as theme tokens on the
- * nav: an accent trail to the current page or scene, and the docs' hover for Glide. Groups have
- * icons, so the default rails fit.
- */
-.sidebar-nav {
-  --ow-fg: var(--docs-fg);
-  --ow-muted: var(--docs-muted);
-  --ow-focus: var(--docs-accent);
-  --ow-accent: var(--docs-accent);
-  /* The rails stay, as quiet hairlines; the accent trail draws the path you are on. */
-  --ow-line: var(--docs-line);
-  --ow-bg: var(--docs-bg);
+.sidebar-open,
+.sidebar-collapse {
   --ow-hover: var(--docs-hover);
-  font-size: var(--docs-text-ui);
+  color: var(--docs-muted);
 }
 
-/* The current row is marked by its text and the trail's node, without a fill. */
-.sidebar-nav .ow-tree-rail-nav__item::before {
-  content: none;
+.sidebar-open:hover,
+.sidebar-collapse:hover {
+  color: var(--docs-fg);
 }
 
-.sidebar-nav .ow-tree-rail-nav__item[data-current] {
-  font-weight: 500;
+/* Floating at the top left of the pages that have no preview bar. */
+.site-open,
+.site-tools {
+  position: fixed;
+  inset-block-start: 12px;
+  z-index: 50;
 }
 
-/* An open group's chevron shows on hover or focus; a closed one keeps it, to say it opens. */
-.sidebar-nav .ow-tree-rail-nav__chevron {
-  transition:
-    rotate 0.34s var(--ow-ease-out),
-    opacity 0.12s ease;
+.site-open {
+  inset-inline-start: 12px;
+  inline-size: 32px;
+  block-size: 32px;
+  border-radius: var(--ow-radius);
+  background-color: var(--ow-panel);
+  box-shadow: var(--ow-surface-shadow);
 }
 
-.sidebar-nav
-  .ow-tree-rail-nav__item[aria-expanded="true"]:not(:hover, :focus-visible)
-  .ow-tree-rail-nav__chevron {
-  opacity: 0;
+.site-tools {
+  inset-block-start: 16px;
+  inset-inline-end: var(--docs-page-x);
+}
+
+/* A component page carries both in its bar. */
+.site:has(.cp) .site-open,
+.site:has(.cp) .site-tools {
+  display: none;
+}
+
+/* Beside the open sidebar, the other pages have no corner to float in. */
+@media (width >= 768px) {
+  .site[data-sidebar-state="open"] .site-open {
+    display: none;
+  }
+
+  /* With the sidebar folded, the preview meets the window on both sides. */
+  .site[data-sidebar-state="closed"] .cp-preview {
+    margin-inline-start: var(--docs-page-x);
+  }
 }
 
 /* The search above the sidebar's nav (DS-5): it opens the Command Menu, so a flat well with no
- * field edge, like the Lab's color buttons. */
+ * field edge. */
 .sidebar-search {
   --py: 9.25px;
   --ow-edge: transparent;
-  background-color: var(--docs-surface);
-  box-shadow: var(--docs-shadow);
+  background-color: color-mix(in srgb, var(--docs-fg) 6%, transparent);
+  box-shadow: none;
   inline-size: 100%;
   margin-block-end: 12px;
   gap: 8px;
@@ -1441,85 +1337,252 @@ body {
   color: var(--docs-muted);
 }
 
-/* Available pages read as such; planned ones stay muted, with the "Soon" tag beside them. */
-.sidebar-nav .ow-tree-rail-nav__node:not([data-planned]) > .ow-tree-rail-nav__item[data-depth="2"] {
-  color: var(--docs-fg);
-}
-
-/* The sidebar's head: the brand, and (as a panel below 1100 px) the close button at its end. */
-.site-sidebar-head {
-  display: flex;
-  flex: none;
-  align-items: center;
-  gap: 8px;
-  block-size: 56px;
-  box-sizing: border-box;
-  padding-inline: 16px 10px;
-}
-
 .sidebar-brand {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   color: var(--docs-fg);
-  font-size: var(--docs-text-ui);
-  font-weight: 600;
   text-decoration: none;
+}
+
+.sidebar-brand-text {
+  display: grid;
+  gap: 1px;
+}
+
+.sidebar-brand-name {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 18px;
 }
 
 .logo {
   flex: none;
+  overflow: visible;
 }
 
-.sidebar-close {
-  display: grid;
-  place-items: center;
-  inline-size: 36px;
-  block-size: 36px;
-  margin-inline-start: auto;
-  padding: 0;
-  border: 0;
-  border-radius: var(--docs-radius);
-  background: none;
-  color: var(--docs-muted);
+.logo-body,
+.logo-pupil {
+  fill: var(--docs-fg);
 }
 
-.sidebar-close:hover {
-  background-color: var(--docs-hover);
-  color: var(--docs-fg);
+.logo-paper,
+.logo-mouth {
+  fill: var(--docs-bg);
 }
 
-@media (width >= 1100px) {
-  .sidebar-close {
-    display: none;
+.logo-glass {
+  fill: var(--ow-accent);
+}
+
+.logo-bridge {
+  fill: none;
+  stroke: var(--ow-accent);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.logo-squash,
+.logo-body {
+  transform-origin: 24px 41px;
+}
+
+.logo-drop,
+.logo-shades {
+  transform-origin: 24px 23px;
+}
+
+.logo-eye {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.logo-mouth {
+  d: path(
+    "M21.14 32.14C23.05 33.71 24.95 33.71 26.86 32.14C27.22 31.85 27.76 31.9 28.06 32.26C28.35 32.62 28.3 33.16 27.94 33.46C25.31 35.62 22.69 35.62 20.06 33.46C19.7 33.16 19.65 32.62 19.94 32.26C20.24 31.9 20.78 31.85 21.14 32.14Z"
+  );
+}
+
+.logo-body {
+  animation: logo-pop 0.6s both;
+}
+
+.logo-face {
+  animation: logo-rise 0.3s 0.45s both;
+}
+
+.logo-drop {
+  animation: logo-land 0.65s 0.85s both;
+}
+
+.logo-glint {
+  animation: logo-sweep 0.55s 1.45s cubic-bezier(0.4, 0, 0.6, 1) both;
+}
+
+.logo-shades {
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.logo-pupil {
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.logo-mouth {
+  transition: d 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@media (hover: hover) {
+  :where(a, button):hover .logo .logo-shades,
+  .logo:hover .logo-shades {
+    transform: translateY(-13.5px) rotate(-9deg);
+  }
+
+  :where(a, button):hover .logo .logo-eye,
+  .logo:hover .logo-eye {
+    animation: logo-blink 2.2s 0.55s infinite;
+  }
+
+  :where(a, button):hover .logo .logo-squash,
+  .logo:hover .logo-squash {
+    animation: logo-boing 0.5s cubic-bezier(0.4, 0, 0.3, 1);
+  }
+
+  :where(a, button):hover .logo .logo-pupil,
+  .logo:hover .logo-pupil {
+    transform: translate(-0.7px, -1.1px);
+  }
+
+  :where(a, button):hover .logo .logo-mouth,
+  .logo:hover .logo-mouth {
+    d: path(
+      "M22.01 32.45C22.89 30.65 25.11 30.65 25.99 32.45C26.19 32.86 26.3 33.33 26.3 33.8C26.3 34.27 26.19 34.74 25.99 35.15C25.11 36.95 22.89 36.95 22.01 35.15C21.81 34.74 21.7 34.27 21.7 33.8C21.7 33.33 21.81 32.86 22.01 32.45Z"
+    );
+  }
+}
+
+:where(a, button):focus-visible .logo .logo-shades {
+  transform: translateY(-13.5px) rotate(-9deg);
+}
+
+:where(a, button):focus-visible .logo .logo-eye {
+  animation: logo-blink 2.2s 0.55s infinite;
+}
+
+:where(a, button):focus-visible .logo .logo-squash {
+  animation: logo-boing 0.5s cubic-bezier(0.4, 0, 0.3, 1);
+}
+
+:where(a, button):focus-visible .logo .logo-pupil {
+  transform: translate(-0.7px, -1.1px);
+}
+
+:where(a, button):focus-visible .logo .logo-mouth {
+  d: path(
+    "M22.01 32.45C22.89 30.65 25.11 30.65 25.99 32.45C26.19 32.86 26.3 33.33 26.3 33.8C26.3 34.27 26.19 34.74 25.99 35.15C25.11 36.95 22.89 36.95 22.01 35.15C21.81 34.74 21.7 34.27 21.7 33.8C21.7 33.33 21.81 32.86 22.01 32.45Z"
+  );
+}
+
+@keyframes logo-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.3, 0.1);
+  }
+  45% {
+    opacity: 1;
+    transform: scale(0.93, 1.1);
+  }
+  70% {
+    transform: scale(1.05, 0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes logo-rise {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+}
+
+@keyframes logo-land {
+  0% {
+    opacity: 0;
+    transform: translateY(-24px) rotate(-16deg);
+    animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.6);
+  }
+  25% {
+    opacity: 1;
+  }
+  55% {
+    transform: translateY(1.6px) rotate(3deg);
+  }
+  75% {
+    transform: translateY(-0.8px) rotate(-1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes logo-sweep {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(64px);
+  }
+}
+
+@keyframes logo-blink {
+  0%,
+  38%,
+  100% {
+    transform: scaleY(1);
+  }
+  44% {
+    transform: scaleY(0.12);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes logo-boing {
+  0% {
+    transform: none;
+  }
+  30% {
+    transform: scale(1.05, 0.93);
+  }
+  62% {
+    transform: scale(0.97, 1.04);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo *,
+  .logo-body,
+  .logo-face,
+  .logo-drop,
+  .logo-glint {
+    animation: none !important;
+    transition: none !important;
   }
 }
 
 .sidebar-version {
-  padding-inline: 6px;
-  border-radius: 999px;
-  background-color: var(--docs-well);
   color: var(--docs-muted);
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: var(--docs-text-micro);
-  line-height: 1.4;
-  min-block-size: 18px;
-}
-
-.sidebar-nav .soon {
-  flex: none;
-}
-
-.sidebar-scene-n {
-  flex: none;
-  color: var(--docs-muted);
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: var(--docs-text-micro);
-  font-variant-numeric: tabular-nums;
-}
-
-.sidebar-nav [aria-current="step"] .sidebar-scene-n {
-  color: var(--docs-accent);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  white-space: nowrap;
 }
 
 .site-content {
@@ -1533,8 +1596,8 @@ body {
   }
 }
 
-/* Room above the text for the dock, until the sidebar shows. */
-@media (width < 1100px) {
+/* Room above the text for the floating buttons, until the sidebar shows. */
+@media (width < 768px) {
   .site-content,
   .page {
     padding-block-start: 64px;
@@ -1611,7 +1674,7 @@ body {
   font-size: var(--docs-text-ui);
 }
 
-/* Prose, code, and tables inside pages and Lab scenes */
+/* Prose, code, and tables inside pages */
 
 /* MDX code blocks (components/mdx.tsx), owsem-ui Code Blocks. */
 .docs-code {
@@ -1623,190 +1686,39 @@ body {
   color: var(--tk-text);
 }
 
-@layer docs-base {
-  /* Scrolls inside itself so wide tables never scroll the page (DS-9). */
-  table {
-    display: block;
-    max-inline-size: 100%;
-    margin-block: 24px;
-    overflow-x: auto;
-    border-collapse: separate;
-    border-spacing: 0;
-    font-size: var(--docs-text-small);
-    line-height: 1.5;
-    font-variant-numeric: tabular-nums;
-  }
-
-  th,
-  td {
-    padding: 8px 12px;
-    border-block-end: 1px solid var(--docs-line);
-    text-align: start;
-  }
-
-  th {
-    color: var(--docs-muted);
-    font-weight: 500;
-  }
+/* Markdown tables (components/mdx.tsx) are owsem-ui Tables: a card that scrolls or stacks inside itself. */
+.docs-table {
+  margin-block: 24px;
+  font-size: var(--docs-text-small);
 }
 
-/*
- * Lab (DS-2, DS-9, DS-10). From 960 px (SIDE_BY_SIDE in components/lab/layout.ts) the narrative
- * sits beside the stage; below, the stage fills the screen and the narrative is a sheet over it
- * (--sheet-h). Container queries inside the stage follow its own width.
- */
-
-.lab {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
+/* A name in a cell stays whole ("data-size", not "data-" / "size"); the column grows instead. */
+.docs-table code {
+  white-space: nowrap;
 }
 
-.lab-narrative {
-  min-inline-size: 0;
-  padding: 8px 16px 48px;
-  font-size: var(--docs-text-body-compact);
-  line-height: 1.6;
+/* Stacked, long values (a type union) may wrap between their words. */
+.docs-table[data-layout="stack"] code {
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 
-.lab-narrative :where(h2) {
-  margin-block: 0 0.75rem;
+/* Stacked cells read as text, not chips: no background; the record's name is the one bold mono. */
+.docs-table[data-layout="stack"] code {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--docs-fg);
+  font-size: 0.8125rem;
 }
 
-.lab-narrative :where(h3) {
-  margin-block: 2rem 0.5rem;
-}
-
-/* Stage */
-
-.lab-stage {
-  container: stage / inline-size;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background-color: var(--docs-bg);
-}
-
-@media (width < 960px) {
-  /* SHEET_HALF and SHEET_FULL_GAP in components/lab/layout.ts. */
-  .lab {
-    --sheet-h: 0px;
-  }
-
-  .lab[data-sheet="half"] {
-    --sheet-h: 58dvh;
-  }
-
-  .lab[data-sheet="full"] {
-    --sheet-h: calc(100dvh - 64px);
-  }
-
-  .lab[data-dragging] {
-    --sheet-h: var(--sheet-drag);
-  }
-
-  /* The stage takes the screen above the sheet, the two meeting as the sheet moves. */
-  .lab-stage-frame {
-    position: fixed;
-    inset: 0 0 auto;
-    z-index: 20;
-    block-size: calc(100dvh - var(--sheet-h));
-    transition: block-size 0.4s var(--ease);
-  }
-
-  .lab-stage-frame > .lab-stage {
-    block-size: 100%;
-  }
-
-  /* Rising from shut, the sheet waits for the caption to fade (.lab-caption). */
-  .lab[data-sheet-move="open"] :is(.lab-stage-frame, .lab-narrative) {
-    transition-delay: 0.15s;
-  }
-
-  .lab[data-dragging] :is(.lab-stage-frame, .lab-narrative) {
-    transition: none;
-  }
-
-  /* Over the stage, under the site's menu (the dock and the sidebar it opens). */
-  .lab-narrative {
-    position: fixed;
-    inset: auto 0 0;
-    z-index: 30;
-    display: flex;
-    flex-direction: column;
-    block-size: var(--sheet-h);
-    padding: 0;
-    border-radius: var(--ow-radius) var(--ow-radius) 0 0;
-    background-color: var(--docs-bg);
-    box-shadow: 0 -24px 60px -24px rgb(0 0 0 / 0.4);
-    transition: block-size 0.4s var(--ease);
-  }
-
-  .lab[data-sheet="closed"] .lab-narrative {
-    visibility: hidden;
-    transition:
-      block-size 0.4s var(--ease),
-      visibility 0s 0.4s;
-  }
-
-  /* The narrative's end picks the last scene (LabShell), so no extra room is needed below it. */
-  .lab-narrative-scroll {
-    flex: 1;
-    min-block-size: 0;
-    padding: 0 24px 24px;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scroll-padding-block-start: 12px;
-  }
-
-  .lab-narrative-scroll:focus-visible {
-    outline: 2px solid var(--docs-accent);
-    outline-offset: -2px;
-  }
-}
-
-@media (width >= 960px) {
-  .lab {
-    /* The text grows with wide screens, so its lines reach the paragraphs' 60ch. */
-    grid-template-columns: clamp(440px, 38%, 640px) minmax(0, 1fr);
-  }
-
-  .lab-narrative {
-    grid-area: 1 / 1;
-    padding: 24px clamp(32px, 2.5vw, 48px) 96px;
-  }
-
-  .lab-stage-column {
-    position: sticky;
-    grid-area: 1 / 2;
-    align-self: start;
-    inset-block-start: var(--top-h);
-    block-size: calc(100vh - var(--top-h));
-  }
-
-  .lab-stage-frame,
-  .lab-stage-frame > .lab-stage {
-    block-size: 100%;
-  }
-
-  /* The frame sits outside the stage theme, so the margin around the well stays the page's. */
-  .lab-stage-frame {
-    background-color: var(--docs-bg);
-  }
-
-  .lab-stage-frame > .lab-stage {
-    background-color: transparent;
-  }
-}
-
-/* Until the sidebar shows, the dock sits above the narrative. */
-@media (960px <= width < 1100px) {
-  .lab-narrative {
-    padding-block-start: 64px;
-  }
+.docs-table[data-layout="stack"] :is(.ow-table__head, .ow-table__cell):first-child code {
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
 /* The sheet's handle: tap to switch half and full height, drag to set it. */
-.lab-sheet-handle {
+.cp-sheet-handle {
   display: grid;
   flex: none;
   place-items: center;
@@ -1819,7 +1731,7 @@ body {
   touch-action: none;
 }
 
-.lab-sheet-handle::before {
+.cp-sheet-handle::before {
   content: "";
   inline-size: 40px;
   block-size: 5px;
@@ -1827,557 +1739,25 @@ body {
   background-color: var(--docs-control);
 }
 
-.lab-sheet-handle:focus-visible {
+.cp-sheet-handle:focus-visible {
   outline: 2px solid var(--docs-accent);
   outline-offset: -2px;
 }
 
-.lab-sheet-head {
-  display: flex;
-  flex: none;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  block-size: 44px;
-  padding-inline: 24px 8px;
-}
-
-.lab-sheet-title {
-  margin: 0;
-  color: var(--docs-muted);
-  font-size: var(--docs-text-ui);
-  font-weight: 500;
-}
-
-.lab-sheet-close {
-  display: grid;
-  place-items: center;
-  inline-size: 36px;
-  block-size: 36px;
-  padding: 0;
-  border: 0;
-  border-radius: var(--docs-radius);
-  background: none;
-  color: var(--docs-muted);
-}
-
-.lab-sheet-close:hover {
-  background-color: var(--docs-hover);
-  color: var(--docs-fg);
-}
-
-/* The scenes, between the sheet's head and its text; the one being read is underlined. */
-.lab-scene-nav {
-  --fade-size: 28px;
-  flex: none;
-  padding-block-end: 4px;
-}
-
-/* Positioned, so a link's offsetLeft counts from the row's start (LabShell). */
-.lab-scene-nav .ow-scroll-area__content {
-  position: relative;
-  display: flex;
-  gap: 24px;
-  padding-inline: 24px;
-}
-
-.lab-scene-nav a {
-  display: inline-flex;
-  flex: none;
-  align-items: baseline;
-  gap: 8px;
-  padding-block: 12px;
-  color: var(--docs-muted);
-  font-size: var(--docs-text-small);
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.lab-scene-nav a:focus-visible {
-  outline-offset: -2px;
-}
-
-.lab-scene-nav a span {
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: var(--docs-text-micro);
-}
-
-.lab-scene-nav a:hover {
-  color: var(--docs-fg);
-}
-
-.lab-scene-nav a[aria-current="true"] {
-  box-shadow: inset 0 -2px 0 var(--docs-accent);
-  color: var(--docs-fg);
-}
-
-.lab-scene-nav a[aria-current="true"] span {
-  color: var(--docs-accent);
-}
-
-/*
- * The narrow stage's caption, under the demo. A rising panel waits for it to fade, then takes its
- * room; closing, the room comes back first, then the caption. minmax(0, 0fr) folds the room.
- */
-.lab-caption {
-  display: grid;
-  flex: none;
-  grid-template-rows: minmax(0, 1fr);
-  overflow: hidden;
-  transition:
-    grid-template-rows 0.4s var(--ease),
-    opacity 0.25s ease 0.4s;
-}
-
-.lab-caption-inner {
-  padding: 0 24px 24px;
-}
-
-.lab-caption .page-header {
-  margin: 0;
-}
-
-.lab-caption h1 {
-  margin-block-start: 8px;
-}
-
-.lab-caption .lead {
-  display: -webkit-box;
-  max-inline-size: 48ch;
-  margin-block: 0.75rem 0;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-}
-
-.lab-caption .badges {
-  margin-block-start: 12px;
-}
-
-.lab:not([data-sheet="closed"]) .lab-caption,
-.lab-stage:has(> .lab-stage-body:is([data-code=""], [data-controls=""]), .lab-inspect-dock)
-  .lab-caption {
-  grid-template-rows: minmax(0, 0fr);
-  visibility: hidden;
-  opacity: 0;
-  transition:
-    opacity 0.15s ease,
-    grid-template-rows 0.4s var(--ease) 0.15s,
-    visibility 0s 0.15s;
-}
-
-/* A phone held sideways keeps its few rows for the demo. */
-@media (width < 960px) and (height < 560px) {
-  .lab-caption {
-    display: none;
-  }
-}
-
-/* Scenes follow their content; a hairline Separator marks where the next one starts. */
-/*
- * Scenes are set apart by space alone. The scene being read, the one shaping the stage, reads in
- * full; the others recede to the muted color (still AA), and fade back as they become active.
- */
-.lab-scene {
-  padding-block: 48px;
-  transition: color 0.3s ease;
-}
-
-.lab-scene:first-child {
-  padding-block-start: 24px;
-}
-
-.lab-scene:not([data-active]) {
-  --scene-text: var(--docs-muted);
-  color: var(--docs-muted);
-}
-
-.lab-scene :is(h1, h2, h3) {
-  transition: color 0.3s ease;
-}
-
-.lab-scene:not([data-active]) :is(h1, h2, h3) {
-  color: var(--docs-body);
-}
-
-/* The scene's number, then its Play scene button: one label above the title. */
-.lab-scene-head {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-block-end: 6px;
-}
-
-.lab-scene-n {
-  margin: 0;
-  color: var(--docs-muted);
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: var(--docs-text-micro);
-  font-variant-numeric: tabular-nums;
-}
-
-.lab-scene[data-active] .lab-scene-n {
-  color: var(--docs-accent);
-}
-
-.lab-narrative p {
-  max-inline-size: 60ch;
-  color: var(--scene-text, var(--docs-body));
-  transition: color 0.3s ease;
-}
-
-.lab-narrative .page-header {
-  margin-block-end: 40px;
-}
-
-/* Focused by a click (tabIndex -1), the stage itself shows no ring. */
-.lab-stage:focus {
-  outline: none;
-}
-
-.lab-stage-bar {
-  position: relative;
-  z-index: 6;
-  display: flex;
-  flex: none;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  block-size: 48px;
-  box-sizing: border-box;
-  padding-inline: 16px 8px;
-  background-color: var(--docs-bg);
-}
-
-.lab-stage-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-inline-size: 0;
-  margin: 0;
-  color: var(--docs-body);
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 0.6875rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.lab-stage-title-text {
-  min-inline-size: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.lab-live {
-  flex: none;
-  inline-size: 6px;
-  block-size: 6px;
-  border-radius: 50%;
-  background-color: light-dark(#1f8a5c, #8fd9b6);
-}
-
-/*
- * The stage toolbar (owsem-ui Toolbar) in the docs' colors, set as theme tokens on it. Narrow, the
- * bar around it is the well; wide, the tools are ghost buttons on the bar, with no track.
- * Toggles (Inspect, Controls, Code) keep Toggle's own look: on is the raised key.
- */
-.lab-tools {
-  --ow-muted: var(--docs-muted);
-  --ow-fg: var(--docs-fg);
-  --ow-hover: var(--docs-hover);
-  --ow-line: var(--docs-line);
-  flex: none;
-  min-inline-size: 0;
-  /* Several tools can be pressed at once; the toolbar's 4 px gap keeps neighbors apart. */
-  padding: 0;
-  background: none;
-  box-shadow: none;
-}
-
-/* 24 px tall (--py 0: the 24 px floor), with the docs' own type and spacing. */
-.lab-tool {
-  --py: 0px;
-  gap: 8px;
-  block-size: 24px;
-  padding-inline: 8px;
-  /* On the bar with no track: the one radius. */
-  border-radius: var(--ow-radius);
-  font-size: var(--docs-text-small);
-  font-weight: 400;
-}
-
-.lab-tool[aria-expanded="true"] {
-  background-color: var(--docs-raised);
-  box-shadow: var(--docs-shadow);
-  color: var(--docs-fg);
-}
-
-.lab-tool-label {
-  position: absolute;
-  inline-size: 1px;
-  block-size: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-/* Tool names show once the stage has room for them. */
-@container stage (min-width: 560px) {
-  .lab-tool-label {
-    position: static;
-    inline-size: auto;
-    block-size: auto;
-    overflow: visible;
-    clip-path: none;
-  }
-}
-
-/*
- * The docs open from the same toolbar, set apart by a hairline, labeled while there is room.
- * Its resting text (the toolbar's --ow-muted) is the accent.
- */
-.lab-tool-docs {
-  --ow-muted: var(--docs-accent);
-  font-weight: 600;
-}
-
-.lab-tool-more {
-  display: none;
-}
-
-/* Down to a 320 px screen: below 480 px, theme and tokens move into More; below 370 px (420 px
- * with Replay), Docs keeps its icon only. */
-@container stage (width < 480px) {
-  .lab-tool[data-more] {
-    display: none;
-  }
-
-  .lab-tool-more {
-    display: inline-flex;
-  }
-}
-
-@container stage (width < 370px) {
-  .lab-tool-docs-label {
-    position: absolute;
-    inline-size: 1px;
-    block-size: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-}
-
-@container stage (width < 420px) {
-  .lab-tools:has([aria-keyshortcuts="R"]) .lab-tool-docs-label {
-    position: absolute;
-    inline-size: 1px;
-    block-size: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-}
-
-/* The Token label waits for a wide stage, so the stage's own name keeps its room. */
-@container stage (width < 760px) {
-  .lab-tool-token-label {
-    position: absolute;
-    inline-size: 1px;
-    block-size: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-}
-
-/* The More menu (owsem-ui Menu): rows as tall as a md Button, for a finger; T beside the label. */
-.lab-more {
-  min-inline-size: 220px;
-}
-
-.lab-more .ow-menu__item {
-  --py: 0.75em;
-}
-
-.lab-more-label {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.lab-tool-sep {
-  margin-inline: 3px;
-}
-
-/* Narrow: the toolbar floats at the top right in a well, the site's menu at the top left. */
-@media (width < 960px) {
-  .lab-stage-bar {
-    position: absolute;
-    inset: 12px 12px auto auto;
-    block-size: auto;
-    max-inline-size: calc(100% - 64px);
-    padding: 3px;
-    border: 0;
-    border-radius: var(--docs-radius);
-    background-color: var(--docs-well);
-  }
-
-  .lab-stage-title {
-    display: none;
-  }
-
-  /* The switchers' size (24 px in a 30 px track), with a taller target for a finger; the dock's. */
-  .lab-stage-bar .lab-tool {
-    position: relative;
-    justify-content: center;
-    min-inline-size: 30px;
-    block-size: 24px;
-    padding-inline: 8px;
-    border-radius: var(--docs-radius-inner);
-  }
-
-  .lab-stage-bar .lab-tool::after {
-    content: "";
-    position: absolute;
-    inset: -5px -2px;
-  }
-
-  /* Under the full sheet, only the toolbar shows: the way back to the stage. */
-  .lab[data-sheet="full"] .lab-stage-body {
-    visibility: hidden;
-  }
-}
-
-/* The sheet, its way in, and the caption exist only on narrow screens. */
+/* The sheet's handle exists only on narrow screens. */
 @media (width >= 960px) {
-  /* Beside the text the well is inset and rounded; panels sit inside it, clipped by its radius. */
-  .lab-stage-body {
-    margin: 0 8px 8px;
-    border-radius: var(--ow-radius);
-  }
-
-  .lab-sheet-handle,
-  .lab-sheet-head,
-  .lab-scene-nav,
-  .lab-tool-sep,
-  .lab-tool-docs,
-  .lab-caption {
+  .cp-sheet-handle {
     display: none;
   }
 }
 
-/*
- * A flat well. The grid is a measuring tool: it fades in only while Inspect is on.
- */
-.lab-stage-body {
-  position: relative;
-  isolation: isolate;
-  display: grid;
-  flex: 1;
-  /* One cell the size of the stage, so a demo taller than it still centers before .lab-fit
-   * scales it down. */
-  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
-  place-items: center;
-  min-block-size: 0;
-  padding: 16px;
-  /* Shut panels wait below its edge, over the caption on a narrow stage. */
-  overflow: clip;
-  background-color: var(--docs-stage);
-  color: var(--docs-fg);
-}
-
-/* Narrow: the whole stage is the canvas, caption included; the top leaves room for the toolbar. */
-@media (width < 960px) {
-  .lab-stage {
-    background-color: var(--docs-stage);
-  }
-
-  .lab-stage-body {
-    padding-block-start: 54px;
-    background: none;
-  }
-}
-
-.lab-stage-body::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background-image:
-    linear-gradient(var(--docs-stage-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--docs-stage-line) 1px, transparent 1px);
-  background-position: center;
-  background-size: 32px 32px;
-  mask-image: radial-gradient(ellipse 60% 55% at 50% 50%, #000 15%, transparent 75%);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 200ms ease;
-}
-
-.lab-stage-body[data-inspect]::before {
-  opacity: 1;
-}
-
-/* States and variants side by side (components/lab/matrix.tsx), without the docs' table lines. */
-.lab-matrix {
-  display: table;
-  margin: -14px -18px;
-  overflow: visible;
-  border-spacing: 18px 14px;
-  font-size: inherit;
-}
-
-.lab-matrix :is(th, td) {
-  padding: 0;
-  border: 0;
-  border-image: none;
-  vertical-align: top;
-}
-
-.lab-matrix th {
-  color: var(--docs-muted);
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: var(--docs-text-micro);
-  font-weight: 400;
-}
-
-.lab-matrix th[scope="row"] {
-  max-inline-size: 84px;
-  padding-block-start: 16px;
-}
-
-.lab-fit {
+.cp-fit {
   transform-origin: center;
   transition: transform 0.35s var(--ease);
 }
 
-/* Play scene (DS-11): only on scenes with an animation, beside the number; it also stops. */
-.lab-play {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  block-size: 24px;
-  padding-inline: 8px 8px;
-  border: 0;
-  border-radius: 999px;
-  background: none;
-  color: var(--docs-muted);
-  font-size: var(--docs-text-small);
-}
-
-.lab-play:hover {
-  background-color: var(--docs-hover);
-  color: var(--docs-fg);
-}
-
-.lab-play[data-playing] {
-  color: var(--docs-accent);
-}
-
 /* A part's name in the anatomy table: it outlines the part on the stage. */
-.lab-part {
+.cp-part {
   display: inline-flex;
   align-items: center;
   block-size: 26px;
@@ -2391,115 +1771,37 @@ body {
   white-space: nowrap;
 }
 
-.lab-part:hover {
+.cp-part:hover {
   background-color: color-mix(in srgb, var(--docs-fg) 6%, var(--docs-surface));
 }
 
-.lab-part[aria-pressed="true"] {
+.cp-part[aria-pressed="true"] {
   background-color: var(--docs-raised);
   color: var(--docs-accent);
 }
 
-/*
- * Inspect (DS-3): dashed outlines on the parts, the selected one solid, with no glow; leader lines
- * run from a dot on each part to its name. Positions come from components/lab/inspect.tsx.
- */
-.lab-inspect {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  pointer-events: none;
-  /* It fades in while the demo makes room for it, and out before it leaves (stage.tsx). */
-  transition: opacity 0.2s var(--ease);
+/* In a stacked table the part name is the record's title: plain text, flush with the labels. */
+.docs-table[data-layout="stack"] .cp-part {
+  block-size: auto;
+  padding-inline: 0;
+  border-radius: 4px;
+  background: none;
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
-@starting-style {
-  .lab-inspect {
-    opacity: 0;
-  }
+.docs-table[data-layout="stack"] .cp-part:hover,
+.docs-table[data-layout="stack"] .cp-part[aria-pressed="true"] {
+  background: none;
+  color: var(--docs-accent);
 }
 
-.lab-inspect[data-leaving] {
-  opacity: 0;
-  transition-duration: 0.15s;
+.docs-table[data-layout="stack"] .cp-part:focus-visible {
+  outline: 2px solid var(--docs-accent);
+  outline-offset: 2px;
 }
 
-.lab-inspect-lines {
-  position: absolute;
-  inset: 0;
-  inline-size: 100%;
-  block-size: 100%;
-  overflow: visible;
-}
-
-.lab-inspect-lines path {
-  fill: none;
-  stroke: color-mix(in srgb, var(--docs-accent) 38%, transparent);
-  stroke-width: 1;
-}
-
-.lab-inspect-lines circle {
-  fill: color-mix(in srgb, var(--docs-accent) 60%, transparent);
-}
-
-.lab-inspect-lines [data-on] path {
-  stroke: var(--docs-accent);
-}
-
-.lab-inspect-lines [data-on] circle {
-  fill: var(--docs-accent);
-}
-
-.lab-ibox {
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline-start: 0;
-  box-sizing: border-box;
-  border-radius: 8px;
-  background-color: color-mix(in srgb, var(--docs-accent) 8%, transparent);
-}
-
-.lab-ibox[data-on] {
-  background-color: color-mix(in srgb, var(--docs-accent) 20%, transparent);
-}
-
-.lab-ichips {
-  min-inline-size: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.lab-ichip {
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline-start: 0;
-  box-sizing: border-box;
-  block-size: 24px;
-  padding-inline: 8px;
-  border: 0;
-  border-radius: 999px;
-  background-color: var(--docs-surface);
-  color: var(--docs-body);
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: var(--docs-text-micro);
-  white-space: nowrap;
-  pointer-events: auto;
-  transition:
-    color 0.15s ease,
-    background-color 0.15s ease;
-}
-
-.lab-ichip:hover {
-  color: var(--docs-fg);
-}
-
-.lab-ichip[aria-pressed="true"] {
-  background-color: var(--docs-accent);
-  color: var(--docs-on-accent);
-}
-
-.lab-part-card {
+.cp-part-card {
   position: absolute;
   inset-block-end: 14px;
   inset-inline-start: 14px;
@@ -2512,14 +1814,14 @@ body {
   pointer-events: auto;
 }
 
-.lab-part-card-name {
+.cp-part-card-name {
   margin: 0;
   color: var(--docs-fg);
   font-size: var(--docs-text-small);
   font-weight: 600;
 }
 
-.lab-part-card-note {
+.cp-part-card-note {
   margin: 4px 0 0;
   color: var(--docs-muted);
   font-size: var(--docs-text-micro);
@@ -2527,7 +1829,7 @@ body {
 }
 
 /* The column holds the card's width, so a long value ends in an ellipsis. */
-.lab-part-card ul {
+.cp-part-card ul {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 8px;
@@ -2537,7 +1839,7 @@ body {
 }
 
 /* A value that does not fit beside a long token name goes to the next line, at the end. */
-.lab-part-card li {
+.cp-part-card li {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -2547,14 +1849,14 @@ body {
   line-height: 1.4;
 }
 
-.lab-part-card code {
+.cp-part-card code {
   padding: 0;
   background: none;
   color: var(--tk-attr);
   font-size: inherit;
 }
 
-.lab-part-card-swatch {
+.cp-part-card-swatch {
   flex: none;
   inline-size: 14px;
   block-size: 14px;
@@ -2563,11 +1865,11 @@ body {
   box-shadow: inset 0 0 0 1px var(--docs-line-strong);
 }
 
-.lab-part-card-swatch[data-empty] {
+.cp-part-card-swatch[data-empty] {
   visibility: hidden;
 }
 
-.lab-part-card-value {
+.cp-part-card-value {
   flex: 1 1 auto;
   min-inline-size: 0;
   overflow: hidden;
@@ -2575,384 +1877,6 @@ body {
   text-align: end;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-/* Under the demo the card spans the stage, its tokens in columns. */
-.lab-part-card[data-place="below"] {
-  inset-inline-end: 14px;
-  inline-size: auto;
-}
-
-.lab-part-card[data-place="below"] ul {
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  column-gap: 24px;
-}
-
-.lab-part-card-sizer {
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline: 14px;
-  display: grid;
-  visibility: hidden;
-}
-
-.lab-part-card-sizer > .lab-part-card {
-  position: static;
-  grid-area: 1 / 1;
-}
-
-/* Docked Inspect (stage under INSPECT_COMPACT, components/lab/layout.ts): names, then card. */
-.lab-inspect-dock {
-  position: absolute;
-  inset: auto 0 0;
-  display: grid;
-  padding-block-end: 16px;
-  border-radius: var(--ow-radius) var(--ow-radius) 0 0;
-  background-color: var(--docs-surface);
-  box-shadow: 0 -24px 60px -24px rgb(0 0 0 / 0.4);
-  pointer-events: auto;
-  transition: translate 0.35s var(--ease) 0.15s;
-}
-
-@starting-style {
-  .lab-inspect-dock {
-    translate: 0 100%;
-  }
-}
-
-.lab-inspect[data-leaving] .lab-inspect-dock {
-  translate: 0 100%;
-  transition-duration: 0.25s;
-  transition-delay: 0s;
-}
-
-.lab-stage-body:is([data-code], [data-controls]) .lab-inspect-dock {
-  display: none;
-}
-
-/* Above the open docs sheet, the names alone, straight on the stage: one sheet is enough. */
-.lab-inspect-dock[data-brief] {
-  padding-block-end: 0;
-  background: none;
-  box-shadow: none;
-}
-
-.lab-inspect-dock .lab-ichips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 16px 16px 10px;
-}
-
-.lab-inspect-dock .lab-ichip {
-  position: static;
-}
-
-.lab-inspect-cards {
-  display: grid;
-}
-
-.lab-part-card[data-place="dock"] {
-  position: static;
-  grid-area: 1 / 1;
-  inline-size: auto;
-  padding: 2px 16px 0;
-  border-radius: 0;
-  background: none;
-  box-shadow: none;
-}
-
-.lab-part-card[data-off] {
-  visibility: hidden;
-}
-
-/* A scene script's pointer; the arrow's tip is the point it stands on. */
-.lab-ghost {
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline-start: 0;
-  z-index: 3;
-  opacity: 0;
-  pointer-events: none;
-  filter: drop-shadow(0 2px 4px rgb(0 0 0 / 0.45));
-  transition: opacity 0.2s ease;
-}
-
-.lab-ghost[data-on] {
-  opacity: 1;
-}
-
-.lab-ghost-arrow {
-  display: block;
-  margin: -3px 0 0 -4px;
-  fill: #fff;
-  stroke: #18181b;
-  stroke-width: 1.3;
-  stroke-linejoin: round;
-  transform-origin: 4px 3px;
-  transition: scale 0.12s ease;
-}
-
-.lab-ghost[data-down] .lab-ghost-arrow {
-  scale: 0.82;
-}
-
-/* Controls and code are sheets attached to the stage edges, told apart by fill. */
-.lab-controls,
-.lab-drawer {
-  position: absolute;
-  inset: auto 0 0;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  block-size: 48%;
-  overflow: hidden;
-  border-radius: var(--ow-radius) var(--ow-radius) 0 0;
-  background-color: var(--docs-surface);
-  box-shadow: var(--docs-shadow);
-  transform: translateY(100%);
-  transition: transform 0.35s var(--ease);
-}
-
-.lab-controls {
-  z-index: 4;
-}
-
-/* The drawer's end follows the side panel in step (below), same timing as the slide. */
-.lab-drawer {
-  z-index: 5;
-  transition:
-    transform 0.35s var(--ease),
-    inset-inline-end 0.35s var(--ease);
-}
-
-.lab-stage-body[data-controls=""] .lab-controls,
-.lab-stage-body[data-code=""] .lab-drawer {
-  transform: none;
-}
-
-/* Narrow, scenes leave the panels shut (LabShell); until the page knows its width, CSS does. */
-@media (width >= 960px) {
-  .lab-stage-body[data-controls="scene"] .lab-controls,
-  .lab-stage-body[data-code="scene"] .lab-drawer {
-    transform: none;
-  }
-}
-
-/* SIDE_PANEL_MIN and SIDE_PANEL_WIDTH in components/lab/layout.ts: on a wide stage the controls
- * sit beside the demo, full height. */
-@container stage (min-width: 720px) {
-  .lab-controls {
-    inset: 0 0 0 auto;
-    inline-size: 280px;
-    block-size: auto;
-    border-radius: var(--ow-radius) 0 0 var(--ow-radius);
-    transform: translateX(100%);
-  }
-
-  /* Set by the controls alone, so the drawer keeps its width while it slides away. */
-  .lab-stage-body[data-controls] .lab-drawer {
-    inset-inline-end: 280px;
-  }
-}
-
-/* Narrow: code and controls wait for the caption to fade, and on a phone-width stage rise as
- * sheets; wider, they sit flush. */
-@media (width < 960px) {
-  .lab-stage-body[data-code=""] .lab-drawer,
-  .lab-stage-body[data-controls=""] .lab-controls {
-    transition-delay: 0.15s;
-  }
-
-  @container stage (width < 720px) {
-    .lab-drawer,
-    .lab-controls {
-      border: 0;
-      border-image: none;
-      border-radius: var(--ow-radius) var(--ow-radius) 0 0;
-    }
-
-    .lab-stage-body[data-code=""] .lab-drawer {
-      box-shadow: 0 -24px 60px -24px rgb(0 0 0 / 0.4);
-    }
-
-    .lab-stage-body[data-controls=""] .lab-controls {
-      box-shadow: 0 -24px 60px -24px rgb(0 0 0 / 0.4);
-    }
-  }
-
-  /* Beside the demo, the controls start under the floating toolbar. */
-  @container stage (width >= 720px) {
-    .lab-controls {
-      padding-block-start: 50px;
-    }
-  }
-}
-
-.lab-controls-inner {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 16px;
-}
-
-.lab-field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-inline-size: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  font-size: var(--docs-text-small);
-}
-
-.lab-field-label,
-.lab-field legend {
-  margin-block-end: 6px;
-  padding: 0;
-  color: var(--docs-muted);
-  font-size: var(--docs-text-small);
-}
-
-/* Color controls (components/lab/color-field.tsx): a flat well, like the segmented track. The
- * control is a button named by its value, so it has no field edge (DP-6). */
-.color-field {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  box-sizing: border-box;
-  /* A set width, so it keeps its size whatever the value. */
-  inline-size: 220px;
-  max-inline-size: 100%;
-  padding: 3px;
-  border-radius: var(--docs-radius);
-  background-color: var(--docs-well);
-}
-
-/* Color Picker's trigger, flat inside the well: the color as a square, then its value. */
-.color-trigger {
-  flex: 1;
-  justify-content: flex-start;
-  gap: 8px;
-  min-inline-size: 0;
-  block-size: 26px;
-  padding: 0 8px 0 0;
-  border-radius: var(--docs-radius-inner);
-  background: none;
-  box-shadow: none;
-  font-size: var(--docs-text-small);
-}
-
-.color-trigger:hover {
-  background-color: var(--docs-hover);
-}
-
-.color-trigger .ow-color-picker__chip {
-  flex: none;
-  inline-size: 26px;
-  block-size: 26px;
-  margin: 0;
-  border-radius: var(--docs-radius-inner);
-}
-
-.color-value {
-  overflow: hidden;
-  font-family: var(--font-mono), ui-monospace, monospace;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.color-value[data-empty] {
-  color: var(--docs-muted);
-  font-family: var(--font-sans), system-ui, sans-serif;
-}
-
-.color-clear {
-  display: inline-grid;
-  flex: none;
-  place-items: center;
-  inline-size: 26px;
-  block-size: 26px;
-  border: 0;
-  border-radius: var(--docs-radius-inner);
-  background: none;
-  color: var(--docs-muted);
-}
-
-.color-clear:hover {
-  background-color: var(--docs-hover);
-  color: var(--docs-fg);
-}
-
-.lab-drawer-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 6px 8px;
-  background-color: var(--docs-surface);
-}
-
-/* Tabs and panel fill the drawer under its bar; the file names keep the code's font. */
-.lab-drawer-tabs {
-  flex: 1;
-  gap: 0;
-  min-block-size: 0;
-}
-
-.lab-drawer-files {
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: var(--docs-text-small);
-}
-
-.lab-drawer-panel {
-  display: flex;
-  flex-direction: column;
-  min-block-size: 0;
-}
-
-/* The scrolling part of the controls and the code drawer. */
-.lab-sheet-scroll {
-  --fade-size: 32px;
-  flex: 1;
-}
-
-.live-code {
-  margin: 0;
-  padding-block: 12px;
-  color: var(--tk-text);
-  font-size: var(--docs-text-code);
-  line-height: 1.6;
-  counter-reset: line;
-}
-
-.live-line {
-  display: block;
-  padding-inline-end: 16px;
-  white-space: pre;
-}
-
-.live-line::before {
-  content: counter(line);
-  counter-increment: line;
-  display: inline-block;
-  inline-size: 36px;
-  padding-inline-end: 12px;
-  color: var(--tk-com);
-  text-align: end;
-  user-select: none;
-}
-
-.live-line[data-changed] {
-  animation: line-flash 1.4s ease-out;
-}
-
-@keyframes line-flash {
-  from {
-    background-color: var(--tk-flash);
-  }
 }
 
 /* Code outside Shiki: install commands, owsem.json, and the index's previews. */
@@ -2976,10 +1900,6 @@ body {
   color: var(--tk-str);
 }
 
-.tk-num {
-  color: var(--tk-num);
-}
-
 .tk-fn {
   color: var(--tk-fn);
 }
@@ -2999,32 +1919,27 @@ body {
   line-height: 1.45;
 }
 
-/* The Tree Rail Nav Lab's demo: a sidebar panel on the stage. */
+/* Tree Rail Nav's demo: a sidebar panel in the preview. */
 .demo-tree-rail {
   box-sizing: border-box;
   inline-size: 280px;
+  max-inline-size: 100%;
   padding: 4px 12px 8px;
   border-radius: var(--ow-radius);
   background-color: var(--docs-surface);
   color: var(--ow-fg);
 }
 
-.demo-tree-rail[data-compact] {
-  inline-size: 220px;
-}
-
-/* The Table of Contents Lab's demo: a small article that scrolls in its frame, beside its list. */
+/* Table of Contents' demo: a small article that scrolls in its frame, beside its list. */
 .demo-toc {
   display: grid;
-  grid-template-columns: 300px 176px;
+  grid-template-columns: minmax(0, 1fr) 176px;
   box-sizing: border-box;
+  inline-size: 476px;
+  max-inline-size: 100%;
   border-radius: var(--ow-radius);
   background-color: var(--docs-surface);
   color: var(--ow-fg);
-}
-
-.demo-toc[data-compact] {
-  grid-template-columns: 176px 156px;
 }
 
 .demo-toc-frame {
@@ -3045,12 +1960,6 @@ body {
   font-size: var(--docs-text-small);
   line-height: 1.5;
   scrollbar-width: thin;
-}
-
-.demo-toc[data-compact] .demo-toc-article {
-  block-size: 160px;
-  padding: 12px 16px 16px;
-  font-size: var(--docs-text-micro);
 }
 
 .demo-toc-article p {
@@ -3079,34 +1988,8 @@ body {
   font-size: 1em;
 }
 
-/* The reading line: 30% down the article's frame, where tracking reads it. */
-.demo-toc-line {
-  position: absolute;
-  inset-block-start: 30%;
-  inset-inline: 0;
-  border-block-start: 1px dashed var(--ow-accent);
-  pointer-events: none;
-}
-
-.demo-toc-line-label {
-  position: absolute;
-  inset-block-end: 3px;
-  inset-inline-end: 10px;
-  padding-inline: 4px;
-  border-radius: 4px;
-  background-color: var(--ow-bg);
-  color: var(--ow-accent);
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: var(--docs-text-micro);
-}
-
 .demo-toc-nav {
   padding: 16px 16px 16px 16px;
-}
-
-.demo-toc[data-compact] .demo-toc-nav {
-  padding: 12px 10px 12px 12px;
-  font-size: var(--docs-text-micro);
 }
 
 .demo-toc-heading {
@@ -3118,7 +2001,7 @@ body {
   text-transform: uppercase;
 }
 
-/* The Color Picker Lab's demo: the panel, and what its two callbacks last sent. */
+/* Color Picker's demos: the panel, and what its two callbacks last sent. */
 .demo-color {
   display: grid;
   gap: 12px;
@@ -3152,10 +2035,20 @@ body {
   text-align: end;
 }
 
-/* A states cell: triggers on the theme's own background. */
+/* Triggers side by side, and by theme: each on that theme's own background. */
+.demo-color-row,
+.demo-color-themes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
 .demo-color-cell {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   gap: 8px;
   padding: 10px;
   border-radius: var(--ow-radius);
@@ -3189,40 +2082,15 @@ body {
   padding-inline-end: 16px;
 }
 
-/* The Toggle Group Lab's demos: a card as wide as its group, and the matrix's surfaces. */
-.demo-toggle {
-  inline-size: max-content;
-  min-inline-size: 300px;
-}
-
-/* In the card's grid, a group keeps its own width: only equal items share a stretched one. */
-.demo-toggle > .ow-toggle-group {
-  justify-self: start;
-}
-
-.demo-toggle-group-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-}
-
-.demo-card .demo-toggle-note {
-  font-size: var(--docs-text-body-compact);
-  text-decoration-thickness: 1px;
-}
-
-.demo-toggle-group-surface {
-  padding: 12px;
-  border-radius: var(--ow-radius);
-  background-color: var(--ow-bg);
-  color: var(--ow-fg);
-}
-
-/* The Tabs Lab's demos: a card with room for the tabs, equal tabs by className, and the matrix's
- * surfaces. */
+/* The Tabs page's demos: room for the tabs, and equal tabs by className. */
 .demo-tabs {
-  inline-size: 380px;
+  inline-size: min(380px, 100%);
+}
+
+.demo-tabs-stack {
+  display: grid;
+  justify-items: start;
+  gap: 16px;
 }
 
 .demo-tabs-panel {
@@ -3243,33 +2111,20 @@ body {
   }
 }
 
-.demo-tabs-surface {
-  padding: 12px;
-  border-radius: var(--ow-radius);
-  background-color: var(--ow-bg);
-  color: var(--ow-fg);
-}
-
-/* The Radio Group Lab's demos: a card as wide as its rows, one rule that lays them out in a row, and
- * the matrix's surfaces. */
-.demo-radio-group {
-  inline-size: max-content;
-  min-inline-size: 300px;
-  max-inline-size: 100%;
-}
-
+/* Radio Group's demos: one rule that lays the rows out side by side, and groups beside each other. */
 .demo-radio-group-across {
   flex-flow: row wrap;
 }
 
-.demo-radio-group-surface {
-  padding: 4px;
-  border-radius: var(--ow-radius);
-  background-color: var(--ow-bg);
-  color: var(--ow-fg);
+.demo-radio-set {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8px 32px;
 }
 
-/* The Button Lab's demos: every variant in a grid, and wrapping rows of buttons. */
+/* Button's demos: every variant in a grid, and wrapping rows of buttons. */
 .demo-board {
   display: grid;
   grid-template-columns: repeat(3, auto);
@@ -3286,92 +2141,8 @@ body {
   max-inline-size: 560px;
 }
 
-/* One theme's backdrop in the states matrix. */
-.demo-button-surface {
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  max-inline-size: none;
-  padding: 16px;
-  border: 1px solid var(--ow-line);
-  border-radius: var(--ow-radius);
-  background-color: var(--ow-bg);
-}
-
-.demo-loaders {
-  gap: 32px;
-}
-
-/* A bracket as wide as the button, and its width in px. */
-.demo-button-measure {
-  display: inline-grid;
-  gap: 8px;
-  margin: 0;
-}
-
-.demo-button-measure-rule {
-  block-size: 5px;
-  border: 1px solid var(--docs-muted);
-  border-block-start: 0;
-}
-
-.demo-button-measure figcaption {
-  justify-self: center;
-  min-block-size: 1lh;
-  color: var(--docs-muted);
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: var(--docs-text-micro);
-  font-variant-numeric: tabular-nums;
-}
-
-/* Dashed lines from each icon to the button's edges (labs/button.tsx measures them). */
-.demo-geometry {
-  position: relative;
-  display: grid;
-  justify-items: center;
-  gap: 32px;
-}
-
-.demo-guide {
-  position: absolute;
-  top: var(--y);
-  left: var(--x);
-  pointer-events: none;
-}
-
-.demo-guide[data-axis="y"] {
-  block-size: var(--length);
-  margin-inline-start: -0.5px;
-  border-inline-start: 1px dashed var(--docs-accent);
-}
-
-.demo-guide[data-axis="x"] {
-  inline-size: var(--length);
-  margin-block-start: -0.5px;
-  border-block-start: 1px dashed var(--docs-accent);
-}
-
-.demo-guide-label {
-  position: absolute;
-  color: var(--docs-accent);
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: var(--docs-text-micro);
-  line-height: 1;
-}
-
-.demo-guide[data-axis="y"] .demo-guide-label {
-  top: 50%;
-  left: 4px;
-  translate: 0 -50%;
-}
-
-.demo-guide[data-axis="x"] .demo-guide-label {
-  bottom: 3px;
-  left: 50%;
-  translate: -50% 0;
-}
-
 /*
- * The Command Menu Lab's demo: an app window, and the menu opens inside it rather than over the
+ * Command Menu's demo: an app window, and the menu opens inside it rather than over the
  * docs. In the states matrix the panel sits in its cell, which grows to fit it.
  */
 .demo-command {
@@ -3380,6 +2151,7 @@ body {
   display: flex;
   flex-direction: column;
   inline-size: 600px;
+  max-inline-size: 100%;
   block-size: 520px;
   box-sizing: border-box;
   overflow: hidden;
@@ -3398,18 +2170,24 @@ body {
   padding: 58px 32px 24px;
 }
 
-.demo-command[data-cell] {
-  inline-size: 300px;
-  block-size: auto;
+/* Inspect's specimen: the Trigger and the open panel in flow, with no scrim over the page. */
+.demo-command-specimen {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+  inline-size: 30rem;
+  max-inline-size: 100%;
 }
 
-.demo-command[data-cell] .ow-command-menu__viewport {
-  position: static;
-  padding: 12px;
-}
-
-.demo-command[data-cell] .ow-command-menu__backdrop {
+.demo-command-specimen .ow-command-menu__backdrop {
   display: none;
+}
+
+.demo-command-specimen .ow-command-menu__viewport {
+  position: static;
+  inline-size: 100%;
+  padding: 0;
 }
 
 .demo-command-bar {
@@ -3478,47 +2256,6 @@ body {
   background-color: color-mix(in oklab, var(--ow-accent) 75%, transparent);
 }
 
-/* Keys a scene script presses, as flat keycaps (the raised material) over the window. */
-.demo-keys {
-  position: absolute;
-  inset-block-end: 18px;
-  inset-inline-start: 50%;
-  z-index: 3;
-  display: flex;
-  gap: 8px;
-  opacity: 0;
-  pointer-events: none;
-  translate: -50% 0;
-  transition: opacity 0.15s ease;
-}
-
-.demo-keys[data-on] {
-  opacity: 1;
-}
-
-.demo-keys kbd {
-  display: inline-grid;
-  place-items: center;
-  min-inline-size: 34px;
-  block-size: 34px;
-  padding-inline: 8px;
-  border: 0;
-  border-radius: 8px;
-  background-color: var(--ow-raised-bg);
-  color: var(--ow-fg);
-  font-family: var(--font-sans), system-ui, sans-serif;
-  font-size: var(--docs-text-body-compact);
-  line-height: 1;
-}
-
-/* The Toggle Lab's note: a title with Pin beside it, the text, and its formatting toggles. */
-.demo-toggle-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
 .demo-toggle-row {
   display: flex;
   gap: 4px;
@@ -3526,15 +2263,6 @@ body {
   margin: 0;
   padding: 0;
   border: 0;
-}
-
-/* The Checkbox Lab's checklist: a parent box over its tasks, each in a label of its own. */
-.demo-checkbox[data-size="sm"] {
-  font-size: var(--docs-text-small);
-}
-
-.demo-checkbox[data-size="lg"] {
-  font-size: var(--docs-text-body);
 }
 
 .demo-checkbox-label {
@@ -3550,29 +2278,7 @@ body {
   padding-inline-start: 1.5em;
 }
 
-/* The Geometry scene draws the box's own press target. */
-.demo-checkbox-target {
-  display: inline-grid;
-  padding: 4px;
-}
-
-.demo-checkbox-target > .ow-checkbox::after {
-  outline: 1px dashed var(--docs-muted);
-  border-radius: 2px;
-}
-
-/* The Customization scene's own class: it beats the component's values without a fight. */
-.demo-checkbox-mine {
-  border-radius: 0;
-}
-
-.demo-checkbox-mine[data-checked] {
-  background-color: var(--ow-fg);
-  box-shadow: none;
-  color: var(--ow-bg);
-}
-
-/* The Switch Lab's settings card, and its large switch. A width from plain CSS: the thumb follows. */
+/* Switch's settings card, and its large switch. A width from plain CSS: the thumb follows. */
 .demo-switch-row {
   display: flex;
   align-items: center;
@@ -3581,133 +2287,29 @@ body {
   cursor: pointer;
 }
 
-.demo-switch-press {
+/* A column of demos, one gap apart. */
+.demo-col {
   display: grid;
-  justify-items: center;
   gap: 12px;
 }
 
-.demo-switch-wide {
-  inline-size: 3.5em;
-}
-
-/* The Input Lab's demos: the field beside a Button, and the ways to restyle it. */
+/* Input's demos. */
 .demo-input {
-  inline-size: min(380px, 100%);
+  inline-size: min(340px, calc(100vw - 64px));
 }
 
-.demo-input-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.demo-input-row > .ow-button {
-  flex: none;
-}
-
-.demo-input-measured {
-  inline-size: 160px;
-  max-inline-size: 100%;
-}
-
-.demo-input-cell {
-  inline-size: 220px;
-  max-inline-size: 100%;
-  box-sizing: border-box;
-}
-
-/* The focus ring on demand, for the states matrix. */
-.demo-input-ring {
-  outline: 2px solid var(--ow-focus);
-  outline-offset: 2px;
-}
-
-.demo-input-custom {
-  gap: 8px;
-}
-
-.demo-input-custom > .demo-caption:not(:first-child) {
-  margin-block-start: 8px;
-}
-
-/* An unlayered rule, as an app would write it: it beats the component's own values. */
-.demo-input-pill {
-  border-radius: 999px;
-  background-color: transparent;
-}
-
-/* The Field Lab's demos: the field over what its control says, and the ways to restyle it. */
+/* Field's demos: the field over what its control says, and the ways to restyle it. */
 .demo-field {
-  inline-size: min(380px, 100%);
+  inline-size: min(340px, calc(100vw - 64px));
 }
 
-.demo-field-wiring {
-  display: grid;
-  gap: 4px;
-  margin: 0;
-  padding-block-start: 12px;
-  border-block-start: 1px solid var(--ow-line);
-  font-size: var(--docs-text-micro);
-  line-height: 1.4;
-}
-
-.demo-field-wiring > div {
-  display: grid;
-  grid-template-columns: 11em 1fr;
-  gap: 8px;
-}
-
-.demo-field-wiring dt {
-  color: var(--ow-muted);
-  font-family: var(--font-mono), ui-monospace, monospace;
-}
-
-.demo-field-wiring dd {
-  margin: 0;
-}
-
-.demo-field-cell {
-  inline-size: 240px;
-  max-inline-size: 100%;
-  box-sizing: border-box;
-  justify-content: stretch;
-}
-
-.demo-field-cell > .ow-field {
-  flex: 1;
-}
-
-.demo-field-custom {
-  gap: 8px;
-}
-
-.demo-field-custom > .demo-caption:not(:first-child) {
-  margin-block-start: 10px;
-}
-
-/* An unlayered rule, as an app would write it: a label beside its control. */
-.demo-field-inline {
-  display: grid;
-  grid-template-columns: 7em 1fr;
-  align-items: center;
-}
-
-/* The Fieldset Lab's demos: unlayered rules, as an app would write them. */
+/* Fieldset's demos: unlayered rules, as an app would write them. */
 .demo-fieldset {
-  inline-size: min(340px, 100%);
+  inline-size: min(340px, calc(100vw - 64px));
 }
 
 .demo-fieldset > .ow-toggle {
   justify-self: start;
-}
-
-.demo-fieldset-tight {
-  gap: 0.5em;
-}
-
-.demo-fieldset-roomy {
-  gap: 2em;
 }
 
 .demo-fieldset-columns {
@@ -3720,19 +2322,9 @@ body {
   grid-column: 1 / -1;
 }
 
-.demo-fieldset-plain::after {
-  content: none;
-}
-
-/* The Form Lab's demos: a sign-up form, and unlayered rules, as an app would write them. */
+/* Form's demos: a sign-up form, and unlayered rules, as an app would write them. */
 .demo-form {
-  inline-size: min(340px, 100%);
-}
-
-.demo-form-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  inline-size: min(340px, calc(100vw - 64px));
 }
 
 /* Keeps its height when empty, so the form doesn't jump when the answer comes. */
@@ -3740,18 +2332,10 @@ body {
   min-block-size: 1.5em;
 }
 
-/* The ring a submit gives the first failed field; a scene's run leaves the visitor's focus alone. */
+/* The ring a submit gives the first failed field. */
 .demo-form [data-demo-focus] {
   outline: 2px solid var(--ow-focus);
   outline-offset: 2px;
-}
-
-.demo-form-tight {
-  gap: 0.5em;
-}
-
-.demo-form-roomy {
-  gap: 2.5em;
 }
 
 .demo-form-row {
@@ -3769,7 +2353,7 @@ body {
   flex: none;
 }
 
-/* The Toolbar Lab's editor: the toolbar over the line it formats. */
+/* Toolbar's editor: the toolbar over the line it formats. */
 .demo-editor {
   display: grid;
   justify-items: center;
@@ -3782,179 +2366,83 @@ body {
   font-size: var(--docs-text-body-compact);
 }
 
-/* The Tooltip Lab: a toolbar with a tooltip per button, and room above it for the open one. */
-.demo-tooltip {
+/* Select's demos: a field as wide as its trigger, and the specimen with room for its open popup. */
+.demo-select-field {
+  display: grid;
+  inline-size: 12rem;
+  max-inline-size: 100%;
+}
+
+.demo-select-specimen {
   position: relative;
   display: grid;
-  justify-items: center;
-  gap: 16px;
-  padding-block: 44px 8px;
+  inline-size: 18rem;
+  block-size: 15rem;
+  align-content: start;
+}
+
+.demo-select-specimen .ow-select__popup {
+  max-block-size: 10rem;
 }
 
 /*
- * Lab popups render here, inside the demo, so they take the stage's theme and scale. The box
- * covers the demo, so Base UI can measure the stage's scale from it; clicks pass through.
+ * The overlays' demos and specimens (Popover, Tooltip, Menu): the open popup lands in a box of
+ * its own, inline, so Inspect can magnify trigger and popup together.
  */
-.demo-portal {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.demo-portal > * {
-  pointer-events: auto;
-}
-
-/* One trigger per side on a card, each tooltip open away from the middle. */
-.demo-tooltip-sides {
-  grid-template: repeat(3, auto) / repeat(3, auto);
-  grid-template-areas:
-    ". top ."
-    "left . right"
-    ". bottom .";
-  gap: 16px 48px;
-  padding: 48px 76px;
-  border-radius: var(--ow-radius);
-  background-color: var(--ow-bg);
-}
-
-.demo-tooltip-sides [data-side-demo="top"] {
-  grid-area: top;
-}
-
-.demo-tooltip-sides [data-side-demo="right"] {
-  grid-area: right;
-}
-
-.demo-tooltip-sides [data-side-demo="bottom"] {
-  grid-area: bottom;
-}
-
-.demo-tooltip-sides [data-side-demo="left"] {
-  grid-area: left;
-}
-
-/* A matrix cell with its tooltip open above the trigger. */
-.demo-cell.demo-tooltip-cell {
-  position: relative;
-  min-inline-size: 104px;
-  padding-block-start: 46px;
-}
-
-/* The Menu Lab: a document's toolbar at the start, with room for its menus and a submenu. */
-.demo-menu {
+.demo-popover-specimen,
+.demo-menu-specimen,
+.demo-tooltip-specimen {
   position: relative;
   display: grid;
-  align-content: start;
   justify-items: start;
-  inline-size: 360px;
-  block-size: 300px;
+  align-content: start;
 }
 
-/* A matrix cell holding a pinned menu: as tall as its popup, which hangs from the anchor. */
-.demo-cell.demo-menu-cell {
-  position: relative;
-  display: block;
-  inline-size: 210px;
-  box-sizing: border-box;
-}
-
-.demo-menu-cell[data-cell$="-sm"] {
-  block-size: 116px;
-}
-
-.demo-menu-cell[data-cell$="-md"] {
-  block-size: 123px;
-}
-
-.demo-menu-cell[data-cell$="-lg"] {
-  block-size: 136px;
-}
-
-.demo-menu-anchor {
-  display: block;
-}
-
-/* A scaled stage skews Base UI's room below the anchor; the cell holds the popup whole. */
-.demo-menu-cell .ow-menu__popup {
-  max-block-size: none;
-}
-
-/* The Select Lab: the field in the middle, with room for its popup to land over it. */
-.demo-select {
-  position: relative;
-  display: grid;
-  align-content: center;
+.demo-popover-specimen {
   justify-items: center;
-  inline-size: 360px;
-  block-size: 320px;
+  inline-size: 20rem;
+  block-size: 15rem;
 }
 
-.demo-select[data-side="top"] {
-  align-content: start;
+.demo-menu-specimen {
+  inline-size: 16rem;
+  block-size: 14rem;
 }
 
-.demo-select-field[data-width="fill"] {
-  inline-size: 14rem;
+.demo-tooltip-specimen {
+  justify-items: center;
+  align-content: end;
+  inline-size: 12rem;
+  block-size: 6.5rem;
 }
 
-.demo-select-field[data-width="fill"] .ow-select__trigger {
-  inline-size: 100%;
+.demo-popover-popup {
+  inline-size: 16rem;
+  max-inline-size: 100%;
 }
 
-.demo-select[data-pinned] .ow-select__popup {
-  max-block-size: 220px;
-}
-
-/* A long list stays under the stage's toolbar: Base UI takes these as the screen's margins. */
-.demo-select .ow-select__positioner[data-side="none"] {
-  margin-block: 56px;
-}
-
-.demo-cell.demo-select-cell {
-  position: relative;
+/* Buttons at the end of a panel's content; the example's code writes the same rule. */
+.demo-popover-actions {
   display: flex;
-  justify-content: center;
-  inline-size: 200px;
-  box-sizing: border-box;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-block-start: 12px;
 }
 
-.demo-select-cell[data-open] {
-  align-items: flex-start;
-  block-size: 136px;
-}
-
-/* The Popover Lab: a document's toolbar with its Share popover, and room for the panel. */
-.demo-popover {
-  position: relative;
+/* Detached: the trigger, and a line with the second one. */
+.demo-popover-detached {
   display: grid;
-  align-content: start;
   justify-items: center;
   gap: 16px;
-  inline-size: 400px;
-  block-size: 290px;
 }
 
-.demo-portal .ow-popover__popup {
-  inline-size: 16rem;
-}
-
-.demo-popover-link {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 12px 0;
+.demo-popover-line {
+  margin: 0;
   color: var(--ow-muted);
-  font-family: var(--font-mono), ui-monospace, monospace;
   font-size: var(--docs-text-small);
 }
 
-.demo-popover-link svg {
-  inline-size: 14px;
-  block-size: 14px;
-}
-
-/* The second trigger: a link-like button in the caption. */
+/* The second trigger: a link-like button in the line. */
 .demo-popover-link-button {
   padding: 0;
   border: 0;
@@ -3965,32 +2453,24 @@ body {
   text-underline-offset: 0.2em;
 }
 
-/* A matrix cell with a trigger and its popover pinned open under it. */
-.demo-cell.demo-popover-cell {
-  position: relative;
-  display: block;
-  inline-size: 280px;
-  block-size: 150px;
-  box-sizing: border-box;
-}
-
-.demo-scroll-area-frame {
-  display: grid;
-  justify-items: center;
+/* Menu's sizes, side by side. */
+.demo-menu-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 12px;
-  inline-size: min(360px, 100%);
 }
 
 /* The height that makes it scroll, and a panel to scroll over. */
 .demo-scroll-area {
   box-sizing: border-box;
-  inline-size: 100%;
+  inline-size: min(360px, 100%);
   block-size: 280px;
   background-color: var(--ow-panel);
   color: var(--ow-fg);
 }
 
-/* What the Scrollbar's className does in the Lab's code. */
+/* What a rule on the scrollbar's class does, as in the example's code. */
 .demo-scroll-area[data-width="wide"] .ow-scroll-area__scrollbar[data-orientation="vertical"] {
   inline-size: 10px;
 }
@@ -4028,18 +2508,8 @@ body {
   line-height: 1.5;
 }
 
-.demo-cell.demo-scroll-area-cell {
-  display: block;
-  inline-size: 220px;
-  padding: 0;
-}
-
-.demo-scroll-area-cell .demo-scroll-area {
-  block-size: 112px;
-}
-
 /*
- * The Dialog Lab: an app's window. Its dialogs portal into it and are placed against it, as they
+ * The Dialog page: an app's window. Its dialogs portal into it and are placed against it, as they
  * are against the screen in an app.
  */
 .demo-dialog {
@@ -4048,6 +2518,7 @@ body {
   display: flex;
   flex-direction: column;
   inline-size: 560px;
+  max-inline-size: 100%;
   block-size: 400px;
   box-sizing: border-box;
   overflow: hidden;
@@ -4064,16 +2535,6 @@ body {
 
 .demo-dialog .ow-dialog__viewport .ow-dialog__popup {
   position: relative;
-}
-
-.demo-dialog[data-cell] {
-  inline-size: 320px;
-  block-size: 200px;
-}
-
-/* Narrower than its parent, so the parent shows around it. */
-.demo-dialog[data-cell] [data-demo="nested"] {
-  inline-size: 240px;
 }
 
 .demo-dialog-bar {
@@ -4120,13 +2581,7 @@ body {
   gap: 8px;
 }
 
-/* The customization scene's layouts: plain CSS on the Popup's className. */
-.demo-dialog-narrow {
-  inline-size: 22em;
-  padding: 12px;
-  border-radius: var(--ow-radius);
-}
-
+/* The Sheet example: plain CSS on the Popup's className. */
 .demo-dialog-sheet {
   inline-size: 100%;
   max-inline-size: none;
@@ -4139,62 +2594,30 @@ body {
   transform: translateY(100%);
 }
 
-.demo-dialog-full {
-  inline-size: 100%;
-  max-inline-size: none;
-  block-size: 100%;
-  max-block-size: none;
-  border-radius: 0;
-}
-
-/* A matrix of controls on the components' own background. */
-.demo-surface {
-  padding: 24px 24px;
-  border-radius: var(--ow-radius);
-  background-color: var(--ow-bg);
-  color: var(--ow-fg);
-}
-
-/* One cell of a states matrix: a few controls on the cell theme's background. */
-.demo-cell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px;
-  border-radius: var(--ow-radius);
-  background-color: var(--ow-bg);
-  color: var(--ow-fg);
-}
-
-/* A control with its used size under it. */
-.demo-measured {
-  display: grid;
-  justify-items: start;
-  gap: 8px;
-}
-
-/* A small note under a demo, such as a measured size. */
-.demo-caption {
-  margin: 0;
-  color: var(--docs-muted);
-  white-space: nowrap;
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: var(--docs-text-micro);
-  font-variant-numeric: tabular-nums;
-}
-
-/* Token setup panel (components/token-setup.tsx, an owsem-ui Popover): under a Lab's toolbar, or
+/* Token setup panel (components/token-setup.tsx, an owsem-ui Popover): under a component page's toolbar, or
  * under the Token chip that opened it. */
 .token-setup {
-  inline-size: min(380px, calc(100vw - 24px));
+  display: flex;
+  flex-direction: column;
+  inline-size: min(380px, calc(100vw - 32px));
   max-block-size: var(--available-height);
-  overflow: auto;
-  overscroll-behavior: contain;
+  padding: 0;
+  /* The rounded edge clips the Scroll Area inside, scrollbar and all. */
+  overflow: clip;
   font-size: var(--docs-text-small);
+}
+
+.token-setup-scroll {
+  flex: 0 1 auto;
+  min-block-size: 0;
+  max-block-size: var(--available-height);
+}
+
+.token-setup-body {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding: 16px;
 }
 
 .token-setup-title {
@@ -4248,15 +2671,55 @@ body {
   color: var(--docs-fg);
 }
 
-/* The Lab intro's line: which tokens the code uses, and a way to change them. */
+/* Which token names the docs show, as a setting: a label and a pill that opens the token setup. */
 .token-chip {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 8px;
-  margin: 12px 0 0;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 12px 0;
   color: var(--docs-muted);
   font-size: var(--docs-text-small);
+}
+
+.token-chip-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 9999px;
+  background-color: var(--ow-well-bg);
+  color: var(--docs-fg);
+  font-size: var(--docs-text-small);
+  cursor: pointer;
+}
+
+.token-chip-trigger:hover,
+.token-chip-trigger[data-popup-open] {
+  background-color: var(--ow-pressed-bg);
+}
+
+.token-chip-trigger:focus-visible {
+  outline: 2px solid var(--ow-focus);
+  outline-offset: 2px;
+}
+
+.token-chip-names {
+  padding: 0;
+  background: none;
+  font-family: var(--font-mono), ui-monospace, monospace;
+}
+
+.token-chip-dot {
+  margin-inline: -2px;
+  color: var(--docs-muted);
+}
+
+.token-chip-caret {
+  display: inline-flex;
+  color: var(--docs-muted);
 }
 
 /* Glide demo (components/glide-demo.tsx): items inside a box use its radius minus the padding. */
@@ -4324,6 +2787,11 @@ body {
 
 .token-table td {
   white-space: nowrap;
+}
+
+.token-table {
+  margin-block: 24px;
+  font-size: var(--docs-text-small);
 }
 
 .token-table-chip {
@@ -4399,6 +2867,1014 @@ body {
   color: var(--docs-on-accent);
 }
 
+/*
+ * The preview-first component page (components/component-page): one large preview card beside
+ * the sidebar, its toolbar at the top right, the examples' picker at the bottom, and the Docs in a
+ * panel that opens on request: a column from 768 px (440 px, or 42% of the screen where that is
+ * less), a bottom sheet below (SHEET_* in components/component-page/layout.ts). The card's width follows the
+ * column. Below 1280 px an open panel also turns the sidebar into a drawer (.site, above).
+ */
+.cp {
+  --cp-docs-w: min(440px, 42vw);
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 0;
+  block-size: 100dvh;
+  /* Clip, not hidden: scrollIntoView (a #hash, a section link) cannot scroll it off its place. */
+  overflow: clip;
+}
+
+.cp[data-mounted] {
+  transition: grid-template-columns 0.35s var(--ease);
+}
+
+@media (width >= 768px) {
+  :root[data-docs-open] .cp {
+    grid-template-columns: minmax(0, 1fr) var(--cp-docs-w);
+  }
+
+  /* Open, the preview is as far from the Docs' text as the sidebar's text is from it: 16 + 16. */
+  :root[data-docs-open] .cp-preview {
+    margin-inline-end: 16px;
+  }
+
+  .cp[data-mounted] .cp-preview {
+    transition: margin-inline-end 0.35s var(--ease);
+  }
+
+  .cp :is(.cp-docs-head, .cp-docs-scroll) {
+    padding-inline-start: 16px;
+  }
+}
+
+.cp-preview {
+  container-type: size;
+  position: relative;
+  min-inline-size: 0;
+  margin: 16px var(--docs-page-x) 16px 16px;
+  overflow: hidden;
+  outline: 1px solid light-dark(var(--docs-line), transparent);
+  outline-offset: -1px;
+  border-radius: var(--ow-radius);
+  background-color: var(--docs-stage);
+  color: var(--docs-fg);
+}
+
+/* Focused by a click (tabIndex -1), the preview itself shows no ring. */
+.cp-preview:focus {
+  outline: 1px solid light-dark(var(--docs-line), transparent);
+}
+
+.cp-bar {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 8;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  pointer-events: none;
+}
+
+.cp-bar > * {
+  pointer-events: auto;
+}
+
+.cp-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-inline-size: 0;
+  min-block-size: 34px;
+}
+
+.cp-title {
+  min-inline-size: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--docs-fg);
+  font-size: var(--docs-text-ui);
+  font-weight: 500;
+  letter-spacing: normal;
+  line-height: 1.45;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cp-badge {
+  flex: none;
+  padding-inline: 8px;
+  border-radius: 999px;
+  background-color: color-mix(in srgb, var(--docs-fg) 8%, transparent);
+  color: var(--docs-muted);
+  font-size: var(--docs-text-micro);
+  line-height: 20px;
+}
+
+/* The sidebar's open button: a quiet icon beside the title. */
+.cp-heading .sidebar-open {
+  margin-inline: -4px 0;
+}
+
+/* The floating toolbar: a small pill on the panel color, as the reference has it. */
+.cp-tools {
+  --ow-muted: var(--docs-muted);
+  --ow-fg: var(--docs-fg);
+  --ow-hover: var(--docs-hover);
+  --ow-line: var(--docs-line);
+  flex: none;
+  gap: 2px;
+  min-inline-size: 0;
+  padding: 3px;
+  border-radius: var(--ow-radius);
+  background: var(--ow-panel);
+  box-shadow: var(--ow-surface-shadow);
+}
+
+.cp-tool {
+  --py: 0px;
+  gap: 6px;
+  min-inline-size: 28px;
+  block-size: 28px;
+  padding-inline: 6px;
+  border-radius: var(--docs-radius-inner);
+  font-size: var(--docs-text-small);
+  font-weight: 400;
+}
+
+.cp-tool-text {
+  padding-inline: 10px;
+  color: var(--docs-fg);
+  font-weight: 500;
+}
+
+.cp-tool[aria-expanded="true"] {
+  background-color: var(--docs-hover);
+  color: var(--docs-fg);
+}
+
+.cp-tool-sep {
+  margin-inline: 2px;
+}
+
+.cp-tool-menu {
+  display: none;
+}
+
+.lang-menu {
+  min-inline-size: 11rem;
+}
+
+.lang-menu .ow-menu__item {
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.cp-menu .ow-menu__item {
+  --py: 0.75em;
+}
+
+/* The Install popover. */
+.cp-install {
+  inline-size: min(560px, calc(100vw - 32px));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: var(--docs-text-small);
+}
+
+.cp-install-title {
+  margin: 0;
+  font-size: var(--docs-text-ui);
+  font-weight: 500;
+  letter-spacing: normal;
+}
+
+.cp-install-label {
+  margin: 0 0 -6px;
+  color: var(--docs-muted);
+}
+
+.cp-install-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cp-install-foot .token-chip {
+  margin: 0;
+}
+
+.cp-install .command {
+  margin: 0;
+}
+
+.cp-install .ow-code-block {
+  margin: 0;
+}
+
+/* The demo sits in the middle with room for the bar and the picker, and is fitted by transform. */
+.cp-body {
+  position: absolute;
+  inset: 0;
+  isolation: isolate;
+  display: grid;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  place-items: center;
+  padding: 64px 16px;
+  overflow: clip;
+}
+
+.cp-demo {
+  animation: cp-in 0.22s var(--ease);
+}
+
+@keyframes cp-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/*
+ * Inspect's anatomy spec sheet (components/component-page/anatomy.tsx): a layer over the preview
+ * body, never in the demo's layout. Only the part names take the pointer. One reveal: the demo
+ * recedes, outlines and lines draw in, then the names and numbers rise in a tiny stagger.
+ */
+/*
+ * The demo fades out as Inspect opens and back in as the specimen lands on it (the delay), by
+ * opacity only: its layout never changes.
+ */
+.cp-body .cp-stage .cp-demo {
+  transition: opacity 0.15s ease 0.17s;
+}
+
+.cp-body[data-inspect] .cp-stage .cp-demo {
+  opacity: 0;
+  pointer-events: none;
+  transition-delay: 0s;
+}
+
+.sp {
+  /* The sheet starts drawing as the specimen nears the middle. */
+  --sp-start: 220ms;
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* The specimen is a real, inert instance: a faint grey wireframe, scaled about its centre. */
+.sp-specimen {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  display: grid;
+  inline-size: max-content;
+  transform-origin: center;
+  opacity: 0.5;
+  filter: grayscale(1);
+  pointer-events: none;
+}
+
+.sp-ui {
+  position: absolute;
+  inset: 0;
+  transition: opacity 0.12s ease;
+}
+
+.sp[data-leaving] .sp-ui {
+  opacity: 0;
+}
+
+/* The specimen moves to a new place (the Docs panel); the sheet waits for it. */
+.sp[data-settling] .sp-ui {
+  opacity: 0;
+}
+
+.sp-probe {
+  position: absolute;
+  visibility: hidden;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.sp-sheet {
+  position: absolute;
+  inset: 0;
+  animation: sp-swap 0.12s ease var(--sp-start) both;
+}
+
+.sp-svg {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  overflow: visible;
+}
+
+.sp-outline {
+  fill: none;
+  stroke: var(--docs-spec-line);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.sp-outline[data-root] {
+  stroke-dasharray: 4 3;
+}
+
+.sp-tint[data-tone="padding"] {
+  fill: color-mix(in srgb, var(--docs-spec-padding) 30%, transparent);
+}
+
+.sp-tint[data-tone="gap"] {
+  fill: color-mix(in srgb, var(--docs-spec-gap) 32%, transparent);
+}
+
+.sp-line,
+.sp-ext,
+.sp-leader path {
+  fill: none;
+  stroke-width: 1;
+}
+
+.sp-line {
+  stroke-dasharray: 1;
+}
+
+.sp-ext {
+  stroke-dasharray: 2 2;
+  opacity: 0.6;
+}
+
+.sp-leader path {
+  stroke: var(--docs-spec-line);
+  stroke-dasharray: 1;
+}
+
+.sp-leader circle {
+  fill: var(--docs-spec-label);
+}
+
+/* A name in focus: its part's outline turns solid and accent, the rest step back. */
+.sp-outline,
+.sp-leader {
+  transition:
+    opacity 0.15s ease,
+    stroke 0.15s ease,
+    stroke-width 0.15s ease;
+}
+
+.sp-sheet[data-hot] :is(.sp-outline, .sp-leader):not([data-on]) {
+  opacity: 0.4;
+}
+
+.sp .sp-outline[data-on] {
+  stroke: var(--docs-accent);
+  stroke-width: 2;
+  stroke-dasharray: none;
+}
+
+.sp .sp-leader[data-on] :is(path, circle) {
+  stroke: var(--docs-accent);
+}
+
+.sp .sp-leader[data-on] circle {
+  fill: var(--docs-accent);
+}
+
+.sp :is(.sp-line, .sp-ext)[data-tone="padding"] {
+  stroke: var(--docs-spec-padding);
+}
+
+.sp :is(.sp-line, .sp-ext)[data-tone="gap"] {
+  stroke: var(--docs-spec-gap);
+}
+
+.sp :is(.sp-line, .sp-ext)[data-tone="measure"] {
+  stroke: var(--docs-spec-measure);
+}
+
+.sp :is(.sp-line, .sp-ext)[data-tone="size"] {
+  stroke: var(--docs-spec-size);
+}
+
+.sp-header {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  min-inline-size: 0;
+  animation: sp-rise 0.2s var(--ease) var(--sp-start) both;
+}
+
+.sp-head-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-block-size: 26px;
+}
+
+.sp-title,
+.sp-summary {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sp-title {
+  color: var(--docs-spec-label);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 26px;
+}
+
+.sp-summary {
+  color: var(--docs-muted);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.sp-tag,
+.sp-label {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  box-sizing: border-box;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  animation: sp-rise 0.2s var(--ease) calc(var(--sp-start) + 60ms + min(var(--i, 0), 10) * 16ms)
+    both;
+}
+
+.sp-tag {
+  block-size: 18px;
+  border-radius: 5px;
+  background-color: var(--docs-spec-tag);
+  font-size: 12px;
+  line-height: 18px;
+  text-align: center;
+}
+
+.sp-tag[data-tone="padding"] {
+  color: var(--docs-spec-padding);
+}
+
+.sp-tag[data-tone="gap"] {
+  color: var(--docs-spec-gap);
+}
+
+.sp-tag[data-tone="measure"] {
+  color: var(--docs-spec-measure);
+}
+
+.sp-tag[data-tone="size"] {
+  color: var(--docs-spec-size);
+}
+
+.sp-label {
+  block-size: 24px;
+  padding: 0;
+  border: 1px solid var(--docs-spec-line);
+  border-radius: 7px;
+  background-color: var(--docs-spec-tag);
+  color: var(--docs-spec-label);
+  font-size: 12px;
+  line-height: 22px;
+  text-align: center;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.sp-label:hover,
+.sp-label[data-popup-open] {
+  border-color: var(--docs-accent);
+  color: var(--docs-accent);
+}
+
+.sp-pop {
+  inline-size: min(300px, calc(100vw - 32px));
+  box-sizing: border-box;
+}
+
+.cp-part-card[data-place="pop"] {
+  position: static;
+  inline-size: auto;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+}
+
+/* The reveal runs once, on one clock; a change of target is only the quick swap. */
+.sp[data-reveal] .sp-outline {
+  animation: sp-box 0.25s var(--ease) var(--sp-start) both;
+}
+
+.sp[data-reveal] :is(.sp-line, .sp-leader path) {
+  animation: sp-draw 0.25s var(--ease) var(--sp-start) both;
+}
+
+.sp[data-reveal] :is(.sp-ext, .sp-tint) {
+  animation: sp-swap 0.25s ease var(--sp-start) both;
+}
+
+@keyframes sp-swap {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes sp-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+@keyframes sp-box {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes sp-rise {
+  from {
+    opacity: 0;
+    translate: 0 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sp {
+    --sp-start: 0ms;
+  }
+
+  .sp-header,
+  .sp-tag,
+  .sp-label {
+    animation-name: sp-swap;
+  }
+
+  .sp[data-reveal] .sp-outline,
+  .sp[data-reveal] :is(.sp-line, .sp-leader path) {
+    animation-name: sp-swap;
+  }
+}
+
+@media (forced-colors: active) {
+  .sp-outline,
+  .sp-line,
+  .sp-ext,
+  .sp-leader path {
+    stroke: CanvasText;
+  }
+
+  .sp-tint {
+    fill: none;
+  }
+
+  .sp-leader circle {
+    fill: CanvasText;
+  }
+
+  .sp-tag,
+  .sp-label {
+    border: 1px solid CanvasText;
+    background-color: Canvas;
+    color: CanvasText;
+  }
+}
+
+.cp-picker {
+  position: absolute;
+  inset-block-end: 16px;
+  inset-inline: 0;
+  z-index: 4;
+  inline-size: fit-content;
+  max-inline-size: calc(100% - 24px);
+  margin-inline: auto;
+}
+
+/* The Docs. */
+.cp-docs {
+  min-inline-size: 0;
+  overflow: hidden;
+  background-color: var(--docs-bg);
+  visibility: hidden;
+  transition: visibility 0s 0.35s;
+}
+
+:root[data-docs-open] .cp-docs {
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.cp-docs-inner {
+  display: flex;
+  flex-direction: column;
+  inline-size: var(--cp-docs-w);
+  block-size: 100%;
+}
+
+.cp-docs-handle {
+  display: none;
+}
+
+/* One row: the section tabs, then Close. */
+.cp-docs-head {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  block-size: 52px;
+  padding-inline: 24px 12px;
+}
+
+/* Focused when it opens (component-page.tsx), as a place to start from; no ring of its own. */
+.cp-docs:focus {
+  outline: none;
+}
+
+.cp-docs-close {
+  display: grid;
+  place-items: center;
+  inline-size: 32px;
+  block-size: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--docs-radius);
+  background: none;
+  color: var(--docs-muted);
+}
+
+.cp-docs-close:hover {
+  background-color: var(--docs-hover);
+  color: var(--docs-fg);
+}
+
+/* The tabs' row fills the head beside Close, and fades only on the side with more tabs. */
+.cp-docs-nav {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+/* Positioned, so a chip's offsetLeft counts from the row's start. */
+.cp-docs-nav .ow-scroll-area__content {
+  position: relative;
+  display: flex;
+  gap: 4px;
+}
+
+.cp-docs-nav .ow-scroll-area {
+  --fade-size: 24px;
+}
+
+.cp-docs-nav .ow-scroll-area__viewport {
+  overscroll-behavior: contain;
+}
+
+.cp-docs-nav a {
+  flex: none;
+  padding: 3px 10px;
+  border-radius: 999px;
+  color: var(--docs-muted);
+  font-size: var(--docs-text-small);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.cp-docs-nav a[aria-current] {
+  background-color: var(--docs-hover);
+  color: var(--docs-fg);
+}
+
+.cp-docs-nav a:hover {
+  background-color: var(--docs-hover);
+  color: var(--docs-fg);
+}
+
+.cp-docs-scroll {
+  flex: 1;
+  min-block-size: 0;
+  padding: 8px 24px 64px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  font-size: var(--docs-text-body-compact);
+  line-height: 1.6;
+  scroll-padding-block-start: 8px;
+}
+
+/* The scrollbar is hidden (classic ones show arrows); the edges fade where there is more. */
+.cp-docs-scroll {
+  scrollbar-width: none;
+}
+
+.cp-docs-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.cp-docs-scroll[data-overflow-start] {
+  mask-image: linear-gradient(to bottom, transparent, #000 28px);
+}
+
+.cp-docs-scroll[data-overflow-end] {
+  mask-image: linear-gradient(to top, transparent, #000 28px);
+}
+
+.cp-docs-scroll[data-overflow-start][data-overflow-end] {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 28px,
+    #000 calc(100% - 28px),
+    transparent
+  );
+}
+
+.cp-docs-scroll :where(h2) {
+  margin-block: 40px 12px;
+  font-size: var(--docs-text-subtitle);
+}
+
+.cp-docs-scroll :where(h3) {
+  margin-block: 24px 6px;
+  font-size: var(--docs-text-ui);
+}
+
+/* An h4 under a part is a label for the table below it, not a second title. */
+.cp-docs-scroll :where(h4) {
+  margin-block: 14px 8px;
+  color: var(--docs-muted);
+  font-size: var(--docs-text-small);
+  font-weight: 500;
+}
+
+.cp-docs-scroll :where(h2:first-of-type) {
+  margin-block-start: 24px;
+}
+
+.cp-docs-scroll .lead {
+  margin-block: 0;
+  font-size: var(--docs-text-body-compact);
+}
+
+.cp-docs-scroll p {
+  max-inline-size: 60ch;
+}
+
+/* The panel is narrow: its tables stack their rows (owsem-ui Table, layout auto). */
+.cp-docs-scroll .docs-table {
+  margin-block: 12px 20px;
+}
+
+.cp-docs-scroll .docs-code,
+.cp-docs-install {
+  margin-block: 12px;
+}
+
+.cp-docs-install {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+
+.cp-docs-install .docs-code,
+.cp-docs-install .command {
+  margin: 0;
+}
+
+/* An example is one card: the header (title, sentence, Preview button), then its code. */
+.cp-example {
+  margin-block-end: 20px;
+  border-radius: var(--ow-radius);
+  background-color: var(--ow-panel);
+  box-shadow: var(--ow-surface-shadow);
+  overflow: clip;
+}
+
+/* The whole header shows the example: the button's ::after covers it. */
+.cp-example__head {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  padding: 14px 14px 12px 16px;
+  transition: background-color 120ms var(--ow-ease-out);
+}
+
+.cp-example__head:not([data-active]):hover {
+  background-color: color-mix(in oklab, var(--ow-fg) 4%, transparent);
+}
+
+.cp-example__head[data-active] {
+  cursor: default;
+}
+
+.cp-example__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cp-example h3 {
+  margin-block: 0;
+}
+
+.cp-example p {
+  margin: 0;
+  color: var(--docs-body);
+}
+
+.cp-example__show {
+  flex: none;
+}
+
+.cp-example__show::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.cp-example__show[aria-pressed="true"] {
+  color: var(--docs-accent);
+  cursor: default;
+}
+
+.cp-example__dot {
+  inline-size: 6px;
+  block-size: 6px;
+  border-radius: 50%;
+  background-color: currentcolor;
+}
+
+/* The code blocks lose their own card: the example's is the card; a hairline divides them. */
+.cp-example .docs-code {
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+  border-block-start: 1px solid var(--ow-line);
+}
+
+/* A small, quiet pill: Preview on an example, Inspect on Anatomy. */
+.cp-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  block-size: 28px;
+  padding-inline: 10px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--docs-muted);
+  font: inherit;
+  font-size: var(--docs-text-small);
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color 120ms var(--ow-ease-out),
+    color 120ms var(--ow-ease-out);
+}
+
+.cp-ghost svg {
+  inline-size: 14px;
+  block-size: 14px;
+}
+
+.cp-ghost:hover,
+.cp-example__head:not([data-active]):hover .cp-ghost {
+  background-color: color-mix(in oklab, var(--ow-fg) 6%, transparent);
+  color: var(--docs-fg);
+}
+
+.cp-ghost[aria-pressed="true"] {
+  background-color: color-mix(in oklab, var(--docs-accent) 12%, transparent);
+  color: var(--docs-accent);
+}
+
+.cp-ghost:focus-visible {
+  outline: 2px solid var(--docs-accent);
+  outline-offset: 2px;
+}
+
+/*
+ * Inspect sits on the row of the Anatomy heading it follows: it takes no height, and its button
+ * hangs at the end, centered on the heading's line (the row is the h2's line-height).
+ */
+.cp-docs-scroll :where(h2):has(+ .cp-inspect) {
+  margin-block-end: 0;
+  line-height: 1.5;
+}
+
+.cp-inspect {
+  --row: calc(var(--docs-text-subtitle) * 1.5);
+  position: relative;
+  block-size: 0;
+  margin-block-end: 12px;
+}
+
+.cp-inspect__button {
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-end: calc((var(--row) - 28px) / 2);
+}
+
+/* Narrow: the preview fills the screen, and the Docs are a sheet over its bottom. */
+@media (width < 768px) {
+  .cp {
+    --sheet-h: 0px;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cp[data-sheet="half"] {
+    --sheet-h: 58dvh;
+  }
+
+  .cp[data-sheet="full"] {
+    --sheet-h: calc(100dvh - 64px);
+  }
+
+  .cp[data-dragging] {
+    --sheet-h: var(--sheet-drag);
+  }
+
+  .cp-bar {
+    padding: 12px;
+  }
+
+  .cp-preview {
+    align-self: start;
+    block-size: calc(100dvh - var(--sheet-h));
+    margin: 0;
+    outline: 0;
+    border-radius: 0;
+    transition: block-size 0.4s var(--ease);
+  }
+
+  .cp[data-dragging] :is(.cp-preview, .cp-docs) {
+    transition: none;
+  }
+
+  .cp[data-sheet="full"] .cp-body,
+  .cp[data-sheet="full"] .cp-picker {
+    visibility: hidden;
+  }
+
+  .cp-docs,
+  :root[data-docs-open] .cp-docs {
+    position: absolute;
+    inset: auto 0 0;
+    z-index: 30;
+    block-size: var(--sheet-h);
+    border-radius: var(--ow-radius) var(--ow-radius) 0 0;
+    background-color: var(--docs-bg);
+    /* A hairline lifts the rounded top from a preview of nearly the same color. */
+    box-shadow:
+      0 0 0 1px var(--docs-line),
+      0 -24px 60px -24px rgb(0 0 0 / 0.4);
+    visibility: visible;
+    transition: block-size 0.4s var(--ease);
+  }
+
+  .cp[data-sheet="closed"] .cp-docs {
+    visibility: hidden;
+    transition:
+      block-size 0.4s var(--ease),
+      visibility 0s 0.4s;
+  }
+
+  .cp-docs-inner {
+    inline-size: 100%;
+  }
+
+  .cp-docs-handle {
+    display: grid;
+  }
+
+  .cp-docs-head {
+    block-size: 44px;
+  }
+
+  .cp-tool[data-more] {
+    display: none;
+  }
+
+  .cp-tool-menu {
+    display: inline-flex;
+  }
+
+  /* Over the sheet the picker would sit on its edge; it rides the preview's bottom. */
+  .cp-picker {
+    inset-block-end: 12px;
+  }
+}
+
 /* Reduced motion must win over every transition and animation above. */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -4409,15 +3885,47 @@ body {
     /* biome-ignore lint/complexity/noImportantStyles: must beat every component rule */
     transition-duration: 0.01ms !important;
   }
-
-  /* The changed-line flash only fades a color, so it stays. */
-  .live-line[data-changed] {
-    /* biome-ignore lint/complexity/noImportantStyles: must beat the rule above */
-    animation-duration: 1.4s !important;
-  }
 }
 
-/* Kbd Lab: a key in a field and at the end of a list row. */
+/* Toggle, Toggle Group, and Toolbar demos: items stacked and centred, with a line under them. */
+.demo-toggle-stack {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+}
+
+.demo-toggle-stack p {
+  margin: 0;
+  color: var(--ow-fg);
+  font-size: var(--docs-text-body-compact);
+}
+
+.demo-toggle-stack p.demo-muted {
+  color: var(--ow-muted);
+}
+
+/* Kbd demos: a sentence, or a field and a row, centred. */
+.demo-kbd-line {
+  margin: 0;
+  color: var(--ow-fg);
+  font-size: var(--docs-text-body);
+}
+
+.demo-kbd-stack {
+  display: grid;
+  gap: 12px;
+  inline-size: 260px;
+  color: var(--ow-fg);
+  font-size: var(--docs-text-ui);
+}
+
+/* Separator's specimen: the hairline in a box of its own length. */
+.demo-separator-specimen {
+  display: grid;
+  inline-size: 200px;
+}
+
+/* Kbd's demos: a key in a field and at the end of a list row. */
 .demo-kbd-field,
 .demo-kbd-row {
   display: flex;
@@ -4433,19 +3941,9 @@ body {
   color: var(--ow-muted);
 }
 
-/* A states matrix cell: a small card in its own theme. */
-.demo-kbd-cell {
-  padding: 10px 16px;
-  border-radius: 10px;
-  background-color: var(--ow-bg);
-  color: var(--ow-fg);
-  line-height: 1.5;
-  white-space: nowrap;
-}
-
-/* Icon Morph Lab: an episode card with its controls, and a filmstrip of one swap. */
+/* Icon Morph page: an episode card with its controls. */
 .demo-morph {
-  inline-size: 320px;
+  inline-size: min(320px, 100%);
 }
 
 .demo-morph-row {
@@ -4454,17 +3952,7 @@ body {
   gap: 8px;
 }
 
-.demo-morph-frame {
-  display: grid;
-  place-items: center;
-  inline-size: 56px;
-  block-size: 56px;
-  border-radius: var(--ow-radius);
-  background-color: var(--ow-well-bg);
-  color: var(--ow-fg);
-}
-
-/* Copy Button Lab: an invite link in a field, with its Copy Button at the end. */
+/* Copy Button's demos: an invite link in a field, with its Copy Button at the end. */
 /* minmax(0, 1fr): a long link gives way to the button instead of widening the card. */
 .demo-copy {
   grid-template-columns: minmax(0, 1fr);
@@ -4492,20 +3980,9 @@ body {
   white-space: nowrap;
 }
 
-/* Code Block Lab: snippets in a Code Block, and a matrix of them. */
+/* Code Block page: snippets in a Code Block. */
 .demo-code {
-  inline-size: 400px;
-}
-
-.demo-cell.demo-code-cell {
-  display: block;
-  padding: 12px;
-}
-
-/* Wide enough for its tabs: Base UI scrolls a list to its active tab, and inside the stage's
- * scaled matrix it measures that scroll wrong. */
-.demo-code-cell .demo-code {
-  inline-size: 380px;
+  inline-size: min(400px, 100%);
 }
 
 /* The prompt, drawn by CSS: not part of the text that Copy takes. */
@@ -4513,25 +3990,6 @@ body {
   content: "$ ";
   color: var(--tk-punct);
   user-select: none;
-}
-
-/* The token table is a white card; it scrolls inside itself, so its own shadow is not clipped. */
-.token-table {
-  border-radius: var(--ow-radius);
-  background-color: var(--docs-surface);
-  box-shadow: var(--docs-shadow);
-}
-
-.token-table :is(th, td):first-child {
-  padding-inline-start: 16px;
-}
-
-.token-table :is(th, td):last-child {
-  padding-inline-end: 16px;
-}
-
-.token-table tbody tr:last-child :is(th, td) {
-  border-block-end: 0;
 }
 
 /* Token setup's blocks inside the popover. */

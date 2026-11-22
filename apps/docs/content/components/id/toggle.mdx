@@ -1,0 +1,118 @@
+---
+title: Toggle
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Untuk menyalin kode sumbernya ke project Anda, pakai item `toggle` dari
+registry.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Toggle } from "owsem-ui/base";
+import { Pin } from "lucide-react";
+
+export function PinButton() {
+  return (
+    <Toggle startIcon={<Pin />} defaultPressed>
+      Sematkan
+    </Toggle>
+  );
+}
+```
+
+Toggle adalah tombol dengan dua state, menyala dan mati. Ukuran dan jaraknya mengikuti Button. Tanpa
+children ia menjadi tombol ikon persegi dan butuh `aria-label`. Untuk sekumpulan toggle yang
+berkaitan, lihat Toggle Group.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Base UI merender `<button>` dengan `aria-pressed`; OwsemUI menambah kelas `ow-toggle` dan
+`data-size`, serta membungkus tiap ikon dalam span.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `button.ow-toggle` | `aria-pressed`, `data-pressed` saat menyala, `data-size`, dan `data-icon-only` tanpa children |
+| <Part name="Icon" /> | `span.ow-toggle__icon` | Dekoratif (`aria-hidden`), dengan `data-side="start"` atau `"end"`; svg atau img di dalamnya mengisinya |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Tinggi 32, 40, atau 48px, seperti Button seukurannya |
+| `startIcon`, `endIcon` | `ReactNode` | | Ikon sebelum atau sesudah label, ukuran font ditambah 2px; dekoratif, jadi toggle perlu nama |
+
+### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-size` | Selalu: `sm`, `md`, atau `lg` |
+| `data-icon-only` | Ada ikon dan tanpa children |
+
+Setel `--py` di `style` untuk mengubah tingginya. Tingginya tidak pernah di bawah 24px, target terkecil yang diizinkan WCAG 2.5.8.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-toggle` | Root |
+| `ow-toggle__icon` | Icon |
+
+## Aksesibilitas [#accessibility]
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab | Memindahkan fokus ke toggle |
+| Space, Enter | Menyalakan atau mematikannya |
+
+- Screen reader mengumumkan tombol toggle dan statenya lewat `aria-pressed`.
+- Biarkan namanya sama di kedua state, misalnya "Tebal": yang berubah adalah statenya.
+- Toggle tanpa children butuh `aria-label`; ikonnya `aria-hidden`.
+- Dengan `prefers-contrast: more` ia tidak mendapat tepi baru; tint dan cincin fokus yang
+  menandainya. Pada forced colors, toggle yang menyala diisi `Highlight`.
+- Kanan ke kiri, `startIcon` berada di sisi kanan.
+
+## Tema [#theming]
+
+Toggle membaca token tema ini. Setel salah satunya pada toggle, atau pada elemen di sekitarnya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-muted` | Teks saat mati |
+| `--ow-hover` | Tint di bawah pointer saat mati |
+| `--ow-fg` | Teks di bawah pointer saat mati, dan dasar teks aksen |
+| `--ow-accent` | Tint menyala (14%, 18% saat hover, 22% saat ditahan) dan teksnya |
+| `--ow-radius` | Sudut |
+| `--ow-motion-scale` | Seberapa dalam tekanan masuk |
+| `--ow-focus` | Cincin fokus |
+
+<ForMode mode="isolated">
+
+Pada mode isolated, nilainya ada di root tiap Toggle, jadi setel pada toggle-nya sendiri.
+
+</ForMode>
+
+## Gerak [#motion]
+
+Tekanan masuk lebih dulu: saat ditahan, toggle menyusut ke 0,97 dan mengambil tint terdalam dalam 90
+ms, lalu lepas dengan spring settle dan sedikit overshoot. Dari mati ke menyala hanya warnanya yang
+berubah; tidak ada yang bergeser. Dengan `prefers-reduced-motion`, warnanya berubah dan toggle tidak
+bergerak.

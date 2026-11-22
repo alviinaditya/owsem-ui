@@ -1,0 +1,124 @@
+---
+title: Tooltip
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. In the registry it is the `tooltip` item; the toolbar in the examples
+also needs `toolbar`.
+
+## Usage [#usage]
+
+```tsx
+import { IconButton, Tooltip } from "owsem-ui/base";
+import { Pin } from "lucide-react";
+
+export function PinButton() {
+  return (
+    <Tooltip.Root>
+      <Tooltip.Trigger render={<IconButton aria-label="Pin" icon={<Pin />} />} />
+      <Tooltip.Portal>
+        <Tooltip.Positioner>
+          <Tooltip.Popup>
+            <Tooltip.Arrow />
+            Pin
+          </Tooltip.Popup>
+        </Tooltip.Positioner>
+      </Tooltip.Portal>
+    </Tooltip.Root>
+  );
+}
+```
+
+Tooltip names a button for people with a pointer or a keyboard: a short label, and its shortcut, on a
+solid dark surface. A tooltip that opened at every pass of the pointer would flicker across a toolbar,
+so the first one waits 600 ms. Wrap the triggers in a `Tooltip.Provider` and, once one is open, its
+neighbours open at once. Without a Provider, each trigger waits on its own.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Base UI renders the parts and places them. OwsemUI styles the popup and the arrow, sets the 8px
+offset, and carries the text direction into the portal. Provider, Root, and Portal have no box of
+their own; Root renders no element, so in Inspect it is the box that holds the trigger and its
+tooltip.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| Provider | none | The group: one `delay`, `closeDelay`, and `timeout` for the tooltips inside |
+| <Part name="Root" /> | none | One tooltip: `open`, `defaultOpen`, `onOpenChange`, and `disabled` |
+| <Part name="Trigger" /> | Your button | Passed to `render`; `data-popup-open` while its tooltip shows |
+| Portal | `div` | Moves the tooltip to `body`, or into `container` |
+| Positioner | `div.ow-tooltip__positioner` | `side`, `align`, `sideOffset` (8), and `dir` |
+| <Part name="Popup" /> | `div.ow-tooltip__popup` | `data-side`, and `data-instant` when it skips the animation |
+| <Part name="Arrow" /> | `div.ow-tooltip__arrow` | Optional and `aria-hidden`, with `data-side`; a triangle in a 12px box |
+| <Part name="Shortcut" /> | `kbd` | Optional, in the popup after the label |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### Tooltip.Positioner
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `sideOffset` | `number \| function` | `8` | Gap to the trigger, with room for the arrow. Base UI's default is `0` |
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-tooltip__positioner` | Positioner |
+| `ow-tooltip__popup` | Popup |
+| `ow-tooltip__arrow` | Arrow |
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| Tab | Focus on a trigger opens its tooltip at once |
+| Escape | Shuts the tooltip; focus stays on the trigger |
+
+- A tooltip is a visual label only. Screen readers read the trigger's own name, so an icon button keeps
+  its `aria-label`, and the tooltip repeats it.
+- Touch screens show no tooltips, since a tap also presses the button: anything a touch user needs
+  belongs on the page, or in a Popover.
+- In forced colors the popup keeps a 1px edge in the system color, and the arrow stays solid.
+
+## Theming [#theming]
+
+Tooltip reads these theme tokens, shared by every tooltip in the app: set them on `:root`, for each
+theme. For one tooltip, set them on its Popup with a class. A class around the trigger does not reach,
+since the tooltip renders in a portal, outside the trigger's subtree.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-tooltip-bg` | Surface: solid, with no edge and no shadow |
+| `--ow-tooltip-fg` | Text; the shortcut takes it at 80%, on a faint key |
+| `--ow-radius` | Corners; a shortcut inside takes them less the popup's block padding |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Popup, so set yours on the Popup with a class.
+
+</ForMode>
+
+## Motion [#motion]
+
+The first tooltip grows out of its trigger in 125 ms, from 0.97 and transparent, and leaves in 100 ms.
+Neighbours that open at once skip the animation, and so do tooltips opened by keyboard focus. With
+`prefers-reduced-motion`, tooltips come and go without any animation.

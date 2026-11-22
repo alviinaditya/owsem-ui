@@ -1,28 +1,21 @@
-import { expect, type Page, test } from "@playwright/test";
-import { openSheet, pickColor, stage, stageTool } from "./lab.ts";
+import { expect, test } from "@playwright/test";
+import { docs, tools, visit } from "./example-page.ts";
 
-const narrative = (page: Page) => page.locator(".lab-narrative");
-
-test("the token setup rewrites a Lab's code and install steps (DS-4)", async ({ page }) => {
-  await page.goto("/en/separator");
-  await openSheet(page);
-  // Customization's line; the code drawer's install pane has the same one.
-  const chip = page.getByRole("button", { name: "Change Token setup" }).first();
+test("the token setup rewrites a page's code, install steps, and tokens (DS-4)", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "desktop", "needs the docs beside the preview");
+  await visit(page, "/en/tabs");
+  await tools(page).getByRole("button", { name: "Install", exact: true }).click();
+  const install = page.getByRole("dialog", { name: /Install/ });
+  await expect(install).toContainText("pnpm add owsem-ui");
+  await install.getByRole("button", { name: /Token setup/ }).click();
   const panel = page.getByRole("dialog", { name: "Token setup" });
-  await chip.click();
   await expect(panel).toBeVisible();
-  await expect(panel.getByRole("button", { name: "Theme tokens" })).toBeFocused();
   await expect(panel.getByRole("button", { name: "Theme tokens" })).toHaveAttribute(
     "aria-pressed",
     "true",
   );
-  // A Popover beside the chip that opened it: under it, or above when there is no room.
-  const chipBox = await chip.boundingBox();
-  const panelBox = await panel.boundingBox();
-  if (!chipBox || !panelBox) throw new Error("The chip and the panel need boxes.");
-  const below = panelBox.y - (chipBox.y + chipBox.height);
-  const above = chipBox.y - (panelBox.y + panelBox.height);
-  expect(Math.min(Math.abs(below - 8), Math.abs(above - 8))).toBeLessThan(1);
 
   await panel.getByRole("button", { name: "Isolated tokens" }).click();
   const prefix = panel.getByLabel("Prefix");
@@ -35,56 +28,52 @@ test("the token setup rewrites a Lab's code and install steps (DS-4)", async ({ 
   await expect(prefix).toHaveValue("acme");
   await expect(panel.locator(".token-setup-json")).toContainText('"mode": "isolated"');
   await expect(panel.locator(".token-setup-json")).toContainText('"prefix": "acme"');
-
+  await page.keyboard.press("Escape");
   await page.keyboard.press("Escape");
   await expect(panel).toBeHidden();
-  await expect(chip).toBeFocused();
-  // Back to the top: the Customization scene the chip sits in opens the code beside the stage.
-  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
-  await expect(stage(page).getByRole("button", { name: "Code" })).toHaveAttribute(
-    "aria-pressed",
-    "false",
-  );
 
-  // The narrative's code, the intro, and the stage follow the setup.
-  await expect(narrative(page)).toContainText("--acme-line");
-  await expect(narrative(page)).not.toContainText("--ow-line");
-  await expect(narrative(page)).toContainText("Isolated tokens · --acme-*");
-  const intro = page.locator(".install").first();
-  await expect(intro).toContainText("pnpm dlx owsem@latest init --tokens isolated --prefix acme");
-  await expect(intro).toContainText("pnpm dlx owsem@latest add separator");
-  await expect(intro).toContainText("not released yet");
-  // The Customization scene describes the mode in use.
-  const customization = page.locator("#scene-customization");
-  await expect(customization).toContainText(
-    "In isolated mode the values sit on each Separator's root",
+  // The install steps, the docs' code, and the token names follow the setup.
+  await tools(page).getByRole("button", { name: "Docs", exact: true }).click();
+  const installation = docs(page).locator(".cp-docs-install").first();
+  await expect(installation).toContainText(
+    "pnpm dlx owsem@latest init --tokens isolated --prefix acme",
   );
-  await stage(page).getByRole("button", { name: "Controls" }).click();
-  await pickColor(page, "Line", "#ff0000");
-  await stage(page).getByRole("button", { name: "Code" }).click();
-  const code = stage(page).getByRole("tabpanel");
-  await expect(code).toContainText('import { Separator } from "@/components/owsem/separator";');
-  await stage(page).getByRole("tab", { name: "settings.css" }).click();
-  await expect(code).toContainText(".settings .ow-separator {");
-  await expect(code).toContainText("--acme-line: #ff0000;");
-  await stage(page).getByRole("tab", { name: "Install" }).click();
-  await expect(code).toContainText("pnpm dlx owsem@latest init --tokens isolated --prefix acme");
+  await expect(installation).toContainText("pnpm dlx owsem@latest add tabs");
+  await expect(installation).toContainText("not released yet");
+  await expect(docs(page).locator("#example-default")).toContainText(
+    'import { Tabs } from "@/components/owsem/tabs";',
+  );
+  await expect(docs(page).getByText("In isolated mode the values sit on")).toBeVisible();
+  await expect(docs(page)).toContainText("--acme-motion-scale");
+  await expect(docs(page)).not.toContainText("--ow-motion-scale");
 
   // Kept for the next visit, until reset.
   await page.reload();
-  await expect(narrative(page)).toContainText("--acme-line");
-  await openSheet(page);
-  await chip.click();
-  await panel.getByRole("button", { name: "Reset to theme tokens, --ow" }).click();
-  await expect(narrative(page)).toContainText("--ow-line");
-  // The default setup's install is one line again.
-  await expect(page.locator(".install-line")).toContainText("pnpm add owsem-ui");
+  await tools(page).getByRole("button", { name: "Docs", exact: true }).click();
+  await expect(docs(page)).toContainText("--acme-motion-scale");
+  await tools(page).getByRole("button", { name: "Install", exact: true }).click();
+  await page
+    .getByRole("dialog", { name: /Install/ })
+    .getByRole("button", { name: /Token setup/ })
+    .click();
+  await page
+    .getByRole("dialog", { name: "Token setup" })
+    .getByRole("button", { name: "Reset to theme tokens, --ow" })
+    .click();
+  await expect(docs(page)).toContainText("--ow-motion-scale");
   expect(await page.evaluate(() => localStorage.getItem("owsem-token-setup"))).toBeNull();
 });
 
-test("the Theming page's code stays literal whatever the token setup", async ({ page }) => {
-  await page.goto("/en/separator");
-  await stageTool(page, "Tokens", "Token setup");
+test("the Theming page's code stays literal whatever the token setup", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "desktop", "needs the Install popover");
+  await visit(page, "/en/tabs");
+  await tools(page).getByRole("button", { name: "Install", exact: true }).click();
+  await page
+    .getByRole("dialog", { name: /Install/ })
+    .getByRole("button", { name: /Token setup/ })
+    .click();
   const panel = page.getByRole("dialog", { name: "Token setup" });
   await expect(panel).toBeVisible();
   await panel.getByRole("button", { name: "Isolated tokens" }).click();
@@ -92,12 +81,12 @@ test("the Theming page's code stays literal whatever the token setup", async ({ 
   await page.keyboard.press("Escape");
   // The Theming page explains the default, so its code keeps --ow.
   await page.goto("/id/docs/theming");
-  await expect(page.getByRole("main")).toContainText("--ow-accent");
+  await expect(page.getByRole("main")).toContainText("--ow-spring-travel");
 });
 
-test("a long prefix leaves the top bar's switchers on screen", async ({ page }, testInfo) => {
+test("a long prefix leaves the preview toolbar on screen", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name === "mobile-390", "sweeps desktop widths");
-  await page.goto("/en/separator");
+  await page.goto("/en/tabs");
   await page.evaluate(() =>
     localStorage.setItem(
       "owsem-token-setup",
@@ -105,12 +94,12 @@ test("a long prefix leaves the top bar's switchers on screen", async ({ page }, 
     ),
   );
   for (const lang of ["en", "id"]) {
-    await page.goto(`/${lang}/separator`);
+    await visit(page, `/${lang}/tabs`);
     for (const width of [641, 768, 901, 1024, 1280]) {
       await page.setViewportSize({ width, height: 800 });
       const right = await page
-        .locator(".theme-switcher")
-        .evaluate((el) => el.getBoundingClientRect().right);
+        .locator(".cp-tools")
+        .evaluateAll((els) => Math.max(...els.map((el) => el.getBoundingClientRect().right)));
       expect(right, `${lang} at ${width} px`).toBeLessThanOrEqual(width);
     }
   }

@@ -1,0 +1,139 @@
+---
+title: Popover
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. In the registry it is the `popover` item; the buttons in the examples
+also need `button` and `toggle`.
+
+## Usage [#usage]
+
+```tsx
+import { Button, Popover } from "owsem-ui/base";
+
+export function SharePopover() {
+  return (
+    <Popover.Root>
+      <Popover.Trigger render={<Button variant="outline" />}>Share</Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Positioner>
+          <Popover.Popup>
+            <Popover.Arrow />
+            <Popover.Title>Share the draft</Popover.Title>
+            <Popover.Description>Anyone with the link can read it.</Popover.Description>
+          </Popover.Popup>
+        </Popover.Positioner>
+      </Popover.Portal>
+    </Popover.Root>
+  );
+}
+```
+
+Popover opens a small panel from a button: a title, a line or two, and controls, on the raised
+material with the popup shadow, with an optional arrow toward the button. Unlike a tooltip, it holds
+content people read and act on, and it works the same with touch and screen readers. Base UI places
+it and handles focus: into the panel when it opens, back to the button when it shuts.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Base UI renders the parts, the dialog's naming, and focus. OwsemUI styles the panel, the arrow, the
+title, and the description, sets the 10px offset, and carries the text direction into the portal.
+Root, Portal, and Backdrop add no look of their own. Root renders no element, so in Inspect it is the
+box that holds the trigger and its panel.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | none | State only: `open`, `modal`, and `handle` |
+| <Part name="Trigger" /> | Your button | Passed to `render`; `aria-expanded`, and `data-popup-open` while open |
+| Portal | `div` | Moves the panel to the end of the body, or into `container` |
+| Positioner | `div.ow-popover__positioner` | `side`, `align`, `sideOffset` (10), `arrowPadding` (12), and `dir`; anchored to the trigger's resting box |
+| <Part name="Popup" /> | `div.ow-popover__popup` | `role="dialog"`, `data-side`, and `data-instant` when it skips the animation |
+| <Part name="Arrow" /> | `div.ow-popover__arrow` | Optional and `aria-hidden`, with `data-side`; a turned square, half of it showing |
+| <Part name="Title" /> | `h2.ow-popover__title` | Names the dialog |
+| <Part name="Description" /> | `p.ow-popover__description` | Describes the dialog, muted |
+| <Part name="Close" /> | Your button | Shuts the popover |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### Popover.Positioner
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `sideOffset` | `number \| function` | `10` | Gap to the trigger, with room for the arrow. Base UI's default is `0` |
+| `arrowPadding` | `number` | `12` | Keeps the arrow off the rounded corners. Base UI's default is `5` |
+
+A `Popover.Trigger` can sit anywhere, outside its Root, linked by a handle: every trigger with that handle opens the same panel under itself, and the handle opens and shuts it from code. With `modal={true}`, the page's scroll is held by OwsemUI's own lock, which leaves the page's `overflow` alone; opened by hover or touch, Base UI's rules stand.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-popover__positioner` | Positioner |
+| `ow-popover__popup` | Popup |
+| `ow-popover__arrow` | Arrow |
+| `ow-popover__title` | Title |
+| `ow-popover__description` | Description |
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| Enter, Space | On the trigger: open the panel; focus moves into it |
+| Tab | Moves through the panel's controls |
+| Escape | Shuts the panel; focus goes back to the trigger |
+
+- Screen readers announce a dialog named by the title and described by the description.
+- `modal` is false by default, so the page stays usable while the panel is open; `true` or
+  `"trap-focus"` keeps focus inside. With `true`, the page's scroll is held without an `overflow` style.
+- `initialFocus` and `finalFocus` pick where focus goes.
+- With `prefers-contrast: more`, the panel gains a 1px ring in `--ow-edge`. In forced colors the panel
+  keeps a 1px edge in the system color, and so does the arrow.
+
+## Theming [#theming]
+
+Popover reads these theme tokens. Set them on the Popup with a class, or for every popover on `:root`.
+A class around the trigger does not reach: the panel renders in a portal, outside the trigger's
+subtree.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-raised-bg` | Surface, the arrow's too |
+| `--ow-popup-shadow` | Shadow, the arrow's too |
+| `--ow-edge` | The ring under `prefers-contrast: more` |
+| `--ow-fg` | Text |
+| `--ow-muted` | The description |
+| `--ow-radius` | Corners |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Popup, so set yours on the Popup with a class.
+
+</ForMode>
+
+The panel has 16px of padding; a class on the Popup changes it, and sets its width, as `share.css`
+does in the examples.
+
+## Motion [#motion]
+
+The panel grows out of its button in 180 ms, from 0.96 and transparent, from the arrow's tip, and
+leaves in 120 ms. Opened from the keyboard, or shut with Escape, it skips the animation. The panel
+measures from the button's resting box, so a button springing back from its press does not move it.
+With `prefers-reduced-motion`, the panel fades without growing.

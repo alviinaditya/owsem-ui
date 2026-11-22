@@ -1,0 +1,165 @@
+---
+title: Radio Group
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import `Radio` and `RadioGroup` from `owsem-ui/base`. In the registry it is the `radio-group` item.
+
+## Usage [#usage]
+
+```tsx
+import { Radio, RadioGroup } from "owsem-ui/base";
+
+export function Delivery() {
+  return (
+    <RadioGroup aria-label="Delivery" defaultValue="standard">
+      <label>
+        <Radio.Root value="standard" />
+        Standard
+      </label>
+      <label>
+        <Radio.Root value="express" />
+        Express
+      </label>
+    </RadioGroup>
+  );
+}
+```
+
+Radio Group is one choice from a few options, all in view. Each option is a `<label>` row with a round
+radio in it; a press anywhere on the row picks it, and the pointer lights the row under it with Glide.
+Name the group with `aria-label` or `aria-labelledby`; each radio takes its name from its row.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Group" /> | `div.ow-radio-group` | `RadioGroup`, with the radiogroup role. Holds the rows and Glide's highlight |
+| <Part name="Row" /> | `label` | Yours, with no class of its own: any `label` holding a radio, at any depth |
+| <Part name="Radio" /> | `span.ow-radio-group__radio` | `Radio.Root`, with the radio role and a hidden `input` beside it. Without children it draws its Indicator |
+| <Part name="Indicator" /> | `span.ow-radio-group__indicator` | Mounted only while checked unless `keepMounted`. Empty, it is the dot; children replace it |
+
+A row has Button's geometry: its padding comes from `--py`, and the circle sits where Button has its
+icon. The circle is the font size plus 6 px, and a pseudo-element extends the press target to 24 px
+without changing the layout. A label that wraps keeps the circle on its first line.
+
+| Size | Font | Circle | Row |
+| --- | --- | --- | --- |
+| `sm` | 13px | 19px | 32px |
+| `md` (default) | 14px | 20px | 40px |
+| `lg` | 16px | 22px | 48px |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### RadioGroup
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | The type scale and row height |
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-size` | Always: `sm`, `md`, or `lg` |
+| `data-glide-active` | On a row: Glide is lighting it |
+
+### Radio.Root
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | An Indicator | Replaces the Indicator |
+
+The group sets no width and no margin: it fits its rows, and it is a flex column, so one rule on
+`className` lays it out another way. There is no orientation prop, because the arrow keys already work in
+both directions.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-radio-group` | Group |
+| `ow-radio-group__radio` | Radio |
+| `ow-radio-group__indicator` | Indicator |
+
+## Accessibility [#accessibility]
+
+The group is one tab stop.
+
+| Key | Action |
+| --- | --- |
+| Tab, Shift Tab | Into the group, on the checked radio or else the first; and out again |
+| Arrow Down, Arrow Right | The next radio, and picks it. It loops and skips disabled radios |
+| Arrow Up, Arrow Left | The previous radio, and picks it. Left and right swap right to left |
+| Space | Picks the focused radio, when nothing is checked yet |
+
+- Enter does nothing, as with a native radio, so it can submit a form.
+- A pointer press moves focus to the radio without showing the ring; keyboard focus draws a 2 px ring,
+  2 px out.
+- A radio without a label row gets no Glide; it still works, as long as you name it with `aria-label`.
+- With `prefers-contrast: more` the circle gets a 1 px edge in `--ow-edge`. In forced colors the circle keeps
+  a visible edge, and a checked one is filled with `Highlight` behind a `HighlightText` dot.
+  Right to left, the circle sits on the right.
+
+## Theming [#theming]
+
+Radio Group reads these theme tokens. Set one on a radio, on the group, or on anything around it.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-fg` | Labels, and the circle's tint while off: 10%, 13% on hover, 16% held |
+| `--ow-accent` | The circle while on |
+| `--ow-primary-shadow` | Its top highlight while on |
+| `--ow-on-accent` | The dot, or a glyph of your own |
+| `--ow-muted` | Disabled labels |
+| `--ow-focus` | The keyboard focus ring |
+| `--ow-hover` | The hover highlight (Glide) |
+| `--ow-radius` | The highlight's corners |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each group's root, so set yours on the group itself, as in
+`.delivery.ow-radio-group`.
+
+</ForMode>
+
+A `className` wins over the component's own values with no `!important`. Every size is in `em`, so
+`font-size` scales the circle and the rows; `--py` sets the rows' density, and `--icon` the circle.
+
+```css
+.delivery {
+  font-size: 1.125rem;
+  --py: 0.5em;
+}
+
+.delivery .ow-radio-group__radio[data-checked] {
+  background-color: var(--ow-good);
+}
+```
+
+## Motion [#motion]
+
+The fill changes at once, with the state. Only the dot moves, on the settle spring (`--ow-spring-settle`),
+scaling in from half its size, and it leaves with the fill. Holding a row presses its circle in to 0.97
+within 90 ms, and it lets go on the spring. `--ow-motion-scale` sets how far a press goes (0 turns it off).
+With `prefers-reduced-motion`, nothing moves: a held circle only changes its fill, and the dot fades in.

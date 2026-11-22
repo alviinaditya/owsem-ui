@@ -1,0 +1,136 @@
+---
+title: Button
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Untuk menyalin kode sumbernya ke project Anda, pakai item `button` dari
+registry.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Button } from "owsem-ui/base";
+
+export function Save() {
+  return <Button onClick={save}>Simpan</Button>;
+}
+```
+
+Button adalah `<button type="button">` native dengan perilaku Base UI. Pilih tampilan dengan
+`variant`, `size`, dan `soft`; tambahkan `startIcon`, `endIcon`, atau `loading`. Untuk ikon tanpa
+teks, pakai `IconButton`.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Base UI merender `<button>`; OwsemUI menambahkan kelas `ow-button` dan menggambar permukaannya
+sebagai pseudo-element, jadi tombolnya tetap satu elemen.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `button.ow-button` | Permukaan, atribut state, dan efek tekan |
+| <Part name="Icon" /> | `span.ow-button__icon` | `startIcon` atau `endIcon`; dekoratif |
+| <Part name="Label" /> | `span.ow-button__label` | Children |
+| <Part name="Spinner" /> | `span.ow-button__spinner` | Hanya dengan prop `loading` |
+| <Part name="Ripple" /> | `span.ow-button__layer` | Memotong riak ke permukaan; tidak ada pada `link` |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `variant` | `"primary" \| "secondary" \| "outline" \| "ghost" \| "link" \| "destructive"` | `"primary"` | Tampilannya |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Font dan padding; setiap varian satu ukuran punya satu tinggi |
+| `soft` | `boolean` | `false` | Tint datar dari nadanya, untuk primary, secondary, dan destructive |
+| `loading` | `boolean` | | Menampilkan spinner, menjaga lebar dan fokus, dan mengabaikan tekanan |
+| `startIcon`, `endIcon` | `ReactNode` | | Ikon di satu ujung |
+
+### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-variant`, `data-size` | Selalu; nilai yang dipilih |
+| `data-soft` | `soft` diset |
+| `data-held` | Tombol sedang ditahan |
+| `data-loading` | `loading` bernilai true |
+| `data-icon-only` | Sebuah `IconButton` |
+
+### IconButton
+
+Menerima prop yang sama, kecuali ikon dan children, ditambah `icon` dan `aria-label` yang wajib.
+Variannya default `ghost`.
+
+### buttonStyles dan ButtonIcon
+
+`buttonStyles({ variant, size, soft, className })` mengembalikan kelas dan atribut data untuk
+tautan, seperti `<a {...buttonStyles()}>`. `ButtonIcon` (`side`: `"start"` atau `"end"`) mengatur
+ukuran ikon di dalamnya. Tautan tetap bertampilan, hover, dan tekan seperti tombol, tanpa riak.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-button` | Root |
+| `ow-button__icon`, `ow-button__glyph` | Ikon dan kotak di sekitarnya |
+| `ow-button__label` | Teks |
+| `ow-button__spinner` | Spinner |
+| `ow-button__layer`, `ow-button__ripple` | Pemotong dan riak |
+
+## Aksesibilitas [#accessibility]
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab | Memindahkan fokus ke tombol, kecuali nonaktif |
+| Enter, Space | Mengaktifkannya |
+
+- `<button>` native, jadi form dan screen reader bekerja seperti pada tombol biasa.
+- `IconButton` tanpa teks terlihat: `aria-label` wajib.
+- Saat loading, tombol menjaga fokus dan punya `aria-busy`. Biarkan labelnya tetap sama.
+- Pada forced colors, tiap tombol punya outline warna sistem, dan cincin fokus memakai `Highlight`.
+
+## Tema [#theming]
+
+Button membaca token tema ini. Setel salah satunya pada sebuah elemen untuk mengubah tombol di
+dalamnya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-radius` | Radius sudut |
+| `--ow-accent`, `--ow-on-accent` | Isi primary dan teksnya; teks link |
+| `--ow-critical-solid`, `--ow-on-critical` | Isi destructive dan teksnya |
+| `--ow-critical` | Tint dan teks destructive soft |
+| `--ow-primary-shadow` | Sorot atas primary dan destructive |
+| `--ow-fg` | Teks, tint secondary, dan garis outline |
+| `--ow-pressed-bg`, `--ow-hover` | Material saat ditekan dan hover |
+| `--ow-focus` | Cincin fokus |
+
+<ForMode mode="isolated">
+
+Pada mode isolated, nilainya ada di root tiap Button, jadi setel pada tombolnya sendiri.
+
+</ForMode>
+
+`--py` bukan warna: ia padding di atas dan di bawah teks, dan menentukan setiap ukuran.
+
+## Gerak [#motion]
+
+Tekanan mengecilkan tombol ke 0,97 dalam 90 ms lalu kembali dengan spring settle Core. Riak tumbuh
+dari titik tekan dan memudar saat dilepas. Keduanya hanya menggerakkan `transform` dan `opacity`,
+dan mengikuti `--ow-motion-scale`. Dengan `prefers-reduced-motion`, tekanan hanya mengubah
+material dan tidak ada riak.

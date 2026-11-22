@@ -1,0 +1,168 @@
+---
+title: Dialog
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. In the registry it is the `dialog` item; the buttons in the examples
+also need `button`.
+
+## Usage [#usage]
+
+```tsx
+import { Button, Dialog } from "owsem-ui/base";
+
+export function ShareDialog() {
+  return (
+    <Dialog.Root>
+      <Dialog.Trigger render={<Button />}>Share</Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Popup>
+          <Dialog.Title>Share the draft</Dialog.Title>
+          <Dialog.Description>Anyone with the link can read it.</Dialog.Description>
+          <Dialog.Close render={<Button />}>Done</Dialog.Close>
+        </Dialog.Popup>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+```
+
+Dialog opens a window over the page: a title, a line or two, and whatever the task needs, centered on
+the raised material over a scrim. Base UI keeps focus inside, holds the page's scroll, and handles
+the keyboard. `Dialog.Trigger` and `Dialog.Close` have no look of their own, so they wear your button
+through `render`; there is no built-in close icon. The examples here land the dialog in a window and
+leave it non-modal, so this page stays usable beside it.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Base UI renders the parts, the dialog's naming, focus, and the scroll lock. OwsemUI styles the scrim,
+the panel, the title, and the description, draws the scrim by default, and carries the text direction
+into the portal. Root and Portal add no look of their own, and Trigger and Close wear your button.
+Root renders no element, so in Inspect it is the window that holds the trigger and its dialog.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | none | State only: `open`, `modal`, and `handle` |
+| <Part name="Trigger" /> | Your button | Passed to `render`; `aria-haspopup`, `aria-expanded`, and `data-popup-open` while open |
+| Portal | `div` | Moves the dialog to the end of the body, or into `container`, and draws the scrim |
+| <Part name="Backdrop" /> | `div.ow-dialog__backdrop` | Optional: write it only to change the scrim, and it replaces Portal's |
+| Viewport | `div.ow-dialog__viewport` | Optional, around the Popup: it scrolls, and the panel keeps its full height |
+| <Part name="Popup" /> | `div.ow-dialog__popup` | `role="dialog"`, `dir`, `--nested-dialogs`, and `data-nested-dialog-open` |
+| <Part name="Title" /> | `h2.ow-dialog__title` | Names the dialog; the one part accessibility requires |
+| <Part name="Description" /> | `p.ow-dialog__description` | Describes the dialog, muted |
+| <Part name="Close" /> | Your button | Shuts the dialog |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### Dialog.Portal
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `backdrop` | `boolean` | `true` | Draws the scrim behind the dialog; `false` leaves the page undimmed. A `Dialog.Backdrop` among the children replaces it |
+
+### Dialog.Backdrop
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `forceRender` | `boolean` | `true` | Renders in a nested dialog too, where it dims the parent. Base UI's default is `false` |
+
+### Dialog.Popup
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `initialFocus` | Same as Base UI | A dialog too long to show whole takes focus itself | Otherwise Base UI's default applies, so it opens at its start, not scrolled to a button at its end |
+
+A Root inside a Popup nests: the parent steps back while the inner one is open, and `backdrop={false}` on the inner Portal leaves the parent undimmed. A modal dialog also holds the page's scroll through OwsemUI's own lock, so the page's text is not drawn again while it is open.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-dialog__backdrop` | Backdrop |
+| `ow-dialog__viewport` | Viewport |
+| `ow-dialog__popup` | Popup |
+| `ow-dialog__title` | Title |
+| `ow-dialog__description` | Description |
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| Enter, Space | On the trigger: open the dialog; focus moves into it |
+| Tab, Shift + Tab | Moves through the dialog's controls, and stays inside while it is modal |
+| Escape | Shuts the top dialog; focus goes back to what opened it |
+
+- Screen readers announce a dialog named by the title and described by the description, so always give
+  it a `Dialog.Title` and a `Dialog.Close`.
+- `modal` is `true` by default: the rest of the page is inert and holds its scroll. `"trap-focus"` keeps
+  focus inside and leaves the scroll and the pointer alone; `false` leaves the page usable (add
+  `backdrop={false}` on the Portal, since a scrim covers it). OwsemUI holds the scroll without setting
+  `overflow` on the page, so its text is not drawn again; opened by touch, Base UI's lock stands.
+- `initialFocus` and `finalFocus` pick where focus goes.
+- With `prefers-contrast: more`, the panel gains a 1px ring in `--ow-edge`. In forced colors it keeps a
+  1px edge in the system color. Dialog ships no text of its own, so there is nothing to translate but
+  yours.
+
+## Theming [#theming]
+
+Dialog reads these theme tokens. Set them on the Popup for one panel, on the Portal to reach the scrim
+as well, or for every dialog on `:root`. A class around the trigger does not reach: the dialog renders
+in a portal, outside the trigger's subtree.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-backdrop` | The scrim |
+| `--ow-raised-bg` | Surface |
+| `--ow-popup-shadow` | Shadow |
+| `--ow-edge` | The ring under `prefers-contrast: more` |
+| `--ow-fg` | Text |
+| `--ow-muted` | The description |
+| `--ow-radius` | Corners, the one radius of every surface |
+| `--ow-focus` | The ring, when the panel itself takes focus |
+| `--ow-ease-out` | Entering and leaving |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Popup, so set yours on the Popup with a class.
+
+</ForMode>
+
+Each of Dialog's rules weighs one class, so a class of yours, or a Tailwind utility, wins without
+`!important`. Sizes are in `em`, so `font-size` on the Popup scales the panel. A sheet is plain CSS, as
+in the Sheet example.
+
+```css
+.wide {
+  inline-size: 40em; /* 32em by default; it still stays 16px inside the screen */
+  padding: 24px;
+}
+```
+
+## Motion [#motion]
+
+The panel fades in and grows from 0.96 in 250 ms, from its own middle, with no translate to keep it
+centered; the scrim only fades, and both leave in 200 ms. A parent steps back 16px and to 0.95 for each
+dialog nested in it. With `prefers-reduced-motion`, the panel fades without growing, and a parent stays
+in place.

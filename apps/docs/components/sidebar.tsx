@@ -1,15 +1,16 @@
 import type { Node } from "fumadocs-core/page-tree";
-import { TreeRailNav } from "owsem-ui/owsem";
-import type { ReactNode } from "react";
+import Link from "next/link";
+import { Sidebar } from "owsem-ui/owsem";
+import ui from "owsem-ui/package.json";
 import { CATEGORIES, type Category, catalog, isAvailable } from "@/lib/catalog";
 import { getDictionary } from "@/lib/dictionaries";
 import type { Lang } from "@/lib/i18n";
-import { labPageScenes } from "@/lib/lab-template";
 import { source } from "@/lib/source";
 import { SearchTrigger } from "./docs-search";
-import { Icon, type IconName } from "./icons/icon";
-import { NavLink } from "./nav-link";
-import { SidebarLabNode } from "./sidebar-lab-node";
+import type { IconName } from "./icons/icon";
+import { Logo } from "./logo";
+import { SidebarLink } from "./nav-link";
+import { SidebarCollapse } from "./sidebar-toggle";
 
 export const CATEGORY_ICONS: Record<Category, IconName> = {
   action: "mouse-pointer-click",
@@ -20,23 +21,6 @@ export const CATEGORY_ICONS: Record<Category, IconName> = {
   display: "layout-dashboard",
 };
 
-/** A first-level group of the sidebar: open to start with, closable. */
-function Group({ label, icon, children }: { label: string; icon: IconName; children: ReactNode }) {
-  return (
-    <TreeRailNav.Node defaultOpen>
-      <TreeRailNav.Toggle>
-        <TreeRailNav.Icon>
-          <Icon name={icon} size={16} />
-        </TreeRailNav.Icon>
-        <TreeRailNav.Label>{label}</TreeRailNav.Label>
-      </TreeRailNav.Toggle>
-      <TreeRailNav.Panel>
-        <TreeRailNav.List>{children}</TreeRailNav.List>
-      </TreeRailNav.Panel>
-    </TreeRailNav.Node>
-  );
-}
-
 /** The docs pages in sidebar order (content/docs/<lang>/meta.json). */
 export const treePages = (nodes: Node[]): Extract<Node, { type: "page" }>[] =>
   nodes.flatMap((node) =>
@@ -44,72 +28,57 @@ export const treePages = (nodes: Node[]): Extract<Node, { type: "page" }>[] =>
   );
 
 /**
- * Every page on a Tree Rail Nav (DS-14), in the root layout: the docs pages (ordered by
- * content/docs/<lang>/meta.json), then the catalog by category. A component with a Lab carries its
- * scenes, shown while its page is open, so the trail runs on to the scene being read. The search
- * sits above it at full width (DS-5), and the rail starts at the first group.
+ * The site's sidebar (the library's Sidebar), for every page: the brand and the search at the top, a group for
+ * the prose pages (content/docs/<lang>/meta.json), then one per catalog category. Components that
+ * are not built yet stay on the index. Its state lives in the Provider (site-shell.tsx).
  */
-export function Sidebar({ lang }: { lang: Lang }) {
+export function SiteSidebar({ lang }: { lang: Lang }) {
   const dict = getDictionary(lang);
+  // Nothing is published before the first release; package.json says 0.0.0 until then.
+  const version = ui.version === "0.0.0" ? dict.nav.prerelease : `v${ui.version}`;
   return (
-    <>
-      <SearchTrigger label={dict.search.trigger} />
-      <TreeRailNav.Root aria-label={dict.nav.sidebar} className="sidebar-nav">
-        <TreeRailNav.List>
-          <Group label={dict.nav.docs} icon="book-open">
+    <Sidebar.Root aria-label={dict.nav.sidebar} className="site-sidebar" id="site-sidebar">
+      <Sidebar.Header className="site-sidebar-head">
+        <div className="site-sidebar-brand">
+          <Link href={`/${lang}`} className="sidebar-brand">
+            <Logo size={40} />
+            <span className="sidebar-brand-text">
+              <span className="sidebar-brand-name">OwsemUI</span>
+              <span className="sidebar-version">{version}</span>
+            </span>
+          </Link>
+          <SidebarCollapse label={dict.cp.hideSidebar} />
+        </div>
+        <SearchTrigger label={dict.search.trigger} />
+      </Sidebar.Header>
+      <Sidebar.Content id="site-sidebar-scroll">
+        <Sidebar.Indicator />
+        <Sidebar.Group>
+          <Sidebar.GroupLabel>{dict.nav.gettingStarted}</Sidebar.GroupLabel>
+          <Sidebar.List>
             {treePages(source.getPageTree(lang).children).map((page) => (
-              <TreeRailNav.Node key={page.url}>
-                <NavLink href={page.url}>
-                  <TreeRailNav.Label>{page.name}</TreeRailNav.Label>
-                </NavLink>
-              </TreeRailNav.Node>
+              <SidebarLink key={page.url} href={page.url}>
+                {page.name}
+              </SidebarLink>
             ))}
-          </Group>
-          {CATEGORIES.map((category) => (
-            <Group
-              key={category}
-              label={dict.catalog.categories[category]}
-              icon={CATEGORY_ICONS[category]}
-            >
-              {catalog
-                .filter((entry) => entry.category === category)
-                .map((entry) => {
-                  const href = `/${lang}/${entry.name}`;
-                  const link = (
-                    <NavLink key={href} href={href}>
-                      <TreeRailNav.Label>{entry.title}</TreeRailNav.Label>
-                      {/* The space keeps "Button Soon" two words for screen readers. */}
-                      {isAvailable(entry) ? null : (
-                        <>
-                          {" "}
-                          <span className="soon">{dict.catalog.soon}</span>
-                        </>
-                      )}
-                    </NavLink>
-                  );
-                  const scenes = labPageScenes(entry.name, lang, dict.lab.overview);
-                  return scenes ? (
-                    <SidebarLabNode
-                      key={entry.name}
-                      href={href}
-                      scenes={scenes}
-                      label={dict.lab.scenes}
-                    >
-                      {link}
-                    </SidebarLabNode>
-                  ) : (
-                    <TreeRailNav.Node
-                      key={entry.name}
-                      data-planned={isAvailable(entry) ? undefined : ""}
-                    >
-                      {link}
-                    </TreeRailNav.Node>
-                  );
-                })}
-            </Group>
-          ))}
-        </TreeRailNav.List>
-      </TreeRailNav.Root>
-    </>
+          </Sidebar.List>
+        </Sidebar.Group>
+        {CATEGORIES.map((category) => {
+          const entries = catalog.filter((e) => e.category === category && isAvailable(e));
+          return entries.length ? (
+            <Sidebar.Group key={category}>
+              <Sidebar.GroupLabel>{dict.catalog.categories[category]}</Sidebar.GroupLabel>
+              <Sidebar.List>
+                {entries.map((entry) => (
+                  <SidebarLink key={entry.name} href={`/${lang}/${entry.name}`}>
+                    {entry.title}
+                  </SidebarLink>
+                ))}
+              </Sidebar.List>
+            </Sidebar.Group>
+          ) : null;
+        })}
+      </Sidebar.Content>
+    </Sidebar.Root>
   );
 }

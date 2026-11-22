@@ -1,0 +1,137 @@
+---
+title: Checkbox
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Untuk menyalin kode sumbernya ke project Anda, pakai item `checkbox` dari
+registry.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Checkbox } from "owsem-ui/base";
+
+export function Updates() {
+  return (
+    <label>
+      <Checkbox.Root />
+      Kabari saya soal rilis baru
+    </label>
+  );
+}
+```
+
+Checkbox adalah kotak yang Anda centang. Label di sekeliling `Checkbox.Root` sudah cukup: ia menggambar
+Indicator dan glyph-nya sendiri, dan label memberinya nama sekaligus menjadi target tekan. Tanpa teks
+yang terlihat, beri `aria-label`. Checkbox Group adalah komponen berikutnya; sampai saat itu, grup
+adalah [Fieldset](/id/fieldset) dengan satu `name`, dan kotak induk memakai `checked` dan
+`indeterminate` dari state Anda.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Base UI merender `<span>` dengan role `checkbox` dan `<input>` tersembunyi di sebelahnya. Dua bagian
+terakhir menggambar dirinya sendiri.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `span.ow-checkbox` | Kotaknya: `aria-checked` dan atribut state |
+| <Part name="Indicator" /> | `span.ow-checkbox__indicator` | Mengisi kotak; dilepas saat mati kecuali `keepMounted` |
+| <Part name="Glyph" /> | `svg[data-glyph]` | Centang atau minus, `aria-hidden` |
+
+Children mengganti apa yang digambar. Memberi `{null}` pada Root membiarkannya kosong.
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### Checkbox.Root
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Font Button; kotaknya ukuran font ditambah 6px: 19, 20, atau 22 px |
+| `children` | `ReactNode` | `<Checkbox.Indicator />` | Mengganti apa yang digambar |
+
+#### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-size` | Selalu; ukuran yang dipilih |
+
+### Checkbox.Indicator
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | Glyph centang dan minus | Glyph buatan Anda; tandai sepasang dengan `data-glyph` agar crossfade tetap |
+
+Kotaknya dalam `em`: `font-size` padanya menskalakan kotak dan glyph-nya. Pseudo-element memperluas
+target tekannya menjadi 24px di semua sisi tanpa menambah layout, jadi dua kotak butuh jarak 8px.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-checkbox` | Root |
+| `ow-checkbox__indicator` | Indicator |
+| `ow-checkbox__stroke` | Goresan tiap glyph |
+
+## Aksesibilitas [#accessibility]
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab | Memindahkan fokus ke kotak |
+| Space | Mencentang atau melepas centang |
+| Enter | Mengirim form tempatnya berada, tanpa mengubah centang |
+
+- Screen reader mengumumkan role dan `aria-checked`, dengan `mixed` saat indeterminate.
+- Namanya dari label atau `aria-label`; glyph-nya `aria-hidden`.
+- Dengan `prefers-contrast: more` kotak mendapat tepi 1px. Pada forced colors, kotak yang dicentang
+  terisi `Highlight` dan glyph-nya `HighlightText`. Kanan-ke-kiri, centang tidak dicerminkan.
+
+## Tema [#theming]
+
+Checkbox membaca token tema ini. Setel salah satunya pada kotak, atau pada elemen di sekitarnya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-fg` | Tint saat mati (10%, 13% saat hover, 16% saat ditahan) |
+| `--ow-accent` | Isian saat dicentang atau indeterminate |
+| `--ow-primary-shadow` | Sorot atas saat dicentang atau indeterminate |
+| `--ow-on-accent` | Glyph |
+| `--ow-hover` | Tint di bawah pointer |
+| `--ow-radius` | Sudut, separuh nilainya |
+| `--ow-focus` | Cincin fokus |
+| `--ow-motion-scale` | Seberapa jauh tekanan dan glyph bergerak |
+
+<ForMode mode="isolated">
+
+Pada mode isolated, nilainya ada di root tiap Checkbox, jadi setel pada kotaknya sendiri.
+
+</ForMode>
+
+State ada di `:where()`, jadi kelas buatan Anda mengalahkannya, begitu juga utilitas Tailwind. Tulis
+`[data-checked]` padanya untuk menata satu state.
+
+## Gerak [#motion]
+
+Isiannya berubah seketika; glyph-lah yang bergerak. Ia memudar masuk dalam 120 ms, tumbuh dari 0,8 pada
+spring settle; centang menggambar goresannya dalam 260 ms dan minus tumbuh dari tengahnya. Kedua glyph
+berbagi satu sel, jadi kotak induk tidak pernah melompat. Tekanan menyusutkan kotak ke 0,97 dalam 90 ms.
+Dengan `prefers-reduced-motion`, tidak ada yang menggambar atau tumbuh: glyph hanya memudar.

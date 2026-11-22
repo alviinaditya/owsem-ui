@@ -7,6 +7,7 @@ import { type Dictionary, getDictionary } from "@/lib/dictionaries";
 import type { Lang } from "@/lib/i18n";
 import { PACKAGE_MANAGER_STORAGE_KEY } from "@/lib/theme";
 import { isDefaultSetup, type TokenSetup } from "@/lib/token-setup";
+import { HighlightedLine } from "./component-page/highlighted";
 import { Icon } from "./icons/icon";
 import { TokenChip, useTokenSetup } from "./token-setup";
 
@@ -28,7 +29,7 @@ const DLX: Record<PackageManager, string> = {
 const REGISTRY = "@owsem=https://owsem.dev/r/{name}.json";
 const CLI = "owsem@latest";
 
-type Labels = Dictionary["lab"];
+type Labels = Dictionary["common"];
 
 // The visitor's package manager, shared by every command on the page and kept across visits.
 const listeners = new Set<() => void>();
@@ -189,7 +190,7 @@ export function PackageInstall({ lang }: { lang: Lang }) {
   return (
     <InstallBlock
       className="docs-code"
-      labels={getDictionary(lang).lab}
+      labels={getDictionary(lang).common}
       commands={(pm) => [`${ADD[pm]} owsem-ui`]}
     />
   );
@@ -265,6 +266,46 @@ export function InstallCommand({ item, labels }: { item: string; labels: Labels 
     <div className="install">
       <InstallBlock labels={labels} commands={(pm) => cliSteps(setup, item, pm)} />
       <CliNote labels={labels} />
+    </div>
+  );
+}
+
+/**
+ * The Install popover's commands: a tab per package manager for the npm package, or the owsem
+ * CLI's steps for another token setup.
+ */
+export function InstallTabs({ item, labels }: { item: string; labels: Labels }) {
+  const setup = useTokenSetup();
+  if (isDefaultSetup(setup)) {
+    return <InstallBlock labels={labels} commands={(pm) => [`${ADD[pm]} owsem-ui`]} />;
+  }
+  return (
+    <>
+      <InstallBlock labels={labels} commands={(pm) => cliSteps(setup, item, pm)} />
+      <CliNote labels={labels} />
+    </>
+  );
+}
+
+/** A line of code with its own Copy, such as an import. */
+export function CodeLine({
+  text,
+  labels,
+  lang,
+}: {
+  text: string;
+  labels: Labels;
+  /** Highlights the line as this language, such as an import as `tsx`. */
+  lang?: "tsx" | "css";
+}) {
+  return (
+    <div className="command">
+      <ScrollArea.Root className="command-text" fade>
+        <ScrollArea.Viewport>
+          <code>{lang ? <HighlightedLine code={text} lang={lang} /> : text}</code>
+        </ScrollArea.Viewport>
+      </ScrollArea.Root>
+      <CopyButton value={text} labels={labels} variant="ghost" size="sm" />
     </div>
   );
 }

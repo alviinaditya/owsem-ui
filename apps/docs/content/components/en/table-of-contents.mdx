@@ -1,0 +1,165 @@
+---
+title: Table of Contents
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/owsem`: Table of Contents is an Owsem component, so it has its own entry. In
+the registry it is the `table-of-contents` item.
+
+## Usage [#usage]
+
+```tsx
+import { TableOfContents } from "owsem-ui/owsem";
+
+export function OnThisPage() {
+  return (
+    <TableOfContents.Root aria-label="On this page">
+      <TableOfContents.List>
+        <TableOfContents.Item>
+          <TableOfContents.Link href="#install">Installation</TableOfContents.Link>
+        </TableOfContents.Item>
+        <TableOfContents.Item>
+          <TableOfContents.Link href="#theming">Theming</TableOfContents.Link>
+          <TableOfContents.List>
+            <TableOfContents.Item>
+              <TableOfContents.Link href="#dark">Dark mode</TableOfContents.Link>
+            </TableOfContents.Item>
+          </TableOfContents.List>
+        </TableOfContents.Item>
+      </TableOfContents.List>
+    </TableOfContents.Root>
+  );
+}
+```
+
+Table of Contents lists a page's sections, with their sub-sections nested, and marks the one being
+read. A rail runs along the list, and a marker slides along it to the current section. Each link
+names its section by hash: `href="#install"` points at the element with that id, so give every
+section an id, as Markdown pipelines with heading slugs do.
+
+The current section is the last one whose top has crossed the reading line, 30% down the scroll
+area. The scroll area is the sections' nearest scrolling ancestor, so a list beside a scrolling box
+works as well as one beside the page; without one, it is the window. A short last section can never
+reach the line, so at the very end the last section is current. Before the first section reaches the
+line, and before the page hydrates, none is.
+
+Links are plain anchors, so the browser scrolls to the section and the URL takes its hash. A clicked
+link stays current until you scroll by yourself, with the wheel, a touch, or a scroll key, so the link
+you picked is marked even when its section is too short to reach the line. A sticky header hides a
+section the browser scrolls to: set `scroll-padding-top` on the scroll area, as tall as the header.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Four parts, and the marker that Root draws. Root finds each link's section by id and tracks scrolling
+with events: nothing runs while the page is still.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `nav.ow-table-of-contents` | Tracks the section being read and holds the marker. Name it with `aria-label` |
+| <Part name="List" /> | `ul.ow-table-of-contents__list` | `data-depth` from 1. The top List draws the rail; a nested one, inside an Item, indents |
+| <Part name="Item" /> | `li.ow-table-of-contents__item` | One section: its Link, and a List for its sub-sections |
+| <Part name="Link" /> | `a.ow-table-of-contents__link` | `href="#id"`; the current one has `aria-current="location"` and `data-current` |
+| <Part name="Marker" /> | `span.ow-table-of-contents__marker` | Drawn by Root on the rail (`aria-hidden`), as tall as the current link; `data-visible` while a link is current |
+
+## API reference [#api]
+
+Root is a `nav`, List a `ul`, Item an `li`, and Link an `a`. Other props pass through to them as they
+are, and so do refs.
+
+### TableOfContents.Root
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `aria-label` | `string` | | Names the navigation |
+| `className`, `style` | `string`, `CSSProperties` | | Theme tokens set here apply to the nav alone |
+
+### TableOfContents.List and TableOfContents.Item
+
+#### Data attributes
+
+| Data attribute | On | Present when |
+| --- | --- | --- |
+| `data-depth` | List | Always; the level, from 1 |
+
+### TableOfContents.Link
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `href` | `string`, as `"#id"` | | The section's id |
+| `render` | `ReactElement \| (props, state) => ReactElement` | | Swaps in a router link |
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-current` | This link's section is the one being read |
+| `data-depth` | Always; the level, from 1 |
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-table-of-contents` | Root |
+| `ow-table-of-contents__marker` | The marker |
+| `ow-table-of-contents__list` | List |
+| `ow-table-of-contents__item` | Item |
+| `ow-table-of-contents__link` | Link |
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| Tab | Moves through the links |
+| Enter | Follows the link: the browser scrolls to its section |
+
+- The current link has `aria-current="location"`, so a screen reader names it as the current location.
+  The server renders none, so nothing wrong is announced before tracking starts.
+- The marker is `aria-hidden`; the structure comes from the lists.
+- Keyboard focus shows a ring inside the link, so a scrolling container never cuts it.
+- In forced colors, the marker uses `Highlight` and the current link is underlined. Right to left,
+  the rail and the marker are on the right.
+
+## Theming [#theming]
+
+Table of Contents reads these theme tokens. Set them on the nav, or on an element around it. The
+marker and the rail read the same tokens as Tree Rail Nav's trail and rail.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-accent` | The marker |
+| `--ow-line` | The rail |
+| `--ow-fg` | The current link, and a hovered one |
+| `--ow-muted` | The other links |
+| `--ow-focus` | The focus ring |
+| `--ow-radius` | The focus ring's corners |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each nav's root, so set yours on the nav itself, as in
+`.on-this-page.ow-table-of-contents`.
+
+</ForMode>
+
+## Motion [#motion]
+
+The marker slides to the next link on the travel spring. At rest it is laid out on the link's own box,
+untransformed, so it lines up with the link at any zoom. With `prefers-reduced-motion`, the marker
+jumps to the next link and only fades in and out.

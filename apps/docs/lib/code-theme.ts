@@ -1,8 +1,8 @@
 import type { ThemeRegistration } from "shiki/core";
 
-// One Shiki theme for every code view: MDX code blocks (source.config.ts) and the Lab's live code
-// (components/lab/live-code.tsx). Colors are the --tk-* tokens in globals.css, so they follow the
-// site theme and a stage's own data-theme.
+// One Shiki theme for every code view: MDX code blocks (source.config.ts) and the examples' code
+// (components/component-page/highlighted.tsx). Colors are the --tk-* tokens in globals.css, so
+// they follow the site theme.
 const tk = (name: string) => `var(--tk-${name})`;
 
 export const CODE_THEME = "owsem";

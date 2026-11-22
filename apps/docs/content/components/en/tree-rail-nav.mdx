@@ -1,0 +1,179 @@
+---
+title: Tree Rail Nav
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/owsem`: Tree Rail Nav is an Owsem component, so it has its own entry. In the
+registry it is the `tree-rail-nav` item.
+
+## Usage [#usage]
+
+```tsx
+import { TreeRailNav } from "owsem-ui/owsem";
+
+export function Sidebar({ path }: { path: string }) {
+  return (
+    <TreeRailNav.Root aria-label="Documentation">
+      <TreeRailNav.Origin>Documentation</TreeRailNav.Origin>
+      <TreeRailNav.List>
+        <TreeRailNav.Node>
+          <TreeRailNav.Link href="/" current={path === "/"}>
+            Overview
+          </TreeRailNav.Link>
+        </TreeRailNav.Node>
+        <TreeRailNav.Node defaultOpen>
+          <TreeRailNav.Toggle>Guides</TreeRailNav.Toggle>
+          <TreeRailNav.Panel>
+            <TreeRailNav.List>
+              <TreeRailNav.Node>
+                <TreeRailNav.Link href="/install" current={path === "/install"}>
+                  Installation
+                </TreeRailNav.Link>
+              </TreeRailNav.Node>
+            </TreeRailNav.List>
+          </TreeRailNav.Panel>
+        </TreeRailNav.Node>
+      </TreeRailNav.List>
+    </TreeRailNav.Root>
+  );
+}
+```
+
+Tree Rail Nav is sidebar navigation in up to three levels. A rail runs down each level, with a dot for
+every row, and a trail follows the rails from the origin at the top to the page you are on. When the
+current row changes, the trail backs up to the branch both routes share, runs down to the new row, and
+pulses when it lands. Each Node is a Base UI Collapsible: a group's row is a disclosure button, and
+rails and the trail follow its panel while it animates.
+
+`current` marks the row of the page shown: `true` or `"page"` sets `aria-current="page"`, and `"step"`
+sets `aria-current="step"`, for the section being read on a long page. If several rows are current,
+the trail goes to the deepest one. Inside a closed group, the trail stops at the group's row and the
+marker turns hollow, so you still see where the page is. On hover, one highlight glides to the nearest
+row: it is Glide from `owsem-ui/core`.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Nine parts, three levels at most, one rail per level. A script draws the rail into an SVG inside Root;
+the rows are plain HTML.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `nav.ow-tree-rail-nav` | Holds the rail SVG and the hover highlight |
+| <Part name="Origin" /> | `div.ow-tree-rail-nav__origin` | Optional label at the top; the trail starts beside it. Without it, the rail starts at the first row |
+| <Part name="List" /> | `ul.ow-tree-rail-nav__list` | A nested List is labelled by its row (`aria-labelledby`); `data-depth` from 1 |
+| Node | `li.ow-tree-rail-nav__node` | A Base UI `Collapsible.Root`: one entry, its row, and a Panel if it is a group |
+| <Part name="Toggle" /> | `button.ow-tree-rail-nav__item` | A group's row: `Collapsible.Trigger`, with `aria-expanded` and `data-panel-open` |
+| <Part name="Link" /> | `a.ow-tree-rail-nav__item` | A page's row; `render` swaps in a router link |
+| <Part name="Panel" /> | `div.ow-tree-rail-nav__panel` | `Collapsible.Panel`, kept mounted so the rail can end at its row |
+| <Part name="Icon" /> | `span.ow-tree-rail-nav__icon` | Decorative (`aria-hidden`); the row's font size plus 2px, any icon inside it filled to fit |
+| <Part name="Label" /> | `span.ow-tree-rail-nav__label` | One line; text that does not fit fades (`data-overflow`), and runs left in a loop while its row is hovered or focused |
+
+The rail is an `svg.ow-tree-rail-nav__rail` inside `div.ow-tree-rail-nav__tree`, drawn by Root's
+script; a Toggle also draws a chevron, `svg.ow-tree-rail-nav__chevron`.
+
+## API reference [#api]
+
+Root is a `nav`, List a `ul`, Origin a `div`, Icon and Label a `span`, and Panel a `div`. Other props
+pass through to the element or to Base UI as they are, and so do refs.
+
+### TreeRailNav.Node
+
+Node, Toggle, and Panel take Base UI's [Collapsible.Root, Trigger, and Panel](https://base-ui.com/react/components/collapsible#api-reference) props as they are, `open`, `defaultOpen`, and `onOpenChange` included. OwsemUI adds none.
+
+### TreeRailNav.Link
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `current` | `boolean \| "page" \| "step"` | | The page shown, or the step being read: the trail ends here |
+| `disabled` | `boolean` | | Dims the row; it does not navigate |
+| `render` | `ReactElement \| (props, state) => ReactElement` | | Swaps in a router link |
+
+#### Data attributes
+
+| Data attribute | On | Present when |
+| --- | --- | --- |
+| `data-current` | Link | `current` is set |
+| `data-depth` | Link, Toggle, Panel, List | Always; the level, from 1 |
+| `data-panel-open` | Toggle | Its group is open |
+| `data-overflow` | Label | The text does not fit |
+
+Disabled links get `aria-disabled` and do not navigate; arrow keys and the hover highlight skip them.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-tree-rail-nav__node` | Node |
+| `ow-tree-rail-nav__panel` | Panel |
+| `ow-tree-rail-nav` | Root |
+| `ow-tree-rail-nav__origin` | Origin |
+| `ow-tree-rail-nav__list` | List |
+| `ow-tree-rail-nav__item` | Link and Toggle |
+| `ow-tree-rail-nav__icon`, `ow-tree-rail-nav__label` | Icon and Label |
+| `ow-tree-rail-nav__tree`, `ow-tree-rail-nav__rail` | The wrapper, and the rail it draws |
+| `ow-tree-rail-nav__chevron` | A Toggle's chevron |
+| `ow-tree-rail-nav__label-text` | The text inside a Label |
+
+## Accessibility [#accessibility]
+
+Tab moves through the links and toggles as usual. Arrow keys move within the tree:
+
+| Key | Action |
+| --- | --- |
+| Arrow Down, Arrow Up | Next or previous visible row, skipping disabled ones |
+| Home, End | First or last visible row |
+| Arrow Right | Opens a closed group, or moves into an open one |
+| Arrow Left | Closes an open group, or moves to the parent row |
+
+- The rail is an SVG with `aria-hidden`; screen readers get the structure from the lists,
+  `aria-expanded`, and `aria-current`. A nested list is labelled by its row.
+- Keyboard focus shows a ring inside the row, so a panel never cuts it.
+- In forced colors, the rail uses `GrayText`, the trail `Highlight`, and the current row is
+  underlined. Right to left, the rail is mirrored.
+
+## Theming [#theming]
+
+Tree Rail Nav reads these theme tokens. Set them on the nav, or on an element around it such as
+`.sidebar`.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-accent` | Trail, lit dots, marker, and the current row's tint |
+| `--ow-line` | Rails |
+| `--ow-fg` | Text, and at 24% the dots the trail has not lit |
+| `--ow-muted` | The origin label |
+| `--ow-bg` | Cuts the dots out of the rail; match the background behind the nav |
+| `--ow-hover` | The hover highlight (Glide) |
+| `--ow-radius` | The rows' and the highlight's corners |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each nav's root, so set yours on the nav itself, as in
+`.sidebar.ow-tree-rail-nav`.
+
+</ForMode>
+
+The rails sit 25px apart: every branch curves the same way, and a first-level row's children line up
+with its text, after the icon. Rows indent just past their rail.
+
+## Motion [#motion]
+
+The trail travels along the rail on the travel spring and pulses when it lands, while a tint sweeps in
+behind the row; panels open and close with the rails following. With `prefers-reduced-motion`, the
+trail does not travel, the tint does not sweep, and panels open at once.

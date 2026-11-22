@@ -1,0 +1,135 @@
+---
+title: Copy Button
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/owsem`. To copy the source into your project instead, use the `copy-button`
+item of the registry, which installs Button, Icon Morph, and Tooltip with it.
+
+## Usage [#usage]
+
+```tsx
+import { CopyButton } from "owsem-ui/owsem";
+
+export function InviteLink({ url }: { url: string }) {
+  return (
+    <div>
+      <code>{url}</code>
+      <CopyButton value={url} labels={{ copy: "Copy link" }} />
+    </div>
+  );
+}
+```
+
+Copy Button copies a piece of text, such as a link, a command, or a key. It is a Button whose copy
+icon morphs into a check that draws itself in, and back after a moment. A press writes `value` with
+the Clipboard API; once the browser confirms, the icon turns into the check and `onCopy` gets the
+text. After `timeout` it goes back. Until then it is busy and another press does not copy again.
+
+When the browser refuses, or has no Clipboard API (outside a secure context, such as plain `http`),
+nothing shows as copied and `onError` gets the reason, so you can show the text to select instead.
+An `onClick` of your own runs first; `preventDefault()` in it skips the copy.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+The Button and its parts, with the icon in Icon Morph, and a status region beside the button. Icon
+only, a Tooltip names it: its popup (`div.ow-tooltip__popup`, in a portal) says Copy, turns to
+Copied in place on a press, and stays open while the check shows. With a label there is no Tooltip.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `button.ow-button.ow-copy-button` | A Button: `data-variant`, `data-size`, `data-icon-only` without a label, and `data-copied` and `aria-disabled="true"` while it shows Copied |
+| <Part name="Icon" /> | `svg.ow-copy-button__icon` | Copy, or the check (`.ow-copy-button__check`), in the Button's icon slot, swapped by Icon Morph |
+| <Part name="Label" /> | `span.ow-copy-button__label` | With `showLabel`: the two words (`__label-text`), the one on show with `data-visible` |
+| Status | `span.ow-copy-button__status` | `role="status"` after the button, visually hidden: says Copied while it shows |
+
+## API reference [#api]
+
+### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `string \| () => string` | | The text to copy, or a function read at the moment of the press |
+| `timeout` | `number` | `1600` | How long it shows Copied, in ms |
+| `labels` | `{ copy?: string; copied?: string }` | `{ copy: "Copy", copied: "Copied" }` | The words it shows and announces, for translation |
+| `showLabel` | `boolean` | `false` | Shows the label beside the icon instead of a Tooltip |
+| `duration` | `string` | The settle spring's | The icon swap's length, a CSS time such as `"300ms"` |
+| `onCopy` | `(text: string) => void` | | After the text is on the clipboard |
+| `onError` | `(error: unknown) => void` | | When the browser refuses or has no Clipboard API |
+| `variant` | `ButtonVariant` | `"ghost"` | As Button's |
+
+`size`, `disabled`, `className`, `style`, `onClick`, and the other Button props pass through (not
+`startIcon`, `endIcon`, `loading`, or `children`), and so does the ref to the `button`.
+
+### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-variant`, `data-size` | Always, as on Button |
+| `data-icon-only` | Without `showLabel` |
+| `data-copied` | While it shows Copied |
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-copy-button` | Root |
+| `ow-copy-button__icon`, `ow-copy-button__check` | Icon, and the check |
+| `ow-copy-button__label`, `ow-copy-button__label-text` | Label, and each word |
+| `ow-copy-button__tip`, `ow-copy-button__tip-text` | The Tooltip's words |
+| `ow-copy-button__status` | Status |
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| Tab | Moves focus to the button |
+| Enter, Space | Copies |
+
+- Its name stays the same while it shows Copied; the status region announces the copy instead, so a
+  screen reader hears it once. With a label, the name is the word on show.
+- While it shows Copied it is `aria-disabled`, so it reads as unavailable until it is ready again,
+  and it keeps focus.
+- Icons are `aria-hidden`. The Tooltip only repeats the name and the status, so nothing depends on it.
+- With `prefers-reduced-motion`, the icons only crossfade and the check is just there. In forced
+  colors, the Button draws its edge and the icons take its text color.
+
+## Theming [#theming]
+
+Copy Button takes every Button prop and reads Button's theme tokens (see Button), plus these. Set
+one on the button, or on anything around it.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-spring-settle`, `--ow-spring-settle-duration` | The icon swap and the check drawing in; `duration` sets the length on one button |
+| `--ow-tooltip-bg`, `--ow-tooltip-fg` | The Tooltip, icon only |
+| `--ow-motion-scale` | How far the icons shrink and blur in the swap |
+| `--ow-ease-out` | The crossfade under reduced motion |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each component's root, so set yours on the button itself.
+
+</ForMode>
+
+## Motion [#motion]
+
+The icons swap on the settle spring: the copy icon shrinks and blurs out as the check comes in, and
+the check draws its stroke on the same spring, like a hand writing it. With a label, both words
+share one cell, so the width holds and nothing around it moves. In the Tooltip, the word changes in
+place and the popup eases to the new width. With `prefers-reduced-motion`, the icons only crossfade
+and the check is just there.

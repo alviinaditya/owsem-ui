@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { demo } from "./lab.ts";
+import { demo } from "./example-page.ts";
 
 test("serves the registry at /r without a language prefix (DS-7)", async ({ request }) => {
   const catalog = await request.get("/r/registry.json", { maxRedirects: 0 });
@@ -13,7 +13,7 @@ test("serves the registry at /r without a language prefix (DS-7)", async ({ requ
   }
 });
 
-test("renders a component Lab in each language", async ({ page }) => {
+test("renders a component page in each language", async ({ page }) => {
   for (const lang of ["id", "en"]) {
     await page.goto(`/${lang}/separator`);
     await expect(page.getByRole("heading", { level: 1, name: "Separator" })).toBeVisible();

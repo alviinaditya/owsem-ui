@@ -1,0 +1,176 @@
+---
+title: Tabs
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Di registry, itemnya `tabs`.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Tabs } from "owsem-ui/base";
+
+export function ProjectTabs() {
+  return (
+    <Tabs.Root defaultValue="overview">
+      <Tabs.List aria-label="Proyek">
+        <Tabs.Tab value="overview">Ringkasan</Tabs.Tab>
+        <Tabs.Tab value="activity">Aktivitas</Tabs.Tab>
+      </Tabs.List>
+      <Tabs.Panel value="overview">Proyek sekilas.</Tabs.Panel>
+      <Tabs.Panel value="activity">Yang terjadi belakangan ini.</Tabs.Panel>
+    </Tabs.Root>
+  );
+}
+```
+
+Tabs menampilkan satu panel dalam satu waktu, dipilih dari sebaris tab. Barisnya adalah well datar
+tanpa tepi, dan sebuah tombol bertint meluncur di bawah tab aktif, dengan tampilan dan gerak yang
+sama seperti Toggle Group: ia meregang dari tepi depannya menuju tab baru, lalu berhenti tanpa
+memantul. Anda menulis empat part; tombol dan sorotan hover menggambar dirinya sendiri. Hanya
+perpindahan dari satu tab ke tab lain yang meluncur.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Empat part Anda tulis sendiri; indikator digambar oleh list.
+
+| Part | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-tabs` | `Tabs.Root` Base UI: list dan panel. Token yang diset di sini sampai ke semua part di dalamnya |
+| <Part name="List" /> | `div.ow-tabs__list` | `role="tablist"`: well-nya. Ia menggambar indikator dan sorotan Glide, dan bergulir ke samping bila tab tidak muat |
+| <Part name="Tab" /> | `button.ow-tabs__tab` | `role="tab"`, `aria-selected`. Teksnya dibungkus `span.ow-tabs__label`, jadi tab yang hanya berisi ikon berbentuk persegi |
+| <Part name="Indicator" /> | `span.ow-tabs__indicator` | Dekoratif (`aria-hidden`); digambar oleh list |
+| <Part name="Panel" /> | `div.ow-tabs__panel` | `role="tabpanel"`, diberi label oleh tab-nya. Tanpa padding, jadi isi Anda yang menentukan |
+
+Base UI punya `Tabs.Indicator` sendiri, yang tidak diekspor OwsemUI: ia menempatkan diri dengan
+`translate`, yang jatuh di antara piksel pada zoom pecahan. Yang ini berhenti di tempat layout
+menaruh tab, pada piksel yang sama.
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### Tabs.List
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Ukuran font dan padding tab |
+
+| Ukuran | Font | Tab | Alur |
+| --- | --- | --- | --- |
+| `sm` | 13px | 24px | 32px |
+| `md` | 14px | 32px | 40px |
+| `lg` | 16px | 40px | 48px |
+
+Wadahnya setinggi Button seukurannya, dan tab berada 4px di dalamnya. Ikon berukuran font ditambah 2px.
+
+#### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-size` | Selalu: `sm`, `md`, atau `lg` |
+
+### Tabs.Tab
+
+#### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-held` | Ditahan (juga pada indikator, saat tab itu yang aktif) |
+
+Teks tab dibungkus label, jadi tab yang hanya berisi ikon berbentuk persegi.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-tabs` | Root |
+| `ow-tabs__list` | List |
+| `ow-tabs__indicator` | Indikator yang digambar list |
+| `ow-tabs__tab` | Tab |
+| `ow-tabs__label` | Teks sebuah Tab |
+| `ow-tabs__panel` | Panel |
+
+## Aksesibilitas [#accessibility]
+
+List adalah satu tab stop.
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab, Shift Tab | Masuk ke list, lalu ke panel |
+| Panah Kanan, Panah Kiri | Tab berikutnya atau sebelumnya, dibalik pada kanan ke kiri. Berputar, dan menggulir tab ke dalam tampilan |
+| Panah Bawah, Panah Atas | Sama, bila vertikal |
+| Home, End | Tab pertama atau terakhir |
+| Enter, Spasi | Memilih tab yang difokus |
+
+- Secara default panah hanya memindahkan fokus, jadi panel yang lambat tampil tidak terbuka saat
+  dilewati. Atur `activateOnFocus` pada list agar memilih sambil bergerak.
+- Beri nama list dengan `aria-label` atau `aria-labelledby`, dan tab yang hanya berisi ikon dengan
+  `aria-label`.
+- Panel bisa dijangkau dengan Tab, agar keyboard bisa menggulirnya. Bila isinya diawali sesuatu yang
+  bisa difokus, beri `tabIndex={-1}` agar satu stop berkurang.
+- Tanpa `defaultValue`, tab pertama yang aktif dipilih setelah halaman berjalan, jadi HTML dari server
+  belum punya panel.
+- Pada forced colors, tab aktif diisi `Highlight` di belakang `HighlightText`, dan well tetap punya
+  tepi yang terlihat. Pada kanan ke kiri, tab pertama dan tombolnya ada di kanan.
+
+## Tema [#theming]
+
+Tabs membaca token tema ini. Atur di root, di satu part, atau di elemen di sekitarnya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-fg` | Tint 6% well, label aktif dan yang di-hover, dan teks panel |
+| `--ow-muted` | Label lainnya |
+| `--ow-accent`, `--ow-raised-bg` | Indikator: tint aksen 14% di atas warna raised |
+| `--ow-hover` | Sorotan hover (Glide) |
+| `--ow-focus` | Cincin fokus, digambar di dalam tab |
+| `--ow-radius` | Sudut well; tab, indikator, dan sorotan memakainya dikurangi padding 4px |
+
+<ForMode mode="isolated">
+
+Pada mode terisolasi, nilai berada di setiap part, jadi atur nilai Anda di part itu dengan kelas.
+
+</ForMode>
+
+CSS biasa pada `className` mengalahkan aturan komponen tanpa `!important`. List selebar isinya, jadi
+baris selebar penuh dengan tab sama lebar adalah dua aturan, dan indikator mengikutinya:
+
+```css
+.equal-tabs .ow-tabs__list {
+  inline-size: 100%;
+}
+
+.equal-tabs .ow-tabs__tab {
+  flex: 1;
+}
+```
+
+Ukurannya dalam `em`, jadi `font-size` pada list menskalakan tab. Panel tidak punya padding atau
+margin yang perlu dibatalkan; `display` buatan Anda pada panel akan mengalahkan atribut `hidden` yang
+menyembunyikannya, jadi taruh grid atau flex Anda pada anak.
+
+## Gerak [#motion]
+
+Indikator meluncur dengan pegas travel Core dan meregang dari tepi depannya, lalu berhenti dengan
+pegas settle tanpa memantul; Glide menyorot tab yang di-hover. Menekan dan menahan sebuah tab
+menskalakannya ke 0,97, begitu pula indikator bila tab itu yang aktif. List yang lebih lebar dari
+induknya bergulir tanpa scrollbar, dan indikator ikut bersama tab-nya. Semuanya mengikuti
+`--ow-motion-scale`. Dengan `prefers-reduced-motion`, indikator berpindah seketika dan tab yang
+ditahan meredup, bukan mengecil.

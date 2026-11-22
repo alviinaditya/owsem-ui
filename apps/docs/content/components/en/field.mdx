@@ -1,0 +1,129 @@
+---
+title: Field
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. In the registry it is the `field` item, which brings `input` with it.
+With per-component CSS, `Field.Control` needs Input's stylesheet too: `owsem-ui/css/input.css`.
+
+## Usage [#usage]
+
+```tsx
+import { Field } from "owsem-ui/base";
+
+export function Email() {
+  return (
+    <Field.Root>
+      <Field.Label>Email</Field.Label>
+      <Field.Control type="email" />
+      <Field.Description>We only use it to sign you in.</Field.Description>
+      <Field.Error />
+    </Field.Root>
+  );
+}
+```
+
+Field ties a label, a control, and its messages together. Base UI does the wiring: the label names the
+control, the description and the error are read out with it, and the validity reaches every part.
+A label and a control are all a common field needs. `Field.Control` is [Input](/en/input); any Base UI
+control inside `Field.Root` is wired the same way, with or without it.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-field` | One column; takes `invalid`, `disabled`, and `validate` |
+| <Part name="Label" /> | `label.ow-field__label` | Names the control |
+| <Part name="Control" /> | `input.ow-input` | Input itself: its size and icons, and `render` for another control |
+| <Part name="Description" /> | `p.ow-field__description` | Muted help text |
+| <Part name="Error" /> | `div.ow-field__error` | Only while invalid; several messages come as a list |
+| Item | `div.ow-field__item` | One option in a checkbox or radio group: control and label in a row |
+| Validity | none | A function of the validity state; renders what you return |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### Field.Control
+
+Input's props, with its sizes and icons. The rest go to Base UI's Field.Control as they are.
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Button's sizes: 32, 40, or 48 px tall |
+| `startIcon` | `ReactNode` | | An icon before the text |
+| `endIcon` | `ReactNode` | | An icon after the text |
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-size` | Always; on the input and the wrapper |
+
+`gap` on the root sets the space between parts. The field has no outer margins and fills its parent.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-field` | Root |
+| `ow-field__label` | Label |
+| `ow-field__description` | Description |
+| `ow-field__error` | Error |
+| `ow-field__item` | Item |
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| Tab | Moves focus to the control |
+| Enter | In a form, submits; alone, runs the field's check |
+
+- A click on the label moves focus to the control, and its text is the control's name.
+- Base UI sets `aria-describedby` to the description, and to the error while it shows; `aria-invalid`
+  says it failed. Don't signal an error by color alone: the message is there.
+- Disabled fades the control and the label to 45%.
+- With `prefers-contrast: more` the control gets a 1px edge; in forced colors messages take the system
+  text color, and an invalid control keeps a 2px edge. Right to left, the label sits on the right.
+
+## Theming [#theming]
+
+Field reads these theme tokens. Set one on a part, on the field, or on anything around it.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-fg` | Label |
+| `--ow-muted` | Description |
+| `--ow-critical` | Error, and the control's tint while invalid |
+
+The control reads Input's tokens too.
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each part's root, so set yours on the parts that read them.
+
+</ForMode>
+
+A `className` on any part wins over its own values with no `!important`. For a label beside its
+control, make the root a grid with `grid-template-columns: 6em 1fr`.
+
+## Motion [#motion]
+
+A message comes and goes at once, since a fade would only delay reading it. The control shakes once when
+it becomes invalid. With `prefers-reduced-motion`, it blinks instead.

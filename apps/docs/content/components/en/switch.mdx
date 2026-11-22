@@ -1,0 +1,121 @@
+---
+title: Switch
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. To copy the source into your project instead, use the `switch`
+item of the registry.
+
+## Usage [#usage]
+
+```tsx
+import { Switch } from "owsem-ui/base";
+
+export function EmailAlerts() {
+  return (
+    <label>
+      <Switch.Root defaultChecked />
+      Email alerts
+    </label>
+  );
+}
+```
+
+A switch turns one setting on or off, and the change applies right away. Name it with a wrapping
+`<label>` or an `aria-label`. It draws its own thumb; give `Switch.Root` a `Switch.Thumb` of your
+own to hold an icon.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Base UI renders a `<span>` with the `switch` role, and a hidden `<input>` beside it for forms.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `span.ow-switch` | The track: `role="switch"`, `aria-checked`, and the state attributes |
+| <Part name="Thumb" /> | `span.ow-switch__thumb` | The white key that moves; Root draws one without children |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### Switch.Root
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Follows Button's font sizes |
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-size` | Always; the chosen size |
+
+### Switch.Thumb
+
+Any node inside it fills the key less 2px.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-switch` | Root |
+| `ow-switch__thumb` | Thumb |
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| Tab | Moves focus to the switch |
+| Space, Enter | Turns it on or off |
+
+- Screen readers announce the role and `aria-checked`. Keep the name the same in both states.
+- A wrapping label makes its text a press target.
+- An icon in the thumb is decorative: give it `aria-hidden`.
+- With `prefers-contrast: more` the track gets a 1px edge; in forced colors it uses system colors.
+
+## Theming [#theming]
+
+Switch reads these theme tokens. Set one on a switch, or on anything around it.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-fg` | Track tint while off (10%, 13% on hover), and an icon in the thumb |
+| `--ow-accent` | Track while on |
+| `--ow-primary-shadow` | Track's top highlight while on |
+| `--ow-on-accent` | Thumb |
+| `--ow-surface-shadow` | Thumb's small shadow |
+| `--ow-radius` | The track's corners |
+| `--ow-motion-scale` | How far a press goes in |
+| `--ow-focus` | Focus ring |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Switch's root, so set yours on the switch itself.
+
+</ForMode>
+
+Everything is sized from `font-size` in `em`; set `font-size`, `inline-size`, or `block-size` with
+plain CSS, and the thumb follows.
+
+## Motion [#motion]
+
+The thumb moves with `translate` on the travel spring; change your mind halfway and it turns back
+from where it is. While travelling it stretches from its leading edge, most at mid-travel. Held down, it widens
+toward where it will go and squashes a little in height within 90 ms, and settles back on the
+settle spring. With `prefers-reduced-motion`, it goes to its place with no travel, stretch, or squash.

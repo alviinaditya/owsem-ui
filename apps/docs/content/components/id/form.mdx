@@ -1,0 +1,92 @@
+---
+title: Form
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Di registry ia adalah item `form`. Ia tidak butuh komponen lain, meski
+pemeriksaannya hanya menjangkau Field, dan kontrol Base UI apa pun di dalamnya.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Button, Field, Form } from "owsem-ui/base";
+
+export function SignUp({ save }) {
+  return (
+    <Form onFormSubmit={save}>
+      <Field.Root name="email">
+        <Field.Label>Email</Field.Label>
+        <Field.Control type="email" required />
+        <Field.Error />
+      </Field.Root>
+      <Button type="submit">Daftar</Button>
+    </Form>
+  );
+}
+```
+
+Form adalah `<form>` native yang memeriksa Field-nya sebelum mengirim. Submit menjalankan pemeriksaan
+tiap Field: `required`, `type`, dan `pattern` milik kontrolnya, dan `validate` apa pun. Bila ada yang
+gagal, tidak ada yang terkirim, tiap field yang gagal menampilkan errornya, dan fokus pindah ke yang
+pertama dengan teksnya terpilih. Base UI mematikan gelembung browser (`noValidate`), jadi pesannya ada
+di `Field.Error`. `onFormSubmit` menerima values menurut `name` tiap Field setelah semuanya lolos.
+
+Setelah submit yang gagal, field memeriksa lagi saat Anda mengetik. `validationMode` membuatnya memeriksa
+saat blur atau saat berubah sejak awal.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `form.ow-form` | Satu kolom dengan satu gap; tanpa bingkai, margin, dan state sendiri |
+
+Field dan Fieldset membentang di dalamnya. `<button>` langsung di dalamnya mempertahankan lebarnya.
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+`gap` adalah satu properti pada satu kelas, dan sisa layout milik Anda, misalnya satu baris untuk kotak
+buletin.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-form` | Root |
+
+## Aksesibilitas [#accessibility]
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab | Berpindah melalui field dan tombolnya |
+| Enter | Di dalam field, mengirim |
+
+- Fokus pindah ke field pertama yang gagal, sehingga pengguna keyboard atau screen reader mendarat di
+  masalahnya dan mendengar nama serta errornya.
+- Beri form `aria-label` bila ia harus menjadi landmark.
+- Submit yang masih gagal menggetarkan lagi field invalid pertama, padahal ia tak pernah berhenti
+  invalid. Forced colors tidak punya yang perlu digambar ulang selain milik Field.
+
+## Tema [#theming]
+
+Form tidak membaca token tema sendiri. Token yang disetel pada form sampai ke Field di dalamnya, misalnya
+`--ow-critical` untuk error.
+
+<Tokens />
+
+## Gerak [#motion]
+
+Satu-satunya gerak adalah getaran yang diberikan submit yang gagal pada field invalid pertama. Dengan
+`prefers-reduced-motion`, field berkedip.

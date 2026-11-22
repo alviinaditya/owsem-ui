@@ -1,0 +1,188 @@
+---
+title: Menu
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. In the registry it is the `menu` item; the button in the examples also
+needs `button`.
+
+## Usage [#usage]
+
+```tsx
+import { Button, Menu } from "owsem-ui/base";
+
+export function EditMenu() {
+  return (
+    <Menu.Root>
+      <Menu.Trigger render={<Button variant="outline" />}>Edit</Menu.Trigger>
+      <Menu.Portal>
+        <Menu.Positioner>
+          <Menu.Popup>
+            <Menu.Item onClick={cut}>Cut</Menu.Item>
+            <Menu.Item onClick={copy}>Copy</Menu.Item>
+          </Menu.Popup>
+        </Menu.Positioner>
+      </Menu.Portal>
+    </Menu.Root>
+  );
+}
+```
+
+Menu opens a list of actions from a button: items with icons and shortcuts, checks and choices, and
+submenus, on the raised material with the popup shadow and no edge, since it floats. Items have no
+hover color of their own: one highlight, Glide, slides to the item under the pointer, so moving down a
+menu reads as one motion. The keyboard moves the same highlight, so the pointer and the keys never show
+two. Disabled items are passed over.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Base UI renders the parts, their roles, and the keyboard. OwsemUI styles them, adds Glide, the
+indicators' default check and dot, the chevron, the sizes, and carries the text direction into the
+portal. Root, Portal, Group, RadioGroup, and SubmenuRoot add no look of their own. Root renders no
+element, so in Inspect it is the box that holds the trigger and its menu.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | none | State only: `open`, `modal`, and `loopFocus` |
+| <Part name="Trigger" /> | Your button | Passed to `render`; `aria-haspopup="menu"` and `aria-expanded` |
+| Backdrop | `div.ow-menu__backdrop` | A modal menu's, drawn by its Portal: clear, over the whole window, under the popup |
+| Positioner | `div.ow-menu__positioner` | 6px from the trigger's resting box, so a press does not shift the menu; a submenu beside its item, first rows in line |
+| <Part name="Popup" /> | `div.ow-menu__popup` | `role="menu"`, `data-size`, `data-instant` when it skips the animation |
+| Viewport | `div.ow-menu__viewport` | Scrolls the items when the menu is taller than the screen, so the popup keeps its rounded corners; the Glide highlight is inside |
+| <Part name="Item" /> | `div.ow-menu__item` | `role="menuitem"` and `data-disabled`; an `svg` first is sized as its icon |
+| Shortcut | `kbd` | Last in an item, at its end, muted |
+| <Part name="GroupLabel" /> | `div.ow-menu__group-label` | Names its `Menu.Group` or `Menu.RadioGroup` |
+| <Part name="CheckboxItem" /> | `div.ow-menu__item` | `role="menuitemcheckbox"`, `aria-checked` |
+| Indicator | `span.ow-menu__indicator` | A check, or a dot in a RadioItem; `data-checked` or `data-unchecked`; it keeps its room while off |
+| <Part name="Separator" /> | `div.ow-menu__separator` | `role="separator"`, a hairline |
+| <Part name="SubmenuTrigger" /> | `div.ow-menu__item` | `aria-haspopup`, `data-popup-open`, and a chevron |
+| Chevron | `span.ow-menu__chevron` | At a SubmenuTrigger's end, mirrored for right-to-left text |
+
+`Menu.LinkItem` is an item that is a link; `render` swaps in a router link.
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### Menu.Positioner
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `sideOffset` | `number \| function` | `6` | Gap to the trigger. Base UI's default is `0` |
+| `alignOffset` | `number \| function` | A submenu's first rows in line | Shift along the trigger. Base UI's default is `0` |
+
+### Menu.Popup
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | The items' type scale |
+
+| Size | Font | Item height | Icon |
+| --- | --- | --- | --- |
+| `sm` | 13px | 29.25px | 15px |
+| `md` | 14px | 31.5px | 16px |
+| `lg` | 16px | 36px | 18px |
+
+Items follow Button's `--py` rule with `--py: 0.5em`.
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-size` | Always: `sm`, `md`, or `lg` |
+
+### Menu.CheckboxItemIndicator and Menu.RadioItemIndicator
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `keepMounted` | `boolean` | `true` | Keeps its room while unchecked, so labels stay in line. Base UI's default is `false` |
+| `children` | `ReactNode` | A check, or a dot for the radio | An icon-sized glyph |
+
+A modal menu (the default) holds the page's scroll through OwsemUI's own lock, which leaves the page's `overflow` alone; a menu opened by hover is never modal.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-menu__backdrop` | Backdrop |
+| `ow-menu__positioner` | Positioner |
+| `ow-menu__popup` | Popup |
+| `ow-menu__viewport` | Inside the Popup, scrolls its items |
+| `ow-menu__item` | Item, CheckboxItem, RadioItem, SubmenuTrigger |
+| `ow-menu__indicator` | Indicators |
+| `ow-menu__chevron` | The SubmenuTrigger's chevron |
+| `ow-menu__group-label` | GroupLabel |
+| `ow-menu__separator` | Separator |
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| Enter, Space, Arrow Down | On the trigger: open the menu at its first item |
+| Arrow Down, Arrow Up | The next or previous item, wrapping around |
+| Home, End | The first or last item |
+| Enter, Space | Pick the item |
+| Arrow Right, Arrow Left | Open a submenu, or go back from one (mirrored right to left) |
+| Escape | Shut the menu; focus goes back to the trigger |
+| A letter | The next item that starts with it |
+
+- Screen readers announce the menu, each item's role and state, and the groups by their labels.
+- `modal` (true by default) keeps the rest of the page out of reach while the menu is open: a clear
+  backdrop takes a press outside, so that press only shuts the menu, and the page holds its scroll.
+  OwsemUI holds it without setting `overflow` on the page, which would make the browser draw the page's
+  text again: the wheel and the scroll keys still work inside the menu. Opened by touch, as in Base
+  UI, the page still scrolls; a menu opened by hover, and a submenu, are never modal.
+- A disabled item is dimmed to 45%; the keyboard still reaches it, and Glide passes it.
+- With `prefers-contrast: more`, the popup gains a 1px ring in `--ow-edge`. In forced colors it keeps a
+  1px edge in the system color, the separators stay, the highlight is an outline in `Highlight`, and
+  the checks follow the text color.
+
+## Theming [#theming]
+
+Menu reads these theme tokens. Set them on the Popup with a class, or for every menu on `:root`. A
+class around the trigger does not reach: the menu renders in a portal, outside the trigger's subtree.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-raised-bg` | Surface |
+| `--ow-popup-shadow` | Shadow |
+| `--ow-edge` | The ring under `prefers-contrast: more` |
+| `--ow-fg` | Item text |
+| `--ow-muted` | Group labels, shortcuts, and chevrons |
+| `--ow-hover` | The highlight (Glide) |
+| `--ow-line` | Separators |
+| `--ow-radius` | The popup's corners; items and Glide take it less the 4px padding |
+| `--ow-focus` | Focus ring |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Popup, so set yours on the Popup with a class.
+
+</ForMode>
+
+## Motion [#motion]
+
+The menu grows out of its trigger in 180 ms, from 0.96 and transparent, and leaves in 120 ms; opened
+from the keyboard, it appears at once. Glide slides one highlight between items, and in the gaps the lit
+one holds. With `prefers-reduced-motion`, the menu fades without growing, and Glide fades instead of
+sliding.

@@ -1,0 +1,96 @@
+---
+title: Fieldset
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Di registry ia adalah item `fieldset`. Ia tidak butuh komponen lain: Field
+yang biasanya Anda taruh di dalamnya, dan kontrol apa pun bisa.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Field, Fieldset } from "owsem-ui/base";
+
+export function Billing() {
+  return (
+    <Fieldset.Root>
+      <Fieldset.Legend>Alamat penagihan</Fieldset.Legend>
+      <Field.Root>
+        <Field.Label>Jalan</Field.Label>
+        <Field.Control />
+      </Field.Root>
+    </Fieldset.Root>
+  );
+}
+```
+
+Fieldset mengelompokkan field yang berkaitan di bawah satu legend, dan satu `disabled` menjangkau semuanya.
+Base UI menamai grup dan meneruskan state; OwsemUI menambah jarak yang rata dan sedikit ruang di bawah
+legend. Beri setiap grup sebuah legend.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `fieldset.ow-fieldset` | Satu kolom tanpa bingkai; `disabled`, dan `data-disabled` saat nonaktif |
+| <Part name="Legend" /> | `div.ow-fieldset__legend` | Menamai grup lewat `aria-labelledby`; ruang 0,75em di bawahnya adalah `::after`-nya |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+Semua isi grup berjarak satu gap, di bawah legend dan antar-field: `1.25em`. Ia tanpa margin luar dan
+mengisi induknya, jadi Form atau layout Anda yang mengatur ruang di sekitarnya. Satu aturan dengan
+`content: none` pada `::after` legend menghapus ruang di bawahnya.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-fieldset` | Root |
+| `ow-fieldset__legend` | Legend |
+
+## Aksesibilitas [#accessibility]
+
+Fieldset tidak menerima fokus: Tab berpindah melalui kontrolnya, dan melewati semuanya saat nonaktif.
+
+- Ia `<fieldset>` native, jadi punya role `group`, bernama legend-nya.
+- `render` menjadikan legend sebuah judul bila outline halaman membutuhkannya; ia tetap menamai grup.
+- Disabled meredupkan legend dan setiap kontrol menjadi 45%.
+- Tidak ada garis yang hilang pada forced colors. Kanan-ke-kiri, legend ada di kanan.
+
+## Tema [#theming]
+
+Fieldset membaca satu token tema. Setel pada legend, root, atau elemen di sekitarnya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-fg` | Legend, dan teks field di dalamnya |
+
+<ForMode mode="isolated">
+
+Pada mode isolated, nilainya ada di root tiap bagian, jadi setel pada legend-nya sendiri.
+
+</ForMode>
+
+`className` mengalahkan nilai bawaannya tanpa `!important`: `gap` adalah satu properti pada satu kelas,
+dan grid pada root menata field dalam kolom.
+
+## Gerak [#motion]
+
+Tidak ada yang bergerak. Disabled mengubah opasitasnya dengan fade singkat milik kontrol, dan dengan
+`prefers-reduced-motion` tidak ada yang perlu diubah.

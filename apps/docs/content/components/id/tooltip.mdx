@@ -1,0 +1,122 @@
+---
+title: Tooltip
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Di registry, itemnya `tooltip`; toolbar pada contoh juga butuh `toolbar`.
+
+## Penggunaan [#usage]
+
+```tsx
+import { IconButton, Tooltip } from "owsem-ui/base";
+import { Pin } from "lucide-react";
+
+export function PinButton() {
+  return (
+    <Tooltip.Root>
+      <Tooltip.Trigger render={<IconButton aria-label="Sematkan" icon={<Pin />} />} />
+      <Tooltip.Portal>
+        <Tooltip.Positioner>
+          <Tooltip.Popup>
+            <Tooltip.Arrow />
+            Sematkan
+          </Tooltip.Popup>
+        </Tooltip.Positioner>
+      </Tooltip.Portal>
+    </Tooltip.Root>
+  );
+}
+```
+
+Tooltip menamai tombol bagi pengguna pointer atau keyboard: label singkat, dan shortcut-nya, pada
+permukaan gelap solid. Tooltip yang terbuka di setiap lewatnya pointer akan berkedip di sepanjang
+toolbar, jadi yang pertama menunggu 600 ms. Bungkus trigger dengan `Tooltip.Provider`, dan begitu satu
+terbuka, tetangganya terbuka seketika. Tanpa Provider, tiap trigger menunggu sendiri.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Base UI merender bagian dan menempatkannya. OwsemUI menata popup dan panah, mengatur offset 8px, dan
+membawa arah teks ke portal. Provider, Root, dan Portal tidak punya kotak sendiri; Root tidak merender
+elemen, jadi di Inspect ia adalah kotak yang memuat trigger dan tooltipnya.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| Provider | tidak ada | Kelompok: satu `delay`, `closeDelay`, dan `timeout` untuk tooltip di dalamnya |
+| <Part name="Root" /> | tidak ada | Satu tooltip: `open`, `defaultOpen`, `onOpenChange`, dan `disabled` |
+| <Part name="Trigger" /> | Tombol Anda | Diteruskan ke `render`; `data-popup-open` saat tooltipnya tampil |
+| Portal | `div` | Memindahkan tooltip ke `body`, atau ke `container` |
+| Positioner | `div.ow-tooltip__positioner` | `side`, `align`, `sideOffset` (8), dan `dir` |
+| <Part name="Popup" /> | `div.ow-tooltip__popup` | `data-side`, dan `data-instant` saat melewati animasi |
+| <Part name="Arrow" /> | `div.ow-tooltip__arrow` | Opsional dan `aria-hidden`, dengan `data-side`; segitiga dalam kotak 12px |
+| <Part name="Shortcut" /> | `kbd` | Opsional, di popup setelah label |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### Tooltip.Positioner
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `sideOffset` | `number \| function` | `8` | Jarak ke trigger, dengan ruang untuk panah. Default Base UI adalah `0` |
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-tooltip__positioner` | Positioner |
+| `ow-tooltip__popup` | Popup |
+| `ow-tooltip__arrow` | Arrow |
+
+## Aksesibilitas [#accessibility]
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab | Fokus pada trigger langsung membuka tooltipnya |
+| Escape | Menutup tooltip; fokus tetap di trigger |
+
+- Tooltip hanyalah label visual. Pembaca layar membaca nama trigger sendiri, jadi tombol ikon tetap
+  memakai `aria-label`, dan tooltip mengulanginya.
+- Layar sentuh tidak menampilkan tooltip, karena ketukan juga menekan tombol: apa pun yang dibutuhkan
+  pengguna sentuh harus ada di halaman, atau di Popover.
+- Pada forced colors popup tetap bertepi 1px dalam warna sistem, dan panah tetap solid.
+
+## Tema [#theming]
+
+Tooltip membaca token tema ini, dipakai bersama oleh semua tooltip di aplikasi: setel pada `:root`,
+untuk tiap tema. Untuk satu tooltip, setel pada Popup-nya dengan sebuah kelas. Kelas di sekitar
+trigger tidak menjangkaunya, karena tooltip dirender dalam portal, di luar subpohon trigger.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-tooltip-bg` | Permukaan: solid, tanpa tepi dan tanpa bayangan |
+| `--ow-tooltip-fg` | Teks; shortcut memakainya 80%, pada tuts yang samar |
+| `--ow-radius` | Sudut; shortcut di dalam memakainya dikurangi padding blok popup |
+
+<ForMode mode="isolated">
+
+Pada mode isolated, nilainya ada di tiap Popup, jadi setel pada Popup dengan sebuah kelas.
+
+</ForMode>
+
+## Gerak [#motion]
+
+Tooltip pertama tumbuh dari triggernya dalam 125 ms, dari 0,97 dan transparan, dan keluar dalam
+100 ms. Tetangga yang terbuka seketika melewati animasi, begitu juga tooltip yang dibuka fokus
+keyboard. Dengan `prefers-reduced-motion`, tooltip datang dan pergi tanpa animasi.

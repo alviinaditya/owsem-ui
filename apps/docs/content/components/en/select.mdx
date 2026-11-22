@@ -1,0 +1,231 @@
+---
+title: Select
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. In the registry it is the `select` item.
+
+## Usage [#usage]
+
+```tsx
+import { Select } from "owsem-ui/base";
+
+export function FruitSelect() {
+  return (
+    <Select.Root defaultValue="Cherry">
+      <Select.Trigger aria-label="Fruit" />
+      <Select.Popup>
+        <Select.Item value="Apple">Apple</Select.Item>
+        <Select.Item value="Cherry">Cherry</Select.Item>
+      </Select.Popup>
+    </Select.Root>
+  );
+}
+```
+
+Select picks one value, or several, from a list in a popup. A Root, a Trigger with a name, a Popup, and
+its Items is the whole shortest form; the parts you leave out draw themselves. The trigger is a field as
+tall as a Button. The popup opens over it with the selected item's text exactly on the trigger's, so the
+value you are reading stays put; near the top or bottom of the screen, opened by touch, or with
+`multiple`, it hangs 6px below the trigger instead, at least as wide as it.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Base UI renders the parts, their roles, and the keyboard. OwsemUI styles them, adds Glide, sets one
+`size` from the Root, carries the text direction into the portal, and draws what you leave out. Root,
+Portal, Backdrop, Group, and Arrow add no look of their own.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | none | State and `size` only; in Inspect, the box around the trigger and its popup |
+| <Part name="Label" /> | `div.ow-select__label` | Names the trigger; without it, give the trigger `aria-label` |
+| <Part name="Trigger" /> | `button.ow-select__trigger` | `role="combobox"`. No children: a Value and an Icon |
+| <Part name="Value" /> | `span.ow-select__value` | `data-placeholder` while empty; the trigger's `placeholder` reaches the one it draws |
+| <Part name="Icon" /> | `span.ow-select__icon` | Lucide's `chevrons-up-down`; children replace it |
+| Backdrop | `div.ow-select__backdrop` | A modal select's, drawn by its Portal: clear, over the whole window, under the popup |
+| Positioner | `div.ow-select__positioner` | Over the trigger at its width, or 6px below its start and at least as wide. A Popup without one draws it, and a Portal |
+| <Part name="Popup" /> | `div.ow-select__popup` | `data-side` is `none` over the trigger |
+| ScrollUpArrow | `div.ow-select__scroll-up-arrow` | Shows while there is more above |
+| List | `div.ow-select__list` | `role="listbox"`, holds the Glide highlight. A Popup without one directly inside draws it, and both arrows |
+| <Part name="GroupLabel" /> | `div.ow-select__group-label` | Names its `Select.Group` |
+| <Part name="Item" /> | `div.ow-select__item` | `role="option"`. Plain children: an ItemText, then an ItemIndicator at the end |
+| <Part name="ItemIndicator" /> | `span.ow-select__item-indicator` | A check at the row's end, in line with the trigger's chevron. It keeps its room, and fades and scales in when picked |
+| <Part name="ItemText" /> | `div.ow-select__item-text` | What lands on the trigger's text; one line, with an ellipsis |
+| <Part name="Separator" /> | `div.ow-select__separator` | A hairline |
+| <Part name="ScrollDownArrow" /> | `div.ow-select__scroll-down-arrow` | Shows while there is more below |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### Select.Root
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Type scale of the trigger and the items; one `size` for both, so the selected item's text lands on the trigger's |
+
+A modal select (the default) holds the page's scroll through OwsemUI's own lock, which leaves the page's `overflow` alone. A Popup laid over the trigger holds it too.
+
+| Size | Font | Trigger | Row | Icon |
+| --- | --- | --- | --- | --- |
+| `sm` | 13px | 32px | 32px | 15px |
+| `md` | 14px | 40px | 33px | 16px |
+| `lg` | 16px | 48px | 40px | 18px |
+
+The trigger follows Button's `--py` rule, so it is as tall as a Button of its size. At `lg`, 40px rows let the popup cover the 48px trigger even with its first item selected. The trigger has no width of its own: it fits its value, and stretches when you say so.
+
+### Select.Trigger
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `placeholder` | `ReactNode` | | Shown while nothing is selected, by the Value drawn when the trigger has no children |
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-size` | Always: `sm`, `md`, or `lg` |
+
+### Select.Positioner
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `alignItemWithTrigger` | `boolean` | `true`; `false` with `multiple` | Lays the selected item's text over the trigger's. Where that cannot work, the popup hangs from the trigger's start instead |
+| `align` | `"start" \| "center" \| "end"` | `"start"` | Base UI's default is `"center"` |
+| `sideOffset` | `number \| function` | `6` | Base UI's default is `0` |
+
+### Select.Popup
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-size` | Always: `sm`, `md`, or `lg` |
+| `data-instant` | It skips the animation, when opened from the keyboard |
+
+### Select.Icon, Select.ScrollUpArrow, Select.ScrollDownArrow
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | Up and down chevrons; a chevron up; a chevron down | Icon-sized glyphs that your children replace |
+
+### Select.ItemIndicator
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `keepMounted` | `boolean` | `true` | Keeps its room while unselected, so labels stay in line. Base UI's default is `false` |
+| `children` | `ReactNode` | A check | An icon-sized glyph |
+
+### Select.Popup and Select.Item without parts
+
+A Popup without a Positioner around it draws a Portal and a Positioner. Without a List directly inside it, it draws a List and both scroll arrows around its children. An Item with plain children puts them in an ItemText, then an ItemIndicator at the end; explicit parts stay in your order.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-select__backdrop` | Backdrop |
+| `ow-select__label` | Label |
+| `ow-select__trigger` | Trigger |
+| `ow-select__value` | Value |
+| `ow-select__icon` | Icon |
+| `ow-select__positioner` | Positioner |
+| `ow-select__popup` | Popup |
+| `ow-select__scroll-up-arrow` | ScrollUpArrow |
+| `ow-select__scroll-down-arrow` | ScrollDownArrow |
+| `ow-select__list` | List |
+| `ow-select__item` | Item |
+| `ow-select__item-text` | ItemText |
+| `ow-select__item-indicator` | ItemIndicator |
+| `ow-select__group-label` | GroupLabel |
+| `ow-select__separator` | Separator |
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| Enter, Space, Arrow Down, Arrow Up | On the trigger: open the list at the selected item |
+| Arrow Down, Arrow Up | The next or previous item |
+| Home, End | The first or last item |
+| Enter, Space | Pick the item |
+| Escape | Shut the list; focus goes back to the trigger |
+| Tab | Shut the list and move on |
+| A letter | The next item that starts with it; on a shut trigger, it picks that item |
+
+- Screen readers announce a combobox with its name and value, and each option with its state. Name it with
+  a `Select.Label`, or `aria-label` on the trigger.
+- `modal` (true by default) keeps the rest of the page out of reach while the list is open: a clear backdrop
+  takes a press outside, so that press only shuts the list, and the page holds its scroll. OwsemUI holds it
+  without setting `overflow` on the page. Laid over its trigger, the list cannot follow a scroll, so the
+  page is held there even with `modal={false}`.
+- Invalid is a tint, a message, and a motion, never color alone. It comes from `aria-invalid` or Base UI's
+  `Field` (`data-invalid`).
+- With `prefers-contrast: more`, the trigger gets a 1px edge in `--ow-edge` and the popup an extra 1px ring.
+  In forced colors the trigger and popup keep a 1px edge in the system color, the highlight is an outline in
+  `Highlight`, and disabled text is `GrayText`.
+
+## Theming [#theming]
+
+Select reads these theme tokens. Set them on a part with a class, or for every select on `:root`. A class
+around the trigger does not reach the popup, which renders in a portal.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-fg` | Text, and the trigger's tint: 6% at rest, 9% on hover and while open |
+| `--ow-critical` | Invalid tint |
+| `--ow-raised-bg` | Popup surface, and the arrows |
+| `--ow-popup-shadow` | Popup shadow |
+| `--ow-muted` | Placeholder, icon, arrows, and group labels |
+| `--ow-hover` | The highlight (Glide) |
+| `--ow-line` | Separators |
+| `--ow-radius` | Trigger and popup corners; items and Glide take it less the 4px padding |
+| `--ow-focus` | Focus ring |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each part, so set yours on that part with a class.
+
+</ForMode>
+
+Every part takes a `className`, and your rule wins over the component's without `!important`. `--py`,
+`--px`, and `--icon` take a value through `style`.
+
+```css
+.field {
+  inline-size: 100%;
+  --ow-radius: 999px;
+}
+```
+
+## Motion [#motion]
+
+Over its trigger the popup only fades in over 180 ms and, after a 60 ms beat that lets a pick's check land,
+out over 140 ms: it does not grow, since growing would move the text that is meant to stay put. Beside the
+trigger it grows from it, as a Menu does. A pick's check fades and scales in on the settle spring, and Glide
+moves one highlight between items. From the keyboard, the popup opens and shuts at once. With
+`prefers-reduced-motion`, the popup only fades wherever it opens, Glide fades instead of sliding, and an
+invalid trigger blinks instead of shaking.

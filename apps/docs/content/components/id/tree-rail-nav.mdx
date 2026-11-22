@@ -1,0 +1,180 @@
+---
+title: Tree Rail Nav
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/owsem`: Tree Rail Nav adalah komponen Owsem, jadi punya entri sendiri. Di
+registry, itemnya `tree-rail-nav`.
+
+## Penggunaan [#usage]
+
+```tsx
+import { TreeRailNav } from "owsem-ui/owsem";
+
+export function Sidebar({ path }: { path: string }) {
+  return (
+    <TreeRailNav.Root aria-label="Dokumentasi">
+      <TreeRailNav.Origin>Dokumentasi</TreeRailNav.Origin>
+      <TreeRailNav.List>
+        <TreeRailNav.Node>
+          <TreeRailNav.Link href="/" current={path === "/"}>
+            Ikhtisar
+          </TreeRailNav.Link>
+        </TreeRailNav.Node>
+        <TreeRailNav.Node defaultOpen>
+          <TreeRailNav.Toggle>Panduan</TreeRailNav.Toggle>
+          <TreeRailNav.Panel>
+            <TreeRailNav.List>
+              <TreeRailNav.Node>
+                <TreeRailNav.Link href="/install" current={path === "/install"}>
+                  Instalasi
+                </TreeRailNav.Link>
+              </TreeRailNav.Node>
+            </TreeRailNav.List>
+          </TreeRailNav.Panel>
+        </TreeRailNav.Node>
+      </TreeRailNav.List>
+    </TreeRailNav.Root>
+  );
+}
+```
+
+Tree Rail Nav adalah navigasi sidebar hingga tiga tingkat. Rail membentang di setiap tingkat, dengan
+satu titik untuk tiap baris, dan jejak mengikuti rail dari asal di atas sampai halaman yang sedang
+Anda buka. Saat baris aktif berganti, jejak mundur ke cabang yang dilalui kedua rute, turun ke baris
+baru, dan berdenyut saat tiba. Setiap Node adalah Collapsible Base UI: baris grup adalah tombol
+disclosure, dan rail serta jejak mengikuti panelnya selagi beranimasi.
+
+`current` menandai baris halaman yang ditampilkan: `true` atau `"page"` memasang
+`aria-current="page"`, dan `"step"` memasang `aria-current="step"`, untuk bagian yang sedang dibaca di
+halaman panjang. Jika beberapa baris aktif, jejak menuju yang terdalam. Di dalam grup yang tertutup,
+jejak berhenti di baris grup dan penanda menjadi berlubang, sehingga Anda tetap melihat di mana
+halamannya. Saat di-hover, satu highlight meluncur ke baris terdekat: itu Glide dari `owsem-ui/core`.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Sembilan bagian, paling banyak tiga tingkat, satu rail per tingkat. Sebuah skrip menggambar rail ke
+SVG di dalam Root; baris-barisnya HTML biasa.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `nav.ow-tree-rail-nav` | Memuat SVG rail dan highlight hover |
+| <Part name="Origin" /> | `div.ow-tree-rail-nav__origin` | Label opsional di paling atas; jejak berawal di sampingnya. Tanpanya, rail mulai dari baris pertama |
+| <Part name="List" /> | `ul.ow-tree-rail-nav__list` | List bersarang diberi label oleh barisnya (`aria-labelledby`); `data-depth` mulai dari 1 |
+| Node | `li.ow-tree-rail-nav__node` | `Collapsible.Root` Base UI: satu entri, barisnya, dan Panel jika ia grup |
+| <Part name="Toggle" /> | `button.ow-tree-rail-nav__item` | Baris grup: `Collapsible.Trigger`, dengan `aria-expanded` dan `data-panel-open` |
+| <Part name="Link" /> | `a.ow-tree-rail-nav__item` | Baris halaman; `render` mengganti dengan link router |
+| <Part name="Panel" /> | `div.ow-tree-rail-nav__panel` | `Collapsible.Panel`, tetap ada di DOM supaya rail bisa berakhir di barisnya |
+| <Part name="Icon" /> | `span.ow-tree-rail-nav__icon` | Dekoratif (`aria-hidden`); seukuran font baris ditambah 2px, ikon di dalamnya diisi penuh |
+| <Part name="Label" /> | `span.ow-tree-rail-nav__label` | Satu baris; teks yang tidak muat memudar (`data-overflow`), lalu berjalan ke kiri berulang selama barisnya di-hover atau terfokus |
+
+Rail adalah `svg.ow-tree-rail-nav__rail` di dalam `div.ow-tree-rail-nav__tree`, digambar oleh skrip
+Root; Toggle juga menggambar chevron, `svg.ow-tree-rail-nav__chevron`.
+
+## Referensi API [#api]
+
+Root adalah `nav`, List `ul`, Origin `div`, Icon dan Label `span`, dan Panel `div`. Props lain
+diteruskan ke elemen atau ke Base UI apa adanya, begitu juga ref.
+
+### TreeRailNav.Node
+
+Node, Toggle, dan Panel menerima prop [Collapsible.Root, Trigger, dan Panel](https://base-ui.com/react/components/collapsible#api-reference) Base UI apa adanya, termasuk `open`, `defaultOpen`, dan `onOpenChange`. OwsemUI tidak menambahkan apa pun.
+
+### TreeRailNav.Link
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `current` | `boolean \| "page" \| "step"` | | Halaman yang ditampilkan, atau langkah yang dibaca: jejak berakhir di sini |
+| `disabled` | `boolean` | | Meredupkan baris; tidak bernavigasi |
+| `render` | `ReactElement \| (props, state) => ReactElement` | | Mengganti dengan link router |
+
+#### Atribut data
+
+| Atribut data | Pada | Ada saat |
+| --- | --- | --- |
+| `data-current` | Link | `current` diisi |
+| `data-depth` | Link, Toggle, Panel, List | Selalu; tingkatnya, mulai dari 1 |
+| `data-panel-open` | Toggle | Grupnya terbuka |
+| `data-overflow` | Label | Teks tidak muat |
+
+Link yang dinonaktifkan mendapat `aria-disabled` dan tidak bernavigasi; tombol panah dan highlight
+hover melewatinya.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-tree-rail-nav__node` | Node |
+| `ow-tree-rail-nav__panel` | Panel |
+| `ow-tree-rail-nav` | Root |
+| `ow-tree-rail-nav__origin` | Origin |
+| `ow-tree-rail-nav__list` | List |
+| `ow-tree-rail-nav__item` | Link dan Toggle |
+| `ow-tree-rail-nav__icon`, `ow-tree-rail-nav__label` | Icon dan Label |
+| `ow-tree-rail-nav__tree`, `ow-tree-rail-nav__rail` | Pembungkus, dan rel yang digambarnya |
+| `ow-tree-rail-nav__chevron` | Chevron sebuah Toggle |
+| `ow-tree-rail-nav__label-text` | Teks di dalam Label |
+
+## Aksesibilitas [#accessibility]
+
+Tab berpindah antar link dan toggle seperti biasa. Tombol panah bergerak di dalam pohon:
+
+| Tombol | Aksi |
+| --- | --- |
+| Panah Bawah, Panah Atas | Baris terlihat berikutnya atau sebelumnya, melewati yang nonaktif |
+| Home, End | Baris terlihat pertama atau terakhir |
+| Panah Kanan | Membuka grup yang tertutup, atau masuk ke grup yang terbuka |
+| Panah Kiri | Menutup grup yang terbuka, atau pindah ke baris induk |
+
+- Rail adalah SVG dengan `aria-hidden`; screen reader mendapat strukturnya dari daftar,
+  `aria-expanded`, dan `aria-current`. List bersarang diberi label oleh barisnya.
+- Fokus keyboard menampilkan cincin di dalam baris, jadi panel tidak pernah memotongnya.
+- Di mode forced colors, rail memakai `GrayText`, jejak `Highlight`, dan baris aktif digarisbawahi.
+  Dari kanan ke kiri, rail dicerminkan.
+
+## Tema [#theming]
+
+Tree Rail Nav membaca token tema berikut. Pasang di nav-nya, atau di elemen di sekelilingnya seperti
+`.sidebar`.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-accent` | Jejak, titik yang menyala, penanda, dan tint baris aktif |
+| `--ow-line` | Rail |
+| `--ow-fg` | Teks, dan pada 24% titik yang belum dilalui jejak |
+| `--ow-muted` | Label origin |
+| `--ow-bg` | Melubangi titik dari rail; samakan dengan latar di belakang nav |
+| `--ow-hover` | Highlight hover (Glide) |
+| `--ow-radius` | Sudut baris dan highlight |
+
+<ForMode mode="isolated">
+
+Di mode isolated, nilainya ada di root setiap nav, jadi atur di nav-nya sendiri, seperti
+`.sidebar.ow-tree-rail-nav`.
+
+</ForMode>
+
+Rail berjarak 25px: setiap cabang melengkung dengan cara yang sama, dan anak baris tingkat pertama
+sejajar dengan teksnya, setelah ikon. Baris menjorok tepat melewati rail-nya.
+
+## Gerak [#motion]
+
+Jejak berjalan di sepanjang rail dengan spring travel dan berdenyut saat tiba, sementara tint
+menyapu masuk di belakang baris; panel membuka dan menutup dengan rail yang mengikuti. Dengan
+`prefers-reduced-motion`, jejak tidak berjalan, tint tidak menyapu, dan panel terbuka seketika.

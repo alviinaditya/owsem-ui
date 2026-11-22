@@ -97,7 +97,7 @@ Class names follow BEM blocks and elements; modifiers are data attributes (FR-6b
   `data-instant` for a change without a transition.
 - Keyframes are named after the block too: `ow-<block>-<name>`, such as
   `ow-tree-rail-nav-marquee`.
-- The classes and the states in a Lab's parts table are public. Other data attributes are
+- The classes and the states in a component's Anatomy table are public. Other data attributes are
   private, like `--_*` properties.
 
 `test/naming.test.ts` fails on a class outside this pattern, a class in a folder that is not its
@@ -121,7 +121,7 @@ starts with the language (`/id/docs`, `/en/docs`); `proxy.ts` redirects unprefix
 1. Add its code to `languages` and `languageNames` in `apps/docs/lib/i18n.ts`.
 2. Add `apps/docs/lib/dictionaries/<code>.ts` and register it in `lib/dictionaries/index.ts`; the
    type check fails until every string exists, including each component's description.
-3. Translate pages into `content/docs/<code>/` and `content/labs/<code>/`. Untranslated pages fall
+3. Translate pages into `content/docs/<code>/` and `content/components/<code>/`. Untranslated pages fall
    back to Indonesian.
 
 ## Dependencies
@@ -137,7 +137,7 @@ starts with the language (`/id/docs`, `/en/docs`); `proxy.ts` redirects unprefix
 
 Every v1.0 component is listed in `apps/docs/lib/catalog.ts` (name, family, category, phase,
 status), and its one-line description is in each docs dictionary. Planned components get a Coming
-soon page; the docs and registry builds fail if an available component lacks its folder or Lab.
+soon page; the docs and registry builds fail if an available component lacks its folder or its page.
 
 To build one, use Separator as the reference:
 
@@ -153,38 +153,25 @@ To build one, use Separator as the reference:
 2. Export it from `src/base.ts` or `src/owsem.ts`, import its CSS in `src/styles.css`, and add a
    size budget to `.size-limit.mjs` (Base 3 kB, Owsem 8 kB; the Core it uses counts once, in the
    core entry).
-3. Build its Lab (see below), then set its `status` in the catalog to `prototype` and add a
-   changeset.
+3. Build its page (see Component pages), then set its `status` in the catalog to `prototype` and
+   add a changeset.
 4. Add it to "Components available now" in `skills/owsem-ui/SKILL.md`, the agent skill users
    install with `npx skills add` (documented on the docs Skills page).
 5. If the docs have a hand-built stand-in for it (below), replace the stand-in with the component
    and delete its CSS from `apps/docs/app/globals.css`. The docs are the components' first real
    app.
 
-### Docs stand-ins
+### Docs use the components
 
-Until a component exists, the docs build its job by hand, in the same materials (flat
-`--docs-well`, raised `--docs-raised`, the `--docs-radius*` scale), so the swap is markup and
-deleted CSS:
+The docs are the components' first real app, so where a docs feature needs a component, it uses
+the library's: Sidebar is the docs sidebar, Table of Contents is the pages' "On this page", Color
+Picker opens from the Token setup's color choices, Copy Button is every Copy, Code Block is every
+code block, and Toggle Group, Tabs, Scroll Area, Popover, Menu, and Tooltip build the page toolbars.
+If a docs feature needs one that does not exist yet, build it by hand in the same materials and
+delete its CSS from `apps/docs/app/globals.css` when the component lands.
 
-| Phase | Component | Replaces in the docs |
-| --- | --- | --- |
-| 1 | Field, Input | The prefix field (`.prefix-field`) and the color controls' hex field (`.color-field`) |
-| 1 | Tabs | The code drawer's file tabs (`.lab-tabs`) |
-| 1 | Scroll Area | `ScrollFade` (sidebar, controls, code drawer, commands) |
-| 2 | Toggle Group | The Token setup's mode (`.seg`), with Popover. Already replaced: the theme, the Lab's choices, the Family filter, and the package manager picker |
-| 3 | Drawer | The sidebar as a menu panel below 1100 px, and the Lab's docs, controls, and code sheets below 960 px (DS-10) |
-
-Swapped already: Tree Rail Nav is the sidebar (DS-14), Table of Contents is the docs pages' "On
-this page", Color Picker opens from the swatch of every Lab color control, in place of the
-browser's `<input type="color">`, Copy Button is every Copy, its status region included, and Code
-Block is every code block outside the Lab's code drawer.
-this page", Scroll Area scrolls the sidebar, the Lab's controls and code drawer, its row of scenes,
-and the install commands, and Color Picker opens from the swatch of every Lab color control, in place of the
-browser's `<input type="color">`.
-
-The docs' `--docs-well` and `--docs-raised` point at the library's
-materials (TK-7), so the docs and the library share one source.
+The docs' surface colors point at the library's materials (TK-7), so the docs and the library
+share one source.
 
 Items in a list (menus, selects, tabs, toggle groups) are lit with Glide from
 `src/core/glide/`, not a hover style of their own; a component that moves its highlight with the
@@ -196,26 +183,35 @@ that leave the folder: Core to `@/lib/owsem/...` and other components to
 
 ### Materials and motion
 
-Lines only separate content; they never draw a shape. A control or container is known by its fill,
-one tone step from what it sits on, and a state changes the tone (or shows the 2px focus ring),
-never an edge. Surfaces come from the materials in `tokens.css` (TK-7): `--ow-panel` for panels,
-`--ow-raised-bg` for keys, thumbs, and popups (with `--ow-popup-shadow`, the only shadow besides the
-primary highlight), `--ow-well-bg` for tracks, `--ow-pressed-bg` while a control is held down,
-`--ow-accent` with `--ow-on-accent` and `--ow-primary-shadow` (a top highlight, no ring) for the
-primary button, and `--ow-critical-solid` with `--ow-on-critical` for the destructive one
-(`--ow-critical` is the critical text tone). The tokens `--ow-panel-shadow`, `--ow-raised-shadow`,
-and `--ow-pressed-shadow` are gone.
+Lines only separate content; they never draw a shape. The light page is white, and a control is
+known by its fill, a tint of the text color that reads on the page and on a white card alike, and a
+state changes the tone (or shows the 2px focus ring), never an edge. Only a wrapper, a container
+that holds other content (Toolbar, Code Block, Table, Color Picker's panel), rests on
+`--ow-surface-shadow`; a single control has none, and floating layers (popups, dialogs) cast
+`--ow-popup-shadow`. Surfaces come from the materials in `tokens.css` (TK-7): `--ow-panel` for
+wrappers, `--ow-raised-bg` for popups and the Switch thumb, `--ow-well-bg` for wells,
+`--ow-pressed-bg` while a control is held down, `--ow-accent` with `--ow-on-accent` and
+`--ow-primary-shadow` (a thin light line inside the top, no drop shadow) for the primary button, and
+`--ow-critical-solid` with `--ow-on-critical` for the destructive one (`--ow-critical` is the
+critical text tone). The tokens `--ow-panel-shadow`, `--ow-raised-shadow`, and
+`--ow-pressed-shadow` are gone. The radius is one, `--ow-radius` (16px); a part nested in a padded
+one takes it less that padding. Heights are 32, 40, and 48px (`sm`, `md`, `lg`) for every control,
+and a group that wraps items in a track (Toolbar, Toggle Group, Tabs) is as tall as one control of
+its size, its items 8px shorter.
 
 Fields, keys, and tracks are tints of the text color held in private vars:
 `color-mix(in oklab, var(--ow-fg) 6%, transparent)` for a field (9% on hover under
-`@media (hover: hover) and (pointer: fine)`), with the rules for the raised step after the resting
-one (in `:where()` the later rule wins). A control has no edge by default (DP-6): the fill, the
-focus ring, and the state indicators carry the boundary. `@media (prefers-contrast: more)` gives
-fields, Checkbox, Radio, and Switch an `inset 0 0 0 1px var(--ow-edge)` edge and popups an extra
-`0 0 0 1px var(--ow-edge)`; `--ow-edge` is used nowhere else. Button `outline` is the only bordered
-variant. Never use soft, blurred, or sunken (inset blur) shadows, which read as neumorphism. The
-only lines that stay are hairlines in `--ow-line` (Separator, and the dividers in Menu, Select,
-Toolbar, Command Menu, and Color Picker). Base never glows (DP-1).
+`@media (hover: hover) and (pointer: fine)`; Checkbox, Radio, and Switch are 10% while off), with
+the rules for the hover step after the resting one (in `:where()` the later rule wins). The selected
+item of Toggle Group, Tabs, and Code Block is a pill of accent tint with accent text. A control has
+no edge by default (DP-6): the fill, the focus ring, and the state indicators carry the boundary.
+`@media (prefers-contrast: more)` gives fields, Checkbox, Radio, and Switch an
+`inset 0 0 0 1px var(--ow-edge)` edge and popups an extra `0 0 0 1px var(--ow-edge)`; `--ow-edge` is
+used nowhere else. Button `outline` is the only bordered variant. Never use sunken (inset blur)
+shadows or a colored glow: they read as neumorphism. The only lines that stay are hairlines in
+`--ow-line` (Separator, and the dividers in Menu, Select, Toolbar, Command Menu, and Color Picker).
+Base never glows (DP-1). A sliding indicator (Toggle Group thumb, Tabs indicator, Code Block key,
+Switch thumb) is gooey: it stretches from its leading edge while it travels, with no squash.
 
 Invalid is a tint, a message, and motion, not color alone: an Input or Select trigger with
 `[data-invalid]` or `[aria-invalid="true"]` takes a 12% `--ow-critical` tint and shakes once (320 ms,
@@ -248,58 +244,46 @@ improvements, or a small primitive Base UI has no part for, such as Kbd, exporte
 from `src/owsem.ts` (`owsem-ui/owsem`); Tree Rail Nav is the reference.
 There is no `flavor` prop, and glow (Lumen) is for Owsem only.
 
-## Labs
+## Component pages
 
-A component page is a Lab: the narrative scrolls beside (or, below 960 px, under) a live stage,
-and the scene being read shapes the stage. The sidebar lists the page's scenes under the
-component and marks the one being read. Separator is the reference. A Lab has two parts:
+A component page is preview-first: a large preview card beside the sidebar, the examples' picker
+under it, and a toolbar with Install, Inspect, Docs, Theme, Language, and a More menu. Docs open in
+a panel (a column from 768 px, with the sidebar stepping aside below 1280 px, and a bottom sheet on
+a phone). Inspect draws an anatomy spec sheet over the preview: the complete specimen, measured
+numbers, part names with leaders, and a popover with each part's tokens. Separator is the
+reference. A page has three parts and a test:
 
-- **Narrative:** `apps/docs/content/labs/<lang>/<name>.mdx` for every language. The text before
-  the first heading is the overview; each `## Title [#id]` starts a scene. The ids are the same in
-  every language and follow one order, which the build checks: up to three signature scenes, then
-  `anatomy`, `states`, `keyboard`, `customization` (only for components with tokens), and `ship`.
-- **Stage:** `apps/docs/labs/<name>.tsx`, a client module whose default export renders
-  `LabShell` with a `defineLab` definition (the demo, the controls, the code files generated from
-  the controls and the visitor's token setup, the `parts` Inspect outlines, and per scene what the
-  stage shows: `cfg`, `code`, `controls`, `theme`, `inspect`, a `play` script, and a `demo` of
-  its own), and is
-  registered in `labs/index.ts`. A scene borrows the stage: the visitor's own changes win and stay
-  after the scene. Controls are `choice` (a segmented radio group) or `color` (a hex field and a
-  swatch that opens Color Picker; `token` names the theme token the component uses until a color
-  is chosen, which the swatch paints and the picker opens on).
+- **Examples:** `apps/docs/examples/<name>.tsx`, a client module whose default export renders
+  `ComponentPage` with a `defineComponent` definition: `imports` and `item` (the registry name),
+  `examples` (each with an `id`, a localized `title` and `description`, the names it `uses`, a
+  `demo(lang)`, and `code(setup, lang)`, which writes the files from the visitor's token setup with
+  `exampleFile`), `parts` (the parts Inspect outlines, at most about eight: a selector into the
+  demo, a localized note, and the tokens each reads, mapped to the private property that holds the
+  value in use), and `anatomy.specimen`, one complete instance with every structural part, which
+  Inspect magnifies. Register the module in `apps/docs/examples/index.ts`.
+- **Docs:** `apps/docs/content/components/<lang>/<name>.mdx` for every language, with eight
+  sections, each `## Title [#id]`. The ids are the same in every language and follow one order,
+  which the build checks: `installation`, `usage`, `examples`, `anatomy`, `api`, `accessibility`,
+  `theming`, and `motion`. In the Anatomy table, `<Part name="Root" />` names a part and outlines
+  it in the preview.
+- **Test:** `apps/docs/e2e/<name>.spec.ts` calls `pageTests(name, { examples, parts, specimen })`
+  from `e2e/example-page.ts` (the picker switches the demos, Inspect shows the specimen and a
+  button per part, and the Docs have their eight sections), then tests the component's own
+  behavior.
 
-The token setup (the stage toolbar's Token button; mode and prefix, DS-4) reaches every Lab: `code(cfg, setup)` writes
-token names with `setup.prefix` and any setup but theme with `ow` imports from the owsem CLI's copy,
-the install tab switches to the owsem CLI, and `--ow-` in the narrative's code is renamed in the
-browser (`data-token-literal` keeps a name as written).
+The token setup (mode and prefix, DS-4; the Token chip in the Install popover and the Docs) reaches
+every page: `code(setup, lang)` writes token names with `setup.prefix` and any setup but theme with
+`ow` imports from the owsem CLI's copy, the install tabs switch to the owsem CLI, and `--ow-` in
+the Docs' code is renamed in the browser (`data-token-literal` keeps a name as written).
 
-Code is highlighted by Shiki with one theme, `apps/docs/lib/code-theme.ts`, in MDX code blocks
-and in the stage's live code alike; its colors are the `--tk-*` tokens in `globals.css`. The code
-drawer ends with an Install tab built from the component's registry name.
+Code is highlighted by Shiki with one theme, `apps/docs/lib/code-theme.ts`, in MDX code blocks and
+in the examples' code alike; its colors are the `--tk-*` tokens in `globals.css`.
 
 The docs CSS is unlayered, so docs chrome beats `@layer owsem.*`. Element defaults (`a`, `button`,
 `:focus-visible`, headings, tables) are the exception: they sit in `@layer docs-base`, ordered
-under owsem-ui by `app/layers.css`, so a component on the stage keeps its own colors and focus
-ring. Style the docs by class; a new element default goes in `docs-base`.
-
-The `states` scene compares rather than describes: its `demo` returns a `Matrix`
-(`components/lab/matrix.tsx`) of live cells, such as variants by sizes or states by themes.
-
-Each part in `parts` has a selector into the demo, a note, and the theme tokens it reads, each
-mapped to the private property that holds the value in use.
-In the anatomy table, `<Part name="Root" />` names a part and picks it on the stage.
-
-A `play` script drives the demo through `ScriptStage`: `click` and `point` move a drawn pointer
-that sends real pointer and mouse events (hover effects and tooltips react; focus stays put),
-`drag` presses and moves it through points in an element's box (start on a thumb), and `wait`
-pauses. Popups in a demo portal into it (`container`), so they take the stage's theme and Inspect
-finds them. It plays once its scene settles, except under reduced motion, where it waits for Play
-scene or Replay. The visitor's own press or key stops it where it is; Stop and a scene change
-remount the demo, so end a script where it started.
-
-Stage shortcuts (I, T, P, C, and R for Replay) work only while focus is on the
-stage; a click anywhere on it puts focus there, and the page header names the ones a Lab has. Play scene and Replay appear only for scenes with an animation; scripted motion uses Motion
-(`motion/react`), everything else CSS transitions, and never GSAP. Every animation follows
+under owsem-ui by `app/layers.css`, so a component in a preview keeps its own colors and focus
+ring. Style the docs by class; a new element default goes in `docs-base`. Docs motion uses Motion
+(`motion/react`) or CSS transitions, never GSAP, and every animation follows
 `prefers-reduced-motion`.
 
 ## Commits

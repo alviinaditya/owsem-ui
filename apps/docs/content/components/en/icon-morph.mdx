@@ -1,0 +1,121 @@
+---
+title: Icon Morph
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/owsem`. In the registry it is the `icon-morph` item.
+
+## Usage [#usage]
+
+```tsx
+import { IconMorph } from "owsem-ui/owsem";
+import { Check, Copy } from "lucide-react";
+
+export function CopyIcon({ copied }: { copied: boolean }) {
+  return <IconMorph>{copied ? <Check key="check" /> : <Copy key="copy" />}</IconMorph>;
+}
+```
+
+Icon Morph swaps one icon for another in place: the old icon shrinks, blurs, and fades out while the
+new one grows in, both in one cell, so nothing around them moves. Use it where an icon shows a state,
+such as Copy turning into a check, Play into Pause, or an empty heart into a full one.
+
+It holds one icon element. Give each icon its own `key`, and change the icon to swap it. A new key
+starts a swap; the same key updates the icon in place, with no animation. Nothing animates on the
+first render either, so a page that loads with a full heart shows it at once, on the server too.
+Without an icon (`null`), the old one leaves and the cell stays empty.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Two parts: the Root cell and an Item around each icon. While a swap runs there are two Items, the
+leaving one first or last in the DOM, each laid over the other in a cell as large as the larger icon.
+Inspect shows one, in an icon button's slot.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `span.ow-icon-morph` | An inline grid of one cell. In the icon slot of a Button, Toggle, or Toolbar item, it and its icons fill the slot, as one icon does |
+| <Part name="Item" /> | `span.ow-icon-morph__item` | One icon. `data-starting-style` while it enters, `data-ending-style` and `aria-hidden` while it leaves |
+
+## API reference [#api]
+
+### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `children` | `ReactElement \| null \| false` | | One icon element, with a `key` |
+| `duration` | `string`, a CSS time such as `"300ms"` | The settle spring's | One swap's length; the spring keeps its curve |
+
+Other props and the `ref` go to the `span`. `duration` lands as `--_duration` in the root's inline style, so the button around it keeps its own
+press. Icons keep their own size, so size them as you would anywhere; in an icon slot the slot sizes
+them. A change mid-swap turns both icons around where they are, without a jump. At most one icon
+leaves at a time: an older one that is still leaving goes at once.
+
+### Data attributes
+
+| Data attribute | On | Present when |
+| --- | --- | --- |
+| `data-starting-style` | Item | It is entering, for a moment |
+| `data-ending-style` | Item | It is leaving; it is also `aria-hidden` |
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-icon-morph` | Root |
+| `ow-icon-morph__item` | Item |
+
+## Accessibility [#accessibility]
+
+Icon Morph is not focusable and adds no role: the control it sits in carries the name and the state.
+
+- Name that control after what it does now (`aria-label` from Play to Pause), or keep one name and
+  show the state with `aria-pressed`, as Like does with a Toggle.
+- When the change matters to someone who cannot see it, such as a copy, announce it in a status
+  region.
+- The leaving icon is `aria-hidden`, so it is never read twice.
+- The icons draw in `currentColor`, so forced colors paint them in the control's text color.
+
+## Theming [#theming]
+
+Icon Morph reads these theme tokens. Set them on the icon itself, since the settle spring also times
+a button's press.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-motion-scale` | How far an icon shrinks and blurs: half its size and 3px at 1, nothing at 0 |
+| `--ow-spring-settle` | The easing of each swap |
+| `--ow-spring-settle-duration` | How long a swap takes |
+| `--ow-ease-out` | The crossfade under reduced motion |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each component's root, so set yours on the icon itself.
+
+</ForMode>
+
+```css
+.like .ow-icon-morph {
+  --ow-spring-settle-duration: 600ms;
+}
+```
+
+## Motion [#motion]
+
+A swap is two CSS transitions on the settle spring, the critically damped Core spring, so an icon
+lands without bouncing; nothing runs at rest. At motion scale 1 a leaving icon goes down to half its
+size with a 3px blur; at 0.5 to three quarters with 1.5px; at 0 it only fades. With
+`prefers-reduced-motion`, icons only crossfade, in 150 ms.

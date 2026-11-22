@@ -1,0 +1,171 @@
+---
+title: Toolbar
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Untuk menyalin kode sumbernya ke project Anda, pakai item `toolbar` dari
+registry; toggle di dalamnya butuh item `toggle` juga.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Toggle, Toolbar } from "owsem-ui/base";
+import { Bold, Undo2 } from "lucide-react";
+
+export function EditorToolbar() {
+  return (
+    <Toolbar.Root aria-label="Format">
+      <Toolbar.Button render={<Toggle />} aria-label="Tebal" startIcon={<Bold />} />
+      <Toolbar.Separator />
+      <Toolbar.Button aria-label="Urungkan" startIcon={<Undo2 />} />
+    </Toolbar.Root>
+  );
+}
+```
+
+Toolbar memuat tombol, toggle, link, dan sebuah field dalam satu baris, dengan garis tipis di antara
+grup. Ia satu perhentian bagi Tab, dan tombol panah berpindah di dalamnya. Toggle adalah
+`Toolbar.Button` yang merender Toggle: toolbar memberinya tempat dalam urutan panah, dan Toggle
+memberinya state menyala.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Base UI merender role dan fokus bergulir; OwsemUI menambah kelas `ow-toolbar` dan `ow-toolbar__*`,
+ukuran, dan ikon.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-toolbar` | `role="toolbar"`, `aria-orientation`, `data-orientation`, dan `data-size`; panelnya |
+| <Part name="Group" /> | `div.ow-toolbar__group` | `role="group"`; beri nama dengan `aria-label` |
+| <Part name="Toggle" /> | `button.ow-toggle.ow-toolbar__button` | Button dengan `render={<Toggle />}`, jadi `aria-pressed` dan `data-pressed` saat menyala |
+| <Part name="Button" /> | `button.ow-toolbar__button` | `data-size`, dan `data-icon-only` tanpa label |
+| <Part name="Icon" /> | `span.ow-toolbar__icon` | Dekoratif (`aria-hidden`), dengan `data-side="start"` atau `"end"` |
+| <Part name="Separator" /> | `div.ow-toolbar__separator` | `role="separator"` dan `data-orientation`, melintang arah toolbar |
+| <Part name="Link" /> | `a.ow-toolbar__link` | Tampil seperti tombol; `render` menukarnya dengan link router |
+| <Part name="Input" /> | `input.ow-toolbar__input` | Tint 6% dari warna teks tanpa tepi, 9% saat hover, setinggi tombol (8px lebih pendek dari bar) |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### Toolbar.Root
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Ukuran font setiap item yang tidak menetapkan sendiri. Bar setinggi 32, 40, atau 48px, seperti Button seukuran itu; itemnya 8px lebih pendek |
+
+#### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-size` | Selalu: `sm`, `md`, atau `lg` |
+
+### Toolbar.Button dan Toolbar.Link
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | Milik toolbar | Ukuran Button |
+| `startIcon`, `endIcon` | `ReactNode` | | Ikon sebelum atau sesudah label, ukuran font ditambah 2px; dekoratif, jadi item perlu nama |
+
+#### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-size` | Selalu: `sm`, `md`, atau `lg` |
+| `data-icon-only` | Ada ikon dan tanpa children |
+
+### Toolbar.Input
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | Milik toolbar | Skala tipe, bukan lebar dalam karakter: setel `inline-size` sebagai gantinya |
+
+#### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-size` | Selalu: `sm`, `md`, atau `lg` |
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-toolbar` | Root |
+| `ow-toolbar__group` | Group |
+| `ow-toolbar__button` | Button, dan Toggle di dalamnya |
+| `ow-toolbar__icon` | Icon |
+| `ow-toolbar__separator` | Separator |
+| `ow-toolbar__link` | Link |
+| `ow-toolbar__input` | Input |
+
+## Aksesibilitas [#accessibility]
+
+Berapa pun itemnya, toolbar hanya satu perhentian dalam urutan Tab. Saat kembali, fokus mendarat di
+item yang terakhir dipakai.
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab, Shift+Tab | Masuk dan keluar dari toolbar, di item yang terakhir dipakai |
+| Panah Kanan, Panah Kiri | Item berikut atau sebelumnya, berputar (Panah Bawah dan Atas saat vertikal) |
+| Space, Enter | Menekan tombol atau menyalakan dan mematikan toggle |
+
+- Kanan ke kiri, Panah Kiri maju. `loopFocus={false}` menghentikan putarannya.
+- Screen reader mengumumkan toolbar dengan namanya, tiap grup dengan namanya sendiri, toggle dengan
+  statusnya, dan garis tipis sebagai separator.
+- Tombol nonaktif tetap bisa difokus, jadi bisa ditemukan dan diumumkan sebagai tidak tersedia.
+- Di dalam field, panah menggeser caret dan menyerahkannya di ujung: pakai satu field saja, dan
+  letakkan di akhir.
+- Dengan `prefers-contrast: more`, field mendapat tepi 1px dalam `--ow-edge`. Pada forced colors,
+  toolbar, item, dan field mempertahankan tepi 1px dalam warna sistem.
+
+## Tema [#theming]
+
+Toolbar membaca token tema ini. Setel salah satunya pada toolbar, atau pada elemen di sekitarnya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-panel` | Permukaan |
+| `--ow-surface-shadow` | Bayangan toolbar |
+| `--ow-muted` | Teks tombol dan link, dan placeholder field |
+| `--ow-hover` | Tint di bawah pointer |
+| `--ow-fg` | Teks di bawah pointer atau saat ditahan, dan teks field; tint 6% (9% saat hover) dicampur darinya |
+| `--ow-pressed-bg` | Isian saat ditahan |
+| `--ow-line` | Separator |
+| `--ow-radius` | Sudut toolbar; item memakainya dikurangi padding 4px |
+| `--ow-focus` | Cincin fokus |
+
+<ForMode mode="isolated">
+
+Pada mode isolated, nilainya ada di root tiap Toolbar, jadi setel pada toolbar-nya sendiri. Toggle di
+dalamnya punya root sendiri: setel nilainya pada toggle itu.
+
+</ForMode>
+
+Toggle di dalam toolbar mempertahankan tampilan Toggle sendiri, dari token tema yang sama.
+
+## Gerak [#motion]
+
+Tombol, link, dan toggle tertekan masuk: saat ditahan, item menyusut ke 0,97 dan mengambil material
+tertekan dalam 90 ms, lalu lepas dengan spring settle. Toggle berganti warna saat menyala; tidak ada
+yang bergeser. Dengan `prefers-reduced-motion`, materialnya tetap berubah dan tidak ada yang
+menyusut.

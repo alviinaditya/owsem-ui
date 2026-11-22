@@ -3,9 +3,8 @@ import { CATEGORY_ICONS, treePages } from "@/components/sidebar";
 import { catalog, isAvailable } from "./catalog";
 import { type Dictionary, format } from "./dictionaries";
 import type { Lang } from "./i18n";
-import { labPageScenes } from "./lab-template";
 import type { SearchEntry, SearchGroup } from "./search";
-import { source } from "./source";
+import { componentSource, source } from "./source";
 
 /** The plain text of a heading, which Fumadocs may hand over as elements. */
 function textOf(node: ReactNode): string {
@@ -17,7 +16,7 @@ function textOf(node: ReactNode): string {
 
 /**
  * The search index for one language (DS-5), built with the page: the docs pages in sidebar order,
- * every catalog component (planned ones lead to their Coming soon page), and each Lab's scenes.
+ * every catalog component (planned ones lead to their Coming soon page), and each component's Docs sections.
  */
 export function buildSearchIndex(lang: Lang, dict: Dictionary): SearchGroup[] {
   const byUrl = new Map(source.getPages(lang).map((page) => [page.url, page]));
@@ -54,24 +53,28 @@ export function buildSearchIndex(lang: Lang, dict: Dictionary): SearchGroup[] {
     }),
   );
 
-  const scenes = catalog.flatMap((entry) => {
-    const list = labPageScenes(entry.name, lang, dict.lab.overview) ?? [];
-    // The overview is the component's own entry.
-    return list.slice(1).map(
-      (scene, i): SearchEntry => ({
-        value: `${entry.name}#${scene.id}`,
-        label: textOf(scene.title),
-        description: format(dict.search.scene, { component: entry.title, n: i + 1 }),
-        url: `/${lang}/${entry.name}#scene-${scene.id}`,
-        icon: "hash",
-        words: `${entry.title} ${scene.id}`,
-      }),
-    );
+  // Each component's Docs sections, which the page opens from the hash.
+  const sections = catalog.flatMap((entry) => {
+    const page = isAvailable(entry) ? componentSource.getPage([entry.name], lang) : undefined;
+    return (page?.data.toc ?? [])
+      .filter((item) => item.depth === 2)
+      .map((item): SearchEntry => {
+        const id = item.url.replace(/^#/, "");
+        const title = textOf(item.title);
+        return {
+          value: `${entry.name}#${id}`,
+          label: title,
+          description: format(dict.search.section, { component: entry.title, section: title }),
+          url: `/${lang}/${entry.name}#${id}`,
+          icon: "hash",
+          words: `${entry.title} ${id}`,
+        };
+      });
   });
 
   return [
     { value: "pages", label: dict.search.groups.pages, items: pages },
     { value: "components", label: dict.search.groups.components, items: components },
-    { value: "scenes", label: dict.search.groups.scenes, items: scenes },
+    { value: "sections", label: dict.search.groups.sections, items: sections },
   ];
 }

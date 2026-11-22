@@ -1,0 +1,124 @@
+---
+title: Icon Morph
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/owsem`. Di registry, itemnya `icon-morph`.
+
+## Penggunaan [#usage]
+
+```tsx
+import { IconMorph } from "owsem-ui/owsem";
+import { Check, Copy } from "lucide-react";
+
+export function CopyIcon({ copied }: { copied: boolean }) {
+  return <IconMorph>{copied ? <Check key="check" /> : <Copy key="copy" />}</IconMorph>;
+}
+```
+
+Icon Morph menukar satu ikon dengan ikon lain di tempat: ikon lama mengecil, memburam, dan memudar
+keluar sementara yang baru tumbuh masuk, keduanya dalam satu sel, jadi tidak ada yang bergeser di
+sekitarnya. Pakai di tempat ikon menunjukkan sebuah keadaan, seperti Salin menjadi centang, Putar
+menjadi Jeda, atau hati kosong menjadi penuh.
+
+Ia memegang satu elemen ikon. Beri tiap ikon `key`-nya sendiri, dan ganti ikonnya untuk menukar.
+`key` baru memulai pertukaran; `key` yang sama memperbarui ikon di tempat, tanpa animasi. Render
+pertama juga tidak beranimasi, jadi halaman yang dimuat dengan hati penuh langsung menampilkannya,
+di server juga. Tanpa ikon (`null`), yang lama keluar dan selnya kosong.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Dua part: sel Root dan sebuah Item di sekitar setiap ikon. Selama pertukaran ada dua Item, yang
+keluar di awal atau akhir DOM, masing-masing menumpuk di atas yang lain dalam sel sebesar ikon yang
+lebih besar. Inspect menampilkan satu, di slot tombol ikon.
+
+| Part | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `span.ow-icon-morph` | Grid inline satu sel. Di slot ikon Button, Toggle, atau item Toolbar, ia dan ikonnya mengisi slot itu, seperti satu ikon |
+| <Part name="Item" /> | `span.ow-icon-morph__item` | Satu ikon. `data-starting-style` saat masuk, `data-ending-style` dan `aria-hidden` saat keluar |
+
+## Referensi API [#api]
+
+### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `children` | `ReactElement \| null \| false` | | Satu elemen ikon, dengan `key` |
+| `duration` | `string`, waktu CSS seperti `"300ms"` | Milik pegas settle | Lama satu pertukaran; kurva pegas tetap |
+
+Props lain dan `ref` menuju `span`. `duration` mendarat sebagai `--_duration` di style inline root, jadi tombol di sekitarnya tetap punya
+tekanannya sendiri. Ikon menjaga ukurannya sendiri, jadi atur ukurannya seperti biasa; di slot ikon,
+slot yang mengaturnya. Perubahan di tengah pertukaran membalik kedua ikon di tempatnya, tanpa
+lompatan. Paling banyak satu ikon keluar dalam satu waktu: yang lebih lama dan masih keluar langsung
+hilang.
+
+### Atribut data
+
+| Atribut data | Di | Ada saat |
+| --- | --- | --- |
+| `data-starting-style` | Item | Sedang masuk, sebentar |
+| `data-ending-style` | Item | Sedang keluar; ia juga `aria-hidden` |
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-icon-morph` | Root |
+| `ow-icon-morph__item` | Item |
+
+## Aksesibilitas [#accessibility]
+
+Icon Morph tidak bisa difokus dan tidak menambah role: kontrol tempatnya berada yang membawa nama dan
+keadaannya.
+
+- Namai kontrol itu sesuai yang dilakukannya sekarang (`aria-label` dari Putar menjadi Jeda), atau
+  pertahankan satu nama dan tampilkan keadaan dengan `aria-pressed`, seperti Suka pada Toggle.
+- Bila perubahan penting bagi orang yang tidak bisa melihatnya, seperti penyalinan, umumkan di region
+  status.
+- Ikon yang keluar `aria-hidden`, jadi tidak pernah terbaca dua kali.
+- Ikon digambar dengan `currentColor`, jadi forced colors mewarnainya dengan warna teks kontrol.
+
+## Tema [#theming]
+
+Icon Morph membaca token tema ini. Atur di ikonnya sendiri, karena pegas settle juga mengatur waktu
+tekanan tombol.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-motion-scale` | Seberapa jauh ikon mengecil dan memburam: setengah ukuran dan 3px pada 1, tidak sama sekali pada 0 |
+| `--ow-spring-settle` | Easing setiap pertukaran |
+| `--ow-spring-settle-duration` | Lama pertukaran |
+| `--ow-ease-out` | Crossfade pada gerak yang dikurangi |
+
+<ForMode mode="isolated">
+
+Pada mode terisolasi, nilai berada di root setiap komponen, jadi atur nilai Anda di ikonnya sendiri.
+
+</ForMode>
+
+```css
+.like .ow-icon-morph {
+  --ow-spring-settle-duration: 600ms;
+}
+```
+
+## Gerak [#motion]
+
+Pertukaran adalah dua transisi CSS pada pegas settle, pegas Core yang teredam kritis, jadi ikon
+mendarat tanpa memantul; tidak ada yang berjalan saat diam. Pada skala gerak 1, ikon yang keluar
+mengecil hingga setengah ukuran dengan blur 3px; pada 0,5 hingga tiga perempat dengan 1,5px; pada 0
+ia hanya memudar. Dengan `prefers-reduced-motion`, ikon hanya crossfade, dalam 150 ms.

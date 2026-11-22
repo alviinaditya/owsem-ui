@@ -52,6 +52,8 @@ export default [
   // Copy Button builds on Button and Icon Morph, which count here too.
   entry("copy-button", "dist/components/copy-button/index.js", "8 kB"),
   entry("icon-morph", "dist/components/icon-morph/index.js", "8 kB"),
+  entry("sidebar", "dist/components/sidebar/index.js", "8 kB"),
+  entry("table", "dist/components/table/index.js", "8 kB"),
   entry("table-of-contents", "dist/components/table-of-contents/index.js", "8 kB"),
   // Base + Owsem: both flavors in one entry; 3 kB or 8 kB is open in the PRD.
   entry("tree-rail-nav", "dist/components/tree-rail-nav/index.js", "8 kB"),

@@ -54,11 +54,27 @@ describe("Toggle Group geometry", () => {
     for (const [i, height] of [24, 32, 40].entries()) {
       const group = groups[i] as HTMLElement;
       const items = itemsOf(group);
+      close(rect(group).height, height + 8);
       for (const item of items) close(rect(item).height, height);
       const first = insets(group, items[0] as Element);
       const last = insets(group, items.at(-1) as Element);
       for (const gap of [first.top, first.bottom, first.left, last.right]) close(gap, 4);
     }
+  });
+
+  test("icon-only items are as tall as labeled ones: the group keeps the control height", async () => {
+    const { groups, itemsOf } = await mount(
+      <ToggleGroup.Root aria-label="Icons" defaultValue={["a"]}>
+        <ToggleGroup.Item value="a" aria-label="A">
+          {ICON}
+        </ToggleGroup.Item>
+        <ToggleGroup.Item value="b" aria-label="B">
+          {ICON}
+        </ToggleGroup.Item>
+      </ToggleGroup.Root>,
+    );
+    close(rect(groups[0] as Element).height, 40);
+    for (const item of itemsOf(groups[0] as Element)) close(rect(item).height, 32);
   });
 
   test("the thumb covers the pressed item exactly; the track takes the one radius, the items less the inset (TK-8)", async () => {

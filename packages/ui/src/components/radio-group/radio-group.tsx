@@ -36,7 +36,7 @@ const GLIDE: GlideOptions = {
 export type RadioGroupSize = "sm" | "md" | "lg";
 
 export interface RadioGroupProps<Value = unknown> extends Omit<BaseRadioGroup.Props<Value>, "ref"> {
-  /** Button's fonts and row heights (FR-11): 29.25, 38.5, or 48 px tall. @default "md" */
+  /** Button's fonts and row heights (FR-11): 32, 40, or 48 px tall. @default "md" */
   size?: RadioGroupSize | undefined;
 }
 

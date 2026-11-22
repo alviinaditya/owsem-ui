@@ -142,6 +142,8 @@
     min-inline-size: 0;
     margin: 0;
     padding: var(--_py) var(--px);
+    /* An icon alone is shorter than a line: the item keeps the height of the others. */
+    min-block-size: calc(2 * var(--_py) + 1lh);
     border: 0;
     border-radius: var(--_radius);
     /* DP-8: invisible here, the item's edge in forced colors. */

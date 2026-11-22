@@ -4,5 +4,7 @@ export * from "./components/color-picker";
 export * from "./components/command-menu";
 export * from "./components/copy-button";
 export * from "./components/icon-morph";
+export * from "./components/sidebar";
+export * from "./components/table";
 export * from "./components/table-of-contents";
 export * from "./components/tree-rail-nav";

@@ -2,8 +2,9 @@
 "owsem-ui": minor
 ---
 
-Edge-free materials: every surface has one fill and no edge. Controls and panels rest on one soft
-shadow (`--ow-surface-shadow`); popups (menus, selects, popovers, dialogs) cast the larger
+Edge-free materials: every surface has one fill and no edge. Wrappers (Toolbar, Code Block, Table, and
+the Color Picker panel) rest on one soft shadow (`--ow-surface-shadow`); a single control has none; popups
+(menus, selects, popovers, dialogs) cast the larger
 `--ow-popup-shadow`.
 
 Separators, and the lines in Menu, Select, Toolbar, Command Menu, and Color Picker, are

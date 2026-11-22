@@ -1,0 +1,260 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * Table, an Owsem component: a card with a quiet header row, hairlines between rows, and no
+ * vertical lines. The caption is a title above the card. Wider than the card, the table scrolls
+ * inside it with a fade on the sides that have more; narrow, the rows stack: the first cell is the
+ * title and the others carry their column's heading. Nothing moves, so nothing animates.
+ */
+@layer owsem.components {
+  .ow-table {
+    /* The theme tokens it reads (TK-9). */
+    --_panel: var(--ow-panel);
+    --_shadow: var(--ow-surface-shadow);
+    --_fg: var(--ow-fg);
+    --_muted: var(--ow-muted);
+    --_line: var(--ow-line);
+    --_focus: var(--ow-focus);
+    --_radius: var(--ow-radius);
+    /* The header and footer: a faint tint of the text color. */
+    --_tint: color-mix(in oklab, var(--_fg) 4%, transparent);
+    --_py: 10px;
+    --_px: 14px;
+    /* Stacked: the width of the headings that lead the values. */
+    --_label: 5.5rem;
+    position: relative;
+    box-sizing: border-box;
+    min-inline-size: 0;
+    max-inline-size: 100%;
+    border-radius: var(--_radius);
+    background-color: var(--_panel);
+    box-shadow: var(--_shadow);
+    color: var(--_fg);
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .ow-table:where([data-size="sm"]) {
+    --_py: 6px;
+    --_px: 12px;
+  }
+
+  /* Room for the caption above the card. */
+  .ow-table:has(.ow-table__caption:not([data-visually-hidden])) {
+    margin-block-start: 28px;
+  }
+
+  .ow-table__scroll {
+    border-radius: inherit;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    /* The scrollbar is hidden; the edges fade where there is more to scroll. */
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement (NF-1) */
+    scrollbar-width: none;
+  }
+
+  .ow-table__scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ow-table__scroll:focus-visible {
+    outline: 2px solid var(--_focus);
+    outline-offset: -2px;
+  }
+
+  .ow-table__scroll:where([data-overflow-start]) {
+    mask-image: linear-gradient(to right, transparent, #000 28px);
+  }
+
+  .ow-table__scroll:where([data-overflow-end]) {
+    mask-image: linear-gradient(to left, transparent, #000 28px);
+  }
+
+  .ow-table__scroll:where([data-overflow-start][data-overflow-end]) {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 28px,
+      #000 calc(100% - 28px),
+      transparent
+    );
+  }
+
+  .ow-table__scroll:where(:dir(rtl)[data-overflow-start]) {
+    mask-image: linear-gradient(to left, transparent, #000 28px);
+  }
+
+  .ow-table__scroll:where(:dir(rtl)[data-overflow-end]) {
+    mask-image: linear-gradient(to right, transparent, #000 28px);
+  }
+
+  .ow-table__scroll:where(:dir(rtl)[data-overflow-start][data-overflow-end]) {
+    mask-image: linear-gradient(
+      to left,
+      transparent,
+      #000 28px,
+      #000 calc(100% - 28px),
+      transparent
+    );
+  }
+
+  .ow-table__table {
+    inline-size: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* A small title above the card, one line; it names the table. */
+  .ow-table__caption {
+    position: absolute;
+    inset-block-end: calc(100% + 8px);
+    inset-inline: 0;
+    overflow: hidden;
+    padding-inline: 2px;
+    color: var(--_muted);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    text-align: start;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ow-table__caption:where([data-visually-hidden]) {
+    inset-block-end: auto;
+    inline-size: 1px;
+    block-size: 1px;
+    padding: 0;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .ow-table__head,
+  .ow-table__cell {
+    padding: var(--_py) var(--_px);
+    border-block-end: 1px solid var(--_line);
+    text-align: start;
+    vertical-align: top;
+  }
+
+  .ow-table__head {
+    color: var(--_muted);
+    font-size: 0.8125rem;
+    font-weight: 500;
+  }
+
+  /* No hairline after the last row of the body. */
+  :where(.ow-table__body > .ow-table__row:last-child) > :is(.ow-table__head, .ow-table__cell) {
+    border-block-end: 0;
+  }
+
+  /* The header and footer rows: a faint tint; the footer has its hairline above. */
+  .ow-table__header :is(.ow-table__head, .ow-table__cell),
+  .ow-table__footer :is(.ow-table__head, .ow-table__cell) {
+    background-color: var(--_tint);
+  }
+
+  .ow-table__footer :is(.ow-table__head, .ow-table__cell) {
+    border-block-end: 0;
+    border-block-start: 1px solid var(--_line);
+  }
+
+  /* A row heading in the body reads as text, not as a column heading. */
+  .ow-table__body .ow-table__head {
+    color: var(--_fg);
+  }
+
+  /*
+   * Stacked: a row is a grid with room to grow. Its first cell is the title across the top; each
+   * other cell is a heading beside its value, the heading column as wide as the longest heading.
+   */
+  .ow-table:where([data-layout="stack"])
+  :is(.ow-table__table, .ow-table__header, .ow-table__body, .ow-table__footer) {
+    display: block;
+  }
+
+  /* The header row stays for screen readers. */
+  .ow-table:where([data-layout="stack"]) .ow-table__header {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .ow-table:where([data-layout="stack"]) .ow-table__row {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 6px 16px;
+    padding: calc(var(--_py) + 6px) var(--_px);
+    border-block-end: 1px solid var(--_line);
+  }
+
+  .ow-table:where([data-layout="stack"]) .ow-table__body > .ow-table__row:last-child {
+    border-block-end: 0;
+  }
+
+  .ow-table:where([data-layout="stack"]) .ow-table__footer > .ow-table__row {
+    border-block-end: 0;
+    background-color: var(--_tint);
+  }
+
+  .ow-table:where([data-layout="stack"]) :is(.ow-table__head, .ow-table__cell) {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    align-items: baseline;
+    min-inline-size: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--_fg);
+    font-size: inherit;
+    font-weight: 400;
+  }
+
+  .ow-table:where([data-layout="stack"]) .ow-table__cell::before {
+    content: attr(data-label);
+    color: var(--_muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .ow-table:where([data-layout="stack"]) .ow-table__value {
+    display: block;
+    min-inline-size: 0;
+    overflow-wrap: break-word;
+  }
+
+  /* The title: the whole row's width, no heading. */
+  .ow-table:where([data-layout="stack"]) :is(.ow-table__head, .ow-table__cell):first-child {
+    display: block;
+    padding-block-end: 4px;
+    font-weight: 600;
+  }
+
+  .ow-table:where([data-layout="stack"]) .ow-table__cell:first-child::before {
+    content: none;
+  }
+
+  /* A cell with nothing in it, such as no default, leaves no heading either. */
+  .ow-table:where([data-layout="stack"]) .ow-table__cell:has(> .ow-table__value:empty) {
+    display: none;
+  }
+
+  @media (forced-colors: active) {
+    .ow-table {
+      outline: 1px solid CanvasText;
+      outline-offset: -1px;
+    }
+
+    .ow-table__head,
+    .ow-table__cell,
+    .ow-table:where([data-layout="stack"]) .ow-table__row {
+      border-color: CanvasText;
+    }
+  }
+}

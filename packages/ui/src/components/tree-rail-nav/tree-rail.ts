@@ -598,7 +598,7 @@ export function createTreeRail(tree: HTMLElement, svg: SVGSVGElement): TreeRail 
     frame = requestAnimationFrame(draw);
   }
 
-  /** The deepest current row: on a Lab page, the scene being read rather than its page. */
+  /** The deepest current row: a nested row (a section) wins over its page. */
   const findTarget = () => {
     let best: HTMLElement | null = null;
     for (const row of tree.querySelectorAll<HTMLElement>(`${ROW}[data-current]`)) {

@@ -62,8 +62,8 @@ export function createThumb(
   root.setAttribute("data-thumb", "");
 
   /**
-   * An element's box from the root's padding edge, in the root's own px: a scaled ancestor (the
-   * Lab's fitted stage, a dialog growing in) is divided out, and so is the element's press scale.
+   * An element's box from the root's padding edge, in the root's own px: a scaled ancestor (a
+   * preview's fitted stage, a dialog growing in) is divided out, and so is the element's press scale.
    * A root that scrolls carries the thumb with its items, so its scroll is added back.
    */
   function measure(el: HTMLElement): Box | null {

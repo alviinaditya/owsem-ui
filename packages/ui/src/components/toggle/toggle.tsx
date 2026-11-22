@@ -15,7 +15,7 @@ const cls = { root: "ow-toggle", icon: "ow-toggle__icon" } as const;
 export type ToggleSize = "sm" | "md" | "lg";
 
 export interface ToggleProps extends Omit<BaseToggle.Props, "ref"> {
-  /** Button's sizes (FR-11): 29.25, 38.5, or 48 px tall. @default "md" */
+  /** Button's sizes (FR-11): 32, 40, or 48 px tall. @default "md" */
   size?: ToggleSize | undefined;
   /** An icon before the label, the font size plus 2px. Decorative: the toggle needs a name. */
   startIcon?: ReactNode;

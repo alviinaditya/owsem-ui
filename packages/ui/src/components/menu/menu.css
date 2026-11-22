@@ -25,9 +25,10 @@
     box-sizing: border-box;
     min-inline-size: 10rem;
     max-block-size: var(--available-height);
-    padding: var(--_pad);
-    overflow-y: auto;
-    overscroll-behavior: contain;
+    /* It only clips: a scrollbar on a rounded box draws square (Chrome), so the viewport scrolls. */
+    display: flex;
+    flex-direction: column;
+    overflow: clip;
     border-radius: var(--ow-radius);
     /* Invisible until forced colors draw it as the edge (DP-8). */
     outline: 1px solid transparent;
@@ -43,6 +44,15 @@
     transition:
       opacity 180ms var(--ow-ease-out),
       transform 180ms var(--ow-ease-out);
+  }
+
+  .ow-menu__viewport {
+    flex: 1 1 auto;
+    box-sizing: border-box;
+    min-block-size: 0;
+    padding: var(--_pad);
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .ow-menu__popup[data-size="sm"] {
@@ -69,7 +79,7 @@
   }
 
   /* Glide's highlight takes the items' corners. */
-  .ow-menu__popup > .ow-glide {
+  .ow-menu__viewport > .ow-glide {
     --_radius: var(--_inner);
   }
 

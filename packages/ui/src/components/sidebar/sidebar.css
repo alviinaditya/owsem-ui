@@ -1,7 +1,7 @@
 @layer owsem.tokens, owsem.components;
 
 /*
- * Sidebar, an Owsem component: the site navigation. Quiet rows, a pill in the gutter beside the
+ * Sidebar, an Owsem component: the site navigation. Quiet rows, a liquid background and dot for the
  * current page, and Glide's highlight between the rest. Desktop: closed, it slides out and fades
  * (translate and opacity only). Mobile: a drawer (Base UI Dialog) from the inline start. Its width is its
  * inline-size, which a class of yours sets.
@@ -20,6 +20,9 @@
     --_radius: max(0px, calc(var(--ow-radius) - 6px));
     /* The indent of the items: the pill lives in it. */
     --_gutter: 12px;
+    /* The tint of the active background: the accent over the surface the sidebar sits on. */
+    --_surface: var(--ow-bg);
+    --_tint: color-mix(in oklab, var(--ow-accent) 12%, var(--_surface));
     --_dir: -1;
     display: flex;
     flex: none;
@@ -63,6 +66,7 @@
     border-start-end-radius: var(--ow-radius);
     border-end-end-radius: var(--ow-radius);
     outline: none;
+    --_surface: var(--ow-raised-bg);
     background-color: var(--ow-raised-bg);
     box-shadow: var(--ow-popup-shadow);
     transition: translate 300ms var(--ow-ease-drawer);
@@ -131,6 +135,8 @@
   .ow-sidebar__content .ow-glide {
     --_bg: color-mix(in oklab, var(--_fg) 4%, transparent);
     --_radius: max(0px, calc(var(--ow-radius) - 6px));
+    /* Inset 1px above and below, like the active background. */
+    clip-path: inset(1px 0 round var(--_radius));
   }
 
   .ow-sidebar__group:where(.ow-sidebar__group ~ .ow-sidebar__group) {
@@ -158,13 +164,15 @@
     list-style: none;
   }
 
+  /* The row spans the gutter too, so the active background and the hover highlight share one box. */
   .ow-sidebar__link {
     display: flex;
     align-items: center;
     gap: 8px;
     box-sizing: border-box;
     block-size: calc(32em / 14);
-    padding-inline: calc(10em / 14);
+    margin-inline-start: calc(-1 * var(--_gutter));
+    padding-inline: calc(var(--_gutter) + 10em / 14) calc(10em / 14);
     border-radius: var(--_radius);
     color: color-mix(in oklab, var(--_fg) 80%, transparent);
     font-weight: 400;
@@ -179,40 +187,45 @@
     }
   }
 
-  .ow-sidebar__link:where([data-active]) {
+  /* The active look arrives with the liquid: data-landed. An active item it left is data-away. */
+  .ow-sidebar__link:where([data-active]:not([data-away]), [data-landed]) {
     color: var(--_fg);
     font-weight: 500;
   }
 
-  /* The current-page pill. sidebar.indicator.ts sets --_x, --_y and --_ms; it ends at rest. */
+  /*
+   * The current-page liquid. sidebar.indicator.ts draws an SVG in it (a background, a dot and the
+   * drop between items) and sets data-visible and data-moving. Behind the rows, in the content's
+   * stacking context; it takes no space.
+   */
   .ow-sidebar__indicator {
     position: absolute;
     inset-block-start: 0;
-    inset-inline-start: calc(var(--_x, 0px) - var(--_gutter) / 2 - 1.5px);
-    inline-size: 3px;
-    block-size: 16px;
+    inset-inline-start: 0;
+    inline-size: 0;
+    block-size: 0;
+    z-index: -1;
     opacity: 0;
     pointer-events: none;
-    translate: 0 var(--_y, 0px);
     /* Its own layer, so it lands without a pixel jump (NF-8). */
-    will-change: translate, opacity;
-    transition:
-      translate calc(var(--_ms, 300) * 1ms * var(--ow-motion-scale)) var(--ow-ease-out),
-      opacity 150ms ease;
-  }
-
-  /* The key: thumb.ts-style stretch from the leading edge, by animation. */
-  .ow-sidebar__indicator::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: var(--ow-radius);
-    background-color: var(--ow-accent);
-    will-change: transform;
+    will-change: opacity;
+    transition: opacity 150ms ease;
   }
 
   .ow-sidebar__indicator[data-visible] {
     opacity: 1;
+  }
+
+  .ow-sidebar__liquid {
+    display: block;
+    overflow: visible;
+    /* The tint of the background; --_mix deepens it toward the accent while it moves. */
+    fill: color-mix(in oklab, var(--ow-accent) var(--_mix, 0%), var(--_tint));
+    will-change: transform;
+  }
+
+  .ow-sidebar__liquid-dot {
+    fill: var(--ow-accent);
   }
 
   .ow-sidebar__link:where([data-disabled]) {
@@ -316,23 +329,20 @@
     }
   }
 
-  /* Reduced motion: the pill jumps. */
-  @media (prefers-reduced-motion: reduce) {
-    .ow-sidebar__indicator {
-      transition: opacity 150ms ease;
-    }
-  }
-
-  /* DP-8: backgrounds are dropped, so the pill is Highlight. */
+  /* DP-8: backgrounds are dropped, so the liquid is Highlight-tinted and the dot is Highlight. */
   @media (forced-colors: active) {
-    .ow-sidebar__indicator::before {
+    .ow-sidebar__liquid {
       forced-color-adjust: none;
-      background-color: Highlight;
+      fill: color-mix(in srgb, Highlight 30%, Canvas);
     }
-  }
 
-  /* The first placement and every jump: nothing transitions. Last, so it wins. */
-  .ow-sidebar__indicator[data-instant] {
-    transition: none;
+    .ow-sidebar__liquid-dot {
+      fill: Highlight;
+    }
+
+    /* The hover box is clipped 1px inside, so its outline sits further in. */
+    .ow-sidebar__content .ow-glide {
+      outline-offset: -3px;
+    }
   }
 }

@@ -38,7 +38,7 @@ async function mount(dir: "ltr" | "rtl") {
 }
 
 describe.each(["ltr", "rtl"] as const)("Sidebar geometry, %s", (dir) => {
-  test("items are 32px tall, 2px apart, with 10px inline padding", async () => {
+  test("items are 32px tall, 2px apart, with 10px inline padding after the 12px gutter", async () => {
     const { all } = await mount(dir);
     const links = all(".ow-sidebar__link");
     const [a, b, c] = links.map((l) => l.getBoundingClientRect());
@@ -51,7 +51,7 @@ describe.each(["ltr", "rtl"] as const)("Sidebar geometry, %s", (dir) => {
       ?.getBoundingClientRect();
     if (!label) throw new Error("no label");
     const inset = dir === "ltr" ? label.left - a.left : a.right - label.right;
-    expect(Math.abs(inset - 10)).toBeLessThanOrEqual(TOL);
+    expect(Math.abs(inset - 22)).toBeLessThanOrEqual(TOL);
   });
 
   test("a long label is cut with an ellipsis and keeps the badge in the row", async () => {

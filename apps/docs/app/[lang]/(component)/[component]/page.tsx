@@ -2,7 +2,7 @@ import type { TOCItemType } from "fumadocs-core/toc";
 import type { Metadata, Route } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ButtonIcon, buttonStyles } from "owsem-ui/base";
+import { buttonVariants } from "owsem-ui/base";
 import { ComponentMeta } from "@/components/component-header";
 import { Icon } from "@/components/icons/icon";
 import { getMDXComponents } from "@/components/mdx";
@@ -113,18 +113,14 @@ function Neighbors({ lang, entry, dict }: PageArgs) {
     <nav className="neighbors" aria-label={dict.common.component}>
       {links.map(({ target, label, rel, icon }) => {
         if (!target) return null;
-        const arrow = (
-          <ButtonIcon side={rel === "prev" ? "start" : "end"}>
-            <Icon name={icon} />
-          </ButtonIcon>
-        );
+        const arrow = <Icon name={icon} />;
         return (
           <Link
             key={rel}
             href={`/${lang}/${target.name}` as Route}
             rel={rel}
             data-rel={rel}
-            {...buttonStyles({ variant: "secondary" })}
+            className={buttonVariants({ variant: "secondary" })}
           >
             {rel === "prev" ? arrow : null}
             <span className="visually-hidden">{label}: </span>

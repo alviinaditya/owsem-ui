@@ -76,7 +76,8 @@ describe("Copy Button", () => {
   test("is a ghost Button with the copy icon, named Copy, and a quiet status region", async () => {
     const { button, status, icons } = await mount();
     expect(button.tagName).toBe("BUTTON");
-    expect(button.className).toBe("ow-button ow-copy-button");
+    expect(button.className).toContain("ow-button ow-button--ghost");
+    expect(button.className).toMatch(/ow-copy-button$/);
     expect(button.dataset.variant).toBe("ghost");
     expect(button.hasAttribute("data-icon-only")).toBe(true);
     expect(button.getAttribute("aria-label")).toBe("Copy");
@@ -298,7 +299,7 @@ describe("Copy Button", () => {
   });
 
   test("passes the Button's props, className, and ref through", async () => {
-    const ref = createRef<HTMLElement>();
+    const ref = createRef<HTMLButtonElement>();
     const screen = await render(
       <CopyButton
         ref={ref}
@@ -312,7 +313,7 @@ describe("Copy Button", () => {
     );
     const button = screen.container.querySelector("button");
     expect(ref.current).toBe(button);
-    expect(button?.className).toBe("ow-button ow-copy-button mine");
+    expect(button?.className).toMatch(/ow-button--outline .*ow-copy-button mine$/);
     expect(button?.dataset.variant).toBe("outline");
     expect(button?.dataset.size).toBe("sm");
     expect(button?.getAttribute("aria-label")).toBe("Copy the command");

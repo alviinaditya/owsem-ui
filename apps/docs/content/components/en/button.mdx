@@ -58,13 +58,14 @@ pseudo-element, so the button stays one element.
 | `soft` | `boolean` | `false` | A flat tint of the tone, for primary, secondary, and destructive |
 | `loading` | `boolean` | | Shows a spinner, keeps the width and focus, and ignores presses |
 | `startIcon`, `endIcon` | `ReactNode` | | An icon at one end |
+| `className` | `string` | | Added after the variant's classes; a string only, not a function |
 
 ### Data attributes
 
 | Data attribute | Present when |
 | --- | --- |
+| `data-slot` | Always: `button` on the root, and `button-icon`, `button-label`, `button-spinner`, `button-ripple` on the parts |
 | `data-variant`, `data-size` | Always; the chosen values |
-| `data-soft` | `soft` is set |
 | `data-held` | The button is held down |
 | `data-loading` | `loading` is true |
 | `data-icon-only` | An `IconButton` |
@@ -74,17 +75,20 @@ pseudo-element, so the button stays one element.
 Takes the same props, except the icons and children, plus `icon` and a required `aria-label`. Its
 variant defaults to `ghost`.
 
-### buttonStyles and ButtonIcon
+### buttonVariants
 
-`buttonStyles({ variant, size, soft, className })` returns the class and data attributes for a
-link, such as `<a {...buttonStyles()}>`. `ButtonIcon` (`side`: `"start"` or `"end"`) sizes an icon
-inside it. A link keeps the look, hover, and press, but has no ripple.
+`buttonVariants({ variant, size, soft })` returns the root's classes as a string, so a link can look
+like a button: `<a className={buttonVariants({ variant: "outline" })}>`. It needs no `"use client"`,
+so Server Components can use it. A link keeps the look, hover, and press, but has no ripple.
 
 ### CSS classes
 
 | CSS class | Part |
 | --- | --- |
 | `ow-button` | Root |
+| `ow-button--primary`, `ow-button--secondary`, `ow-button--outline`, `ow-button--ghost`, `ow-button--link`, `ow-button--destructive` | The variant |
+| `ow-button--sm`, `ow-button--md`, `ow-button--lg` | The size |
+| `ow-button--soft` | The soft tint |
 | `ow-button__icon`, `ow-button__glyph` | The icon and the box around it |
 | `ow-button__label` | The text |
 | `ow-button__spinner` | The spinner |

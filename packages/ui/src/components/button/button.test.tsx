@@ -5,7 +5,8 @@ import { render } from "vitest-browser-react";
 import { axeReport } from "../../../test/a11y.ts";
 import { composite, contrast } from "../../../test/contrast.ts";
 import { measureIdle, settle } from "../../../test/raf-counter.ts";
-import { Button, ButtonIcon, buttonStyles, IconButton } from "./index";
+import { cn } from "../../core/cn";
+import { Button, buttonVariants, IconButton } from "./index";
 
 const root = document.documentElement;
 
@@ -87,7 +88,7 @@ function Gallery() {
       <IconButton icon={<Plus />} aria-label="Add" size="sm" />
       <Button loading>Saving</Button>
       <Button disabled>Disabled</Button>
-      <a href="#next" {...buttonStyles({ variant: "outline" })}>
+      <a href="#next" className={buttonVariants({ variant: "outline" })}>
         Next page
       </a>
     </main>
@@ -101,20 +102,19 @@ describe("Button", () => {
     expect(button.getAttribute("type")).toBe("button");
     expect(button.dataset.variant).toBe("primary");
     expect(button.dataset.size).toBe("md");
+    expect(button.dataset.slot).toBe("button");
+    expect(button.className).toBe("ow-button ow-button--primary ow-button--md");
     expect(button.textContent).toBe("Save");
     // The ripple layer is decorative.
     expect(button.querySelector(".ow-button__layer")?.getAttribute("aria-hidden")).toBe("true");
   });
 
   test("passes className, style, render, and ref through (FR-2, FR-5)", async () => {
-    const ref = createRef<HTMLElement>();
-    const [byString, byFunction, rendered] = await mount(
+    const ref = createRef<HTMLButtonElement>();
+    const [byString, rendered] = await mount(
       <>
         <Button ref={ref} className="mine" style={{ marginBlock: "3px" }}>
           A
-        </Button>
-        <Button disabled className={(state) => (state.disabled ? "is-off" : "is-on")}>
-          B
         </Button>
         <Button render={<span />} nativeButton={false}>
           C
@@ -122,9 +122,8 @@ describe("Button", () => {
       </>,
     );
     expect(ref.current).toBe(byString);
-    expect(byString?.className).toBe("ow-button mine");
+    expect(byString?.className).toBe("ow-button ow-button--primary ow-button--md mine");
     expect(byString?.style.marginBlock).toBe("3px");
-    expect(byFunction?.className).toBe("ow-button is-off");
     expect(rendered?.tagName).toBe("SPAN");
     expect(rendered?.getAttribute("role")).toBe("button");
   });
@@ -215,22 +214,38 @@ describe("Button", () => {
     expect(button.querySelector(".ow-button__icon")?.getAttribute("aria-hidden")).toBe("true");
   });
 
-  test("buttonStyles() styles a link, which keeps its own semantics", async () => {
+  test("buttonVariants() styles a link, which keeps its own semantics", async () => {
     const screen = await render(
-      <a href="#next" {...buttonStyles({ variant: "outline", size: "sm", className: "mine" })}>
+      <a
+        href="#next"
+        className={cn(buttonVariants({ variant: "outline", size: "sm", soft: true }), "mine")}
+      >
         Next
-        <ButtonIcon side="end">
-          <Plus />
-        </ButtonIcon>
+        <Plus />
       </a>,
     );
     const link = screen.container.querySelector("a");
-    expect(link?.className).toBe("ow-button mine");
-    expect(link?.dataset.variant).toBe("outline");
-    expect(link?.dataset.size).toBe("sm");
+    expect(link?.className).toBe("ow-button ow-button--outline ow-button--sm ow-button--soft mine");
     expect(link?.getAttribute("role")).toBeNull();
     expect(link && getComputedStyle(link).display).toBe("inline-flex");
-    expect(link?.querySelector('.ow-button__icon[data-side="end"]')).not.toBeNull();
+  });
+
+  test("marks each part with data-slot", async () => {
+    const button = await one(
+      <Button loading startIcon={<Plus />} endIcon={<Plus />}>
+        Save
+      </Button>,
+    );
+    const slots = [...button.querySelectorAll("[data-slot]")].map((el) =>
+      el.getAttribute("data-slot"),
+    );
+    expect(slots).toEqual([
+      "button-ripple",
+      "button-icon",
+      "button-spinner",
+      "button-label",
+      "button-icon",
+    ]);
   });
 
   test("paints each variant from the materials, in light and dark (DP-7)", async () => {

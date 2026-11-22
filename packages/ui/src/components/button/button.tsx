@@ -1,21 +1,14 @@
 "use client";
 
 import { Button as BaseButton } from "@base-ui/react/button";
-import {
-  type ForwardRefExoticComponent,
-  forwardRef,
-  type PointerEvent,
-  type ReactNode,
-  type RefAttributes,
-  useRef,
-} from "react";
-import { withClassName } from "../../core/class-name";
-import { ButtonIcon, type ButtonStyleOptions, cls, styleAttributes } from "./button-styles";
+import type { ReactElement, ReactNode } from "react";
+import { cn } from "../../core/cn";
+import { useRipple } from "../../core/use-ripple";
+import { type ButtonVariantProps, buttonSlots, buttonVariants } from "./button-variants";
 import "./button.css";
 
-const HELD = "data-held";
-
-export interface ButtonProps extends Omit<BaseButton.Props, "ref">, ButtonStyleOptions {
+export interface ButtonProps extends Omit<BaseButton.Props, "className">, ButtonVariantProps {
+  className?: string | undefined;
   /**
    * Shows a spinner without changing the button's size: in the start icon's place, or centered
    * over the content, which keeps its box. The button ignores presses but keeps focus.
@@ -31,9 +24,9 @@ export interface IconButtonProps extends Omit<ButtonProps, "startIcon" | "endIco
   "aria-label": string;
 }
 
-function Spinner() {
+function Spinner(): ReactElement {
   return (
-    <span className={cls.spinner}>
+    <span data-slot="button-spinner" className={buttonSlots.spinner}>
       <svg
         viewBox="0 0 24 24"
         fill="none"
@@ -48,117 +41,81 @@ function Spinner() {
   );
 }
 
-/** Restarts the ripple at the press point: a CSS transition, so nothing runs per frame. */
-function startRipple(button: HTMLElement, ripple: HTMLElement, event: PointerEvent): void {
-  const box = button.getBoundingClientRect();
-  const style = getComputedStyle(button);
-  const w = Number.parseFloat(style.width);
-  const h = Number.parseFloat(style.height);
-  // Layout px per screen px: undoes the press scale and any scaled ancestor.
-  const k = box.width ? w / box.width : 1;
-  const x = (event.clientX - box.left) * k;
-  const y = (event.clientY - box.top) * k;
-  ripple.style.setProperty("--_x", `${x}px`);
-  ripple.style.setProperty("--_y", `${y}px`);
-  ripple.style.setProperty("--_d", `${2 * Math.hypot(Math.max(x, w - x), Math.max(y, h - y))}px`);
-  delete ripple.dataset.state;
-  // Reading the style applies the reset, so the transition starts from the press point.
-  getComputedStyle(ripple).opacity;
-  ripple.dataset.state = "on";
+export function Button({
+  variant = "primary",
+  size = "md",
+  soft,
+  loading,
+  startIcon,
+  endIcon,
+  disabled,
+  focusableWhenDisabled,
+  className,
+  children,
+  onPointerDown,
+  onPointerUp,
+  onPointerLeave,
+  onPointerCancel,
+  ...props
+}: ButtonProps): ReactElement {
+  const ripple = useRipple();
+  // Mounted only for buttons that can load, so the spinner can fade in and out.
+  const spinner = loading === undefined ? null : <Spinner />;
+  return (
+    <BaseButton
+      data-slot="button"
+      data-variant={variant}
+      data-size={size}
+      {...props}
+      className={cn(buttonVariants({ variant, size, soft }), className)}
+      // Base UI's way to load: disabled, but focusable, with aria-disabled.
+      disabled={disabled || loading}
+      focusableWhenDisabled={focusableWhenDisabled || loading}
+      aria-busy={loading || undefined}
+      data-loading={loading ? "" : undefined}
+      // Base UI skips these while disabled or loading.
+      {...ripple.props({ onPointerDown, onPointerUp, onPointerLeave, onPointerCancel })}
+    >
+      {variant === "link" ? null : (
+        <span className={buttonSlots.layer} aria-hidden="true">
+          <span data-slot="button-ripple" ref={ripple.ref} className={buttonSlots.ripple} />
+        </span>
+      )}
+      {startIcon == null ? spinner : null}
+      {startIcon == null ? null : (
+        <span
+          data-slot="button-icon"
+          data-side="start"
+          aria-hidden="true"
+          className={buttonSlots.icon}
+        >
+          <span className={buttonSlots.glyph}>{startIcon}</span>
+          {spinner}
+        </span>
+      )}
+      {children == null || children === false ? null : (
+        <span data-slot="button-label" className={buttonSlots.label}>
+          {children}
+        </span>
+      )}
+      {endIcon == null ? null : (
+        <span
+          data-slot="button-icon"
+          data-side="end"
+          aria-hidden="true"
+          className={buttonSlots.icon}
+        >
+          <span className={buttonSlots.glyph}>{endIcon}</span>
+        </span>
+      )}
+    </BaseButton>
+  );
 }
 
-// forwardRef keeps refs working on React 18, where `ref` is not a prop.
-export const Button: ForwardRefExoticComponent<ButtonProps & RefAttributes<HTMLElement>> =
-  forwardRef<HTMLElement, ButtonProps>(function Button(
-    {
-      variant,
-      size,
-      soft,
-      loading,
-      startIcon,
-      endIcon,
-      disabled,
-      focusableWhenDisabled,
-      className,
-      children,
-      onPointerDown,
-      onPointerUp,
-      onPointerLeave,
-      onPointerCancel,
-      ...props
-    },
-    ref,
-  ) {
-    const ripple = useRef<HTMLSpanElement>(null);
-    // Mounted only for buttons that can load, so the spinner can fade in and out.
-    const spinner = loading === undefined ? null : <Spinner />;
-    const release = (button: HTMLElement) => {
-      button.removeAttribute(HELD);
-      if (ripple.current?.dataset.state === "on") ripple.current.dataset.state = "off";
-    };
-    return (
-      <BaseButton
-        {...props}
-        ref={ref}
-        className={withClassName(cls.root, className)}
-        // Base UI's way to load: disabled, but focusable, with aria-disabled.
-        disabled={disabled || loading}
-        focusableWhenDisabled={focusableWhenDisabled || loading}
-        aria-busy={loading || undefined}
-        {...styleAttributes({ variant, size, soft })}
-        data-loading={loading ? "" : undefined}
-        // Base UI skips this while disabled or loading.
-        onPointerDown={(event) => {
-          onPointerDown?.(event);
-          if (event.defaultPrevented || event.button !== 0) return;
-          event.currentTarget.setAttribute(HELD, "");
-          if (ripple.current) startRipple(event.currentTarget, ripple.current, event);
-        }}
-        onPointerUp={(event) => {
-          onPointerUp?.(event);
-          release(event.currentTarget);
-        }}
-        onPointerLeave={(event) => {
-          onPointerLeave?.(event);
-          release(event.currentTarget);
-        }}
-        onPointerCancel={(event) => {
-          onPointerCancel?.(event);
-          release(event.currentTarget);
-        }}
-      >
-        {variant === "link" ? null : (
-          <span className={cls.layer} aria-hidden="true">
-            <span ref={ripple} className={cls.ripple} />
-          </span>
-        )}
-        {startIcon == null ? spinner : null}
-        {startIcon == null ? null : (
-          <ButtonIcon side="start">
-            <span className={cls.glyph}>{startIcon}</span>
-            {spinner}
-          </ButtonIcon>
-        )}
-        {children == null || children === false ? null : (
-          <span className={cls.label}>{children}</span>
-        )}
-        {endIcon == null ? null : (
-          <ButtonIcon side="end">
-            <span className={cls.glyph}>{endIcon}</span>
-          </ButtonIcon>
-        )}
-      </BaseButton>
-    );
-  });
-
 /** A square button with one icon and no visible text, so `aria-label` is required. */
-export const IconButton: ForwardRefExoticComponent<IconButtonProps & RefAttributes<HTMLElement>> =
-  forwardRef<HTMLElement, IconButtonProps>(function IconButton(
-    { icon, variant = "ghost", ...props },
-    ref,
-  ) {
-    return <Button {...props} ref={ref} variant={variant} startIcon={icon} data-icon-only="" />;
-  });
+export function IconButton({ icon, variant = "ghost", ...props }: IconButtonProps): ReactElement {
+  return <Button {...props} variant={variant} startIcon={icon} data-icon-only="" />;
+}
 
 export declare namespace Button {
   type Props = ButtonProps;

@@ -62,9 +62,9 @@
     "lint:pkg": "rm -rf .pack && pnpm pack --pack-destination .pack && publint --strict .pack/*.tgz && attw .pack/*.tgz --profile esm-only --exclude-entrypoints ./styles.css ./tokens.css ./tailwind.css"
   },
   "peerDependencies": {
-    "@types/react": "^18.2.7 || ^19.0.0",
-    "react": "^18.2.0 || ^19.0.0",
-    "react-dom": "^18.2.0 || ^19.0.0"
+    "@types/react": "^19.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "peerDependenciesMeta": {
     "@types/react": {
@@ -88,9 +88,7 @@
     "playwright": "catalog:",
     "publint": "catalog:",
     "react": "catalog:",
-    "react-18": "npm:react@18.2.0",
     "react-dom": "catalog:",
-    "react-dom-18": "npm:react-dom@18.2.0",
     "size-limit": "^14.2.0",
     "tailwindcss": "^4.3.3",
     "tsdown": "catalog:",

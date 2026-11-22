@@ -1036,6 +1036,9 @@ body {
 
 /* The arrow nudges toward where the link goes. */
 .neighbors svg {
+  flex: none;
+  inline-size: 1.15em;
+  block-size: 1.15em;
   color: var(--docs-muted);
   translate: var(--nudge, 0) 0;
   transition: translate 0.2s var(--ease);

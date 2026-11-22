@@ -75,12 +75,12 @@
     transition: transform var(--ow-spring-settle-duration) var(--ow-spring-settle);
   }
 
-  .ow-button[data-size="sm"] {
+  .ow-button--sm {
     --py: 0.6058em;
     font-size: 0.8125rem;
   }
 
-  .ow-button[data-size="lg"] {
+  .ow-button--lg {
     --py: 0.875em;
     font-size: 1rem;
   }
@@ -98,7 +98,7 @@
   }
 
   /* Solid fills keep their highlight while held, and the fill darkens a little in both themes. */
-  .ow-button:is([data-variant="primary"], [data-variant="destructive"]) {
+  .ow-button:where(.ow-button--primary, .ow-button--destructive) {
     --_bg: var(--_primary-bg);
     --_shadow: var(--_primary-shadow);
     /* literal: black darkens any fill */
@@ -106,33 +106,29 @@
     --_shadow-pressed: var(--_shadow);
   }
 
-  .ow-button[data-variant="primary"] {
+  .ow-button--primary {
     --_fg: var(--_on-primary);
   }
 
-  .ow-button[data-variant="secondary"] {
+  .ow-button--secondary {
     --_bg: var(--_neutral);
     --_bg-pressed: var(--_neutral-pressed);
   }
 
-  .ow-button[data-variant="destructive"] {
+  .ow-button--destructive {
     --_fg: var(--_on-critical);
     --_bg: var(--_critical);
   }
 
   /* A quiet line from the text color, firmer on hover; held down, the pressed fill keeps it. */
-  .ow-button[data-variant="outline"] {
+  .ow-button--outline {
     --_line: color-mix(in oklab, var(--_ink) 16%, transparent);
     --_shadow: inset 0 0 0 1px var(--_line);
     --_shadow-pressed: var(--_shadow);
   }
 
   /* Soft: a flat tint of the variant's tone with text in that tone, and no edge. */
-  .ow-button[data-soft]:is(
-    [data-variant="primary"],
-    [data-variant="secondary"],
-    [data-variant="destructive"]
-  ) {
+  .ow-button--soft:is(.ow-button--primary, .ow-button--secondary, .ow-button--destructive) {
     --_fg: color-mix(in oklab, var(--_tone) 75%, var(--_ink));
     --_bg: color-mix(in oklab, var(--_tone) 12%, transparent);
     --_shadow: none;
@@ -140,21 +136,21 @@
     --_shadow-pressed: none;
   }
 
-  .ow-button[data-soft][data-variant="primary"] {
+  .ow-button--soft.ow-button--primary {
     --_tone: var(--_primary-bg);
   }
 
-  .ow-button[data-soft][data-variant="secondary"] {
+  .ow-button--soft.ow-button--secondary {
     --_tone: var(--_ink);
   }
 
   /* The critical text tone, so the text reads on the tint in both themes. */
-  .ow-button[data-soft][data-variant="destructive"] {
+  .ow-button--soft.ow-button--destructive {
     --_tone: var(--ow-critical);
   }
 
   /* Link: text only, underlined on hover; a press dims it instead of scaling it. */
-  .ow-button[data-variant="link"] {
+  .ow-button--link {
     --_fg: var(--_link);
     --_press: 1;
     text-decoration-line: underline;
@@ -164,7 +160,7 @@
     transition: opacity 150ms var(--ow-ease-out);
   }
 
-  .ow-button[data-variant="link"]::before {
+  .ow-button--link::before {
     content: none;
   }
 
@@ -173,11 +169,11 @@
       --_tint: var(--_hover);
     }
 
-    .ow-button[data-variant="outline"]:hover:not([data-disabled]) {
+    .ow-button--outline:hover:not([data-disabled]) {
       --_line: color-mix(in oklab, var(--_ink) 28%, transparent);
     }
 
-    .ow-button[data-variant="link"]:hover:not([data-disabled]) {
+    .ow-button--link:hover:not([data-disabled]) {
       text-decoration-color: currentColor;
     }
   }
@@ -194,7 +190,7 @@
     box-shadow: var(--_shadow-pressed);
   }
 
-  .ow-button[data-variant="link"]:is(:active, [data-held]):not([data-disabled]) {
+  .ow-button--link:is(:active, [data-held]):not([data-disabled]) {
     opacity: 0.7;
   }
 
@@ -378,7 +374,7 @@
 
   /* DP-8: materials drop out, so an outline draws the edge in the system color. */
   @media (forced-colors: active) {
-    .ow-button:not([data-variant="link"]) {
+    .ow-button:not(.ow-button--link) {
       outline: 1px solid transparent;
       outline-offset: -1px;
     }

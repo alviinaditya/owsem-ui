@@ -29,7 +29,7 @@ but the props table on the OwsemUI page is the final word.
 
 ## Install from npm
 
-Requires React 18.2 or 19 (`react` and `react-dom` are peers). The package is ESM only. Use the
+Requires React 19 (`react` and `react-dom` are peers). The package is ESM only. Use the
 project's package manager.
 
 ```sh
@@ -62,7 +62,7 @@ npx shadcn add @owsem/separator
 
 Component files land in `components/owsem/<name>/`; the first one also adds the shared
 `@owsem/core` item, `lib/owsem/tokens.css`, `lib/owsem/tailwind.css` (for Tailwind projects), and
-`lib/owsem/class-name.ts`. Import `lib/owsem/tokens.css` once in the app's CSS entry; each
+the Core helpers the component imports, such as `lib/owsem/cn.ts`. Import `lib/owsem/tokens.css` once in the app's CSS entry; each
 component imports its own CSS. Import components from the copy, such as
 `@/components/owsem/separator`. The registry ships no providers: import them from
 `@base-ui/react/direction-provider` and `@base-ui/react/csp-provider`, the copy the copied
@@ -184,14 +184,14 @@ part, such as Kbd; Owsem components are OwsemUI's own. No component has a `flavo
 ### Button
 
 ```tsx
-import { Button, ButtonIcon, buttonStyles, IconButton } from "owsem-ui/base"; // or "@/components/owsem/button"
+import { Button, buttonVariants, IconButton } from "owsem-ui/base"; // or "@/components/owsem/button"
 <Button onClick={save}>Save</Button>
 <Button variant="secondary" size="sm" startIcon={<Plus />}>Add</Button>
 <Button loading={saving}>Save</Button>
 <IconButton icon={<Trash />} aria-label="Delete" variant="destructive" />
-<a href="/docs" {...buttonStyles({ variant: "outline" })}>
+<a href="/docs" className={buttonVariants({ variant: "outline" })}>
   Docs
-  <ButtonIcon side="end"><ArrowRight /></ButtonIcon>
+  <ArrowRight />
 </a>
 ```
 
@@ -199,8 +199,8 @@ import { Button, ButtonIcon, buttonStyles, IconButton } from "owsem-ui/base"; //
   `variant` (`"primary"`, the default, `"secondary"`, `"outline"`, `"ghost"`, `"link"`,
   `"destructive"`), `size` (`"sm"`, `"md"`, the default, `"lg"`), `soft` (a flat tint, for
   primary, secondary, and destructive), `loading`, `startIcon`, `endIcon`, and Base UI's
-  `disabled`, `focusableWhenDisabled`, `nativeButton`, `className`, `style`, `render`. The ref
-  goes to the button.
+  `disabled`, `focusableWhenDisabled`, `nativeButton`, `className` (a string), `style`, `render`.
+  The ref goes to the button.
 - `loading` keeps the width and focus, ignores presses, and sets `aria-busy` and `aria-disabled`.
   Keep the label the same while loading. Use a boolean (`loading={saving}`) on buttons that can
   load, so the spinner fades in.
@@ -210,9 +210,8 @@ import { Button, ButtonIcon, buttonStyles, IconButton } from "owsem-ui/base"; //
   an 8% tint of the text color (16% held), `ghost` is clear until hovered (`--ow-pressed-bg` held), and `soft` is a
   tint of the variant's tone. `outline` is the only variant with an edge, a quiet 1px line from the
   text color. There is no drop shadow and no socket; do not add a `box-shadow` around a button.
-- Links: never render a link through Button. Spread `buttonStyles({ variant, size, soft,
-  className })` on the `<a>` or router `Link`, and wrap icons in `ButtonIcon` (`side`). Pass icons
-  as elements; their size is the font size plus 2px, so do not size them.
+- Links: never render a link through Button. Pass `className={buttonVariants({ variant, size,
+  soft })}` to the `<a>` or router `Link`. Size an icon inside a link yourself.
 - Size: `--py` (padding above and below the text) sets any custom size, through `style` on the
   button itself: `style={{ "--py": "0.6em" }}`. Do not set `height` or `padding`.
 - Reads `--ow-accent` with `--ow-on-accent` (primary; the link mixes the accent toward `--ow-fg`),

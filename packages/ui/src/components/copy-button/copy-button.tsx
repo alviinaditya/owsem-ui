@@ -10,7 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { withClassName } from "../../core/class-name";
+import { joinClass } from "../../core/class-name";
 import { Button, type ButtonProps } from "../button/button";
 import { IconMorph } from "../icon-morph/icon-morph";
 import {
@@ -116,129 +116,128 @@ function useTipWidth(deps: readonly unknown[]) {
  * the copy. Icon only, its Tooltip names it and, on a click, turns its words to the copied label in
  * place, and back when the icon is.
  */
-export const CopyButton: ForwardRefExoticComponent<CopyButtonProps & RefAttributes<HTMLElement>> =
-  forwardRef<HTMLElement, CopyButtonProps>(function CopyButton(
-    {
-      value,
-      timeout = 1600,
-      labels,
-      showLabel = false,
-      onCopy,
-      onError,
-      onClick,
-      variant = "ghost",
-      className,
-      duration,
-      style,
-      ...props
-    },
-    ref,
-  ) {
-    const copy = labels?.copy ?? "Copy";
-    const copied = labels?.copied ?? "Copied";
-    // Counts copies, so each one restarts the timer.
-    const [done, setDone] = useState(0);
-    useEffect(() => {
-      if (!done) return;
-      const timer = setTimeout(() => setDone(0), timeout);
-      return () => clearTimeout(timer);
-    }, [done, timeout]);
-    const on = done > 0;
-    // The Tooltip's own open state (hover or focus). While copied it stays open; once the icon is
-    // back it stays only as far as the pointer or focus does.
-    const [hint, setHint] = useState(false);
-    const tip = useTipWidth([on, copy, copied]);
-    const timing = duration
-      ? ({ ...style, "--_duration": duration } as ButtonProps["style"])
-      : style;
+export const CopyButton: ForwardRefExoticComponent<
+  CopyButtonProps & RefAttributes<HTMLButtonElement>
+> = forwardRef<HTMLButtonElement, CopyButtonProps>(function CopyButton(
+  {
+    value,
+    timeout = 1600,
+    labels,
+    showLabel = false,
+    onCopy,
+    onError,
+    onClick,
+    variant = "ghost",
+    className,
+    duration,
+    style,
+    ...props
+  },
+  ref,
+) {
+  const copy = labels?.copy ?? "Copy";
+  const copied = labels?.copied ?? "Copied";
+  // Counts copies, so each one restarts the timer.
+  const [done, setDone] = useState(0);
+  useEffect(() => {
+    if (!done) return;
+    const timer = setTimeout(() => setDone(0), timeout);
+    return () => clearTimeout(timer);
+  }, [done, timeout]);
+  const on = done > 0;
+  // The Tooltip's own open state (hover or focus). While copied it stays open; once the icon is
+  // back it stays only as far as the pointer or focus does.
+  const [hint, setHint] = useState(false);
+  const tip = useTipWidth([on, copy, copied]);
+  const timing = duration ? ({ ...style, "--_duration": duration } as ButtonProps["style"]) : style;
 
-    const button = (
-      <Button
-        aria-label={showLabel ? undefined : copy}
-        {...props}
-        ref={ref}
-        style={timing}
-        variant={variant}
-        className={withClassName(cls.root, className)}
-        data-copied={on ? "" : undefined}
-        // Busy until the icon is back: it says so, without the disabled look.
-        aria-disabled={on || props["aria-disabled"] || undefined}
-        data-icon-only={showLabel ? undefined : ""}
-        startIcon={<IconMorph duration={duration}>{on ? CHECK : COPY}</IconMorph>}
-        onClick={(event) => {
-          onClick?.(event);
-          // Busy until the icon is back.
-          if (event.defaultPrevented || on) return;
-          const text = typeof value === "function" ? value() : value;
-          // Missing outside secure contexts (http), so that fails like a refusal.
-          const write = navigator.clipboard?.writeText(text);
-          (write ?? Promise.reject(new Error("The Clipboard API is not available.")))
-            .then(() => {
-              setDone((n) => n + 1);
-              onCopy?.(text);
-            })
-            .catch((error: unknown) => onError?.(error));
-        }}
-      >
-        {showLabel ? (
-          // Both words share one cell, so the width holds; the hidden one is not read.
-          <span className={cls.label}>
-            <span className={cls.labelText} data-visible={on ? undefined : ""}>
-              {copy}
-            </span>
-            <span className={cls.labelText} data-visible={on ? "" : undefined}>
-              {copied}
-            </span>
+  const button = (
+    <Button
+      aria-label={showLabel ? undefined : copy}
+      {...props}
+      ref={ref}
+      style={timing}
+      variant={variant}
+      className={joinClass(cls.root, className)}
+      data-copied={on ? "" : undefined}
+      // Busy until the icon is back: it says so, without the disabled look.
+      aria-disabled={on || props["aria-disabled"] || undefined}
+      data-icon-only={showLabel ? undefined : ""}
+      startIcon={<IconMorph duration={duration}>{on ? CHECK : COPY}</IconMorph>}
+      onClick={(event) => {
+        onClick?.(event);
+        // Busy until the icon is back.
+        if (event.defaultPrevented || on) return;
+        const text = typeof value === "function" ? value() : value;
+        // Missing outside secure contexts (http), so that fails like a refusal.
+        const write = navigator.clipboard?.writeText(text);
+        (write ?? Promise.reject(new Error("The Clipboard API is not available.")))
+          .then(() => {
+            setDone((n) => n + 1);
+            onCopy?.(text);
+          })
+          .catch((error: unknown) => onError?.(error));
+      }}
+    >
+      {showLabel ? (
+        // Both words share one cell, so the width holds; the hidden one is not read.
+        <span className={cls.label}>
+          <span className={cls.labelText} data-visible={on ? undefined : ""}>
+            {copy}
           </span>
-        ) : null}
-      </Button>
-    );
-
-    return (
-      <>
-        {showLabel ? (
-          button
-        ) : (
-          <TooltipRoot
-            open={on || hint}
-            onOpenChange={(open, details) => {
-              // The press is the click that copies: the same Tooltip stays and changes its words.
-              if (!open && details.reason === "trigger-press") return;
-              setHint(open);
-            }}
-          >
-            <TooltipTrigger render={button} />
-            <TooltipPortal>
-              <TooltipPositioner>
-                <TooltipPopup>
-                  <TooltipArrow />
-                  <span ref={tip} className={cls.tip}>
-                    <span
-                      className={cls.tipText}
-                      data-visible={on ? undefined : ""}
-                      aria-hidden={on ? "true" : undefined}
-                    >
-                      {copy}
-                    </span>
-                    <span
-                      className={cls.tipText}
-                      data-visible={on ? "" : undefined}
-                      aria-hidden={on ? undefined : "true"}
-                    >
-                      {copied}
-                    </span>
-                  </span>
-                </TooltipPopup>
-              </TooltipPositioner>
-            </TooltipPortal>
-          </TooltipRoot>
-        )}
-        <span role="status" className={cls.status}>
-          {on ? copied : ""}
+          <span className={cls.labelText} data-visible={on ? "" : undefined}>
+            {copied}
+          </span>
         </span>
-      </>
-    );
-  });
+      ) : null}
+    </Button>
+  );
+
+  return (
+    <>
+      {showLabel ? (
+        button
+      ) : (
+        <TooltipRoot
+          open={on || hint}
+          onOpenChange={(open, details) => {
+            // The press is the click that copies: the same Tooltip stays and changes its words.
+            if (!open && details.reason === "trigger-press") return;
+            setHint(open);
+          }}
+        >
+          <TooltipTrigger render={button} />
+          <TooltipPortal>
+            <TooltipPositioner>
+              <TooltipPopup>
+                <TooltipArrow />
+                <span ref={tip} className={cls.tip}>
+                  <span
+                    className={cls.tipText}
+                    data-visible={on ? undefined : ""}
+                    aria-hidden={on ? "true" : undefined}
+                  >
+                    {copy}
+                  </span>
+                  <span
+                    className={cls.tipText}
+                    data-visible={on ? "" : undefined}
+                    aria-hidden={on ? undefined : "true"}
+                  >
+                    {copied}
+                  </span>
+                </span>
+              </TooltipPopup>
+            </TooltipPositioner>
+          </TooltipPortal>
+        </TooltipRoot>
+      )}
+      <span role="status" className={cls.status}>
+        {on ? copied : ""}
+      </span>
+    </>
+  );
+});
 
 export declare namespace CopyButton {
   type Props = CopyButtonProps;

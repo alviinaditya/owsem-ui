@@ -17,7 +17,7 @@ import { Separator } from "owsem-ui/base";
 
 The package is ESM-only. JavaScript never imports CSS: load `owsem-ui/styles.css` once, or
 `owsem-ui/tokens.css` plus `owsem-ui/css/<component>.css`. Peers: `react` and `react-dom`
-`^18.2.0 || ^19.0.0`.
+`^19.0.0`.
 
 ## Themes
 

@@ -27,8 +27,8 @@ const cls = {
 
 const ITEM = `.${cls.item}`;
 
-// The thumb is placed before the first paint; the server has no layout, so it falls back without
-// React 18's warning (and the pressed item draws its own key until then).
+// The thumb is placed before the first paint; the server has no layout, so it falls back
+// to an effect there (and the pressed item draws its own key until then).
 const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 export type ToggleGroupSize = "sm" | "md" | "lg";

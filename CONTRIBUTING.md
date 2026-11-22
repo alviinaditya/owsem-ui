@@ -35,12 +35,11 @@ Do not add a script named `ci`: `pnpm ci` always runs pnpm's built-in command.
 
 ## Tests
 
-Vitest in `packages/ui` has three projects:
+Vitest in `packages/ui` has two projects:
 
 | Project | Files | Engines |
 | --- | --- | --- |
 | `unit` | `*.test.tsx` | Chromium |
-| `react18` | `src/**/*.test.tsx` on React 18.2 (aliased `react-18`, `react-dom-18`), the lowest peer | Chromium |
 | `geometry` | `*.geometry.test.tsx` | `OWSEM_BROWSERS`, default `chromium,firefox`; CI uses `chromium,firefox,webkit` |
 
 WebKit does not run on Arch; leave it to CI. The first run after importing a new Base UI entry point

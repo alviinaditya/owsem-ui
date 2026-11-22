@@ -32,11 +32,11 @@ const MARQUEE_SPEED = 40;
 const ROW = `.${cls.item}`;
 
 // Drawing before the first paint keeps a nav mounted on the client (a route change) from showing
-// a frame without its trail; the server has no layout, so it falls back without React 18's warning.
+// a frame without its trail; the server has no layout, so it falls back to an effect there.
 const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 // The level of the list a row is in: 1 for the top list. Panels pass their row's level on.
-// (Context.Provider, not <Context>: React 18.2 is a supported peer.)
+//
 const DepthContext = createContext(0);
 // The id of the node's row, which labels the node's nested list.
 const RowIdContext = createContext<string | undefined>(undefined);

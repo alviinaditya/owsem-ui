@@ -7,7 +7,6 @@ const cls = { root: "ow-separator" } as const;
 
 type Props = Omit<BaseSeparator.Props, "ref">;
 
-// forwardRef keeps refs working on React 18, where `ref` is not a prop.
 export const Separator: ForwardRefExoticComponent<Props & RefAttributes<HTMLDivElement>> =
   forwardRef<HTMLDivElement, Props>(function Separator({ className, ...props }, ref) {
     return <BaseSeparator ref={ref} className={withClassName(cls.root, className)} {...props} />;

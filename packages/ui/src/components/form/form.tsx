@@ -35,7 +35,7 @@ function shakeFirstInvalid(form: HTMLFormElement) {
  * A native form with Base UI's validation: it checks its fields, takes server errors through
  * `errors`, and focuses the first invalid field. It draws only the gap between them.
  */
-// forwardRef keeps refs working on React 18; the cast keeps Base UI's generic form values.
+// The cast keeps Base UI's generic form values.
 export const Form: typeof BaseForm = forwardRef<HTMLFormElement, Props>(function Form(
   { className, onSubmitCapture, ...props },
   ref,

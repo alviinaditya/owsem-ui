@@ -60,21 +60,6 @@ export default defineConfig({
         },
       },
       {
-        // FR-5: component tests again on React 18.2, the lowest peer, where `ref` is not a prop.
-        resolve: {
-          alias: [
-            { find: /^react(\/.*)?$/, replacement: "react-18$1" },
-            { find: /^react-dom(\/.*)?$/, replacement: "react-dom-18$1" },
-          ],
-        },
-        test: {
-          name: "react18",
-          include: ["src/**/*.test.tsx"],
-          exclude: ["**/*.geometry.test.{ts,tsx}"],
-          browser: { instances: [instance("chromium")] },
-        },
-      },
-      {
         test: {
           name: "geometry",
           include: ["src/**/*.geometry.test.{ts,tsx}", "test/**/*.geometry.test.{ts,tsx}"],

@@ -21,7 +21,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { withClassName } from "../../core/class-name";
+import { joinClass, withClassName } from "../../core/class-name";
 import { GlideHighlight, useGlide } from "../../core/glide/use-glide";
 import { CopyButton, type CopyButtonProps } from "../copy-button/copy-button";
 import { IconMorph } from "../icon-morph/icon-morph";
@@ -41,11 +41,11 @@ const cls = {
   panel: "ow-code-block__panel",
 } as const;
 
-// The thumb is placed before the first paint; the server has no layout, so it falls back without
-// React 18's warning (and the active tab draws its own key until then).
+// The thumb is placed before the first paint; the server has no layout, so it falls back
+// to an effect there (and the active tab draws its own key until then).
 const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-// (Context.Provider, not <Context>: React 18.2 is a supported peer.)
+//
 const RootContext = createContext<{
   root: RefObject<HTMLDivElement | null>;
   /** The active tab's value, as far as Root knows it: set, or the last one picked. */
@@ -265,8 +265,8 @@ export interface CodeBlockCopyProps extends Omit<CopyButtonProps, "value"> {
 
 /** Copy Button, icon only at the end of the header, with its Tooltip: it copies the snippet on show. */
 export const CodeBlockCopy: ForwardRefExoticComponent<
-  CodeBlockCopyProps & RefAttributes<HTMLElement>
-> = forwardRef<HTMLElement, CodeBlockCopyProps>(function CodeBlockCopy(
+  CodeBlockCopyProps & RefAttributes<HTMLButtonElement>
+> = forwardRef<HTMLButtonElement, CodeBlockCopyProps>(function CodeBlockCopy(
   { value, className, ...props },
   ref,
 ) {
@@ -276,7 +276,7 @@ export const CodeBlockCopy: ForwardRefExoticComponent<
       size="sm"
       {...props}
       ref={ref}
-      className={withClassName(cls.copy, className)}
+      className={joinClass(cls.copy, className)}
       value={value ?? (() => shownText(root.current))}
     />
   );

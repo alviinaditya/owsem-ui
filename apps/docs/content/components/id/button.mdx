@@ -58,13 +58,14 @@ sebagai pseudo-element, jadi tombolnya tetap satu elemen.
 | `soft` | `boolean` | `false` | Tint datar dari nadanya, untuk primary, secondary, dan destructive |
 | `loading` | `boolean` | | Menampilkan spinner, menjaga lebar dan fokus, dan mengabaikan tekanan |
 | `startIcon`, `endIcon` | `ReactNode` | | Ikon di satu ujung |
+| `className` | `string` | | Ditambahkan setelah kelas varian; hanya string, bukan fungsi |
 
 ### Atribut data
 
 | Atribut data | Ada saat |
 | --- | --- |
+| `data-slot` | Selalu: `button` pada root, dan `button-icon`, `button-label`, `button-spinner`, `button-ripple` pada bagian |
 | `data-variant`, `data-size` | Selalu; nilai yang dipilih |
-| `data-soft` | `soft` diset |
 | `data-held` | Tombol sedang ditahan |
 | `data-loading` | `loading` bernilai true |
 | `data-icon-only` | Sebuah `IconButton` |
@@ -74,17 +75,21 @@ sebagai pseudo-element, jadi tombolnya tetap satu elemen.
 Menerima prop yang sama, kecuali ikon dan children, ditambah `icon` dan `aria-label` yang wajib.
 Variannya default `ghost`.
 
-### buttonStyles dan ButtonIcon
+### buttonVariants
 
-`buttonStyles({ variant, size, soft, className })` mengembalikan kelas dan atribut data untuk
-tautan, seperti `<a {...buttonStyles()}>`. `ButtonIcon` (`side`: `"start"` atau `"end"`) mengatur
-ukuran ikon di dalamnya. Tautan tetap bertampilan, hover, dan tekan seperti tombol, tanpa riak.
+`buttonVariants({ variant, size, soft })` mengembalikan kelas root sebagai string, sehingga tautan
+bisa tampil seperti tombol: `<a className={buttonVariants({ variant: "outline" })}>`. Tidak perlu
+`"use client"`, jadi Server Component bisa memakainya. Tautan tetap bertampilan, hover, dan tekan
+seperti tombol, tanpa riak.
 
 ### Kelas CSS
 
 | Kelas CSS | Bagian |
 | --- | --- |
 | `ow-button` | Root |
+| `ow-button--primary`, `ow-button--secondary`, `ow-button--outline`, `ow-button--ghost`, `ow-button--link`, `ow-button--destructive` | Varian |
+| `ow-button--sm`, `ow-button--md`, `ow-button--lg` | Ukuran |
+| `ow-button--soft` | Tint soft |
 | `ow-button__icon`, `ow-button__glyph` | Ikon dan kotak di sekitarnya |
 | `ow-button__label` | Teks |
 | `ow-button__spinner` | Spinner |

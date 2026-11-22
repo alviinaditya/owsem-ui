@@ -14,7 +14,7 @@ const items = [
   ["/switch", "Switch"],
 ] as const;
 
-// The ref goes through its own prop: on React 18, `ref` is not a prop of a function component.
+// The Indicator's ref goes through its own prop.
 function Nav({
   active,
   indicatorRef,

@@ -18,12 +18,10 @@ import { cls, createTracker } from "./tracker";
 import "./table-of-contents.css";
 
 // Placing the marker before the first paint keeps a nav mounted on the client (a route change)
-// from showing a frame without it; the server has no layout, so it falls back without React 18's
-// warning.
+// from showing a frame without it; the server has no layout, so it falls back to an effect there.
 const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-// The level of the list a link is in: 1 for the top list. (Context.Provider, not <Context>:
-// React 18.2 is a supported peer.)
+// The level of the list a link is in: 1 for the top list.
 const DepthContext = createContext(0);
 
 export type TableOfContentsRootProps = ComponentPropsWithoutRef<"nav">;

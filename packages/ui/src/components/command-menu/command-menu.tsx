@@ -50,7 +50,7 @@ const join = (base: string, className: string | undefined) =>
   className ? `${base} ${className}` : base;
 
 // Before the first paint, so the list never shows a frame unfaded; the server has no layout, so
-// it falls back without React 18's warning.
+// it falls back to an effect there.
 const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 export type CommandMenuSize = "sm" | "md" | "lg";

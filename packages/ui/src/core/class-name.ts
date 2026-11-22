@@ -1,7 +1,9 @@
 type ClassName<State> = string | ((state: State) => string | undefined) | undefined;
 
-const join = (base: string, extra: string | undefined): string =>
-  extra ? `${base} ${extra}` : base;
+/** Joins class names, skipping empty ones. */
+export function joinClass(...parts: (string | false | null | undefined)[]): string {
+  return parts.filter(Boolean).join(" ");
+}
 
 /**
  * Prepends an OwsemUI class to a Base UI `className`. A string stays a string, so props passed
@@ -11,6 +13,6 @@ export function withClassName<State>(
   base: string,
   className: ClassName<State>,
 ): string | ((state: State) => string) {
-  if (typeof className === "function") return (state) => join(base, className(state));
-  return join(base, className);
+  if (typeof className === "function") return (state) => joinClass(base, className(state));
+  return joinClass(base, className);
 }

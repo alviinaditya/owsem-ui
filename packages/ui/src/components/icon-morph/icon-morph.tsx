@@ -18,7 +18,7 @@ import "./icon-morph.css";
 const cls = { root: "ow-icon-morph", item: "ow-icon-morph__item" } as const;
 
 // Before the first paint, so an icon is never drawn in the wrong state; the server has no layout,
-// so it falls back without React 18's warning.
+// so it falls back to an effect there.
 const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 export interface IconMorphProps extends Omit<ComponentPropsWithoutRef<"span">, "children"> {

@@ -24,8 +24,7 @@ const cls = {
 
 export type ToolbarSize = "sm" | "md" | "lg";
 
-// The toolbar's size, for items that do not set their own. (Context.Provider: React 18.2 is a
-// supported peer.)
+// The toolbar's size, for items that do not set their own.
 const SizeContext = createContext<ToolbarSize>("md");
 
 interface ItemProps {

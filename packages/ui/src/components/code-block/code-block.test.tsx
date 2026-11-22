@@ -142,7 +142,8 @@ describe("Code Block", () => {
     expect(icon()).toBe("ts");
     expect(get(".ow-code-block__title").textContent).toBe("greet.ts");
     const copy = get(".ow-code-block__copy");
-    expect(copy.className).toBe("ow-button ow-copy-button ow-code-block__copy");
+    expect(copy.className).toContain("ow-button ow-button--ghost");
+    expect(copy.className).toMatch(/ow-copy-button ow-code-block__copy$/);
     expect([copy.dataset.variant, copy.dataset.size]).toEqual(["ghost", "sm"]);
     // Icon only, named by its label.
     expect(copy.hasAttribute("data-icon-only")).toBe(true);

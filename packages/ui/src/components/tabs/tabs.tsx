@@ -30,10 +30,10 @@ const cls = {
 const TAB = `.${cls.tab}`;
 
 // The indicator is placed before the first paint; the server has no layout, so it falls back
-// without React 18's warning (and the active tab draws its own key until then).
+// to an effect there (and the active tab draws its own key until then).
 const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-// For the List's Glide axis. (Context.Provider, not <Context>: React 18.2 is a supported peer.)
+// For the List's Glide axis.
 const OrientationContext = createContext<Tabs.Root.Orientation>("horizontal");
 
 export type TabsSize = "sm" | "md" | "lg";

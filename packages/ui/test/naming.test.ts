@@ -1,7 +1,8 @@
 import { describe, expect, test } from "vitest";
 
 // FR-6b: the root part is .ow-<block> and every other part .ow-<block>__<element>, where the block
-// is the folder under components/ or core/. Variants and states are data attributes.
+// is the folder under components/ or core/. A variant or size is a modifier, .ow-<block>--<name>;
+// states are data attributes.
 
 const sheets = import.meta.glob<string>("../src/**/*.css", {
   query: "?raw",
@@ -15,7 +16,7 @@ const sources = import.meta.glob<string>(["../src/**/*.{ts,tsx}", "!../src/**/*.
 });
 
 const NAME = "[a-z][a-z\\d]*(?:-[a-z\\d]+)*";
-const CLASS = new RegExp(`^ow-(${NAME})(?:__(${NAME}))?$`);
+const CLASS = new RegExp(`^ow-(${NAME})(?:__(${NAME}))?(?:--${NAME})?$`);
 // One meaning, one name.
 const RENAMED: Record<string, string> = {
   "data-part": "a class",
@@ -53,7 +54,7 @@ describe("Class names (FR-6b)", () => {
     for (const [path, classes] of files) {
       for (const name of classes) {
         const block = CLASS.exec(name)?.[1];
-        if (!block) problems.push(`${path}: .${name} is not .ow-<block>__<element>`);
+        if (!block) problems.push(`${path}: .${name} is not .ow-<block>__<element>--<modifier>`);
         else if (!blocks.has(block)) problems.push(`${path}: .${name} has no folder ${block}`);
       }
     }
@@ -86,7 +87,9 @@ describe("Class names (FR-6b)", () => {
     const problems: string[] = [];
     for (const [path, css] of Object.entries(sheets)) {
       for (const [, name] of uncomment(css).matchAll(/@keyframes\s+([\w-]+)/g)) {
-        if (!name?.startsWith(`ow-${blockOf(path)}-`)) problems.push(`${path}: @keyframes ${name}`);
+        // The Tailwind bridge is no block's folder; its keyframes are shared.
+        const prefix = path.endsWith("/tailwind.css") ? "ow-" : `ow-${blockOf(path)}-`;
+        if (!name?.startsWith(prefix)) problems.push(`${path}: @keyframes ${name}`);
       }
     }
     expect(problems).toEqual([]);

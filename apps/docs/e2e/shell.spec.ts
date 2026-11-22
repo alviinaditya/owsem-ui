@@ -66,8 +66,8 @@ test("a component page links the components before and after it, as Buttons", as
   );
   for (const link of await nav.getByRole("link").all()) {
     await expect(link).toHaveClass(/\bow-button\b/);
-    await expect(link).toHaveAttribute("data-variant", "secondary");
-    await expect(link.locator('.ow-button__icon[aria-hidden="true"] svg')).toHaveCount(1);
+    await expect(link).toHaveClass(/\bow-button--secondary\b/);
+    await expect(link.locator("svg")).toHaveCount(1);
   }
 });
 

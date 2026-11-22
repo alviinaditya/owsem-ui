@@ -1,0 +1,87 @@
+---
+title: Separator
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. To copy the source into your project instead, use the `separator`
+item of the registry.
+
+## Usage [#usage]
+
+```tsx
+import { Separator } from "owsem-ui/base";
+
+export function Settings() {
+  return (
+    <section>
+      <h3>Profile</h3>
+      <Separator />
+      <h3>Security</h3>
+    </section>
+  );
+}
+```
+
+Separator divides content with a hairline: one 1px line in the line color, quiet enough to leave the
+content in front. `orientation` is `horizontal` (default) or `vertical`. A vertical separator fills
+the row's height inside a flex or grid container, and stays 1px thick even when the container
+stretches it.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+A single part. Base UI renders `<div role="separator">` with `aria-orientation` and
+`data-orientation`; OwsemUI adds the `ow-separator` class and draws the line as a border.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-separator` | `data-orientation`; reads `--ow-line` |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-separator` | Root |
+
+## Accessibility [#accessibility]
+
+Separator is not focusable and has no keyboard interaction.
+
+- Screen readers announce it as a separator through `role="separator"` and `aria-orientation`.
+- In forced colors, the line uses the system color so it stays visible.
+
+## Theming [#theming]
+
+Separator reads one theme token. Set it on a Separator, or on anything around it.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-line` | The line |
+
+<ForMode mode="isolated">
+
+In isolated mode the value sits on each Separator's root, so set yours on the Separator itself.
+
+</ForMode>
+
+## Motion [#motion]
+
+Separator does not move: it has no states and no transitions, so `prefers-reduced-motion` changes
+nothing.

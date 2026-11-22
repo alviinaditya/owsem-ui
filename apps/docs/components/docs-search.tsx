@@ -39,7 +39,7 @@ interface DocsSearchProps {
 /**
  * The docs search (DS-5), a Command Menu over every page: ⌘K or Ctrl K anywhere, the sidebar's
  * origin, or the dock's button, which reach it through its handle. It wraps nothing, so the docs'
- * other dialogs (a Lab's demo) are not nested in it. Results come from the index built with the
+ * other dialogs (an example's demo) are not nested in it. Results come from the index built with the
  * page, matched as the visitor types.
  */
 export function DocsSearch({ groups, labels, families, soon }: DocsSearchProps) {
@@ -52,7 +52,7 @@ export function DocsSearch({ groups, labels, families, soon }: DocsSearchProps) 
 
   const go = (url: string) => {
     const [path, hash] = url.split("#");
-    // On the same page a scene link is a hash change, which the Lab follows.
+    // On the same page a section link is a hash change, which the page follows.
     if (hash && path === location.pathname) location.hash = hash;
     else router.push(url as Route);
   };

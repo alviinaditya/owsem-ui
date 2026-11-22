@@ -1,0 +1,186 @@
+---
+title: Code Block
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/owsem`. Di registry, itemnya `code-block`, yang memasang Copy Button, Button,
+Icon Morph, dan Tooltip bersamanya.
+
+## Penggunaan [#usage]
+
+```tsx
+import { CodeBlock } from "owsem-ui/owsem";
+import { Atom } from "lucide-react";
+import type { ReactNode } from "react";
+
+// `code` di-highlight saat build, misalnya dengan Shiki: sebuah <pre>.
+export function FileSnippet({ name, code }: { name: string; code: ReactNode }) {
+  return (
+    <CodeBlock.Root>
+      <CodeBlock.Header>
+        <CodeBlock.Title icon={<Atom />}>{name}</CodeBlock.Title>
+        <CodeBlock.Copy />
+      </CodeBlock.Header>
+      <CodeBlock.Panel>{code}</CodeBlock.Panel>
+    </CodeBlock.Root>
+  );
+}
+```
+
+Code Block menampilkan kode pada satu permukaan: isian panel dengan bayangan permukaan dan tanpa tepi,
+header yang tenang, dan kode di bawahnya. Header berisi satu ikon, judul atau sebaris tab, dan Salin
+di ujung. Ia tidak meng-highlight kode: beri tiap Panel kode yang sudah di-highlight, misalnya oleh
+Shiki saat build, sebagai `<pre>`. Setiap blok kode di dokumentasi ini adalah salah satunya.
+
+Satu snippet memakai Title; beberapa memakai List berisi Tab, satu per snippet, dan satu Panel
+masing-masing. Ikon di depan adalah ikon file: beri tiap Tab ikonnya dengan `icon`, dan ikon tab aktif
+memimpin list lalu berubah menjadi ikon berikutnya saat tab berganti. Tab yang ikonnya berbagi `key`,
+seperti satu ikon terminal untuk semua package manager, menjaganya tetap diam. Saat snippet lain
+tampil, tinggi blok meluncur ke tinggi barunya, bukan melompat.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Sembilan part, dan sebuah Title sebagai pengganti List untuk satu snippet.
+
+| Part | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-code-block` | Permukaannya; root Tabs Base UI, dengan `value`, `defaultValue`, `onValueChange` |
+| Header | `div.ow-code-block__header` | Baris di atas kode |
+| <Part name="Icon" /> | `span.ow-code-block__icon` | Digambar Title atau List dari `icon` mereka; `aria-hidden` |
+| Title | `span.ow-code-block__title` | Nama satu snippet, dengan `icon`. Ia menamai Panel yang bergulir |
+| <Part name="List" /> | `div.ow-code-block__list` | List Tabs Base UI (`role="tablist"`); namai dengan `aria-label` |
+| <Part name="Tab" /> | `button.ow-code-block__tab` | `value`, dan `icon` untuk header. Yang aktif punya `data-active` dan `aria-selected` |
+| Thumb | `span.ow-code-block__thumb` | Tint di bawah tab aktif; `aria-hidden` |
+| <Part name="Copy" /> | `button.ow-code-block__copy` | Sebuah Copy Button: `size="sm"`, ikon dengan Tooltip-nya, selalu terlihat |
+| <Part name="Panel" /> | `div.ow-code-block__panel` | Kodenya, pada permukaan yang sama. Dengan `value`, panel Tabs Base UI; tanpa itu, kotak yang bisa difokus keyboard selama kodenya meluap |
+
+## Referensi API [#api]
+
+### CodeBlock.Root
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `value`, `defaultValue` | `value` Tab yang aktif | | Snippet mana yang tampil |
+| `onValueChange` | `(value, details) => void` | | Dipanggil saat tab lain dipilih |
+
+Props lain diteruskan ke [Tabs.Root](https://base-ui.com/react/components/tabs#api-reference) Base UI, kecuali `orientation`.
+
+### CodeBlock.List dan CodeBlock.Tab
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `activateOnFocus` | `boolean` | `true` | List: panah memilih sambil bergerak |
+| `value` | `any` | | Tab: memasangkannya dengan Panel-nya |
+| `icon` | `ReactElement` | | Tab: ikon snippet-nya, yang memimpin list selama tab itu aktif |
+
+#### Atribut data
+
+| Atribut data | Di | Ada saat |
+| --- | --- | --- |
+| `data-active` | Tab | Tab yang dipilih |
+| `data-visible` | Thumb | Ia berada di bawah tab aktif |
+| `data-held` | Tab, Thumb | Sedang ditahan |
+
+Props lain diteruskan ke [Tabs.List](https://base-ui.com/react/components/tabs#api-reference) dan Tabs.Tab Base UI.
+
+### CodeBlock.Title, CodeBlock.Copy, dan CodeBlock.Panel
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `icon` | `ReactElement` | | Title: ikon di depannya |
+| `value` | `string \| () => string` | Teks Panel yang tampil | Copy: yang disalin |
+| `showLabel` | `boolean` | `false` | Copy: menaruh kata di samping ikon, tanpa Tooltip |
+| `value` | `value` Tab | | Panel: tab-nya; kosongkan untuk satu snippet |
+
+Copy menerima semua prop Copy Button selain default `value`; prop lain diteruskan ke elemen setiap
+part, begitu pula ref. Props lain Panel diteruskan ke [Tabs.Panel](https://base-ui.com/react/components/tabs#api-reference) Base UI,
+termasuk `keepMounted`. Ia menyalin teks Panel yang tampil, dibaca saat ditekan, jadi mengikuti tab
+dan teks apa pun yang diubah skrip. Prompt yang digambar CSS (`::before`) bukan bagian teks itu, jadi
+ia tidak ikut. Kode dibaca dari kiri ke kanan di halaman mana pun, dan baris yang lebih lebar dari blok
+bergulir ke samping di dalam Panel, bukan halaman.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-code-block` | Root |
+| `ow-code-block__header` | Header |
+| `ow-code-block__icon` | Ikon di depan |
+| `ow-code-block__title` | Title |
+| `ow-code-block__list` | List |
+| `ow-code-block__tab` | Tab |
+| `ow-code-block__thumb` | Thumb |
+| `ow-code-block__copy` | Copy |
+| `ow-code-block__panel` | Panel |
+
+## Aksesibilitas [#accessibility]
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab | Tab aktif, lalu Copy, lalu Panel yang bergulir |
+| Panah Kanan, Panah Kiri | Tab berikutnya atau sebelumnya; memilih sambil bergerak |
+| Home, End | Tab pertama atau terakhir |
+| Tombol panah | Pada Panel yang bergulir dan difokus: menggulirkannya |
+
+- List dinamai oleh `aria-label`-nya. Panel yang meluap adalah region yang dinamai Title, jadi keyboard
+  bisa menggulirkannya.
+- Ikon `aria-hidden`. Copy mengumumkan Tersalin di region status, dan Tooltip-nya menamainya.
+- Tab yang tidak muat bergulir ke samping di header; yang difokus masuk ke tampilan.
+- Pada forced colors, outline menggambar blok, dan thumb memakai `Highlight`.
+
+## Tema [#theming]
+
+Code Block membaca token tema ini. Atur di blok atau di sekitarnya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-panel` | Permukaan, dan di bawah tint thumb |
+| `--ow-surface-shadow` | Bayangan permukaan |
+| `--ow-accent` | Tint 14% thumb dan teks tab aktif |
+| `--ow-fg`, `--ow-muted` | Teks, dan teks lain di header |
+| `--ow-hover` | Sorotan Glide |
+| `--ow-radius` | Sudut blok; tab, thumb, dan Glide memakainya dikurangi padding header 4px |
+| `--ow-focus` | Cincin fokus |
+| `--ow-font-mono` | Font kode, yang diatur aplikasi Anda |
+
+<ForMode mode="isolated">
+
+Pada mode terisolasi, nilai berada di root setiap komponen, jadi atur nilai Anda di blok itu sendiri.
+
+</ForMode>
+
+Copy juga membaca token Button dan Tooltip. Warna kode datang bersama kode yang Anda highlight; jangan
+beri ia latar, agar panel terlihat.
+
+```css
+.snippets {
+  --ow-panel: #f3f0fa;
+}
+```
+
+## Gerak [#motion]
+
+Thumb meluncur ke tab aktif dengan pegas travel, ikon berubah bentuk dengan pegas settle (Icon Morph),
+tinggi blok meluncur saat snippet lain tampil, dan centang di Copy menggambar dirinya. Render pertama
+tidak bergerak. Semuanya mengikuti `--ow-motion-scale`. Dengan `prefers-reduced-motion`, thumb dan
+Glide hanya memudar, ikon hanya crossfade, dan tinggi berubah seketika.

@@ -1,0 +1,122 @@
+---
+title: Switch
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Untuk menyalin kode sumbernya ke project Anda, pakai item `switch` dari
+registry.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Switch } from "owsem-ui/base";
+
+export function EmailAlerts() {
+  return (
+    <label>
+      <Switch.Root defaultChecked />
+      Notifikasi email
+    </label>
+  );
+}
+```
+
+Switch menyalakan atau mematikan satu pengaturan, dan perubahannya langsung berlaku. Beri nama
+dengan `<label>` pembungkus atau `aria-label`. Thumb-nya tergambar sendiri; beri `Switch.Root`
+sebuah `Switch.Thumb` buatan Anda untuk memuat ikon.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Base UI merender `<span>` dengan role `switch`, dan `<input>` tersembunyi di sebelahnya untuk form.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `span.ow-switch` | Track: `role="switch"`, `aria-checked`, dan atribut state |
+| <Part name="Thumb" /> | `span.ow-switch__thumb` | Tombol putih yang bergerak; Root menggambarnya bila tanpa children |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### Switch.Root
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Mengikuti ukuran font Button |
+
+#### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-size` | Selalu; ukuran yang dipilih |
+
+### Switch.Thumb
+
+Node apa pun di dalamnya mengisi tombol dikurangi 2px.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-switch` | Root |
+| `ow-switch__thumb` | Thumb |
+
+## Aksesibilitas [#accessibility]
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab | Memindahkan fokus ke switch |
+| Space, Enter | Menyalakan atau mematikannya |
+
+- Screen reader mengumumkan role dan `aria-checked`. Biarkan namanya sama di kedua state.
+- Label pembungkus menjadikan teksnya target tekan.
+- Ikon di thumb dekoratif: beri `aria-hidden`.
+- Dengan `prefers-contrast: more` track mendapat tepi 1px; pada forced colors ia memakai warna sistem.
+
+## Tema [#theming]
+
+Switch membaca token tema ini. Setel salah satunya pada switch, atau pada elemen di sekitarnya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-fg` | Tint track saat mati (10%, 13% saat hover), dan ikon di thumb |
+| `--ow-accent` | Track saat menyala |
+| `--ow-primary-shadow` | Sorot atas track saat menyala |
+| `--ow-on-accent` | Thumb |
+| `--ow-surface-shadow` | Bayangan kecil thumb |
+| `--ow-radius` | Sudut track |
+| `--ow-motion-scale` | Seberapa dalam tekanan masuk |
+| `--ow-focus` | Cincin fokus |
+
+<ForMode mode="isolated">
+
+Pada mode isolated, nilainya ada di root tiap Switch, jadi setel pada switch-nya sendiri.
+
+</ForMode>
+
+Semua ukuran berasal dari `font-size` dalam `em`; setel `font-size`, `inline-size`, atau
+`block-size` dengan CSS biasa, dan thumb mengikuti.
+
+## Gerak [#motion]
+
+Thumb bergerak dengan `translate` pada spring travel; berubah pikiran di tengah jalan, ia berbalik
+dari posisinya. Saat bergerak ia memanjang dari sisi depannya, paling panjang di tengah perjalanan. Saat
+ditahan, ia melebar ke arah tujuannya dan sedikit memendek dalam 90 ms, lalu kembali dengan
+spring settle. Dengan `prefers-reduced-motion`, ia langsung ke tempatnya tanpa perjalanan,
+peregangan, atau penyempitan.

@@ -1,0 +1,129 @@
+---
+title: Field
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Di registry ia adalah item `field`, yang membawa `input` bersamanya. Dengan
+CSS per komponen, `Field.Control` butuh stylesheet Input juga: `owsem-ui/css/input.css`.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Field } from "owsem-ui/base";
+
+export function Email() {
+  return (
+    <Field.Root>
+      <Field.Label>Email</Field.Label>
+      <Field.Control type="email" />
+      <Field.Description>Kami hanya memakainya untuk masuk.</Field.Description>
+      <Field.Error />
+    </Field.Root>
+  );
+}
+```
+
+Field mengikat label, kontrol, dan pesannya. Base UI yang menyambungkan: label menamai kontrol,
+deskripsi dan error dibacakan bersamanya, dan validitasnya sampai ke setiap bagian. Label dan kontrol
+sudah cukup untuk field umum. `Field.Control` adalah [Input](/id/input); kontrol Base UI apa pun di
+dalam `Field.Root` tersambung dengan cara yang sama, dengan atau tanpa itu.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-field` | Satu kolom; menerima `invalid`, `disabled`, dan `validate` |
+| <Part name="Label" /> | `label.ow-field__label` | Menamai kontrol |
+| <Part name="Control" /> | `input.ow-input` | Input itu sendiri: size dan ikonnya, dan `render` untuk kontrol lain |
+| <Part name="Description" /> | `p.ow-field__description` | Teks bantuan yang redup |
+| <Part name="Error" /> | `div.ow-field__error` | Hanya saat invalid; beberapa pesan datang sebagai daftar |
+| Item | `div.ow-field__item` | Satu opsi dalam grup checkbox atau radio: kontrol dan label dalam satu baris |
+| Validity | tidak ada | Fungsi dari state validitas; merender apa yang Anda kembalikan |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### Field.Control
+
+Prop Input, dengan ukuran dan ikonnya. Sisanya masuk ke Field.Control milik Base UI apa adanya.
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Ukuran Button: tinggi 32, 40, atau 48 px |
+| `startIcon` | `ReactNode` | | Ikon sebelum teks |
+| `endIcon` | `ReactNode` | | Ikon setelah teks |
+
+#### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-size` | Selalu; pada input dan wrapper |
+
+`gap` pada root mengatur jarak antar-bagian. Field tanpa margin luar dan mengisi induknya.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-field` | Root |
+| `ow-field__label` | Label |
+| `ow-field__description` | Description |
+| `ow-field__error` | Error |
+| `ow-field__item` | Item |
+
+## Aksesibilitas [#accessibility]
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab | Memindahkan fokus ke kontrol |
+| Enter | Di dalam form, mengirim; sendirian, menjalankan pemeriksaan field |
+
+- Klik pada label memindahkan fokus ke kontrol, dan teksnya menjadi nama kontrol.
+- Base UI mengisi `aria-describedby` dengan deskripsi, dan dengan error selama tampil; `aria-invalid`
+  menyatakan kegagalannya. Jangan menandai error hanya dengan warna: pesannya ada.
+- Disabled meredupkan kontrol dan label menjadi 45%.
+- Dengan `prefers-contrast: more` kontrol mendapat tepi 1px; pada forced colors pesan memakai warna teks
+  sistem, dan kontrol invalid mempertahankan tepi 2px. Kanan-ke-kiri, label ada di kanan.
+
+## Tema [#theming]
+
+Field membaca token tema ini. Setel salah satunya pada bagian, pada field, atau pada elemen di sekitarnya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-fg` | Label |
+| `--ow-muted` | Deskripsi |
+| `--ow-critical` | Error, dan tint kontrol saat invalid |
+
+Kontrolnya juga membaca token Input.
+
+<ForMode mode="isolated">
+
+Pada mode isolated, nilainya ada di root tiap bagian, jadi setel pada bagian yang membacanya.
+
+</ForMode>
+
+`className` pada bagian mana pun mengalahkan nilai bawaannya tanpa `!important`. Untuk label di samping
+kontrol, jadikan root grid dengan `grid-template-columns: 6em 1fr`.
+
+## Gerak [#motion]
+
+Pesan datang dan pergi seketika, karena fade hanya menunda membaca. Kontrol bergetar sekali saat menjadi
+invalid. Dengan `prefers-reduced-motion`, ia berkedip.

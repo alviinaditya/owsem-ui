@@ -1,36 +1,42 @@
 import { expect, test } from "@playwright/test";
 import { catalog, isAvailable } from "../lib/catalog.ts";
-import { openSheet } from "./lab.ts";
+import { tools, visit } from "./example-page.ts";
+import { showSidebar, sidebar as sidebarOf } from "./helpers.ts";
 
 const robots = (page: import("@playwright/test").Page) => page.locator('meta[name="robots"]');
 
-test("the sidebar lists every catalog component", async ({ page }, testInfo) => {
+test("the sidebar lists the available components by category; planned ones stay on the index", async ({
+  page,
+}, testInfo) => {
   await page.goto("/en/docs");
-  if (testInfo.project.name === "mobile-390") {
-    await page.getByRole("button", { name: "Menu", exact: true }).click();
-  }
-  const sidebar = page.getByRole("navigation", { name: "Documentation navigation" });
+  if (testInfo.project.name === "mobile-390") await showSidebar(page);
+  const sidebar = sidebarOf(page);
+  await expect(sidebar.getByRole("group", { name: "Getting started" })).toBeVisible();
   for (const entry of catalog) {
-    const name = isAvailable(entry) ? entry.title : `${entry.title} Soon`;
-    await expect(sidebar.getByRole("link", { name, exact: true })).toHaveCount(1);
+    const link = sidebar.getByRole("link", { name: entry.title, exact: true });
+    await expect(link).toHaveCount(isAvailable(entry) ? 1 : 0);
   }
+  await expect(sidebar.getByText("Soon")).toHaveCount(0);
+  // A group of available components: an uppercase label, then its links.
+  const forms = sidebar.getByRole("group", { name: "Forms" });
+  await expect(forms.getByRole("link", { name: "Switch", exact: true })).toBeVisible();
+  await expect(forms).toHaveText(/Field/);
+  // Only categories with an available component have a group.
+  await expect(sidebar.getByRole("group", { name: "Disclosure" })).toHaveCount(0);
 });
 
-test("the sidebar fades the edges that have more to scroll", async ({ page }, testInfo) => {
+test("the sidebar's content scrolls on its own, and the page does not", async ({
+  page,
+}, testInfo) => {
   await page.goto("/en/docs");
-  if (testInfo.project.name === "mobile-390") {
-    await page.getByRole("button", { name: "Menu", exact: true }).click();
-  }
+  if (testInfo.project.name === "mobile-390") await showSidebar(page);
   const scroller = page.locator("#site-sidebar-scroll");
-  // Written out in a Server Component: Root still recognizes its Viewport and adds no other.
-  await expect(page.locator(".site-sidebar-scroll .ow-scroll-area__viewport")).toHaveCount(1);
-  await expect(scroller).not.toHaveAttribute("data-overflow-y-start");
-  await expect(scroller).toHaveAttribute("data-overflow-y-end", "");
+  expect(await scroller.evaluate((el) => el.scrollHeight > el.clientHeight)).toBe(true);
   await scroller.evaluate((el) => el.scrollTo(0, el.scrollHeight));
-  await expect(scroller).toHaveAttribute("data-overflow-y-start", "");
-  await expect(scroller).not.toHaveAttribute("data-overflow-y-end");
+  expect(await scroller.evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
+  expect(await page.evaluate(() => scrollY)).toBe(0);
   // Long labels truncate inside it; only the height scrolls.
-  await expect(scroller).not.toHaveAttribute("data-has-overflow-x");
+  expect(await scroller.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
 });
 
 test("planned components show Coming soon and stay out of search", async ({ page }) => {
@@ -48,16 +54,21 @@ test("planned components show Coming soon and stay out of search", async ({ page
   await expect(robots(page)).toHaveCount(0);
 });
 
-test("a Lab links the components before and after it", async ({ page }) => {
-  await page.goto("/en/separator");
-  // Below 960 px the links end the docs sheet.
-  await openSheet(page);
+test("a component page links the components before and after it, as Buttons", async ({ page }) => {
+  await visit(page, "/en/tabs");
+  await tools(page).getByRole("button", { name: "Docs", exact: true }).click();
   const nav = page.getByRole("navigation", { name: "Component" });
-  await expect(nav.getByRole("link", { name: "Previous: Collapsible" })).toHaveAttribute(
+  await nav.scrollIntoViewIfNeeded();
+  await expect(nav.getByRole("link", { name: "Previous: Menu" })).toHaveAttribute("rel", "prev");
+  await expect(nav.getByRole("link", { name: "Next: Context Menu" })).toHaveAttribute(
     "rel",
-    "prev",
+    "next",
   );
-  await expect(nav.getByRole("link", { name: "Next: Kbd" })).toHaveAttribute("rel", "next");
+  for (const link of await nav.getByRole("link").all()) {
+    await expect(link).toHaveClass(/\bow-button\b/);
+    await expect(link).toHaveAttribute("data-variant", "secondary");
+    await expect(link.locator('.ow-button__icon[aria-hidden="true"] svg')).toHaveCount(1);
+  }
 });
 
 test("the index filters components by family", async ({ page }) => {
@@ -110,111 +121,124 @@ test("the index shows a grid or a list, and keeps the choice", async ({ page }) 
   await expect(page.locator("html")).not.toHaveAttribute("data-index-view");
 });
 
-test("the mobile menu opens and closes after navigating", async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== "mobile-390", "the menu button only shows below 900 px");
+test("the mobile drawer opens and closes after navigating", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile-390", "the drawer only exists below 768 px");
   await page.goto("/id/docs");
-  const menu = page.getByRole("button", { name: "Menu", exact: true });
-  const sidebar = page.getByRole("navigation", { name: "Navigasi dokumentasi" });
-  await expect(sidebar).toBeHidden();
+  const open = page.getByRole("button", { name: "Tampilkan sidebar" });
+  const drawer = sidebarOf(page, "Navigasi dokumentasi");
+  await expect(drawer).toBeHidden();
 
-  await menu.click();
-  await expect(menu).toHaveAttribute("aria-expanded", "true");
-  // Escape inside the panel closes it and returns focus to the button.
-  await expect(sidebar.getByRole("link").first()).toBeVisible();
+  await open.click();
+  await expect(drawer).toBeVisible();
+  // Escape shuts it and returns focus to the button.
   await page.keyboard.press("Escape");
-  await expect(menu).toBeFocused();
-  await expect(sidebar).toBeHidden();
-  await menu.click();
-  await sidebar.getByRole("link", { name: "Separator" }).click();
+  await expect(drawer).toBeHidden();
+  await expect(open).toBeFocused();
+  await open.click();
+  await drawer.getByRole("link", { name: "Separator" }).click();
   await expect(page).toHaveURL(/\/id\/separator$/);
-  await expect(sidebar).toBeHidden();
+  await expect(drawer).toBeHidden();
 
   // Going back to the page where it was opened keeps it closed.
   await page.goBack();
   await expect(page).toHaveURL(/\/id\/docs$/);
-  await expect(sidebar).toBeHidden();
-  await expect(menu).toHaveAttribute("aria-expanded", "false");
+  await expect(drawer).toBeHidden();
 });
 
-test("the sidebar's trail runs to the page, then to the scene being read (DS-14)", async ({
-  page,
-}, testInfo) => {
-  test.skip(testInfo.project.name === "mobile-390", "the sidebar is a menu panel below 1100 px");
+test("the sidebar marks the page you are on", async ({ page }, testInfo) => {
   await page.goto("/en/separator");
-  const sidebar = page.locator("#site-sidebar");
+  if (testInfo.project.name === "mobile-390") await showSidebar(page);
+  const sidebar = sidebarOf(page);
   await expect(sidebar.getByRole("link", { name: "Separator", exact: true })).toHaveAttribute(
     "aria-current",
     "page",
   );
-  // The deepest current row wins: the scene, under its component.
-  await expect(sidebar.locator("[data-arrived]")).toContainText("Overview");
-  await page.evaluate(() =>
-    document.getElementById("scene-states")?.scrollIntoView({ behavior: "instant" }),
+  await expect(sidebar.locator('.ow-sidebar__content [aria-current="page"]')).toHaveCount(1);
+  await sidebar.getByRole("link", { name: "Kbd", exact: true }).click();
+  await expect(page).toHaveURL(/\/en\/kbd$/);
+  // The drawer shuts after a navigation.
+  if (testInfo.project.name === "mobile-390") await showSidebar(page);
+  await expect(sidebar.getByRole("link", { name: "Kbd", exact: true })).toHaveAttribute(
+    "aria-current",
+    "page",
   );
-  await expect(sidebar.locator("[data-arrived]")).toContainText("States and variants", {
-    timeout: 4000,
-  });
+  await expect(sidebar.locator('.ow-sidebar__content [aria-current="page"]')).toHaveCount(1);
 });
 
-test("sidebar groups close and open again (DS-14)", async ({ page }, testInfo) => {
-  await page.goto("/en/docs");
-  if (testInfo.project.name === "mobile-390") {
-    await page.getByRole("button", { name: "Menu", exact: true }).click();
-  }
-  const sidebar = page.getByRole("navigation", { name: "Documentation navigation" });
-  const display = sidebar.getByRole("button", { name: "Display" });
-  const meter = sidebar.getByRole("link", { name: "Meter Soon" });
-  await expect(display).toHaveAttribute("aria-expanded", "true");
-  await display.click();
-  await expect(display).toHaveAttribute("aria-expanded", "false");
-  await expect(meter).toBeHidden();
-  await display.click();
-  await expect(meter).toBeVisible();
-});
-
-test("the sidebar stays mounted from the docs to a Lab, so the trail travels there", async ({
+test("Ctrl or ⌘ with B folds the sidebar and the page takes its room, and the choice is kept", async ({
   page,
 }, testInfo) => {
-  test.skip(testInfo.project.name === "mobile-390", "the sidebar is a menu panel below 1100 px");
+  test.skip(testInfo.project.name === "mobile-390", "a phone's sidebar is a drawer");
   await page.goto("/en/docs/glide");
+  const sidebar = sidebarOf(page);
+  const main = page.locator("#content");
+  const open = (await main.boundingBox())?.width ?? 0;
+  await expect(sidebar).toBeVisible();
+  await page.keyboard.press("Control+b");
+  await expect(sidebar).toBeHidden();
+  await expect.poll(async () => (await main.boundingBox())?.width ?? 0).toBeGreaterThan(open + 200);
+  // The open button is at the page's top left, and the choice survives a reload.
+  await page.reload();
+  await expect(sidebar).toBeHidden();
+  await page.getByRole("button", { name: "Show sidebar" }).click();
+  await expect(sidebar).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem("owsem-sidebar"))).toBeNull();
+  // The sidebar's own button folds it too.
+  await sidebar.getByRole("button", { name: "Hide sidebar" }).click();
+  await expect(sidebar).toBeHidden();
+  expect(await page.evaluate(() => localStorage.getItem("owsem-sidebar"))).toBe("hidden");
+});
+
+test("the sidebar stays mounted from the docs to a component page, so the trail travels there", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name === "mobile-390", "the sidebar is a drawer below 768 px");
+  await page.goto("/en/docs/glide");
+  await expect(page.locator(".site")).toHaveAttribute("data-mounted", "");
   const sidebar = page.locator("#site-sidebar");
   await sidebar.evaluate((el) => el.setAttribute("data-mark", "before"));
   await sidebar.getByRole("link", { name: "Separator", exact: true }).click();
   await expect(page).toHaveURL(/\/en\/separator$/);
   // Same element: not remounted by the change of layout.
   await expect(sidebar).toHaveAttribute("data-mark", "before");
-  await expect(sidebar.locator("[data-arrived]")).toContainText("Overview", { timeout: 4000 });
+  await expect(sidebar.getByRole("link", { name: "Separator", exact: true })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
 });
 
-test("no top bar: the sidebar's foot holds the settings, and a dock opens it below 1100 px", async ({
+test("no top bar: the language is a menu at the top right, and a button opens the sidebar below 768 px", async ({
   page,
 }, testInfo) => {
   await page.goto("/en/docs");
   await expect(page.getByRole("banner")).toHaveCount(0);
-  const menu = page.getByRole("button", { name: "Menu", exact: true });
-  const foot = page.locator(".site-sidebar-foot");
+  // Language is a menu beside Theme, at the page's top right; the sidebar has no foot.
+  await expect(page.locator(".site-sidebar-foot")).toHaveCount(0);
+  const tools = page.getByRole("toolbar", { name: "Page tools" });
+  await expect(tools.getByRole("button", { name: "Theme" })).toBeVisible();
+  await tools.getByRole("button", { name: "Language: English" }).click();
+  await expect(page.getByRole("menuitem", { name: "Bahasa Indonesia" })).toHaveAttribute(
+    "href",
+    "/id/docs",
+  );
+  await expect(page.getByRole("button", { name: /Token/ })).toHaveCount(0);
   if (testInfo.project.name === "mobile-390") {
-    await expect(foot).toBeHidden();
-    // The dock sits at the top left, above the page's text, as on a Lab.
-    const dock = await page.locator(".dock").boundingBox();
+    // The button sits at the top left, above the page's text.
+    const open = await page.getByRole("button", { name: "Show sidebar" }).boundingBox();
     const title = await page.getByRole("heading", { level: 1 }).boundingBox();
-    if (!dock || !title) throw new Error("The dock and the title need boxes.");
-    expect(dock.x).toBeLessThan(20);
-    expect(dock.y).toBeLessThan(20);
-    expect(title.y).toBeGreaterThan(dock.y + dock.height);
-    await menu.click();
+    if (!open || !title) throw new Error("The button and the title need boxes.");
+    expect(open.x).toBeLessThan(20);
+    expect(open.y).toBeLessThan(20);
+    expect(title.y).toBeGreaterThan(open.y + open.height);
   } else {
-    await expect(menu).toBeHidden();
+    await expect(page.getByRole("button", { name: "Show sidebar" })).toBeHidden();
   }
-  await expect(foot.getByRole("group", { name: "Theme" })).toBeVisible();
-  await expect(foot.getByRole("navigation", { name: "Language" })).toBeVisible();
-  // The token setup opens from the Labs (stage toolbar, Token chips), not from the foot.
-  await expect(foot.getByRole("button", { name: /Token/ })).toHaveCount(0);
 });
 
 test("a navigation fades between pages, and the sidebar stays put", async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name === "mobile-390", "the sidebar is a panel below 1100 px");
+  test.skip(testInfo.project.name === "mobile-390", "the sidebar is a drawer below 768 px");
   await page.goto("/en/docs/glide");
+  await expect(page.locator(".site")).toHaveAttribute("data-mounted", "");
   // Records the animations of the next view transition once it is ready.
   await page.evaluate(() => {
     const start = document.startViewTransition.bind(document);
@@ -231,9 +255,30 @@ test("a navigation fades between pages, and the sidebar stays put", async ({ pag
       return transition;
     };
   });
-  const sidebar = page.getByRole("navigation", { name: "Documentation navigation" });
+  const sidebar = sidebarOf(page);
   await sidebar.getByRole("link", { name: "Button", exact: true }).click();
   await expect(page).toHaveURL(/\/en\/button$/);
   await expect(page.locator("html")).toHaveAttribute("data-animations", /page-fade.*page-rise/);
   await expect(page.locator(".site-sidebar")).toHaveCSS("view-transition-name", "site-sidebar");
+});
+
+test("the drawer has the brand and the search; Escape and the scrim shut it", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile-390", "the sidebar is a drawer below 768 px");
+  await visit(page, "/en/tabs");
+  const open = page.getByRole("button", { name: "Show sidebar" });
+  const drawer = sidebarOf(page);
+  await open.click();
+  await expect(drawer).toBeVisible();
+  await expect(drawer.locator(".site-sidebar-head")).toContainText("OwsemUI");
+  await expect(drawer.getByRole("button", { name: /Search docs/ })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(drawer).toBeHidden();
+  await expect(open).toBeFocused();
+
+  await open.click();
+  await expect(drawer).toBeVisible();
+  await page.mouse.click(375, 600);
+  await expect(drawer).toBeHidden();
 });

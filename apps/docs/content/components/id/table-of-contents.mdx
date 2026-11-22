@@ -1,0 +1,167 @@
+---
+title: Table of Contents
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/owsem`: Table of Contents adalah komponen Owsem, jadi punya entri sendiri. Di
+registry, itemnya `table-of-contents`.
+
+## Penggunaan [#usage]
+
+```tsx
+import { TableOfContents } from "owsem-ui/owsem";
+
+export function OnThisPage() {
+  return (
+    <TableOfContents.Root aria-label="Di halaman ini">
+      <TableOfContents.List>
+        <TableOfContents.Item>
+          <TableOfContents.Link href="#install">Instalasi</TableOfContents.Link>
+        </TableOfContents.Item>
+        <TableOfContents.Item>
+          <TableOfContents.Link href="#theming">Tema</TableOfContents.Link>
+          <TableOfContents.List>
+            <TableOfContents.Item>
+              <TableOfContents.Link href="#dark">Mode gelap</TableOfContents.Link>
+            </TableOfContents.Item>
+          </TableOfContents.List>
+        </TableOfContents.Item>
+      </TableOfContents.List>
+    </TableOfContents.Root>
+  );
+}
+```
+
+Table of Contents mendaftar bagian-bagian sebuah halaman, dengan sub-bagian bersarang, dan menandai
+yang sedang dibaca. Rail membentang di sepanjang daftar, dan penanda meluncur di atasnya ke bagian
+yang aktif. Setiap link menamai bagiannya lewat hash: `href="#install"` menunjuk elemen dengan id itu,
+jadi beri setiap bagian sebuah id, seperti yang dilakukan pipeline Markdown dengan slug judul.
+
+Bagian yang aktif adalah yang terakhir yang tepi atasnya sudah melewati garis baca, 30% dari atas area
+gulir. Area gulir adalah leluhur terdekat bagian-bagian itu yang bisa digulir, jadi daftar di samping
+kotak yang bergulir bekerja sama baiknya dengan daftar di samping halaman; tanpa itu, yang dipakai
+adalah window. Bagian terakhir yang pendek tidak akan pernah mencapai garis, jadi di ujung paling
+bawah bagian terakhir yang aktif. Sebelum bagian pertama mencapai garis, dan sebelum halaman
+terhidrasi, tidak ada yang aktif.
+
+Link adalah anchor biasa, jadi browser menggulir ke bagiannya dan URL mengambil hash-nya. Link yang
+diklik tetap aktif sampai Anda menggulir sendiri, dengan roda mouse, sentuhan, atau tombol gulir,
+sehingga link pilihan Anda tetap ditandai meski bagiannya terlalu pendek untuk mencapai garis. Header
+sticky menutupi bagian yang dituju browser: atur `scroll-padding-top` di area gulir, setinggi header.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Empat bagian, dan penanda yang digambar Root. Root menemukan bagian setiap link lewat id dan melacak
+gulir dengan event: tidak ada yang berjalan selagi halaman diam.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `nav.ow-table-of-contents` | Melacak bagian yang sedang dibaca dan memuat penanda. Beri nama dengan `aria-label` |
+| <Part name="List" /> | `ul.ow-table-of-contents__list` | `data-depth` mulai dari 1. List teratas menggambar rail; yang bersarang, di dalam Item, menjorok |
+| <Part name="Item" /> | `li.ow-table-of-contents__item` | Satu bagian: Link-nya, dan List untuk sub-bagiannya |
+| <Part name="Link" /> | `a.ow-table-of-contents__link` | `href="#id"`; yang aktif punya `aria-current="location"` dan `data-current` |
+| <Part name="Marker" /> | `span.ow-table-of-contents__marker` | Digambar Root di atas rail (`aria-hidden`), setinggi link yang aktif; `data-visible` selama ada link aktif |
+
+## Referensi API [#api]
+
+Root adalah `nav`, List `ul`, Item `li`, dan Link `a`. Props lain diteruskan ke elemen-elemen itu
+apa adanya, begitu juga ref.
+
+### TableOfContents.Root
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `aria-label` | `string` | | Menamai navigasi |
+| `className`, `style` | `string`, `CSSProperties` | | Token tema yang dipasang di sini hanya berlaku untuk nav-nya |
+
+### TableOfContents.List dan TableOfContents.Item
+
+#### Atribut data
+
+| Atribut data | Pada | Ada saat |
+| --- | --- | --- |
+| `data-depth` | List | Selalu; tingkatnya, mulai dari 1 |
+
+### TableOfContents.Link
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `href` | `string`, berupa `"#id"` | | Id bagiannya |
+| `render` | `ReactElement \| (props, state) => ReactElement` | | Mengganti dengan link router |
+
+#### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-current` | Bagian link ini yang sedang dibaca |
+| `data-depth` | Selalu; tingkatnya, mulai dari 1 |
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-table-of-contents` | Root |
+| `ow-table-of-contents__marker` | Penanda |
+| `ow-table-of-contents__list` | List |
+| `ow-table-of-contents__item` | Item |
+| `ow-table-of-contents__link` | Link |
+
+## Aksesibilitas [#accessibility]
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab | Berpindah antar link |
+| Enter | Mengikuti link: browser menggulir ke bagiannya |
+
+- Link yang aktif punya `aria-current="location"`, jadi screen reader menyebutnya sebagai lokasi saat
+  ini. Server tidak merender satu pun, jadi tidak ada yang salah diumumkan sebelum pelacakan mulai.
+- Penanda `aria-hidden`; strukturnya datang dari daftar.
+- Fokus keyboard menampilkan cincin di dalam link, jadi container yang bergulir tidak pernah
+  memotongnya.
+- Di mode forced colors, penanda memakai `Highlight` dan link aktif digarisbawahi. Dari kanan ke kiri,
+  rail dan penanda ada di kanan.
+
+## Tema [#theming]
+
+Table of Contents membaca token tema berikut. Pasang di nav-nya, atau di elemen di sekelilingnya.
+Penanda dan rail membaca token yang sama dengan jejak dan rail Tree Rail Nav.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-accent` | Penanda |
+| `--ow-line` | Rail |
+| `--ow-fg` | Link yang aktif, dan yang di-hover |
+| `--ow-muted` | Link lainnya |
+| `--ow-focus` | Cincin fokus |
+| `--ow-radius` | Sudut cincin fokus |
+
+<ForMode mode="isolated">
+
+Di mode isolated, nilainya ada di root setiap nav, jadi atur di nav-nya sendiri, seperti
+`.on-this-page.ow-table-of-contents`.
+
+</ForMode>
+
+## Gerak [#motion]
+
+Penanda meluncur ke link berikutnya dengan spring travel. Saat diam, ia diletakkan di kotak link itu
+sendiri, tanpa transform, jadi sejajar dengan link di zoom berapa pun. Dengan
+`prefers-reduced-motion`, penanda melompat ke link berikutnya dan hanya memudar masuk dan keluar.

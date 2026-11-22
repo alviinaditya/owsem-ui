@@ -6,7 +6,7 @@ const config: NextConfig = {
   typedRoutes: true,
   // Keep `next dev` from writing AGENTS.md into the repo.
   agentRules: false,
-  // No React Compiler: it would also transform owsem-ui's dist, so Labs would not run npm's code.
+  // No React Compiler: it would also transform owsem-ui's dist, so examples would not run npm's code.
   async headers() {
     return [
       {

@@ -1,0 +1,145 @@
+---
+title: Scroll Area
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Di registry, itemnya `scroll-area`.
+
+## Penggunaan [#usage]
+
+```tsx
+import { ScrollArea } from "owsem-ui/base";
+
+export function ReleaseNotes() {
+  return <ScrollArea.Root className="notes">{content}</ScrollArea.Root>;
+}
+```
+
+Scroll Area menggulir kontennya dengan scrollbar tipis miliknya sendiri, sama di setiap browser, yang
+melayang di atas konten dan hanya tampil saat hover atau menggulir. Beri ia konten dan tinggi
+(`block-size` atau `max-block-size` pada Root); sisanya ia gambar sendiri. Bila hanya konten di dalam
+Root, ia menggambar part lain untuk kedua arah. Scrollbar muncul hanya untuk arah yang meluap, dan tab
+stop hanya selama ada yang meluap, jadi markup yang sama cocok untuk daftar, tabel lebar, dan kotak
+yang tak punya apa-apa untuk digulir.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Dengan Viewport di antara anak langsungnya, anak-anak itu adalah part-nya, seperti di Base UI: tanpa
+Content atau Thumb, masing-masing menggambar dirinya sendiri, dan tanpa Scrollbar tidak ada scrollbar.
+Membungkus Viewport dengan komponen Anda menyembunyikannya dari Root, jadi berikan milik Anda ke
+`render`-nya.
+
+| Part | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-scroll-area` | `fade`; ukurannya dari Anda. Cincin fokus digambar di sini |
+| <Part name="Viewport" /> | `div.ow-scroll-area__viewport` | Yang digulir; scrollbar native disembunyikan. Tab stop selama isinya meluap |
+| <Part name="Content" /> | `div.ow-scroll-area__content` | Selebar baris terpanjangnya; `style={{ minWidth: 0 }}` agar terpotong |
+| <Part name="Scrollbar" /> | `div.ow-scroll-area__scrollbar` | Satu per arah; `aria-hidden` |
+| <Part name="Thumb" /> | `div.ow-scroll-area__thumb` | Pilnya |
+| <Part name="Corner" /> | `div.ow-scroll-area__corner` | Kosong; `aria-hidden` |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### ScrollArea.Root
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `fade` | `boolean` | `false` | Memudarkan tepi selama masih ada yang bisa digulir ke arah itu; `--fade-size` (2em) mengatur seberapa jauh |
+
+#### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-fade` | `fade` diatur |
+
+Dengan hanya konten di dalamnya, Root menggambar Viewport, Scrollbar untuk tiap sumbu, dan Corner. Dengan Viewport di antara children langsungnya, children itulah bagiannya, seperti di Base UI. Viewport tanpa Content menggambar satu, dan Scrollbar tanpa children menggambar Thumb.
+
+Base UI menyembunyikan scrollbar native dengan `<style>` yang ia tambahkan saat berjalan; OwsemUI menyertakan aturan itu di stylesheet-nya. Untuk Content Security Policy yang ketat, matikan milik Base UI dengan membungkus aplikasi dalam `<CSPProvider disableStyleElements>`, dari `owsem-ui/core`.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-scroll-area` | Root |
+| `ow-scroll-area__viewport` | Viewport |
+| `ow-scroll-area__content` | Content |
+| `ow-scroll-area__scrollbar` | Scrollbar |
+| `ow-scroll-area__thumb` | Thumb |
+| `ow-scroll-area__corner` | Corner |
+
+## Aksesibilitas [#accessibility]
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab | Mencapai Viewport selama isinya meluap, dengan cincin fokus di dalam Root |
+| Tombol panah | Menggulir satu baris |
+| Page Up, Page Down | Menggulir satu halaman |
+| Home, End | Menggulir ke awal atau akhir |
+
+- Scrollbar `aria-hidden`, seperti yang native bagi teknologi bantu, yang membaca kontennya sendiri.
+  Area tekan thumb setidaknya 24 kali 24px, bahkan pada thumb terpendek. Menekan track melompat ke sana;
+  thumb juga bisa ditarik.
+- Bila semua isi Viewport sudah bisa difokus, seperti daftar tautan, ia tidak perlu menjadi tab stop:
+  beri `tabIndex={-1}`.
+- Saat tersembunyi, scrollbar meneruskan semua pointer, jadi gesekan di tepi menggulir dan klik
+  mencapai konten.
+- Pada forced colors, thumb memakai `CanvasText` dan cincin `Highlight`.
+
+## Tema [#theming]
+
+Scroll Area membaca token tema ini. Atur di Root atau di mana pun di atasnya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-muted` | Thumb, berkontras 3:1 terhadap panel dan halaman di kedua tema |
+| `--ow-radius` | Sudut, dan seberapa jauh bar menjauhinya |
+| `--ow-focus` | Cincin fokus |
+| `--ow-ease-out` | Pemudaran scrollbar |
+
+<ForMode mode="isolated">
+
+Pada mode terisolasi, nilai berada di setiap part, jadi atur nilai Anda di part itu dengan kelas.
+
+</ForMode>
+
+CSS biasa menang tanpa `!important`. `inline-size` bar (`block-size` bila mendatar) adalah milik pil,
+dan thumb mengikutinya; `background-color` pada Thumb mewarnainya ulang. Bila hanya konten di dalam,
+jangkau part lewat kelas Root. Ukurannya dalam `em`, jadi `font-size` menskalakannya. Melewati
+ujungnya, roda menggerakkan halaman, seperti scroller lain; `overscroll-behavior: contain` pada
+Viewport menghentikannya.
+
+```css
+.notes {
+  block-size: 16rem;
+}
+
+.notes .ow-scroll-area__scrollbar[data-orientation="vertical"] {
+  inline-size: 10px;
+}
+```
+
+## Gerak [#motion]
+
+Scrollbar memudar masuk saat pointer datang ke area dan saat menggulir, dengan roda, sentuh, atau
+keyboard, bertahan selama thumb ditahan, lalu memudar keluar. Hanya opasitasnya yang bergerak;
+menggulir dari kode tidak menampilkannya. Tepi yang memudar adalah CSS biasa dari jarak yang diukur
+Base UI saat menggulir, tanpa transisi. Gerak yang dikurangi tidak mengubah apa pun, karena hanya
+opasitas yang bergerak.

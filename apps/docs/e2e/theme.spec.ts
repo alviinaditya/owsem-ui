@@ -1,16 +1,8 @@
-import { expect, type TestInfo, test } from "@playwright/test";
-import { thumbKey } from "./lab.ts";
+import { expect, type Page, test } from "@playwright/test";
+import { tools, visit } from "./example-page.ts";
 
-type Page = import("@playwright/test").Page;
 const html = (page: Page) => page.locator("html");
-const themes = (page: Page, name: string) => page.getByRole("group", { name });
-
-/** Below 1100 px the switchers live in the sidebar, which the dock's Menu opens. */
-async function showSettings(page: Page, testInfo: TestInfo) {
-  if (testInfo.project.name !== "mobile-390") return;
-  const menu = page.getByRole("button", { name: "Menu", exact: true });
-  if ((await menu.getAttribute("aria-expanded")) !== "true") await menu.click();
-}
+const theme = (page: Page) => page.getByRole("button", { name: "Theme", exact: true });
 
 test("follows the system theme by default", async ({ page }) => {
   await page.emulateMedia({ colorScheme: "dark" });
@@ -22,58 +14,65 @@ test("follows the system theme by default", async ({ page }) => {
   expect(await html(page).evaluate((el) => getComputedStyle(el).colorScheme)).toBe("light");
 });
 
-test("stores the chosen theme and restores it on load", async ({ page }, testInfo) => {
+test("the Theme button flips the site's theme, keeps it, and restores it on load", async ({
+  page,
+}) => {
   const errors: string[] = [];
   page.on("console", (message) => {
     if (message.type() === "error") errors.push(message.text());
   });
 
+  await page.emulateMedia({ colorScheme: "light" });
   await page.goto("/en");
-  await showSettings(page, testInfo);
-  const dark = themes(page, "Theme").getByRole("button", { name: "Dark" });
-  await dark.click();
+  await expect(html(page)).not.toHaveAttribute("data-theme");
+  await theme(page).click();
   await expect(html(page)).toHaveAttribute("data-theme", "dark");
+  expect(await page.evaluate(() => localStorage.getItem("owsem-theme"))).toBe("dark");
 
   // Only the inline <head> script sets data-theme on load; hydration must not log a mismatch.
   await page.reload();
   await expect(html(page)).toHaveAttribute("data-theme", "dark");
-  await showSettings(page, testInfo);
-  await expect(dark).toHaveAttribute("aria-pressed", "true");
-  // The thumb is under Dark, placed there on hydration without sliding from a default.
-  const thumb = page.locator(".theme-switcher .ow-toggle-group__thumb");
-  await expect(thumb).toHaveCSS("opacity", "1");
-  expect(await thumb.evaluate((el) => el.getAnimations().length)).toBe(0);
-  const [at, under] = await Promise.all([thumbKey(thumb), dark.boundingBox()]);
-  expect(Math.abs(at.x - (under?.x ?? 1))).toBeLessThanOrEqual(0.5);
-  expect(Math.abs(at.width - (under?.width ?? 1))).toBeLessThanOrEqual(0.5);
-  await themes(page, "Theme").getByRole("button", { name: "System" }).click();
-  await expect(html(page)).not.toHaveAttribute("data-theme");
-  expect(await page.evaluate(() => localStorage.getItem("owsem-theme"))).toBeNull();
+  await theme(page).click();
+  await expect(html(page)).toHaveAttribute("data-theme", "light");
   expect(errors).toEqual([]);
 });
 
-test("keeps the chosen theme when switching language", async ({ page }, testInfo) => {
+test("every kind of page has a Theme button, a narrow component page's in its Menu", async ({
+  page,
+}, testInfo) => {
+  const narrow = testInfo.project.name === "mobile-390";
+  await visit(page, "/en/tabs");
+  if (narrow) {
+    await tools(page).getByRole("button", { name: "Menu", exact: true }).click();
+    await expect(page.getByRole("menu").getByRole("menuitem", { name: "Theme" })).toBeVisible();
+  } else {
+    await expect(theme(page)).toBeVisible();
+  }
+  // A narrow preview keeps Theme in its toolbar menu (component-page.spec.ts).
+  for (const path of ["/en", "/en/docs/theming", ...(narrow ? [] : ["/en/switch"])]) {
+    await page.goto(path);
+    await expect(theme(page), path).toBeVisible();
+  }
+});
+
+test("keeps the chosen theme when switching language", async ({ page }) => {
   const errors: string[] = [];
   page.on("console", (message) => {
     if (message.type() === "error") errors.push(message.text());
   });
 
   await page.goto("/en/docs");
-  await showSettings(page, testInfo);
-  await themes(page, "Theme").getByRole("button", { name: "Dark" }).click();
+  await theme(page).click();
+  await expect(html(page)).toHaveAttribute("data-theme", "dark");
   // A client-side switch: the page is not reloaded, so this survives.
   await page.evaluate(() => Object.assign(window, { owsemMark: "kept" }));
-  await page.getByRole("link", { name: "Bahasa Indonesia" }).click();
+  await page.getByRole("button", { name: "Language: English" }).click();
+  await page.getByRole("menuitem", { name: "Bahasa Indonesia" }).click();
   await expect(page).toHaveURL(/\/id\/docs$/);
   await expect(html(page)).toHaveAttribute("lang", "id");
   expect(await page.evaluate(() => (window as Window & { owsemMark?: string }).owsemMark)).toBe(
     "kept",
   );
   await expect(html(page)).toHaveAttribute("data-theme", "dark");
-  await showSettings(page, testInfo);
-  await expect(themes(page, "Tema").getByRole("button", { name: "Gelap" })).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
   expect(errors).toEqual([]);
 });

@@ -1,0 +1,148 @@
+---
+title: Toggle Group
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. To copy the source into your project instead, use the
+`toggle-group` item of the registry.
+
+## Usage [#usage]
+
+```tsx
+import { useState } from "react";
+import { ToggleGroup } from "owsem-ui/base";
+
+export function ViewSwitcher() {
+  const [view, setView] = useState("list");
+  return (
+    <ToggleGroup.Root
+      aria-label="View"
+      value={[view]}
+      onValueChange={([next]) => next && setView(next)}
+    >
+      <ToggleGroup.Item value="list">List</ToggleGroup.Item>
+      <ToggleGroup.Item value="board">Board</ToggleGroup.Item>
+    </ToggleGroup.Root>
+  );
+}
+```
+
+A row of toggle buttons that work as one. With one choice at a time it is a segmented control: a
+track and a thumb that slides to the pressed item. With `multiple`, each item toggles on its own.
+Base UI lets a pressed item be pressed again to leave nothing pressed; a segmented control keeps one
+choice, so ignore an empty value as above.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Three parts, two of them yours to write: Root and Item. The hover highlight is Glide, from
+`owsem-ui/core`.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-toggle-group` | Base UI's `ToggleGroup` with `role="group"`: the track |
+| <Part name="Item" /> | `button.ow-toggle-group__item` | Base UI's `Toggle` with `aria-pressed`; its text is wrapped in `span.ow-toggle-group__label`, so an icon-only item is square |
+| <Part name="Thumb" /> | `span.ow-toggle-group__thumb` | Decorative (`aria-hidden`): placed by a script, moved by CSS; single selection only |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### ToggleGroup.Root
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Font size and padding of the items. The group is 32, 40, or 48px tall, as a Button of that size; its items are 8px shorter |
+| `equal` | `boolean` | `false` | Every item as wide as the widest, or an equal share of a stretched group |
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-size` | Always: `sm`, `md`, or `lg` |
+| `data-equal` | `equal` is set |
+
+### ToggleGroup.Item
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-held` | While held down |
+
+An Item is Base UI's Toggle, so its props and data attributes are Toggle's. The thumb takes no props; it has `data-visible` while it sits under a pressed item and `data-held` while that item is held. Refs go to the `div` or the `button`.
+
+A value kept in storage is only known after hydration. Render none on the server (`value={[]}`) and the stored one after: the thumb then appears in place instead of sliding from a default.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-toggle-group` | Root |
+| `ow-toggle-group__item` | Item |
+| `ow-toggle-group__label` | An item's text |
+| `ow-toggle-group__thumb` | Thumb |
+
+## Accessibility [#accessibility]
+
+The group is one tab stop; its keyboard comes from Base UI.
+
+| Key | Action |
+| --- | --- |
+| Tab, Shift+Tab | Into the group, and out again |
+| Arrow Right, Arrow Left | The next or previous item, reversed right to left; it loops and skips disabled items |
+| Home, End | The first or last item |
+| Space, Enter | Press or release the focused item |
+
+- With `orientation="vertical"`, Arrow Down and Arrow Up move instead.
+- Screen readers announce each item as a toggle button with its pressed state. Name the group with
+  `aria-label` or `aria-labelledby`, and an item with only an icon with `aria-label`.
+- With `prefers-reduced-motion`, the thumb moves at once and nothing scales when held.
+- In forced colors, the pressed item is filled with `Highlight` and the track keeps a visible edge.
+
+## Theming [#theming]
+
+Toggle Group reads these theme tokens. Set them on the group, or on an element around it.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-fg` | Labels of hovered items, the track's 6% tint, and the base of the accent text |
+| `--ow-muted` | Other labels |
+| `--ow-accent` | The thumb (14% over `--ow-raised-bg`) and the pressed label |
+| `--ow-raised-bg` | What the thumb tints, and pressed items with `multiple` |
+| `--ow-hover` | The hover highlight (Glide) |
+| `--ow-radius` | The track's corners; the items, thumb, and highlight take it less 4px |
+| `--ow-focus` | The keyboard focus ring |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each group's root, so set yours on the group itself.
+
+</ForMode>
+
+An item's padding is its own `--py`: set it on the items, not on the group.
+
+## Motion [#motion]
+
+The thumb is gooey: pick another item and it slides there on the travel spring, its key stretching
+from the leading edge along the way and settling at the new width. Change your mind mid-slide and it
+turns from where it is. On the first render, and when a value arrives after hydration, it appears in
+place. Glide lights the nearest item along the axis, so the highlight never blinks out in the gaps.
+
+Held down, the item and the thumb scale to 0.97 in 90 ms and spring back on release. With
+`prefers-reduced-motion`, the thumb only fades and a held thumb dims instead.

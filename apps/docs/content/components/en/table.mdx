@@ -1,0 +1,162 @@
+---
+title: Table
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/owsem`. To copy the source into your project instead, use the `table` item
+of the registry.
+
+## Usage [#usage]
+
+```tsx
+import { Table } from "owsem-ui/owsem";
+
+export function Plans() {
+  return (
+    <Table.Root>
+      <Table.Caption>Plans</Table.Caption>
+      <Table.Header>
+        <Table.Row>
+          <Table.Head>Plan</Table.Head>
+          <Table.Head>Price</Table.Head>
+        </Table.Row>
+      </Table.Header>
+      <Table.Body>
+        <Table.Row>
+          <Table.Cell>Free</Table.Cell>
+          <Table.Cell>$0</Table.Cell>
+        </Table.Row>
+      </Table.Body>
+    </Table.Root>
+  );
+}
+```
+
+Table is a plain HTML table drawn as a quiet card: muted headings on a faint tint, hairlines between
+rows, no vertical lines. Write the table inside `Table.Root`, with a `Caption`, a `Header` of
+`Head` cells, a `Body` of `Row`s and `Cell`s, and a `Footer` if you need one. The Root holds a
+scroller and the `<table>`, so `tableProps` is how you reach the `<table>` itself.
+
+Put a `Caption` or a heading before each table. The Caption sits above the card, so two tables in a
+row read as two.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+A `div` card that holds a scroller and the `<table>`. The Caption is in the table in the markup and
+drawn above the card.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-table` | The card; holds `div.ow-table__scroll` and `table.ow-table__table`. `data-layout` and `data-size` |
+| <Part name="Caption" /> | `caption.ow-table__caption` | A small title above the card, one line |
+| <Part name="Header" /> | `thead.ow-table__header` | The headings, on a faint tint |
+| <Part name="Head" /> | `th.ow-table__head` | A heading cell; `scope="col"` in the header, `"row"` elsewhere |
+| <Part name="Body" /> | `tbody.ow-table__body` | The data rows |
+| <Part name="Row" /> | `tr.ow-table__row` | A row |
+| <Part name="Cell" /> | `td.ow-table__cell` | A data cell, top-aligned |
+| <Part name="Footer" /> | `tfoot.ow-table__footer` | Closing rows, such as a total |
+
+## API reference [#api]
+
+### Table.Root
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `layout` | `"auto" \| "table" \| "stack"` | `"auto"` | `"table"` always draws a table, `"stack"` always stacks its rows, `"auto"` stacks under `stackBelow` |
+| `stackBelow` | `number` | `480` | The Root width in pixels under which `"auto"` stacks |
+| `size` | `"default" \| "sm"` | `"default"` | `"sm"` tightens the cell padding |
+| `tableProps` | `ComponentProps<"table">` | | Props, `ref` included, for the inner `<table>` |
+| `aria-label`, `aria-labelledby` | `string` | | Name the scroller while it scrolls; else the Caption does |
+| `className`, `style` | `string`, `CSSProperties` | | On the card |
+| `render` | `ReactElement \| (props) => ReactElement` | | Replaces the card's `div` |
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-layout` | Always; `"table"` or `"stack"`, the layout in use |
+| `data-size` | `size` is set |
+| `data-overflow-start`, `data-overflow-end` | On `div.ow-table__scroll`: more content toward that side |
+
+### The other parts
+
+#### Part props
+
+| Part | Element | Own props |
+| --- | --- | --- |
+| `Table.Caption` | `caption` | `visuallyHidden`: hides it from sight and keeps the name |
+| `Table.Head` | `th` | `scope`: `"col"` in the header, `"row"` elsewhere |
+| `Table.Header`, `Table.Body`, `Table.Footer`, `Table.Row`, `Table.Cell` | `thead`, `tbody`, `tfoot`, `tr`, `td` | None |
+
+Every part takes `className`, `style`, `render`, and a `ref` to its element; other props pass
+through as they are.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-table` | Root |
+| `ow-table__scroll`, `ow-table__table` | The scroller and the table inside the Root |
+| `ow-table__caption` | Caption |
+| `ow-table__header`, `ow-table__body`, `ow-table__footer` | The row groups |
+| `ow-table__row` | Row |
+| `ow-table__head`, `ow-table__cell` | Head and Cell |
+| `ow-table__value` | The value inside a Cell |
+
+## Accessibility [#accessibility]
+
+It is a real table, so assistive technology gets its rows, columns, and headings.
+
+- The Caption is the table's name. Hide it from sight with `visuallyHidden` if a heading says it
+  already.
+- `Head` in the header has `scope="col"`, so each cell is read with its column.
+- Stacked, the table keeps its table roles and the header row stays for screen readers, so the
+  structure does not change when the width does.
+- Wider than the card, the card scrolls and takes the Tab key (`role="region"`, named by the
+  Caption, `aria-label`, or `aria-labelledby`), and the arrow keys scroll it. When nothing
+  overflows it is not in the tab order.
+- In forced colors, the hairlines and the card's edge take the system text color.
+
+## Theming [#theming]
+
+Table reads these theme tokens. Set one on a table, or on anything around it.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-panel` | The card's fill |
+| `--ow-surface-shadow` | The card's shadow |
+| `--ow-radius` | The card's corners |
+| `--ow-fg` | Cell text, and a 4% tint for the header and footer |
+| `--ow-muted` | The headings and the Caption |
+| `--ow-line` | The hairlines |
+| `--ow-focus` | The focus ring of a scrolling table |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Table's root, so set yours on the Table itself.
+
+</ForMode>
+
+Table does not style `code` or other content in cells; do that in your own CSS. Spacing comes from
+`size`; for anything else, a rule on a `className` beats the component's own values.
+
+## Motion [#motion]
+
+Table does not move: its fades are static gradients and nothing animates, so
+`prefers-reduced-motion` changes nothing.

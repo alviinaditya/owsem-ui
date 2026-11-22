@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Field, Popover, ToggleGroup } from "owsem-ui/base";
+import { Button, Field, Popover, ScrollArea, ToggleGroup } from "owsem-ui/base";
 import { CodeBlock, type CopyButtonLabels } from "owsem-ui/owsem";
 import {
   type ReactNode,
@@ -30,7 +30,7 @@ type Labels = Dictionary["tokens"];
 
 /** Where a trigger wants the panel; triggers without a place get it under themselves. */
 export interface TokenSetupPlace {
-  /** The panel opens under this element, at its end: a Lab stage's toolbar. */
+  /** The panel opens under this element, at its end: a component page's toolbar. */
   anchor: RefObject<HTMLElement | null>;
   /** Where focus goes back once it shuts: `true` for the trigger itself. */
   finalFocus: () => HTMLElement | true | null;
@@ -95,7 +95,7 @@ export function useTokenNames(root: RefObject<HTMLElement | null>): void {
     for (let node = walker.nextNode(); node; node = walker.nextNode()) {
       const text = node as Text;
       const parent = text.parentElement;
-      if (!parent?.closest("code") || parent.closest(".live-code, [data-token-literal]")) continue;
+      if (!parent?.closest("code") || parent.closest("[data-token-literal]")) continue;
       const original = originals.get(text) ?? text.data;
       if (!original.includes("--ow-")) continue;
       originals.set(text, original);
@@ -180,8 +180,12 @@ function PrefixField({ setup, labels }: { setup: TokenSetup; labels: Labels }) {
   );
 }
 
+/** The page's side gutter, --docs-page-x: 16px, or 24px from 768px wide. Read when the panel opens. */
+const pageGutter = () =>
+  typeof window !== "undefined" && window.matchMedia("(width >= 768px)").matches ? 24 : 16;
+
 /**
- * The panel a Lab stage's Token button and every Token chip open (a Popover: Escape and a click
+ * The panel a component page's Token button and every Token chip open (a Popover: Escape and a click
  * outside close it, and focus goes back). Rendered once in the site shell, so every page shares it.
  */
 export function TokenSetupPanel({
@@ -202,7 +206,8 @@ export function TokenSetupPanel({
             anchor={payload?.anchor}
             align={payload ? "end" : "start"}
             sideOffset={8}
-            collisionPadding={8}
+            // Clear of the window's edges by the page's gutter (--docs-page-x), not hugging them.
+            collisionPadding={pageGutter()}
             // Above or below only, scrolling when short of room; slid back on screen rather than
             // flipped to the other end.
             collisionAvoidance={{ align: "shift", fallbackAxisSide: "none" }}
@@ -216,38 +221,43 @@ export function TokenSetupPanel({
               }
               finalFocus={payload?.finalFocus ?? true}
             >
-              <Popover.Title className="token-setup-title">{labels.title}</Popover.Title>
-              <ToggleGroup.Root
-                aria-label={labels.mode}
-                className="docs-choice token-setup-mode"
-                equal
-                value={[setup.mode]}
-                onValueChange={([mode]) => mode && setTokenSetup({ ...setup, mode })}
-              >
-                {TOKEN_MODES.map((mode) => (
-                  <ToggleGroup.Item key={mode} value={mode}>
-                    {labels[mode]}
-                  </ToggleGroup.Item>
-                ))}
-              </ToggleGroup.Root>
-              <p className="token-setup-note">
-                {setup.mode === "theme" ? labels.themeNote : labels.isolatedNote}
-              </p>
-              <PrefixField setup={setup} labels={labels} />
-              <OwsemJson setup={setup} labels={copyLabels} />
-              {isDefaultSetup(setup) ? null : (
-                <>
-                  <p className="token-setup-note">{labels.cli}</p>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    className="token-setup-reset"
-                    onClick={() => setTokenSetup(DEFAULT_TOKEN_SETUP)}
+              {/* The scroller sits inside the rounded popup, so its scrollbar keeps the corners. */}
+              <ScrollArea.Root className="token-setup-scroll" fade>
+                <div className="token-setup-body">
+                  <Popover.Title className="token-setup-title">{labels.title}</Popover.Title>
+                  <ToggleGroup.Root
+                    aria-label={labels.mode}
+                    className="docs-choice token-setup-mode"
+                    equal
+                    value={[setup.mode]}
+                    onValueChange={([mode]) => mode && setTokenSetup({ ...setup, mode })}
                   >
-                    {labels.reset}
-                  </Button>
-                </>
-              )}
+                    {TOKEN_MODES.map((mode) => (
+                      <ToggleGroup.Item key={mode} value={mode}>
+                        {labels[mode]}
+                      </ToggleGroup.Item>
+                    ))}
+                  </ToggleGroup.Root>
+                  <p className="token-setup-note">
+                    {setup.mode === "theme" ? labels.themeNote : labels.isolatedNote}
+                  </p>
+                  <PrefixField setup={setup} labels={labels} />
+                  <OwsemJson setup={setup} labels={copyLabels} />
+                  {isDefaultSetup(setup) ? null : (
+                    <>
+                      <p className="token-setup-note">{labels.cli}</p>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="token-setup-reset"
+                        onClick={() => setTokenSetup(DEFAULT_TOKEN_SETUP)}
+                      >
+                        {labels.reset}
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </ScrollArea.Root>
             </Popover.Popup>
           </Popover.Positioner>
         </Popover.Portal>
@@ -256,18 +266,28 @@ export function TokenSetupPanel({
   );
 }
 
-/** "Theme tokens · --ow-*", with a button that opens the panel. */
+/** A setting control, "Token names  [Theme tokens · --ow-*]": the pill opens the panel. */
 export function TokenChip({ lang }: { lang: Lang }) {
   const setup = useTokenSetup();
   const labels = getDictionary(lang).tokens;
   const names = `--${setup.prefix}-*`;
   return (
-    <p className="token-chip">
-      {labels[setup.mode]} · <code data-token-literal="">{names}</code>
-      <Popover.Trigger handle={tokenSetupHandle} className="text-button">
-        {labels.change}
+    <div className="token-chip">
+      <span className="token-chip-label">{labels.names}</span>
+      <Popover.Trigger handle={tokenSetupHandle} className="token-chip-trigger">
+        <Icon name="palette" />
+        {labels[setup.mode]}
+        <span className="token-chip-dot" aria-hidden="true">
+          ·
+        </span>
+        <code className="token-chip-names" data-token-literal="">
+          {names}
+        </code>
         <span className="visually-hidden"> {labels.title}</span>
+        <span className="token-chip-caret" aria-hidden="true">
+          <Icon name="chevron-down" size={14} />
+        </span>
       </Popover.Trigger>
-    </p>
+    </div>
   );
 }

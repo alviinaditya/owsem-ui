@@ -1,6 +1,6 @@
 /**
- * The visitor's token setup (DS-4): how their project names OwsemUI tokens. The code in every Lab
- * follows it. Anything but theme tokens with `ow` comes from the owsem CLI (TK-6).
+ * The visitor's token setup (DS-4): how their project names OwsemUI tokens. The code in every
+ * example follows it. Anything but theme tokens with `ow` comes from the owsem CLI (TK-6).
  */
 export type TokenMode = "theme" | "isolated";
 

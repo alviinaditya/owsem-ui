@@ -1,144 +1,134 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { useEffect, useRef, useSyncExternalStore } from "react";
-import { searchHandle } from "./docs-search";
-import { Icon } from "./icons/icon";
+import { Sidebar } from "owsem-ui/owsem";
+import { type ReactNode, useEffect, useState, useSyncExternalStore } from "react";
+import { SIDEBAR_STORAGE_KEY } from "@/lib/theme";
 
-// <html data-sidebar="open"> drives the narrow-screen sidebar (globals.css), so the toggle in
-// the dock and the sidebar share it without a common React parent.
+// The wide screen's choice to fold the sidebar away is kept across visits. It lives on
+// <html data-sidebar-hidden>, which lib/theme.ts sets before the first paint, so the column is the
+// right width from the start; the Provider follows it once React has hydrated.
 const listeners = new Set<() => void>();
+const isHidden = () => document.documentElement.dataset.sidebarHidden !== undefined;
 
-const isOpen = () => document.documentElement.dataset.sidebar === "open";
-
-export function setSidebarOpen(open: boolean): void {
-  if (open === isOpen()) return;
-  if (open) document.documentElement.dataset.sidebar = "open";
-  else delete document.documentElement.dataset.sidebar;
+function setHidden(hidden: boolean): void {
+  if (hidden === isHidden()) return;
+  if (hidden) document.documentElement.dataset.sidebarHidden = "";
+  else delete document.documentElement.dataset.sidebarHidden;
+  try {
+    if (hidden) localStorage.setItem(SIDEBAR_STORAGE_KEY, "hidden");
+    else localStorage.removeItem(SIDEBAR_STORAGE_KEY);
+  } catch {
+    // Storage blocked: it holds until the next page load.
+  }
   for (const listener of listeners) listener();
 }
 
-function subscribe(listener: () => void): () => void {
+const subscribe = (listener: () => void) => {
   listeners.add(listener);
   return () => {
     listeners.delete(listener);
   };
+};
+
+// Below 1280 px an open Docs panel (<html data-docs-open>, on a component page) takes a column
+// beside the preview, so the sidebar steps aside as a drawer. This is only a layout mode: the
+// visitor's folded-or-open choice above is not touched.
+/** The column's fold-away (globals.css .site), before it hands over to the drawer. */
+const FOLD_MS = 320;
+const NARROW_QUERY = "(max-width: 767px)";
+const DOCS_QUERY = "(max-width: 1279px)";
+let previews = 0;
+const stepListeners = new Set<() => void>();
+const stepsAside = () =>
+  previews > 0 &&
+  document.documentElement.dataset.docsOpen !== undefined &&
+  matchMedia(DOCS_QUERY).matches;
+
+/** A component page calls this while it is mounted: its Docs panel can make the sidebar a drawer. */
+export function registerPreviewPage(): () => void {
+  previews++;
+  for (const listener of stepListeners) listener();
+  return () => {
+    previews--;
+    for (const listener of stepListeners) listener();
+  };
 }
 
-const TOGGLE_ID = "site-menu-button";
+const subscribeStep = (listener: () => void) => {
+  stepListeners.add(listener);
+  const media = matchMedia(DOCS_QUERY);
+  media.addEventListener("change", listener);
+  const observer = new MutationObserver(listener);
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-docs-open"],
+  });
+  return () => {
+    stepListeners.delete(listener);
+    media.removeEventListener("change", listener);
+    observer.disconnect();
+  };
+};
 
-/** Scrolls the sidebar, not the page, so the current page's link (and its scenes) is in view. */
-export function revealCurrentLink(): HTMLElement | undefined {
-  const sidebar = document.getElementById("site-sidebar-scroll");
-  const link = sidebar?.querySelector<HTMLElement>('[aria-current="page"]');
-  if (!sidebar || !link) return undefined;
-  const own = link.getBoundingClientRect();
-  const box = sidebar.getBoundingClientRect();
-  // Leave room below for the scene list of a Lab page.
-  if (own.top < box.top || own.bottom > box.bottom - 160) {
-    sidebar.scrollTop += own.top - box.top - box.height / 3;
-  }
-  return link;
+/**
+ * The site's Sidebar state: open on a wide screen unless the visitor folded it, and a drawer on a
+ * narrow one. Its `.site` box is the page's layout, which reads the Provider's data attributes.
+ */
+export function SiteSidebarProvider({ children }: { children: ReactNode }) {
+  const hidden = useSyncExternalStore(subscribe, isHidden, () => false);
+  // Transitions wait for the first paint, so a folded sidebar does not slide out on load.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
+  const aside = useSyncExternalStore(subscribeStep, stepsAside, () => false);
+  // The column folds away first (the library's own slide), then the sidebar becomes a drawer, so
+  // opening the Docs reads as one move. Closing them brings the column straight back.
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [settled, setSettled] = useState(false);
+  useEffect(() => {
+    if (!aside) {
+      setSettled(false);
+      setDrawerOpen(false);
+      return;
+    }
+    const timer = setTimeout(() => setSettled(true), FOLD_MS);
+    return () => clearTimeout(timer);
+  }, [aside]);
+  const drawer = aside && settled;
+  return (
+    <Sidebar.Provider
+      className="site"
+      data-mounted={mounted ? "" : undefined}
+      open={!hidden && !aside}
+      onOpenChange={(open) => {
+        if (!aside) setHidden(!open);
+      }}
+      mobileOpen={drawerOpen}
+      onMobileOpenChange={setDrawerOpen}
+      mobileQuery={drawer ? DOCS_QUERY : NARROW_QUERY}
+    >
+      {children}
+    </Sidebar.Provider>
+  );
+}
+
+/** At the end of the sidebar's head: folds it (wide), or shuts the drawer (narrow). */
+export function SidebarCollapse({ label }: { label: string }) {
+  return <Sidebar.Trigger className="sidebar-collapse" aria-label={label} title={label} />;
 }
 
 /**
- * Below 1100 px the sidebar is a panel opened from the dock, at the top left of every page. The
- * open panel has its own close button, so the dock steps aside meanwhile.
+ * Opens the sidebar from the page's top left. It only shows while the sidebar is folded or a
+ * drawer (globals.css), so a preview carries one in its bar and the other pages float one.
  */
-export function SidebarToggle({ label }: { label: string }) {
-  const open = useSyncExternalStore(subscribe, isOpen, () => false);
-  const button = useRef<HTMLButtonElement>(null);
-  const pathname = usePathname();
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: close after every navigation, Back included
-  useEffect(() => setSidebarOpen(false), [pathname]);
-
-  useEffect(() => {
-    const panel = document.getElementById("site-sidebar");
-    if (!open || !panel) return;
-    // Focus moves into the panel, at the current page, so Tab continues there.
-    requestAnimationFrame(() => {
-      (revealCurrentLink() ?? panel.querySelector<HTMLElement>("a"))?.focus({
-        preventScroll: true,
-      });
-    });
-    const inside = (target: EventTarget | null) =>
-      target instanceof Node && (panel.contains(target) || button.current?.contains(target));
-    const close = (refocus: boolean) => {
-      setSidebarOpen(false);
-      if (refocus) button.current?.focus();
-    };
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && inside(document.activeElement)) close(true);
-    };
-    const onPointer = (event: PointerEvent) => {
-      if (!inside(event.target)) close(false);
-    };
-    const onFocusOut = (event: FocusEvent) => {
-      if (event.relatedTarget && !inside(event.relatedTarget)) close(false);
-    };
-    // Any link closes it, a link to the current page included.
-    const onClick = (event: MouseEvent) => {
-      if (event.target instanceof Element && event.target.closest("a")) close(false);
-    };
-    document.addEventListener("keydown", onKey);
-    document.addEventListener("pointerdown", onPointer);
-    panel.addEventListener("focusout", onFocusOut);
-    panel.addEventListener("click", onClick);
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.removeEventListener("pointerdown", onPointer);
-      panel.removeEventListener("focusout", onFocusOut);
-      panel.removeEventListener("click", onClick);
-    };
-  }, [open]);
-
+export function SidebarOpen({ label, className }: { label: string; className?: string }) {
   return (
-    <button
-      ref={button}
-      id={TOGGLE_ID}
-      type="button"
-      className="dock-button"
-      aria-expanded={open}
-      aria-controls="site-sidebar"
-      onClick={() => setSidebarOpen(!open)}
-    >
-      <Icon name="menu" size={18} />
-      <span className="dock-label">{label}</span>
-    </button>
-  );
-}
-
-/** The dock's search button, beside Menu (DS-5); the sidebar's own is out of view down here. */
-export function SearchButton({ label }: { label: string }) {
-  return (
-    <button
-      type="button"
-      className="dock-button"
-      aria-haspopup="dialog"
-      aria-keyshortcuts="Meta+K Control+K"
-      onClick={() => searchHandle.open(null)}
-    >
-      <Icon name="search" size={18} />
-      <span className="dock-label">{label}</span>
-    </button>
-  );
-}
-
-/** The open panel's own close button, in the sidebar's head; focus goes back to the dock. */
-export function SidebarClose({ label }: { label: string }) {
-  return (
-    <button
-      type="button"
-      className="sidebar-close"
+    <Sidebar.Trigger
+      className={className ? `sidebar-open ${className}` : "sidebar-open"}
       aria-label={label}
       title={label}
-      onClick={() => {
-        setSidebarOpen(false);
-        requestAnimationFrame(() => document.getElementById(TOGGLE_ID)?.focus());
-      }}
-    >
-      <Icon name="x" size={18} />
-    </button>
+    />
   );
 }

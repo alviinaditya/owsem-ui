@@ -1,0 +1,130 @@
+---
+title: Input
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. To copy the source into your project instead, use the `input` item
+of the registry.
+
+## Usage [#usage]
+
+```tsx
+import { Input } from "owsem-ui/base";
+
+export function EmailInput() {
+  return <Input aria-label="Email" placeholder="name@company.com" />;
+}
+```
+
+Input is a one-line text field. It needs a name: a `Field.Label`, a `<label>`, or `aria-label`; a
+placeholder is not one. It fills its parent, and a width of your own narrows it. Inside a
+[Field](/en/field), Base UI sets its invalid and disabled states for you.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Input is one element, with two more only when it has an icon.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Wrapper" /> | `span.ow-input__wrapper` | Only with an icon; it has no look and only places the icons |
+| <Part name="Input" /> | `input.ow-input` | Always the field itself, with or without icons |
+| <Part name="Icon" /> | `span.ow-input__icon` | Decorative (`aria-hidden`), `data-side="start"` or `"end"` |
+
+Decide at the first render whether it has an icon: the wrapper arrives with the first one, and adding
+it later remounts the input, which loses focus. For an icon that comes and goes, swap one node for
+another instead of passing `null`.
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Button's sizes: 32, 40, or 48 px tall. Not the native character width; set `inline-size` for that |
+| `startIcon` | `ReactNode` | | An icon before the text, the font size plus 2px |
+| `endIcon` | `ReactNode` | | An icon after the text |
+
+`ref`, `className`, and `style` reach the input even with icons; custom properties and `fontSize` in `style` also reach the
+wrapper, so the icons follow them.
+
+### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-size` | Always; on the input and the wrapper |
+
+| Size | Font | Height | Icon |
+| --- | --- | --- | --- |
+| `sm` | 13px | 32px | 15px |
+| `md` | 14px | 40px | 16px |
+| `lg` | 16px | 48px | 18px |
+
+An Input and a Button of one size line up in a row. Set `--py` in `style` to change the height, or
+`font-size` to scale all of it.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-input__wrapper` | Wrapper |
+| `ow-input` | Input |
+| `ow-input__icon` | Icon |
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| Tab | Moves focus to the field |
+| Everything else | The browser's own text editing |
+
+- It is a native `<input>`, so autofill, spellcheck, and input modes work as they always do.
+- Icons are `aria-hidden`; the input needs its own name.
+- Invalid is a tint, a message, and a motion, never color alone. Pair `aria-invalid` with text, as
+  Field's error does.
+- With `prefers-contrast: more` the field gets a 1px edge. In forced colors the edge is a 1px system
+  line (2px while invalid), the focus ring is `Highlight`, and disabled is `GrayText`. Right to left,
+  `startIcon` sits on the right.
+
+## Theming [#theming]
+
+Input reads these theme tokens. Set one on an input, or on anything around it.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-fg` | Text, and the tint behind it: 6% at rest, 9% on hover |
+| `--ow-critical` | Tint while invalid (14%) |
+| `--ow-muted` | Placeholder and icons |
+| `--ow-radius` | Corners |
+| `--ow-focus` | Focus ring |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Input's root, so set yours on the input itself.
+
+</ForMode>
+
+A `className` wins over the component's own values with no `!important`, since they sit in a lower
+cascade layer; Tailwind utilities win the same way. In a flex row, an Input with icons keeps its
+wrapper at the full width, so size the wrapper (`.ow-input__wrapper`) or the parent there.
+
+## Motion [#motion]
+
+The tint steps between rest, hover, and invalid with a short ease. An input that becomes invalid shakes
+once, 4px at most, and not again while you type; one that is invalid from its first render stays
+still. With `prefers-reduced-motion`, the shake becomes a blink to 60% opacity and back.

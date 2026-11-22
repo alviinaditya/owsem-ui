@@ -1,0 +1,92 @@
+---
+title: Form
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. In the registry it is the `form` item. It needs no other component,
+though its checks reach only Fields, and any Base UI control inside one.
+
+## Usage [#usage]
+
+```tsx
+import { Button, Field, Form } from "owsem-ui/base";
+
+export function SignUp({ save }) {
+  return (
+    <Form onFormSubmit={save}>
+      <Field.Root name="email">
+        <Field.Label>Email</Field.Label>
+        <Field.Control type="email" required />
+        <Field.Error />
+      </Field.Root>
+      <Button type="submit">Sign up</Button>
+    </Form>
+  );
+}
+```
+
+Form is a native `<form>` that checks its Fields before it submits. Submitting runs each Field's checks:
+the control's own `required`, `type`, and `pattern`, and any `validate`. If one fails, nothing submits,
+each failed field shows its error, and focus goes to the first one with its text selected. Base UI turns
+off the browser's bubbles (`noValidate`), so the messages sit in `Field.Error`. `onFormSubmit` gets the
+values by each Field's `name` once all of them pass.
+
+After a failed submit, fields check again as you type. `validationMode` makes them check on blur or on
+change from the start.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `form.ow-form` | One column with one gap; no frame, no margins, and no states of its own |
+
+Fields and Fieldsets stretch across it. A `<button>` directly inside keeps its own width.
+
+## API reference [#api]
+
+<BaseUiReference />
+
+`gap` is one property on one class, and the rest of the layout is yours, such as a row for a newsletter
+box.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-form` | Root |
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| Tab | Moves through its fields and buttons |
+| Enter | In a field, submits |
+
+- Focus goes to the first failed field, so a keyboard or screen reader user lands on the problem and
+  hears its name and its error.
+- Give the form an `aria-label` when it should be a landmark.
+- A submit that still fails shakes the first invalid field again, even though it never stopped being
+  invalid. Forced colors have nothing to redraw beyond the Field's own.
+
+## Theming [#theming]
+
+Form reads no theme token of its own. A token set on the form reaches the Fields inside, such as
+`--ow-critical` for the errors.
+
+<Tokens />
+
+## Motion [#motion]
+
+The only motion is the shake a failing submit gives the first invalid field again. With
+`prefers-reduced-motion`, the field blinks instead.

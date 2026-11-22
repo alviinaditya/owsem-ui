@@ -1,0 +1,136 @@
+---
+title: Checkbox
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. To copy the source into your project instead, use the `checkbox`
+item of the registry.
+
+## Usage [#usage]
+
+```tsx
+import { Checkbox } from "owsem-ui/base";
+
+export function Updates() {
+  return (
+    <label>
+      <Checkbox.Root />
+      Tell me about new releases
+    </label>
+  );
+}
+```
+
+A checkbox is a box you tick. A label around `Checkbox.Root` is all it needs: it draws its own
+Indicator and glyphs, and the label names it and is a press target. With no visible text, give it an
+`aria-label`. Checkbox Group is a later component; until then, a group is a [Fieldset](/en/fieldset)
+with one `name`, and a parent box is `checked` and `indeterminate` from your own state.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Base UI renders a `<span>` with the `checkbox` role and a hidden `<input>` beside it. The last two
+parts draw themselves.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `span.ow-checkbox` | The box: `aria-checked` and the state attributes |
+| <Part name="Indicator" /> | `span.ow-checkbox__indicator` | Fills the box; unmounted while off unless `keepMounted` |
+| <Part name="Glyph" /> | `svg[data-glyph]` | The check or the minus, `aria-hidden` |
+
+Children replace what is drawn. Passing `{null}` to Root leaves it empty.
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### Checkbox.Root
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Button's fonts; the box is the font size plus 6px: 19, 20, or 22 px |
+| `children` | `ReactNode` | `<Checkbox.Indicator />` | Replaces what is drawn |
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-size` | Always; the chosen size |
+
+### Checkbox.Indicator
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | The check and minus glyphs | Your own glyph; mark a pair with `data-glyph` to keep the crossfade |
+
+The box is in `em`: `font-size` on it scales the box and its glyphs. A pseudo-element extends its
+press target to 24px on every side without adding layout, so two boxes need 8px between them.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-checkbox` | Root |
+| `ow-checkbox__indicator` | Indicator |
+| `ow-checkbox__stroke` | The stroke of each glyph |
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| Tab | Moves focus to the box |
+| Space | Checks or unchecks it |
+| Enter | Submits the form it is in, without toggling |
+
+- Screen readers announce the role and `aria-checked`, with `mixed` while indeterminate.
+- The name comes from the label or an `aria-label`; the glyphs are `aria-hidden`.
+- With `prefers-contrast: more` the box gets a 1px edge. In forced colors a checked box is filled
+  with `Highlight` and the glyph is `HighlightText`. Right to left, the check is not mirrored.
+
+## Theming [#theming]
+
+Checkbox reads these theme tokens. Set one on a box, or on anything around it.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-fg` | Tint while off (10%, 13% on hover, 16% held) |
+| `--ow-accent` | Fill while checked or indeterminate |
+| `--ow-primary-shadow` | Top highlight while checked or indeterminate |
+| `--ow-on-accent` | Glyph |
+| `--ow-hover` | Tint under the pointer |
+| `--ow-radius` | Corners, at half its value |
+| `--ow-focus` | Focus ring |
+| `--ow-motion-scale` | How far the press and the glyphs move |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Checkbox's root, so set yours on the box itself.
+
+</ForMode>
+
+States sit in `:where()`, so a class of your own beats them, and so does a Tailwind utility. Write
+`[data-checked]` on it to style one state.
+
+## Motion [#motion]
+
+The fill changes at once; the glyph is what moves. It fades in within 120 ms, growing from 0.8 on the
+settle spring; the check draws its stroke in over 260 ms and the minus grows from its middle. The two
+glyphs share one cell, so a parent box never jumps. A press shrinks the box to 0.97 within 90 ms.
+With `prefers-reduced-motion`, nothing draws or grows: the glyphs only fade.

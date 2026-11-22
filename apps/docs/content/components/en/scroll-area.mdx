@@ -1,0 +1,143 @@
+---
+title: Scroll Area
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. In the registry it is the `scroll-area` item.
+
+## Usage [#usage]
+
+```tsx
+import { ScrollArea } from "owsem-ui/base";
+
+export function ReleaseNotes() {
+  return <ScrollArea.Root className="notes">{content}</ScrollArea.Root>;
+}
+```
+
+Scroll Area scrolls its content with a thin scrollbar of its own, the same in every browser, that
+floats over the content and shows only on hover or while scrolling. Give it your content and a height
+(`block-size` or `max-block-size` on the Root); it draws the rest. With only content inside, Root
+draws the other parts for both axes. A scrollbar appears only for an axis that overflows, and a tab
+stop only while something does, so the same markup fits a list, a wide table, and a box with nothing
+to scroll.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+With a Viewport among its direct children, those children are the parts, as in Base UI: leave out
+Content or Thumb and each draws itself, and leave out a Scrollbar and there is none. Wrapping the
+Viewport in a component of your own hides it from Root, so pass yours to its `render` instead.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-scroll-area` | `fade`; sized by you. The focus ring is drawn here |
+| <Part name="Viewport" /> | `div.ow-scroll-area__viewport` | Scrolls; native scrollbars hidden. A tab stop while it overflows |
+| <Part name="Content" /> | `div.ow-scroll-area__content` | As wide as its longest line; `style={{ minWidth: 0 }}` to truncate instead |
+| <Part name="Scrollbar" /> | `div.ow-scroll-area__scrollbar` | One per axis; `aria-hidden` |
+| <Part name="Thumb" /> | `div.ow-scroll-area__thumb` | The pill |
+| <Part name="Corner" /> | `div.ow-scroll-area__corner` | Empty; `aria-hidden` |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### ScrollArea.Root
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `fade` | `boolean` | `false` | Fades an edge while there is more to scroll that way; `--fade-size` (2em) sets how far |
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-fade` | `fade` is set |
+
+With only content inside, Root draws a Viewport, a Scrollbar for each axis, and a Corner. With a Viewport among its direct children, those children are the parts, as in Base UI. A Viewport without a Content draws one, and a Scrollbar without children draws a Thumb.
+
+Base UI hides native scrollbars with a `<style>` it adds at runtime; OwsemUI ships that rule in its stylesheet instead. For a strict Content Security Policy, turn Base UI's off by wrapping the app in `<CSPProvider disableStyleElements>`, from `owsem-ui/core`.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-scroll-area` | Root |
+| `ow-scroll-area__viewport` | Viewport |
+| `ow-scroll-area__content` | Content |
+| `ow-scroll-area__scrollbar` | Scrollbar |
+| `ow-scroll-area__thumb` | Thumb |
+| `ow-scroll-area__corner` | Corner |
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| Tab | Reaches the Viewport while its content overflows, with a focus ring inside the Root |
+| Arrow keys | Scroll by a line |
+| Page Up, Page Down | Scroll by a page |
+| Home, End | Scroll to the start or the end |
+
+- The scrollbars are `aria-hidden`, as native ones are to assistive technology, which reads the
+  content itself. The thumb's press area is at least 24 by 24px, even on the shortest thumb. Pressing
+  the track jumps there; the thumb can also be dragged.
+- When everything in the Viewport can already take focus, such as a list of links, it does not need
+  to be a stop of its own: set `tabIndex={-1}` on it.
+- While hidden, the scrollbar lets every pointer through, so a swipe at the edge scrolls and a click
+  reaches the content.
+- In forced colors, the thumb takes `CanvasText` and the ring `Highlight`.
+
+## Theming [#theming]
+
+Scroll Area reads these theme tokens. Set them on the Root or anywhere above it.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-muted` | The thumb, at 3:1 contrast against the panel and the page in both themes |
+| `--ow-radius` | The corners, and how far the bars keep from them |
+| `--ow-focus` | The focus ring |
+| `--ow-ease-out` | The scrollbar's fade |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each part, so set yours on the part with a class.
+
+</ForMode>
+
+Plain CSS wins with no `!important`. The bar's `inline-size` (`block-size` when horizontal) is the
+pill's, and the thumb follows it; `background-color` on the Thumb recolors it. With only content
+inside, reach the parts through the Root's class. Its sizes are in `em`, so `font-size` scales it.
+Past its end, a wheel moves the page, as with any scroller; `overscroll-behavior: contain` on the
+Viewport stops that.
+
+```css
+.notes {
+  block-size: 16rem;
+}
+
+.notes .ow-scroll-area__scrollbar[data-orientation="vertical"] {
+  inline-size: 10px;
+}
+```
+
+## Motion [#motion]
+
+The scrollbar fades in as the pointer comes over the area and while it scrolls, by wheel, touch, or
+keyboard, stays while its thumb is held, and fades out. Only its opacity moves; scrolling from code
+does not show it. Faded edges are plain CSS from the distances Base UI measures as it scrolls, with
+nothing to transition. Reduced motion changes nothing, since only opacity moves.

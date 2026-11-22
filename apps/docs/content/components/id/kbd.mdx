@@ -1,0 +1,97 @@
+---
+title: Kbd
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Untuk menyalin kode sumbernya ke project Anda, pakai item `kbd` dari
+registry.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Kbd } from "owsem-ui/base";
+
+export function SearchHint() {
+  return (
+    <p>
+      Tekan <Kbd>⌘K</Kbd> untuk mencari.
+    </p>
+  );
+}
+```
+
+Kbd menampilkan sebuah tombol sebagai tuts kecil: tint datar dari warna teks tanpa tepi. Ukurannya
+mengikuti teks di sekitarnya, jadi satu Kbd pas di kalimat, field pencarian, atau ujung baris daftar.
+Taruh seluruh pintasan dalam satu Kbd (`⌘K`, `Ctrl K`), atau satu tombol per Kbd berdampingan.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Satu bagian: `<kbd>` dengan kelas `ow-kbd`.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `kbd.ow-kbd` | Tutsnya; 0,75 dari ukuran teks sekitar, setengah radius kontrol |
+
+## Referensi API [#api]
+
+### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `className` | `string` | | Ditambahkan ke `ow-kbd` |
+| `style` | `CSSProperties` | | Gaya inline |
+| `render` | `ReactElement \| (props) => ReactElement` | | Mengganti elemennya |
+
+Ref menuju `kbd`; prop lain diteruskan apa adanya. Ia tidak punya atribut data karena tidak punya state.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-kbd` | Root |
+
+## Aksesibilitas [#accessibility]
+
+Kbd tidak dapat difokus dan tidak punya interaksi keyboard.
+
+- Screen reader membaca teksnya, jadi tulis tombol seperti orang menyebutnya.
+- Bila kontrol sudah menamai pintasannya dengan `aria-keyshortcuts`, sembunyikan petunjuk yang hanya
+  visual dengan `aria-hidden`, seperti pencarian di dokumentasi ini.
+- Pada forced colors, tuts diberi garis tepi dalam warna sistem.
+
+## Tema [#theming]
+
+Kbd membaca token tema ini. Setel salah satunya pada Kbd, atau pada elemen di sekitarnya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-fg` | Isian tuts, tint 8% darinya, dan 30% teks tombol |
+| `--ow-muted` | Teks tombol, 70% darinya |
+| `--ow-radius` | Dibagi dua, sudut tuts |
+
+<ForMode mode="isolated">
+
+Pada mode isolated, nilainya ada di root tiap Kbd, jadi setel pada Kbd-nya sendiri.
+
+</ForMode>
+
+Semuanya diukur dalam `em`, jadi tuts menjaga proporsinya pada ukuran teks berapa pun.
+
+## Gerak [#motion]
+
+Kbd tidak bergerak: ia tidak punya state maupun transisi, jadi `prefers-reduced-motion` tidak
+mengubah apa pun.

@@ -27,7 +27,7 @@ export default async function DocsPage(props: PageProps<"/[lang]/docs/[[...slug]
         </header>
         <Mdx components={getMDXComponents(lang)} />
       </article>
-      <Toc items={page.data.toc} label={getDictionary(lang).lab.toc} />
+      <Toc items={page.data.toc} label={getDictionary(lang).common.toc} />
     </PageMain>
   );
 }

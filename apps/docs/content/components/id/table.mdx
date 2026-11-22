@@ -1,0 +1,162 @@
+---
+title: Table
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/owsem`. Untuk menyalin kode sumbernya ke project Anda, pakai item `table` dari
+registry.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Table } from "owsem-ui/owsem";
+
+export function Plans() {
+  return (
+    <Table.Root>
+      <Table.Caption>Paket</Table.Caption>
+      <Table.Header>
+        <Table.Row>
+          <Table.Head>Paket</Table.Head>
+          <Table.Head>Harga</Table.Head>
+        </Table.Row>
+      </Table.Header>
+      <Table.Body>
+        <Table.Row>
+          <Table.Cell>Gratis</Table.Cell>
+          <Table.Cell>$0</Table.Cell>
+        </Table.Row>
+      </Table.Body>
+    </Table.Root>
+  );
+}
+```
+
+Table adalah tabel HTML biasa yang digambar sebagai kartu yang tenang: judul muted di atas tint
+tipis, garis tipis antarbaris, tanpa garis vertikal. Tulis tabelnya di dalam `Table.Root`, dengan
+`Caption`, `Header` berisi sel `Head`, `Body` berisi `Row` dan `Cell`, serta `Footer` bila perlu.
+Root memuat scroller dan `<table>`, jadi `tableProps` adalah jalan ke `<table>` itu sendiri.
+
+Beri `Caption` atau judul sebelum tiap tabel. Caption berada di atas kartu, jadi dua tabel berurutan
+terbaca sebagai dua.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Kartu `div` yang memuat scroller dan `<table>`. Caption ada di dalam tabel pada markup dan digambar
+di atas kartu.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-table` | Kartunya; memuat `div.ow-table__scroll` dan `table.ow-table__table`. `data-layout` dan `data-size` |
+| <Part name="Caption" /> | `caption.ow-table__caption` | Judul kecil di atas kartu, satu baris |
+| <Part name="Header" /> | `thead.ow-table__header` | Judul kolom, di atas tint tipis |
+| <Part name="Head" /> | `th.ow-table__head` | Sel judul; `scope="col"` di header, `"row"` di tempat lain |
+| <Part name="Body" /> | `tbody.ow-table__body` | Baris data |
+| <Part name="Row" /> | `tr.ow-table__row` | Sebuah baris |
+| <Part name="Cell" /> | `td.ow-table__cell` | Sel data, rata atas |
+| <Part name="Footer" /> | `tfoot.ow-table__footer` | Baris penutup, seperti total |
+
+## Referensi API [#api]
+
+### Table.Root
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `layout` | `"auto" \| "table" \| "stack"` | `"auto"` | `"table"` selalu tabel, `"stack"` selalu menumpuk baris, `"auto"` menumpuk di bawah `stackBelow` |
+| `stackBelow` | `number` | `480` | Lebar Root dalam piksel di bawah mana `"auto"` menumpuk |
+| `size` | `"default" \| "sm"` | `"default"` | `"sm"` merapatkan padding sel |
+| `tableProps` | `ComponentProps<"table">` | | Props, termasuk `ref`, untuk `<table>` di dalam |
+| `aria-label`, `aria-labelledby` | `string` | | Menamai scroller saat menggulir; kalau tidak, Caption yang menamai |
+| `className`, `style` | `string`, `CSSProperties` | | Pada kartu |
+| `render` | `ReactElement \| (props) => ReactElement` | | Mengganti `div` kartu |
+
+#### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-layout` | Selalu; `"table"` atau `"stack"`, tata letak yang dipakai |
+| `data-size` | `size` diatur |
+| `data-overflow-start`, `data-overflow-end` | Pada `div.ow-table__scroll`: masih ada isi ke sisi itu |
+
+### Bagian lainnya
+
+#### Props bagian
+
+| Bagian | Elemen | Prop sendiri |
+| --- | --- | --- |
+| `Table.Caption` | `caption` | `visuallyHidden`: menyembunyikannya dari pandangan dan tetap jadi nama |
+| `Table.Head` | `th` | `scope`: `"col"` di header, `"row"` di tempat lain |
+| `Table.Header`, `Table.Body`, `Table.Footer`, `Table.Row`, `Table.Cell` | `thead`, `tbody`, `tfoot`, `tr`, `td` | Tidak ada |
+
+Setiap bagian menerima `className`, `style`, `render`, dan `ref` ke elemennya; prop lain diteruskan
+apa adanya.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-table` | Root |
+| `ow-table__scroll`, `ow-table__table` | Scroller dan tabel di dalam Root |
+| `ow-table__caption` | Caption |
+| `ow-table__header`, `ow-table__body`, `ow-table__footer` | Kelompok baris |
+| `ow-table__row` | Row |
+| `ow-table__head`, `ow-table__cell` | Head dan Cell |
+| `ow-table__value` | Nilai di dalam Cell |
+
+## Aksesibilitas [#accessibility]
+
+Ini tabel sungguhan, jadi teknologi bantu mendapat baris, kolom, dan judulnya.
+
+- Caption adalah nama tabel. Sembunyikan dari pandangan dengan `visuallyHidden` bila sebuah judul
+  sudah menyebutnya.
+- `Head` di header punya `scope="col"`, jadi tiap sel dibaca bersama kolomnya.
+- Saat bertumpuk, tabel tetap punya role tabelnya dan baris header tetap ada untuk pembaca layar,
+  jadi strukturnya tidak berubah saat lebarnya berubah.
+- Lebih lebar dari kartu, kartu menggulir dan menerima tombol Tab (`role="region"`, dinamai Caption,
+  `aria-label`, atau `aria-labelledby`), dan tombol panah menggulirnya. Bila tidak ada yang meluap,
+  ia tidak masuk urutan tab.
+- Pada forced colors, garis tipis dan tepi kartu memakai warna teks sistem.
+
+## Tema [#theming]
+
+Table membaca token tema ini. Atur satu pada sebuah tabel, atau pada apa pun di sekitarnya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-panel` | Isian kartu |
+| `--ow-surface-shadow` | Bayangan kartu |
+| `--ow-radius` | Sudut kartu |
+| `--ow-fg` | Teks sel, dan tint 4% untuk header dan footer |
+| `--ow-muted` | Judul kolom dan Caption |
+| `--ow-line` | Garis tipis |
+| `--ow-focus` | Cincin fokus tabel yang menggulir |
+
+<ForMode mode="isolated">
+
+Pada mode terisolasi nilainya ada di root tiap Table, jadi atur milik Anda pada Table itu sendiri.
+
+</ForMode>
+
+Table tidak menata `code` atau isi lain di sel; lakukan di CSS Anda sendiri. Jarak datang dari
+`size`; untuk yang lain, aturan pada `className` mengalahkan nilai bawaan komponen.
+
+## Gerak [#motion]
+
+Table tidak bergerak: pudarnya adalah gradien statis dan tidak ada yang beranimasi, jadi
+`prefers-reduced-motion` tidak mengubah apa-apa.

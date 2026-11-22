@@ -1,0 +1,87 @@
+---
+title: Separator
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Untuk menyalin kode sumbernya ke project Anda, pakai item `separator`
+dari registry.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Separator } from "owsem-ui/base";
+
+export function Settings() {
+  return (
+    <section>
+      <h3>Profil</h3>
+      <Separator />
+      <h3>Keamanan</h3>
+    </section>
+  );
+}
+```
+
+Separator memisahkan konten dengan garis tipis: satu garis 1px dalam warna garis, cukup tenang untuk
+membiarkan konten di depan. `orientation` adalah `horizontal` (bawaan) atau `vertical`. Separator
+vertikal mengisi tinggi baris di dalam container flex atau grid, dan tetap setebal 1px meski
+container merentangkannya.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Satu bagian. Base UI merender `<div role="separator">` dengan `aria-orientation` dan
+`data-orientation`; OwsemUI menambah kelas `ow-separator` dan menggambar garis sebagai border.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-separator` | `data-orientation`; membaca `--ow-line` |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-separator` | Root |
+
+## Aksesibilitas [#accessibility]
+
+Separator tidak dapat difokus dan tidak punya interaksi keyboard.
+
+- Screen reader mengumumkannya sebagai separator lewat `role="separator"` dan `aria-orientation`.
+- Pada forced colors, garis memakai warna sistem sehingga tetap terlihat.
+
+## Tema [#theming]
+
+Separator membaca satu token tema. Setel pada Separator, atau pada elemen di sekitarnya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-line` | Garisnya |
+
+<ForMode mode="isolated">
+
+Pada mode isolated, nilainya ada di root tiap Separator, jadi setel pada Separator-nya sendiri.
+
+</ForMode>
+
+## Gerak [#motion]
+
+Separator tidak bergerak: ia tidak punya state maupun transisi, jadi `prefers-reduced-motion` tidak
+mengubah apa pun.

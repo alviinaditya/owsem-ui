@@ -1,0 +1,117 @@
+---
+title: Toggle
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. To copy the source into your project instead, use the `toggle` item
+of the registry.
+
+## Usage [#usage]
+
+```tsx
+import { Toggle } from "owsem-ui/base";
+import { Pin } from "lucide-react";
+
+export function PinButton() {
+  return (
+    <Toggle startIcon={<Pin />} defaultPressed>
+      Pin
+    </Toggle>
+  );
+}
+```
+
+A toggle is a button with two states, on and off. Its sizes and spacing are Button's. Without
+children it is a square icon button and needs an `aria-label`. For a set of related toggles, see
+Toggle Group.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Base UI renders a `<button>` with `aria-pressed`; OwsemUI adds the `ow-toggle` class and
+`data-size`, and wraps each icon in a span.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `button.ow-toggle` | `aria-pressed`, `data-pressed` while on, `data-size`, and `data-icon-only` without children |
+| <Part name="Icon" /> | `span.ow-toggle__icon` | Decorative (`aria-hidden`), with `data-side="start"` or `"end"`; an svg or img inside fills it |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | 32, 40, or 48px tall, as a Button of its size |
+| `startIcon`, `endIcon` | `ReactNode` | | An icon before or after the label, the font size plus 2px; decorative, so the toggle needs a name |
+
+### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-size` | Always: `sm`, `md`, or `lg` |
+| `data-icon-only` | An icon and no children |
+
+Set `--py` in `style` to change the height. It never drops under 24px, the smallest target WCAG 2.5.8 allows.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-toggle` | Root |
+| `ow-toggle__icon` | Icon |
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| Tab | Moves focus to the toggle |
+| Space, Enter | Turns it on or off |
+
+- Screen readers announce a toggle button and its state through `aria-pressed`.
+- Keep the name the same in both states, such as "Bold": the state is what changes.
+- A toggle without children needs an `aria-label`; its icons are `aria-hidden`.
+- With `prefers-contrast: more` it gets no new edge; the tint and the focus ring carry it. In forced
+  colors an on toggle is filled with `Highlight`.
+- Right to left, `startIcon` sits on the right.
+
+## Theming [#theming]
+
+Toggle reads these theme tokens. Set one on a toggle, or on anything around it.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-muted` | Text while off |
+| `--ow-hover` | Tint under the pointer while off |
+| `--ow-fg` | Text under the pointer while off, and the base of the accent text |
+| `--ow-accent` | The on tint (14%, 18% on hover, 22% held) and its text |
+| `--ow-radius` | Corners |
+| `--ow-motion-scale` | How far a press goes in |
+| `--ow-focus` | Focus ring |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Toggle's root, so set yours on the toggle itself.
+
+</ForMode>
+
+## Motion [#motion]
+
+A press goes in first: held, the toggle shrinks to 0.97 and takes the deepest tint within 90 ms, then
+lets go on the settle spring with a small overshoot. Off to on only changes tone; nothing slides.
+With `prefers-reduced-motion`, the tone changes and the toggle does not move.

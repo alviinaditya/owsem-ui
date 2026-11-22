@@ -6,7 +6,7 @@ import type { Family } from "./catalog";
  * matched here in the browser. No network: the index travels with the page.
  */
 
-export type SearchKind = "pages" | "components" | "scenes";
+export type SearchKind = "pages" | "components" | "sections";
 
 export interface SearchEntry {
   /** Unique across the index. */
@@ -82,11 +82,11 @@ function score(entry: SearchEntry, terms: string[]): number {
 
 /**
  * The groups and items that match `query`, best first; every word of the query must match. An
- * empty query lists the pages and components, without the scenes.
+ * empty query lists the pages and components, without the sections.
  */
 export function searchGroups(groups: readonly SearchGroup[], query: string): SearchGroup[] {
   const terms = fold(query).trim().split(/\s+/).filter(Boolean);
-  if (!terms.length) return groups.filter((group) => group.value !== "scenes");
+  if (!terms.length) return groups.filter((group) => group.value !== "sections");
   return groups
     .map((group) => {
       const hits = group.items

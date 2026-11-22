@@ -1,7 +1,7 @@
 /**
  * Every v1.0 component, in PRD order: Base phases 1 to 3, then Owsem components. Base is a Base UI
  * component with OwsemUI's styling; Owsem is OwsemUI's own, beyond Base UI (PRD, principle 3). The docs
- * sidebar, index, and Lab routes and the registry build read it. Descriptions live in the
+ * sidebar, index, and component routes and the registry build read it. Descriptions live in the
  * dictionaries. Run by Node too (build-registry.ts): erasable TypeScript only.
  */
 
@@ -19,7 +19,7 @@ export interface CatalogEntry {
   phase?: 1 | 2 | 3;
   /** Expressions (PRD, Owsem scope): Base may have Tactile and Kinetic; Lumen and Surface are Owsem's. */
   expressions?: readonly Expression[];
-  /** "planned" shows a Coming soon page; the others need a Lab and a packages/ui folder. */
+  /** "planned" shows a Coming soon page; the others need examples and a packages/ui folder. */
   status: "planned" | "prototype" | "done";
 }
 
@@ -82,6 +82,7 @@ export const catalog = [
   { name: "icon-morph", title: "Icon Morph", family: "owsem", category: "display", expressions: ["kinetic"], status: "prototype" },
   { name: "copy-button", title: "Copy Button", family: "owsem", category: "action", expressions: ["kinetic"], status: "prototype" },
   { name: "code-block", title: "Code Block", family: "owsem", category: "display", expressions: ["kinetic"], status: "prototype" },
+  { name: "table", title: "Table", family: "owsem", category: "display", status: "prototype" },
 ] as const satisfies readonly CatalogEntry[];
 
 export type ComponentName = (typeof catalog)[number]["name"];

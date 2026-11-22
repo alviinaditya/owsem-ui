@@ -1,0 +1,231 @@
+---
+title: Select
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Di registry, itemnya `select`.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Select } from "owsem-ui/base";
+
+export function FruitSelect() {
+  return (
+    <Select.Root defaultValue="Ceri">
+      <Select.Trigger aria-label="Buah" />
+      <Select.Popup>
+        <Select.Item value="Apel">Apel</Select.Item>
+        <Select.Item value="Ceri">Ceri</Select.Item>
+      </Select.Popup>
+    </Select.Root>
+  );
+}
+```
+
+Select memilih satu nilai, atau beberapa, dari daftar dalam popup. Root, Trigger yang bernama, Popup, dan
+Item-nya adalah bentuk terpendeknya; bagian yang dilewatkan menggambar dirinya sendiri. Trigger adalah
+kolom setinggi Button. Popup terbuka di atasnya dengan teks item terpilih tepat di atas teks trigger,
+sehingga nilai yang Anda baca tidak bergeser; di dekat tepi atas atau bawah layar, saat dibuka lewat
+sentuhan, atau dengan `multiple`, popup menggantung 6px di bawah trigger, selebar trigger atau lebih.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Base UI merender bagian, role, dan keyboard-nya. OwsemUI menatanya, menambah Glide, mengatur satu `size`
+dari Root, membawa arah teks ke portal, dan menggambar apa yang Anda lewatkan. Root, Portal, Backdrop,
+Group, dan Arrow tidak menambah tampilan sendiri.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | tidak ada | Hanya state dan `size`; di Inspect, kotak yang memuat trigger dan popupnya |
+| <Part name="Label" /> | `div.ow-select__label` | Menamai trigger; tanpanya, beri trigger `aria-label` |
+| <Part name="Trigger" /> | `button.ow-select__trigger` | `role="combobox"`. Tanpa children: Value dan Icon |
+| <Part name="Value" /> | `span.ow-select__value` | `data-placeholder` saat kosong; `placeholder` trigger sampai ke Value yang digambarnya |
+| <Part name="Icon" /> | `span.ow-select__icon` | `chevrons-up-down` dari Lucide; children menggantikannya |
+| Backdrop | `div.ow-select__backdrop` | Milik select modal, digambar Portal-nya: bening, menutupi seluruh jendela, di bawah popup |
+| Positioner | `div.ow-select__positioner` | Di atas trigger selebarnya, atau 6px di bawah awalnya dan selebar trigger atau lebih. Popup tanpa Positioner menggambarnya, dan Portal |
+| <Part name="Popup" /> | `div.ow-select__popup` | `data-side` bernilai `none` saat di atas trigger |
+| ScrollUpArrow | `div.ow-select__scroll-up-arrow` | Muncul selama masih ada isi di atas |
+| List | `div.ow-select__list` | `role="listbox"`, memegang highlight Glide. Popup tanpa List langsung di dalamnya menggambarnya, dan kedua panah |
+| <Part name="GroupLabel" /> | `div.ow-select__group-label` | Menamai `Select.Group`-nya |
+| <Part name="Item" /> | `div.ow-select__item` | `role="option"`. Children biasa: ItemText, lalu ItemIndicator di ujung |
+| <Part name="ItemIndicator" /> | `span.ow-select__item-indicator` | Centang di ujung baris, sejajar chevron trigger. Tetap menyimpan tempatnya, dan memudar serta membesar masuk saat dipilih |
+| <Part name="ItemText" /> | `div.ow-select__item-text` | Yang mendarat di atas teks trigger; satu baris, dengan elipsis |
+| <Part name="Separator" /> | `div.ow-select__separator` | Garis tipis |
+| <Part name="ScrollDownArrow" /> | `div.ow-select__scroll-down-arrow` | Muncul selama masih ada isi di bawah |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### Select.Root
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Skala huruf trigger dan item; satu `size` untuk keduanya, sehingga teks item terpilih mendarat tepat di teks trigger |
+
+Select modal (bawaan) menahan gulir halaman lewat kunci milik OwsemUI, yang membiarkan `overflow` halaman. Popup yang diletakkan di atas trigger juga menahannya.
+
+| Ukuran | Font | Trigger | Baris | Ikon |
+| --- | --- | --- | --- | --- |
+| `sm` | 13px | 32px | 32px | 15px |
+| `md` | 14px | 40px | 33px | 16px |
+| `lg` | 16px | 48px | 40px | 18px |
+
+Trigger mengikuti aturan `--py` Button, jadi setinggi Button seukurannya. Pada `lg`, baris 40px membuat popup menutupi trigger 48px bahkan saat item pertama terpilih. Trigger tidak punya lebar sendiri: ia muat dengan nilainya, dan melebar bila Anda memintanya.
+
+### Select.Trigger
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `placeholder` | `ReactNode` | | Tampil saat belum ada yang dipilih, lewat Value yang digambar bila trigger tanpa children |
+
+#### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-size` | Selalu: `sm`, `md`, atau `lg` |
+
+### Select.Positioner
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `alignItemWithTrigger` | `boolean` | `true`; `false` dengan `multiple` | Meletakkan teks item terpilih di atas teks trigger. Bila itu tak bisa, popup menggantung dari awal trigger |
+| `align` | `"start" \| "center" \| "end"` | `"start"` | Default Base UI adalah `"center"` |
+| `sideOffset` | `number \| function` | `6` | Default Base UI adalah `0` |
+
+### Select.Popup
+
+#### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-size` | Selalu: `sm`, `md`, atau `lg` |
+| `data-instant` | Ia melewati animasi, saat dibuka dari keyboard |
+
+### Select.Icon, Select.ScrollUpArrow, Select.ScrollDownArrow
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | Chevron atas dan bawah; chevron atas; chevron bawah | Glyph seukuran ikon yang diganti oleh children Anda |
+
+### Select.ItemIndicator
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `keepMounted` | `boolean` | `true` | Tetap memakai ruangnya saat tidak dipilih, sehingga label tetap sejajar. Default Base UI adalah `false` |
+| `children` | `ReactNode` | Sebuah centang | Glyph seukuran ikon |
+
+### Select.Popup dan Item tanpa bagian
+
+Popup tanpa Positioner di sekelilingnya menggambar Portal dan Positioner. Tanpa List langsung di dalamnya, ia menggambar List dan kedua panah gulir di sekitar children-nya. Item dengan children biasa menaruhnya di ItemText, lalu ItemIndicator di ujung; bagian eksplisit tetap dalam urutan Anda.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-select__backdrop` | Backdrop |
+| `ow-select__label` | Label |
+| `ow-select__trigger` | Trigger |
+| `ow-select__value` | Value |
+| `ow-select__icon` | Icon |
+| `ow-select__positioner` | Positioner |
+| `ow-select__popup` | Popup |
+| `ow-select__scroll-up-arrow` | ScrollUpArrow |
+| `ow-select__scroll-down-arrow` | ScrollDownArrow |
+| `ow-select__list` | List |
+| `ow-select__item` | Item |
+| `ow-select__item-text` | ItemText |
+| `ow-select__item-indicator` | ItemIndicator |
+| `ow-select__group-label` | GroupLabel |
+| `ow-select__separator` | Separator |
+
+## Aksesibilitas [#accessibility]
+
+| Tombol | Aksi |
+| --- | --- |
+| Enter, Spasi, Panah Bawah, Panah Atas | Pada trigger: membuka daftar di item terpilih |
+| Panah Bawah, Panah Atas | Item berikutnya atau sebelumnya |
+| Home, End | Item pertama atau terakhir |
+| Enter, Spasi | Memilih item |
+| Escape | Menutup daftar; fokus kembali ke trigger |
+| Tab | Menutup daftar dan lanjut |
+| Sebuah huruf | Item berikutnya yang diawali huruf itu; pada trigger tertutup, langsung memilih item itu |
+
+- Pembaca layar mengumumkan combobox dengan nama dan nilainya, dan tiap opsi dengan state-nya. Beri nama
+  dengan `Select.Label`, atau `aria-label` pada trigger.
+- `modal` (true secara default) menjaga sisa halaman tak terjangkau selama daftar terbuka: backdrop bening
+  menerima tekanan di luar, sehingga tekanan itu hanya menutup daftar, dan halaman menahan gulirnya.
+  OwsemUI menahannya tanpa menyetel `overflow` pada halaman. Saat diletakkan di atas triggernya, daftar
+  tidak bisa mengikuti guliran, jadi halaman ditahan di sana walau dengan `modal={false}`.
+- Invalid adalah tint, pesan, dan gerak, tidak pernah warna saja. Asalnya dari `aria-invalid` atau `Field`
+  Base UI (`data-invalid`).
+- Dengan `prefers-contrast: more`, trigger mendapat tepi 1px dalam `--ow-edge` dan popup cincin 1px
+  tambahan. Pada forced colors trigger dan popup tetap punya tepi 1px dalam warna sistem, highlight
+  menjadi outline `Highlight`, dan teks nonaktif memakai `GrayText`.
+
+## Tema [#theming]
+
+Select membaca token tema ini. Pasang pada sebuah bagian dengan class, atau untuk semua select di `:root`.
+Class di sekeliling trigger tidak sampai ke popup, yang dirender di portal.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-fg` | Teks, dan tint trigger: 6% saat diam, 9% saat hover dan terbuka |
+| `--ow-critical` | Tint invalid |
+| `--ow-raised-bg` | Permukaan popup, dan panah |
+| `--ow-popup-shadow` | Bayangan popup |
+| `--ow-muted` | Placeholder, ikon, panah, dan label grup |
+| `--ow-hover` | Highlight (Glide) |
+| `--ow-line` | Pemisah |
+| `--ow-radius` | Sudut trigger dan popup; item dan Glide memakainya dikurangi padding 4px |
+| `--ow-focus` | Cincin fokus |
+
+<ForMode mode="isolated">
+
+Pada mode isolated nilainya berada di tiap bagian, jadi pasang milik Anda pada bagian itu dengan class.
+
+</ForMode>
+
+Setiap bagian menerima `className`, dan aturan Anda mengalahkan bawaan komponen tanpa `!important`.
+`--py`, `--px`, dan `--icon` menerima nilai lewat `style`.
+
+```css
+.field {
+  inline-size: 100%;
+  --ow-radius: 999px;
+}
+```
+
+## Gerak [#motion]
+
+Di atas triggernya, popup hanya memudar masuk dalam 180 ms dan, setelah jeda 60 ms yang membiarkan centang
+pilihan mendarat, keluar dalam 140 ms: ia tidak membesar, karena itu akan menggeser teks yang justru harus
+diam. Di samping trigger, ia tumbuh dari trigger, seperti Menu. Centang pilihan memudar dan membesar masuk
+dengan spring settle, dan Glide memindahkan satu highlight antar item. Dari keyboard, popup membuka dan
+menutup seketika. Dengan `prefers-reduced-motion`, popup hanya memudar di mana pun ia terbuka, Glide
+memudar alih-alih meluncur, dan trigger invalid berkedip alih-alih bergetar.

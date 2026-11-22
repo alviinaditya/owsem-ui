@@ -1,0 +1,187 @@
+---
+title: Code Block
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/owsem`. In the registry it is the `code-block` item, which installs Copy
+Button, Button, Icon Morph, and Tooltip with it.
+
+## Usage [#usage]
+
+```tsx
+import { CodeBlock } from "owsem-ui/owsem";
+import { Atom } from "lucide-react";
+import type { ReactNode } from "react";
+
+// `code` is highlighted at build time, such as with Shiki: a <pre>.
+export function FileSnippet({ name, code }: { name: string; code: ReactNode }) {
+  return (
+    <CodeBlock.Root>
+      <CodeBlock.Header>
+        <CodeBlock.Title icon={<Atom />}>{name}</CodeBlock.Title>
+        <CodeBlock.Copy />
+      </CodeBlock.Header>
+      <CodeBlock.Panel>{code}</CodeBlock.Panel>
+    </CodeBlock.Root>
+  );
+}
+```
+
+Code Block shows code on one surface: the panel fill with the surface shadow and no edge, a quiet
+header, and the code under it. The header has one icon, a title or a row of tabs, and Copy at the
+end. It does not highlight code: give each Panel its code highlighted already, such as by Shiki at
+build time, as a `<pre>`. Every code block in these docs is one.
+
+One snippet takes a Title; several take a List of Tabs, one per snippet, and a Panel each. The icon
+in front is the file's: give each Tab its own with `icon`, and the active tab's leads the list and
+morphs into the next one's as the tab changes. Tabs whose icons share a `key`, such as one terminal
+icon for every package manager, keep it still. When another snippet comes on show, the block's
+height glides to its new height instead of jumping.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Nine parts, and a Title in place of the List for one snippet.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-code-block` | The surface; Base UI's Tabs root, with `value`, `defaultValue`, `onValueChange` |
+| Header | `div.ow-code-block__header` | The row above the code |
+| <Part name="Icon" /> | `span.ow-code-block__icon` | Drawn by Title or List from their `icon`; `aria-hidden` |
+| Title | `span.ow-code-block__title` | One snippet's name, with `icon`. It names a Panel that scrolls |
+| <Part name="List" /> | `div.ow-code-block__list` | Base UI's Tabs list (`role="tablist"`); name it with `aria-label` |
+| <Part name="Tab" /> | `button.ow-code-block__tab` | `value`, and `icon` for the header. The active one has `data-active` and `aria-selected` |
+| Thumb | `span.ow-code-block__thumb` | A tint under the active tab; `aria-hidden` |
+| <Part name="Copy" /> | `button.ow-code-block__copy` | A Copy Button: `size="sm"`, an icon with its Tooltip, always in view |
+| <Part name="Panel" /> | `div.ow-code-block__panel` | The code, on the same surface. With `value`, Base UI's Tabs panel; without, a box the keyboard can focus while its code overflows |
+
+## API reference [#api]
+
+### CodeBlock.Root
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value`, `defaultValue` | the active Tab's `value` | | Which snippet is on show |
+| `onValueChange` | `(value, details) => void` | | Called when another tab is picked |
+
+Other props go to Base UI's [Tabs.Root](https://base-ui.com/react/components/tabs#api-reference), except `orientation`.
+
+### CodeBlock.List and CodeBlock.Tab
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `activateOnFocus` | `boolean` | `true` | List: the arrow keys pick as they move |
+| `value` | `any` | | Tab: pairs it with its Panel |
+| `icon` | `ReactElement` | | Tab: its snippet's icon, which leads the list while the tab is active |
+
+#### Data attributes
+
+| Data attribute | On | Present when |
+| --- | --- | --- |
+| `data-active` | Tab | It is the picked tab |
+| `data-visible` | Thumb | It sits under an active tab |
+| `data-held` | Tab, Thumb | Held down |
+
+Other props go to Base UI's [Tabs.List](https://base-ui.com/react/components/tabs#api-reference) and Tabs.Tab.
+
+### CodeBlock.Title, CodeBlock.Copy, and CodeBlock.Panel
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `icon` | `ReactElement` | | Title: the icon before it |
+| `value` | `string \| () => string` | The text of the Panel on show | Copy: what to copy |
+| `showLabel` | `boolean` | `false` | Copy: puts the word beside the icon, with no Tooltip |
+| `value` | the Tab's `value` | | Panel: its tab; leave it out for a single snippet |
+
+Copy takes every Copy Button prop except `value`'s default; other props pass through to each part's
+element, and so do refs. Panel's other props go to Base UI's [Tabs.Panel](https://base-ui.com/react/components/tabs#api-reference),
+`keepMounted` included. It copies the text of the Panel on show, read at the moment of the press, so
+it follows the tabs and any text a script changed. A prompt that CSS draws (`::before`) is not part
+of that text, so it stays out on its own. Code reads left to right on any page, and a line wider than
+the block scrolls sideways inside the Panel, never the page.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-code-block` | Root |
+| `ow-code-block__header` | Header |
+| `ow-code-block__icon` | The leading icon |
+| `ow-code-block__title` | Title |
+| `ow-code-block__list` | List |
+| `ow-code-block__tab` | Tab |
+| `ow-code-block__thumb` | Thumb |
+| `ow-code-block__copy` | Copy |
+| `ow-code-block__panel` | Panel |
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| Tab | The active tab, then Copy, then a Panel that scrolls |
+| Arrow Right, Arrow Left | The next or previous tab; they pick as they move |
+| Home, End | The first or last tab |
+| Arrow keys | On a focused Panel that scrolls: scroll it |
+
+- A List is named by its `aria-label`. A Panel that overflows is a region named by the Title, so the
+  keyboard can scroll it.
+- The icon is `aria-hidden`. Copy announces Copied in a status region, and its Tooltip names it.
+- Tabs that do not fit scroll sideways in the header; the focused one comes into view.
+- In forced colors, an outline draws the block, and the thumb takes `Highlight`.
+
+## Theming [#theming]
+
+Code Block reads these theme tokens. Set them on the block or around it.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-panel` | The surface, and under the thumb's tint |
+| `--ow-surface-shadow` | The surface's shadow |
+| `--ow-accent` | The thumb's 14% tint and the active tab's text |
+| `--ow-fg`, `--ow-muted` | Text, and the header's other text |
+| `--ow-hover` | Glide's highlight |
+| `--ow-radius` | The block's corners; the tabs, the thumb, and Glide take it less the header's 4px padding |
+| `--ow-focus` | The focus ring |
+| `--ow-font-mono` | The code's font, which your app sets |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each component's root, so set yours on the block itself.
+
+</ForMode>
+
+Copy reads the Button's and the Tooltip's tokens as well. The code's own colors come with your
+highlighted code; give it no background, so the panel shows.
+
+```css
+.snippets {
+  --ow-panel: #f3f0fa;
+}
+```
+
+## Motion [#motion]
+
+The thumb slides to the active tab on the travel spring, the icon morphs on the settle spring (Icon
+Morph), the block's height glides when another snippet comes on show, and the check in Copy draws
+itself in. The first render does not move. All of it follows `--ow-motion-scale`. With
+`prefers-reduced-motion`, the thumb and Glide only fade, the icon only crossfades, and the height
+changes at once.

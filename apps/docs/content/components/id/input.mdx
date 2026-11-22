@@ -1,0 +1,131 @@
+---
+title: Input
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Untuk menyalin kode sumbernya ke project Anda, pakai item `input` dari
+registry.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Input } from "owsem-ui/base";
+
+export function EmailInput() {
+  return <Input aria-label="Email" placeholder="nama@perusahaan.com" />;
+}
+```
+
+Input adalah kolom teks satu baris. Ia butuh nama: `Field.Label`, `<label>`, atau `aria-label`;
+placeholder bukan nama. Ia mengisi induknya, dan lebar buatan Anda mempersempitnya. Di dalam
+[Field](/id/field), Base UI mengatur state invalid dan disabled-nya.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Input adalah satu elemen, dengan dua elemen lagi hanya bila punya ikon.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Wrapper" /> | `span.ow-input__wrapper` | Hanya dengan ikon; tanpa tampilan, hanya menempatkan ikonnya |
+| <Part name="Input" /> | `input.ow-input` | Selalu kolomnya sendiri, dengan atau tanpa ikon |
+| <Part name="Icon" /> | `span.ow-input__icon` | Dekoratif (`aria-hidden`), `data-side="start"` atau `"end"` |
+
+Putuskan di render pertama apakah ia punya ikon: wrapper hadir bersama ikon pertama, dan menambahkannya
+kemudian me-remount input, yang membuatnya kehilangan fokus. Untuk ikon yang datang dan pergi, tukar
+satu node dengan node lain alih-alih memberi `null`.
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Ukuran Button: tinggi 32, 40, atau 48 px. Bukan lebar karakter native; setel `inline-size` untuk itu |
+| `startIcon` | `ReactNode` | | Ikon sebelum teks, ukuran font ditambah 2px |
+| `endIcon` | `ReactNode` | | Ikon setelah teks |
+
+`ref`, `className`, dan `style` sampai ke input meski ada ikon; custom property dan `fontSize` di `style` juga sampai ke wrapper,
+sehingga ikon mengikutinya.
+
+### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-size` | Selalu; pada input dan wrapper |
+
+| Ukuran | Font | Tinggi | Ikon |
+| --- | --- | --- | --- |
+| `sm` | 13px | 32px | 15px |
+| `md` | 14px | 40px | 16px |
+| `lg` | 16px | 48px | 18px |
+
+Input dan Button berukuran sama sejajar dalam satu baris. Setel `--py` di `style` untuk mengubah
+tingginya, atau `font-size` untuk menskalakan semuanya.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-input__wrapper` | Wrapper |
+| `ow-input` | Input |
+| `ow-input__icon` | Icon |
+
+## Aksesibilitas [#accessibility]
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab | Memindahkan fokus ke kolom |
+| Lainnya | Penyuntingan teks bawaan browser |
+
+- Ia `<input>` native, jadi autofill, spellcheck, dan input mode bekerja seperti biasa.
+- Ikon `aria-hidden`; input butuh namanya sendiri.
+- Invalid adalah tint, pesan, dan gerak, tidak pernah warna saja. Pasangkan `aria-invalid` dengan teks,
+  seperti error pada Field.
+- Dengan `prefers-contrast: more` kolom mendapat tepi 1px. Pada forced colors tepinya garis sistem 1px
+  (2px saat invalid), cincin fokusnya `Highlight`, dan disabled `GrayText`. Kanan-ke-kiri,
+  `startIcon` ada di kanan.
+
+## Tema [#theming]
+
+Input membaca token tema ini. Setel salah satunya pada input, atau pada elemen di sekitarnya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-fg` | Teks, dan tint di belakangnya: 6% saat diam, 9% saat hover |
+| `--ow-critical` | Tint saat invalid (14%) |
+| `--ow-muted` | Placeholder dan ikon |
+| `--ow-radius` | Sudut |
+| `--ow-focus` | Cincin fokus |
+
+<ForMode mode="isolated">
+
+Pada mode isolated, nilainya ada di root tiap Input, jadi setel pada input-nya sendiri.
+
+</ForMode>
+
+`className` mengalahkan nilai bawaan komponen tanpa `!important`, karena nilai itu ada di layer
+cascade yang lebih rendah; utilitas Tailwind menang dengan cara yang sama. Di baris flex, Input
+berikon menjaga wrapper-nya selebar penuh, jadi atur ukuran wrapper (`.ow-input__wrapper`) atau
+induknya.
+
+## Gerak [#motion]
+
+Tint berpindah antara diam, hover, dan invalid dengan ease singkat. Input yang menjadi invalid bergetar
+sekali, paling jauh 4px, dan tidak lagi saat Anda mengetik; yang sudah invalid sejak render pertama
+tetap diam. Dengan `prefers-reduced-motion`, getaran menjadi kedipan ke opasitas 60% dan kembali.

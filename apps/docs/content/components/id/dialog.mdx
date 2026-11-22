@@ -1,0 +1,168 @@
+---
+title: Dialog
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Di registry, itemnya `dialog`; tombol pada contoh juga butuh `button`.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Button, Dialog } from "owsem-ui/base";
+
+export function ShareDialog() {
+  return (
+    <Dialog.Root>
+      <Dialog.Trigger render={<Button />}>Bagikan</Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Popup>
+          <Dialog.Title>Bagikan draf</Dialog.Title>
+          <Dialog.Description>Siapa pun yang punya link bisa membacanya.</Dialog.Description>
+          <Dialog.Close render={<Button />}>Selesai</Dialog.Close>
+        </Dialog.Popup>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+```
+
+Dialog membuka jendela di atas halaman: judul, satu-dua baris, dan apa pun yang dibutuhkan tugasnya,
+di tengah pada material raised di atas scrim. Base UI menjaga fokus tetap di dalam, menahan gulir
+halaman, dan menangani keyboard. `Dialog.Trigger` dan `Dialog.Close` tidak punya tampilan sendiri,
+jadi keduanya memakai tombol Anda lewat `render`; tidak ada ikon tutup bawaan. Contoh di sini
+meletakkan dialog di sebuah jendela dan tidak memodalkannya, agar halaman ini tetap bisa dipakai.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Base UI merender bagian, penamaan dialog, fokus, dan kunci gulir. OwsemUI menata scrim, panel, judul,
+dan deskripsi, menggambar scrim secara default, dan membawa arah teks ke portal. Root dan Portal tidak
+menambah tampilan sendiri, dan Trigger serta Close memakai tombol Anda. Root tidak merender elemen,
+jadi di Inspect ia adalah jendela yang memuat trigger dan dialognya.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | tidak ada | Hanya state: `open`, `modal`, dan `handle` |
+| <Part name="Trigger" /> | Tombol Anda | Diteruskan ke `render`; `aria-haspopup`, `aria-expanded`, dan `data-popup-open` saat terbuka |
+| Portal | `div` | Memindahkan dialog ke akhir body, atau ke `container`, dan menggambar scrim |
+| <Part name="Backdrop" /> | `div.ow-dialog__backdrop` | Opsional: tulis hanya untuk mengubah scrim, dan ia menggantikan milik Portal |
+| Viewport | `div.ow-dialog__viewport` | Opsional, di sekitar Popup: ia yang menggulir, dan panel tetap setinggi isinya |
+| <Part name="Popup" /> | `div.ow-dialog__popup` | `role="dialog"`, `dir`, `--nested-dialogs`, dan `data-nested-dialog-open` |
+| <Part name="Title" /> | `h2.ow-dialog__title` | Menamai dialog; satu-satunya bagian yang diwajibkan aksesibilitas |
+| <Part name="Description" /> | `p.ow-dialog__description` | Mendeskripsikan dialog, muted |
+| <Part name="Close" /> | Tombol Anda | Menutup dialog |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### Dialog.Portal
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `backdrop` | `boolean` | `true` | Menggambar tirai di belakang dialog; `false` membiarkan halaman tidak redup. `Dialog.Backdrop` di antara children menggantikannya |
+
+### Dialog.Backdrop
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `forceRender` | `boolean` | `true` | Dirender juga di dialog bertumpuk, tempat ia meredupkan induk. Default Base UI adalah `false` |
+
+### Dialog.Popup
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `initialFocus` | Sama seperti Base UI | Dialog yang terlalu panjang mengambil fokus sendiri | Selain itu default Base UI berlaku, jadi dialog terbuka di awalnya, bukan tergulir ke tombol di ujung |
+
+Root di dalam Popup membuat dialog bertumpuk: induk mundur selama yang di dalamnya terbuka, dan `backdrop={false}` pada Portal dalam membiarkan induk tidak redup. Dialog modal juga menahan gulir halaman lewat kunci milik OwsemUI, sehingga teks halaman tidak digambar ulang selama dialog terbuka.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-dialog__backdrop` | Backdrop |
+| `ow-dialog__viewport` | Viewport |
+| `ow-dialog__popup` | Popup |
+| `ow-dialog__title` | Title |
+| `ow-dialog__description` | Description |
+
+## Aksesibilitas [#accessibility]
+
+| Tombol | Aksi |
+| --- | --- |
+| Enter, Spasi | Pada trigger: membuka dialog; fokus pindah ke dalamnya |
+| Tab, Shift + Tab | Berpindah antar kontrol dialog, dan tetap di dalam selama modal |
+| Escape | Menutup dialog teratas; fokus kembali ke yang membukanya |
+
+- Pembaca layar mengumumkan dialog bernama judulnya dan berdeskripsi deskripsinya, jadi selalu beri
+  `Dialog.Title` dan `Dialog.Close`.
+- `modal` bernilai `true` secara default: sisa halaman inert dan menahan gulirnya. `"trap-focus"` menjaga
+  fokus di dalam dan membiarkan gulir serta pointer; `false` membiarkan halaman bisa dipakai (tambahkan
+  `backdrop={false}` pada Portal, karena scrim menutupi halaman). OwsemUI menahan gulir tanpa menyetel
+  `overflow` pada halaman, sehingga teksnya tidak digambar ulang; saat dibuka lewat sentuhan, kunci
+  Base UI yang berlaku.
+- `initialFocus` dan `finalFocus` memilih ke mana fokus pergi.
+- Dengan `prefers-contrast: more`, panel mendapat cincin 1px dalam `--ow-edge`. Pada forced colors ia
+  tetap bertepi 1px dalam warna sistem. Dialog tidak membawa teks sendiri, jadi tidak ada yang perlu
+  diterjemahkan selain milik Anda.
+
+## Tema [#theming]
+
+Dialog membaca token tema ini. Setel pada Popup untuk satu panel, pada Portal agar scrim ikut, atau
+pada `:root` untuk semua dialog. Kelas di sekitar trigger tidak menjangkaunya: dialog dirender dalam
+portal, di luar subpohon trigger.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-backdrop` | Scrim |
+| `--ow-raised-bg` | Permukaan |
+| `--ow-popup-shadow` | Bayangan |
+| `--ow-edge` | Cincin pada `prefers-contrast: more` |
+| `--ow-fg` | Teks |
+| `--ow-muted` | Deskripsi |
+| `--ow-radius` | Sudut, satu radius untuk semua permukaan |
+| `--ow-focus` | Cincin saat panel sendiri mengambil fokus |
+| `--ow-ease-out` | Masuk dan keluar |
+
+<ForMode mode="isolated">
+
+Pada mode isolated, nilainya ada di tiap Popup, jadi setel pada Popup dengan sebuah kelas.
+
+</ForMode>
+
+Tiap aturan Dialog berbobot satu kelas, jadi kelas Anda, atau utilitas Tailwind, menang tanpa
+`!important`. Ukurannya dalam `em`, jadi `font-size` pada Popup menskalakan panel. Sheet hanyalah CSS,
+seperti pada contoh Sheet.
+
+```css
+.wide {
+  inline-size: 40em; /* 32em secara default; tetap 16px di dalam layar */
+  padding: 24px;
+}
+```
+
+## Gerak [#motion]
+
+Panel memudar masuk dan tumbuh dari 0,96 dalam 250 ms, dari tengahnya sendiri, tanpa translate agar
+tetap di tengah; scrim hanya memudar, dan keduanya keluar dalam 200 ms. Induk mundur 16px dan ke 0,95
+untuk tiap dialog yang bertumpuk di dalamnya. Dengan `prefers-reduced-motion`, panel memudar tanpa
+tumbuh, dan induk tetap di tempat.

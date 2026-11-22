@@ -1,0 +1,196 @@
+---
+title: Color Picker
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/owsem`: Color Picker adalah komponen Owsem, jadi punya entri sendiri. Di registry,
+itemnya `color-picker`.
+
+## Penggunaan [#usage]
+
+```tsx
+"use client";
+
+import { ColorPicker } from "owsem-ui/owsem";
+import { useState } from "react";
+
+export function BrandColor({ onSave }: { onSave: (color: string) => void }) {
+  const [color, setColor] = useState("#7c6ab8");
+  return <ColorPicker value={color} onChange={setColor} onChangeComplete={onSave} />;
+}
+```
+
+Color Picker memilih warna seperti yang diharapkan desainer: seret di atas saturasi dan kecerahan, geser
+rona dan opasitas, ketik hex, RGB, atau HSL, atau ambil swatch. Pakai sebagai panel inline, atau buka dari
+trigger dengan `ColorPickerPopover`. `onChange` mengikuti setiap gerakan, untuk pratinjau langsung;
+`onChangeComplete` datang sekali saat perubahan selesai, untuk menyimpan atau pekerjaan yang terlalu berat
+untuk setiap frame.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Panelnya sepuluh bagian dalam satu `div`.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-color-picker` | Panelnya; token tema yang dipasang di sini hanya berlaku untuknya; `data-disabled` |
+| <Part name="Area" /> | `div.ow-color-picker__area` | `role="slider"` dua dimensi, dengan tombol sendiri; `data-dragging` saat diseret |
+| Thumb | `span.ow-color-picker__thumb` | Cincin di sekeliling warna dengan garis gelap 1px, juga pada tiap slider (`div` dengan `data-dragging`) |
+| <Part name="Hue" /> | `div.ow-color-picker__slider` | `Slider` Base UI, `data-channel="hue"`; `div.ow-color-picker__control`-nya memuat `div.ow-color-picker__track` |
+| <Part name="Alpha" /> | `div.ow-color-picker__slider` | `Slider` Base UI di atas papan catur, `data-channel="alpha"` |
+| <Part name="EyeDropper" /> | `button.ow-color-picker__tool` | Hanya di browser yang punya EyeDropper API |
+| <Part name="Preview" /> | `span.ow-color-picker__preview` | Warna saat ini, setinggi kedua track |
+| <Part name="Format" /> | `button.ow-color-picker__format` | Berganti HEX, RGB, dan HSL |
+| <Part name="Field" /> | `label.ow-color-picker__field` | Memuat `input.ow-color-picker__input`; huruf di bawahnya, `span.ow-color-picker__label`, adalah notasi |
+| <Part name="Swatches" /> | `div.ow-color-picker__swatches` | `ToggleGroup` Base UI; tiap `button.ow-color-picker__swatch` punya `aria-pressed` dan `data-pressed`, serta `data-alpha` bila transparan |
+
+`div.ow-color-picker__tools` memuat eye dropper, slider (dalam `div.ow-color-picker__sliders`), dan
+preview; `div.ow-color-picker__inputs` memuat tombol format dan kolom. Ikonnya `svg.ow-color-picker__icon`.
+
+`ColorPickerPopover` menambah trigger, `button.ow-color-picker__trigger` (`Popover.Trigger` Base UI, dengan
+`data-size` dan `data-variant`), yang menampilkan `span.ow-color-picker__chip` (`data-alpha` bila
+transparan) dan `span.ow-color-picker__value`, serta popup, `div.ow-color-picker__popup` (`Popover.Popup`,
+sebuah dialog, dalam `div.ow-color-picker__positioner`), yang memuat panel. Popup berjangkar pada kotak
+trigger saat diam, bukan saat ditekan, sehingga tidak melompat selagi trigger memantul kembali.
+
+## Referensi API [#api]
+
+### ColorPicker
+
+| Prop | Tipe | Default |
+| --- | --- | --- |
+| `value` | `string` | |
+| `defaultValue` | `string` | `#7c6ab8` |
+| `onChange` | `(value, color) => void` | |
+| `onChangeComplete` | `(value, color) => void` | |
+| `format` | `"hex" \| "rgb" \| "hsl"` | `"hex"` |
+| `alpha`, `inputs`, `eyeDropper` | `boolean` | `true` |
+| `swatches` | `ColorSwatch[] \| false` | 16 warna |
+| `disabled` | `boolean` | `false` |
+| `labels` | `Partial<ColorPickerLabels>` | Inggris |
+
+`value` dan `defaultValue` menerima hex, `rgb()`, `hsl()`, atau warna CSS apa pun yang bisa diurai
+browser, seperti `oklch()` atau `var(--ow-accent)`. `ColorSwatch` adalah sebuah warna, atau `{ color, label }`
+dengan nama untuk diumumkan. `color` adalah semua model sekaligus: `{ hex, rgb, hsl, hsv }`. Ref menuju
+`div`; prop lain diteruskan.
+
+### ColorPickerPopover
+
+Menerima prop yang sama, ditambah milik trigger:
+
+| Prop | Tipe | Default |
+| --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| `variant` | `"field" \| "swatch"` | `"field"` |
+| `side`, `align`, `sideOffset` | Positioner Popover | `"bottom"`, `"start"`, `8` |
+| `disabled` | `boolean` | `false` |
+| `children` | `ReactNode` | Warna dan nilainya |
+
+Ref menuju `button` trigger. `open`, `defaultOpen`, dan `onOpenChange` adalah prop [Popover.Root](https://base-ui.com/react/components/popover#api-reference) Base UI; `side`, `align`, dan `sideOffset` menuju Positioner-nya, dengan default yang berbeda dari Base UI (`"bottom"`, `"center"`, `0`). Beri nama kolom dari labelnya ditambah nilainya sendiri:
+
+```tsx
+<span id="brand-label">Warna merek</span>
+<ColorPickerPopover id="brand" aria-labelledby="brand-label brand" defaultValue="#7c6ab8" />
+```
+
+`parseColor`, `formatColor`, dan konversinya (`hsvaToRgba`, `rgbaToHsva`, `hsvaToHsla`, `hslaToHsva`,
+`rgbaToHex`) juga diekspor, dan berjalan di Server Component.
+
+| Atribut data | Pada | Ada saat |
+| --- | --- | --- |
+| `data-disabled` | Root | Pemilih nonaktif |
+| `data-dragging` | Area, thumb | Seretan sedang berjalan |
+| `data-channel` | Slider | `hue` atau `alpha` |
+| `data-alpha` | Swatch, chip | Warnanya transparan |
+| `data-size`, `data-variant` | Trigger popover | Ukuran dan variannya |
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-color-picker` | Root |
+| `ow-color-picker__tools`, `ow-color-picker__tool` | Baris alat, dan eye dropper-nya |
+| `ow-color-picker__area` | Area |
+| `ow-color-picker__thumb` | Thumb |
+| `ow-color-picker__sliders`, `ow-color-picker__slider` | Slider rona dan opasitas |
+| `ow-color-picker__control`, `ow-color-picker__track` | Control dan track slider |
+| `ow-color-picker__preview` | Pratinjau warna |
+| `ow-color-picker__inputs`, `ow-color-picker__format` | Kolom, dan tombol format |
+| `ow-color-picker__field`, `ow-color-picker__input`, `ow-color-picker__label` | Sebuah kolom, input, dan hurufnya |
+| `ow-color-picker__swatches`, `ow-color-picker__swatch` | Swatch |
+| `ow-color-picker__icon` | Ikon |
+| `ow-color-picker__trigger`, `ow-color-picker__chip`, `ow-color-picker__value` | Trigger popover, warnanya, dan nilainya |
+| `ow-color-picker__positioner`, `ow-color-picker__popup` | Positioner dan panel popover |
+
+## Aksesibilitas [#accessibility]
+
+Tab bergerak melalui area, eye dropper, slider, tombol format, kolom, dan swatch.
+
+| Di mana | Tombol | Aksi |
+| --- | --- | --- |
+| Area | Tombol panah | Saturasi (kiri, kanan) atau kecerahan (atas, bawah) sebesar 1; dengan Shift, 10 |
+| Area | Page Up, Page Down | Kecerahan sebesar 10 |
+| Area | Home, End | Saturasi ke 0 atau 100 |
+| Rona, opasitas | Tombol panah, Page Up, Page Down, Home, End | Tombol Slider Base UI |
+| Kolom | Panah Atas, Panah Bawah | Angka sebesar 1; dengan Shift, 10 |
+| Kolom | Enter | Menerapkan hex |
+| Kolom | Escape | Membatalkan edit; Escape kedua menutup popover |
+| Swatch | Tombol panah, Enter, Spasi | Berpindah antar swatch, dan menerapkannya |
+| Trigger | Enter, Spasi | Membuka popover pada area; Escape menutupnya dan fokus kembali |
+
+- Area adalah `role="slider"` yang `aria-valuetext`-nya menyebut kedua nilai, seperti "Saturasi 42%,
+  Kecerahan 72%". Rona dan opasitas adalah slider Base UI, dengan input range di tiap thumb.
+- Setiap kata yang ditampilkan atau diumumkan pemilih ada di `labels`; versi Indonesia halaman ini
+  meneruskan yang berbahasa Indonesia. Huruf format dan kanal (HEX, R, G, B, H, S, L, A) adalah notasi dan
+  tetap.
+- Swatch yang cocok dengan warna saat ini membawa centang, gelap atau terang sesuai warnanya.
+- Pada forced colors, area, track, dan swatch tetap memakai warnanya sendiri di dalam outline warna sistem,
+  fokus memakai `Highlight`, dan swatch saat ini mendapat outline `Highlight`. Dengan
+  `prefers-contrast: more`, kolom mendapat tepi 1px dalam `--ow-edge` dan popover cincin di dalamnya. Pada
+  kanan ke kiri, saturasi, rona, dan opasitas tumbuh ke kiri.
+
+## Tema [#theming]
+
+Color Picker membaca token tema ini. Pasang pada pemilih, atau pada elemen di sekelilingnya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-panel` | Panel, dan kotak terang papan catur |
+| `--ow-surface-shadow` | Bayangan panel |
+| `--ow-line` | Kotak gelap papan catur, dan garis tipis di atas swatch |
+| `--ow-raised-bg`, `--ow-popup-shadow` | Isian dan bayangan popover |
+| `--ow-fg`, `--ow-muted`, `--ow-focus` | Teks, label, dan cincin fokus; `--ow-fg` juga mewarnai kolom (6%, 9% saat hover) dan tombol eye dropper dan format |
+| `--ow-radius` | Sudut panel, area, kolom, dan tombol; swatch 2px lebih kecil, warna trigger setengahnya |
+
+<ForMode mode="isolated">
+
+Pada mode isolated nilainya berada di root tiap pemilih, jadi pasang milik Anda pada pemilihnya sendiri,
+seperti `.brand-picker.ow-color-picker`.
+
+</ForMode>
+
+Lebar (256px) dan tinggi area (160px) adalah tata letak: atur `inline-size` pada pemilih dengan
+`className` atau `style`, dan `block-size` pada `.ow-color-picker__area`-nya. Gradien, spektrum rona,
+cincin putih thumb dengan garis gelapnya, dan centang pada swatch tetap sama di setiap tema, sehingga
+terbaca di atas warna apa pun. Panel popover di-portal ke body, jadi pasang tokennya di tempat yang bisa
+dibaca popup, seperti `:root`; ia membawa tema dan arah triggernya sendiri.
+
+## Gerak [#motion]
+
+Thumb memadat di bawah pointer dan memantul kembali saat dilepas; tombol dan swatch mengecil sedikit saat
+ditekan. Popover memudar di tempat dalam 150 ms dan keluar dalam 100 ms, tanpa skala: ia besar, jadi skala
+menggeser tepi jauhnya hingga terbaca sebagai pergeseran. Dibuka dari keyboard, ia muncul seketika. Dengan
+`prefers-reduced-motion`, popover tetap memudar, dan thumb, tombol, serta swatch mempertahankan ukurannya.

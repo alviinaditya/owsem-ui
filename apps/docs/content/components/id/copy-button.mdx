@@ -1,0 +1,138 @@
+---
+title: Copy Button
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/owsem`. Untuk menyalin kode sumbernya ke project Anda, pakai item
+`copy-button` dari registry, yang memasang Button, Icon Morph, dan Tooltip bersamanya.
+
+## Penggunaan [#usage]
+
+```tsx
+import { CopyButton } from "owsem-ui/owsem";
+
+export function InviteLink({ url }: { url: string }) {
+  return (
+    <div>
+      <code>{url}</code>
+      <CopyButton value={url} labels={{ copy: "Salin link", copied: "Tersalin" }} />
+    </div>
+  );
+}
+```
+
+Copy Button menyalin sepotong teks, seperti link, perintah, atau kunci. Ia adalah Button yang ikon
+salinnya berubah menjadi centang yang tergambar sendiri, lalu kembali sesaat kemudian. Tekanan
+menulis `value` dengan Clipboard API; begitu browser mengonfirmasi, ikon berubah menjadi centang dan
+`onCopy` menerima teksnya. Setelah `timeout` ia kembali. Sampai saat itu ia sibuk dan tekanan lain
+tidak menyalin lagi.
+
+Bila browser menolak, atau tidak punya Clipboard API (di luar konteks aman, seperti `http` biasa),
+tidak ada yang tampil tersalin dan `onError` menerima alasannya, sehingga Anda bisa menampilkan
+teksnya untuk dipilih. `onClick` Anda berjalan lebih dulu; `preventDefault()` di dalamnya melewati
+penyalinan.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Button dan bagiannya, dengan ikon di Icon Morph, dan region status di sebelah tombol. Hanya ikon,
+sebuah Tooltip menamainya: popup-nya (`div.ow-tooltip__popup`, di portal) berkata Salin, berubah
+menjadi Tersalin di tempat saat ditekan, dan tetap terbuka selama centang tampil. Dengan label tidak
+ada Tooltip.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `button.ow-button.ow-copy-button` | Button: `data-variant`, `data-size`, `data-icon-only` tanpa label, serta `data-copied` dan `aria-disabled="true"` saat menampilkan Tersalin |
+| <Part name="Icon" /> | `svg.ow-copy-button__icon` | Salin, atau centang (`.ow-copy-button__check`), di slot ikon Button, ditukar oleh Icon Morph |
+| <Part name="Label" /> | `span.ow-copy-button__label` | Dengan `showLabel`: kedua kata (`__label-text`), yang tampil punya `data-visible` |
+| Status | `span.ow-copy-button__status` | `role="status"` setelah tombol, tersembunyi secara visual: berkata Tersalin selama tampil |
+
+## Referensi API [#api]
+
+### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `value` | `string \| () => string` | | Teks yang disalin, atau fungsi yang dibaca saat tombol ditekan |
+| `timeout` | `number` | `1600` | Berapa lama ia menampilkan Tersalin, dalam ms |
+| `labels` | `{ copy?: string; copied?: string }` | `{ copy: "Copy", copied: "Copied" }` | Kata yang ditampilkan dan diumumkan, untuk terjemahan |
+| `showLabel` | `boolean` | `false` | Menampilkan label di samping ikon, bukan Tooltip |
+| `duration` | `string` | Milik spring settle | Lama pertukaran ikon, waktu CSS seperti `"300ms"` |
+| `onCopy` | `(text: string) => void` | | Setelah teks ada di clipboard |
+| `onError` | `(error: unknown) => void` | | Saat browser menolak atau tak punya Clipboard API |
+| `variant` | `ButtonVariant` | `"ghost"` | Seperti Button |
+
+`size`, `disabled`, `className`, `style`, `onClick`, dan prop Button lainnya diteruskan (kecuali
+`startIcon`, `endIcon`, `loading`, atau `children`), begitu juga ref ke `button`.
+
+### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-variant`, `data-size` | Selalu, seperti pada Button |
+| `data-icon-only` | Tanpa `showLabel` |
+| `data-copied` | Saat menampilkan Tersalin |
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-copy-button` | Root |
+| `ow-copy-button__icon`, `ow-copy-button__check` | Icon, dan centangnya |
+| `ow-copy-button__label`, `ow-copy-button__label-text` | Label, dan tiap katanya |
+| `ow-copy-button__tip`, `ow-copy-button__tip-text` | Kata di Tooltip |
+| `ow-copy-button__status` | Status |
+
+## Aksesibilitas [#accessibility]
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab | Memindahkan fokus ke tombol |
+| Enter, Space | Menyalin |
+
+- Namanya tetap sama saat menampilkan Tersalin; region status yang mengumumkan penyalinan, jadi
+  screen reader mendengarnya sekali. Dengan label, namanya adalah kata yang tampil.
+- Saat menampilkan Tersalin ia `aria-disabled`, jadi terbaca tidak tersedia sampai siap lagi, dan
+  tetap memegang fokus.
+- Ikon `aria-hidden`. Tooltip hanya mengulang nama dan status, jadi tidak ada yang bergantung padanya.
+- Dengan `prefers-reduced-motion`, ikon hanya crossfade dan centang langsung ada. Pada forced
+  colors, Button menggambar tepinya dan ikon memakai warna teksnya.
+
+## Tema [#theming]
+
+Copy Button menerima semua prop Button dan membaca token tema Button (lihat Button), ditambah ini.
+Setel salah satunya pada tombol, atau pada elemen di sekitarnya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-spring-settle`, `--ow-spring-settle-duration` | Pertukaran ikon dan centang yang tergambar; `duration` menetapkan lamanya pada satu tombol |
+| `--ow-tooltip-bg`, `--ow-tooltip-fg` | Tooltip, hanya ikon |
+| `--ow-motion-scale` | Seberapa jauh ikon menyusut dan mengabur saat pertukaran |
+| `--ow-ease-out` | Crossfade pada reduced motion |
+
+<ForMode mode="isolated">
+
+Pada mode isolated, nilainya ada di root tiap komponen, jadi setel pada tombolnya sendiri.
+
+</ForMode>
+
+## Gerak [#motion]
+
+Ikon bertukar pada spring settle: ikon salin menyusut dan mengabur keluar saat centang masuk, dan
+centang menggambar goresannya pada spring yang sama, seperti ditulis tangan. Dengan label, kedua
+kata berbagi satu sel, jadi lebarnya tetap dan tak ada yang bergeser di sekitarnya. Di Tooltip, kata
+berubah di tempat dan popup melebar atau menyempit dengan halus. Dengan `prefers-reduced-motion`,
+ikon hanya crossfade dan centang langsung ada.

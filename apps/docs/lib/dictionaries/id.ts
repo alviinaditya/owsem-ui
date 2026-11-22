@@ -181,6 +181,8 @@ export const id = {
     progress: "Kemajuan tugas, dengan nilai pasti atau tak tentu.",
     meter: "Nilai dalam rentang, dengan warna status.",
     "lumen-rail-nav": "Navigasi sidebar dengan cahaya yang berjalan di sepanjang rail.",
+    sidebar:
+      "Navigasi situs berkelompok, dengan pil di samping halaman yang dibuka; laci modal di seluler.",
     "tree-rail-nav":
       "Navigasi sidebar tiga tingkat, dengan jejak di sepanjang rail menuju halaman yang dibuka.",
     "command-menu":

@@ -20,6 +20,7 @@ import RadioGroupPage from "./radio-group";
 import ScrollAreaPage from "./scroll-area";
 import SelectPage from "./select";
 import SeparatorPage from "./separator";
+import SidebarPage from "./sidebar";
 import SwitchPage from "./switch";
 import TablePage from "./table";
 import TableOfContentsPage from "./table-of-contents";
@@ -59,6 +60,7 @@ export const examples: Partial<Record<ComponentName, ComponentType<ExamplePagePr
   "toggle-group": ToggleGroupPage,
   toolbar: ToolbarPage,
   "table-of-contents": TableOfContentsPage,
+  sidebar: SidebarPage,
   "tree-rail-nav": TreeRailNavPage,
   tooltip: TooltipPage,
   tabs: TabsPage,

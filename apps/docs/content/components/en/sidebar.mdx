@@ -1,0 +1,362 @@
+---
+title: Sidebar
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/owsem`: Sidebar is an Owsem component, so it has its own entry. In the
+registry it is the `sidebar` item.
+
+## Usage [#usage]
+
+```tsx
+import { Sidebar } from "owsem-ui/owsem";
+
+export function AppSidebar({ path }: { path: string }) {
+  return (
+    <Sidebar.Provider>
+      <Sidebar.Root aria-label="Documentation">
+        <Sidebar.Header>Documentation</Sidebar.Header>
+        <Sidebar.Content>
+          <Sidebar.Indicator />
+          <Sidebar.Group>
+            <Sidebar.GroupLabel>Get started</Sidebar.GroupLabel>
+            <Sidebar.List>
+              <Sidebar.Item href="/" active={path === "/"}>
+                Overview
+              </Sidebar.Item>
+              <Sidebar.Item href="/install" active={path === "/install"}>
+                Installation
+              </Sidebar.Item>
+            </Sidebar.List>
+          </Sidebar.Group>
+        </Sidebar.Content>
+      </Sidebar.Root>
+      <main>{/* the page */}</main>
+    </Sidebar.Provider>
+  );
+}
+```
+
+Sidebar is the site navigation: groups of quiet rows, a liquid background and dot for the current page, and
+a faint highlight that glides between the other rows on hover (Glide, from `owsem-ui/core`). The
+Provider holds the open state of both modes, so a `Sidebar.Trigger` can sit anywhere under it. Closed
+on desktop, the sidebar slides out, fades, and leaves its box, so the page beside it takes the room.
+Under `mobileQuery`, it becomes a modal drawer from the inline start, with a focus trap, Esc, and a
+scrim; choosing an item closes it.
+
+The width is the Root's `inline-size` (248px by default): set it with a class or `style`. The content
+scrolls on its own, with its scrollbar hidden and its edges fading where there is more to scroll, and
+the current item scrolls into view.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Thirteen parts. The Provider wraps the Root and the page; the Root holds an optional Header, the
+scrolling Content, and an optional Footer.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Provider" /> | `div.ow-sidebar__provider` | A flex box with the state of both modes; `data-sidebar-state` and `data-sidebar-mobile` let the page around the sidebar be laid out from CSS |
+| <Part name="Root" /> | `nav.ow-sidebar` | Named "Sidebar" unless you set `aria-label`. On mobile, a Base UI `Dialog.Popup` with `data-mobile`, and a `div.ow-sidebar__backdrop` behind it |
+| <Part name="Header" /> | `div.ow-sidebar__header` | Fixed above Content: a logo, a search field, a Trigger |
+| <Part name="Content" /> | `div.ow-sidebar__content` | The scrolling middle; it holds Glide's highlight and the Indicator |
+| <Part name="Group" /> | `div.ow-sidebar__group` | One section: a label and a list |
+| <Part name="GroupLabel" /> | `div.ow-sidebar__group-label` | A small heading in capitals |
+| <Part name="List" /> | `ul.ow-sidebar__list` | Its inline-start padding is the gutter the Indicator lives in |
+| <Part name="Item" /> | `li.ow-sidebar__item > a.ow-sidebar__link` | The li and its link; `render` swaps in a router link. Text is wrapped in `span.ow-sidebar__label` and truncated with an ellipsis |
+| <Part name="ItemIcon" /> | `span.ow-sidebar__icon` | A leading icon, 1rem; `aria-hidden` unless you set `aria-label` |
+| <Part name="ItemBadge" /> | `span.ow-sidebar__badge` | A small tag at the end of an item, such as "New" |
+| <Part name="Indicator" /> | `span.ow-sidebar__indicator` | A tinted background behind the active item, with a dot in the gutter at its start end, drawn as SVG; render it once inside Content |
+| <Part name="Footer" /> | `div.ow-sidebar__footer` | Fixed below Content |
+| <Part name="Trigger" /> | `button.ow-sidebar__trigger` | Toggles the sidebar of the current mode; a panel icon unless you pass children |
+
+## API reference [#api]
+
+Sidebar is an Owsem component with no Base UI counterpart, so this is its whole API, apart from the
+drawer, which is a Base UI Dialog. Every part but the Provider's state takes the props of its element
+as they are, and refs. `render` swaps the element on every part except ItemIcon and ItemBadge.
+`useSidebar()` returns `{ open, setOpen, toggle, mobile, mobileOpen, setMobileOpen }` for a control of
+your own under the Provider.
+
+### Sidebar.Provider
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `open` | `boolean` | | The desktop state, controlled |
+| `defaultOpen` | `boolean` | `true` | The desktop state, uncontrolled |
+| `onOpenChange` | `(open: boolean) => void` | | Called when the desktop state changes |
+| `mobileOpen` | `boolean` | | The drawer state, controlled |
+| `defaultMobileOpen` | `boolean` | `false` | The drawer state, uncontrolled |
+| `onMobileOpenChange` | `(open: boolean) => void` | | Called when the drawer opens or closes |
+| `mobileQuery` | `string` | `"(max-width: 767px)"` | The media query under which the sidebar is a drawer |
+| `shortcut` | `string \| false` | `"b"` | The key that, with Ctrl or Cmd, toggles the sidebar; `false` turns it off |
+| `render` | `ReactElement \| (props, state) => ReactElement` | | Swaps the element |
+
+#### Data attributes
+
+| Data attribute | On | Present when |
+| --- | --- | --- |
+| `data-sidebar-state` | Provider | Always; `open` or `closed` for the current mode |
+| `data-sidebar-mobile` | Provider | `mobileQuery` matches, so the sidebar is a drawer |
+
+### Sidebar.Root
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `aria-label` | `string` | `"Sidebar"` | The name of the nav or drawer |
+| `render` | `ReactElement \| (props, state) => ReactElement` | | Swaps the element |
+
+#### Data attributes
+
+| Data attribute | On | Present when |
+| --- | --- | --- |
+| `data-state` | Root (desktop) | Always; `open` or `closed` |
+| `data-mobile` | Root | The sidebar is a drawer |
+| `data-starting-style`, `data-ending-style` | Root (drawer), backdrop | The drawer is opening or closing |
+
+A closed desktop Root is `inert`.
+
+### Sidebar.Header
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `render` | `ReactElement \| (props, state) => ReactElement` | | Swaps the element |
+
+#### Data attributes
+
+None.
+
+### Sidebar.Content
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `render` | `ReactElement \| (props, state) => ReactElement` | | Swaps the element |
+
+#### Data attributes
+
+| Data attribute | On | Present when |
+| --- | --- | --- |
+| `data-overflow-start` | Content | There is more to scroll toward the start |
+| `data-overflow-end` | Content | There is more to scroll toward the end |
+
+### Sidebar.Group
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `render` | `ReactElement \| (props, state) => ReactElement` | | Swaps the element |
+
+#### Data attributes
+
+None.
+
+### Sidebar.GroupLabel
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `render` | `ReactElement \| (props, state) => ReactElement` | | Swaps the element |
+
+#### Data attributes
+
+None.
+
+### Sidebar.List
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `render` | `ReactElement \| (props, state) => ReactElement` | | Swaps the element |
+
+#### Data attributes
+
+None.
+
+### Sidebar.Item
+
+Every prop but `active`, `disabled`, and `render` goes to the link, `className` and `ref` included.
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `active` | `boolean` | | The current page: the same as `aria-current="page"` |
+| `disabled` | `boolean` | | Not available yet: muted, no highlight, no navigation, out of the tab order |
+| `render` | `ReactElement \| (props, state) => ReactElement` | | Swaps the link for a router's |
+
+#### Data attributes
+
+| Data attribute | On | Present when |
+| --- | --- | --- |
+| `data-active` | Item (li and link) | The item is current |
+| `data-landed` | Item's link | The Indicator's liquid has landed on it; the active look (color, weight) arrives with it |
+| `data-away` | Item's link | The item is active but the liquid has left it for another |
+| `data-disabled` | Item (li and link) | `disabled` is set |
+
+### Sidebar.ItemIcon
+
+#### Props
+
+A `span` with its own props only.
+
+#### Data attributes
+
+None.
+
+### Sidebar.ItemBadge
+
+#### Props
+
+A `span` with its own props only.
+
+#### Data attributes
+
+None.
+
+### Sidebar.Indicator
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `render` | `ReactElement \| (props, state) => ReactElement` | | Swaps the element |
+
+#### Data attributes
+
+| Data attribute | On | Present when |
+| --- | --- | --- |
+| `data-visible` | Indicator | An item is active |
+| `data-moving` | Indicator | The liquid is on its way to a new item |
+
+### Sidebar.Footer
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `render` | `ReactElement \| (props, state) => ReactElement` | | Swaps the element |
+
+#### Data attributes
+
+None.
+
+### Sidebar.Trigger
+
+Named "Toggle sidebar" unless you pass `aria-label` or children.
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `render` | `ReactElement \| (props, state) => ReactElement` | | Swaps the element |
+| `children` | `ReactNode` | A panel icon | The button's content |
+
+#### Data attributes
+
+| Data attribute | On | Present when |
+| --- | --- | --- |
+| `data-state` | Trigger | Always; `open` or `closed` for the current mode |
+| `data-mobile` | Trigger | The sidebar is a drawer |
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-sidebar__provider` | Provider |
+| `ow-sidebar` | Root |
+| `ow-sidebar__backdrop` | The drawer's scrim |
+| `ow-sidebar__header` | Header |
+| `ow-sidebar__content` | Content |
+| `ow-sidebar__footer` | Footer |
+| `ow-sidebar__group` | Group |
+| `ow-sidebar__group-label` | GroupLabel |
+| `ow-sidebar__list` | List |
+| `ow-sidebar__item` | Item's li |
+| `ow-sidebar__link` | Item's link |
+| `ow-sidebar__label` | The text inside an Item |
+| `ow-sidebar__icon` | ItemIcon |
+| `ow-sidebar__badge` | ItemBadge |
+| `ow-sidebar__indicator` | Indicator |
+| `ow-sidebar__trigger` | Trigger |
+
+## Accessibility [#accessibility]
+
+- Root is a `nav` named "Sidebar"; set `aria-label` to name it for your site. Items are links in lists,
+  and the current one has `aria-current="page"`.
+- A disabled item has `aria-disabled`, no `href`, and is out of the tab order.
+- Trigger has `aria-expanded` and `aria-controls`, and a name unless you give it children.
+- A closed desktop sidebar is `inert`, so it is out of the tab order and the accessibility tree.
+- The drawer is a modal Base UI Dialog: focus is trapped, Esc and the scrim close it, the page behind
+  does not scroll, and focus returns to the Trigger when it closes. Focus starts on the drawer, so no
+  row shows a ring until Tab.
+- Ctrl or Cmd with <kbd>B</kbd> toggles the sidebar; set `shortcut` to change the key, or `false`.
+- Keyboard focus shows a ring inside the row. The Indicator is decorative. In forced colors its dot
+  is `Highlight` and its background a light tint of it.
+
+## Theming [#theming]
+
+Sidebar reads these theme tokens. Set them on the Root, or on an element around it such as
+`.sidebar`.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-fg` | Text, and at 80% the rows at rest |
+| `--ow-muted` | Group labels and disabled rows |
+| `--ow-accent` | The Indicator's dot and drop, and its background as a tint over the surface |
+| `--ow-bg` | The surface the Indicator's tint is mixed with |
+| `--ow-hover` | The Trigger's hover tint |
+| `--ow-focus` | Focus rings |
+| `--ow-radius` | The Indicator's background, badges, and the drawer; rows use it minus 6px, so they nest |
+| `--ow-raised-bg` | The drawer's surface, and what the Indicator's tint is mixed with there |
+| `--ow-popup-shadow` | The drawer's shadow |
+| `--ow-backdrop` | The drawer's scrim |
+| `--ow-ease-drawer`, `--ow-ease-out` | The slide and the fades |
+| `--ow-motion-scale` | Scales the slide and the Indicator's time; 0 turns them off |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Root, so set yours on the Root itself, as in
+`.sidebar.ow-sidebar`.
+
+</ForMode>
+
+The drawer is portaled to the body, so set its tokens on `:root` or on the Root's class rather than on
+an element around it.
+
+## Motion [#motion]
+
+Closed on desktop, the sidebar slides out toward the inline start in 300ms while it fades, and slides
+back in on open; the drawer does the same over a scrim. The Indicator moves in three steps: the
+active background shrinks into a drop at its start end (0.16s) while its color deepens toward the
+accent, the drop drips to the new item (0.3s), pulling away from a remnant on a neck that thins and
+snaps and stretching into a teardrop with speed, and it lands with a small splat and spreads out to
+fill the new background (0.36s) while the color leaves the dot, which stays. Every move takes the
+same time, near or far. Pick again mid-way and the drop changes course, with no remnant. The new
+item's text takes its active look when the liquid lands. A click on an item moves the liquid there at
+once, before the page's `active` follows, and it goes back if `active` does not change within 3
+seconds. The hover highlight glides between rows. With `prefers-reduced-motion`, or
+`--ow-motion-scale: 0`, the sidebar and the drawer only fade, and the Indicator jumps.

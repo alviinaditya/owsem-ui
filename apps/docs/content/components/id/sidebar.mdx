@@ -1,0 +1,363 @@
+---
+title: Sidebar
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/owsem`: Sidebar adalah komponen Owsem, jadi punya entri sendiri. Di registry,
+namanya item `sidebar`.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Sidebar } from "owsem-ui/owsem";
+
+export function AppSidebar({ path }: { path: string }) {
+  return (
+    <Sidebar.Provider>
+      <Sidebar.Root aria-label="Dokumentasi">
+        <Sidebar.Header>Dokumentasi</Sidebar.Header>
+        <Sidebar.Content>
+          <Sidebar.Indicator />
+          <Sidebar.Group>
+            <Sidebar.GroupLabel>Mulai</Sidebar.GroupLabel>
+            <Sidebar.List>
+              <Sidebar.Item href="/" active={path === "/"}>
+                Ikhtisar
+              </Sidebar.Item>
+              <Sidebar.Item href="/install" active={path === "/install"}>
+                Instalasi
+              </Sidebar.Item>
+            </Sidebar.List>
+          </Sidebar.Group>
+        </Sidebar.Content>
+      </Sidebar.Root>
+      <main>{/* halamannya */}</main>
+    </Sidebar.Provider>
+  );
+}
+```
+
+Sidebar adalah navigasi situs: grup baris yang tenang, latar cair dan titik untuk halaman yang dibuka,
+dan highlight tipis yang meluncur di antara baris lain saat di-hover (Glide, dari `owsem-ui/core`).
+Provider memegang status buka kedua mode, jadi `Sidebar.Trigger` bisa di mana saja di bawahnya. Saat
+ditutup di desktop, sidebar bergeser keluar, memudar, dan melepas kotaknya, sehingga halaman di
+sampingnya mengambil ruangnya. Di bawah `mobileQuery`, ia menjadi laci modal dari sisi awal, dengan
+jebakan fokus, Esc, dan scrim; memilih item menutupnya.
+
+Lebarnya adalah `inline-size` milik Root (bawaan 248px): atur dengan class atau `style`. Kontennya
+digulir sendiri, dengan scrollbar tersembunyi dan tepi yang memudar di sisi yang masih bisa digulir,
+dan item yang aktif digulir ke dalam pandangan.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Tiga belas bagian. Provider membungkus Root dan halaman; Root memuat Header opsional, Content yang
+digulir, dan Footer opsional.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Provider" /> | `div.ow-sidebar__provider` | Kotak flex dengan status kedua mode; `data-sidebar-state` dan `data-sidebar-mobile` memungkinkan tata letak halaman di sekitar sidebar dari CSS |
+| <Part name="Root" /> | `nav.ow-sidebar` | Bernama "Sidebar" kecuali Anda memasang `aria-label`. Di seluler, `Dialog.Popup` Base UI dengan `data-mobile`, dan `div.ow-sidebar__backdrop` di belakangnya |
+| <Part name="Header" /> | `div.ow-sidebar__header` | Tetap di atas Content: logo, kolom cari, Trigger |
+| <Part name="Content" /> | `div.ow-sidebar__content` | Bagian tengah yang digulir; memuat highlight Glide dan Indicator |
+| <Part name="Group" /> | `div.ow-sidebar__group` | Satu bagian: label dan daftar |
+| <Part name="GroupLabel" /> | `div.ow-sidebar__group-label` | Judul kecil berhuruf kapital |
+| <Part name="List" /> | `ul.ow-sidebar__list` | Padding sisi awalnya adalah talang tempat Indicator tinggal |
+| <Part name="Item" /> | `li.ow-sidebar__item > a.ow-sidebar__link` | li dan tautannya; `render` menggantinya dengan tautan router. Teks dibungkus `span.ow-sidebar__label` dan dipotong dengan elipsis |
+| <Part name="ItemIcon" /> | `span.ow-sidebar__icon` | Ikon di awal, 1rem; `aria-hidden` kecuali Anda memasang `aria-label` |
+| <Part name="ItemBadge" /> | `span.ow-sidebar__badge` | Label kecil di ujung item, seperti "Baru" |
+| <Part name="Indicator" /> | `span.ow-sidebar__indicator` | Latar berwarna di belakang item aktif, dengan titik di talang pada ujung awalnya, digambar sebagai SVG; render sekali di dalam Content |
+| <Part name="Footer" /> | `div.ow-sidebar__footer` | Tetap di bawah Content |
+| <Part name="Trigger" /> | `button.ow-sidebar__trigger` | Membuka dan menutup sidebar mode saat ini; ikon panel kecuali Anda memberi children |
+
+## Referensi API [#api]
+
+Sidebar adalah komponen Owsem tanpa padanan di Base UI, jadi ini seluruh API-nya, kecuali lacinya yang
+berupa Dialog Base UI. Setiap bagian menerima props elemennya apa adanya, dan ref. `render` mengganti
+elemen di setiap bagian kecuali ItemIcon dan ItemBadge. `useSidebar()` mengembalikan `{ open, setOpen,
+toggle, mobile, mobileOpen, setMobileOpen }` untuk kontrol Anda sendiri di bawah Provider.
+
+### Sidebar.Provider
+
+#### Props
+
+| Prop | Tipe | Bawaan | Deskripsi |
+| --- | --- | --- | --- |
+| `open` | `boolean` | | Status desktop, terkontrol |
+| `defaultOpen` | `boolean` | `true` | Status desktop, tak terkontrol |
+| `onOpenChange` | `(open: boolean) => void` | | Dipanggil saat status desktop berubah |
+| `mobileOpen` | `boolean` | | Status laci, terkontrol |
+| `defaultMobileOpen` | `boolean` | `false` | Status laci, tak terkontrol |
+| `onMobileOpenChange` | `(open: boolean) => void` | | Dipanggil saat laci terbuka atau tertutup |
+| `mobileQuery` | `string` | `"(max-width: 767px)"` | Media query yang menjadikan sidebar sebuah laci |
+| `shortcut` | `string \| false` | `"b"` | Tombol yang, bersama Ctrl atau Cmd, membuka dan menutup sidebar; `false` mematikannya |
+| `render` | `ReactElement \| (props, state) => ReactElement` | | Mengganti elemen |
+
+#### Data attributes
+
+| Data attribute | Pada | Ada saat |
+| --- | --- | --- |
+| `data-sidebar-state` | Provider | Selalu; `open` atau `closed` untuk mode saat ini |
+| `data-sidebar-mobile` | Provider | `mobileQuery` cocok, jadi sidebar adalah laci |
+
+### Sidebar.Root
+
+#### Props
+
+| Prop | Tipe | Bawaan | Deskripsi |
+| --- | --- | --- | --- |
+| `aria-label` | `string` | `"Sidebar"` | Nama nav atau laci |
+| `render` | `ReactElement \| (props, state) => ReactElement` | | Mengganti elemen |
+
+#### Data attributes
+
+| Data attribute | Pada | Ada saat |
+| --- | --- | --- |
+| `data-state` | Root (desktop) | Selalu; `open` atau `closed` |
+| `data-mobile` | Root | Sidebar adalah laci |
+| `data-starting-style`, `data-ending-style` | Root (laci), backdrop | Laci sedang terbuka atau tertutup |
+
+Root desktop yang tertutup `inert`.
+
+### Sidebar.Header
+
+#### Props
+
+| Prop | Tipe | Bawaan | Deskripsi |
+| --- | --- | --- | --- |
+| `render` | `ReactElement \| (props, state) => ReactElement` | | Mengganti elemen |
+
+#### Data attributes
+
+Tidak ada.
+
+### Sidebar.Content
+
+#### Props
+
+| Prop | Tipe | Bawaan | Deskripsi |
+| --- | --- | --- | --- |
+| `render` | `ReactElement \| (props, state) => ReactElement` | | Mengganti elemen |
+
+#### Data attributes
+
+| Data attribute | Pada | Ada saat |
+| --- | --- | --- |
+| `data-overflow-start` | Content | Masih ada yang bisa digulir ke arah awal |
+| `data-overflow-end` | Content | Masih ada yang bisa digulir ke arah akhir |
+
+### Sidebar.Group
+
+#### Props
+
+| Prop | Tipe | Bawaan | Deskripsi |
+| --- | --- | --- | --- |
+| `render` | `ReactElement \| (props, state) => ReactElement` | | Mengganti elemen |
+
+#### Data attributes
+
+Tidak ada.
+
+### Sidebar.GroupLabel
+
+#### Props
+
+| Prop | Tipe | Bawaan | Deskripsi |
+| --- | --- | --- | --- |
+| `render` | `ReactElement \| (props, state) => ReactElement` | | Mengganti elemen |
+
+#### Data attributes
+
+Tidak ada.
+
+### Sidebar.List
+
+#### Props
+
+| Prop | Tipe | Bawaan | Deskripsi |
+| --- | --- | --- | --- |
+| `render` | `ReactElement \| (props, state) => ReactElement` | | Mengganti elemen |
+
+#### Data attributes
+
+Tidak ada.
+
+### Sidebar.Item
+
+Semua prop selain `active`, `disabled`, dan `render` diteruskan ke tautan, termasuk `className` dan
+`ref`.
+
+#### Props
+
+| Prop | Tipe | Bawaan | Deskripsi |
+| --- | --- | --- | --- |
+| `active` | `boolean` | | Halaman yang dibuka: sama dengan `aria-current="page"` |
+| `disabled` | `boolean` | | Belum tersedia: diredam, tanpa highlight, tanpa navigasi, di luar urutan Tab |
+| `render` | `ReactElement \| (props, state) => ReactElement` | | Mengganti tautan dengan milik router |
+
+#### Data attributes
+
+| Data attribute | Pada | Ada saat |
+| --- | --- | --- |
+| `data-active` | Item (li dan tautan) | Item sedang dibuka |
+| `data-landed` | Tautan Item | Cairan Indicator sudah mendarat di sana; tampilan aktif (warna, ketebalan) tiba bersamanya |
+| `data-away` | Tautan Item | Item aktif, tetapi cairan sudah pindah ke item lain |
+| `data-disabled` | Item (li dan tautan) | `disabled` dipasang |
+
+### Sidebar.ItemIcon
+
+#### Props
+
+Sebuah `span` dengan propsnya sendiri saja.
+
+#### Data attributes
+
+Tidak ada.
+
+### Sidebar.ItemBadge
+
+#### Props
+
+Sebuah `span` dengan propsnya sendiri saja.
+
+#### Data attributes
+
+Tidak ada.
+
+### Sidebar.Indicator
+
+#### Props
+
+| Prop | Tipe | Bawaan | Deskripsi |
+| --- | --- | --- | --- |
+| `render` | `ReactElement \| (props, state) => ReactElement` | | Mengganti elemen |
+
+#### Data attributes
+
+| Data attribute | Pada | Ada saat |
+| --- | --- | --- |
+| `data-visible` | Indicator | Ada item yang aktif |
+| `data-moving` | Indicator | Cairan sedang menuju item baru |
+
+### Sidebar.Footer
+
+#### Props
+
+| Prop | Tipe | Bawaan | Deskripsi |
+| --- | --- | --- | --- |
+| `render` | `ReactElement \| (props, state) => ReactElement` | | Mengganti elemen |
+
+#### Data attributes
+
+Tidak ada.
+
+### Sidebar.Trigger
+
+Bernama "Toggle sidebar" kecuali Anda memberi `aria-label` atau children.
+
+#### Props
+
+| Prop | Tipe | Bawaan | Deskripsi |
+| --- | --- | --- | --- |
+| `render` | `ReactElement \| (props, state) => ReactElement` | | Mengganti elemen |
+| `children` | `ReactNode` | Ikon panel | Isi tombol |
+
+#### Data attributes
+
+| Data attribute | Pada | Ada saat |
+| --- | --- | --- |
+| `data-state` | Trigger | Selalu; `open` atau `closed` untuk mode saat ini |
+| `data-mobile` | Trigger | Sidebar adalah laci |
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-sidebar__provider` | Provider |
+| `ow-sidebar` | Root |
+| `ow-sidebar__backdrop` | Scrim laci |
+| `ow-sidebar__header` | Header |
+| `ow-sidebar__content` | Content |
+| `ow-sidebar__footer` | Footer |
+| `ow-sidebar__group` | Group |
+| `ow-sidebar__group-label` | GroupLabel |
+| `ow-sidebar__list` | List |
+| `ow-sidebar__item` | li milik Item |
+| `ow-sidebar__link` | Tautan milik Item |
+| `ow-sidebar__label` | Teks di dalam Item |
+| `ow-sidebar__icon` | ItemIcon |
+| `ow-sidebar__badge` | ItemBadge |
+| `ow-sidebar__indicator` | Indicator |
+| `ow-sidebar__trigger` | Trigger |
+
+## Aksesibilitas [#accessibility]
+
+- Root adalah `nav` bernama "Sidebar"; pasang `aria-label` untuk menamainya sesuai situs Anda. Item
+  adalah tautan dalam daftar, dan yang sedang dibuka punya `aria-current="page"`.
+- Item yang dinonaktifkan punya `aria-disabled`, tanpa `href`, dan di luar urutan Tab.
+- Trigger punya `aria-expanded` dan `aria-controls`, serta nama kecuali Anda memberinya children.
+- Sidebar desktop yang tertutup `inert`, jadi keluar dari urutan Tab dan pohon aksesibilitas.
+- Laci adalah Dialog Base UI yang modal: fokus terjebak di dalamnya, Esc dan scrim menutupnya,
+  halaman di belakang tidak bergulir, dan fokus kembali ke Trigger saat ditutup. Fokus dimulai di
+  laci, jadi tidak ada baris yang menampilkan cincin sampai Tab ditekan.
+- Ctrl atau Cmd dengan <kbd>B</kbd> membuka dan menutup sidebar; ubah tombolnya dengan `shortcut`,
+  atau `false` untuk mematikannya.
+- Fokus keyboard menampilkan cincin di dalam baris. Indicator bersifat dekoratif. Di forced colors titiknya
+  `Highlight` dan latarnya rona tipis darinya.
+
+## Tema [#theming]
+
+Sidebar membaca token tema ini. Pasang di Root, atau di elemen yang membungkusnya seperti `.sidebar`.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-fg` | Teks, dan pada 80% baris yang diam |
+| `--ow-muted` | Label grup dan baris yang dinonaktifkan |
+| `--ow-accent` | Titik dan tetes Indicator, serta latarnya sebagai rona di atas permukaan |
+| `--ow-bg` | Permukaan tempat rona Indicator dicampur |
+| `--ow-hover` | Warna hover Trigger |
+| `--ow-focus` | Cincin fokus |
+| `--ow-radius` | Latar Indicator, badge, dan laci; baris memakainya dikurangi 6px, supaya sudutnya bersarang |
+| `--ow-raised-bg` | Permukaan laci, dan tempat rona Indicator dicampur di sana |
+| `--ow-popup-shadow` | Bayangan laci |
+| `--ow-backdrop` | Scrim laci |
+| `--ow-ease-drawer`, `--ow-ease-out` | Geseran dan pemudaran |
+| `--ow-motion-scale` | Menskalakan geseran dan waktu Indicator; 0 mematikannya |
+
+<ForMode mode="isolated">
+
+Pada mode terisolasi, nilainya berada di setiap Root, jadi pasang milik Anda di Root itu sendiri,
+seperti `.sidebar.ow-sidebar`.
+
+</ForMode>
+
+Laci dipindahkan ke body lewat portal, jadi pasang tokennya di `:root` atau di class Root, bukan di
+elemen yang membungkusnya.
+
+## Gerak [#motion]
+
+Saat ditutup di desktop, sidebar bergeser keluar ke sisi awal selama 300ms sambil memudar, lalu
+bergeser kembali saat dibuka; laci melakukan hal yang sama di atas scrim. Indicator bergerak dalam tiga langkah:
+latar aktif menyusut menjadi tetes di ujung awalnya (0,16 dtk) sambil warnanya menguat ke aksen, tetes
+itu menetes ke item baru (0,3 dtk), lepas dari sisa di belakangnya lewat leher yang menipis lalu putus
+dan memanjang menjadi bentuk air mata saat melaju, lalu mendarat dengan percikan kecil dan melebar
+mengisi latar baru (0,36 dtk) sementara warna meninggalkan titik, yang tetap tinggal. Setiap
+perpindahan memakan waktu yang sama, dekat atau jauh. Pilih lagi di tengah jalan dan tetes berubah
+arah, tanpa sisa. Teks item baru mengambil tampilan aktifnya saat cairan mendarat. Klik pada item
+memindahkan cairan ke sana seketika, sebelum `active` di halaman menyusul, dan ia kembali jika
+`active` tidak berubah dalam 3 detik. Highlight hover meluncur di antara baris. Dengan
+`prefers-reduced-motion`, atau `--ow-motion-scale: 0`, sidebar dan laci hanya memudar, dan Indicator
+melompat.

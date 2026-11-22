@@ -11,13 +11,13 @@ import {
   Kbd,
   Menu,
   Popover,
-  ScrollArea,
   Radio,
   RadioGroup,
+  ScrollArea,
   Select,
   Separator,
-  Tabs,
   Switch,
+  Tabs,
   Toggle,
   ToggleGroup,
   Toolbar,
@@ -570,99 +570,6 @@ const B = (x: number, y: number, w: number, h: number, r = 5) => (
 );
 
 const SKETCHES: Partial<Record<ComponentName, ReactNode>> = {
-  field: (
-    <>
-      {F(36, 22, 32)}
-      {B(36, 33, 88, 22)}
-      {F(44, 42, 36, 4, 0.35)}
-      {F(36, 63, 56, 4, 0.3)}
-    </>
-  ),
-  fieldset: (
-    <>
-      {B(28, 18, 104, 66, 7)}
-      {F(36, 15, 36, 6, 0.6)}
-      {B(38, 30, 84, 18)}
-      {B(38, 56, 84, 18)}
-    </>
-  ),
-  form: (
-    <>
-      {B(36, 14, 88, 18)}
-      {B(36, 38, 88, 18)}
-      <rect x={36} y={64} width={38} height={18} rx={5} fill="currentColor" opacity={0.6} />
-    </>
-  ),
-  input: (
-    <>
-      {B(28, 36, 104, 24, 6)}
-      {F(38, 46, 40, 5, 0.4)}
-      <path d="M82 43v11" />
-    </>
-  ),
-  checkbox: (
-    <>
-      <rect x={42} y={38} width={20} height={20} rx={5} fill="currentColor" opacity={0.6} />
-      <path d="m46 48 4 4 8-8" stroke="var(--docs-surface)" strokeWidth={2.4} />
-      {F(70, 45, 48)}
-    </>
-  ),
-  "radio-group": (
-    <>
-      {[26, 48, 70].map((y, i) => (
-        <g key={y}>
-          <circle cx={52} cy={y} r={8} />
-          {i === 0 ? <circle cx={52} cy={y} r={4} fill="currentColor" stroke="none" /> : null}
-          {F(66, y - 2.5, 40 - i * 6)}
-        </g>
-      ))}
-    </>
-  ),
-  checkbox: (
-    <>
-      <rect x={42} y={38} width={20} height={20} rx={5} fill="currentColor" opacity={0.6} />
-      <path d="m46 48 4 4 8-8" stroke="var(--docs-surface)" strokeWidth={2.4} />
-      {F(70, 45, 48)}
-    </>
-  ),
-  switch: (
-    <>
-      <rect x={44} y={37} width={40} height={22} rx={11} fill="currentColor" opacity={0.6} />
-      <circle cx={73} cy={48} r={8} fill="var(--docs-surface)" stroke="none" />
-      {F(92, 45, 30)}
-    </>
-  ),
-  dialog: (
-    <>
-      {B(26, 12, 108, 72, 8)}
-      {F(38, 24, 48, 6, 0.6)}
-      {F(38, 37, 80, 4, 0.35)}
-      {F(38, 46, 64, 4, 0.35)}
-      {B(70, 62, 26, 13, 4)}
-      <rect x={100} y={62} width={24} height={13} rx={4} fill="currentColor" opacity={0.6} />
-    </>
-  ),
-  "scroll-area": (
-    <>
-      {B(36, 12, 88, 72, 7)}
-      {[24, 36, 48, 60, 72].map((y, i) => (
-        <g key={y}>{F(46, y, 52 - (i % 2) * 14, 4, 0.35)}</g>
-      ))}
-      <rect x={115} y={20} width={3} height={26} rx={1.5} fill="currentColor" stroke="none" />
-    </>
-  ),
-  tabs: (
-    <>
-      {B(26, 16, 36, 18, 5)}
-      {F(34, 23, 20)}
-      {F(70, 23, 20, 5, 0.35)}
-      {F(100, 23, 22, 5, 0.35)}
-      <path d="M26 42h108" opacity={0.5} />
-      {F(26, 54, 96, 4, 0.35)}
-      {F(26, 64, 76, 4, 0.35)}
-      {F(26, 74, 86, 4, 0.35)}
-    </>
-  ),
   "checkbox-group": (
     <>
       {[26, 48, 70].map((y, i) => (

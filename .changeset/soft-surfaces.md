@@ -2,7 +2,7 @@
 "owsem-ui": minor
 ---
 
-A soft look: a light grey page, generously rounded controls and containers, and a bright blue
+A soft look: a white page, generously rounded controls and containers, and a bright blue
 accent. Shadow belongs only to wrappers, the containers that hold other content; a single control
 has none. In dark, the surfaces are one step lighter than the page and a hairline top highlight
 stands in for a wrapper's shadow.

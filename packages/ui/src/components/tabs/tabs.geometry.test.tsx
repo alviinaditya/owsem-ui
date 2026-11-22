@@ -63,6 +63,7 @@ describe("Tabs geometry", () => {
     for (const [i, height] of [24, 32, 40].entries()) {
       const list = lists[i] as HTMLElement;
       const tabs = tabsOf(list);
+      close(rect(list).height, height + 8);
       for (const tab of tabs) close(rect(tab).height, height);
       const first = insets(list, tabs[0] as Element);
       const last = insets(list, tabs.at(-1) as Element);

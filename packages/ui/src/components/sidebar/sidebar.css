@@ -1,0 +1,338 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * Sidebar, an Owsem component: the site navigation. Quiet rows, a pill in the gutter beside the
+ * current page, and Glide's highlight between the rest. Desktop: closed, it slides out and fades
+ * (translate and opacity only). Mobile: a drawer (Base UI Dialog) from the inline start. Its width is its
+ * inline-size, which a class of yours sets.
+ */
+@layer owsem.components {
+  .ow-sidebar__provider {
+    display: flex;
+    min-inline-size: 0;
+  }
+
+  .ow-sidebar {
+    --_fg: var(--ow-fg);
+    --_muted: var(--ow-muted);
+    --_focus: var(--ow-focus);
+    /* The rows sit 6px inside the surface, so their corners are nested. */
+    --_radius: max(0px, calc(var(--ow-radius) - 6px));
+    /* The indent of the items: the pill lives in it. */
+    --_gutter: 12px;
+    --_dir: -1;
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    box-sizing: border-box;
+    inline-size: 248px;
+    min-block-size: 0;
+    color: var(--_fg);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    translate: 0;
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: translate, opacity;
+    transition:
+      translate 300ms var(--ow-ease-drawer),
+      opacity 200ms var(--ow-ease-out),
+      visibility 0s linear 300ms;
+  }
+
+  .ow-sidebar:dir(rtl) {
+    --_dir: 1;
+  }
+
+  /* Closed: out of sight and out of the tab order once it has slid away. */
+  .ow-sidebar:where([data-state="closed"]) {
+    translate: calc(var(--_dir) * 100% * var(--ow-motion-scale)) 0;
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .ow-sidebar:where([data-state="open"]) {
+    transition-delay: 0s;
+  }
+
+  /* The drawer: over the page, from the inline start. */
+  .ow-sidebar[data-mobile] {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    max-inline-size: calc(100% - 48px);
+    border-start-end-radius: var(--ow-radius);
+    border-end-end-radius: var(--ow-radius);
+    outline: none;
+    background-color: var(--ow-raised-bg);
+    box-shadow: var(--ow-popup-shadow);
+    transition: translate 300ms var(--ow-ease-drawer);
+  }
+
+  .ow-sidebar[data-mobile]:where([data-starting-style], [data-ending-style]) {
+    translate: calc(var(--_dir) * 100% * var(--ow-motion-scale)) 0;
+  }
+
+  .ow-sidebar[data-mobile]:where([data-ending-style]) {
+    transition-duration: 220ms;
+  }
+
+  .ow-sidebar__backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: var(--ow-backdrop);
+    transition: opacity 250ms var(--ow-ease-out);
+  }
+
+  .ow-sidebar__backdrop:where([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+  }
+
+  .ow-sidebar__header,
+  .ow-sidebar__footer {
+    flex: none;
+    padding: 12px;
+  }
+
+  .ow-sidebar__content {
+    position: relative;
+    flex: 1 1 auto;
+    min-block-size: 0;
+    padding: 12px 12px 32px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    /* The scrollbar is hidden; the edges fade where there is more to scroll. */
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement (NF-1) */
+    scrollbar-width: none;
+  }
+
+  .ow-sidebar__content::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ow-sidebar__content:where([data-overflow-start]) {
+    mask-image: linear-gradient(to bottom, transparent, #000 28px);
+  }
+
+  .ow-sidebar__content:where([data-overflow-end]) {
+    mask-image: linear-gradient(to top, transparent, #000 28px);
+  }
+
+  .ow-sidebar__content:where([data-overflow-start][data-overflow-end]) {
+    mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      #000 28px,
+      #000 calc(100% - 28px),
+      transparent
+    );
+  }
+
+  /* The hover highlight: a faint tint with the rows' corners. */
+  .ow-sidebar__content .ow-glide {
+    --_bg: color-mix(in oklab, var(--_fg) 4%, transparent);
+    --_radius: max(0px, calc(var(--ow-radius) - 6px));
+  }
+
+  .ow-sidebar__group:where(.ow-sidebar__group ~ .ow-sidebar__group) {
+    margin-block-start: 20px;
+  }
+
+  /* Not raised above the pill: a label in its own layer drew a seam at fractional zoom. */
+  .ow-sidebar__group-label {
+    padding-block: 0 6px;
+    color: var(--_muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    line-height: 1rem;
+    text-transform: uppercase;
+  }
+
+  .ow-sidebar__list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    padding-inline-start: var(--_gutter);
+    list-style: none;
+  }
+
+  .ow-sidebar__link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-sizing: border-box;
+    block-size: calc(32em / 14);
+    padding-inline: calc(10em / 14);
+    border-radius: var(--_radius);
+    color: color-mix(in oklab, var(--_fg) 80%, transparent);
+    font-weight: 400;
+    text-decoration: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @media (hover: hover) {
+    .ow-sidebar__link:where(:hover:not([data-disabled])) {
+      color: var(--_fg);
+    }
+  }
+
+  .ow-sidebar__link:where([data-active]) {
+    color: var(--_fg);
+    font-weight: 500;
+  }
+
+  /* The current-page pill. sidebar.indicator.ts sets --_x, --_y and --_ms; it ends at rest. */
+  .ow-sidebar__indicator {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: calc(var(--_x, 0px) - var(--_gutter) / 2 - 1.5px);
+    inline-size: 3px;
+    block-size: 16px;
+    opacity: 0;
+    pointer-events: none;
+    translate: 0 var(--_y, 0px);
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: translate, opacity;
+    transition:
+      translate calc(var(--_ms, 300) * 1ms * var(--ow-motion-scale)) var(--ow-ease-out),
+      opacity 150ms ease;
+  }
+
+  /* The key: thumb.ts-style stretch from the leading edge, by animation. */
+  .ow-sidebar__indicator::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: var(--ow-radius);
+    background-color: var(--ow-accent);
+    will-change: transform;
+  }
+
+  .ow-sidebar__indicator[data-visible] {
+    opacity: 1;
+  }
+
+  .ow-sidebar__link:where([data-disabled]) {
+    color: var(--_muted);
+    cursor: default;
+  }
+
+  .ow-sidebar__link:where(:focus-visible) {
+    outline: 2px solid var(--_focus);
+    outline-offset: -2px;
+  }
+
+  .ow-sidebar__label {
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ow-sidebar__icon {
+    display: inline-flex;
+    flex: none;
+    inline-size: 1rem;
+    block-size: 1rem;
+  }
+
+  .ow-sidebar__icon > svg {
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  .ow-sidebar__badge {
+    flex: none;
+    margin-inline-start: auto;
+    padding: 1px 6px;
+    border-radius: var(--ow-radius);
+    background-color: color-mix(in oklab, var(--_fg) 8%, transparent);
+    color: var(--_fg);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    line-height: 1rem;
+  }
+
+  .ow-sidebar__trigger {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    inline-size: calc(32em / 14);
+    block-size: calc(32em / 14);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: max(0px, calc(var(--ow-radius) - 6px));
+    background-color: transparent;
+    color: color-mix(in oklab, var(--ow-fg) 80%, transparent);
+    font: inherit;
+    font-size: 0.875rem;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ow-sidebar__trigger > svg {
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+  }
+
+  @media (hover: hover) {
+    .ow-sidebar__trigger:where(:hover) {
+      background-color: var(--ow-hover);
+      color: var(--ow-fg);
+    }
+  }
+
+  .ow-sidebar__trigger:where(:focus-visible) {
+    outline: 2px solid var(--ow-focus);
+    outline-offset: 2px;
+  }
+
+  /* FR-20: no movement; it only fades. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-sidebar,
+    .ow-sidebar:where([data-state="closed"]),
+    .ow-sidebar[data-mobile]:where([data-starting-style], [data-ending-style]) {
+      translate: 0;
+    }
+
+    .ow-sidebar {
+      transition:
+        opacity 200ms var(--ow-ease-out),
+        visibility 0s linear 200ms;
+    }
+
+    .ow-sidebar[data-mobile] {
+      transition: opacity 200ms var(--ow-ease-out);
+    }
+
+    .ow-sidebar[data-mobile]:where([data-starting-style], [data-ending-style]) {
+      opacity: 0;
+    }
+  }
+
+  /* Reduced motion: the pill jumps. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-sidebar__indicator {
+      transition: opacity 150ms ease;
+    }
+  }
+
+  /* DP-8: backgrounds are dropped, so the pill is Highlight. */
+  @media (forced-colors: active) {
+    .ow-sidebar__indicator::before {
+      forced-color-adjust: none;
+      background-color: Highlight;
+    }
+  }
+
+  /* The first placement and every jump: nothing transitions. Last, so it wins. */
+  .ow-sidebar__indicator[data-instant] {
+    transition: none;
+  }
+}

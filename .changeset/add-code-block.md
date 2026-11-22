@@ -3,14 +3,14 @@
 ---
 
 Add Code Block, an Owsem component exported from `owsem-ui/owsem`: code on one surface, the panel
-fill with no edge. The header sits on it as a quiet row, with the code below it. The header has one icon, a `CodeBlock.Title` for one snippet or a `CodeBlock.List` of
+fill with the surface shadow and no edge. The header sits on it as a quiet row, with the code below it. The header has one icon, a `CodeBlock.Title` for one snippet or a `CodeBlock.List` of
 `CodeBlock.Tab`s for several, and `CodeBlock.Copy` at the end; each snippet goes in a
 `CodeBlock.Panel`.
 
 Tabs are Base UI's Tabs (`value`, `defaultValue`, and `onValueChange` on Root; the arrow keys pick
-as they move), a tint-of-text thumb slides under the active tab as in Toggle Group, and Glide lights the
+as they move), an accent-tint key slides under the active tab as in Toggle Group, and Glide lights the
 hovered one. Each Tab's `icon` leads the header while it is active and morphs into the next tab's
 (Icon Morph). Copy is a Copy Button that copies the panel on show, or its own `value`. Code Block
 does not highlight code: give each panel a `<pre>` highlighted already. Long lines scroll inside the
 panel, which the keyboard can then focus, and code reads left to right on any page. It reads the
-theme tokens only: `--ow-panel`, `--ow-fg` for the thumb, and `--ow-font-mono` for the code.
+theme tokens only: `--ow-panel`, `--ow-accent` for the key, `--ow-fg`, and `--ow-font-mono` for the code.

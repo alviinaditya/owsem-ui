@@ -1,10 +1,10 @@
 @layer owsem.tokens, owsem.components;
 
 /*
- * A field that opens a list. The trigger is the Field material: a raised surface with the surface
- * shadow and no edge, as tall as a Button (FR-9). The popup is a raised fill with the popup shadow; items are flat, and
- * Glide lights the one nearest the pointer or the one the keyboard reached. The trigger has no width
- * of its own: it fits its value, and stretches when you set one.
+ * A field that opens a list. The trigger is the Field material: a 6% tint of the text color with no
+ * shadow and no edge, as tall as a Button (FR-9). The popup is a raised fill with the popup shadow;
+ * items are flat, and Glide lights the one nearest the pointer or the one the keyboard reached. The
+ * trigger has no width of its own: it fits its value, and stretches when you set one.
  */
 @layer owsem.components {
   /* Its padding, not a margin, sets it apart from the trigger below. */

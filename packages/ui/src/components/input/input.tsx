@@ -18,7 +18,7 @@ export type InputSize = "sm" | "md" | "lg";
 
 // `size` is the type scale here, not the input's width in characters; set `inline-size` instead.
 export interface InputProps extends Omit<BaseInput.Props, "ref" | "size"> {
-  /** Button's sizes (FR-11): 29.25, 38.5, or 48 px tall. @default "md" */
+  /** Button's sizes (FR-11): 32, 40, or 48 px tall. @default "md" */
   size?: InputSize | undefined;
   /** An icon before the text, the font size plus 2px. Decorative: the input needs a name. */
   startIcon?: ReactNode;

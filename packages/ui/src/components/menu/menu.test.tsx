@@ -284,6 +284,27 @@ describe("Menu", () => {
     expect(getComputedStyle(kbd).borderTopWidth).toBe("0px");
   });
 
+  test("a tall menu scrolls in its viewport; the popup only clips, keeping its corners", async () => {
+    await render(<Edit open popupStyle={{ maxBlockSize: 120 }} />);
+    await expect.poll(popup).not.toBeNull();
+    const outer = popup() as HTMLElement;
+    const viewport = outer.querySelector<HTMLElement>(".ow-menu__viewport");
+    expect(viewport).not.toBeNull();
+    expect(getComputedStyle(outer).overflowY).toBe("clip");
+    expect(getComputedStyle(viewport as HTMLElement).overflowY).toBe("auto");
+    expect(outer.scrollHeight).toBeLessThanOrEqual(outer.clientHeight);
+    expect((viewport as HTMLElement).scrollHeight).toBeGreaterThan(
+      (viewport as HTMLElement).clientHeight,
+    );
+    // The lit item still lines up after the list scrolls.
+    (viewport as HTMLElement).scrollTop = 40;
+    await userEvent.keyboard("{ArrowDown}");
+    await settle();
+    const lit = document.activeElement as HTMLElement;
+    const glow = outer.querySelector<HTMLElement>(".ow-glide")?.getBoundingClientRect();
+    expect(glow?.top).toBeCloseTo(lit.getBoundingClientRect().top, 0);
+  });
+
   test("grows from its trigger: 0.96 and transparent to full, 180 ms ease-out", async () => {
     const runs: { property: string; frames: Keyframe[] }[] = [];
     const onRun = (event: TransitionEvent) => {

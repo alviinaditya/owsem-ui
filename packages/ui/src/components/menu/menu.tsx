@@ -24,6 +24,7 @@ const cls = {
   backdrop: "ow-menu__backdrop",
   positioner: "ow-menu__positioner",
   popup: "ow-menu__popup",
+  viewport: "ow-menu__viewport",
   item: "ow-menu__item",
   indicator: "ow-menu__indicator",
   chevron: "ow-menu__chevron",
@@ -156,7 +157,7 @@ export interface MenuPopupProps extends Omit<BaseMenu.Popup.Props, "ref"> {
 }
 
 /**
- * The panel with the popup shadow. Glide lights the item nearest the pointer; the keyboard's
+ * The panel with the popup shadow. It clips; its items scroll in an inner viewport. Glide lights the item nearest the pointer; the keyboard's
  * highlight (focus) moves it too.
  */
 export const MenuPopup: ForwardRefExoticComponent<MenuPopupProps & RefAttributes<HTMLDivElement>> =
@@ -165,18 +166,17 @@ export const MenuPopup: ForwardRefExoticComponent<MenuPopupProps & RefAttributes
     ref,
   ) {
     const glide = useGlide<HTMLDivElement>({ axis: "y", items: ITEMS });
-    const { ref: glideRef, setActive } = glide;
+    const { ref: viewportRef, setActive } = glide;
     const { modal, hover, open } = useContext(ModalContext);
     const [self, setSelf] = useState<HTMLDivElement | null>(null);
     useScrollLock(self, modal && !hover && open);
     const setRef = useCallback(
       (el: HTMLDivElement | null) => {
-        glideRef(el);
         setSelf(el);
         if (typeof ref === "function") ref(el);
         else if (ref) ref.current = el;
       },
-      [glideRef, ref],
+      [ref],
     );
     const follow = (event: Parameters<NonNullable<MenuPopupProps["onFocus"]>>[0]) => {
       onFocus?.(event);
@@ -192,8 +192,11 @@ export const MenuPopup: ForwardRefExoticComponent<MenuPopupProps & RefAttributes
         onFocus={follow}
         {...props}
       >
-        <GlideHighlight glide={glide} />
-        {children}
+        {/* The popup only clips, so its rounded corners cut the scrollbar; this scrolls. */}
+        <div ref={viewportRef} className={cls.viewport}>
+          <GlideHighlight glide={glide} />
+          {children}
+        </div>
       </BaseMenu.Popup>
     );
   });

@@ -17,16 +17,17 @@ async function mount(ui: ReactNode) {
   return { all, one: (selector: string) => all(selector)[0] as HTMLElement };
 }
 
-// FR-11: 2 × --py + 1lh at line-height 1.25; icons the font size plus 2 px.
-const SIZES: Record<ToolbarSize, { height: number; icon: number }> = {
-  sm: { height: 32, icon: 15 },
-  md: { height: 40, icon: 16 },
-  lg: { height: 48, icon: 18 },
+// FR-11: the bar is as tall as a Button of its size; the items are 8 px shorter (the inset on
+// both sides). Icons are the font size plus 2 px.
+const SIZES: Record<ToolbarSize, { bar: number; height: number; icon: number }> = {
+  sm: { bar: 32, height: 24, icon: 15 },
+  md: { bar: 40, height: 32, icon: 16 },
+  lg: { bar: 48, height: 40, icon: 18 },
 };
 
 describe("Toolbar geometry (FR-9 to FR-11, FR-10b)", () => {
   for (const [size, expected] of Object.entries(SIZES) as [ToolbarSize, typeof SIZES.md][]) {
-    test(`${size}: every item ${expected.height} px tall, icons even, the panel concentric`, async () => {
+    test(`${size}: the bar ${expected.bar} px, every item ${expected.height} px tall, icons even, the panel concentric`, async () => {
       const { all, one } = await mount(
         <Toolbar.Root aria-label="Bar" size={size}>
           <Toolbar.Button aria-label="Icon" startIcon={<Glyph />} />
@@ -39,10 +40,16 @@ describe("Toolbar geometry (FR-9 to FR-11, FR-10b)", () => {
           <Toolbar.Input aria-label="Field" />
         </Toolbar.Root>,
       );
+      expect(
+        Math.abs(one(".ow-toolbar").getBoundingClientRect().height - expected.bar),
+      ).toBeLessThanOrEqual(TOL);
       const items = all(".ow-toolbar__button, .ow-toolbar__link, .ow-toolbar__input");
       expect(items).toHaveLength(5);
       for (const item of items) {
-        expect(item.getBoundingClientRect().height, item.className).toBeCloseTo(expected.height, 1);
+        expect(
+          Math.abs(item.getBoundingClientRect().height - expected.height),
+          item.className,
+        ).toBeLessThanOrEqual(TOL);
       }
 
       // Icon only: a square, also when the item renders a Toggle (FR-10a).

@@ -4,7 +4,7 @@
  * Theme tokens (TK-5). Without data-theme the system theme applies; data-theme="light" or "dark"
  * forces a theme on any subtree. The dark set appears twice and must stay identical (tested).
  * Materials (TK-7) are written in full per theme, never derived from the accent. The look is soft:
- * a light grey page, with shadow only on wrappers, the containers that hold other content (Toolbar,
+ * a white page, with shadow only on wrappers, the containers that hold other content (Toolbar,
  * Code Block, the Color Picker panel; floating layers use --ow-popup-shadow). A single control has
  * no shadow: a field, a secondary button, a key, a check, a switch track, or the track of a segmented
  * control is a tint of the text color, so it reads on the page and on a white card alike. The selected
@@ -129,13 +129,13 @@
   :root,
   [data-theme="light"] {
     color-scheme: light;
-    --ow-bg: #f3f4f6;
+    --ow-bg: #ffffff;
     --ow-fg: #18181b;
     --ow-muted: #63636b;
     --ow-accent: #2563eb;
     --ow-on-accent: #ffffff;
     --ow-focus: #1d4ed8;
-    --ow-line: #e3e5ea;
+    --ow-line: #e4e4e7;
     /* A control's boundary at 3:1, drawn only when more contrast is requested (prefers-contrast). */
     --ow-edge: #82828b;
     /* Hover on quiet controls, and the lit item of a list (Glide). */
@@ -146,14 +146,17 @@
     /* A solid critical fill (the destructive button) and its text; --ow-critical is the text tone. */
     --ow-critical-solid: #b03f2a;
     --ow-on-critical: #ffffff;
-    /* Materials (DP-3): a surface is a fill with the resting shadow below, no edge; a popup floats
-     * higher, with the larger shadow. */
+    /* Materials (DP-3): a surface is a fill with the resting shadow below, which includes a hairline
+     * ring so it holds on the white page; a popup floats higher, with the larger shadow. */
     --ow-panel: #ffffff;
     --ow-raised-bg: #ffffff;
-    --ow-surface-shadow: 0 1px 2px rgb(0 0 0 / 0.05), 0 4px 14px -4px rgb(0 0 0 / 0.1);
-    --ow-popup-shadow: 0 2px 6px -2px rgb(0 0 0 / 0.08), 0 16px 40px -10px rgb(0 0 0 / 0.2);
-    --ow-well-bg: #e6e8ec;
-    --ow-pressed-bg: #e1e3e8;
+    --ow-surface-shadow:
+      0 0 0 1px rgb(0 0 0 / 0.06), 0 1px 2px rgb(0 0 0 / 0.05), 0 4px 14px -4px rgb(0 0 0 / 0.1);
+    --ow-popup-shadow:
+      0 0 0 1px rgb(0 0 0 / 0.06), 0 2px 6px -2px rgb(0 0 0 / 0.08),
+      0 16px 40px -10px rgb(0 0 0 / 0.2);
+    --ow-well-bg: #f1f2f5;
+    --ow-pressed-bg: #e8eaee;
     /* A solid fill (primary, destructive, a checked box): only a thin light line inside its top, no drop. */
     --ow-primary-shadow: inset 0 1px 0 rgb(255 255 255 / 0.25);
     --ow-tooltip-bg: #18181b;

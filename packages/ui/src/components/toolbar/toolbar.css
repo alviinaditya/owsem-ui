@@ -1,8 +1,9 @@
 @layer owsem.tokens, owsem.components;
 
 /*
- * A row of buttons, toggles, links, and a field on a panel, with hairlines between groups.
- * Items are quiet ghost buttons with Button's geometry (FR-9 to FR-11). Their rules sit in
+ * A row of buttons, toggles, links, and a field on a panel, with hairlines between groups. The bar
+ * is 32, 40, or 48px tall (sm, md, lg); its items are quiet ghost buttons 24, 32, or 40px tall in
+ * the 4px padding, so their radius follows the bar's curve (FR-9 to FR-11). Their rules sit in
  * :where(), with no specificity, so a Toggle or another styled control passed to an item's
  * `render` keeps its own look (an on Toggle is a tint of the accent).
  */
@@ -50,9 +51,10 @@
     flex-direction: column;
   }
 
-  /* Items: Button's geometry, --py the only input. */
+  /* Items: Button's geometry, --py the only input. The bar is as tall as a Button of its size, so
+   * an item is 8px shorter: 24, 32, 40 for sm, md, lg (the inset is 4px on each side). */
   :where(.ow-toolbar__button, .ow-toolbar__link, .ow-toolbar__input) {
-    --py: 0.8036em;
+    --py: 0.5179em;
     --_py: max(var(--py), (24px - 1lh) / 2);
     --px: calc(var(--_py) + (1lh - 1cap) / 2);
     --icon: calc(1em + 2px);
@@ -75,13 +77,26 @@
   }
 
   :where(.ow-toolbar__button, .ow-toolbar__link, .ow-toolbar__input):where([data-size="sm"]) {
-    --py: 0.6058em;
+    --py: 0.3em;
     font-size: 0.8125rem;
   }
 
   :where(.ow-toolbar__button, .ow-toolbar__link, .ow-toolbar__input):where([data-size="lg"]) {
-    --py: 0.875em;
+    --py: 0.625em;
     font-size: 1rem;
+  }
+
+  /* Toggle's own sizes (one class more) give way to the toolbar's. */
+  .ow-toolbar .ow-toggle.ow-toolbar__button {
+    --py: 0.5179em;
+  }
+
+  .ow-toolbar .ow-toggle.ow-toolbar__button[data-size="sm"] {
+    --py: 0.3em;
+  }
+
+  .ow-toolbar .ow-toggle.ow-toolbar__button[data-size="lg"] {
+    --py: 0.625em;
   }
 
   /* Buttons and links: flat, tinted under the pointer, the pressed material while held (DP-4). */

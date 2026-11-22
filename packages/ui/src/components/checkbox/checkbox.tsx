@@ -63,7 +63,7 @@ export const CheckboxIndicator: ForwardRefExoticComponent<
 export type CheckboxSize = "sm" | "md" | "lg";
 
 export interface CheckboxRootProps extends Omit<BaseCheckbox.Root.Props, "ref"> {
-  /** Button's fonts (FR-11), and the box is the font size plus 2px: 15, 16, or 18 px. @default "md" */
+  /** Button's fonts (FR-11), and the box is the font size plus 6px: 19, 20, or 22 px. @default "md" */
   size?: CheckboxSize | undefined;
 }
 

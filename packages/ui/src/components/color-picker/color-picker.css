@@ -4,8 +4,9 @@
  * Color Picker, an Owsem component (Tactile): soft surfaces with no edges (TK-7). The area,
  * tracks, and swatches are colors inside a 1px edge, the thumbs are rings that compact when
  * pressed, the buttons and fields are tints of the text color with no shadow, and the popover is a
- * panel with the popup shadow that scales out of its trigger. The colors being picked are painted inline; the
- * rest are theme tokens (TK-9), apart from the literals that must read on any color.
+ * panel with the popup shadow that fades in place (150 ms in, 100 ms out). The colors being picked
+ * are painted inline; the rest are theme tokens (TK-9), apart from the literals that must read on
+ * any color.
  */
 @layer owsem.components {
   .ow-color-picker,
@@ -490,7 +491,6 @@
     border-radius: inherit;
   }
 
-  /* Scales out of the trigger (Base UI's --transform-origin), and back into it. */
   /*
    * The popup fades in place. It is large, so even a 0.96 scale moved its far edges 10 to 14px,
    * which read as the panel shifting as it opened.

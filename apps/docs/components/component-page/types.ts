@@ -1,3 +1,5 @@
+import type { ComponentFiles } from "@/lib/component-files";
+import type { Token } from "@/lib/highlight";
 import type { Lang } from "@/lib/i18n";
 
 /** Text for every docs language; the type check fails until each one exists. */
@@ -21,4 +23,22 @@ export interface Part {
 export interface CodeFile {
   name: string;
   code: string;
+}
+
+/** The files of the Manual install, read on the server: CSS always, Tailwind v4 when it exists. */
+export interface ManualFiles extends ComponentFiles {
+  /** Each file's tokens by path, highlighted on the server: the client does no tokenizing. */
+  lines: Record<string, Token[][]>;
+}
+
+/** What /api/manual/<component> returns: CSS always, Tailwind v4 when it exists. */
+export interface ManualData {
+  css: ManualFiles;
+  tailwind?: ManualFiles;
+}
+
+/** What the page passes for the Manual tab: enough to draw it; the files load on first open. */
+export interface ManualInstall {
+  name: string;
+  tailwind: boolean;
 }

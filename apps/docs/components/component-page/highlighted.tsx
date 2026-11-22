@@ -3,6 +3,7 @@
 import { Fragment, type ReactNode, useEffect, useMemo, useState } from "react";
 import type { HighlighterCore, ThemedToken } from "shiki/core";
 import { CODE_THEME, codeTheme } from "@/lib/code-theme";
+import type { Token } from "@/lib/highlight";
 import type { CodeFile } from "./types";
 
 const LANGS = { tsx: "tsx", ts: "tsx", css: "css" } as const;
@@ -89,4 +90,39 @@ export function HighlightedLine({ code, lang }: { code: string; lang: "tsx" | "c
     [highlighter, code, lang],
   );
   return highlight(code, tokens);
+}
+
+/**
+ * Code the server already highlighted: no Shiki on the client. `limit` renders only the first
+ * lines, for a collapsed block.
+ */
+export function HighlightedLines({
+  lines,
+  limit,
+}: {
+  lines: Token[][];
+  limit?: number | undefined;
+}) {
+  const shown = limit === undefined ? lines : lines.slice(0, limit);
+  return (
+    <pre>
+      <code>
+        {shown.map((line, i) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: lines are positional
+          <Fragment key={i}>
+            {i > 0 ? "\n" : ""}
+            {line.map(([text, color, italic], j) => (
+              <span
+                // biome-ignore lint/suspicious/noArrayIndexKey: tokens are positional
+                key={j}
+                style={{ color: color || undefined, fontStyle: italic ? "italic" : undefined }}
+              >
+                {text}
+              </span>
+            ))}
+          </Fragment>
+        ))}
+      </code>
+    </pre>
+  );
 }

@@ -54,6 +54,7 @@
   ],
   "scripts": {
     "build": "tsdown",
+    "tailwind:build": "node scripts/build-tailwind.ts",
     "dev": "tsdown --watch --no-clean",
     "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.build.json && tsc -p tsconfig.node.json",
     "test": "vitest run",
@@ -84,6 +85,8 @@
     "@types/react-dom": "catalog:",
     "@vitest/browser-playwright": "catalog:",
     "axe-core": "catalog:",
+    "class-variance-authority": "^0.7.1",
+    "cn": "^0.5.2",
     "lightningcss": "catalog:",
     "playwright": "catalog:",
     "publint": "catalog:",

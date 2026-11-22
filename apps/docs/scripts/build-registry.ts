@@ -4,11 +4,16 @@
  * Run directly by Node (type stripping), so only erasable TypeScript here and in its imports.
  */
 import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Registry, RegistryItem } from "shadcn/schema";
 import { catalog, isAvailable } from "../lib/catalog.ts";
+import {
+  isSource,
+  npmDependencies,
+  coreModules as readCoreModules,
+  rewriteImports,
+} from "../lib/component-files.ts";
 import { en } from "../lib/dictionaries/en.ts";
 import { RESERVED_SLUGS } from "../lib/reserved-slugs.ts";
 import { siteUrl } from "../lib/site.ts";
@@ -18,10 +23,6 @@ const uiSrc = join(docsDir, "../../packages/ui/src");
 const stageDir = join(docsDir, ".registry");
 const outDir = join(docsDir, "public/r");
 
-const baseUiVersion: string = createRequire(join(uiSrc, "../package.json"))(
-  "@base-ui/react/package.json",
-).version;
-
 /** Writes a registry copy of a packages/ui file; shadcn only accepts paths inside stageDir. */
 function stage(item: string, from: string, to: string, transform = (code: string) => code) {
   const dest = join(stageDir, "src", item, to);
@@ -29,28 +30,6 @@ function stage(item: string, from: string, to: string, transform = (code: string
   writeFileSync(dest, transform(readFileSync(join(uiSrc, from), "utf8")));
   return `src/${item}/${to}`;
 }
-
-/**
- * CLI-6: relative imports that leave a component folder become alias imports, which shadcn and
- * `owsem add` rewrite to the user's paths. Sources in packages/ui stay relative. Imported
- * components are added to `uses`, so they are installed too.
- */
-function rewriteImports(name: string, code: string, uses: Set<string>): string {
-  return code.replace(/(from |import )(["'])(\.\.\/[^"']+)\2/g, (_, keyword, quote, path) => {
-    if (path.startsWith("../../core/")) {
-      return `${keyword}${quote}@/lib/owsem/${path.slice("../../core/".length)}${quote}`;
-    }
-    const component = /^\.\.\/([a-z0-9-]+)\//.exec(path)?.[1];
-    if (!component) throw new Error(`${name}: cannot rewrite import "${path}" for the registry.`);
-    uses.add(`@owsem/${component}`);
-    return `${keyword}${quote}@/components/owsem/${path.slice("../".length)}${quote}`;
-  });
-}
-
-const npmDependencies = (code: string): string[] =>
-  code.includes('from "@base-ui/react') ? [`@base-ui/react@~${baseUiVersion}`] : [];
-
-const isSource = (file: string) => /\.(tsx?|css)$/.test(file) && !/\.test\.tsx?$/.test(file);
 
 function assertValidItem(item: RegistryItem): void {
   if (item.name.includes("/") || RESERVED_SLUGS.has(item.name)) {
@@ -72,9 +51,7 @@ rmSync(outDir, { recursive: true, force: true });
 
 // Core modules and their CSS keep their path under @lib/owsem/. index.ts only re-exports (Base UI
 // providers for npm users); tokens.css and tailwind.css are listed on their own.
-const coreModules = readdirSync(join(uiSrc, "core"), { recursive: true, encoding: "utf8" }).filter(
-  (file) => isSource(file) && file !== "index.ts" && file !== "tokens/tokens.css",
-);
+const coreModules = readCoreModules(uiSrc);
 
 const items: RegistryItem[] = [
   {
@@ -83,6 +60,15 @@ const items: RegistryItem[] = [
     title: "Owsem Core",
     description:
       "Theme tokens with the --ow- prefix, the OwsemUI @layer order, Glide, helpers, and a Tailwind CSS v4 theme.",
+    dependencies: [
+      ...new Set(
+        coreModules
+          .filter((file) => file.endsWith(".ts"))
+          .flatMap((file) =>
+            npmDependencies(readFileSync(join(uiSrc, "core", file), "utf8"), uiSrc),
+          ),
+      ),
+    ],
     files: [
       {
         path: stage("core", "core/tokens/tokens.css", "tokens.css"),
@@ -130,7 +116,7 @@ for (const name of componentNames) {
     .filter(isSource)
     .map((file) => ({
       path: stage(name, `components/${name}/${file}`, file, (code) => {
-        for (const dependency of npmDependencies(code)) dependencies.add(dependency);
+        for (const dependency of npmDependencies(code, uiSrc)) dependencies.add(dependency);
         return file.endsWith(".css") ? code : rewriteImports(name, code, uses);
       }),
       type: file.endsWith(".css") ? ("registry:file" as const) : ("registry:ui" as const),

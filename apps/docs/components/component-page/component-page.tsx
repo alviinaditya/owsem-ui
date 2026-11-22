@@ -30,6 +30,7 @@ import { Tip } from "../tip";
 import { TokenChip, useTokenNames, useTokenSetup } from "../token-setup";
 import { ANATOMY_LEAVE_MS, Anatomy } from "./anatomy";
 import { SHEET_FULL_GAP, SHEET_HALF } from "./layout";
+import type { ManualInstall } from "./types";
 
 /** What the page passes to a component's example module (examples/<name>.tsx). */
 export interface ExamplePageProps {
@@ -44,6 +45,8 @@ export interface ExamplePageProps {
   sections: { id: string; title: ReactNode }[];
   labels: Dictionary["cp"];
   common: Dictionary["common"];
+  /** The Manual install's files for this component. */
+  install: ManualInstall;
   /** After the Docs: the links to the components before and after. */
   footer: ReactNode;
   /** The Docs content (content/components/<lang>/<name>.mdx). */
@@ -55,6 +58,7 @@ interface PageContext {
   definition: ComponentDefinition;
   labels: Dictionary["cp"];
   common: Dictionary["common"];
+  install: ManualInstall;
   activeId: string;
   showExample: (id: string) => void;
   inspecting: boolean;
@@ -143,6 +147,7 @@ export function ComponentPage({
   sections,
   labels,
   common,
+  install,
   footer,
   children,
 }: ExamplePageProps & { definition: ComponentDefinition }) {
@@ -452,6 +457,7 @@ export function ComponentPage({
     definition,
     labels,
     common,
+    install,
     activeId: active?.id ?? "",
     showExample: setActiveId,
     inspecting,

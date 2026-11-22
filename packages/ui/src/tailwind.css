@@ -48,5 +48,28 @@
     --ease-ow-spring-travel: var(--ow-spring-travel);
     --ease-ow-spring-settle: var(--ow-spring-settle);
     --ease-ow-spring-glide: var(--ow-spring-glide);
+
+    /* Button's loading spinner, and its pulse when motion is reduced. */
+    --animate-ow-spin: ow-spin 0.8s linear infinite;
+    --animate-ow-pulse: ow-pulse 0.8s ease-in-out infinite alternate;
   }
 }
+
+/*
+ * Button's loading spinner and its pulse when motion is reduced. Top level, so a copy of one block
+ * works alone; --animate-ow-spin and --animate-ow-pulse above name them for your own classes.
+ */
+@keyframes ow-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@keyframes ow-pulse {
+  to {
+    opacity: 0.4;
+  }
+}
+
+/* A held press: a pointer or a key down, never while disabled. */
+@custom-variant held (&:is(:active, [data-held]):not([data-disabled]));

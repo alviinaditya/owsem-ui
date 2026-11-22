@@ -1,12 +1,15 @@
 "use client";
 
+import { Tabs } from "owsem-ui/base";
 import { CodeBlock } from "owsem-ui/owsem";
+import { useState } from "react";
 import { importPath } from "@/lib/examples";
 import { Icon } from "../icons/icon";
 import { CodeLine, InstallTabs } from "../install";
 import { TokenChip, useTokenSetup } from "../token-setup";
 import { usePage } from "./component-page";
 import { Highlighted } from "./highlighted";
+import { loadManual, ManualInstall } from "./manual-install";
 
 /**
  * The MDX components of a component page's Docs (content/components/<lang>/<name>.mdx): each one
@@ -56,15 +59,37 @@ export function Install() {
   const setup = useTokenSetup();
   const { definition, common } = page;
   const names = definition.imports.join(", ");
+  const [tab, setTab] = useState<string | number | null>("command");
+  // The Manual files load on the first open; hovering or focusing the tab starts it early.
+  const [opened, setOpened] = useState(false);
+  const warm = () => void loadManual(page.install.name).catch(() => {});
   return (
-    <div className="cp-docs-install">
-      <InstallTabs item={definition.item} labels={common} />
-      <CodeLine
-        text={`import { ${names} } from "${importPath(setup, definition.item)}";`}
-        labels={common}
-        lang="tsx"
-      />
-    </div>
+    <Tabs.Root
+      value={tab}
+      onValueChange={(next) => {
+        setTab(next);
+        if (next === "manual") setOpened(true);
+      }}
+      className="cp-docs-install"
+    >
+      <Tabs.List size="sm" aria-label={page.labels.installMode}>
+        <Tabs.Tab value="command">{page.labels.installCommand}</Tabs.Tab>
+        <Tabs.Tab value="manual" onPointerEnter={warm} onFocus={warm}>
+          {page.labels.installManual}
+        </Tabs.Tab>
+      </Tabs.List>
+      <Tabs.Panel value="command" keepMounted className="cp-docs-install__panel">
+        <InstallTabs item={definition.item} labels={common} />
+        <CodeLine
+          text={`import { ${names} } from "${importPath(setup, definition.item)}";`}
+          labels={common}
+          lang="tsx"
+        />
+      </Tabs.Panel>
+      <Tabs.Panel value="manual" keepMounted className="cp-docs-install__panel">
+        <ManualInstall active={opened} />
+      </Tabs.Panel>
+    </Tabs.Root>
   );
 }
 

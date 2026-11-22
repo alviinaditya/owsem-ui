@@ -3,6 +3,7 @@ export type Theme = (typeof THEMES)[number];
 
 export const THEME_STORAGE_KEY = "owsem-theme";
 export const PACKAGE_MANAGER_STORAGE_KEY = "owsem-package-manager";
+export const INSTALL_FLAVOR_STORAGE_KEY = "owsem-install-flavor";
 export const TOKEN_SETUP_STORAGE_KEY = "owsem-token-setup";
 export const INDEX_VIEW_STORAGE_KEY = "owsem-index-view";
 export const SIDEBAR_STORAGE_KEY = "owsem-sidebar";

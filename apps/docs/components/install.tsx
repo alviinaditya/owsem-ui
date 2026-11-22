@@ -14,7 +14,7 @@ import { TokenChip, useTokenSetup } from "./token-setup";
 const PACKAGE_MANAGERS = ["pnpm", "npm", "yarn", "bun"] as const;
 type PackageManager = (typeof PACKAGE_MANAGERS)[number];
 
-const ADD: Record<PackageManager, string> = {
+export const ADD: Record<PackageManager, string> = {
   pnpm: "pnpm add",
   npm: "npm install",
   yarn: "yarn add",
@@ -135,7 +135,7 @@ function Command({ text, labels }: { text: string; labels: Labels }) {
  * Commands in a Code Block with a tab per package manager: the visitor's choice, kept across
  * visits and shared by every command on the page. Copy takes them all, without the prompts.
  */
-function InstallBlock({
+export function InstallBlock({
   commands,
   labels,
   className,
@@ -203,7 +203,7 @@ const cliSteps = (setup: TokenSetup, item: string, pm: PackageManager) => [
 ];
 
 /** Under the owsem CLI's commands: it is not released yet. */
-function CliNote({ labels }: { labels: Labels }) {
+export function CliNote({ labels }: { labels: Labels }) {
   const [before, after] = labels.cliSoon.split("{token}");
   return (
     <p className="install-note">

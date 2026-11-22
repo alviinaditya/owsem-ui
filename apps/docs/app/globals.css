@@ -3650,6 +3650,118 @@ body {
   margin: 0;
 }
 
+/* The Command and Manual tabs, and the content of each under them. */
+.cp-docs-install__panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  margin-block-start: 12px;
+}
+
+.cp-docs-install__panel[hidden] {
+  display: none;
+}
+
+.manual {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+/* pnpm-style: the first flavor is raised until hydration reads the stored choice. */
+.manual-flavor {
+  justify-self: start;
+}
+
+.manual-flavor:not(:has([aria-pressed="true"])) [data-option="css"] {
+  background-color: var(--docs-raised);
+  color: var(--docs-fg);
+}
+
+.manual-steps[hidden] {
+  display: none;
+}
+
+/* Numbered steps joined by a vertical line, number to number. */
+.manual-steps {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.manual-step {
+  position: relative;
+  min-inline-size: 0;
+  padding-block-end: 24px;
+  padding-inline-start: 36px;
+  counter-increment: step;
+}
+
+.manual-step:last-child {
+  padding-block-end: 0;
+}
+
+.manual-step::before {
+  content: counter(step);
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  display: grid;
+  place-items: center;
+  inline-size: 24px;
+  block-size: 24px;
+  border-radius: 50%;
+  background-color: var(--docs-surface);
+  box-shadow: var(--ow-surface-shadow);
+  color: var(--docs-muted);
+  font-size: var(--docs-text-small);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.manual-step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  inset-block: 32px 8px;
+  inset-inline-start: 11.5px;
+  inline-size: 1px;
+  background-color: var(--docs-line);
+}
+
+.manual-step__title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.manual-step__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  margin-block-start: 8px;
+}
+
+.manual-step__body > p {
+  max-inline-size: none;
+  margin: 0;
+}
+
+/* A long file shows 240px, fading out, until Expand. The Code Block's panel scrolls sideways. */
+.manual-file__code[data-collapsed] {
+  max-block-size: 240px;
+  overflow-y: hidden;
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 64px), transparent);
+}
+
+.manual-file__toggle {
+  flex: none;
+  color: var(--docs-muted);
+}
+
 /* An example is one card: the header (title, sentence, Preview button), then its code. */
 .cp-example {
   margin-block-end: 20px;

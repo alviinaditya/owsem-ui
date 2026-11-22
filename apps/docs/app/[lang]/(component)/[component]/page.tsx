@@ -16,6 +16,7 @@ import {
   isAvailable,
   readingOrder,
 } from "@/lib/catalog";
+import { hasTailwind } from "@/lib/component-files";
 import { type Dictionary, getDictionary } from "@/lib/dictionaries";
 import { i18n, isLang, type Lang, localeAlternates } from "@/lib/i18n";
 import { assertNotReserved } from "@/lib/reserved-slugs";
@@ -139,6 +140,7 @@ function ExamplesPage({ lang, entry, dict }: PageArgs) {
   const Examples = examples[entry.name as ComponentName];
   if (!page || !Examples) notFound();
   const Mdx = page.data.body;
+  const install = { name: entry.name, tailwind: hasTailwind(entry.name) };
   return (
     <PageMain className="cp-main">
       <Examples
@@ -149,6 +151,7 @@ function ExamplesPage({ lang, entry, dict }: PageArgs) {
         sections={docSections(page.data.toc)}
         labels={dict.cp}
         common={dict.common}
+        install={install}
         footer={<Neighbors lang={lang} entry={entry} dict={dict} />}
       >
         <Mdx components={getMDXComponents(lang, undefined, entry)} />

@@ -6,10 +6,16 @@
  */
 /* Re-declared on every theme root: the light-dark() fallback Next emits resolves where the
  * property is declared, so a preview's own data-theme needs its own copy. */
-/* The page's side gutter (the sidebar's start edge, the preview's end edge) and the sidebar. */
+/*
+ * The page's side gutter (the sidebar's start edge, the preview's end edge), the sidebar, and the
+ * frame: the space above and below the preview card, which the sidebar and the Docs keep too.
+ * --docs-bar-y is the middle of the preview's toolbar row, where each column's first row sits.
+ */
 :root {
   --docs-page-x: 16px;
   --docs-sidebar-w: 256px;
+  --docs-frame-y: 16px;
+  --docs-bar-y: calc(var(--docs-frame-y) + 16px + 17px);
 }
 
 @media (width >= 768px) {
@@ -1155,7 +1161,7 @@ body {
   --ow-focus: var(--docs-accent);
   --ow-hover: var(--docs-hover);
   /* The list ends where the preview card does, clear of the window's edge. */
-  padding-block-end: 16px;
+  padding-block-end: var(--docs-frame-y);
   font-size: var(--docs-text-ui);
 }
 
@@ -1176,10 +1182,11 @@ body {
 }
 
 /* One left edge: the logo, the search field and the group labels; the items sit in the gutter. */
+/* The brand row (40px) is centered on the preview's toolbar row. */
 .site-sidebar-head {
   display: grid;
   gap: 20px;
-  padding: 20px 16px 32px var(--docs-page-x);
+  padding: calc(var(--docs-bar-y) - 20px) 16px 32px var(--docs-page-x);
 }
 
 .site-sidebar-brand {
@@ -2905,13 +2912,23 @@ body {
   .cp :is(.cp-docs-head, .cp-docs-scroll) {
     padding-inline-start: 16px;
   }
+
+  /* Inside the frame like the preview: the tabs on its toolbar row, the text ending where it does. */
+  .cp-docs-inner {
+    box-sizing: border-box;
+    padding-block: var(--docs-frame-y);
+  }
+
+  .cp .cp-docs-head {
+    block-size: calc(2 * (var(--docs-bar-y) - var(--docs-frame-y)));
+  }
 }
 
 .cp-preview {
   container-type: size;
   position: relative;
   min-inline-size: 0;
-  margin: 16px var(--docs-page-x) 16px 16px;
+  margin: var(--docs-frame-y) var(--docs-page-x) var(--docs-frame-y) 16px;
   overflow: hidden;
   outline: 1px solid light-dark(var(--docs-line), transparent);
   outline-offset: -1px;

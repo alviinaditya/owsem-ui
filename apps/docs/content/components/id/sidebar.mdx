@@ -249,6 +249,7 @@ Tidak ada.
 | --- | --- | --- |
 | `data-visible` | Indicator | Ada item yang aktif |
 | `data-moving` | Indicator | Cairan sedang menuju item baru |
+| `data-waiting` | Indicator | Cairan sudah mendarat di item yang diklik dan halaman belum menyusul; titik berdenyut |
 
 ### Sidebar.Footer
 
@@ -299,6 +300,7 @@ Bernama "Toggle sidebar" kecuali Anda memberi `aria-label` atau children.
 | `ow-sidebar__icon` | ItemIcon |
 | `ow-sidebar__badge` | ItemBadge |
 | `ow-sidebar__indicator` | Indicator |
+| `ow-sidebar__pulse` | Denyut pemuatan pada titik Indicator |
 | `ow-sidebar__trigger` | Trigger |
 
 ## Aksesibilitas [#accessibility]
@@ -358,6 +360,6 @@ mengisi latar baru (0,36 dtk) sementara warna meninggalkan titik, yang tetap tin
 perpindahan memakan waktu yang sama, dekat atau jauh. Pilih lagi di tengah jalan dan tetes berubah
 arah, tanpa sisa. Teks item baru mengambil tampilan aktifnya saat cairan mendarat. Klik pada item
 memindahkan cairan ke sana seketika, sebelum `active` di halaman menyusul, dan ia kembali jika
-`active` tidak berubah dalam 3 detik. Highlight hover meluncur di antara baris. Dengan
+`active` tidak berubah dalam 3 detik. Jika perpindahan selesai dan `active` belum menyusul, titik berdenyut (membesar lalu kembali sambil cincin tipis memancar keluar, 0,9 dtk, di compositor) sampai `active` tiba, kamu klik lagi, atau cairan kembali. Highlight hover meluncur di antara baris. Dengan
 `prefers-reduced-motion`, atau `--ow-motion-scale: 0`, sidebar dan laci hanya memudar, dan Indicator
 melompat.

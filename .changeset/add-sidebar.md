@@ -12,7 +12,7 @@ is bold and scrolled into view inside `Content`, never the page; items sit in a 
 dot in the gutter. To a new page the background shrinks into a drop, the drop drips there on a neck
 that snaps and lands with a small splat, and it spreads out to fill the new background, in the same
 time near or far; a re-pick mid-way changes course. It jumps to a clicked item before the page's
-`active` follows (and returns after 3 seconds if it does not), and only jumps under reduced motion or
+`active` follows (its dot pulses while the page loads, and it returns after 3 seconds if `active` does not follow), and only jumps under reduced motion or
 `--ow-motion-scale: 0`; hovering the other items slides Glide's highlight between them. `Content` hides its scrollbar, leaves room below the last item, and fades the edge that has more to
 scroll (`data-overflow-start`, `data-overflow-end`). Long labels are cut with an ellipsis, and `disabled` items are
 muted and cannot be followed. Every part takes `className`, `style`, and `ref`, and `render` swaps

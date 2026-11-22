@@ -14,6 +14,9 @@
  *   lands elsewhere it follows that; if nothing changes within `PENDING_MS` it goes back.
  * - The item's text styling arrives when the liquid lands: `data-landed` marks that item, and
  *   `data-away` an active item the liquid has left.
+ * - If the move ends and the page has not arrived, a CSS pulse on the dot (`data-waiting`) shows it
+ *   is loading. It runs on the compositor, no requestAnimationFrame, and stops when `active`
+ *   arrives, on a new click, or before the revert.
  */
 
 export interface Indicator {
@@ -129,6 +132,11 @@ export function createIndicator(root: HTMLElement, pill: HTMLElement): Indicator
   const bead = shape("circle", "ow-sidebar__liquid-dot");
   for (const el of [neck, rem, tail, back, body, bead]) svg.append(el);
   pill.append(svg);
+  // The loading pulse: an HTML dot over the bead, shown by `data-waiting`, animated in CSS.
+  const pulse = document.createElement("span");
+  pulse.className = "ow-sidebar__pulse";
+  pulse.setAttribute("aria-hidden", "true");
+  pill.append(pulse);
 
   let rtl = false;
   let at: HTMLElement | null = null; // where the liquid is, or is going
@@ -160,6 +168,21 @@ export function createIndicator(root: HTMLElement, pill: HTMLElement): Indicator
   };
   /** Inline coordinate to the SVG's x: the SVG sits at the inline start edge. */
   const X = (u: number) => (rtl ? -u : u);
+
+  /** Pulse while the clicked item has landed and the page has not followed. Placed once, not per frame. */
+  function waiting(): void {
+    const on =
+      phase === "rest" &&
+      !!dest &&
+      !!pending &&
+      at === pending &&
+      !pending.hasAttribute("data-active");
+    if (on && dest) {
+      pulse.style.setProperty("--_x", `${X(dest.c - BEAD).toFixed(2)}px`);
+      pulse.style.setProperty("--_y", `${(centre(dest) - BEAD).toFixed(2)}px`);
+    }
+    pill.toggleAttribute("data-waiting", on);
+  }
 
   function measure(el: HTMLElement): Place | null {
     const r = el.getBoundingClientRect();
@@ -346,7 +369,10 @@ export function createIndicator(root: HTMLElement, pill: HTMLElement): Indicator
     // A scale of 0 should not get here; if it changed mid-move, finish at once.
     const done = scale <= 0 ? step(T_SHRINK + T_DRIP + T_FILL) : step(real / scale);
     raf = done ? 0 : requestAnimationFrame(tick);
-    if (done) pill.removeAttribute("data-moving");
+    if (done) {
+      pill.removeAttribute("data-moving");
+      waiting();
+    }
   };
   function go(): void {
     if (raf) return;
@@ -372,6 +398,7 @@ export function createIndicator(root: HTMLElement, pill: HTMLElement): Indicator
     beadR = BEAD;
     land(el);
     draw();
+    waiting();
   }
 
   function sync(): void {
@@ -401,11 +428,13 @@ export function createIndicator(root: HTMLElement, pill: HTMLElement): Indicator
         rect = bg(place);
         land(item);
         draw();
+        waiting();
       } else if (phase === "drip") drip.y1 = centre(place);
       else land(landed);
       return;
     }
     // A new item: shrink from wherever the background is now.
+    pill.removeAttribute("data-waiting");
     at = item;
     anchor = place.c;
     if (phase === "rest" || phase === "fill") {
@@ -426,6 +455,7 @@ export function createIndicator(root: HTMLElement, pill: HTMLElement): Indicator
   function settle(): void {
     clearTimeout(timer);
     pending = null;
+    pill.removeAttribute("data-waiting");
     sync();
   }
 
@@ -437,6 +467,7 @@ export function createIndicator(root: HTMLElement, pill: HTMLElement): Indicator
     const target = item.getAttribute("target");
     if (target && target !== "_self") return;
     pending = item;
+    pill.removeAttribute("data-waiting");
     clearTimeout(timer);
     timer = window.setTimeout(settle, PENDING_MS);
     sync();
@@ -473,6 +504,8 @@ export function createIndicator(root: HTMLElement, pill: HTMLElement): Indicator
       sizes.disconnect();
       root.removeEventListener("click", onClick);
       svg.remove();
+      pulse.remove();
+      pill.removeAttribute("data-waiting");
       for (const item of root.querySelectorAll(ITEM)) {
         item.removeAttribute("data-landed");
         item.removeAttribute("data-away");

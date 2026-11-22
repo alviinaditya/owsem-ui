@@ -269,4 +269,119 @@ describe("Sidebar.Indicator", () => {
     const screen = await render(<Nav active="/button" />);
     expect((await axeReport(screen.container)).violations).toEqual([]);
   });
+
+  describe("loading pulse", () => {
+    const pulse = () => q(".ow-sidebar__pulse");
+    const arrive: { fn: () => void } = { fn: () => {} };
+    function Pending() {
+      const [active, setActive] = useState("/button");
+      arrive.fn = () => setActive("/switch");
+      return <Nav active={active} />;
+    }
+    const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    const click = () => {
+      link("Switch").addEventListener("click", (e) => e.preventDefault());
+      link("Switch").click();
+    };
+    const waiting = () => pill().hasAttribute("data-waiting");
+
+    test("shows only after the move ends, on the dot, with CSS animations on transform and opacity", async () => {
+      await render(<Pending />);
+      await expect.poll(off("Button")).toBeLessThan(0.6);
+      click();
+      expect(waiting()).toBe(false);
+      await expect.poll(() => pill().hasAttribute("data-moving")).toBe(true);
+      expect(waiting()).toBe(false);
+      await expect.poll(waiting).toBe(true);
+      expect(pill().hasAttribute("data-moving")).toBe(false);
+      expect(Math.abs(mid(pulse()) - mid(link("Switch")))).toBeLessThan(0.6);
+      const p = pulse().getBoundingClientRect();
+      const d = dot().getBoundingClientRect();
+      expect(Math.abs(p.left + p.width / 2 - (d.left + d.width / 2))).toBeLessThan(0.6);
+      expect(Math.abs(p.width - 7)).toBeLessThan(0.6);
+      const anims = pulse().getAnimations({ subtree: true });
+      expect(anims.length).toBe(2);
+      for (const a of anims) {
+        expect(a).toBeInstanceOf(CSSAnimation);
+        for (const frame of (a.effect as KeyframeEffect).getKeyframes()) {
+          const props = Object.keys(frame).filter(
+            (k) => !["offset", "computedOffset", "easing", "composite"].includes(k),
+          );
+          for (const k of props) expect(["transform", "opacity"]).toContain(k);
+        }
+      }
+    });
+
+    test("runs no requestAnimationFrame while pulsing", async () => {
+      await render(<Pending />);
+      await expect.poll(off("Button")).toBeLessThan(0.6);
+      click();
+      await expect.poll(waiting).toBe(true);
+      const spy = vi.spyOn(window, "requestAnimationFrame");
+      await wait(400);
+      expect(waiting()).toBe(true);
+      expect(spy).not.toHaveBeenCalled();
+    });
+
+    test("stops when active arrives, and the dot stays", async () => {
+      await render(<Pending />);
+      await expect.poll(off("Button")).toBeLessThan(0.6);
+      click();
+      await expect.poll(waiting).toBe(true);
+      arrive.fn();
+      await expect.poll(waiting).toBe(false);
+      expect(getComputedStyle(pulse()).display).toBe("none");
+      expect(off("Switch")()).toBeLessThan(0.6);
+    });
+
+    test("the revert after PENDING_MS stops it before the move back", async () => {
+      await render(<Pending />);
+      await expect.poll(off("Button")).toBeLessThan(0.6);
+      vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+      click();
+      for (let i = 0; i < 120 && !waiting(); i++) await frame();
+      expect(waiting()).toBe(true);
+      vi.advanceTimersByTime(PENDING_MS);
+      expect(waiting()).toBe(false);
+      expect(pill().hasAttribute("data-moving")).toBe(true);
+    });
+
+    test("an early active never pulses", async () => {
+      await render(<Pending />);
+      await expect.poll(off("Button")).toBeLessThan(0.6);
+      let seen = false;
+      new MutationObserver(() => {
+        if (waiting()) seen = true;
+      }).observe(pill(), { attributes: true, attributeFilter: ["data-waiting"] });
+      link("Switch").addEventListener("click", (e) => {
+        e.preventDefault();
+        arrive.fn();
+      });
+      link("Switch").click();
+      await expect.poll(off("Switch")).toBeLessThan(0.6);
+      await wait(300);
+      expect(seen).toBe(false);
+      expect(waiting()).toBe(false);
+    });
+
+    test("a new click stops it and starts the normal move", async () => {
+      await render(<Pending />);
+      await expect.poll(off("Button")).toBeLessThan(0.6);
+      click();
+      await expect.poll(waiting).toBe(true);
+      link("Input").addEventListener("click", (e) => e.preventDefault());
+      link("Input").click();
+      expect(waiting()).toBe(false);
+      expect(pill().hasAttribute("data-moving")).toBe(true);
+    });
+
+    test("reduced motion: no animation", async () => {
+      await commands.setReducedMotion("reduce");
+      await render(<Pending />);
+      await expect.poll(off("Button")).toBeLessThan(0.6);
+      click();
+      await expect.poll(off("Switch")).toBeLessThan(0.6);
+      expect(pulse().getAnimations({ subtree: true })).toHaveLength(0);
+    });
+  });
 });

@@ -46,3 +46,22 @@ test("a click on an item moves the Indicator to it", async ({ page }) => {
   await expect(target).toHaveAttribute("data-landed", "");
   await expect.poll(() => onLink(target)).toBeLessThan(1);
 });
+
+test("the dot pulses while the next page loads", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name === "mobile-390", "the docs sidebar is a drawer on a phone");
+  await page.goto("/en/button");
+  await page.route(/tooltip/, async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+    await route.continue();
+  });
+  const pill = page.locator(".ow-sidebar__indicator").first();
+  await expect(pill).toHaveAttribute("data-visible", "");
+  await page
+    .locator(".ow-sidebar__link", { hasText: /^Tooltip/ })
+    .first()
+    .click({ noWaitAfter: true });
+  await expect(pill).toHaveAttribute("data-waiting", "");
+  await expect(pill.locator(".ow-sidebar__pulse")).toBeVisible();
+  await expect(pill).not.toHaveAttribute("data-waiting", "", { timeout: 15000 });
+  await expect(page).toHaveURL(/tooltip/);
+});

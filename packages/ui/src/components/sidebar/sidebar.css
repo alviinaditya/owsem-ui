@@ -228,6 +228,53 @@
     fill: var(--ow-accent);
   }
 
+  /* The loading pulse on the dot (data-waiting): transform and opacity only. */
+  .ow-sidebar__pulse {
+    display: none;
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    inline-size: 7px;
+    block-size: 7px;
+    border-radius: 50%;
+    background: var(--ow-accent);
+    translate: var(--_x, 0) var(--_y, 0);
+    will-change: transform, opacity;
+    animation: ow-sidebar-swell calc(0.9s * var(--ow-motion-scale)) ease-in-out infinite;
+  }
+
+  .ow-sidebar__indicator[data-waiting] .ow-sidebar__pulse {
+    display: block;
+  }
+
+  .ow-sidebar__pulse::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--ow-accent);
+    border-radius: inherit;
+    opacity: 0;
+    will-change: transform, opacity;
+    animation: ow-sidebar-ping calc(0.9s * var(--ow-motion-scale)) ease-out infinite;
+  }
+
+  @keyframes ow-sidebar-swell {
+    50% {
+      transform: scale(1.5);
+    }
+  }
+
+  @keyframes ow-sidebar-ping {
+    from {
+      transform: scale(1);
+      opacity: 0.5;
+    }
+    to {
+      transform: scale(3);
+      opacity: 0;
+    }
+  }
+
   .ow-sidebar__link:where([data-disabled]) {
     color: var(--_muted);
     cursor: default;
@@ -308,6 +355,11 @@
 
   /* FR-20: no movement; it only fades. */
   @media (prefers-reduced-motion: reduce) {
+    .ow-sidebar__pulse,
+    .ow-sidebar__pulse::after {
+      animation: none;
+    }
+
     .ow-sidebar,
     .ow-sidebar:where([data-state="closed"]),
     .ow-sidebar[data-mobile]:where([data-starting-style], [data-ending-style]) {
@@ -338,6 +390,15 @@
 
     .ow-sidebar__liquid-dot {
       fill: Highlight;
+    }
+
+    .ow-sidebar__pulse {
+      forced-color-adjust: none;
+      background: Highlight;
+    }
+
+    .ow-sidebar__pulse::after {
+      border-color: Highlight;
     }
 
     /* The hover box is clipped 1px inside, so its outline sits further in. */

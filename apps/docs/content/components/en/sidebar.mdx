@@ -249,6 +249,7 @@ None.
 | --- | --- | --- |
 | `data-visible` | Indicator | An item is active |
 | `data-moving` | Indicator | The liquid is on its way to a new item |
+| `data-waiting` | Indicator | The liquid has landed on a clicked item and the page has not followed yet; the dot pulses |
 
 ### Sidebar.Footer
 
@@ -299,6 +300,7 @@ Named "Toggle sidebar" unless you pass `aria-label` or children.
 | `ow-sidebar__icon` | ItemIcon |
 | `ow-sidebar__badge` | ItemBadge |
 | `ow-sidebar__indicator` | Indicator |
+| `ow-sidebar__pulse` | The loading pulse on the Indicator's dot |
 | `ow-sidebar__trigger` | Trigger |
 
 ## Accessibility [#accessibility]
@@ -358,5 +360,5 @@ fill the new background (0.36s) while the color leaves the dot, which stays. Eve
 same time, near or far. Pick again mid-way and the drop changes course, with no remnant. The new
 item's text takes its active look when the liquid lands. A click on an item moves the liquid there at
 once, before the page's `active` follows, and it goes back if `active` does not change within 3
-seconds. The hover highlight glides between rows. With `prefers-reduced-motion`, or
+seconds. If the move ends and `active` has not followed, the dot pulses (it swells and settles while a thin ring pings out, 0.9s, on the compositor) until `active` arrives, you click again, or the move goes back. The hover highlight glides between rows. With `prefers-reduced-motion`, or
 `--ow-motion-scale: 0`, the sidebar and the drawer only fade, and the Indicator jumps.

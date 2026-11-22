@@ -29,25 +29,29 @@ async function viewport(width: number, height: number) {
   await page.viewport(width, height);
 }
 
-/** Clicks the trigger, and pauses the popup's transform transition as it starts. */
-async function pausedOpening() {
-  const started = new Promise<CSSTransition>((resolve) => {
-    const onRun = (event: TransitionEvent) => {
-      const target = event.target as HTMLElement;
-      if (event.propertyName !== "transform" || !target.classList.contains("ow-dialog__popup")) {
-        return;
-      }
-      document.removeEventListener("transitionrun", onRun);
-      const run = target
-        .getAnimations()
-        .find((a) => (a as CSSTransition).transitionProperty === "transform") as CSSTransition;
-      run.pause();
-      resolve(run);
-    };
-    document.addEventListener("transitionrun", onRun);
-  });
+/**
+ * Clicks the trigger, and pauses the popup's transform transition once it is listed. Polled rather
+ * than caught in transitionrun: WebKit fires that event before getAnimations() has the transition.
+ */
+async function pausedOpening(): Promise<CSSTransition> {
   await userEvent.click(document.querySelector("button") as HTMLElement);
-  return started;
+  let run: CSSTransition | undefined;
+  await expect
+    .poll(
+      () => {
+        run = popup()
+          ?.getAnimations()
+          .find(
+            (a): a is CSSTransition =>
+              a instanceof CSSTransition && a.transitionProperty === "transform",
+          );
+        run?.pause();
+        return run;
+      },
+      { interval: 1 },
+    )
+    .toBeDefined();
+  return run as CSSTransition;
 }
 
 function appCss(css: string) {

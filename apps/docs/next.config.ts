@@ -6,6 +6,8 @@ const config: NextConfig = {
   typedRoutes: true,
   // Keep `next dev` from writing AGENTS.md into the repo.
   agentRules: false,
+  // The dev badge sits over the page's corner buttons and catches e2e clicks against `next dev`.
+  devIndicators: false,
   // No React Compiler: it would also transform owsem-ui's dist, so examples would not run npm's code.
   async headers() {
     return [

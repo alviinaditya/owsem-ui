@@ -454,10 +454,12 @@ export const SidebarContent: ForwardRefExoticComponent<
 export type SidebarIndicatorProps = useRender.ComponentProps<"span">;
 
 /**
- * The marker of the current page: a small pill in the gutter beside the active `Item`. Render it
- * once inside `Content`; it scrolls with the list and travels to a new active item, stretching from
- * its leading edge. A click on an item moves it there at once, before the page catches up, and it
- * returns if `active` does not change within 3 seconds. Hidden while no item is active.
+ * The marker of the current page: a tinted background behind the active `Item`, with a small dot
+ * in the gutter at its start end. Render it once inside `Content`; it scrolls with the list. To a
+ * new item the background shrinks into a drop, the drop drips there, lands with a small splat and
+ * spreads out to fill the new background, in the same time near or far. A click on an item moves
+ * it there at once, before the page catches up, and it returns if `active` does not change within
+ * 3 seconds. Hidden while no item is active. It draws an SVG inside its `span`.
  */
 export const SidebarIndicator: ForwardRefExoticComponent<
   Omit<SidebarIndicatorProps, "ref"> & RefAttributes<HTMLSpanElement>

@@ -177,6 +177,8 @@ export const en = {
     progress: "Task progress, determinate or indeterminate.",
     meter: "A value within a range, with status colors.",
     "lumen-rail-nav": "Sidebar navigation with light that travels along a rail.",
+    sidebar:
+      "Site navigation in groups, with a pill beside the current page; a modal drawer on mobile.",
     "tree-rail-nav":
       "Sidebar navigation in three levels, with a trail along the rail to the current page.",
     "command-menu": "A command palette opened with ⌘K: a glass panel that filters as you type.",

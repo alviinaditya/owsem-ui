@@ -72,6 +72,7 @@ export const catalog = [
   { name: "avatar", title: "Avatar", family: "base", category: "display", phase: 3, status: "planned" },
   { name: "progress", title: "Progress", family: "base", category: "display", phase: 3, status: "planned" },
   { name: "meter", title: "Meter", family: "base", category: "display", phase: 3, status: "planned" },
+  { name: "sidebar", title: "Sidebar", family: "owsem", category: "navigation", status: "prototype" },
   { name: "tree-rail-nav", title: "Tree Rail Nav", family: "owsem", category: "navigation", expressions: ["kinetic"], status: "prototype" },
   { name: "lumen-rail-nav", title: "Lumen Rail Nav", family: "owsem", category: "navigation", expressions: ["lumen", "kinetic"], status: "planned" },
   { name: "command-menu", title: "Command Menu", family: "owsem", category: "navigation", expressions: ["kinetic", "surface"], status: "prototype" },

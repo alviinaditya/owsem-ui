@@ -75,13 +75,13 @@ describe("Sidebar Content overflow", () => {
       .toBeGreaterThanOrEqual(24);
   });
 
-  test("the pill stays on the active item after scrolling", async () => {
+  test("the liquid stays on the active item after scrolling", async () => {
     await render(<Nav count={40} active="/p20" />);
     const el = content();
-    const pill = el.querySelector(".ow-sidebar__indicator") as HTMLElement;
+    const dot = el.querySelector(".ow-sidebar__liquid-dot") as Element;
     const link = el.querySelector('a[href="/p20"]') as HTMLElement;
     const centered = () => {
-      const a = pill.getBoundingClientRect();
+      const a = dot.getBoundingClientRect();
       const b = link.getBoundingClientRect();
       return Math.abs(a.top + a.height / 2 - (b.top + b.height / 2));
     };

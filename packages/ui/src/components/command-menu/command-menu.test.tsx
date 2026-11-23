@@ -457,7 +457,7 @@ describe("Command Menu", () => {
     await expect.poll(() => close()?.getAttribute("aria-label")).toBe("Tutup");
   });
 
-  test("passes className, style, render, and ref through (FR-2, FR-5)", async () => {
+  test("passes className, style, render, and ref through", async () => {
     const refs = {
       trigger: createRef<HTMLButtonElement>(),
       popup: createRef<HTMLDivElement>(),
@@ -471,11 +471,7 @@ describe("Command Menu", () => {
         <CommandMenu.Trigger ref={refs.trigger} className="mine" style={{ marginBlock: "3px" }}>
           Search
         </CommandMenu.Trigger>
-        <CommandMenu.Popup
-          ref={refs.popup}
-          aria-label="Commands"
-          className={(state) => (state.open ? "is-open" : "")}
-        >
+        <CommandMenu.Popup ref={refs.popup} aria-label="Commands" className="is-open">
           <CommandMenu.Input ref={refs.input} aria-label="Search" className="field-mine" />
           <CommandMenu.List ref={refs.list} className="list-mine">
             {(item: string) => (
@@ -484,7 +480,7 @@ describe("Command Menu", () => {
                 value={item}
                 ref={item === "One" ? refs.item : undefined}
                 render={<a href={`#${item}`} />}
-                className={(state) => (state.highlighted ? "lit" : "dim")}
+                className="lit"
               >
                 {item}
                 <CommandMenu.Shortcut ref={item === "One" ? refs.shortcut : undefined}>
@@ -497,9 +493,13 @@ describe("Command Menu", () => {
       </CommandMenu.Root>,
     );
     await expect.poll(() => refs.item.current).not.toBeNull();
-    expect(refs.trigger.current?.className).toBe("ow-command-menu__trigger mine");
+    expect(refs.trigger.current?.className).toBe(
+      "ow-command-menu__trigger ow-command-menu__trigger--md mine",
+    );
     expect(refs.trigger.current?.style.marginBlock).toBe("3px");
-    expect(refs.popup.current?.className).toBe("ow-command-menu__popup is-open");
+    expect(refs.popup.current?.className).toBe(
+      "ow-command-menu__popup ow-command-menu__popup--md is-open",
+    );
     expect(refs.input.current?.className).toBe("ow-command-menu__input field-mine");
     expect(refs.list.current?.className).toBe("ow-command-menu__list list-mine");
     expect(refs.item.current?.tagName).toBe("A");
@@ -802,4 +802,38 @@ describe("Command Menu", () => {
     expect(held()).toBe(false);
     expect(pageStyle()).toEqual(before);
   });
+});
+
+test("every part has its data-slot", async () => {
+  await render(<Menu defaultOpen />);
+  await expect.poll(popup).not.toBeNull();
+  const slots = () =>
+    [
+      ...new Set(
+        [...document.querySelectorAll('[data-slot^="command-menu"]')].map((el) =>
+          el.getAttribute("data-slot"),
+        ),
+      ),
+    ].sort();
+  expect(slots()).toEqual(
+    [
+      "command-menu-backdrop",
+      "command-menu-close",
+      "command-menu-empty",
+      "command-menu-field",
+      "command-menu-footer",
+      "command-menu-group",
+      "command-menu-group-label",
+      "command-menu-input",
+      "command-menu-item",
+      "command-menu-item-description",
+      "command-menu-item-icon",
+      "command-menu-item-label",
+      "command-menu-list",
+      "command-menu-popup",
+      "command-menu-shortcut",
+      "command-menu-trigger",
+      "command-menu-viewport",
+    ].sort(),
+  );
 });

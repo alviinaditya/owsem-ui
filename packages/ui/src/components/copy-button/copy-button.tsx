@@ -1,16 +1,14 @@
 "use client";
 
 import {
-  type ForwardRefExoticComponent,
-  forwardRef,
-  type RefAttributes,
+  type ReactElement,
   useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
   useState,
 } from "react";
-import { joinClass } from "../../core/class-name";
+import { cn } from "../../core/cn";
 import { Button, type ButtonProps } from "../button/button";
 import { IconMorph } from "../icon-morph/icon-morph";
 import {
@@ -21,18 +19,8 @@ import {
   TooltipRoot,
   TooltipTrigger,
 } from "../tooltip/tooltip";
+import { copyButtonSlots } from "./copy-button-variants";
 import "./copy-button.css";
-
-const cls = {
-  root: "ow-copy-button",
-  icon: "ow-copy-button__icon",
-  check: "ow-copy-button__check",
-  label: "ow-copy-button__label",
-  labelText: "ow-copy-button__label-text",
-  tip: "ow-copy-button__tip",
-  tipText: "ow-copy-button__tip-text",
-  status: "ow-copy-button__status",
-} as const;
 
 export interface CopyButtonLabels {
   /** @default "Copy" */
@@ -67,7 +55,13 @@ export interface CopyButtonProps
 
 // Lucide icons (ISC): copy and check. The check draws its stroke in as it enters.
 const COPY = (
-  <svg key="copy" className={cls.icon} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+  <svg
+    key="copy"
+    className={copyButtonSlots.icon}
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+    focusable="false"
+  >
     <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
     <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
   </svg>
@@ -75,7 +69,7 @@ const COPY = (
 const CHECK = (
   <svg
     key="check"
-    className={`${cls.icon} ${cls.check}`}
+    className={cn(copyButtonSlots.icon, copyButtonSlots.check)}
     viewBox="0 0 24 24"
     aria-hidden="true"
     focusable="false"
@@ -116,25 +110,20 @@ function useTipWidth(deps: readonly unknown[]) {
  * the copy. Icon only, its Tooltip names it and, on a click, turns its words to the copied label in
  * place, and back when the icon is.
  */
-export const CopyButton: ForwardRefExoticComponent<
-  CopyButtonProps & RefAttributes<HTMLButtonElement>
-> = forwardRef<HTMLButtonElement, CopyButtonProps>(function CopyButton(
-  {
-    value,
-    timeout = 1600,
-    labels,
-    showLabel = false,
-    onCopy,
-    onError,
-    onClick,
-    variant = "ghost",
-    className,
-    duration,
-    style,
-    ...props
-  },
-  ref,
-) {
+export function CopyButton({
+  value,
+  timeout = 1600,
+  labels,
+  showLabel = false,
+  onCopy,
+  onError,
+  onClick,
+  variant = "ghost",
+  className,
+  duration,
+  style,
+  ...props
+}: CopyButtonProps): ReactElement {
   const copy = labels?.copy ?? "Copy";
   const copied = labels?.copied ?? "Copied";
   // Counts copies, so each one restarts the timer.
@@ -153,12 +142,12 @@ export const CopyButton: ForwardRefExoticComponent<
 
   const button = (
     <Button
+      data-slot="copy-button"
       aria-label={showLabel ? undefined : copy}
       {...props}
-      ref={ref}
       style={timing}
       variant={variant}
-      className={joinClass(cls.root, className)}
+      className={cn(copyButtonSlots.root, className)}
       data-copied={on ? "" : undefined}
       // Busy until the icon is back: it says so, without the disabled look.
       aria-disabled={on || props["aria-disabled"] || undefined}
@@ -181,11 +170,19 @@ export const CopyButton: ForwardRefExoticComponent<
     >
       {showLabel ? (
         // Both words share one cell, so the width holds; the hidden one is not read.
-        <span className={cls.label}>
-          <span className={cls.labelText} data-visible={on ? undefined : ""}>
+        <span data-slot="copy-button-label" className={copyButtonSlots.label}>
+          <span
+            data-slot="copy-button-label-text"
+            className={copyButtonSlots.labelText}
+            data-visible={on ? undefined : ""}
+          >
             {copy}
           </span>
-          <span className={cls.labelText} data-visible={on ? "" : undefined}>
+          <span
+            data-slot="copy-button-label-text"
+            className={copyButtonSlots.labelText}
+            data-visible={on ? "" : undefined}
+          >
             {copied}
           </span>
         </span>
@@ -211,16 +208,18 @@ export const CopyButton: ForwardRefExoticComponent<
             <TooltipPositioner>
               <TooltipPopup>
                 <TooltipArrow />
-                <span ref={tip} className={cls.tip}>
+                <span ref={tip} data-slot="copy-button-tip" className={copyButtonSlots.tip}>
                   <span
-                    className={cls.tipText}
+                    data-slot="copy-button-tip-text"
+                    className={copyButtonSlots.tipText}
                     data-visible={on ? undefined : ""}
                     aria-hidden={on ? "true" : undefined}
                   >
                     {copy}
                   </span>
                   <span
-                    className={cls.tipText}
+                    data-slot="copy-button-tip-text"
+                    className={copyButtonSlots.tipText}
                     data-visible={on ? "" : undefined}
                     aria-hidden={on ? undefined : "true"}
                   >
@@ -232,12 +231,12 @@ export const CopyButton: ForwardRefExoticComponent<
           </TooltipPortal>
         </TooltipRoot>
       )}
-      <span role="status" className={cls.status}>
+      <span role="status" data-slot="copy-button-status" className={copyButtonSlots.status}>
         {on ? copied : ""}
       </span>
     </>
   );
-});
+}
 
 export declare namespace CopyButton {
   type Props = CopyButtonProps;

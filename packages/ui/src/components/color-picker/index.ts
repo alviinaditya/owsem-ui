@@ -21,3 +21,4 @@ export {
   type ColorSwatch,
   colorPickerLabels,
 } from "./color-picker";
+export type { ColorPickerSize, ColorPickerVariant } from "./color-picker-variants";

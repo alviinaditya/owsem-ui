@@ -39,12 +39,12 @@
     transition: color 0.15s ease;
   }
 
-  .ow-command-menu__trigger[data-size="sm"] {
+  .ow-command-menu__trigger--sm {
     --py: 0.6058em;
     font-size: 13px;
   }
 
-  .ow-command-menu__trigger[data-size="lg"] {
+  .ow-command-menu__trigger--lg {
     --py: 0.875em;
     font-size: 16px;
   }
@@ -126,12 +126,12 @@
     line-height: 1.25;
   }
 
-  .ow-command-menu__popup[data-size="sm"] {
+  .ow-command-menu__popup--sm {
     --_n: 0.6058;
     font-size: 13px;
   }
 
-  .ow-command-menu__popup[data-size="lg"] {
+  .ow-command-menu__popup--lg {
     --_n: 0.875;
     font-size: 16px;
   }

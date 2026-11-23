@@ -6,15 +6,13 @@ import { Slider } from "@base-ui/react/slider";
 import { Toggle } from "@base-ui/react/toggle";
 import { ToggleGroup } from "@base-ui/react/toggle-group";
 import {
-  type ComponentPropsWithoutRef,
+  type ComponentProps,
   type CSSProperties,
   createContext,
-  type ForwardRefExoticComponent,
-  forwardRef,
   type KeyboardEvent,
   type PointerEvent,
+  type ReactElement,
   type ReactNode,
-  type RefAttributes,
   useCallback,
   useContext,
   useEffect,
@@ -23,7 +21,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { withClassName } from "../../core/class-name";
+import { cn } from "../../core/cn";
+import { useMergedRefs } from "../../core/merge-refs";
 import { restingRect } from "../../core/resting-anchor";
 import {
   type ColorFormat,
@@ -40,35 +39,15 @@ import {
   rgbaToHsva,
   toColorResult,
 } from "./color";
+import {
+  type ColorPickerSize,
+  type ColorPickerVariant,
+  colorPickerSlots,
+  colorPickerTriggerVariants,
+} from "./color-picker-variants";
 import "./color-picker.css";
 
-const cls = {
-  root: "ow-color-picker",
-  area: "ow-color-picker__area",
-  thumb: "ow-color-picker__thumb",
-  tools: "ow-color-picker__tools",
-  tool: "ow-color-picker__tool",
-  sliders: "ow-color-picker__sliders",
-  slider: "ow-color-picker__slider",
-  control: "ow-color-picker__control",
-  track: "ow-color-picker__track",
-  preview: "ow-color-picker__preview",
-  inputs: "ow-color-picker__inputs",
-  format: "ow-color-picker__format",
-  field: "ow-color-picker__field",
-  input: "ow-color-picker__input",
-  label: "ow-color-picker__label",
-  swatches: "ow-color-picker__swatches",
-  swatch: "ow-color-picker__swatch",
-  icon: "ow-color-picker__icon",
-  trigger: "ow-color-picker__trigger",
-  chip: "ow-color-picker__chip",
-  value: "ow-color-picker__value",
-  positioner: "ow-color-picker__positioner",
-  popup: "ow-color-picker__popup",
-} as const;
-
-/** Every text the picker shows or announces, for translation (FR-17). */
+/** Every text the picker shows or announces, for translation. */
 export interface ColorPickerLabels {
   /** The popover's dialog. */
   picker: string;
@@ -160,8 +139,8 @@ function resolveColor(value: string, scope: Element): HSVA | null {
   return rgbaToHsva({ r, g, b, a: a / 255 });
 }
 
-const Icon = ({ children }: { children: ReactNode }) => (
-  <svg className={cls.icon} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+const Icon = ({ children }: { children: ReactNode }): ReactElement => (
+  <svg className={colorPickerSlots.icon} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
     {children}
   </svg>
 );
@@ -206,7 +185,7 @@ function Area({
   /** Keyboard steps, in saturation and brightness points. */
   onStep: (ds: number, dv: number) => void;
   onEnd: () => void;
-}) {
+}): ReactElement {
   const rtl = useDirection() === "rtl";
   const pressed = useRef(false);
   const [dragging, setDragging] = useState(false);
@@ -247,7 +226,8 @@ function Area({
 
   return (
     <div
-      className={cls.area}
+      data-slot="color-picker-area"
+      className={colorPickerSlots.area}
       role="slider"
       tabIndex={disabled ? -1 : 0}
       aria-label={labels.area}
@@ -277,7 +257,8 @@ function Area({
       onKeyDown={onKeyDown}
     >
       <span
-        className={cls.thumb}
+        data-slot="color-picker-thumb"
+        className={colorPickerSlots.thumb}
         style={{
           insetInlineStart: `${hsva.s}%`,
           insetBlockStart: `${100 - hsva.v}%`,
@@ -311,10 +292,11 @@ function Channel({
   trackStyle?: CSSProperties | undefined;
   onValue: (value: number) => void;
   onCommit: () => void;
-}) {
+}): ReactElement {
   return (
     <Slider.Root
-      className={cls.slider}
+      data-slot="color-picker-slider"
+      className={colorPickerSlots.slider}
       data-channel={channel}
       value={value}
       max={max}
@@ -322,10 +304,15 @@ function Channel({
       onValueChange={onValue}
       onValueCommitted={onCommit}
     >
-      <Slider.Control className={cls.control}>
-        <Slider.Track className={cls.track} style={trackStyle}>
+      <Slider.Control data-slot="color-picker-control" className={colorPickerSlots.control}>
+        <Slider.Track
+          data-slot="color-picker-track"
+          className={colorPickerSlots.track}
+          style={trackStyle}
+        >
           <Slider.Thumb
-            className={cls.thumb}
+            data-slot="color-picker-thumb"
+            className={colorPickerSlots.thumb}
             aria-label={label}
             getAriaValueText={(_, n) => `${n}${unit}`}
             style={{ backgroundColor: thumb }}
@@ -359,7 +346,7 @@ function Field({
   onInput?: (text: string) => boolean;
   /** The edit is done. */
   onCommit: (text: string) => void;
-}) {
+}): ReactElement {
   const [draft, setDraft] = useState<string | null>(null);
   // Whether typing applied a number since the field was last committed.
   const applied = useRef(false);
@@ -371,9 +358,14 @@ function Field({
   };
 
   return (
-    <label className={cls.field} data-wide={range ? undefined : ""}>
+    <label
+      data-slot="color-picker-field"
+      className={colorPickerSlots.field}
+      data-wide={range ? undefined : ""}
+    >
       <input
-        className={cls.input}
+        data-slot="color-picker-input"
+        className={colorPickerSlots.input}
         value={shown}
         aria-label={label}
         disabled={disabled}
@@ -404,7 +396,7 @@ function Field({
           }
         }}
       />
-      <span className={cls.label} aria-hidden="true">
+      <span data-slot="color-picker-label" className={colorPickerSlots.label} aria-hidden="true">
         {short}
       </span>
     </label>
@@ -418,7 +410,8 @@ const toNumber = (text: string): number | null => {
 };
 
 export interface ColorPickerProps
-  extends Omit<ComponentPropsWithoutRef<"div">, "onChange" | "defaultValue" | "children"> {
+  extends Omit<ComponentProps<"div">, "onChange" | "defaultValue" | "children" | "className"> {
+  className?: string | undefined;
   /** The color, controlled: hex, `rgb()`, `hsl()`, or any CSS color the browser can resolve. */
   value?: string | undefined;
   /** The first color, uncontrolled. Default `#7c6ab8`. */
@@ -442,29 +435,26 @@ export interface ColorPickerProps
 }
 
 /** The picker: an area, hue and opacity sliders, fields, and swatches. */
-export const ColorPicker: ForwardRefExoticComponent<
-  ColorPickerProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, ColorPickerProps>(function ColorPicker(
-  {
-    value,
-    defaultValue = DEFAULT_COLOR,
-    onChange,
-    onChangeComplete,
-    format = "hex",
-    alpha = true,
-    inputs = true,
-    swatches = SWATCHES,
-    eyeDropper = true,
-    disabled = false,
-    labels: labelsProp,
-    className,
-    ...props
-  },
+export function ColorPicker({
+  value,
+  defaultValue = DEFAULT_COLOR,
+  onChange,
+  onChangeComplete,
+  format = "hex",
+  alpha = true,
+  inputs = true,
+  swatches = SWATCHES,
+  eyeDropper = true,
+  disabled = false,
+  labels: labelsProp,
+  className,
   ref,
-) {
+  ...props
+}: ColorPickerProps): ReactElement {
   const labels = { ...colorPickerLabels, ...labelsProp };
   const scope = useContext(ScopeContext);
   const root = useRef<HTMLDivElement | null>(null);
+  const merged = useMergedRefs(root, ref);
   const opaque = (color: HSVA): HSVA => (alpha ? color : { ...color, a: 1 });
   const [hsva, setHsva] = useState(() => opaque(parseColor(value ?? defaultValue) ?? BLACK));
   // The latest color for event handlers, ahead of the next render.
@@ -519,15 +509,6 @@ export const ColorPicker: ForwardRefExoticComponent<
   const hsla = hsvaToHsla(hsva);
   const rgb = `${rgba.r} ${rgba.g} ${rgba.b}`;
   const hex8 = rgbaToHex(rgba, true);
-
-  const setRef = useCallback(
-    (el: HTMLDivElement | null) => {
-      root.current = el;
-      if (typeof ref === "function") ref(el);
-      else if (ref) ref.current = el;
-    },
-    [ref],
-  );
 
   const pick = async () => {
     const EyeDropper = (window as EyeDropperWindow).EyeDropper;
@@ -622,10 +603,11 @@ export const ColorPicker: ForwardRefExoticComponent<
 
   return (
     <div
-      ref={setRef}
-      className={className ? `${cls.root} ${className}` : cls.root}
+      data-slot="color-picker"
       data-disabled={disabled ? "" : undefined}
       {...props}
+      ref={merged}
+      className={cn(colorPickerSlots.root, className)}
     >
       <Area
         hsva={hsva}
@@ -638,11 +620,16 @@ export const ColorPicker: ForwardRefExoticComponent<
         }}
         onEnd={done}
       />
-      <div className={cls.tools} data-stack={alpha ? "" : undefined}>
+      <div
+        data-slot="color-picker-tools"
+        className={colorPickerSlots.tools}
+        data-stack={alpha ? "" : undefined}
+      >
         {canPick && eyeDropper ? (
           <button
             type="button"
-            className={cls.tool}
+            data-slot="color-picker-tool"
+            className={colorPickerSlots.tool}
             aria-label={labels.eyeDropper}
             disabled={disabled}
             onClick={pick}
@@ -650,7 +637,7 @@ export const ColorPicker: ForwardRefExoticComponent<
             {PIPETTE}
           </button>
         ) : null}
-        <div className={cls.sliders}>
+        <div data-slot="color-picker-sliders" className={colorPickerSlots.sliders}>
           <Channel
             channel="hue"
             value={Math.round(hsva.h)}
@@ -678,16 +665,18 @@ export const ColorPicker: ForwardRefExoticComponent<
           ) : null}
         </div>
         <span
-          className={cls.preview}
+          data-slot="color-picker-preview"
+          className={colorPickerSlots.preview}
           style={{ "--_color": `rgb(${rgb} / ${hsva.a})` } as CSSProperties}
           aria-hidden="true"
         />
       </div>
       {inputs ? (
-        <div className={cls.inputs}>
+        <div data-slot="color-picker-inputs" className={colorPickerSlots.inputs}>
           <button
             type="button"
-            className={cls.format}
+            data-slot="color-picker-format"
+            className={colorPickerSlots.format}
             aria-label={`${labels.format}: ${mode.toUpperCase()}`}
             disabled={disabled}
             onClick={() => setMode(FORMATS[(FORMATS.indexOf(mode) + 1) % FORMATS.length] ?? "hex")}
@@ -706,7 +695,8 @@ export const ColorPicker: ForwardRefExoticComponent<
       ) : null}
       {presets.length ? (
         <ToggleGroup
-          className={cls.swatches}
+          data-slot="color-picker-swatches"
+          className={colorPickerSlots.swatches}
           aria-label={labels.swatches}
           value={active ? [active] : []}
           disabled={disabled}
@@ -715,7 +705,8 @@ export const ColorPicker: ForwardRefExoticComponent<
             <Toggle
               key={preset.key}
               value={preset.key}
-              className={cls.swatch}
+              data-slot="color-picker-swatch"
+              className={colorPickerSlots.swatch}
               aria-label={preset.label}
               data-alpha={preset.parsed.a < 1 && alpha ? "" : undefined}
               data-light={preset.light ? "" : undefined}
@@ -729,7 +720,7 @@ export const ColorPicker: ForwardRefExoticComponent<
       ) : null}
     </div>
   );
-});
+}
 
 export interface ColorPickerPopoverProps
   extends Pick<
@@ -745,17 +736,20 @@ export interface ColorPickerPopoverProps
       | "eyeDropper"
       | "labels"
     >,
-    Omit<Popover.Trigger.Props, "value" | "defaultValue" | "onChange" | "children" | "ref"> {
+    Omit<Popover.Trigger.Props, "value" | "defaultValue" | "onChange" | "children" | "className"> {
+  className?: string | undefined;
+  /** The size of an outer part that renders this one, such as Toolbar.Button. */
+  "data-size"?: ColorPickerSize | undefined;
   open?: Popover.Root.Props["open"];
   defaultOpen?: Popover.Root.Props["defaultOpen"];
   onOpenChange?: Popover.Root.Props["onOpenChange"];
   side?: Popover.Positioner.Props["side"];
   align?: Popover.Positioner.Props["align"];
   sideOffset?: Popover.Positioner.Props["sideOffset"];
-  /** The trigger's size (FR-11). Default `"md"`. */
-  size?: "sm" | "md" | "lg" | undefined;
+  /** The trigger's size. Default `"md"`. */
+  size?: ColorPickerSize | undefined;
   /** `"field"` shows the color and its value; `"swatch"` is a square of the color. */
-  variant?: "field" | "swatch" | undefined;
+  variant?: ColorPickerVariant | undefined;
   /** Replaces the trigger's content. */
   children?: ReactNode;
 }
@@ -764,37 +758,36 @@ export interface ColorPickerPopoverProps
  * A trigger that opens the picker in a popover. The trigger paints the color, so a value Color
  * Picker cannot parse, such as `var(--ow-accent)`, still shows and follows its theme.
  */
-export const ColorPickerPopover: ForwardRefExoticComponent<
-  ColorPickerPopoverProps & RefAttributes<HTMLButtonElement>
-> = forwardRef<HTMLButtonElement, ColorPickerPopoverProps>(function ColorPickerPopover(
-  {
-    value,
-    defaultValue = DEFAULT_COLOR,
-    onChange,
-    onChangeComplete,
-    format = "hex",
-    alpha = true,
-    inputs,
-    swatches,
-    eyeDropper,
-    labels,
-    open,
-    defaultOpen,
-    onOpenChange,
-    side = "bottom",
-    align = "start",
-    sideOffset = 8,
-    size = "md",
-    variant = "field",
-    className,
-    children,
-    ...props
-  },
+export function ColorPickerPopover({
+  "data-size": outerSize,
+  value,
+  defaultValue = DEFAULT_COLOR,
+  onChange,
+  onChangeComplete,
+  format = "hex",
+  alpha = true,
+  inputs,
+  swatches,
+  eyeDropper,
+  labels,
+  open,
+  defaultOpen,
+  onOpenChange,
+  side = "bottom",
+  align = "start",
+  sideOffset = 8,
+  size = outerSize ?? "md",
+  variant = "field",
+  className,
+  children,
   ref,
-) {
+  ...props
+}: ColorPickerPopoverProps): ReactElement {
   const [inner, setInner] = useState(defaultValue);
   const current = value ?? inner;
   const [trigger, setTrigger] = useState<HTMLButtonElement | null>(null);
+  const track = useCallback((el: HTMLButtonElement | null) => setTrigger(el), []);
+  const merged = useMergedRefs(track, ref);
   const direction = useDirection();
   const parsed = parseColor(current);
   // The trigger compacts when pressed (Tactile): anchor to its resting box, so the popup does not
@@ -807,28 +800,21 @@ export const ColorPickerPopover: ForwardRefExoticComponent<
     [trigger],
   );
 
-  const setRef = useCallback(
-    (el: HTMLButtonElement | null) => {
-      setTrigger(el);
-      if (typeof ref === "function") ref(el);
-      else if (ref) ref.current = el;
-    },
-    [ref],
-  );
-
   return (
     <Popover.Root open={open} defaultOpen={defaultOpen} onOpenChange={onOpenChange}>
       <Popover.Trigger
-        ref={setRef}
-        className={withClassName(cls.trigger, className)}
-        data-size={size}
+        data-slot="color-picker-trigger"
         data-variant={variant}
         {...props}
+        ref={merged}
+        className={cn(colorPickerTriggerVariants({ size, variant }), className)}
+        data-size={size}
       >
         {children === undefined ? (
           <>
             <span
-              className={cls.chip}
+              data-slot="color-picker-chip"
+              className={colorPickerSlots.chip}
               data-alpha={parsed && parsed.a < 1 && alpha ? "" : undefined}
               style={
                 {
@@ -837,7 +823,7 @@ export const ColorPickerPopover: ForwardRefExoticComponent<
               }
             />
             {variant === "field" ? (
-              <span className={cls.value}>
+              <span data-slot="color-picker-value" className={colorPickerSlots.value}>
                 {parsed ? formatColor(parsed, format, alpha) : current}
               </span>
             ) : null}
@@ -848,18 +834,20 @@ export const ColorPickerPopover: ForwardRefExoticComponent<
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner
-          className={cls.positioner}
+          data-slot="color-picker-positioner"
+          className={colorPickerSlots.positioner}
           side={side}
           align={align}
           sideOffset={sideOffset}
           collisionPadding={8}
           anchor={anchor}
-          // Portaled to the body: keep the trigger's direction (FR-16) and theme.
+          // Portaled to the body: keep the trigger's direction and theme.
           dir={direction}
           data-theme={trigger?.closest("[data-theme]")?.getAttribute("data-theme") ?? undefined}
         >
           <Popover.Popup
-            className={cls.popup}
+            data-slot="color-picker-popup"
+            className={colorPickerSlots.popup}
             aria-label={labels?.picker ?? colorPickerLabels.picker}
           >
             <ScopeContext.Provider value={trigger}>
@@ -883,4 +871,4 @@ export const ColorPickerPopover: ForwardRefExoticComponent<
       </Popover.Portal>
     </Popover.Root>
   );
-});
+}

@@ -4,13 +4,10 @@ import { Autocomplete } from "@base-ui/react/autocomplete";
 import { Dialog } from "@base-ui/react/dialog";
 import { useDirection } from "@base-ui/react/direction-provider";
 import {
-  type ComponentPropsWithoutRef,
+  type ComponentProps,
   createContext,
-  type ForwardRefExoticComponent,
-  forwardRef,
-  type JSX,
+  type ReactElement,
   type ReactNode,
-  type RefAttributes,
   useCallback,
   useContext,
   useEffect,
@@ -18,45 +15,26 @@ import {
   useRef,
   useState,
 } from "react";
-import { withClassName } from "../../core/class-name";
+import { cn } from "../../core/cn";
 import { createGlide } from "../../core/glide/glide";
 import { GlideHighlight } from "../../core/glide/use-glide";
+import { useMergedRefs } from "../../core/merge-refs";
 import { useOpenState, useScrollLock } from "../../core/scroll-lock";
 import { Kbd } from "../kbd/kbd";
+import {
+  type CommandMenuSize,
+  commandMenuPopupVariants,
+  commandMenuSlots,
+  commandMenuTriggerVariants,
+} from "./command-menu-variants";
 import "./command-menu.css";
-
-const cls = {
-  trigger: "ow-command-menu__trigger",
-  icon: "ow-command-menu__icon",
-  backdrop: "ow-command-menu__backdrop",
-  viewport: "ow-command-menu__viewport",
-  popup: "ow-command-menu__popup",
-  close: "ow-command-menu__close",
-  field: "ow-command-menu__field",
-  input: "ow-command-menu__input",
-  list: "ow-command-menu__list",
-  empty: "ow-command-menu__empty",
-  group: "ow-command-menu__group",
-  groupLabel: "ow-command-menu__group-label",
-  item: "ow-command-menu__item",
-  itemIcon: "ow-command-menu__item-icon",
-  itemLabel: "ow-command-menu__item-label",
-  itemDescription: "ow-command-menu__item-description",
-  shortcut: "ow-command-menu__shortcut",
-  footer: "ow-command-menu__footer",
-} as const;
-
-const join = (base: string, className: string | undefined) =>
-  className ? `${base} ${className}` : base;
 
 // Before the first paint, so the list never shows a frame unfaded; the server has no layout, so
 // it falls back to an effect there.
 const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-export type CommandMenuSize = "sm" | "md" | "lg";
-
 // Icons from Lucide (https://lucide.dev), ISC License: search and x.
-function SearchIcon({ className }: { className: string }): JSX.Element {
+function SearchIcon({ className }: { className: string }): ReactElement {
   return (
     <svg className={className} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <path d="m21 21-4.34-4.34" />
@@ -117,8 +95,8 @@ export interface CommandMenuRootProps<Item = unknown>
  */
 export function CommandMenuRoot<Groups extends readonly { items: readonly unknown[] }[]>(
   props: Omit<CommandMenuRootProps<Groups[number]["items"][number]>, "items"> & { items: Groups },
-): JSX.Element;
-export function CommandMenuRoot<Item = unknown>(props: CommandMenuRootProps<Item>): JSX.Element;
+): ReactElement;
+export function CommandMenuRoot<Item = unknown>(props: CommandMenuRootProps<Item>): ReactElement;
 export function CommandMenuRoot({
   shortcut = "k",
   handle,
@@ -135,7 +113,7 @@ export function CommandMenuRoot({
   loopFocus,
   children,
   ...props
-}: CommandMenuRootProps<unknown>): JSX.Element {
+}: CommandMenuRootProps<unknown>): ReactElement {
   const { open, onOpenChange } = useOpenState(props);
   const [ownHandle] = useState(() => Dialog.createHandle());
   const dialog = handle ?? ownHandle;
@@ -181,7 +159,10 @@ export function CommandMenuRoot({
   );
 }
 
-export interface CommandMenuTriggerProps extends Omit<Dialog.Trigger.Props, "ref"> {
+export interface CommandMenuTriggerProps extends Omit<Dialog.Trigger.Props, "className"> {
+  className?: string | undefined;
+  /** The size of an outer part that renders this one, such as Toolbar.Button. */
+  "data-size"?: CommandMenuSize | undefined;
   /** Default `"md"`. */
   size?: CommandMenuSize | undefined;
 }
@@ -191,35 +172,37 @@ export interface CommandMenuTriggerProps extends Omit<Dialog.Trigger.Props, "ref
  * inside, and the shortcut as a `Shortcut`; inside Root, Root's shortcut is announced with
  * aria-keyshortcuts. Outside Root, pass the Root's `handle`.
  */
-export const CommandMenuTrigger: ForwardRefExoticComponent<
-  CommandMenuTriggerProps & RefAttributes<HTMLButtonElement>
-> = forwardRef<HTMLButtonElement, CommandMenuTriggerProps>(function CommandMenuTrigger(
-  { className, size = "md", children, ...props },
-  ref,
-) {
+export function CommandMenuTrigger({
+  "data-size": outerSize,
+  className,
+  size = outerSize ?? "md",
+  children,
+  ...props
+}: CommandMenuTriggerProps): ReactElement {
   const key = useContext(RootContext)?.shortcut?.toUpperCase();
   return (
     <Dialog.Trigger
-      ref={ref}
-      className={withClassName(cls.trigger, className)}
-      data-size={size}
+      data-slot="command-menu-trigger"
       aria-keyshortcuts={key ? `Meta+${key} Control+${key}` : undefined}
       {...props}
+      className={cn(commandMenuTriggerVariants({ size }), className)}
+      data-size={size}
     >
-      <SearchIcon className={cls.icon} />
+      <SearchIcon className={commandMenuSlots.icon} />
       {children}
     </Dialog.Trigger>
   );
-});
+}
 
-export interface CommandMenuPopupProps extends Omit<Dialog.Popup.Props, "ref"> {
+export interface CommandMenuPopupProps extends Omit<Dialog.Popup.Props, "className"> {
+  className?: string | undefined;
   /** Default `"md"`. */
   size?: CommandMenuSize | undefined;
   /** The scrim over the page: `"dim"`, or `"blur"` to blur the page under it too. Default `"dim"`. */
   backdrop?: "dim" | "blur" | undefined;
   /** Where the popup is rendered. Default: `document.body`. */
   container?: Dialog.Portal.Props["container"];
-  /** The name of the close button, for screen readers on touch screens (FR-17). Default `"Close"`. */
+  /** The name of the close button, for screen readers on touch screens. Default `"Close"`. */
   closeLabel?: string | undefined;
 }
 
@@ -228,40 +211,50 @@ export interface CommandMenuPopupProps extends Omit<Dialog.Popup.Props, "ref"> {
  * popup, holding the Autocomplete that filters the list. It opens and closes at once: a palette
  * opened from the keyboard many times a day does not animate.
  */
-export const CommandMenuPopup: ForwardRefExoticComponent<
-  CommandMenuPopupProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, CommandMenuPopupProps>(function CommandMenuPopup(
-  { className, size = "md", backdrop = "dim", container, closeLabel = "Close", children, ...props },
+export function CommandMenuPopup({
+  className,
+  size = "md",
+  backdrop = "dim",
+  container,
+  closeLabel = "Close",
+  children,
   ref,
-) {
+  ...props
+}: CommandMenuPopupProps): ReactElement {
   const { list, lock } = useRootContext("Popup");
   const [self, setSelf] = useState<HTMLDivElement | null>(null);
   useScrollLock(self, lock);
-  const setRef = useCallback(
-    (el: HTMLDivElement | null) => {
-      setSelf(el);
-      if (typeof ref === "function") ref(el);
-      else if (ref) ref.current = el;
-    },
-    [ref],
-  );
-  // Portaled to the body: the text direction comes from Base UI's DirectionProvider (FR-16).
+  const merged = useMergedRefs(setSelf, ref);
+  // Portaled to the body: the text direction comes from Base UI's DirectionProvider.
   const direction = useDirection();
   return (
     <Dialog.Portal container={container}>
-      <Dialog.Backdrop className={cls.backdrop} data-blur={backdrop === "blur" ? "" : undefined} />
-      <Dialog.Viewport className={cls.viewport} dir={direction}>
+      <Dialog.Backdrop
+        data-slot="command-menu-backdrop"
+        className={commandMenuSlots.backdrop}
+        data-blur={backdrop === "blur" ? "" : undefined}
+      />
+      <Dialog.Viewport
+        data-slot="command-menu-viewport"
+        className={commandMenuSlots.viewport}
+        dir={direction}
+      >
         <Dialog.Popup
-          ref={setRef}
-          className={withClassName(cls.popup, className)}
+          data-slot="command-menu-popup"
           data-size={size}
           {...props}
+          ref={merged}
+          className={cn(commandMenuPopupVariants({ size }), className)}
         >
           <Autocomplete.Root open inline autoHighlight="always" keepHighlight {...list}>
             {children}
           </Autocomplete.Root>
           {/* Touch screen readers have no Escape key (Base UI Dialog). Shown when focused. */}
-          <Dialog.Close className={cls.close} aria-label={closeLabel}>
+          <Dialog.Close
+            data-slot="command-menu-close"
+            className={commandMenuSlots.close}
+            aria-label={closeLabel}
+          >
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M18 6 6 18" />
               <path d="m6 6 12 12" />
@@ -271,24 +264,25 @@ export const CommandMenuPopup: ForwardRefExoticComponent<
       </Dialog.Viewport>
     </Dialog.Portal>
   );
-});
+}
 
-export type CommandMenuInputProps = Omit<Autocomplete.Input.Props, "ref">;
+export interface CommandMenuInputProps extends Omit<Autocomplete.Input.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** The search field at the top of the popup, after a search icon. Give it an aria-label. */
-export const CommandMenuInput: ForwardRefExoticComponent<
-  CommandMenuInputProps & RefAttributes<HTMLInputElement>
-> = forwardRef<HTMLInputElement, CommandMenuInputProps>(function CommandMenuInput(
-  { className, ...props },
-  ref,
-) {
+export function CommandMenuInput({ className, ...props }: CommandMenuInputProps): ReactElement {
   return (
-    <Autocomplete.InputGroup className={cls.field}>
-      <SearchIcon className={cls.icon} />
-      <Autocomplete.Input ref={ref} className={withClassName(cls.input, className)} {...props} />
+    <Autocomplete.InputGroup data-slot="command-menu-field" className={commandMenuSlots.field}>
+      <SearchIcon className={commandMenuSlots.icon} />
+      <Autocomplete.Input
+        data-slot="command-menu-input"
+        {...props}
+        className={cn(commandMenuSlots.input, className)}
+      />
     </Autocomplete.InputGroup>
   );
-});
+}
 
 const HIGHLIGHTED = "[data-highlighted]";
 const GLIDE = {
@@ -300,21 +294,24 @@ const GLIDE = {
   hideDelay: 2 ** 31 - 1,
 };
 
-export type CommandMenuListProps = Omit<Autocomplete.List.Props, "ref">;
+export interface CommandMenuListProps extends Omit<Autocomplete.List.Props, "className"> {
+  className?: string | undefined;
+}
 
 /**
  * The results, a listbox that scrolls, its edges fading while there is more that way. One
  * highlight glides to the item Base UI highlights, from the keyboard, the pointer, or the query
  * (Glide, Kinetic). A function child renders each item.
  */
-export const CommandMenuList: ForwardRefExoticComponent<
-  CommandMenuListProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, CommandMenuListProps>(function CommandMenuList(
-  { className, children, ...props },
+export function CommandMenuList({
+  className,
+  children,
   ref,
-) {
+  ...props
+}: CommandMenuListProps): ReactElement {
   const list = useRef<HTMLDivElement | null>(null);
   const highlightRef = useRef<HTMLSpanElement | null>(null);
+  const merged = useMergedRefs(list, ref);
 
   useBeforePaint(() => {
     const el = list.current;
@@ -352,17 +349,13 @@ export const CommandMenuList: ForwardRefExoticComponent<
     };
   }, []);
 
-  const setRef = useCallback(
-    (el: HTMLDivElement | null) => {
-      list.current = el;
-      if (typeof ref === "function") ref(el);
-      else if (ref) ref.current = el;
-    },
-    [ref],
-  );
-
   return (
-    <Autocomplete.List ref={setRef} className={withClassName(cls.list, className)} {...props}>
+    <Autocomplete.List
+      data-slot="command-menu-list"
+      {...props}
+      ref={merged}
+      className={cn(commandMenuSlots.list, className)}
+    >
       <GlideHighlight glide={{ highlightRef }} />
       {typeof children === "function" ? (
         <Autocomplete.Collection>{children}</Autocomplete.Collection>
@@ -371,59 +364,63 @@ export const CommandMenuList: ForwardRefExoticComponent<
       )}
     </Autocomplete.List>
   );
-});
+}
 
-export type CommandMenuEmptyProps = Omit<Autocomplete.Empty.Props, "ref">;
+export interface CommandMenuEmptyProps extends Omit<Autocomplete.Empty.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** Shown when nothing matches the query; announced to screen readers. */
-export const CommandMenuEmpty: ForwardRefExoticComponent<
-  CommandMenuEmptyProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, CommandMenuEmptyProps>(function CommandMenuEmpty(
-  { className, ...props },
-  ref,
-) {
+export function CommandMenuEmpty({ className, ...props }: CommandMenuEmptyProps): ReactElement {
   return (
-    <Autocomplete.Empty ref={ref} className={withClassName(cls.empty, className)} {...props} />
-  );
-});
-
-export type CommandMenuGroupProps = Omit<Autocomplete.Group.Props, "ref">;
-
-/** A group of items with its `GroupLabel`; `items` feeds the `Collection` inside it. */
-export const CommandMenuGroup: ForwardRefExoticComponent<
-  CommandMenuGroupProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, CommandMenuGroupProps>(function CommandMenuGroup(
-  { className, ...props },
-  ref,
-) {
-  return (
-    <Autocomplete.Group ref={ref} className={withClassName(cls.group, className)} {...props} />
-  );
-});
-
-export type CommandMenuGroupLabelProps = Omit<Autocomplete.GroupLabel.Props, "ref">;
-
-/** A group's name, which labels the group for screen readers. */
-export const CommandMenuGroupLabel: ForwardRefExoticComponent<
-  CommandMenuGroupLabelProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, CommandMenuGroupLabelProps>(function CommandMenuGroupLabel(
-  { className, ...props },
-  ref,
-) {
-  return (
-    <Autocomplete.GroupLabel
-      ref={ref}
-      className={withClassName(cls.groupLabel, className)}
+    <Autocomplete.Empty
+      data-slot="command-menu-empty"
       {...props}
+      className={cn(commandMenuSlots.empty, className)}
     />
   );
-});
+}
+
+export interface CommandMenuGroupProps extends Omit<Autocomplete.Group.Props, "className"> {
+  className?: string | undefined;
+}
+
+/** A group of items with its `GroupLabel`; `items` feeds the `Collection` inside it. */
+export function CommandMenuGroup({ className, ...props }: CommandMenuGroupProps): ReactElement {
+  return (
+    <Autocomplete.Group
+      data-slot="command-menu-group"
+      {...props}
+      className={cn(commandMenuSlots.group, className)}
+    />
+  );
+}
+
+export interface CommandMenuGroupLabelProps
+  extends Omit<Autocomplete.GroupLabel.Props, "className"> {
+  className?: string | undefined;
+}
+
+/** A group's name, which labels the group for screen readers. */
+export function CommandMenuGroupLabel({
+  className,
+  ...props
+}: CommandMenuGroupLabelProps): ReactElement {
+  return (
+    <Autocomplete.GroupLabel
+      data-slot="command-menu-group-label"
+      {...props}
+      className={cn(commandMenuSlots.groupLabel, className)}
+    />
+  );
+}
 
 /** Renders the filtered items of the group it is in (or of the list): a function per item. */
 export const CommandMenuCollection: typeof Autocomplete.Collection = Autocomplete.Collection;
 export type CommandMenuCollectionProps = Autocomplete.Collection.Props;
 
-export interface CommandMenuItemProps extends Omit<Autocomplete.Item.Props, "ref"> {
+export interface CommandMenuItemProps extends Omit<Autocomplete.Item.Props, "className"> {
+  className?: string | undefined;
   /** Close the menu once the item runs, unless its onClick prevented the default. Default `true`. */
   closeOnClick?: boolean | undefined;
 }
@@ -432,84 +429,111 @@ export interface CommandMenuItemProps extends Omit<Autocomplete.Item.Props, "ref
  * A command. Its onClick runs on a click and on Enter while it is highlighted; then the menu
  * closes. Lay it out with `ItemIcon`, `ItemLabel`, `ItemDescription`, and `Shortcut`.
  */
-export const CommandMenuItem: ForwardRefExoticComponent<
-  CommandMenuItemProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, CommandMenuItemProps>(function CommandMenuItem(
-  { className, closeOnClick = true, onClick, ...props },
-  ref,
-) {
+export function CommandMenuItem({
+  className,
+  closeOnClick = true,
+  onClick,
+  ...props
+}: CommandMenuItemProps): ReactElement {
   const { close } = useRootContext("Item");
   return (
     <Autocomplete.Item
-      ref={ref}
-      className={withClassName(cls.item, className)}
+      data-slot="command-menu-item"
+      {...props}
+      className={cn(commandMenuSlots.item, className)}
       onClick={(event) => {
         onClick?.(event);
         if (closeOnClick && !event.defaultPrevented) close();
       }}
-      {...props}
     />
   );
-});
+}
 
-export type CommandMenuItemIconProps = ComponentPropsWithoutRef<"span">;
+export interface CommandMenuItemIconProps extends Omit<ComponentProps<"span">, "className"> {
+  className?: string | undefined;
+}
 
 /** An item's icon (decorative), the item's font size plus 2px. */
-export const CommandMenuItemIcon: ForwardRefExoticComponent<
-  CommandMenuItemIconProps & RefAttributes<HTMLSpanElement>
-> = forwardRef<HTMLSpanElement, CommandMenuItemIconProps>(function CommandMenuItemIcon(
-  { className, ...props },
-  ref,
-) {
-  return <span ref={ref} aria-hidden="true" className={join(cls.itemIcon, className)} {...props} />;
-});
+export function CommandMenuItemIcon({
+  className,
+  ...props
+}: CommandMenuItemIconProps): ReactElement {
+  return (
+    <span
+      data-slot="command-menu-item-icon"
+      aria-hidden="true"
+      {...props}
+      className={cn(commandMenuSlots.itemIcon, className)}
+    />
+  );
+}
 
-export type CommandMenuItemLabelProps = ComponentPropsWithoutRef<"span">;
+export interface CommandMenuItemLabelProps extends Omit<ComponentProps<"span">, "className"> {
+  className?: string | undefined;
+}
 
 /** An item's name, on one line. */
-export const CommandMenuItemLabel: ForwardRefExoticComponent<
-  CommandMenuItemLabelProps & RefAttributes<HTMLSpanElement>
-> = forwardRef<HTMLSpanElement, CommandMenuItemLabelProps>(function CommandMenuItemLabel(
-  { className, ...props },
-  ref,
-) {
-  return <span ref={ref} className={join(cls.itemLabel, className)} {...props} />;
-});
+export function CommandMenuItemLabel({
+  className,
+  ...props
+}: CommandMenuItemLabelProps): ReactElement {
+  return (
+    <span
+      data-slot="command-menu-item-label"
+      {...props}
+      className={cn(commandMenuSlots.itemLabel, className)}
+    />
+  );
+}
 
-export type CommandMenuItemDescriptionProps = ComponentPropsWithoutRef<"span">;
+export interface CommandMenuItemDescriptionProps extends Omit<ComponentProps<"span">, "className"> {
+  className?: string | undefined;
+}
 
 /** A muted line after the label, on the same row; it gives way first when space runs out. */
-export const CommandMenuItemDescription: ForwardRefExoticComponent<
-  CommandMenuItemDescriptionProps & RefAttributes<HTMLSpanElement>
-> = forwardRef<HTMLSpanElement, CommandMenuItemDescriptionProps>(
-  function CommandMenuItemDescription({ className, ...props }, ref) {
-    return <span ref={ref} className={join(cls.itemDescription, className)} {...props} />;
-  },
-);
+export function CommandMenuItemDescription({
+  className,
+  ...props
+}: CommandMenuItemDescriptionProps): ReactElement {
+  return (
+    <span
+      data-slot="command-menu-item-description"
+      {...props}
+      className={cn(commandMenuSlots.itemDescription, className)}
+    />
+  );
+}
 
-export type CommandMenuShortcutProps = Omit<Kbd.Props, "ref">;
+export type CommandMenuShortcutProps = Kbd.Props;
 
 /** A Kbd keycap: an item's shortcut (at its end), the Trigger's, or a hint in the Footer. */
-export const CommandMenuShortcut: ForwardRefExoticComponent<
-  CommandMenuShortcutProps & RefAttributes<HTMLElement>
-> = forwardRef<HTMLElement, CommandMenuShortcutProps>(function CommandMenuShortcut(
-  { className, ...props },
-  ref,
-) {
-  return <Kbd ref={ref} className={join(cls.shortcut, className)} {...props} />;
-});
+export function CommandMenuShortcut({
+  className,
+  ...props
+}: CommandMenuShortcutProps): ReactElement {
+  return (
+    <Kbd
+      data-slot="command-menu-shortcut"
+      {...props}
+      className={cn(commandMenuSlots.shortcut, className)}
+    />
+  );
+}
 
-export type CommandMenuFooterProps = ComponentPropsWithoutRef<"div">;
+export interface CommandMenuFooterProps extends Omit<ComponentProps<"div">, "className"> {
+  className?: string | undefined;
+}
 
 /** A row under the list, past a hairline, for hints such as which key does what. */
-export const CommandMenuFooter: ForwardRefExoticComponent<
-  CommandMenuFooterProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, CommandMenuFooterProps>(function CommandMenuFooter(
-  { className, ...props },
-  ref,
-) {
-  return <div ref={ref} className={join(cls.footer, className)} {...props} />;
-});
+export function CommandMenuFooter({ className, ...props }: CommandMenuFooterProps): ReactElement {
+  return (
+    <div
+      data-slot="command-menu-footer"
+      {...props}
+      className={cn(commandMenuSlots.footer, className)}
+    />
+  );
+}
 
 /** A handle to open and close a Root from anywhere, such as a button outside it. */
 export const createCommandMenuHandle: typeof Dialog.createHandle = Dialog.createHandle;

@@ -389,3 +389,30 @@ describe("Copy Button", () => {
     expect(await measureIdle()).toEqual({ rafCalls: 0, runningAnimations: [] });
   });
 });
+
+test("every part has its data-slot", async () => {
+  const labelled = await mount({ showLabel: true });
+  const slots = (el: ParentNode, prefix = "copy-button") =>
+    [...el.querySelectorAll(`[data-slot^="${prefix}"]`)].map((node) =>
+      node.getAttribute("data-slot"),
+    );
+  expect(slots(labelled.screen.container)).toEqual([
+    "copy-button",
+    "copy-button-label",
+    "copy-button-label-text",
+    "copy-button-label-text",
+    "copy-button-status",
+  ]);
+  await labelled.screen.unmount();
+
+  const icon = await mount();
+  await userEvent.hover(icon.button);
+  await expect.poll(() => document.querySelector('[data-slot="copy-button-tip"]')).not.toBeNull();
+  expect(slots(document)).toEqual([
+    "copy-button",
+    "copy-button-status",
+    "copy-button-tip",
+    "copy-button-tip-text",
+    "copy-button-tip-text",
+  ]);
+});

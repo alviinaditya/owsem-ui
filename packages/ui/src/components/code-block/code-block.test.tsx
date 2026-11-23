@@ -665,3 +665,69 @@ describe("Code Block", () => {
     });
   });
 });
+
+test("every part has its data-slot", async () => {
+  const slots = (el: ParentNode) =>
+    [...el.querySelectorAll('[data-slot^="code-block"]')].map((node) =>
+      node.getAttribute("data-slot"),
+    );
+  const single = await render(<Single />);
+  expect(slots(single.container)).toEqual([
+    "code-block",
+    "code-block-header",
+    "code-block-icon",
+    "code-block-title",
+    "code-block-copy",
+    "code-block-panel",
+  ]);
+  await single.unmount();
+
+  const tabbed = await render(<Tabbed />);
+  expect(slots(tabbed.container)).toEqual([
+    "code-block",
+    "code-block-header",
+    "code-block-icon",
+    "code-block-list",
+    "code-block-thumb",
+    "code-block-tab",
+    "code-block-tab",
+    "code-block-tab",
+    "code-block-copy",
+    "code-block-panel",
+  ]);
+});
+
+test("a nested block copies its own panel, not the one around it", async () => {
+  const writeText = clipboard();
+  const outer = await render(
+    <CodeBlock.Root>
+      <CodeBlock.Panel>
+        <Single code="inner code" />
+      </CodeBlock.Panel>
+    </CodeBlock.Root>,
+  );
+  await painted();
+  const copy = outer.container.querySelector<HTMLElement>('[data-slot="code-block-copy"]');
+  copy?.click();
+  await expect.poll(() => writeText.mock.calls).toEqual([["inner code"]]);
+});
+
+test("a Root and a Panel given another data-slot still copy the panel on show", async () => {
+  const writeText = clipboard();
+  const screen = await render(
+    <CodeBlock.Root data-slot="mine">
+      <CodeBlock.Header>
+        <CodeBlock.Copy />
+      </CodeBlock.Header>
+      <CodeBlock.Panel data-slot="mine-panel">
+        <pre>
+          <code>shown code</code>
+        </pre>
+      </CodeBlock.Panel>
+    </CodeBlock.Root>,
+  );
+  await painted();
+  screen.container.querySelector<HTMLElement>('[data-slot="code-block-copy"]')?.click();
+  await expect.poll(() => writeText.mock.calls).toEqual([["shown code"]]);
+  expect(screen.container.querySelector('[data-slot="mine"]')).toBeNull();
+});

@@ -435,12 +435,12 @@
     transition: scale var(--_settle-duration) var(--_settle);
   }
 
-  .ow-color-picker__trigger[data-size="sm"] {
+  .ow-color-picker__trigger--sm {
     --py: 0.6058em;
     font-size: 13px;
   }
 
-  .ow-color-picker__trigger[data-size="lg"] {
+  .ow-color-picker__trigger--lg {
     --py: 0.875em;
     font-size: 16px;
   }
@@ -475,7 +475,7 @@
   }
 
   /* A square as tall as the field, filled with the color. */
-  .ow-color-picker__trigger[data-variant="swatch"] {
+  .ow-color-picker__trigger--swatch {
     justify-content: center;
     inline-size: calc(2 * var(--_py) + 1lh);
     block-size: calc(2 * var(--_py) + 1lh);
@@ -484,7 +484,7 @@
     box-shadow: none;
   }
 
-  .ow-color-picker__trigger[data-variant="swatch"] > .ow-color-picker__chip {
+  .ow-color-picker__trigger--swatch > .ow-color-picker__chip {
     inline-size: 100%;
     block-size: 100%;
     margin: 0;

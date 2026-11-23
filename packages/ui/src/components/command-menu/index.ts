@@ -13,7 +13,7 @@ export type {
   CommandMenuPopupProps,
   CommandMenuRootProps,
   CommandMenuShortcutProps,
-  CommandMenuSize,
   CommandMenuTriggerProps,
 } from "./command-menu";
 export * as CommandMenu from "./command-menu.parts";
+export type { CommandMenuSize } from "./command-menu-variants";

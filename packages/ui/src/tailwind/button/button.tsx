@@ -5,10 +5,17 @@ import { Button as BaseButton } from "@base-ui/react/button";
 import type { ReactElement, ReactNode } from "react";
 import { cn } from "../lib/cn";
 import { useRipple } from "../lib/use-ripple";
-import { type ButtonVariantProps, buttonSlots, buttonVariants } from "./button-variants";
+import {
+  type ButtonSize,
+  type ButtonVariantProps,
+  buttonSlots,
+  buttonVariants,
+} from "./button-variants";
 
 export interface ButtonProps extends Omit<BaseButton.Props, "className">, ButtonVariantProps {
   className?: string | undefined;
+  /** The size of an outer part that renders this one, such as Toolbar.Button. */
+  "data-size"?: ButtonSize | undefined;
   /**
    * Shows a spinner without changing the button's size: in the start icon's place, or centered
    * over the content, which keeps its box. The button ignores presses but keeps focus.
@@ -42,8 +49,9 @@ function Spinner(): ReactElement {
 }
 
 export function Button({
+  "data-size": outerSize,
   variant = "primary",
-  size = "md",
+  size = outerSize ?? "md",
   soft,
   loading,
   startIcon,
@@ -65,8 +73,8 @@ export function Button({
     <BaseButton
       data-slot="button"
       data-variant={variant}
-      data-size={size}
       {...props}
+      data-size={size}
       className={cn(buttonVariants({ variant, size, soft }), className)}
       // Base UI's way to load: disabled, but focusable, with aria-disabled.
       disabled={disabled || loading}

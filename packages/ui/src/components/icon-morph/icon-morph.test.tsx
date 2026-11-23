@@ -303,3 +303,13 @@ describe("Icon Morph", () => {
     expect(plain.root.style.getPropertyValue("--_duration")).toBe("");
   });
 });
+
+test("every part has its data-slot", async () => {
+  const { screen, show } = await mount("copy");
+  await show("check");
+  const slots = (el: Element) =>
+    [...el.querySelectorAll("[data-slot]")].map((node) => node.getAttribute("data-slot"));
+  const root = screen.container.querySelector(".ow-icon-morph");
+  expect(root?.getAttribute("data-slot")).toBe("icon-morph");
+  expect(slots(screen.container)).toEqual(["icon-morph", "icon-morph-item", "icon-morph-item"]);
+});

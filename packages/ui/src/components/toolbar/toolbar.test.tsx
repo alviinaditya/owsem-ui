@@ -5,6 +5,9 @@ import { commands, userEvent } from "vitest/browser";
 import { render } from "vitest-browser-react";
 import { axeReport } from "../../../test/a11y.ts";
 import { measureIdle, settle } from "../../../test/raf-counter.ts";
+import { Button } from "../button";
+import { ColorPickerPopover } from "../color-picker";
+import { CommandMenu } from "../command-menu";
 import { Input } from "../input";
 import { Switch } from "../switch";
 import { Toggle } from "../toggle";
@@ -162,6 +165,30 @@ describe("Toolbar", () => {
     expect(track.classList.contains("ow-switch--sm")).toBe(true);
     expect(track.dataset.size).toBe("sm");
     expect(getComputedStyle(track).fontSize).toBe("13px");
+  });
+
+  test("a Button, a Command Menu trigger, and a Color Picker trigger take the toolbar's size", async () => {
+    const { q } = await mount(
+      <Toolbar.Root aria-label="Small" size="sm">
+        <Toolbar.Button aria-label="Save" render={<Button />} />
+        <CommandMenu.Root>
+          <Toolbar.Button aria-label="Find" render={<CommandMenu.Trigger />} />
+        </CommandMenu.Root>
+        <Toolbar.Button aria-label="Tint" render={<ColorPickerPopover />} />
+      </Toolbar.Root>,
+    );
+    const button = q('[aria-label="Save"]');
+    expect(button.classList.contains("ow-button--sm")).toBe(true);
+    expect(button.dataset.size).toBe("sm");
+    expect(getComputedStyle(button).fontSize).toBe("13px");
+    const trigger = q('[aria-label="Find"]');
+    expect(trigger.classList.contains("ow-command-menu__trigger--sm")).toBe(true);
+    expect(trigger.dataset.size).toBe("sm");
+    expect(getComputedStyle(trigger).fontSize).toBe("13px");
+    const tint = q('[aria-label="Tint"]');
+    expect(tint.classList.contains("ow-color-picker__trigger--sm")).toBe(true);
+    expect(tint.dataset.size).toBe("sm");
+    expect(getComputedStyle(tint).fontSize).toBe("13px");
   });
 
   test("items take the toolbar's size unless they set their own (FR-3)", async () => {

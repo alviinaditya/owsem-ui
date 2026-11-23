@@ -93,8 +93,9 @@ export interface DialogViewportProps extends Omit<BaseDialog.Viewport.Props, "cl
 export function DialogViewport({ className, ...props }: DialogViewportProps): ReactElement {
   return (
     <BaseDialog.Viewport
-      data-slot="dialog-viewport"
       {...props}
+      // Found by this, so it stays.
+      data-slot="dialog-viewport"
       className={cn(dialogSlots.viewport, className)}
     />
   );

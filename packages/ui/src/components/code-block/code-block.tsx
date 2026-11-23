@@ -3,17 +3,12 @@
 import { Tabs } from "@base-ui/react/tabs";
 import {
   Children,
-  type ComponentPropsWithoutRef,
+  type ComponentProps,
   cloneElement,
   createContext,
-  type ForwardRefExoticComponent,
-  forwardRef,
   isValidElement,
   type ReactElement,
-  type Ref,
-  type RefAttributes,
   type RefObject,
-  useCallback,
   useContext,
   useEffect,
   useId,
@@ -21,49 +16,39 @@ import {
   useRef,
   useState,
 } from "react";
-import { joinClass, withClassName } from "../../core/class-name";
+import { cn } from "../../core/cn";
 import { GlideHighlight, useGlide } from "../../core/glide/use-glide";
+import { useMergedRefs } from "../../core/merge-refs";
 import { CopyButton, type CopyButtonProps } from "../copy-button/copy-button";
 import { IconMorph } from "../icon-morph/icon-morph";
 import { createThumb } from "../toggle-group/thumb";
+import { codeBlockSlots } from "./code-block-variants";
 import { createHeightGlide, type HeightGlide } from "./height-glide";
 import "./code-block.css";
 
-const cls = {
-  root: "ow-code-block",
-  header: "ow-code-block__header",
-  icon: "ow-code-block__icon",
-  title: "ow-code-block__title",
-  list: "ow-code-block__list",
-  thumb: "ow-code-block__thumb",
-  tab: "ow-code-block__tab",
-  copy: "ow-code-block__copy",
-  panel: "ow-code-block__panel",
-} as const;
+// The code finds its parts by these, never by class. Base UI gives every tab its role, also when
+// another element renders it; the rest are this component's own data-slots.
+const ROOT = '[data-slot="code-block"]';
+const PANEL = '[data-slot="code-block-panel"]';
+const TITLE = '[data-slot="code-block-title"]';
+const TAB = '[role="tab"]';
 
 // The thumb is placed before the first paint; the server has no layout, so it falls back
 // to an effect there (and the active tab draws its own key until then).
 const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-//
 const RootContext = createContext<{
   root: RefObject<HTMLDivElement | null>;
   /** The active tab's value, as far as Root knows it: set, or the last one picked. */
   value: unknown;
 }>({ root: { current: null }, value: undefined });
 
-const assignRef = <T,>(ref: Ref<T> | undefined, el: T | null) => {
-  if (typeof ref === "function") ref(el);
-  else if (ref) (ref as { current: T | null }).current = el;
-};
-
 /** The panel on show. */
 function shownPanel(root: HTMLElement | null): HTMLElement | null {
   if (!root) return null;
   return (
-    [...root.querySelectorAll<HTMLElement>(`.${cls.panel}`)].find(
-      (el) =>
-        el.closest(`.${cls.root}`) === root && !el.hidden && !el.hasAttribute("data-ending-style"),
+    [...root.querySelectorAll<HTMLElement>(PANEL)].find(
+      (el) => el.closest(ROOT) === root && !el.hidden && !el.hasAttribute("data-ending-style"),
     ) ?? null
   );
 }
@@ -74,35 +59,33 @@ function shownText(root: HTMLElement | null): string {
 }
 
 /** The one leading icon: it morphs into the next when its key changes. */
-function LeadingIcon({ icon }: { icon: ReactElement | null }) {
+function LeadingIcon({ icon }: { icon: ReactElement | null }): ReactElement {
   return (
-    <span className={cls.icon} aria-hidden="true">
+    <span data-slot="code-block-icon" className={codeBlockSlots.icon} aria-hidden="true">
       <IconMorph>{icon}</IconMorph>
     </span>
   );
 }
 
-export type CodeBlockRootProps = Omit<Tabs.Root.Props, "orientation">;
+export interface CodeBlockRootProps extends Omit<Tabs.Root.Props, "orientation" | "className"> {
+  className?: string | undefined;
+}
 
 /**
  * One surface: a header, then the code under it. With tabs it is Base UI's Tabs root: `value`,
  * `defaultValue`, and `onValueChange` pick the snippet on show.
  */
-export const CodeBlockRoot: ForwardRefExoticComponent<
-  CodeBlockRootProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, CodeBlockRootProps>(function CodeBlockRoot(
-  { className, value, defaultValue, onValueChange, ...props },
+export function CodeBlockRoot({
+  className,
+  value,
+  defaultValue,
+  onValueChange,
   ref,
-) {
+  ...props
+}: CodeBlockRootProps): ReactElement {
   const root = useRef<HTMLDivElement | null>(null);
+  const merged = useMergedRefs(root, ref);
   const [picked, setPicked] = useState<unknown>(defaultValue);
-  const setRef = useCallback(
-    (el: HTMLDivElement | null) => {
-      root.current = el;
-      assignRef(ref, el);
-    },
-    [ref],
-  );
   const current = value === undefined ? picked : value;
   // The height eases when another snippet comes on show; the first render does not move.
   const glide = useRef<HeightGlide | null>(null);
@@ -121,8 +104,10 @@ export const CodeBlockRoot: ForwardRefExoticComponent<
     <RootContext.Provider value={{ root, value: current }}>
       <Tabs.Root
         {...props}
-        ref={setRef}
-        className={withClassName(cls.root, className)}
+        // Found by this, so it stays.
+        data-slot="code-block"
+        ref={merged}
+        className={cn(codeBlockSlots.root, className)}
         value={value}
         defaultValue={defaultValue}
         onValueChange={(next, details) => {
@@ -132,49 +117,53 @@ export const CodeBlockRoot: ForwardRefExoticComponent<
       />
     </RootContext.Provider>
   );
-});
+}
 
-export type CodeBlockHeaderProps = ComponentPropsWithoutRef<"div">;
+export interface CodeBlockHeaderProps extends Omit<ComponentProps<"div">, "className"> {
+  className?: string | undefined;
+}
 
 /** The row above the code: an icon with a Title or a List of tabs, and Copy at the end. */
-export const CodeBlockHeader: ForwardRefExoticComponent<
-  CodeBlockHeaderProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, CodeBlockHeaderProps>(function CodeBlockHeader(
-  { className, ...props },
-  ref,
-) {
+export function CodeBlockHeader({ className, ...props }: CodeBlockHeaderProps): ReactElement {
   return (
-    <div ref={ref} className={className ? `${cls.header} ${className}` : cls.header} {...props} />
+    <div
+      data-slot="code-block-header"
+      {...props}
+      className={cn(codeBlockSlots.header, className)}
+    />
   );
-});
+}
 
-export interface CodeBlockTitleProps extends ComponentPropsWithoutRef<"span"> {
+export interface CodeBlockTitleProps extends Omit<ComponentProps<"span">, "className"> {
+  className?: string | undefined;
   /** The icon before it, such as the file type's. A new `key` morphs it into the next. */
   icon?: ReactElement | null | undefined;
 }
 
 /** The name of a single snippet, such as its file. It names the code for assistive technology. */
-export const CodeBlockTitle: ForwardRefExoticComponent<
-  CodeBlockTitleProps & RefAttributes<HTMLSpanElement>
-> = forwardRef<HTMLSpanElement, CodeBlockTitleProps>(function CodeBlockTitle(
-  { icon, className, id, ...props },
-  ref,
-) {
+export function CodeBlockTitle({
+  icon,
+  className,
+  id,
+  ...props
+}: CodeBlockTitleProps): ReactElement {
   const own = useId();
   return (
     <>
       {icon ? <LeadingIcon icon={icon} /> : null}
       <span
-        ref={ref}
-        id={id ?? own}
-        className={className ? `${cls.title} ${className}` : cls.title}
         {...props}
+        // Found by this, so it stays.
+        data-slot="code-block-title"
+        id={id ?? own}
+        className={cn(codeBlockSlots.title, className)}
       />
     </>
   );
-});
+}
 
-export interface CodeBlockTabProps extends Omit<Tabs.Tab.Props, "ref"> {
+export interface CodeBlockTabProps extends Omit<Tabs.Tab.Props, "className"> {
+  className?: string | undefined;
   /**
    * Its snippet's icon, which leads the list while the tab is active and morphs into the next
    * tab's. Tabs whose icons share a `key` keep the one icon still.
@@ -183,50 +172,42 @@ export interface CodeBlockTabProps extends Omit<Tabs.Tab.Props, "ref"> {
 }
 
 /** One snippet's tab: Base UI's Tab. */
-export const CodeBlockTab: ForwardRefExoticComponent<
-  CodeBlockTabProps & RefAttributes<HTMLElement>
-> = forwardRef<HTMLElement, CodeBlockTabProps>(function CodeBlockTab(
-  { icon: _icon, className, ...props },
-  ref,
-) {
-  return <Tabs.Tab {...props} ref={ref} className={withClassName(cls.tab, className)} />;
-});
+export function CodeBlockTab({
+  icon: _icon,
+  className,
+  ...props
+}: CodeBlockTabProps): ReactElement {
+  return (
+    <Tabs.Tab data-slot="code-block-tab" {...props} className={cn(codeBlockSlots.tab, className)} />
+  );
+}
 
-export type CodeBlockListProps = Omit<Tabs.List.Props, "ref">;
+export interface CodeBlockListProps extends Omit<Tabs.List.Props, "className"> {
+  className?: string | undefined;
+}
 
 /**
  * The tabs, one per snippet: Base UI's Tabs list, with arrow keys that pick as they move. A thumb
  * slides under the active tab, as in Toggle Group. It scrolls sideways when the tabs do not fit,
  * and the active tab's icon leads it.
  */
-export const CodeBlockList: ForwardRefExoticComponent<
-  CodeBlockListProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, CodeBlockListProps>(function CodeBlockList(
-  { className, children, activateOnFocus = true, ...props },
+export function CodeBlockList({
+  className,
+  children,
+  activateOnFocus = true,
   ref,
-) {
+  ...props
+}: CodeBlockListProps): ReactElement {
   const { value } = useContext(RootContext);
-  const glide = useGlide<HTMLDivElement>({
-    items: `.${cls.tab}`,
-    axis: "x",
-    skip: "[data-active]",
-  });
+  const glide = useGlide<HTMLDivElement>({ items: TAB, axis: "x", skip: "[data-active]" });
   const list = useRef<HTMLDivElement | null>(null);
   const thumb = useRef<HTMLSpanElement>(null);
+  const merged = useMergedRefs(list, useMergedRefs(glide.ref, ref));
   useBeforePaint(() => {
     if (!list.current || !thumb.current) return;
-    const instance = createThumb(list.current, thumb.current, `.${cls.tab}`, "data-active");
+    const instance = createThumb(list.current, thumb.current, TAB, "data-active");
     return () => instance.destroy();
   }, []);
-  const glideRef = glide.ref;
-  const setRef = useCallback(
-    (el: HTMLDivElement | null) => {
-      list.current = el;
-      glideRef(el);
-      assignRef(ref, el);
-    },
-    [glideRef, ref],
-  );
   // The tabs' icons, read from the Tab elements; until a value is known, the first tab's.
   const tabs = Children.toArray(children).filter(
     (child): child is ReactElement<CodeBlockTabProps> => isValidElement(child),
@@ -245,18 +226,24 @@ export const CodeBlockList: ForwardRefExoticComponent<
         />
       ) : null}
       <Tabs.List
+        data-slot="code-block-list"
         {...props}
-        ref={setRef}
+        ref={merged}
         activateOnFocus={activateOnFocus}
-        className={withClassName(cls.list, className)}
+        className={cn(codeBlockSlots.list, className)}
       >
         <GlideHighlight glide={glide} />
-        <span ref={thumb} className={cls.thumb} aria-hidden="true" />
+        <span
+          data-slot="code-block-thumb"
+          ref={thumb}
+          className={codeBlockSlots.thumb}
+          aria-hidden="true"
+        />
         {children}
       </Tabs.List>
     </>
   );
-});
+}
 
 export interface CodeBlockCopyProps extends Omit<CopyButtonProps, "value"> {
   /** The text to copy. Default: the text of the panel on show. */
@@ -264,25 +251,21 @@ export interface CodeBlockCopyProps extends Omit<CopyButtonProps, "value"> {
 }
 
 /** Copy Button, icon only at the end of the header, with its Tooltip: it copies the snippet on show. */
-export const CodeBlockCopy: ForwardRefExoticComponent<
-  CodeBlockCopyProps & RefAttributes<HTMLButtonElement>
-> = forwardRef<HTMLButtonElement, CodeBlockCopyProps>(function CodeBlockCopy(
-  { value, className, ...props },
-  ref,
-) {
+export function CodeBlockCopy({ value, className, ...props }: CodeBlockCopyProps): ReactElement {
   const { root } = useContext(RootContext);
   return (
     <CopyButton
+      data-slot="code-block-copy"
       size="sm"
       {...props}
-      ref={ref}
-      className={joinClass(cls.copy, className)}
+      className={cn(codeBlockSlots.copy, className)}
       value={value ?? (() => shownText(root.current))}
     />
   );
-});
+}
 
-export interface CodeBlockPanelProps extends ComponentPropsWithoutRef<"div"> {
+export interface CodeBlockPanelProps extends Omit<ComponentProps<"div">, "className"> {
+  className?: string | undefined;
   /** The tab it belongs to; leave it out for a single snippet. */
   value?: Tabs.Tab.Value;
   /** With tabs: keep it in the DOM while another tab is active. */
@@ -293,53 +276,60 @@ export interface CodeBlockPanelProps extends ComponentPropsWithoutRef<"div"> {
  * The code, such as a highlighted `<pre>`, under the header on the same surface. It scrolls
  * sideways for long lines, and the keyboard can scroll it.
  */
-export const CodeBlockPanel: ForwardRefExoticComponent<
-  CodeBlockPanelProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, CodeBlockPanelProps>(function CodeBlockPanel(
-  { value, keepMounted, className, ...props },
-  ref,
-) {
-  const name = className ? `${cls.panel} ${className}` : cls.panel;
+export function CodeBlockPanel({
+  value,
+  keepMounted,
+  className,
+  ...props
+}: CodeBlockPanelProps): ReactElement {
+  const name = cn(codeBlockSlots.panel, className);
   return value === undefined ? (
-    <SinglePanel {...props} ref={ref} className={name} />
+    <SinglePanel {...props} className={name} />
   ) : (
-    <Tabs.Panel {...props} ref={ref} value={value} keepMounted={keepMounted} className={name} />
+    <Tabs.Panel
+      {...props}
+      // Found by this, so it stays.
+      data-slot="code-block-panel"
+      value={value}
+      keepMounted={keepMounted}
+      className={name}
+    />
   );
-});
+}
 
 /** A panel without tabs: focusable while its code overflows, named by the Title if there is one. */
-const SinglePanel = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<"div">>(
-  function SinglePanel(props, ref) {
-    const panel = useRef<HTMLDivElement | null>(null);
-    // null while it fits; else the Title's id, or "" without a Title.
-    const [label, setLabel] = useState<string | null>(null);
-    useEffect(() => {
-      const el = panel.current;
-      if (!el) return;
-      const check = () => {
-        const title = el.closest(`.${cls.root}`)?.querySelector(`.${cls.title}`);
-        setLabel(el.scrollWidth > el.clientWidth ? (title?.id ?? "") : null);
-      };
-      // The panel resizes with the page, and its code with what it holds.
-      const observer = new ResizeObserver(check);
-      observer.observe(el);
-      for (const child of el.children) observer.observe(child);
-      return () => observer.disconnect();
-    }, []);
-    const setRef = useCallback(
-      (el: HTMLDivElement | null) => {
-        panel.current = el;
-        assignRef(ref, el);
-      },
-      [ref],
-    );
-    // A region named by the Title, or a plain focusable box without one.
-    const scrollable =
-      label === null
-        ? {}
-        : label
-          ? { role: "region", "aria-labelledby": label, tabIndex: 0 }
-          : { tabIndex: 0 };
-    return <div ref={setRef} {...scrollable} {...props} />;
-  },
-);
+function SinglePanel({ ref, ...props }: ComponentProps<"div">): ReactElement {
+  const panel = useRef<HTMLDivElement | null>(null);
+  const merged = useMergedRefs(panel, ref);
+  // null while it fits; else the Title's id, or "" without a Title.
+  const [label, setLabel] = useState<string | null>(null);
+  useEffect(() => {
+    const el = panel.current;
+    if (!el) return;
+    const check = () => {
+      const title = el.closest(ROOT)?.querySelector(TITLE);
+      setLabel(el.scrollWidth > el.clientWidth ? (title?.id ?? "") : null);
+    };
+    // The panel resizes with the page, and its code with what it holds.
+    const observer = new ResizeObserver(check);
+    observer.observe(el);
+    for (const child of el.children) observer.observe(child);
+    return () => observer.disconnect();
+  }, []);
+  // A region named by the Title, or a plain focusable box without one.
+  const scrollable =
+    label === null
+      ? {}
+      : label
+        ? { role: "region", "aria-labelledby": label, tabIndex: 0 }
+        : { tabIndex: 0 };
+  return (
+    <div
+      {...scrollable}
+      {...props}
+      // Found by this, so it stays.
+      data-slot="code-block-panel"
+      ref={merged}
+    />
+  );
+}

@@ -672,7 +672,7 @@ describe("ColorPickerPopover", () => {
           style={{ marginBlock: "3px" }}
           aria-label="Brand"
         />
-        <ColorPickerPopover className={(state) => (state.open ? "open" : "shut")} />
+        <ColorPickerPopover className="shut" />
         <ColorPickerPopover render={<span />} nativeButton={false} />
       </>,
     );
@@ -680,10 +680,14 @@ describe("ColorPickerPopover", () => {
       ".ow-color-picker__trigger",
     );
     expect(ref.current).toBe(first);
-    expect(first?.className).toBe("ow-color-picker__trigger mine");
+    expect(first?.className).toBe(
+      "ow-color-picker__trigger ow-color-picker__trigger--md ow-color-picker__trigger--field mine",
+    );
     expect(first?.style.marginBlock).toBe("3px");
     expect(first?.getAttribute("aria-label")).toBe("Brand");
-    expect(second?.className).toBe("ow-color-picker__trigger shut");
+    expect(second?.className).toBe(
+      "ow-color-picker__trigger ow-color-picker__trigger--md ow-color-picker__trigger--field shut",
+    );
     expect(third?.tagName).toBe("SPAN");
   });
 
@@ -813,4 +817,53 @@ describe("ColorPickerPopover", () => {
     await settle({ maxMs: 3000 });
     expect(await measureIdle(1500)).toEqual({ rafCalls: 0, runningAnimations: [] });
   });
+});
+
+test("every part has its data-slot", async () => {
+  const slots = (scope: ParentNode) =>
+    [
+      ...new Set(
+        [...scope.querySelectorAll('[data-slot^="color-picker"]')].map((el) =>
+          el.getAttribute("data-slot"),
+        ),
+      ),
+    ].sort();
+  const picker = [
+    "color-picker",
+    "color-picker-area",
+    "color-picker-control",
+    "color-picker-field",
+    "color-picker-format",
+    "color-picker-input",
+    "color-picker-inputs",
+    "color-picker-label",
+    "color-picker-preview",
+    "color-picker-slider",
+    "color-picker-sliders",
+    "color-picker-swatch",
+    "color-picker-swatches",
+    "color-picker-thumb",
+    "color-picker-tools",
+    "color-picker-track",
+    // The screen color picker is there where the browser has the EyeDropper API.
+    ...("EyeDropper" in window ? ["color-picker-tool"] : []),
+  ].sort();
+  const plain = await render(<ColorPicker />);
+  await expect.poll(() => slots(plain.container)).toEqual(picker);
+  await plain.unmount();
+
+  await render(<ColorPickerPopover defaultOpen />);
+  await expect
+    .poll(() => document.querySelector('[data-slot="color-picker-popup"]'))
+    .not.toBeNull();
+  expect(slots(document)).toEqual(
+    [
+      ...picker,
+      "color-picker-chip",
+      "color-picker-popup",
+      "color-picker-positioner",
+      "color-picker-trigger",
+      "color-picker-value",
+    ].sort(),
+  );
 });

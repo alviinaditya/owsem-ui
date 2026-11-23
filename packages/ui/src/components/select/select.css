@@ -52,12 +52,12 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  .ow-select__trigger:where([data-size="sm"]) {
+  .ow-select__trigger--sm {
     --py: 0.6058em;
     font-size: 0.8125rem;
   }
 
-  .ow-select__trigger:where([data-size="lg"]) {
+  .ow-select__trigger--lg {
     --py: 0.875em;
     font-size: 1rem;
   }
@@ -190,12 +190,12 @@
 
   /* At sm the items' --py is the trigger's, so their inline padding gives up the popup's padding,
    * and the text still lands on the trigger's. */
-  .ow-select__popup:where([data-size="sm"]) {
+  .ow-select__popup--sm {
     --_py-less: calc(-1 * var(--_pad));
     font-size: 0.8125rem;
   }
 
-  .ow-select__popup:where([data-size="lg"]) {
+  .ow-select__popup--lg {
     font-size: 1rem;
   }
 
@@ -280,13 +280,13 @@
     cursor: default;
   }
 
-  :where(.ow-select__popup[data-size="sm"]) .ow-select__item {
+  :where(.ow-select__popup--sm) .ow-select__item {
     --py: 0.6058em;
     padding-inline: calc(var(--px) - var(--_pad));
   }
 
   /* 40px at lg, so the popup covers the 48px trigger even with its first item selected. */
-  :where(.ow-select__popup[data-size="lg"]) .ow-select__item {
+  :where(.ow-select__popup--lg) .ow-select__item {
     --py: 0.625em;
   }
 

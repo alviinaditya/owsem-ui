@@ -2,29 +2,12 @@
 
 import { Dialog as BaseDialog } from "@base-ui/react/dialog";
 import { useDirection } from "@base-ui/react/direction-provider";
-import {
-  createContext,
-  type ForwardRefExoticComponent,
-  forwardRef,
-  type JSX,
-  type RefAttributes,
-  useCallback,
-  useContext,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react";
-import { withClassName } from "../../core/class-name";
+import { createContext, type ReactElement, useCallback, useContext, useRef, useState } from "react";
+import { cn } from "../../core/cn";
+import { useMergedRefs } from "../../core/merge-refs";
 import { useOpenState, useScrollLock } from "../../core/scroll-lock";
+import { dialogSlots } from "./dialog-variants";
 import "./dialog.css";
-
-const cls = {
-  backdrop: "ow-dialog__backdrop",
-  viewport: "ow-dialog__viewport",
-  popup: "ow-dialog__popup",
-  title: "ow-dialog__title",
-  description: "ow-dialog__description",
-} as const;
 
 // Parts without a look of their own come straight from Base UI.
 
@@ -41,7 +24,7 @@ const LockContext = createContext(false);
  * puts back the `overflow` Base UI sets on the page, so its text is not drawn again while the
  * dialog is open. Opened by touch, Base UI's own lock stands.
  */
-export function DialogRoot<Payload = unknown>(props: DialogRootProps<Payload>): JSX.Element {
+export function DialogRoot<Payload = unknown>(props: DialogRootProps<Payload>): ReactElement {
   const { open, onOpenChange } = useOpenState(props);
   return (
     <LockContext.Provider value={open && (props.modal ?? true) === true}>
@@ -56,29 +39,31 @@ export const DialogClose: typeof BaseDialog.Close = BaseDialog.Close;
 /** Links a Root to triggers placed elsewhere (detached triggers), and opens it from code. */
 export const createDialogHandle: typeof BaseDialog.createHandle = BaseDialog.createHandle;
 
-export type DialogBackdropProps = Omit<BaseDialog.Backdrop.Props, "ref">;
+export interface DialogBackdropProps extends Omit<BaseDialog.Backdrop.Props, "className"> {
+  className?: string | undefined;
+}
 
 /**
  * The scrim. Portal draws one, so write this only to change it. Unlike Base UI's, it also renders
  * in a nested dialog, where it dims the parent; `forceRender={false}` turns that off.
  */
-export const DialogBackdrop: ForwardRefExoticComponent<
-  DialogBackdropProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, DialogBackdropProps>(function DialogBackdrop(
-  { className, forceRender = true, ...props },
-  ref,
-) {
+export function DialogBackdrop({
+  className,
+  forceRender = true,
+  ...props
+}: DialogBackdropProps): ReactElement {
   return (
     <BaseDialog.Backdrop
-      ref={ref}
-      className={withClassName(cls.backdrop, className)}
-      forceRender={forceRender}
+      data-slot="dialog-backdrop"
       {...props}
+      className={cn(dialogSlots.backdrop, className)}
+      forceRender={forceRender}
     />
   );
-});
+}
 
-export interface DialogPortalProps extends Omit<BaseDialog.Portal.Props, "ref"> {
+export interface DialogPortalProps extends Omit<BaseDialog.Portal.Props, "className"> {
+  className?: string | undefined;
   /**
    * Whether to draw the scrim, unless a `Dialog.Backdrop` among the children replaces it. Default
    * `true`; set it to `false` for a dialog that leaves the page undimmed.
@@ -87,100 +72,103 @@ export interface DialogPortalProps extends Omit<BaseDialog.Portal.Props, "ref"> 
 }
 
 /** Moves the dialog to the end of the body, or into `container`, and draws the scrim behind it. */
-export const DialogPortal: ForwardRefExoticComponent<
-  DialogPortalProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, DialogPortalProps>(function DialogPortal(
-  { backdrop = true, children, ...props },
-  ref,
-) {
+export function DialogPortal({
+  backdrop = true,
+  children,
+  ...props
+}: DialogPortalProps): ReactElement {
   return (
-    <BaseDialog.Portal ref={ref} {...props}>
+    <BaseDialog.Portal data-slot="dialog-portal" {...props}>
       {backdrop ? <DialogBackdrop /> : null}
       {children}
     </BaseDialog.Portal>
   );
-});
+}
 
-export type DialogViewportProps = Omit<BaseDialog.Viewport.Props, "ref">;
+export interface DialogViewportProps extends Omit<BaseDialog.Viewport.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** Optional, around the Popup: long content then scrolls here, with the popup at its full height. */
-export const DialogViewport: ForwardRefExoticComponent<
-  DialogViewportProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, DialogViewportProps>(function DialogViewport(
-  { className, ...props },
-  ref,
-) {
+export function DialogViewport({ className, ...props }: DialogViewportProps): ReactElement {
   return (
-    <BaseDialog.Viewport ref={ref} className={withClassName(cls.viewport, className)} {...props} />
+    <BaseDialog.Viewport
+      data-slot="dialog-viewport"
+      {...props}
+      className={cn(dialogSlots.viewport, className)}
+    />
   );
-});
+}
 
-export type DialogPopupProps = Omit<BaseDialog.Popup.Props, "ref">;
+export interface DialogPopupProps extends Omit<BaseDialog.Popup.Props, "className"> {
+  className?: string | undefined;
+}
 
 /**
  * The panel: the panel material with the popup shadow. It takes the text direction from
- * DirectionProvider, since the portal leaves the subtree that sets `dir` (FR-16). A dialog too long
- * to show whole takes focus itself, so it opens at its start, not scrolled to a button at its end.
+ * DirectionProvider, since the portal leaves the subtree that sets `dir`. A dialog too long to
+ * show whole takes focus itself, so it opens at its start, not scrolled to a button at its end.
  */
-export const DialogPopup: ForwardRefExoticComponent<
-  DialogPopupProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, DialogPopupProps>(function DialogPopup(
-  { className, initialFocus, ...props },
+export function DialogPopup({
+  className,
+  initialFocus,
   ref,
-) {
+  ...props
+}: DialogPopupProps): ReactElement {
   const direction = useDirection();
   const popup = useRef<HTMLDivElement | null>(null);
   const [self, setSelf] = useState<HTMLDivElement | null>(null);
-  useImperativeHandle(ref, () => popup.current as HTMLDivElement);
   useScrollLock(self, useContext(LockContext));
-  const setRef = useCallback((el: HTMLDivElement | null) => {
+  const track = useCallback((el: HTMLDivElement | null) => {
     popup.current = el;
     setSelf(el);
   }, []);
+  const merged = useMergedRefs(track, ref);
   return (
     <BaseDialog.Popup
-      ref={setRef}
-      className={withClassName(cls.popup, className)}
+      data-slot="dialog-popup"
       dir={direction}
+      {...props}
+      ref={merged}
+      className={cn(dialogSlots.popup, className)}
       initialFocus={
         initialFocus ??
         (() => {
           const el = popup.current;
-          const scroller = el?.closest(`.${cls.viewport}`) ?? el;
+          const scroller = el?.closest('[data-slot="dialog-viewport"]') ?? el;
           return scroller && scroller.scrollHeight > scroller.clientHeight ? el : true;
         })
       }
-      {...props}
     />
   );
-});
+}
 
-export type DialogTitleProps = Omit<BaseDialog.Title.Props, "ref">;
+export interface DialogTitleProps extends Omit<BaseDialog.Title.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** The dialog's heading; it names the dialog for assistive technology. */
-export const DialogTitle: ForwardRefExoticComponent<
-  DialogTitleProps & RefAttributes<HTMLHeadingElement>
-> = forwardRef<HTMLHeadingElement, DialogTitleProps>(function DialogTitle(
-  { className, ...props },
-  ref,
-) {
-  return <BaseDialog.Title ref={ref} className={withClassName(cls.title, className)} {...props} />;
-});
-
-export type DialogDescriptionProps = Omit<BaseDialog.Description.Props, "ref">;
-
-/** A muted line under the title; it describes the dialog for assistive technology. */
-export const DialogDescription: ForwardRefExoticComponent<
-  DialogDescriptionProps & RefAttributes<HTMLParagraphElement>
-> = forwardRef<HTMLParagraphElement, DialogDescriptionProps>(function DialogDescription(
-  { className, ...props },
-  ref,
-) {
+export function DialogTitle({ className, ...props }: DialogTitleProps): ReactElement {
   return (
-    <BaseDialog.Description
-      ref={ref}
-      className={withClassName(cls.description, className)}
+    <BaseDialog.Title
+      data-slot="dialog-title"
       {...props}
+      className={cn(dialogSlots.title, className)}
     />
   );
-});
+}
+
+export interface DialogDescriptionProps extends Omit<BaseDialog.Description.Props, "className"> {
+  className?: string | undefined;
+}
+
+/** A muted line under the title; it describes the dialog for assistive technology. */
+export function DialogDescription({ className, ...props }: DialogDescriptionProps): ReactElement {
+  return (
+    <BaseDialog.Description
+      data-slot="dialog-description"
+      {...props}
+      className={cn(dialogSlots.description, className)}
+    />
+  );
+}

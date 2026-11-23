@@ -2,15 +2,10 @@
 
 import { useDirection } from "@base-ui/react/direction-provider";
 import { Tooltip as BaseTooltip } from "@base-ui/react/tooltip";
-import { type ForwardRefExoticComponent, forwardRef, type RefAttributes } from "react";
-import { withClassName } from "../../core/class-name";
+import type { ReactElement } from "react";
+import { cn } from "../../core/cn";
+import { tooltipSlots } from "./tooltip-variants";
 import "./tooltip.css";
-
-const cls = {
-  positioner: "ow-tooltip__positioner",
-  popup: "ow-tooltip__popup",
-  arrow: "ow-tooltip__arrow",
-} as const;
 
 // Parts without a look of their own come straight from Base UI.
 
@@ -29,50 +24,57 @@ export const TooltipViewport: typeof BaseTooltip.Viewport = BaseTooltip.Viewport
 /** Links a Root to triggers placed elsewhere (detached triggers). */
 export const createTooltipHandle: typeof BaseTooltip.createHandle = BaseTooltip.createHandle;
 
-export type TooltipPositionerProps = Omit<BaseTooltip.Positioner.Props, "ref">;
+export interface TooltipPositionerProps extends Omit<BaseTooltip.Positioner.Props, "className"> {
+  className?: string | undefined;
+}
 
 /**
  * Places the tooltip 8px from its trigger, room for the arrow. It takes the text direction from
- * DirectionProvider, since the portal leaves the subtree that sets `dir` (FR-16).
+ * DirectionProvider, since the portal leaves the subtree that sets `dir`.
  */
-export const TooltipPositioner: ForwardRefExoticComponent<
-  TooltipPositionerProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, TooltipPositionerProps>(function TooltipPositioner(
-  { className, sideOffset = 8, ...props },
-  ref,
-) {
+export function TooltipPositioner({
+  className,
+  sideOffset = 8,
+  ...props
+}: TooltipPositionerProps): ReactElement {
   const direction = useDirection();
   return (
     <BaseTooltip.Positioner
-      ref={ref}
-      className={withClassName(cls.positioner, className)}
-      sideOffset={sideOffset}
+      data-slot="tooltip-positioner"
       dir={direction}
       {...props}
+      className={cn(tooltipSlots.positioner, className)}
+      sideOffset={sideOffset}
     />
   );
-});
+}
 
-export type TooltipPopupProps = Omit<BaseTooltip.Popup.Props, "ref">;
+export interface TooltipPopupProps extends Omit<BaseTooltip.Popup.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** The label: a solid dark surface, with no material. A `kbd` inside reads as its shortcut. */
-export const TooltipPopup: ForwardRefExoticComponent<
-  TooltipPopupProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, TooltipPopupProps>(function TooltipPopup(
-  { className, ...props },
-  ref,
-) {
-  return <BaseTooltip.Popup ref={ref} className={withClassName(cls.popup, className)} {...props} />;
-});
+export function TooltipPopup({ className, ...props }: TooltipPopupProps): ReactElement {
+  return (
+    <BaseTooltip.Popup
+      data-slot="tooltip-popup"
+      {...props}
+      className={cn(tooltipSlots.popup, className)}
+    />
+  );
+}
 
-export type TooltipArrowProps = Omit<BaseTooltip.Arrow.Props, "ref">;
+export interface TooltipArrowProps extends Omit<BaseTooltip.Arrow.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** A small triangle toward the trigger; Base UI keeps it centered on the trigger. */
-export const TooltipArrow: ForwardRefExoticComponent<
-  TooltipArrowProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, TooltipArrowProps>(function TooltipArrow(
-  { className, ...props },
-  ref,
-) {
-  return <BaseTooltip.Arrow ref={ref} className={withClassName(cls.arrow, className)} {...props} />;
-});
+export function TooltipArrow({ className, ...props }: TooltipArrowProps): ReactElement {
+  return (
+    <BaseTooltip.Arrow
+      data-slot="tooltip-arrow"
+      {...props}
+      className={cn(tooltipSlots.arrow, className)}
+    />
+  );
+}

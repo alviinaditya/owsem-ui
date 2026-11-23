@@ -5,46 +5,30 @@ import { Select as BaseSelect } from "@base-ui/react/select";
 import {
   Children,
   createContext,
-  type ForwardRefExoticComponent,
   Fragment,
-  forwardRef,
   isValidElement,
-  type JSX,
+  type ReactElement,
   type ReactNode,
-  type RefAttributes,
-  useCallback,
   useContext,
   useEffect,
   useMemo,
   useState,
 } from "react";
-import { withClassName } from "../../core/class-name";
+import { cn } from "../../core/cn";
 import { GlideHighlight, useGlide } from "../../core/glide/use-glide";
+import { useMergedRefs } from "../../core/merge-refs";
 import { trackPointerType, useScrollLock } from "../../core/scroll-lock";
 import { useShakeGate } from "../../core/shake";
+import {
+  type SelectSize,
+  type SelectVariantProps,
+  selectPopupVariants,
+  selectSlots,
+  selectTriggerVariants,
+} from "./select-variants";
 import "./select.css";
 
-const cls = {
-  backdrop: "ow-select__backdrop",
-  label: "ow-select__label",
-  trigger: "ow-select__trigger",
-  value: "ow-select__value",
-  icon: "ow-select__icon",
-  positioner: "ow-select__positioner",
-  popup: "ow-select__popup",
-  scrollUpArrow: "ow-select__scroll-up-arrow",
-  scrollDownArrow: "ow-select__scroll-down-arrow",
-  list: "ow-select__list",
-  item: "ow-select__item",
-  itemText: "ow-select__item-text",
-  itemIndicator: "ow-select__item-indicator",
-  groupLabel: "ow-select__group-label",
-  separator: "ow-select__separator",
-} as const;
-
 const ITEMS = '[role="option"]';
-
-export type SelectSize = "sm" | "md" | "lg";
 
 // Lucide icons (ISC): chevrons-up-down, chevron-up, chevron-down, check.
 const glyph = (shape: "chevrons" | "up" | "down" | "check") => (
@@ -94,26 +78,26 @@ const PlacedContext = createContext<false | { overlay: boolean }>(false);
 
 // Parts without a look of their own come straight from Base UI.
 
-export type SelectPortalProps = BaseSelect.Portal.Props;
 export type SelectBackdropProps = BaseSelect.Backdrop.Props;
 export type SelectArrowProps = BaseSelect.Arrow.Props;
 export type SelectGroupProps = BaseSelect.Group.Props;
 
+export interface SelectPortalProps extends Omit<BaseSelect.Portal.Props, "className"> {
+  className?: string | undefined;
+}
+
 /** Base UI's Portal; for a modal select it puts a clear backdrop under the popup for outside presses. */
-export const SelectPortal: ForwardRefExoticComponent<
-  Omit<SelectPortalProps, "ref"> & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, Omit<SelectPortalProps, "ref">>(function SelectPortal(
-  { children, ...props },
-  ref,
-) {
+export function SelectPortal({ children, ...props }: SelectPortalProps): ReactElement {
   const { modal } = useContext(SelectContext);
   return (
-    <BaseSelect.Portal ref={ref} {...props}>
-      {modal ? <BaseSelect.Backdrop className={cls.backdrop} /> : null}
+    <BaseSelect.Portal data-slot="select-portal" {...props}>
+      {modal ? (
+        <BaseSelect.Backdrop data-slot="select-backdrop" className={selectSlots.backdrop} />
+      ) : null}
       {children}
     </BaseSelect.Portal>
   );
-});
+}
 export const SelectBackdrop: typeof BaseSelect.Backdrop = BaseSelect.Backdrop;
 export const SelectArrow: typeof BaseSelect.Arrow = BaseSelect.Arrow;
 export const SelectGroup: typeof BaseSelect.Group = BaseSelect.Group;
@@ -121,10 +105,7 @@ export const SelectGroup: typeof BaseSelect.Group = BaseSelect.Group;
 export type SelectRootProps<
   Value,
   Multiple extends boolean | undefined = false,
-> = BaseSelect.Root.Props<Value, Multiple> & {
-  /** The trigger's and the items' type scale: 13, 14, or 16px. @default "md" */
-  size?: SelectSize | undefined;
-};
+> = BaseSelect.Root.Props<Value, Multiple> & SelectVariantProps;
 
 /** The keyboard's own press, or the click a browser makes from one (detail 0). */
 const fromKeyboard = (event: Event) =>
@@ -142,7 +123,7 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
   modal = true,
   onOpenChange,
   ...props
-}: SelectRootProps<Value, Multiple>): JSX.Element {
+}: SelectRootProps<Value, Multiple>): ReactElement {
   const [instant, setInstant] = useState(false);
   // Base UI mounts the popup ahead, on the trigger's focus, so the lock follows `open`.
   const [opened, setOpened] = useState(props.defaultOpen ?? false);
@@ -156,7 +137,7 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
   return (
     <SelectContext.Provider value={shared}>
       <BaseSelect.Root
-        {...(props as BaseSelect.Root.Props<Value, Multiple>)}
+        {...props}
         modal={false}
         onOpenChange={(next, details) => {
           setInstant(fromKeyboard(details.event));
@@ -168,66 +149,80 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
   );
 }
 
-export type SelectLabelProps = Omit<BaseSelect.Label.Props, "ref">;
+export interface SelectLabelProps extends Omit<BaseSelect.Label.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** Names the trigger, and focuses it when pressed. */
-export const SelectLabel: ForwardRefExoticComponent<
-  SelectLabelProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, SelectLabelProps>(function SelectLabel(
-  { className, ...props },
-  ref,
-) {
-  return <BaseSelect.Label ref={ref} className={withClassName(cls.label, className)} {...props} />;
-});
+export function SelectLabel({ className, ...props }: SelectLabelProps): ReactElement {
+  return (
+    <BaseSelect.Label
+      data-slot="select-label"
+      {...props}
+      className={cn(selectSlots.label, className)}
+    />
+  );
+}
 
-export type SelectValueProps = Omit<BaseSelect.Value.Props, "ref">;
+export interface SelectValueProps extends Omit<BaseSelect.Value.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** The selected item's label, or the muted placeholder; a long one ends in an ellipsis. */
-export const SelectValue: ForwardRefExoticComponent<
-  SelectValueProps & RefAttributes<HTMLSpanElement>
-> = forwardRef<HTMLSpanElement, SelectValueProps>(function SelectValue(
-  { className, ...props },
-  ref,
-) {
-  return <BaseSelect.Value ref={ref} className={withClassName(cls.value, className)} {...props} />;
-});
+export function SelectValue({ className, ...props }: SelectValueProps): ReactElement {
+  return (
+    <BaseSelect.Value
+      data-slot="select-value"
+      {...props}
+      className={cn(selectSlots.value, className)}
+    />
+  );
+}
 
-export type SelectIconProps = Omit<BaseSelect.Icon.Props, "ref">;
+export interface SelectIconProps extends Omit<BaseSelect.Icon.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** Up and down chevrons, icon-sized; children replace them. */
-export const SelectIcon: ForwardRefExoticComponent<
-  SelectIconProps & RefAttributes<HTMLSpanElement>
-> = forwardRef<HTMLSpanElement, SelectIconProps>(function SelectIcon(
-  { className, children = glyph("chevrons"), ...props },
-  ref,
-) {
+export function SelectIcon({
+  className,
+  children = glyph("chevrons"),
+  ...props
+}: SelectIconProps): ReactElement {
   return (
-    <BaseSelect.Icon ref={ref} className={withClassName(cls.icon, className)} {...props}>
+    <BaseSelect.Icon data-slot="select-icon" {...props} className={cn(selectSlots.icon, className)}>
       {children}
     </BaseSelect.Icon>
   );
-});
+}
 
-export interface SelectTriggerProps extends Omit<BaseSelect.Trigger.Props, "ref"> {
+export interface SelectTriggerProps extends Omit<BaseSelect.Trigger.Props, "className"> {
+  className?: string | undefined;
+  /** The size of an outer part that renders this one, such as Toolbar.Button. */
+  "data-size"?: SelectSize | undefined;
   /** Shown while nothing is selected, by the Value drawn when the trigger has no children. */
   placeholder?: ReactNode;
 }
 
 /** The field. Without children it draws a Value and an Icon. */
-export const SelectTrigger: ForwardRefExoticComponent<
-  SelectTriggerProps & RefAttributes<HTMLButtonElement>
-> = forwardRef<HTMLButtonElement, SelectTriggerProps>(function SelectTrigger(
-  { className, placeholder, children, ...props },
+export function SelectTrigger({
+  "data-size": outerSize,
+  className,
+  placeholder,
+  children,
   ref,
-) {
-  const { size } = useContext(SelectContext);
+  ...props
+}: SelectTriggerProps): ReactElement {
+  const { size: rootSize } = useContext(SelectContext);
+  const size = outerSize ?? rootSize;
   const gate = useShakeGate(ref);
   return (
     <BaseSelect.Trigger
-      ref={gate}
-      className={withClassName(cls.trigger, className)}
-      data-size={size}
+      data-slot="select-trigger"
       {...props}
+      ref={gate}
+      className={cn(selectTriggerVariants({ size }), className)}
+      data-size={size}
     >
       {children ?? (
         <>
@@ -237,9 +232,11 @@ export const SelectTrigger: ForwardRefExoticComponent<
       )}
     </BaseSelect.Trigger>
   );
-});
+}
 
-export type SelectPositionerProps = Omit<BaseSelect.Positioner.Props, "ref">;
+export interface SelectPositionerProps extends Omit<BaseSelect.Positioner.Props, "className"> {
+  className?: string | undefined;
+}
 
 /**
  * Lays the selected item's text over the trigger's, as Base UI does, so the popup covers the
@@ -248,124 +245,128 @@ export type SelectPositionerProps = Omit<BaseSelect.Positioner.Props, "ref">;
  * in view as it adds up the picks. It takes the text direction from DirectionProvider, since the
  * portal leaves the subtree that sets `dir`.
  */
-export const SelectPositioner: ForwardRefExoticComponent<
-  SelectPositionerProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, SelectPositionerProps>(function SelectPositioner(
-  { className, sideOffset = 6, align = "start", alignItemWithTrigger, children, ...props },
-  ref,
-) {
+export function SelectPositioner({
+  className,
+  sideOffset = 6,
+  align = "start",
+  alignItemWithTrigger,
+  children,
+  ...props
+}: SelectPositionerProps): ReactElement {
   const direction = useDirection();
   const { multiple } = useContext(SelectContext);
   const overlay = alignItemWithTrigger ?? !multiple;
   const placed = useMemo(() => ({ overlay }), [overlay]);
   return (
     <BaseSelect.Positioner
-      ref={ref}
-      className={withClassName(cls.positioner, className)}
+      data-slot="select-positioner"
+      dir={direction}
+      {...props}
+      className={cn(selectSlots.positioner, className)}
       sideOffset={sideOffset}
       align={align}
       alignItemWithTrigger={overlay}
-      dir={direction}
-      {...props}
     >
       <PlacedContext.Provider value={placed}>{children}</PlacedContext.Provider>
     </BaseSelect.Positioner>
   );
-});
+}
 
-export type SelectScrollUpArrowProps = Omit<BaseSelect.ScrollUpArrow.Props, "ref">;
+export interface SelectScrollUpArrowProps
+  extends Omit<BaseSelect.ScrollUpArrow.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** Shows while the list has more above; the pointer resting on it scrolls. */
-export const SelectScrollUpArrow: ForwardRefExoticComponent<
-  SelectScrollUpArrowProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, SelectScrollUpArrowProps>(function SelectScrollUpArrow(
-  { className, children = glyph("up"), ...props },
-  ref,
-) {
+export function SelectScrollUpArrow({
+  className,
+  children = glyph("up"),
+  ...props
+}: SelectScrollUpArrowProps): ReactElement {
   return (
     <BaseSelect.ScrollUpArrow
-      ref={ref}
-      className={withClassName(cls.scrollUpArrow, className)}
+      data-slot="select-scroll-up-arrow"
       {...props}
+      className={cn(selectSlots.scrollUpArrow, className)}
     >
       {children}
     </BaseSelect.ScrollUpArrow>
   );
-});
+}
 
-export type SelectScrollDownArrowProps = Omit<BaseSelect.ScrollDownArrow.Props, "ref">;
+export interface SelectScrollDownArrowProps
+  extends Omit<BaseSelect.ScrollDownArrow.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** Shows while the list has more below; the pointer resting on it scrolls. */
-export const SelectScrollDownArrow: ForwardRefExoticComponent<
-  SelectScrollDownArrowProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, SelectScrollDownArrowProps>(function SelectScrollDownArrow(
-  { className, children = glyph("down"), ...props },
-  ref,
-) {
+export function SelectScrollDownArrow({
+  className,
+  children = glyph("down"),
+  ...props
+}: SelectScrollDownArrowProps): ReactElement {
   return (
     <BaseSelect.ScrollDownArrow
-      ref={ref}
-      className={withClassName(cls.scrollDownArrow, className)}
+      data-slot="select-scroll-down-arrow"
       {...props}
+      className={cn(selectSlots.scrollDownArrow, className)}
     >
       {children}
     </BaseSelect.ScrollDownArrow>
   );
-});
+}
 
-export type SelectListProps = Omit<BaseSelect.List.Props, "ref">;
+export interface SelectListProps extends Omit<BaseSelect.List.Props, "className"> {
+  className?: string | undefined;
+}
 
 /**
  * The scrolling list, which holds the Glide highlight so it scrolls with the items. Glide lights
  * the item nearest the pointer; the keyboard's highlight (focus) moves it too.
  */
-export const SelectList: ForwardRefExoticComponent<
-  SelectListProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, SelectListProps>(function SelectList(
-  { className, onFocus, children, ...props },
+export function SelectList({
+  className,
+  onFocus,
+  children,
   ref,
-) {
+  ...props
+}: SelectListProps): ReactElement {
   const glide = useGlide<HTMLDivElement>({ axis: "y", items: ITEMS });
-  const { ref: glideRef, setActive } = glide;
-  const setRef = useCallback(
-    (el: HTMLDivElement | null) => {
-      glideRef(el);
-      if (typeof ref === "function") ref(el);
-      else if (ref) ref.current = el;
-    },
-    [glideRef, ref],
-  );
+  const merged = useMergedRefs(glide.ref, ref);
   const follow = (event: Parameters<NonNullable<SelectListProps["onFocus"]>>[0]) => {
     onFocus?.(event);
     const item = event.target as HTMLElement;
     // Base UI focuses a disabled item under the pointer too; Glide passes those by.
-    if (item.matches(ITEMS) && !item.matches("[data-disabled]:hover")) setActive(item);
+    if (item.matches(ITEMS) && !item.matches("[data-disabled]:hover")) glide.setActive(item);
   };
   return (
     <BaseSelect.List
-      ref={setRef}
-      className={withClassName(cls.list, className)}
+      data-slot="select-list"
       onFocus={follow}
       {...props}
+      ref={merged}
+      className={cn(selectSlots.list, className)}
     >
       <GlideHighlight glide={glide} />
       {children}
     </BaseSelect.List>
   );
-});
+}
 
-export type SelectPopupProps = Omit<BaseSelect.Popup.Props, "ref">;
+export interface SelectPopupProps extends Omit<BaseSelect.Popup.Props, "className"> {
+  className?: string | undefined;
+}
 
 /**
  * The panel with the popup shadow. Without a Positioner around it, it draws a Portal and a
  * Positioner; without a List directly inside it, a List and the scroll arrows around its children.
  */
-export const SelectPopup: ForwardRefExoticComponent<
-  SelectPopupProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, SelectPopupProps>(function SelectPopup(
-  { className, children, ...props },
+export function SelectPopup({
+  className,
+  children,
   ref,
-) {
+  ...props
+}: SelectPopupProps): ReactElement {
   const { size, instant, modal, open, multiple } = useContext(SelectContext);
   const placed = useContext(PlacedContext);
   const [self, setSelf] = useState<HTMLDivElement | null>(null);
@@ -373,21 +374,15 @@ export const SelectPopup: ForwardRefExoticComponent<
   // scroll; this lock takes that over, so the page is not drawn again.
   const overlay = placed ? placed.overlay : !multiple;
   useScrollLock(self, open && (modal || overlay));
-  const setRef = useCallback(
-    (el: HTMLDivElement | null) => {
-      setSelf(el);
-      if (typeof ref === "function") ref(el);
-      else if (ref) ref.current = el;
-    },
-    [ref],
-  );
+  const merged = useMergedRefs(setSelf, ref);
   const popup = (
     <BaseSelect.Popup
-      ref={setRef}
-      className={withClassName(cls.popup, className)}
+      data-slot="select-popup"
       data-size={size}
       data-instant={instant ? "" : undefined}
       {...props}
+      ref={merged}
+      className={cn(selectPopupVariants({ size }), className)}
     >
       {holds(children, SelectList) ? (
         children
@@ -406,100 +401,96 @@ export const SelectPopup: ForwardRefExoticComponent<
       <SelectPositioner>{popup}</SelectPositioner>
     </SelectPortal>
   );
-});
+}
 
-export type SelectItemTextProps = Omit<BaseSelect.ItemText.Props, "ref">;
+export interface SelectItemTextProps extends Omit<BaseSelect.ItemText.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** The label: what lands on the trigger's text, and what typing matches. */
-export const SelectItemText: ForwardRefExoticComponent<
-  SelectItemTextProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, SelectItemTextProps>(function SelectItemText(
-  { className, ...props },
-  ref,
-) {
+export function SelectItemText({ className, ...props }: SelectItemTextProps): ReactElement {
   return (
-    <BaseSelect.ItemText ref={ref} className={withClassName(cls.itemText, className)} {...props} />
+    <BaseSelect.ItemText
+      data-slot="select-item-text"
+      {...props}
+      className={cn(selectSlots.itemText, className)}
+    />
   );
-});
+}
 
-export type SelectItemIndicatorProps = Omit<BaseSelect.ItemIndicator.Props, "ref">;
+export interface SelectItemIndicatorProps
+  extends Omit<BaseSelect.ItemIndicator.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** A check, icon-sized. It keeps its room while unselected, so labels stay in line. */
-export const SelectItemIndicator: ForwardRefExoticComponent<
-  SelectItemIndicatorProps & RefAttributes<HTMLSpanElement>
-> = forwardRef<HTMLSpanElement, SelectItemIndicatorProps>(function SelectItemIndicator(
-  { className, keepMounted = true, children = glyph("check"), ...props },
-  ref,
-) {
+export function SelectItemIndicator({
+  className,
+  keepMounted = true,
+  children = glyph("check"),
+  ...props
+}: SelectItemIndicatorProps): ReactElement {
   return (
     <BaseSelect.ItemIndicator
-      ref={ref}
-      className={withClassName(cls.itemIndicator, className)}
-      keepMounted={keepMounted}
+      data-slot="select-item-indicator"
       {...props}
+      className={cn(selectSlots.itemIndicator, className)}
+      keepMounted={keepMounted}
     >
       {children}
     </BaseSelect.ItemIndicator>
   );
-});
+}
 
-export type SelectItemProps = Omit<BaseSelect.Item.Props, "ref">;
+export interface SelectItemProps extends Omit<BaseSelect.Item.Props, "className"> {
+  className?: string | undefined;
+}
 
 /**
  * An option. Plain children go in an ItemText, then an ItemIndicator at the end, where the
  * trigger's icon is; explicit parts stay in your order.
  */
-export const SelectItem: ForwardRefExoticComponent<SelectItemProps & RefAttributes<HTMLElement>> =
-  forwardRef<HTMLElement, SelectItemProps>(function SelectItem(
-    { className, children, ...props },
-    ref,
-  ) {
-    return (
-      <BaseSelect.Item ref={ref} className={withClassName(cls.item, className)} {...props}>
-        {holds(children, SelectItemText, SelectItemIndicator) ? (
-          children
-        ) : (
-          <>
-            <SelectItemText>{children}</SelectItemText>
-            <SelectItemIndicator />
-          </>
-        )}
-      </BaseSelect.Item>
-    );
-  });
+export function SelectItem({ className, children, ...props }: SelectItemProps): ReactElement {
+  return (
+    <BaseSelect.Item data-slot="select-item" {...props} className={cn(selectSlots.item, className)}>
+      {holds(children, SelectItemText, SelectItemIndicator) ? (
+        children
+      ) : (
+        <>
+          <SelectItemText>{children}</SelectItemText>
+          <SelectItemIndicator />
+        </>
+      )}
+    </BaseSelect.Item>
+  );
+}
 
-export type SelectGroupLabelProps = Omit<BaseSelect.GroupLabel.Props, "ref">;
+export interface SelectGroupLabelProps extends Omit<BaseSelect.GroupLabel.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** A group's name, small and muted; it labels the group for assistive technology too. */
-export const SelectGroupLabel: ForwardRefExoticComponent<
-  SelectGroupLabelProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, SelectGroupLabelProps>(function SelectGroupLabel(
-  { className, ...props },
-  ref,
-) {
+export function SelectGroupLabel({ className, ...props }: SelectGroupLabelProps): ReactElement {
   return (
     <BaseSelect.GroupLabel
-      ref={ref}
-      className={withClassName(cls.groupLabel, className)}
+      data-slot="select-group-label"
       {...props}
+      className={cn(selectSlots.groupLabel, className)}
     />
   );
-});
+}
 
-export type SelectSeparatorProps = Omit<BaseSelect.Separator.Props, "ref">;
+export interface SelectSeparatorProps extends Omit<BaseSelect.Separator.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** A hairline between groups. */
-export const SelectSeparator: ForwardRefExoticComponent<
-  SelectSeparatorProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, SelectSeparatorProps>(function SelectSeparator(
-  { className, ...props },
-  ref,
-) {
+export function SelectSeparator({ className, ...props }: SelectSeparatorProps): ReactElement {
   return (
     <BaseSelect.Separator
-      ref={ref}
-      className={withClassName(cls.separator, className)}
+      data-slot="select-separator"
       {...props}
+      className={cn(selectSlots.separator, className)}
     />
   );
-});
+}

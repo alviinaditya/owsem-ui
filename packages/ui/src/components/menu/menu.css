@@ -55,11 +55,11 @@
     overscroll-behavior: contain;
   }
 
-  .ow-menu__popup[data-size="sm"] {
+  .ow-menu__popup--sm {
     font-size: 0.8125rem;
   }
 
-  .ow-menu__popup[data-size="lg"] {
+  .ow-menu__popup--lg {
     font-size: 1rem;
   }
 

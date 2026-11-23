@@ -16,8 +16,8 @@ export type {
   SelectScrollDownArrowProps,
   SelectScrollUpArrowProps,
   SelectSeparatorProps,
-  SelectSize,
   SelectTriggerProps,
   SelectValueProps,
 } from "./select";
 export * as Select from "./select.parts";
+export type { SelectSize } from "./select-variants";

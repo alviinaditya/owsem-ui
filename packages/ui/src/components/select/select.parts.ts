@@ -1,4 +1,4 @@
-// No "use client" here: the namespace object must be readable from Server Components (FR-5).
+// No "use client" here: the namespace object must be readable from Server Components.
 
 export type {
   SelectArrowProps,
@@ -18,7 +18,6 @@ export type {
   SelectScrollDownArrowProps,
   SelectScrollUpArrowProps,
   SelectSeparatorProps,
-  SelectSize,
   SelectTriggerProps,
   SelectValueProps,
 } from "./select";
@@ -43,3 +42,4 @@ export {
   SelectTrigger as Trigger,
   SelectValue as Value,
 } from "./select";
+export type { SelectSize } from "./select-variants";

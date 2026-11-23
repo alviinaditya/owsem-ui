@@ -650,7 +650,7 @@ describe("Select", () => {
       positioner: createRef<HTMLDivElement>(),
       popup: createRef<HTMLDivElement>(),
       list: createRef<HTMLDivElement>(),
-      item: createRef<HTMLElement>(),
+      item: createRef<HTMLDivElement>(),
       text: createRef<HTMLDivElement>(),
       indicator: createRef<HTMLSpanElement>(),
       group: createRef<HTMLDivElement>(),
@@ -662,13 +662,13 @@ describe("Select", () => {
         <Select.Label ref={refs.label} className="l">
           Letter
         </Select.Label>
-        <Select.Trigger ref={refs.trigger} className={() => "t"} style={{ zIndex: 2 }}>
+        <Select.Trigger ref={refs.trigger} className="t" style={{ zIndex: 2 }}>
           <Select.Value ref={refs.value} className="v" />
           <Select.Icon ref={refs.icon} className="c" render={<b />} />
         </Select.Trigger>
         <Select.Portal>
           <Select.Positioner ref={refs.positioner} className="p">
-            <Select.Popup ref={refs.popup} className={() => "u"} style={{ zIndex: 3 }}>
+            <Select.Popup ref={refs.popup} className="u" style={{ zIndex: 3 }}>
               <Select.List ref={refs.list} className="s">
                 <Select.Group ref={refs.group}>
                   <Select.GroupLabel ref={refs.groupLabel} className="g">
@@ -691,14 +691,14 @@ describe("Select", () => {
     );
     await expect.poll(() => refs.popup.current).not.toBeNull();
     expect(refs.label.current?.className).toBe("ow-select__label l");
-    expect(refs.trigger.current?.className).toBe("ow-select__trigger t");
+    expect(refs.trigger.current?.className).toBe("ow-select__trigger ow-select__trigger--lg t");
     expect(refs.trigger.current?.style.zIndex).toBe("2");
     expect(refs.trigger.current?.dataset.size).toBe("lg");
     expect(refs.value.current?.className).toBe("ow-select__value v");
     expect(refs.icon.current?.className).toBe("ow-select__icon c");
     expect(refs.icon.current?.tagName).toBe("B");
     expect(refs.positioner.current?.className).toBe("ow-select__positioner p");
-    expect(refs.popup.current?.className).toBe("ow-select__popup u");
+    expect(refs.popup.current?.className).toBe("ow-select__popup ow-select__popup--lg u");
     expect(refs.popup.current?.style.zIndex).toBe("3");
     expect(refs.popup.current?.dataset.size).toBe("lg");
     expect(refs.list.current?.classList.contains("ow-select__list")).toBe(true);
@@ -1103,4 +1103,65 @@ describe("Select", () => {
     await settle();
     expect(await measureIdle()).toEqual({ rafCalls: 0, runningAnimations: [] });
   });
+});
+
+test("every part has its data-slot", async () => {
+  await render(
+    <Select.Root defaultOpen defaultValue="a">
+      <Select.Label>Letter</Select.Label>
+      <Select.Trigger />
+      <Select.Portal>
+        <Select.Positioner>
+          <Select.Popup>
+            <Select.ScrollUpArrow keepMounted />
+            <Select.List>
+              <Select.Group>
+                <Select.GroupLabel>Group</Select.GroupLabel>
+                <Select.Item value="a">A</Select.Item>
+              </Select.Group>
+              <Select.Separator />
+              <Select.Item value="b">B</Select.Item>
+            </Select.List>
+            <Select.ScrollDownArrow keepMounted />
+          </Select.Popup>
+        </Select.Positioner>
+      </Select.Portal>
+    </Select.Root>,
+  );
+  await expect.poll(() => document.querySelector('[data-slot="select-popup"]')).not.toBeNull();
+  const slots = [...document.querySelectorAll('[data-slot^="select"]')].map((el) =>
+    el.getAttribute("data-slot"),
+  );
+  expect(slots).toEqual([
+    "select-label",
+    "select-trigger",
+    "select-value",
+    "select-icon",
+    "select-portal",
+    "select-backdrop",
+    "select-positioner",
+    "select-popup",
+    "select-scroll-up-arrow",
+    "select-list",
+    "select-group-label",
+    "select-item",
+    "select-item-text",
+    "select-item-indicator",
+    "select-separator",
+    "select-item",
+    "select-item-text",
+    "select-item-indicator",
+    "select-scroll-down-arrow",
+  ]);
+});
+
+test("a trigger rendered by an outer part keeps the outer data-size", async () => {
+  const screen = await render(
+    <Select.Root size="md">
+      <Select.Trigger data-size="lg" aria-label="Letter" />
+    </Select.Root>,
+  );
+  const trigger = screen.container.querySelector('[data-slot="select-trigger"]');
+  expect(trigger?.getAttribute("data-size")).toBe("lg");
+  expect(trigger?.className).toBe("ow-select__trigger ow-select__trigger--lg");
 });

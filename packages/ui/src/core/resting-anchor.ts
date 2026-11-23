@@ -1,4 +1,5 @@
 import { type Ref, type RefCallback, useCallback, useRef } from "react";
+import { useMergedRefs } from "./merge-refs";
 
 /** A box Base UI measures in place of the trigger; scroll and resize follow the trigger. */
 export interface RestingAnchor {
@@ -7,7 +8,7 @@ export interface RestingAnchor {
 }
 
 /**
- * A popup's anchor at its trigger's resting box. A press scales the trigger (DP-4), and the popup
+ * A popup's anchor at its trigger's resting box. A press scales the trigger, and the popup
  * opens while it is still settling: placed from the pressed box, it lands a device pixel off, then
  * jumps when Base UI measures again as the trigger grows back. This anchor undoes the trigger's own
  * scale and translate, so every measure gives the box it rests at.
@@ -64,14 +65,10 @@ export function useRestingAnchor<T extends Element>(
   forwarded: Ref<T> | undefined,
 ): { ref: RefCallback<T>; anchor: () => RestingAnchor | null } {
   const own = useRef<T | null>(null);
-  const ref: RefCallback<T> = useCallback(
-    (node) => {
-      own.current = node;
-      if (typeof forwarded === "function") forwarded(node);
-      else if (forwarded) forwarded.current = node;
-    },
-    [forwarded],
-  );
+  const track = useCallback((node: T | null) => {
+    own.current = node;
+  }, []);
+  const ref = useMergedRefs(track, forwarded);
   const anchor = useCallback((): RestingAnchor | null => {
     const trigger = own.current && findTrigger(own.current);
     if (!trigger) return null;

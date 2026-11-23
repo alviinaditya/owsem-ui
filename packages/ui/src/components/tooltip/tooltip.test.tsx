@@ -192,7 +192,7 @@ describe("Tooltip", () => {
         <Tooltip.Trigger aria-label="Bold">B</Tooltip.Trigger>
         <Tooltip.Portal>
           <Tooltip.Positioner ref={refs.positioner} className="p" style={{ zIndex: 3 }}>
-            <Tooltip.Popup ref={refs.popup} className={() => "u"} render={<section />}>
+            <Tooltip.Popup ref={refs.popup} className="u" render={<section />}>
               <Tooltip.Arrow ref={refs.arrow} className="a" />
               Bold
             </Tooltip.Popup>
@@ -342,4 +342,27 @@ describe("Tooltip", () => {
     await settle();
     expect(await measureIdle(1000)).toEqual({ rafCalls: 0, runningAnimations: [] });
   });
+});
+
+test("every part has its data-slot", async () => {
+  await render(
+    <Tooltip.Provider>
+      <Tooltip.Root defaultOpen>
+        <Tooltip.Trigger>Open</Tooltip.Trigger>
+        <Tooltip.Portal>
+          <Tooltip.Positioner>
+            <Tooltip.Popup>
+              <Tooltip.Arrow />
+              Tip
+            </Tooltip.Popup>
+          </Tooltip.Positioner>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+    </Tooltip.Provider>,
+  );
+  await expect.poll(() => document.querySelector('[data-slot="tooltip-popup"]')).not.toBeNull();
+  const slots = [...document.querySelectorAll('[data-slot^="tooltip"]')].map((el) =>
+    el.getAttribute("data-slot"),
+  );
+  expect(slots).toEqual(["tooltip-positioner", "tooltip-popup", "tooltip-arrow"]);
 });

@@ -2,46 +2,22 @@
 
 import { useDirection } from "@base-ui/react/direction-provider";
 import { Menu as BaseMenu } from "@base-ui/react/menu";
-import {
-  createContext,
-  type ForwardRefExoticComponent,
-  forwardRef,
-  type JSX,
-  type RefAttributes,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import { withClassName } from "../../core/class-name";
+import { createContext, type ReactElement, useContext, useEffect, useMemo, useState } from "react";
+import { cn } from "../../core/cn";
 import { GlideHighlight, useGlide } from "../../core/glide/use-glide";
+import { useMergedRefs } from "../../core/merge-refs";
 import { useRestingAnchor } from "../../core/resting-anchor";
 import { trackPointerType, useScrollLock } from "../../core/scroll-lock";
+import { type MenuVariantProps, menuPopupVariants, menuSlots } from "./menu-variants";
 import "./menu.css";
-
-const cls = {
-  backdrop: "ow-menu__backdrop",
-  positioner: "ow-menu__positioner",
-  popup: "ow-menu__popup",
-  viewport: "ow-menu__viewport",
-  item: "ow-menu__item",
-  indicator: "ow-menu__indicator",
-  chevron: "ow-menu__chevron",
-  groupLabel: "ow-menu__group-label",
-  separator: "ow-menu__separator",
-} as const;
 
 /** Every kind of item Glide lights: plain, link, checkbox, radio, and submenu triggers. */
 const ITEMS = '[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]';
-
-export type MenuSize = "sm" | "md" | "lg";
 
 // Parts without a look of their own come straight from Base UI.
 
 export type MenuRootProps<Payload = unknown> = BaseMenu.Root.Props<Payload>;
 export type MenuTriggerProps<Payload = unknown> = BaseMenu.Trigger.Props<Payload>;
-export type MenuPortalProps = BaseMenu.Portal.Props;
 export type MenuGroupProps = BaseMenu.Group.Props;
 export type MenuRadioGroupProps = BaseMenu.RadioGroup.Props;
 export type MenuSubmenuRootProps = BaseMenu.SubmenuRoot.Props;
@@ -60,7 +36,7 @@ export function MenuRoot<Payload = unknown>({
   modal = true,
   onOpenChange,
   ...props
-}: MenuRootProps<Payload>): JSX.Element {
+}: MenuRootProps<Payload>): ReactElement {
   const [hover, setHover] = useState(false);
   // A kept-mounted popup outlives the menu's opening, so the lock follows `open`.
   const [opened, setOpened] = useState(props.defaultOpen ?? false);
@@ -83,7 +59,7 @@ export function MenuRoot<Payload = unknown>({
 }
 
 /** A submenu: never modal of its own, as in Base UI; the menu it belongs to holds the page. */
-export function MenuSubmenuRoot(props: MenuSubmenuRootProps): JSX.Element {
+export function MenuSubmenuRoot(props: MenuSubmenuRootProps): ReactElement {
   return (
     <ModalContext.Provider value={NOT_MODAL}>
       <BaseMenu.SubmenuRoot {...props} />
@@ -94,21 +70,22 @@ export function MenuSubmenuRoot(props: MenuSubmenuRootProps): JSX.Element {
 /** The button that opens the menu; pass your button to `render`. */
 export const MenuTrigger: typeof BaseMenu.Trigger = BaseMenu.Trigger;
 
+export interface MenuPortalProps extends Omit<BaseMenu.Portal.Props, "className"> {
+  className?: string | undefined;
+}
+
 /** Base UI's Portal; for a modal menu it puts a clear backdrop under the popup for outside presses. */
-export const MenuPortal: ForwardRefExoticComponent<
-  Omit<MenuPortalProps, "ref"> & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, Omit<MenuPortalProps, "ref">>(function MenuPortal(
-  { children, ...props },
-  ref,
-) {
+export function MenuPortal({ children, ...props }: MenuPortalProps): ReactElement {
   const { modal } = useContext(ModalContext);
   return (
-    <BaseMenu.Portal ref={ref} {...props}>
-      {modal ? <BaseMenu.Backdrop className={cls.backdrop} /> : null}
+    <BaseMenu.Portal data-slot="menu-portal" {...props}>
+      {modal ? (
+        <BaseMenu.Backdrop data-slot="menu-backdrop" className={menuSlots.backdrop} />
+      ) : null}
       {children}
     </BaseMenu.Portal>
   );
-});
+}
 export const MenuGroup: typeof BaseMenu.Group = BaseMenu.Group;
 export const MenuRadioGroup: typeof BaseMenu.RadioGroup = BaseMenu.RadioGroup;
 export const MenuViewport: typeof BaseMenu.Viewport = BaseMenu.Viewport;
@@ -122,7 +99,9 @@ const PAD = 4;
 const lineUp: Offset = ({ side, align }) =>
   align === "start" && side !== "top" && side !== "bottom" ? -PAD : 0;
 
-export type MenuPositionerProps = Omit<BaseMenu.Positioner.Props, "ref">;
+export interface MenuPositionerProps extends Omit<BaseMenu.Positioner.Props, "className"> {
+  className?: string | undefined;
+}
 
 /**
  * Places the menu 6px from its trigger; a submenu beside its item, first items in line. It takes
@@ -130,122 +109,130 @@ export type MenuPositionerProps = Omit<BaseMenu.Positioner.Props, "ref">;
  * It anchors to the trigger's resting box, not its pressed one; a context menu's Positioner must
  * not, since its anchor is the pointer.
  */
-export const MenuPositioner: ForwardRefExoticComponent<
-  MenuPositionerProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, MenuPositionerProps>(function MenuPositioner(
-  { className, sideOffset = 6, alignOffset = lineUp, ...props },
-  forwarded,
-) {
+export function MenuPositioner({
+  className,
+  sideOffset = 6,
+  alignOffset = lineUp,
+  ref,
+  ...props
+}: MenuPositionerProps): ReactElement {
   const direction = useDirection();
-  const { ref, anchor } = useRestingAnchor(forwarded);
+  const resting = useRestingAnchor(ref);
   return (
     <BaseMenu.Positioner
-      ref={ref}
-      anchor={anchor}
-      className={withClassName(cls.positioner, className)}
+      data-slot="menu-positioner"
+      dir={direction}
+      anchor={resting.anchor}
+      {...props}
+      ref={resting.ref}
+      className={cn(menuSlots.positioner, className)}
       sideOffset={sideOffset}
       alignOffset={alignOffset}
-      dir={direction}
-      {...props}
     />
   );
-});
+}
 
-export interface MenuPopupProps extends Omit<BaseMenu.Popup.Props, "ref"> {
-  /** The items' type scale: 13, 14, or 16px. @default "md" */
-  size?: MenuSize | undefined;
+export interface MenuPopupProps extends Omit<BaseMenu.Popup.Props, "className">, MenuVariantProps {
+  className?: string | undefined;
 }
 
 /**
- * The panel with the popup shadow. It clips; its items scroll in an inner viewport. Glide lights the item nearest the pointer; the keyboard's
- * highlight (focus) moves it too.
+ * The panel with the popup shadow. It clips; its items scroll in an inner viewport. Glide lights
+ * the item nearest the pointer; the keyboard's highlight (focus) moves it too.
  */
-export const MenuPopup: ForwardRefExoticComponent<MenuPopupProps & RefAttributes<HTMLDivElement>> =
-  forwardRef<HTMLDivElement, MenuPopupProps>(function MenuPopup(
-    { className, size = "md", onFocus, children, ...props },
-    ref,
-  ) {
-    const glide = useGlide<HTMLDivElement>({ axis: "y", items: ITEMS });
-    const { ref: viewportRef, setActive } = glide;
-    const { modal, hover, open } = useContext(ModalContext);
-    const [self, setSelf] = useState<HTMLDivElement | null>(null);
-    useScrollLock(self, modal && !hover && open);
-    const setRef = useCallback(
-      (el: HTMLDivElement | null) => {
-        setSelf(el);
-        if (typeof ref === "function") ref(el);
-        else if (ref) ref.current = el;
-      },
-      [ref],
-    );
-    const follow = (event: Parameters<NonNullable<MenuPopupProps["onFocus"]>>[0]) => {
-      onFocus?.(event);
-      const item = event.target as HTMLElement;
-      // A submenu's focus bubbles here through React's tree; its items are not this popup's.
-      if (item.matches(ITEMS) && event.currentTarget.contains(item)) setActive(item);
-    };
-    return (
-      <BaseMenu.Popup
-        ref={setRef}
-        className={withClassName(cls.popup, className)}
-        data-size={size}
-        onFocus={follow}
-        {...props}
-      >
-        {/* The popup only clips, so its rounded corners cut the scrollbar; this scrolls. */}
-        <div ref={viewportRef} className={cls.viewport}>
-          <GlideHighlight glide={glide} />
-          {children}
-        </div>
-      </BaseMenu.Popup>
-    );
-  });
+export function MenuPopup({
+  className,
+  size = "md",
+  onFocus,
+  children,
+  ref,
+  ...props
+}: MenuPopupProps): ReactElement {
+  const glide = useGlide<HTMLDivElement>({ axis: "y", items: ITEMS });
+  const { ref: viewportRef, setActive } = glide;
+  const { modal, hover, open } = useContext(ModalContext);
+  const [self, setSelf] = useState<HTMLDivElement | null>(null);
+  useScrollLock(self, modal && !hover && open);
+  const merged = useMergedRefs(setSelf, ref);
+  const follow = (event: Parameters<NonNullable<MenuPopupProps["onFocus"]>>[0]) => {
+    onFocus?.(event);
+    const item = event.target as HTMLElement;
+    // A submenu's focus bubbles here through React's tree; its items are not this popup's.
+    if (item.matches(ITEMS) && event.currentTarget.contains(item)) setActive(item);
+  };
+  return (
+    <BaseMenu.Popup
+      data-slot="menu-popup"
+      data-size={size}
+      onFocus={follow}
+      {...props}
+      ref={merged}
+      className={cn(menuPopupVariants({ size }), className)}
+    >
+      {/* The popup only clips, so its rounded corners cut the scrollbar; this scrolls. */}
+      <div data-slot="menu-viewport" ref={viewportRef} className={menuSlots.viewport}>
+        <GlideHighlight glide={glide} />
+        {children}
+      </div>
+    </BaseMenu.Popup>
+  );
+}
 
-export type MenuItemProps = Omit<BaseMenu.Item.Props, "ref">;
+export interface MenuItemProps extends Omit<BaseMenu.Item.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** An action. Put an icon (`svg`) first and a shortcut (`kbd`) last; both are sized for you. */
-export const MenuItem: ForwardRefExoticComponent<MenuItemProps & RefAttributes<HTMLDivElement>> =
-  forwardRef<HTMLDivElement, MenuItemProps>(function MenuItem({ className, ...props }, ref) {
-    return <BaseMenu.Item ref={ref} className={withClassName(cls.item, className)} {...props} />;
-  });
+export function MenuItem({ className, ...props }: MenuItemProps): ReactElement {
+  return (
+    <BaseMenu.Item data-slot="menu-item" {...props} className={cn(menuSlots.item, className)} />
+  );
+}
 
-export type MenuLinkItemProps = Omit<BaseMenu.LinkItem.Props, "ref">;
+export interface MenuLinkItemProps extends Omit<BaseMenu.LinkItem.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** A link that looks like an item; `render` swaps in a router link. */
-export const MenuLinkItem: ForwardRefExoticComponent<
-  MenuLinkItemProps & RefAttributes<HTMLAnchorElement>
-> = forwardRef<HTMLAnchorElement, MenuLinkItemProps>(function MenuLinkItem(
-  { className, ...props },
-  ref,
-) {
-  return <BaseMenu.LinkItem ref={ref} className={withClassName(cls.item, className)} {...props} />;
-});
+export function MenuLinkItem({ className, ...props }: MenuLinkItemProps): ReactElement {
+  return (
+    <BaseMenu.LinkItem
+      data-slot="menu-link-item"
+      {...props}
+      className={cn(menuSlots.item, className)}
+    />
+  );
+}
 
-export type MenuCheckboxItemProps = Omit<BaseMenu.CheckboxItem.Props, "ref">;
+export interface MenuCheckboxItemProps extends Omit<BaseMenu.CheckboxItem.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** An on/off item; put a CheckboxItemIndicator first. */
-export const MenuCheckboxItem: ForwardRefExoticComponent<
-  MenuCheckboxItemProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, MenuCheckboxItemProps>(function MenuCheckboxItem(
-  { className, ...props },
-  ref,
-) {
+export function MenuCheckboxItem({ className, ...props }: MenuCheckboxItemProps): ReactElement {
   return (
-    <BaseMenu.CheckboxItem ref={ref} className={withClassName(cls.item, className)} {...props} />
+    <BaseMenu.CheckboxItem
+      data-slot="menu-checkbox-item"
+      {...props}
+      className={cn(menuSlots.item, className)}
+    />
   );
-});
+}
 
-export type MenuRadioItemProps = Omit<BaseMenu.RadioItem.Props, "ref">;
+export interface MenuRadioItemProps extends Omit<BaseMenu.RadioItem.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** One choice in a RadioGroup; put a RadioItemIndicator first. */
-export const MenuRadioItem: ForwardRefExoticComponent<
-  MenuRadioItemProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, MenuRadioItemProps>(function MenuRadioItem(
-  { className, ...props },
-  ref,
-) {
-  return <BaseMenu.RadioItem ref={ref} className={withClassName(cls.item, className)} {...props} />;
-});
+export function MenuRadioItem({ className, ...props }: MenuRadioItemProps): ReactElement {
+  return (
+    <BaseMenu.RadioItem
+      data-slot="menu-radio-item"
+      {...props}
+      className={cn(menuSlots.item, className)}
+    />
+  );
+}
 
 // Drawn for OwsemUI; they follow the text color, forced colors included.
 const glyph = (shape: "check" | "dot" | "chevron") => (
@@ -264,93 +251,104 @@ const glyph = (shape: "check" | "dot" | "chevron") => (
   </svg>
 );
 
-export type MenuCheckboxItemIndicatorProps = Omit<BaseMenu.CheckboxItemIndicator.Props, "ref">;
+export interface MenuCheckboxItemIndicatorProps
+  extends Omit<BaseMenu.CheckboxItemIndicator.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** A check, icon-sized. It keeps its room while unchecked, so labels stay in line. */
-export const MenuCheckboxItemIndicator: ForwardRefExoticComponent<
-  MenuCheckboxItemIndicatorProps & RefAttributes<HTMLSpanElement>
-> = forwardRef<HTMLSpanElement, MenuCheckboxItemIndicatorProps>(function MenuCheckboxItemIndicator(
-  { className, keepMounted = true, children = glyph("check"), ...props },
-  ref,
-) {
+export function MenuCheckboxItemIndicator({
+  className,
+  keepMounted = true,
+  children = glyph("check"),
+  ...props
+}: MenuCheckboxItemIndicatorProps): ReactElement {
   return (
     <BaseMenu.CheckboxItemIndicator
-      ref={ref}
-      className={withClassName(cls.indicator, className)}
-      keepMounted={keepMounted}
+      data-slot="menu-checkbox-item-indicator"
       {...props}
+      className={cn(menuSlots.indicator, className)}
+      keepMounted={keepMounted}
     >
       {children}
     </BaseMenu.CheckboxItemIndicator>
   );
-});
+}
 
-export type MenuRadioItemIndicatorProps = Omit<BaseMenu.RadioItemIndicator.Props, "ref">;
+export interface MenuRadioItemIndicatorProps
+  extends Omit<BaseMenu.RadioItemIndicator.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** A dot, icon-sized. It keeps its room while unchecked, so labels stay in line. */
-export const MenuRadioItemIndicator: ForwardRefExoticComponent<
-  MenuRadioItemIndicatorProps & RefAttributes<HTMLSpanElement>
-> = forwardRef<HTMLSpanElement, MenuRadioItemIndicatorProps>(function MenuRadioItemIndicator(
-  { className, keepMounted = true, children = glyph("dot"), ...props },
-  ref,
-) {
+export function MenuRadioItemIndicator({
+  className,
+  keepMounted = true,
+  children = glyph("dot"),
+  ...props
+}: MenuRadioItemIndicatorProps): ReactElement {
   return (
     <BaseMenu.RadioItemIndicator
-      ref={ref}
-      className={withClassName(cls.indicator, className)}
-      keepMounted={keepMounted}
+      data-slot="menu-radio-item-indicator"
       {...props}
+      className={cn(menuSlots.indicator, className)}
+      keepMounted={keepMounted}
     >
       {children}
     </BaseMenu.RadioItemIndicator>
   );
-});
+}
 
-export type MenuSubmenuTriggerProps = Omit<BaseMenu.SubmenuTrigger.Props, "ref">;
+export interface MenuSubmenuTriggerProps extends Omit<BaseMenu.SubmenuTrigger.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** An item that opens a submenu, with a chevron at its end. */
-export const MenuSubmenuTrigger: ForwardRefExoticComponent<
-  MenuSubmenuTriggerProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, MenuSubmenuTriggerProps>(function MenuSubmenuTrigger(
-  { className, children, ...props },
-  ref,
-) {
+export function MenuSubmenuTrigger({
+  className,
+  children,
+  ...props
+}: MenuSubmenuTriggerProps): ReactElement {
   return (
-    <BaseMenu.SubmenuTrigger ref={ref} className={withClassName(cls.item, className)} {...props}>
+    <BaseMenu.SubmenuTrigger
+      data-slot="menu-submenu-trigger"
+      {...props}
+      className={cn(menuSlots.item, className)}
+    >
       {children}
-      <span className={cls.chevron}>{glyph("chevron")}</span>
+      <span data-slot="menu-chevron" className={menuSlots.chevron}>
+        {glyph("chevron")}
+      </span>
     </BaseMenu.SubmenuTrigger>
   );
-});
+}
 
-export type MenuGroupLabelProps = Omit<BaseMenu.GroupLabel.Props, "ref">;
+export interface MenuGroupLabelProps extends Omit<BaseMenu.GroupLabel.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** A group's name, small and muted; it labels the group for assistive technology too. */
-export const MenuGroupLabel: ForwardRefExoticComponent<
-  MenuGroupLabelProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, MenuGroupLabelProps>(function MenuGroupLabel(
-  { className, ...props },
-  ref,
-) {
+export function MenuGroupLabel({ className, ...props }: MenuGroupLabelProps): ReactElement {
   return (
     <BaseMenu.GroupLabel
-      ref={ref}
-      className={withClassName(cls.groupLabel, className)}
+      data-slot="menu-group-label"
       {...props}
+      className={cn(menuSlots.groupLabel, className)}
     />
   );
-});
+}
 
-export type MenuSeparatorProps = Omit<BaseMenu.Separator.Props, "ref">;
+export interface MenuSeparatorProps extends Omit<BaseMenu.Separator.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** A hairline between groups. */
-export const MenuSeparator: ForwardRefExoticComponent<
-  MenuSeparatorProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, MenuSeparatorProps>(function MenuSeparator(
-  { className, ...props },
-  ref,
-) {
+export function MenuSeparator({ className, ...props }: MenuSeparatorProps): ReactElement {
   return (
-    <BaseMenu.Separator ref={ref} className={withClassName(cls.separator, className)} {...props} />
+    <BaseMenu.Separator
+      data-slot="menu-separator"
+      {...props}
+      className={cn(menuSlots.separator, className)}
+    />
   );
-});
+}

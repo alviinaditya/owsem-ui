@@ -1,4 +1,4 @@
-// No "use client" here: the namespace object must be readable from Server Components (FR-5).
+// No "use client" here: the namespace object must be readable from Server Components.
 
 export type {
   MenuCheckboxItemIndicatorProps,
@@ -15,7 +15,6 @@ export type {
   MenuRadioItemProps,
   MenuRootProps,
   MenuSeparatorProps,
-  MenuSize,
   MenuSubmenuRootProps,
   MenuSubmenuTriggerProps,
   MenuTriggerProps,
@@ -41,3 +40,4 @@ export {
   MenuTrigger as Trigger,
   MenuViewport as Viewport,
 } from "./menu";
+export type { MenuSize } from "./menu-variants";

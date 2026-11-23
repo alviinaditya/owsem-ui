@@ -533,7 +533,7 @@ describe("Dialog", () => {
         <Dialog.Portal ref={refs.portal} className="o">
           <Dialog.Backdrop ref={refs.backdrop} className="b" style={{ zIndex: 2 }} />
           <Dialog.Viewport ref={refs.viewport} className="v">
-            <Dialog.Popup ref={refs.popup} className={() => "u"} render={<section />}>
+            <Dialog.Popup ref={refs.popup} className="u" render={<section />}>
               <Dialog.Title ref={refs.title} className="t" render={<h3>Title</h3>} />
               <Dialog.Description ref={refs.description} className="d">
                 Text
@@ -881,4 +881,31 @@ describe("Dialog", () => {
     expect(held()).toBe(false);
     expect(pageStyle()).toEqual(before);
   });
+});
+
+test("every part has its data-slot", async () => {
+  await render(
+    <Dialog.Root defaultOpen>
+      <Dialog.Portal>
+        <Dialog.Viewport>
+          <Dialog.Popup>
+            <Dialog.Title>T</Dialog.Title>
+            <Dialog.Description>D</Dialog.Description>
+          </Dialog.Popup>
+        </Dialog.Viewport>
+      </Dialog.Portal>
+    </Dialog.Root>,
+  );
+  await expect.poll(() => document.querySelector('[data-slot="dialog-popup"]')).not.toBeNull();
+  const slots = [...document.querySelectorAll('[data-slot^="dialog"]')].map((el) =>
+    el.getAttribute("data-slot"),
+  );
+  expect(slots).toEqual([
+    "dialog-portal",
+    "dialog-backdrop",
+    "dialog-viewport",
+    "dialog-popup",
+    "dialog-title",
+    "dialog-description",
+  ]);
 });

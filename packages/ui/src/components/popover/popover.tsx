@@ -2,28 +2,13 @@
 
 import { useDirection } from "@base-ui/react/direction-provider";
 import { Popover as BasePopover } from "@base-ui/react/popover";
-import {
-  createContext,
-  type ForwardRefExoticComponent,
-  forwardRef,
-  type JSX,
-  type RefAttributes,
-  useCallback,
-  useContext,
-  useState,
-} from "react";
-import { withClassName } from "../../core/class-name";
+import { createContext, type ReactElement, useContext, useState } from "react";
+import { cn } from "../../core/cn";
+import { useMergedRefs } from "../../core/merge-refs";
 import { useRestingAnchor } from "../../core/resting-anchor";
 import { useOpenState, useScrollLock } from "../../core/scroll-lock";
+import { popoverSlots } from "./popover-variants";
 import "./popover.css";
-
-const cls = {
-  positioner: "ow-popover__positioner",
-  popup: "ow-popover__popup",
-  arrow: "ow-popover__arrow",
-  title: "ow-popover__title",
-  description: "ow-popover__description",
-} as const;
 
 // Parts without a look of their own come straight from Base UI.
 
@@ -42,7 +27,7 @@ const LockContext = createContext(false);
  * puts back the `overflow` Base UI sets on the page, so its text is not drawn again while the
  * popover is open. Opened by hover or by touch, Base UI's own rules stand.
  */
-export function PopoverRoot<Payload = unknown>(props: PopoverRootProps<Payload>): JSX.Element {
+export function PopoverRoot<Payload = unknown>(props: PopoverRootProps<Payload>): ReactElement {
   const [hover, setHover] = useState(false);
   const { open, onOpenChange } = useOpenState(props);
   return (
@@ -67,96 +52,98 @@ export const PopoverViewport: typeof BasePopover.Viewport = BasePopover.Viewport
 /** Links a Root to triggers placed elsewhere (detached triggers), and opens it from code. */
 export const createPopoverHandle: typeof BasePopover.createHandle = BasePopover.createHandle;
 
-export type PopoverPositionerProps = Omit<BasePopover.Positioner.Props, "ref">;
+export interface PopoverPositionerProps extends Omit<BasePopover.Positioner.Props, "className"> {
+  className?: string | undefined;
+}
 
 /**
  * Places the popover 10px from its trigger, room for the arrow, and keeps the arrow off the
  * rounded corners. It takes the text direction from DirectionProvider, since the portal leaves
- * the subtree that sets `dir` (FR-16), and anchors to the trigger's resting box, not its pressed one.
+ * the subtree that sets `dir`, and anchors to the trigger's resting box, not its pressed one.
  */
-export const PopoverPositioner: ForwardRefExoticComponent<
-  PopoverPositionerProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, PopoverPositionerProps>(function PopoverPositioner(
-  { className, sideOffset = 10, arrowPadding = 12, ...props },
-  forwarded,
-) {
+export function PopoverPositioner({
+  className,
+  sideOffset = 10,
+  arrowPadding = 12,
+  ref,
+  ...props
+}: PopoverPositionerProps): ReactElement {
   const direction = useDirection();
-  const { ref, anchor } = useRestingAnchor(forwarded);
+  const resting = useRestingAnchor(ref);
   return (
     <BasePopover.Positioner
-      ref={ref}
-      className={withClassName(cls.positioner, className)}
+      data-slot="popover-positioner"
+      dir={direction}
+      anchor={resting.anchor}
+      {...props}
+      ref={resting.ref}
+      className={cn(popoverSlots.positioner, className)}
       sideOffset={sideOffset}
       arrowPadding={arrowPadding}
-      dir={direction}
-      anchor={anchor}
-      {...props}
     />
   );
-});
+}
 
-export type PopoverPopupProps = Omit<BasePopover.Popup.Props, "ref">;
+export interface PopoverPopupProps extends Omit<BasePopover.Popup.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** The panel: the panel material with the popup shadow. */
-export const PopoverPopup: ForwardRefExoticComponent<
-  PopoverPopupProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, PopoverPopupProps>(function PopoverPopup(
-  { className, ...props },
-  ref,
-) {
+export function PopoverPopup({ className, ref, ...props }: PopoverPopupProps): ReactElement {
   const [self, setSelf] = useState<HTMLDivElement | null>(null);
   useScrollLock(self, useContext(LockContext));
-  const setRef = useCallback(
-    (el: HTMLDivElement | null) => {
-      setSelf(el);
-      if (typeof ref === "function") ref(el);
-      else if (ref) ref.current = el;
-    },
-    [ref],
-  );
+  const merged = useMergedRefs(setSelf, ref);
   return (
-    <BasePopover.Popup ref={setRef} className={withClassName(cls.popup, className)} {...props} />
-  );
-});
-
-export type PopoverArrowProps = Omit<BasePopover.Arrow.Props, "ref">;
-
-/** An optional arrow toward the trigger, with the panel's edge; Base UI keeps it on the trigger. */
-export const PopoverArrow: ForwardRefExoticComponent<
-  PopoverArrowProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, PopoverArrowProps>(function PopoverArrow(
-  { className, ...props },
-  ref,
-) {
-  return <BasePopover.Arrow ref={ref} className={withClassName(cls.arrow, className)} {...props} />;
-});
-
-export type PopoverTitleProps = Omit<BasePopover.Title.Props, "ref">;
-
-/** The popover's heading; it names the dialog for assistive technology. */
-export const PopoverTitle: ForwardRefExoticComponent<
-  PopoverTitleProps & RefAttributes<HTMLHeadingElement>
-> = forwardRef<HTMLHeadingElement, PopoverTitleProps>(function PopoverTitle(
-  { className, ...props },
-  ref,
-) {
-  return <BasePopover.Title ref={ref} className={withClassName(cls.title, className)} {...props} />;
-});
-
-export type PopoverDescriptionProps = Omit<BasePopover.Description.Props, "ref">;
-
-/** A muted line under the title; it describes the dialog for assistive technology. */
-export const PopoverDescription: ForwardRefExoticComponent<
-  PopoverDescriptionProps & RefAttributes<HTMLParagraphElement>
-> = forwardRef<HTMLParagraphElement, PopoverDescriptionProps>(function PopoverDescription(
-  { className, ...props },
-  ref,
-) {
-  return (
-    <BasePopover.Description
-      ref={ref}
-      className={withClassName(cls.description, className)}
+    <BasePopover.Popup
+      data-slot="popover-popup"
       {...props}
+      ref={merged}
+      className={cn(popoverSlots.popup, className)}
     />
   );
-});
+}
+
+export interface PopoverArrowProps extends Omit<BasePopover.Arrow.Props, "className"> {
+  className?: string | undefined;
+}
+
+/** An optional arrow toward the trigger, with the panel's edge; Base UI keeps it on the trigger. */
+export function PopoverArrow({ className, ...props }: PopoverArrowProps): ReactElement {
+  return (
+    <BasePopover.Arrow
+      data-slot="popover-arrow"
+      {...props}
+      className={cn(popoverSlots.arrow, className)}
+    />
+  );
+}
+
+export interface PopoverTitleProps extends Omit<BasePopover.Title.Props, "className"> {
+  className?: string | undefined;
+}
+
+/** The popover's heading; it names the dialog for assistive technology. */
+export function PopoverTitle({ className, ...props }: PopoverTitleProps): ReactElement {
+  return (
+    <BasePopover.Title
+      data-slot="popover-title"
+      {...props}
+      className={cn(popoverSlots.title, className)}
+    />
+  );
+}
+
+export interface PopoverDescriptionProps extends Omit<BasePopover.Description.Props, "className"> {
+  className?: string | undefined;
+}
+
+/** A muted line under the title; it describes the dialog for assistive technology. */
+export function PopoverDescription({ className, ...props }: PopoverDescriptionProps): ReactElement {
+  return (
+    <BasePopover.Description
+      data-slot="popover-description"
+      {...props}
+      className={cn(popoverSlots.description, className)}
+    />
+  );
+}

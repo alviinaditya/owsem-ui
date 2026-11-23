@@ -394,7 +394,7 @@ describe("Menu", () => {
         <Menu.Trigger>Open</Menu.Trigger>
         <Menu.Portal>
           <Menu.Positioner ref={refs.positioner} className="p">
-            <Menu.Popup ref={refs.popup} className={() => "u"} style={{ zIndex: 3 }}>
+            <Menu.Popup ref={refs.popup} className="u" style={{ zIndex: 3 }}>
               <Menu.Item ref={refs.item} className="i" render={<section />}>
                 One
               </Menu.Item>
@@ -420,7 +420,7 @@ describe("Menu", () => {
     );
     await expect.poll(() => refs.popup.current).not.toBeNull();
     expect(refs.positioner.current?.className).toBe("ow-menu__positioner p");
-    expect(refs.popup.current?.className).toBe("ow-menu__popup u");
+    expect(refs.popup.current?.className).toBe("ow-menu__popup ow-menu__popup--md u");
     expect(refs.popup.current?.style.zIndex).toBe("3");
     expect(refs.popup.current?.dataset.size).toBe("md");
     expect(refs.item.current?.className).toBe("ow-menu__item i");
@@ -678,4 +678,57 @@ describe("Menu", () => {
     await settle();
     expect(await measureIdle()).toEqual({ rafCalls: 0, runningAnimations: [] });
   });
+});
+
+test("every part has its data-slot", async () => {
+  await render(
+    <Menu.Root defaultOpen>
+      <Menu.Trigger>Open</Menu.Trigger>
+      <Menu.Portal>
+        <Menu.Positioner>
+          <Menu.Popup>
+            <Menu.Item>One</Menu.Item>
+            <Menu.LinkItem href="#two">Two</Menu.LinkItem>
+            <Menu.Group>
+              <Menu.GroupLabel>Group</Menu.GroupLabel>
+              <Menu.CheckboxItem checked>
+                <Menu.CheckboxItemIndicator />
+                Three
+              </Menu.CheckboxItem>
+            </Menu.Group>
+            <Menu.RadioGroup value="a">
+              <Menu.RadioItem value="a">
+                <Menu.RadioItemIndicator />A
+              </Menu.RadioItem>
+            </Menu.RadioGroup>
+            <Menu.Separator />
+            <Menu.SubmenuRoot>
+              <Menu.SubmenuTrigger>More</Menu.SubmenuTrigger>
+            </Menu.SubmenuRoot>
+          </Menu.Popup>
+        </Menu.Positioner>
+      </Menu.Portal>
+    </Menu.Root>,
+  );
+  await expect.poll(() => document.querySelector('[data-slot="menu-popup"]')).not.toBeNull();
+  const slots = [...document.querySelectorAll('[data-slot^="menu"]')].map((el) =>
+    el.getAttribute("data-slot"),
+  );
+  expect(slots).toEqual([
+    "menu-portal",
+    "menu-backdrop",
+    "menu-positioner",
+    "menu-popup",
+    "menu-viewport",
+    "menu-item",
+    "menu-link-item",
+    "menu-group-label",
+    "menu-checkbox-item",
+    "menu-checkbox-item-indicator",
+    "menu-radio-item",
+    "menu-radio-item-indicator",
+    "menu-separator",
+    "menu-submenu-trigger",
+    "menu-chevron",
+  ]);
 });

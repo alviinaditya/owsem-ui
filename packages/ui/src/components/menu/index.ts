@@ -13,9 +13,9 @@ export type {
   MenuRadioItemProps,
   MenuRootProps,
   MenuSeparatorProps,
-  MenuSize,
   MenuSubmenuRootProps,
   MenuSubmenuTriggerProps,
   MenuTriggerProps,
 } from "./menu";
 export * as Menu from "./menu.parts";
+export type { MenuSize } from "./menu-variants";

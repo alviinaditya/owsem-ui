@@ -180,7 +180,7 @@ describe("Popover", () => {
         <Popover.Trigger>Open</Popover.Trigger>
         <Popover.Portal>
           <Popover.Positioner ref={refs.positioner} className="p" style={{ zIndex: 3 }}>
-            <Popover.Popup ref={refs.popup} className={() => "u"} render={<section />}>
+            <Popover.Popup ref={refs.popup} className="u" render={<section />}>
               <Popover.Arrow ref={refs.arrow} className="a" />
               <Popover.Title ref={refs.title} className="t" render={<h3>Title</h3>} />
               <Popover.Description ref={refs.description} className="d">
@@ -345,4 +345,32 @@ describe("Popover", () => {
     expect(held()).toBe(false);
     expect(pageStyle()).toEqual(before);
   });
+});
+
+test("every part has its data-slot", async () => {
+  await render(
+    <Popover.Root defaultOpen>
+      <Popover.Trigger>Open</Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Positioner>
+          <Popover.Popup>
+            <Popover.Arrow />
+            <Popover.Title>T</Popover.Title>
+            <Popover.Description>D</Popover.Description>
+          </Popover.Popup>
+        </Popover.Positioner>
+      </Popover.Portal>
+    </Popover.Root>,
+  );
+  await expect.poll(() => document.querySelector('[data-slot="popover-popup"]')).not.toBeNull();
+  const slots = [...document.querySelectorAll('[data-slot^="popover"]')].map((el) =>
+    el.getAttribute("data-slot"),
+  );
+  expect(slots).toEqual([
+    "popover-positioner",
+    "popover-popup",
+    "popover-arrow",
+    "popover-title",
+    "popover-description",
+  ]);
 });

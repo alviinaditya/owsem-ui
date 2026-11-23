@@ -1,61 +1,44 @@
 import { ScrollArea as BaseScrollArea } from "@base-ui/react/scroll-area";
-import {
-  Children,
-  type ForwardRefExoticComponent,
-  forwardRef,
-  isValidElement,
-  type ReactNode,
-  type RefAttributes,
-} from "react";
-import { withClassName } from "../../core/class-name";
+import { Children, isValidElement, type ReactElement, type ReactNode } from "react";
+import { cn } from "../../core/cn";
+import { scrollAreaSlots } from "./scroll-area-variants";
 import "./scroll-area.css";
-
-const cls = {
-  root: "ow-scroll-area",
-  viewport: "ow-scroll-area__viewport",
-  content: "ow-scroll-area__content",
-  scrollbar: "ow-scroll-area__scrollbar",
-  thumb: "ow-scroll-area__thumb",
-  corner: "ow-scroll-area__corner",
-} as const;
 
 // No "use client" in this file: Root and Viewport compare their children with the parts below, and
 // a client boundary would hide those from them in a Server Component's children.
 const hasPart = (children: ReactNode, part: unknown) =>
   Children.toArray(children).some((child) => isValidElement(child) && child.type === part);
 
-export type ScrollAreaContentProps = Omit<BaseScrollArea.Content.Props, "ref">;
+export interface ScrollAreaContentProps extends Omit<BaseScrollArea.Content.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** Holds the content, and tells Base UI when its size changes. */
-export const ScrollAreaContent: ForwardRefExoticComponent<
-  ScrollAreaContentProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, ScrollAreaContentProps>(function ScrollAreaContent(
-  { className, ...props },
-  ref,
-) {
+export function ScrollAreaContent({ className, ...props }: ScrollAreaContentProps): ReactElement {
   return (
     <BaseScrollArea.Content
-      ref={ref}
-      className={withClassName(cls.content, className)}
+      data-slot="scroll-area-content"
       {...props}
+      className={cn(scrollAreaSlots.content, className)}
     />
   );
-});
+}
 
-export type ScrollAreaViewportProps = Omit<BaseScrollArea.Viewport.Props, "ref">;
+export interface ScrollAreaViewportProps extends Omit<BaseScrollArea.Viewport.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** The element that scrolls; its native scrollbars are hidden. Draws Content if you leave it out. */
-export const ScrollAreaViewport: ForwardRefExoticComponent<
-  ScrollAreaViewportProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, ScrollAreaViewportProps>(function ScrollAreaViewport(
-  { className, children, ...props },
-  ref,
-) {
+export function ScrollAreaViewport({
+  className,
+  children,
+  ...props
+}: ScrollAreaViewportProps): ReactElement {
   return (
     <BaseScrollArea.Viewport
-      ref={ref}
-      className={withClassName(cls.viewport, className)}
+      data-slot="scroll-area-viewport"
       {...props}
+      className={cn(scrollAreaSlots.viewport, className)}
     >
       {hasPart(children, ScrollAreaContent) ? (
         children
@@ -64,77 +47,82 @@ export const ScrollAreaViewport: ForwardRefExoticComponent<
       )}
     </BaseScrollArea.Viewport>
   );
-});
+}
 
-export type ScrollAreaThumbProps = Omit<BaseScrollArea.Thumb.Props, "ref">;
+export interface ScrollAreaThumbProps extends Omit<BaseScrollArea.Thumb.Props, "className"> {
+  className?: string | undefined;
+}
 
-/** A pill that shows the position, with a press area of at least 24px each way (FR-14). */
-export const ScrollAreaThumb: ForwardRefExoticComponent<
-  ScrollAreaThumbProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, ScrollAreaThumbProps>(function ScrollAreaThumb(
-  { className, ...props },
-  ref,
-) {
+/** A pill that shows the position, with a press area of at least 24px each way. */
+export function ScrollAreaThumb({ className, ...props }: ScrollAreaThumbProps): ReactElement {
   return (
-    <BaseScrollArea.Thumb ref={ref} className={withClassName(cls.thumb, className)} {...props} />
+    <BaseScrollArea.Thumb
+      data-slot="scroll-area-thumb"
+      {...props}
+      className={cn(scrollAreaSlots.thumb, className)}
+    />
   );
-});
+}
 
-export type ScrollAreaScrollbarProps = Omit<BaseScrollArea.Scrollbar.Props, "ref">;
+export interface ScrollAreaScrollbarProps
+  extends Omit<BaseScrollArea.Scrollbar.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** Floats over the content, so it takes no room; shown on hover and while scrolling. Draws Thumb. */
-export const ScrollAreaScrollbar: ForwardRefExoticComponent<
-  ScrollAreaScrollbarProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, ScrollAreaScrollbarProps>(function ScrollAreaScrollbar(
-  { className, children, ...props },
-  ref,
-) {
+export function ScrollAreaScrollbar({
+  className,
+  children,
+  ...props
+}: ScrollAreaScrollbarProps): ReactElement {
   return (
     <BaseScrollArea.Scrollbar
-      ref={ref}
-      className={withClassName(cls.scrollbar, className)}
+      data-slot="scroll-area-scrollbar"
       {...props}
+      className={cn(scrollAreaSlots.scrollbar, className)}
     >
       {children ?? <ScrollAreaThumb />}
     </BaseScrollArea.Scrollbar>
   );
-});
+}
 
-export type ScrollAreaCornerProps = Omit<BaseScrollArea.Corner.Props, "ref">;
+export interface ScrollAreaCornerProps extends Omit<BaseScrollArea.Corner.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** The square where two scrollbars meet, which keeps them apart. Empty by default. */
-export const ScrollAreaCorner: ForwardRefExoticComponent<
-  ScrollAreaCornerProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, ScrollAreaCornerProps>(function ScrollAreaCorner(
-  { className, ...props },
-  ref,
-) {
+export function ScrollAreaCorner({ className, ...props }: ScrollAreaCornerProps): ReactElement {
   return (
-    <BaseScrollArea.Corner ref={ref} className={withClassName(cls.corner, className)} {...props} />
+    <BaseScrollArea.Corner
+      data-slot="scroll-area-corner"
+      {...props}
+      className={cn(scrollAreaSlots.corner, className)}
+    />
   );
-});
+}
 
-export type ScrollAreaRootProps = Omit<BaseScrollArea.Root.Props, "ref"> & {
+export interface ScrollAreaRootProps extends Omit<BaseScrollArea.Root.Props, "className"> {
+  className?: string | undefined;
   /** Fades an edge while there is more to scroll that way; `--fade-size` sets how far. */
   fade?: boolean;
-};
+}
 
 /**
  * Sized by your CSS. With only content inside, it draws the other parts for both axes. With a
  * Viewport among its direct children, those children are the parts, as in Base UI.
  */
-export const ScrollAreaRoot: ForwardRefExoticComponent<
-  ScrollAreaRootProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, ScrollAreaRootProps>(function ScrollAreaRoot(
-  { className, fade, children, ...props },
-  ref,
-) {
+export function ScrollAreaRoot({
+  className,
+  fade,
+  children,
+  ...props
+}: ScrollAreaRootProps): ReactElement {
   return (
     <BaseScrollArea.Root
-      ref={ref}
-      className={withClassName(cls.root, className)}
+      data-slot="scroll-area"
       data-fade={fade ? "" : undefined}
       {...props}
+      className={cn(scrollAreaSlots.root, className)}
     >
       {hasPart(children, ScrollAreaViewport) ? (
         children
@@ -148,4 +136,4 @@ export const ScrollAreaRoot: ForwardRefExoticComponent<
       )}
     </BaseScrollArea.Root>
   );
-});
+}

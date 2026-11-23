@@ -59,11 +59,11 @@
     will-change: transform;
   }
 
-  .ow-tabs__list:where([data-size="sm"]) {
+  .ow-tabs__list--sm {
     font-size: 13px;
   }
 
-  .ow-tabs__list:where([data-size="lg"]) {
+  .ow-tabs__list--lg {
     font-size: 16px;
   }
 
@@ -175,11 +175,11 @@
       scale var(--_settle);
   }
 
-  :where(.ow-tabs__list[data-size="sm"]) .ow-tabs__tab {
+  :where(.ow-tabs__list--sm) .ow-tabs__tab {
     --py: 0.3em;
   }
 
-  :where(.ow-tabs__list[data-size="lg"]) .ow-tabs__tab {
+  :where(.ow-tabs__list--lg) .ow-tabs__tab {
     --py: 0.625em;
   }
 

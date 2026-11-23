@@ -190,7 +190,7 @@ describe("Tabs", () => {
     const refs = {
       root: createRef<HTMLDivElement>(),
       list: createRef<HTMLDivElement>(),
-      tab: createRef<HTMLElement>(),
+      tab: createRef<HTMLButtonElement>(),
       panel: createRef<HTMLDivElement>(),
     };
     const screen = await render(
@@ -201,12 +201,7 @@ describe("Tabs", () => {
           className="mine-list"
           style={{ marginBlock: "2px" }}
         >
-          <Tabs.Tab
-            ref={refs.tab}
-            value="a"
-            className={(state) => (state.active ? "on" : "off")}
-            style={{ marginInline: "3px" }}
-          >
+          <Tabs.Tab ref={refs.tab} value="a" className="on" style={{ marginInline: "3px" }}>
             A
           </Tabs.Tab>
           <Tabs.Tab value="b" nativeButton={false} render={<a href="#b">B</a>} />
@@ -225,7 +220,7 @@ describe("Tabs", () => {
     const { container } = screen;
     expect(refs.root.current?.className).toBe("ow-tabs mine-root");
     expect(refs.root.current?.style.marginBlock).toBe("1px");
-    expect(refs.list.current?.className).toBe("ow-tabs__list mine-list");
+    expect(refs.list.current?.className).toBe("ow-tabs__list ow-tabs__list--md mine-list");
     expect(refs.list.current?.style.marginBlock).toBe("2px");
     expect(refs.tab.current?.className).toBe("ow-tabs__tab on");
     expect(refs.tab.current?.style.marginInline).toBe("3px");
@@ -790,4 +785,26 @@ describe("Tabs", () => {
     const lit = glide.getBoundingClientRect();
     expect(Math.abs(lit.left - at.left)).toBeLessThan(1);
   });
+});
+
+test("every part has its data-slot", async () => {
+  const screen = await render(
+    <Tabs.Root defaultValue="a">
+      <Tabs.List aria-label="T">
+        <Tabs.Tab value="a">A</Tabs.Tab>
+      </Tabs.List>
+      <Tabs.Panel value="a">A</Tabs.Panel>
+    </Tabs.Root>,
+  );
+  const slots = [...screen.container.querySelectorAll("[data-slot]")].map((el) =>
+    el.getAttribute("data-slot"),
+  );
+  expect(slots).toEqual([
+    "tabs",
+    "tabs-list",
+    "tabs-indicator",
+    "tabs-tab",
+    "tabs-label",
+    "tabs-panel",
+  ]);
 });

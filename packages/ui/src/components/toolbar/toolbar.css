@@ -33,11 +33,11 @@
     line-height: 1.25;
   }
 
-  .ow-toolbar[data-size="sm"] {
+  .ow-toolbar--sm {
     font-size: 0.8125rem;
   }
 
-  .ow-toolbar[data-size="lg"] {
+  .ow-toolbar--lg {
     font-size: 1rem;
   }
 
@@ -76,12 +76,12 @@
     border-radius: var(--_inner);
   }
 
-  :where(.ow-toolbar__button, .ow-toolbar__link, .ow-toolbar__input):where([data-size="sm"]) {
+  :where(.ow-toolbar__button--sm, .ow-toolbar__link--sm, .ow-toolbar__input--sm) {
     --py: 0.3em;
     font-size: 0.8125rem;
   }
 
-  :where(.ow-toolbar__button, .ow-toolbar__link, .ow-toolbar__input):where([data-size="lg"]) {
+  :where(.ow-toolbar__button--lg, .ow-toolbar__link--lg, .ow-toolbar__input--lg) {
     --py: 0.625em;
     font-size: 1rem;
   }

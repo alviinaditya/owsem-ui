@@ -1,4 +1,4 @@
-// No "use client" here: the namespace object must be readable from Server Components (FR-5).
+// No "use client" here: the namespace object must be readable from Server Components.
 
 export type {
   ToolbarButtonProps,
@@ -7,7 +7,6 @@ export type {
   ToolbarLinkProps,
   ToolbarRootProps,
   ToolbarSeparatorProps,
-  ToolbarSize,
 } from "./toolbar";
 export {
   ToolbarButton as Button,
@@ -17,3 +16,4 @@ export {
   ToolbarRoot as Root,
   ToolbarSeparator as Separator,
 } from "./toolbar";
+export type { ToolbarSize } from "./toolbar-variants";

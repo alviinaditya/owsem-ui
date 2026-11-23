@@ -132,7 +132,9 @@ describe("Toolbar", () => {
     const { q } = await mount();
     await pointerAway();
     const bold = q<HTMLButtonElement>('[aria-label="Bold"]');
-    expect(bold.className).toBe("ow-toggle ow-toggle--md ow-toolbar__button");
+    expect(bold.className).toBe(
+      "ow-toggle ow-toggle--md ow-toolbar__button ow-toolbar__button--md",
+    );
     expect(bold.dataset.size).toBe("md");
     expect(bold.hasAttribute("data-icon-only")).toBe(true);
     await userEvent.click(bold);
@@ -189,7 +191,7 @@ describe("Toolbar", () => {
     };
     const { q } = await mount(
       <Toolbar.Root ref={refs.root} className="r" style={{ marginBlock: "1px" }} aria-label="All">
-        <Toolbar.Group ref={refs.group} className={() => "g"}>
+        <Toolbar.Group ref={refs.group} className="g">
           <Toolbar.Button ref={refs.button} className="b">
             B
           </Toolbar.Button>
@@ -202,14 +204,14 @@ describe("Toolbar", () => {
       </Toolbar.Root>,
     );
     expect(refs.root.current).toBe(q(".ow-toolbar"));
-    expect(refs.root.current?.className).toBe("ow-toolbar r");
+    expect(refs.root.current?.className).toBe("ow-toolbar ow-toolbar--md r");
     expect(refs.root.current?.style.marginBlock).toBe("1px");
     expect(refs.group.current?.className).toBe("ow-toolbar__group g");
-    expect(refs.button.current?.className).toBe("ow-toolbar__button b");
+    expect(refs.button.current?.className).toBe("ow-toolbar__button ow-toolbar__button--md b");
     expect(refs.separator.current?.className).toBe("ow-toolbar__separator s");
-    expect(refs.link.current?.className).toBe("ow-toolbar__link l");
+    expect(refs.link.current?.className).toBe("ow-toolbar__link ow-toolbar__link--md l");
     expect(refs.link.current?.hasAttribute("data-router")).toBe(true);
-    expect(refs.input.current?.className).toBe("ow-toolbar__input i");
+    expect(refs.input.current?.className).toBe("ow-toolbar__input ow-toolbar__input--md i");
   });
 
   test("sits on the panel, its buttons quiet until hovered, in light and dark", async () => {
@@ -397,4 +399,24 @@ describe("Toolbar", () => {
     await settle();
     expect(await measureIdle()).toEqual({ rafCalls: 0, runningAnimations: [] });
   });
+});
+
+test("every part has its data-slot", async () => {
+  const { screen } = await mount();
+  const slots = [
+    ...new Set(
+      [...screen.container.querySelectorAll("[data-slot]")].map((el) =>
+        el.getAttribute("data-slot"),
+      ),
+    ),
+  ];
+  expect(slots.sort()).toEqual([
+    "toolbar",
+    "toolbar-button",
+    "toolbar-group",
+    "toolbar-icon",
+    "toolbar-input",
+    "toolbar-link",
+    "toolbar-separator",
+  ]);
 });

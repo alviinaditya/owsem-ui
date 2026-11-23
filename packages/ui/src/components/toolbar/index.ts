@@ -5,6 +5,6 @@ export type {
   ToolbarLinkProps,
   ToolbarRootProps,
   ToolbarSeparatorProps,
-  ToolbarSize,
 } from "./toolbar";
 export * as Toolbar from "./toolbar.parts";
+export type { ToolbarSize } from "./toolbar-variants";

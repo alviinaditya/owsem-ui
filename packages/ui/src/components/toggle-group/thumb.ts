@@ -26,7 +26,7 @@ interface Box {
 }
 
 const DISABLED = ':disabled, [aria-disabled="true"], [data-disabled]';
-// A quick tap still shows the whole press (DP-4).
+// A quick tap still shows the whole press.
 const PRESS_MS = 90;
 
 // The stretch: 1.15 up to 1.35 by distance (in sizes of the thumb), then back to 1.

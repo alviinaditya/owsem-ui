@@ -113,12 +113,7 @@ describe("Toggle Group", () => {
         style={{ marginBlock: "3px" }}
         defaultValue={["left"]}
       >
-        <ToggleGroup.Item
-          ref={itemRef}
-          value="left"
-          className={(state) => (state.pressed ? "on" : "off")}
-          style={{ marginInline: "1px" }}
-        >
+        <ToggleGroup.Item ref={itemRef} value="left" className="on" style={{ marginInline: "1px" }}>
           Left
         </ToggleGroup.Item>
         <ToggleGroup.Item value="right" render={<span />} nativeButton={false}>
@@ -127,7 +122,7 @@ describe("Toggle Group", () => {
       </ToggleGroup.Root>,
     );
     expect(rootRef.current).toBe(group);
-    expect(group.className).toBe("ow-toggle-group mine");
+    expect(group.className).toBe("ow-toggle-group ow-toggle-group--md mine");
     expect(group.style.marginBlock).toBe("3px");
     expect(itemRef.current).toBe(item("Left"));
     expect(item("Left").className).toBe("ow-toggle-group__item on");
@@ -472,4 +467,21 @@ describe("Toggle Group", () => {
     expect(getComputedStyle(month).scale).toBe("none");
     window.dispatchEvent(new PointerEvent("pointerup", { button: 0 }));
   });
+});
+
+test("every part has its data-slot", async () => {
+  const screen = await render(
+    <ToggleGroup.Root aria-label="Align" defaultValue={["left"]}>
+      <ToggleGroup.Item value="left">Left</ToggleGroup.Item>
+    </ToggleGroup.Root>,
+  );
+  const slots = [...screen.container.querySelectorAll("[data-slot]")].map((el) =>
+    el.getAttribute("data-slot"),
+  );
+  expect(slots).toEqual([
+    "toggle-group",
+    "toggle-group-thumb",
+    "toggle-group-item",
+    "toggle-group-label",
+  ]);
 });

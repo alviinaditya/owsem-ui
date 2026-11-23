@@ -4,30 +4,21 @@ import { Tabs } from "@base-ui/react/tabs";
 import {
   Children,
   createContext,
-  type ForwardRefExoticComponent,
-  forwardRef,
-  type RefAttributes,
-  useCallback,
+  type ReactElement,
   useContext,
   useEffect,
   useLayoutEffect,
   useRef,
 } from "react";
-import { withClassName } from "../../core/class-name";
+import { cn } from "../../core/cn";
 import { GlideHighlight, useGlide } from "../../core/glide/use-glide";
+import { useMergedRefs } from "../../core/merge-refs";
 import { createThumb } from "../toggle-group/thumb";
+import { type TabsListVariantProps, tabsListVariants, tabsSlots } from "./tabs-variants";
 import "./tabs.css";
 
-const cls = {
-  root: "ow-tabs",
-  list: "ow-tabs__list",
-  indicator: "ow-tabs__indicator",
-  tab: "ow-tabs__tab",
-  label: "ow-tabs__label",
-  panel: "ow-tabs__panel",
-} as const;
-
-const TAB = `.${cls.tab}`;
+// Base UI gives every tab this role, also when another element renders it.
+const TAB = '[role="tab"]';
 
 // The indicator is placed before the first paint; the server has no layout, so it falls back
 // to an effect there (and the active tab draws its own key until then).
@@ -36,118 +27,122 @@ const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffe
 // For the List's Glide axis.
 const OrientationContext = createContext<Tabs.Root.Orientation>("horizontal");
 
-export type TabsSize = "sm" | "md" | "lg";
-
-export type TabsRootProps = Omit<Tabs.Root.Props, "ref">;
+export interface TabsRootProps extends Omit<Tabs.Root.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** The tabs and their panels: the list above the panel, or beside it when vertical. */
-export const TabsRoot: ForwardRefExoticComponent<TabsRootProps & RefAttributes<HTMLDivElement>> =
-  forwardRef<HTMLDivElement, TabsRootProps>(function TabsRoot(
-    { className, orientation = "horizontal", ...props },
-    ref,
-  ) {
-    return (
-      <OrientationContext.Provider value={orientation}>
-        <Tabs.Root
-          {...props}
-          ref={ref}
-          orientation={orientation}
-          className={withClassName(cls.root, className)}
-        />
-      </OrientationContext.Provider>
-    );
-  });
+export function TabsRoot({
+  className,
+  orientation = "horizontal",
+  ...props
+}: TabsRootProps): ReactElement {
+  return (
+    <OrientationContext.Provider value={orientation}>
+      <Tabs.Root
+        data-slot="tabs"
+        {...props}
+        orientation={orientation}
+        className={cn(tabsSlots.root, className)}
+      />
+    </OrientationContext.Provider>
+  );
+}
 
-export interface TabsListProps extends Omit<Tabs.List.Props, "ref"> {
-  /** Font size and padding of the tabs (FR-11). Default `"md"`. */
-  size?: TabsSize | undefined;
+export interface TabsListProps extends Omit<Tabs.List.Props, "className">, TabsListVariantProps {
+  className?: string | undefined;
 }
 
 /**
  * The tabs: a flat well as wide as they are, and scrolling sideways when they do not fit. It draws
  * the indicator that slides under the active tab, and the hover highlight (Glide).
  */
-export const TabsList: ForwardRefExoticComponent<TabsListProps & RefAttributes<HTMLDivElement>> =
-  forwardRef<HTMLDivElement, TabsListProps>(function TabsList(
-    { className, size = "md", onClick, children, ...props },
-    ref,
-  ) {
-    const orientation = useContext(OrientationContext);
-    const glide = useGlide<HTMLDivElement>({
-      items: TAB,
-      skip: "[data-active]",
-      axis: orientation === "vertical" ? "y" : "x",
-    });
-    const list = useRef<HTMLDivElement | null>(null);
-    const indicator = useRef<HTMLSpanElement>(null);
-
-    useBeforePaint(() => {
-      if (!list.current || !indicator.current) return;
-      const instance = createThumb(list.current, indicator.current, TAB, "data-active");
-      return () => instance.destroy();
-    }, []);
-
-    const glideRef = glide.ref;
-    const setRef = useCallback(
-      (el: HTMLDivElement | null) => {
-        list.current = el;
-        glideRef(el);
-        if (typeof ref === "function") ref(el);
-        else if (ref) ref.current = el;
-      },
-      [glideRef, ref],
-    );
-
-    return (
-      <Tabs.List
-        {...props}
-        ref={setRef}
-        className={withClassName(cls.list, className)}
-        data-size={size}
-        onClick={(event) => {
-          // A tab the list's edge cuts comes in when it is clicked; the arrow keys already do this.
-          (event.target as Element).closest(TAB)?.scrollIntoView({
-            block: "nearest",
-            inline: "nearest",
-          });
-          onClick?.(event);
-        }}
-      >
-        <GlideHighlight glide={glide} />
-        <span ref={indicator} className={cls.indicator} aria-hidden="true" />
-        {children}
-      </Tabs.List>
-    );
+export function TabsList({
+  size = "md",
+  className,
+  onClick,
+  children,
+  ref,
+  ...props
+}: TabsListProps): ReactElement {
+  const orientation = useContext(OrientationContext);
+  const glide = useGlide<HTMLDivElement>({
+    items: TAB,
+    skip: "[data-active]",
+    axis: orientation === "vertical" ? "y" : "x",
   });
+  const list = useRef<HTMLDivElement | null>(null);
+  const indicator = useRef<HTMLSpanElement>(null);
+  const merged = useMergedRefs(list, useMergedRefs(glide.ref, ref));
 
-export type TabsTabProps = Omit<Tabs.Tab.Props, "ref">;
+  useBeforePaint(() => {
+    if (!list.current || !indicator.current) return;
+    const instance = createThumb(list.current, indicator.current, TAB, "data-active");
+    return () => instance.destroy();
+  }, []);
+
+  return (
+    <Tabs.List
+      data-slot="tabs-list"
+      {...props}
+      ref={merged}
+      className={cn(tabsListVariants({ size }), className)}
+      data-size={size}
+      onClick={(event) => {
+        // A tab the list's edge cuts comes in when it is clicked; the arrow keys already do this.
+        (event.target as Element).closest(TAB)?.scrollIntoView({
+          block: "nearest",
+          inline: "nearest",
+        });
+        onClick?.(event);
+      }}
+    >
+      <GlideHighlight glide={glide} />
+      <span
+        ref={indicator}
+        data-slot="tabs-indicator"
+        className={tabsSlots.indicator}
+        aria-hidden="true"
+      />
+      {children}
+    </Tabs.List>
+  );
+}
+
+export interface TabsTabProps extends Omit<Tabs.Tab.Props, "className"> {
+  className?: string | undefined;
+}
 
 /**
  * One tab: Base UI's Tab. It holds any node; its text is wrapped in a span, so a tab with only an
- * icon is square (FR-10a).
+ * icon is square.
  */
-export const TabsTab: ForwardRefExoticComponent<TabsTabProps & RefAttributes<HTMLElement>> =
-  forwardRef<HTMLElement, TabsTabProps>(function TabsTab({ className, children, ...props }, ref) {
-    return (
-      <Tabs.Tab {...props} ref={ref} className={withClassName(cls.tab, className)}>
-        {Children.map(children, (child) =>
-          typeof child === "string" || typeof child === "number" ? (
-            <span className={cls.label}>{child}</span>
-          ) : (
-            child
-          ),
-        )}
-      </Tabs.Tab>
-    );
-  });
+export function TabsTab({ className, children, ...props }: TabsTabProps): ReactElement {
+  return (
+    <Tabs.Tab data-slot="tabs-tab" {...props} className={cn(tabsSlots.tab, className)}>
+      {Children.map(children, (child) =>
+        typeof child === "string" || typeof child === "number" ? (
+          <span data-slot="tabs-label" className={tabsSlots.label}>
+            {child}
+          </span>
+        ) : (
+          child
+        ),
+      )}
+    </Tabs.Tab>
+  );
+}
 
-export type TabsPanelProps = Omit<Tabs.Panel.Props, "ref">;
+export interface TabsPanelProps extends Omit<Tabs.Panel.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** What a tab shows: Base UI's Panel, with no padding of its own. */
-export const TabsPanel: ForwardRefExoticComponent<TabsPanelProps & RefAttributes<HTMLDivElement>> =
-  forwardRef<HTMLDivElement, TabsPanelProps>(function TabsPanel({ className, ...props }, ref) {
-    return <Tabs.Panel {...props} ref={ref} className={withClassName(cls.panel, className)} />;
-  });
+export function TabsPanel({ className, ...props }: TabsPanelProps): ReactElement {
+  return (
+    <Tabs.Panel data-slot="tabs-panel" {...props} className={cn(tabsSlots.panel, className)} />
+  );
+}
 
 export declare namespace TabsRoot {
   type Props = TabsRootProps;

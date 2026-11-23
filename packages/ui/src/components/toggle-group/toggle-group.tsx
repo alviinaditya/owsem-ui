@@ -2,41 +2,29 @@
 
 import { Toggle } from "@base-ui/react/toggle";
 import { ToggleGroup as BaseToggleGroup } from "@base-ui/react/toggle-group";
-import {
-  Children,
-  type ForwardRefExoticComponent,
-  forwardRef,
-  type JSX,
-  type RefAttributes,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-} from "react";
-import { withClassName } from "../../core/class-name";
+import { Children, type ReactElement, useEffect, useLayoutEffect, useRef } from "react";
+import { cn } from "../../core/cn";
 import { GlideHighlight, useGlide } from "../../core/glide/use-glide";
+import { useMergedRefs } from "../../core/merge-refs";
 import { createThumb } from "./thumb";
+import {
+  type ToggleGroupVariantProps,
+  toggleGroupSlots,
+  toggleGroupVariants,
+} from "./toggle-group-variants";
 import "./toggle-group.css";
 
-const cls = {
-  root: "ow-toggle-group",
-  thumb: "ow-toggle-group__thumb",
-  item: "ow-toggle-group__item",
-  label: "ow-toggle-group__label",
-} as const;
-
-const ITEM = `.${cls.item}`;
+// Base UI's Toggle always sets aria-pressed, also when another element renders it.
+const ITEM = "[aria-pressed]";
 
 // The thumb is placed before the first paint; the server has no layout, so it falls back
 // to an effect there (and the pressed item draws its own key until then).
 const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-export type ToggleGroupSize = "sm" | "md" | "lg";
-
 export interface ToggleGroupRootProps<Value extends string = string>
-  extends Omit<BaseToggleGroup.Props<Value>, "ref"> {
-  /** Font size and padding of the items (FR-11). Default `"md"`. */
-  size?: ToggleGroupSize | undefined;
+  extends Omit<BaseToggleGroup.Props<Value>, "className">,
+    ToggleGroupVariantProps {
+  className?: string | undefined;
   /**
    * Every item as wide as the widest, or an equal share of the group's width when something
    * stretches it.
@@ -44,18 +32,18 @@ export interface ToggleGroupRootProps<Value extends string = string>
   equal?: boolean | undefined;
 }
 
-type ToggleGroupRootComponent = <Value extends string = string>(
-  props: ToggleGroupRootProps<Value> & RefAttributes<HTMLDivElement>,
-) => JSX.Element;
-
 /**
  * The group: a flat track holding the items, the thumb that slides under the pressed one
  * (single selection), and the hover highlight (Glide).
  */
-export const ToggleGroupRoot: ToggleGroupRootComponent = forwardRef<
-  HTMLDivElement,
-  ToggleGroupRootProps
->(function ToggleGroupRoot({ className, size = "md", equal, children, ...props }, ref) {
+export function ToggleGroupRoot<Value extends string = string>({
+  size = "md",
+  equal,
+  className,
+  children,
+  ref,
+  ...props
+}: ToggleGroupRootProps<Value>): ReactElement {
   const glide = useGlide<HTMLDivElement>({
     items: ITEM,
     skip: "[data-pressed]",
@@ -63,6 +51,7 @@ export const ToggleGroupRoot: ToggleGroupRootComponent = forwardRef<
   });
   const root = useRef<HTMLDivElement | null>(null);
   const thumb = useRef<HTMLSpanElement>(null);
+  const merged = useMergedRefs(root, useMergedRefs(glide.ref, ref));
 
   useBeforePaint(() => {
     if (!root.current || !thumb.current) return;
@@ -70,56 +59,58 @@ export const ToggleGroupRoot: ToggleGroupRootComponent = forwardRef<
     return () => instance.destroy();
   }, []);
 
-  const glideRef = glide.ref;
-  const setRef = useCallback(
-    (el: HTMLDivElement | null) => {
-      root.current = el;
-      glideRef(el);
-      if (typeof ref === "function") ref(el);
-      else if (ref) ref.current = el;
-    },
-    [glideRef, ref],
-  );
-
   return (
     <BaseToggleGroup
+      data-slot="toggle-group"
       {...props}
-      ref={setRef}
-      className={withClassName(cls.root, className)}
+      ref={merged}
+      className={cn(toggleGroupVariants({ size }), className)}
       data-size={size}
       data-equal={equal ? "" : undefined}
     >
       <GlideHighlight glide={glide} />
-      <span ref={thumb} className={cls.thumb} aria-hidden="true" />
+      <span
+        ref={thumb}
+        data-slot="toggle-group-thumb"
+        className={toggleGroupSlots.thumb}
+        aria-hidden="true"
+      />
       {children}
     </BaseToggleGroup>
   );
-}) as unknown as ToggleGroupRootComponent;
+}
 
-export type ToggleGroupItemProps = Omit<Toggle.Props, "ref">;
+export interface ToggleGroupItemProps extends Omit<Toggle.Props, "className"> {
+  className?: string | undefined;
+}
 
 /**
  * One choice: Base UI's Toggle. Its text is wrapped in a span, so an item with only an icon is
- * square (FR-10a).
+ * square.
  */
-export const ToggleGroupItem: ForwardRefExoticComponent<
-  ToggleGroupItemProps & RefAttributes<HTMLButtonElement>
-> = forwardRef<HTMLButtonElement, ToggleGroupItemProps>(function ToggleGroupItem(
-  { className, children, ...props },
-  ref,
-) {
+export function ToggleGroupItem({
+  className,
+  children,
+  ...props
+}: ToggleGroupItemProps): ReactElement {
   return (
-    <Toggle {...props} ref={ref} className={withClassName(cls.item, className)}>
+    <Toggle
+      data-slot="toggle-group-item"
+      {...props}
+      className={cn(toggleGroupSlots.item, className)}
+    >
       {Children.map(children, (child) =>
         typeof child === "string" || typeof child === "number" ? (
-          <span className={cls.label}>{child}</span>
+          <span data-slot="toggle-group-label" className={toggleGroupSlots.label}>
+            {child}
+          </span>
         ) : (
           child
         ),
       )}
     </Toggle>
   );
-});
+}
 
 export declare namespace ToggleGroupRoot {
   type Props<Value extends string = string> = ToggleGroupRootProps<Value>;

@@ -137,11 +137,7 @@ describe("ScrollArea", () => {
     };
     const { all, one } = await mountMeasured(
       <ScrollArea.Root ref={refs.root} className="a" style={{ ...size, marginBlock: "3px" }}>
-        <ScrollArea.Viewport
-          ref={refs.viewport}
-          className={(state) => (state.hasOverflowY ? "b-y" : "b-n")}
-          render={<section />}
-        >
+        <ScrollArea.Viewport ref={refs.viewport} className="b" render={<section />}>
           <ScrollArea.Content ref={refs.content} className="c">
             <Wide />
           </ScrollArea.Content>
@@ -158,7 +154,7 @@ describe("ScrollArea", () => {
     expect(one("").style.marginBlock).toBe("3px");
     expect(refs.root.current).toBe(one(""));
     expect(one("__viewport").tagName).toBe("SECTION");
-    await expect.poll(() => one("__viewport").className).toContain("b-y");
+    expect(one("__viewport").className).toContain("ow-scroll-area__viewport b");
     expect(refs.viewport.current).toBe(one("__viewport"));
     expect(one("__content").className).toBe("ow-scroll-area__content c");
     expect(refs.content.current).toBe(one("__content"));
@@ -540,4 +536,23 @@ describe("ScrollArea", () => {
     await settle();
     expect(await measureIdle()).toEqual({ rafCalls: 0, runningAnimations: [] });
   });
+});
+
+test("every part has its data-slot", async () => {
+  const { container } = await mountMeasured(
+    <ScrollArea.Root style={size}>
+      <Wide />
+    </ScrollArea.Root>,
+  );
+  const slots = new Set(
+    [...container.querySelectorAll("[data-slot]")].map((el) => el.getAttribute("data-slot")),
+  );
+  expect([...slots].sort()).toEqual([
+    "scroll-area",
+    "scroll-area-content",
+    "scroll-area-corner",
+    "scroll-area-scrollbar",
+    "scroll-area-thumb",
+    "scroll-area-viewport",
+  ]);
 });

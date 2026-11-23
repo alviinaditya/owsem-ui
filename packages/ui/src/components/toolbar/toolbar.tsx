@@ -1,35 +1,27 @@
 "use client";
 
 import { Toolbar as BaseToolbar } from "@base-ui/react/toolbar";
+import { createContext, type ReactElement, type ReactNode, useContext } from "react";
+import { cn } from "../../core/cn";
 import {
-  createContext,
-  type ForwardRefExoticComponent,
-  forwardRef,
-  type ReactNode,
-  type RefAttributes,
-  useContext,
-} from "react";
-import { withClassName } from "../../core/class-name";
+  type ToolbarSize,
+  type ToolbarVariantProps,
+  toolbarButtonVariants,
+  toolbarInputVariants,
+  toolbarLinkVariants,
+  toolbarSlots,
+  toolbarVariants,
+} from "./toolbar-variants";
 import "./toolbar.css";
-
-const cls = {
-  root: "ow-toolbar",
-  group: "ow-toolbar__group",
-  button: "ow-toolbar__button",
-  link: "ow-toolbar__link",
-  icon: "ow-toolbar__icon",
-  input: "ow-toolbar__input",
-  separator: "ow-toolbar__separator",
-} as const;
-
-export type ToolbarSize = "sm" | "md" | "lg";
 
 // The toolbar's size, for items that do not set their own.
 const SizeContext = createContext<ToolbarSize>("md");
 
 interface ItemProps {
-  /** Button's sizes (FR-11). @default the toolbar's size */
+  /** Button's sizes. @default the toolbar's size */
   size?: ToolbarSize | undefined;
+  /** The size of an outer part that renders this one. */
+  "data-size"?: ToolbarSize | undefined;
   /** An icon before the label, the font size plus 2px. Decorative: the item needs a name. */
   startIcon?: ReactNode;
   /** An icon after the label. */
@@ -38,7 +30,12 @@ interface ItemProps {
 
 const icon = (node: ReactNode, side: "start" | "end") =>
   node == null ? null : (
-    <span className={cls.icon} data-side={side} aria-hidden="true">
+    <span
+      data-slot="toolbar-icon"
+      data-side={side}
+      aria-hidden="true"
+      className={toolbarSlots.icon}
+    >
       {node}
     </span>
   );
@@ -61,131 +58,143 @@ function itemContent({ startIcon, endIcon, children }: ItemProps & { children?: 
   };
 }
 
-export interface ToolbarRootProps extends Omit<BaseToolbar.Root.Props, "ref"> {
-  /** The size of every item that does not set its own. @default "md" */
-  size?: ToolbarSize | undefined;
+export interface ToolbarRootProps
+  extends Omit<BaseToolbar.Root.Props, "className">,
+    ToolbarVariantProps {
+  className?: string | undefined;
 }
 
 /** The toolbar: one Tab stop, then arrow keys move between its items (Base UI). */
-export const ToolbarRoot: ForwardRefExoticComponent<
-  ToolbarRootProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, ToolbarRootProps>(function ToolbarRoot(
-  { className, size = "md", ...props },
-  ref,
-) {
+export function ToolbarRoot({ size = "md", className, ...props }: ToolbarRootProps): ReactElement {
   return (
     <SizeContext.Provider value={size}>
       <BaseToolbar.Root
-        ref={ref}
-        className={withClassName(cls.root, className)}
-        data-size={size}
+        data-slot="toolbar"
         {...props}
+        className={cn(toolbarVariants({ size }), className)}
+        data-size={size}
       />
     </SizeContext.Provider>
   );
-});
+}
 
-export type ToolbarGroupProps = Omit<BaseToolbar.Group.Props, "ref">;
+export interface ToolbarGroupProps extends Omit<BaseToolbar.Group.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** Items that belong together, such as text formatting. */
-export const ToolbarGroup: ForwardRefExoticComponent<
-  ToolbarGroupProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, ToolbarGroupProps>(function ToolbarGroup(
-  { className, ...props },
-  ref,
-) {
-  return <BaseToolbar.Group ref={ref} className={withClassName(cls.group, className)} {...props} />;
-});
+export function ToolbarGroup({ className, ...props }: ToolbarGroupProps): ReactElement {
+  return (
+    <BaseToolbar.Group
+      data-slot="toolbar-group"
+      {...props}
+      className={cn(toolbarSlots.group, className)}
+    />
+  );
+}
 
-export interface ToolbarButtonProps extends Omit<BaseToolbar.Button.Props, "ref">, ItemProps {}
+export interface ToolbarButtonProps extends Omit<BaseToolbar.Button.Props, "className">, ItemProps {
+  className?: string | undefined;
+}
 
 /**
  * A quiet ghost button. Its styles have no specificity, so a Toggle or a popup's trigger passed
  * to `render` keeps its own look.
  */
-export const ToolbarButton: ForwardRefExoticComponent<
-  ToolbarButtonProps & RefAttributes<HTMLButtonElement>
-> = forwardRef<HTMLButtonElement, ToolbarButtonProps>(function ToolbarButton(
-  { className, size, startIcon, endIcon, children, ...props },
-  ref,
-) {
+export function ToolbarButton({
+  "data-size": outerSize,
+  size,
+  startIcon,
+  endIcon,
+  className,
+  children,
+  ...props
+}: ToolbarButtonProps): ReactElement {
   const toolbarSize = useContext(SizeContext);
+  const resolved = size ?? outerSize ?? toolbarSize;
   const content = itemContent({ startIcon, endIcon, children });
   return (
     <BaseToolbar.Button
-      ref={ref}
-      className={withClassName(cls.button, className)}
-      data-size={size ?? toolbarSize}
+      data-slot="toolbar-button"
       {...content.attrs}
       {...props}
+      className={cn(toolbarButtonVariants({ size: resolved }), className)}
+      data-size={resolved}
     >
       {content.children}
     </BaseToolbar.Button>
   );
-});
+}
 
-export interface ToolbarLinkProps extends Omit<BaseToolbar.Link.Props, "ref">, ItemProps {}
+export interface ToolbarLinkProps extends Omit<BaseToolbar.Link.Props, "className">, ItemProps {
+  className?: string | undefined;
+}
 
 /** A link that looks like the toolbar's buttons. */
-export const ToolbarLink: ForwardRefExoticComponent<
-  ToolbarLinkProps & RefAttributes<HTMLAnchorElement>
-> = forwardRef<HTMLAnchorElement, ToolbarLinkProps>(function ToolbarLink(
-  { className, size, startIcon, endIcon, children, ...props },
-  ref,
-) {
+export function ToolbarLink({
+  "data-size": outerSize,
+  size,
+  startIcon,
+  endIcon,
+  className,
+  children,
+  ...props
+}: ToolbarLinkProps): ReactElement {
   const toolbarSize = useContext(SizeContext);
+  const resolved = size ?? outerSize ?? toolbarSize;
   const content = itemContent({ startIcon, endIcon, children });
   return (
     <BaseToolbar.Link
-      ref={ref}
-      className={withClassName(cls.link, className)}
-      data-size={size ?? toolbarSize}
+      data-slot="toolbar-link"
       {...content.attrs}
       {...props}
+      className={cn(toolbarLinkVariants({ size: resolved }), className)}
+      data-size={resolved}
     >
       {content.children}
     </BaseToolbar.Link>
   );
-});
+}
 
 // `size` is the type scale here, not the input's width in characters; set `inline-size` instead.
-export interface ToolbarInputProps extends Omit<BaseToolbar.Input.Props, "ref" | "size"> {
-  /** Button's sizes (FR-11). @default the toolbar's size */
+export interface ToolbarInputProps extends Omit<BaseToolbar.Input.Props, "className" | "size"> {
+  className?: string | undefined;
+  /** Button's sizes. @default the toolbar's size */
   size?: ToolbarSize | undefined;
+  /** The size of an outer part that renders this one. */
+  "data-size"?: ToolbarSize | undefined;
 }
 
 /** A flat field with a 3:1 edge, as tall as the buttons. Arrow keys move the caret: put it last. */
-export const ToolbarInput: ForwardRefExoticComponent<
-  ToolbarInputProps & RefAttributes<HTMLInputElement>
-> = forwardRef<HTMLInputElement, ToolbarInputProps>(function ToolbarInput(
-  { className, size, ...props },
-  ref,
-) {
+export function ToolbarInput({
+  "data-size": outerSize,
+  size,
+  className,
+  ...props
+}: ToolbarInputProps): ReactElement {
   const toolbarSize = useContext(SizeContext);
+  const resolved = size ?? outerSize ?? toolbarSize;
   return (
     <BaseToolbar.Input
-      ref={ref}
-      className={withClassName(cls.input, className)}
-      data-size={size ?? toolbarSize}
+      data-slot="toolbar-input"
       {...props}
+      className={cn(toolbarInputVariants({ size: resolved }), className)}
+      data-size={resolved}
     />
   );
-});
+}
 
-export type ToolbarSeparatorProps = Omit<BaseToolbar.Separator.Props, "ref">;
+export interface ToolbarSeparatorProps extends Omit<BaseToolbar.Separator.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** A hairline between groups, across the toolbar's direction. */
-export const ToolbarSeparator: ForwardRefExoticComponent<
-  ToolbarSeparatorProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, ToolbarSeparatorProps>(function ToolbarSeparator(
-  { className, ...props },
-  ref,
-) {
+export function ToolbarSeparator({ className, ...props }: ToolbarSeparatorProps): ReactElement {
   return (
     <BaseToolbar.Separator
-      ref={ref}
-      className={withClassName(cls.separator, className)}
+      data-slot="toolbar-separator"
       {...props}
+      className={cn(toolbarSlots.separator, className)}
     />
   );
-});
+}

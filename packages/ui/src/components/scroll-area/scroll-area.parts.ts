@@ -1,4 +1,4 @@
-// No "use client" here: the namespace object must be readable from Server Components (FR-5).
+// No "use client" here: the namespace object must be readable from Server Components.
 
 export type {
   ScrollAreaContentProps,

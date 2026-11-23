@@ -43,11 +43,11 @@
     will-change: transform;
   }
 
-  .ow-toggle-group[data-size="sm"] {
+  .ow-toggle-group--sm {
     font-size: 13px;
   }
 
-  .ow-toggle-group[data-size="lg"] {
+  .ow-toggle-group--lg {
     font-size: 16px;
   }
 
@@ -162,11 +162,11 @@
       scale var(--_settle);
   }
 
-  .ow-toggle-group[data-size="sm"] .ow-toggle-group__item {
+  .ow-toggle-group--sm .ow-toggle-group__item {
     --py: 0.3em;
   }
 
-  .ow-toggle-group[data-size="lg"] .ow-toggle-group__item {
+  .ow-toggle-group--lg .ow-toggle-group__item {
     --py: 0.625em;
   }
 

@@ -24,6 +24,10 @@ export const components: string[] = [
   "icon-morph",
   "tooltip",
   "copy-button",
+  "popover",
+  "dialog",
+  "scroll-area",
+  "table",
 ];
 
 const HEADER = "// Generated from";

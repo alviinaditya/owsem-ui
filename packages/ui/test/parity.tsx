@@ -178,6 +178,12 @@ export function pick(style: CSSStyleDeclaration, names: readonly string[]): Styl
       if (`border${side}${part}` in picked) picked[`border${side}${part}`] = "-";
     }
   }
+  // An outline of style none draws nothing, whatever its width and color say.
+  if (read("outlineStyle") === "none") {
+    for (const part of ["Width", "Color"]) {
+      if (`outline${part}` in picked) picked[`outline${part}`] = "-";
+    }
+  }
   // Both ask for the layer the movement needs.
   if (picked.willChange === "scale") picked.willChange = "transform";
   if ("transform" in picked) {
@@ -212,9 +218,21 @@ export interface Part {
   placeholder: Style | undefined;
 }
 
+/** Whether a transformed element between `el` and `origin` is the box a fixed `el` sits in. */
+function heldFixed(el: Element, origin: Element): boolean {
+  for (let up = el.parentElement; up && origin.contains(up); up = up.parentElement) {
+    if (getComputedStyle(up).transform !== "none") return true;
+  }
+  return false;
+}
+
 /** Every element of a side: the geometry from its container, and its computed styles. */
-export function measure(side: Element, props: readonly string[] = PROPS): Part[] {
-  return measureFrom(side, side.firstElementChild as Element, props);
+export function measure(
+  side: Element,
+  props: readonly string[] = PROPS,
+  pseudo: readonly string[] = PSEUDO,
+): Part[] {
+  return measureFrom(side, side.firstElementChild as Element, props, pseudo);
 }
 
 /**
@@ -225,6 +243,7 @@ export function measureFrom(
   origin: Element,
   root: Element,
   props: readonly string[] = PROPS,
+  pseudo: readonly string[] = PSEUDO,
 ): Part[] {
   const corner = origin.getBoundingClientRect();
   return [root, ...root.querySelectorAll("*")].map((el, index) => {
@@ -235,16 +254,17 @@ export function measureFrom(
       index,
       label: `${index} ${el.tagName.toLowerCase()}${slot ? ` ${slot}` : ""}`,
       // Nothing is laid out (display: none, here or above): the box has no place.
-      // A fixed element, such as Base UI's hidden input, is placed in the viewport, not in its side.
+      // A fixed element, such as Base UI's hidden input, is placed in the viewport, not in its side,
+      // unless a transformed box between them holds it.
       box: (el.getClientRects().length === 0
         ? [0, 0, 0, 0]
-        : getComputedStyle(el).position === "fixed"
+        : getComputedStyle(el).position === "fixed" && !heldFixed(el, origin)
           ? [box.x, box.y, box.width, box.height]
           : [box.x - corner.x, box.y - corner.y, box.width, box.height]
       ).map(round),
       style: pick(getComputedStyle(el), props),
-      before: pick(getComputedStyle(el, "::before"), PSEUDO),
-      after: pick(getComputedStyle(el, "::after"), PSEUDO),
+      before: pick(getComputedStyle(el, "::before"), pseudo),
+      after: pick(getComputedStyle(el, "::after"), pseudo),
       placeholder: field ? pick(getComputedStyle(el, "::placeholder"), PLACEHOLDER) : undefined,
     };
   });
@@ -346,6 +366,8 @@ export interface Options {
   target?: string;
   /** Properties to compare instead of PROPS. */
   props?: readonly string[];
+  /** Properties of ::before and ::after to compare instead of PSEUDO. */
+  pseudo?: readonly string[];
   /**
    * Runs on each side after it is rendered and before it is measured, to put it in a state the
    * component sets itself, such as `data-ending-style`. It must do the same to both sides.
@@ -508,7 +530,11 @@ export function tailwindParity(candidates: Iterable<string>, accepted: Accepted[
     const names = options.names ?? cases.map((one) => one.name);
     const problems = names.flatMap((name) => {
       const { css: a, tw: b } = sides(screen.container, name);
-      return compare(name, measure(a, options.props), measure(b, options.props));
+      return compare(
+        name,
+        measure(a, options.props, options.pseudo),
+        measure(b, options.props, options.pseudo),
+      );
     });
     expect(summarize(unaccepted(problems))).toEqual([]);
   };
@@ -547,7 +573,7 @@ export function tailwindParity(candidates: Iterable<string>, accepted: Accepted[
       // Real input: the page must agree the state is on, or the case proves nothing.
       const query = { hover: ":hover", held: ":active", focus: ":focus-visible" }[state];
       if (!el.matches(query)) throw new Error(`${name}: the element is not ${query}`);
-      taken.push(measure(side, options.props));
+      taken.push(measure(side, options.props, options.pseudo));
       if (state === "focus") el.blur();
       else {
         // Leave before the button comes up, so nothing is clicked.

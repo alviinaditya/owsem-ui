@@ -54,8 +54,16 @@ describe("src/tailwind (generated)", () => {
       Object.keys(actual)
         .filter((path) => path.startsWith("lib/"))
         .sort(),
-    ).toEqual(["lib/cn.ts", "lib/merge-refs.ts", "lib/shake.ts", "lib/use-ripple.ts"]);
+    ).toEqual([
+      "lib/cn.ts",
+      "lib/merge-refs.ts",
+      "lib/resting-anchor.ts",
+      "lib/scroll-lock.ts",
+      "lib/shake.ts",
+      "lib/use-ripple.ts",
+    ]);
     expect(actual["lib/shake.ts"]).toContain('from "./merge-refs"');
+    expect(actual["lib/resting-anchor.ts"]).toContain('from "./merge-refs"');
     expect(actual["input/input.tsx"]).toContain('from "../lib/shake"');
   });
 

@@ -157,3 +157,6 @@
     stroke-dashoffset: 0;
   }
 }
+
+/* The viewport of a Scroll Area with `fade`; the Root is the group. */
+@custom-variant ow-scroll-area-fade (:where(.group\/ow-scroll-area[data-fade]) > &);

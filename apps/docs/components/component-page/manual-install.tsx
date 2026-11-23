@@ -163,6 +163,9 @@ const StepsBody = memo(function StepsBody({
     <>
       {packages ? (
         <Step title={labels.manualDependencies}>
+          {flavor === "tailwind" ? (
+            <p className="install-note">{labels.manualFlavorTailwindNote}</p>
+          ) : null}
           <InstallBlock labels={common} commands={(pm) => [`${ADD[pm]} ${packages}`]} />
         </Step>
       ) : null}

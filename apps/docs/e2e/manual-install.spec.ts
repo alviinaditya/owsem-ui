@@ -213,9 +213,9 @@ test("Tailwind Switch: its class map and only the bridge parts it uses, no CSS f
     await expect(titles.filter({ hasText: path })).toHaveCount(1);
   }
   await expect(titles.filter({ hasText: "switch.css" })).toHaveCount(0);
-  await expect(manual(page).locator(".manual-step:visible").first()).toContainText(
-    "class-variance-authority",
-  );
+  const dependencies = manual(page).locator(".manual-step:visible").first();
+  await expect(dependencies).toContainText("class-variance-authority");
+  await expect(dependencies).toContainText("Tailwind CSS v4.1 or newer");
   const bridge = await copyVisibleFile(page, "lib/owsem/tailwind.css");
   // The thumb's registered properties and its two variants, and nothing of Input's or Button's.
   expect(bridge).toContain("@property --_switch-travel");
@@ -251,4 +251,41 @@ test("Tailwind Copy Button: the components it draws, and its keyframes", async (
   expect(bridge).toContain("@keyframes ow-copy-button-draw");
   expect(bridge).toContain("@keyframes ow-spin");
   expect(bridge).toContain("@custom-variant held ");
+});
+
+test("Tailwind Popover: the Core modules it imports, no CSS file", async ({ page }) => {
+  test.skip(
+    !existsSync(join(process.cwd(), "../../packages/ui/src/tailwind/popover")),
+    "packages/ui/src/tailwind/popover/ does not exist yet",
+  );
+  await openTailwindManual(page, "/en/popover");
+  const titles = manual(page).locator(".ow-code-block__title:visible");
+  for (const path of [
+    "components/owsem/popover/popover.tsx",
+    "components/owsem/popover/popover-variants.ts",
+    "lib/owsem/resting-anchor.ts",
+    "lib/owsem/scroll-lock.ts",
+    "lib/owsem/merge-refs.ts",
+    "lib/owsem/cn.ts",
+  ]) {
+    await expect(titles.filter({ hasText: path })).toHaveCount(1);
+  }
+  await expect(titles.filter({ hasText: "popover.css" })).toHaveCount(0);
+  const classes = await copyVisibleFile(page, "popover/popover-variants.ts");
+  expect(classes).toContain("group/ow-popover");
+});
+
+test("Tailwind Scroll Area: its one custom variant in the bridge", async ({ page }) => {
+  test.skip(
+    !existsSync(join(process.cwd(), "../../packages/ui/src/tailwind/scroll-area")),
+    "packages/ui/src/tailwind/scroll-area/ does not exist yet",
+  );
+  await openTailwindManual(page, "/en/scroll-area");
+  await expect(
+    manual(page).locator(".ow-code-block__title:visible", { hasText: "scroll-area.css" }),
+  ).toHaveCount(0);
+  const bridge = await copyVisibleFile(page, "lib/owsem/tailwind.css");
+  expect(bridge).toContain("@custom-variant ow-scroll-area-fade");
+  expect(bridge).not.toContain("@custom-variant ow-label-hover");
+  expect(bridge).not.toContain("@keyframes");
 });

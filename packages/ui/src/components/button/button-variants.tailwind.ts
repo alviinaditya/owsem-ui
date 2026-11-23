@@ -20,7 +20,7 @@ export interface ButtonVariantProps {
 // The classes every button has. The variant, the size, and soft add theirs, and a user's
 // className is merged last (in Button), so it wins over any of them.
 const root = [
-  // Box. The padding comes from one number, --py (FR-9 to FR-11); the size sets it.
+  // Box. The padding comes from one number, --py; the size sets it.
   "group/ow-button relative isolate m-0 box-border inline-flex items-center justify-center gap-[0.5em]",
   "border-0 rounded-(--ow-radius) bg-transparent py-(--_py) px-(--px) align-middle whitespace-nowrap",
   "[--_py:max(var(--py),calc((24px_-_1lh)_/_2))] [--px:calc(var(--_py)_+_(1lh_-_1cap)_/_2)]",
@@ -28,9 +28,9 @@ const root = [
   "[--_press:calc(1_-_0.03_*_var(--ow-motion-scale))]",
   // Type.
   "font-[family-name:inherit] font-medium text-(color:--ow-fg) no-underline",
-  // Touch, and its own layer so it lands without a pixel jump (NF-8).
+  // Touch, and its own layer so it lands without a pixel jump.
   "cursor-pointer touch-manipulation [-webkit-tap-highlight-color:transparent] will-change-[scale]",
-  // Releasing settles with the Core spring; the press is in within 90 ms (DP-4).
+  // Releasing settles with the Core spring; the press is in within 90 ms.
   "transition-[scale] duration-(--ow-spring-settle-duration) ease-(--ow-spring-settle)",
   "held:scale-(--_press) held:duration-90 held:ease-(--ow-ease-out)",
   // The face, drawn by ::before under the content: a fill, the hover tint over it, an edge. Held,
@@ -39,15 +39,15 @@ const root = [
   "before:pointer-events-none before:bg-transparent before:bg-[linear-gradient(var(--_tint)_0_0)]",
   "before:shadow-none [--_tint:transparent] pointer-fine:hover:not-data-disabled:[--_tint:var(--ow-hover)]",
   "held:before:bg-(color:--ow-pressed-bg) held:before:bg-none held:before:shadow-none",
-  // Icon only (FR-10a): square, the same height as the others.
+  // Icon only: square, the same height as the others.
   "data-icon-only:p-[calc(var(--_py)_+_(1lh_-_var(--icon))_/_2)] data-icon-only:[--_icon-margin:0]",
-  // FR-13: 2px outside the face.
+  // 2px outside the face.
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(color:--ow-focus)",
   "data-disabled:not-data-loading:cursor-not-allowed data-disabled:not-data-loading:opacity-50",
   "data-loading:cursor-progress",
-  // FR-20: no movement; the press is the material alone.
+  // No movement; the press is the material alone.
   "motion-reduce:[--_press:1]",
-  // DP-8: materials drop out, so an outline draws the edge in the system color.
+  // Materials drop out, so an outline draws the edge in the system color.
   "forced-colors:focus-visible:outline-2 forced-colors:focus-visible:outline-offset-2",
   "forced-colors:focus-visible:outline-[Highlight]",
   "forced-colors:data-disabled:not-data-loading:text-[GrayText]",

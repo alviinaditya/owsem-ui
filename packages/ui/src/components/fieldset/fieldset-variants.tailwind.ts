@@ -8,7 +8,7 @@ const root = ["flex flex-col gap-[1.25em] min-w-0 m-0 p-0 border-0 text-[0.875re
 // fields, on top of their gap.
 const legend = [
   "m-0 text-(color:--ow-fg) text-[length:inherit] font-semibold",
-  "after:block after:block-[0.75em] after:content-['']",
+  "after:block after:h-[0.75em] after:content-['']",
   "data-disabled:cursor-not-allowed data-disabled:opacity-45",
 ];
 

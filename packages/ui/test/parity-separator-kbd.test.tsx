@@ -22,7 +22,7 @@ const tw = tailwindParity(
     ...Object.values(kbdSlots),
     SEPARATOR_OVERRIDES,
     KBD_OVERRIDES,
-    "data-[orientation=horizontal]:border-bs-4 data-[orientation=vertical]:border-s-4",
+    "data-[orientation=horizontal]:border-t-4 data-[orientation=vertical]:border-s-4",
   ),
 );
 
@@ -200,7 +200,7 @@ describe("className on Separator and Kbd in Tailwind CSS v4", () => {
     tw.load();
     const screen = await render(
       <div style={{ display: "flex", flexDirection: "column" }}>
-        <TwSeparator className="data-[orientation=horizontal]:border-bs-4" />
+        <TwSeparator className="data-[orientation=horizontal]:border-t-4" />
       </div>,
     );
     const line = screen.container.querySelector('[role="separator"]');

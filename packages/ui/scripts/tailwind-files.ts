@@ -6,11 +6,26 @@
  * writes the result to src/tailwind/.
  */
 
-/** Components with a `<name>-variants.tailwind.ts`. */
-export const components: string[] = ["button"];
+/**
+ * Components with a `<name>-variants.tailwind.ts`. A component that imports another (Field uses
+ * Input) needs it listed here too.
+ */
+export const components: string[] = [
+  "button",
+  "separator",
+  "kbd",
+  "toggle",
+  "input",
+  "field",
+  "fieldset",
+  "form",
+];
 
 const HEADER = "// Generated from";
 const CORE = /"\.\.\/\.\.\/core\/([^"]+)"/g;
+const SIBLING = /"\.\/([^"./]+)"/g;
+// Another component's folder: "../input/input". The same path resolves in src/tailwind/.
+const COMPONENT = /"\.\.\/([a-z][a-z0-9-]*)\/[^"]+"/g;
 
 /** Source files by path under src/, for example "components/button/button.tsx". */
 export type Sources = Record<string, string>;
@@ -28,15 +43,26 @@ export function generate(sources: Sources): Sources {
     return code;
   };
   const header = (from: string) => `${HEADER} ${from} by scripts/build-tailwind.ts; do not edit.\n`;
-  /** Imports of core/ move to lib/, and are noted for copying. */
-  const relink = (file: string, code: string, prefix = "../lib/"): string =>
-    code.replace(CORE, (_, core: string) => {
-      if (!sources[`core/${core}.ts`] && !TAILWIND_CORE[core]) {
-        throw new Error(`${file}: core/${core} is not a module.`);
-      }
-      lib.add(core);
-      return `"${prefix}${core}"`;
-    });
+  /** A core module a file imports: it moves to lib/, and is noted for copying. */
+  const take = (file: string, core: string): void => {
+    if (!sources[`core/${core}.ts`] && !TAILWIND_CORE[core]) {
+      throw new Error(`${file}: core/${core} is not a module.`);
+    }
+    lib.add(core);
+  };
+  /** Imports of core/ move to lib/; another component must have a Tailwind flavor too. */
+  const relink = (file: string, code: string, own: string): string =>
+    code
+      .replace(CORE, (_, core: string) => {
+        take(file, core);
+        return `"../lib/${core}"`;
+      })
+      .replace(COMPONENT, (match, other: string) => {
+        if (other !== own && other !== "lib" && !components.includes(other)) {
+          throw new Error(`${file}: imports ${other}, which has no Tailwind flavor yet.`);
+        }
+        return match;
+      });
 
   for (const name of components) {
     const dir = `components/${name}/`;
@@ -49,13 +75,21 @@ export function generate(sources: Sources): Sources {
     for (const file of names) {
       const source = file === `${variants}.ts` ? `${dir}${variants}.tailwind.ts` : dir + file;
       const code = need(source).replace(`import "./${name}.css";\n`, "");
-      files[`${name}/${file}`] = header(`components/${name}`) + relink(file, code);
+      files[`${name}/${file}`] =
+        header(`components/${name}`) + relink(`${name}/${file}`, code, name);
     }
   }
-  for (const core of [...lib].sort()) {
+  // A core module may take its siblings, so this walks a set that grows.
+  for (const core of lib) {
     const tailwind = TAILWIND_CORE[core];
     const from = tailwind ?? `core/${core}.ts`;
-    files[`lib/${core}.ts`] = header(from) + relink(from, need(from), "./");
+    // A core module imports its siblings as "./x"; they sit side by side in lib/ too.
+    const code = need(from).replace(SIBLING, (match, next: string) => {
+      if (!sources[`core/${next}.ts`]) return match;
+      take(from, next);
+      return match;
+    });
+    files[`lib/${core}.ts`] = header(from) + code;
   }
   return files;
 }

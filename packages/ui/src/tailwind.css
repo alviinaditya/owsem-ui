@@ -73,3 +73,31 @@
 
 /* A held press: a pointer or a key down, never while disabled. */
 @custom-variant held (&:is(:active, [data-held]):not([data-disabled]));
+
+/* An input that is invalid, by Base UI's attribute or the author's; no more specific than a class. */
+@custom-variant ow-input-invalid (&:where([data-invalid], [aria-invalid="true"]));
+
+/* An input that is disabled, natively or by Base UI. */
+@custom-variant ow-input-disabled (&:where([data-disabled], :disabled));
+
+/* Input rejects with a shake, and with a blink when motion is reduced. */
+@keyframes ow-input-shake {
+  20% {
+    transform: translateX(calc(-4px * var(--ow-motion-scale)));
+  }
+  40% {
+    transform: translateX(calc(4px * var(--ow-motion-scale)));
+  }
+  60% {
+    transform: translateX(calc(-2px * var(--ow-motion-scale)));
+  }
+  80% {
+    transform: translateX(calc(2px * var(--ow-motion-scale)));
+  }
+}
+
+@keyframes ow-input-blink {
+  from {
+    opacity: 0.6;
+  }
+}

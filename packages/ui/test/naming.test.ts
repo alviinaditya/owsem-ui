@@ -33,9 +33,16 @@ const uncomment = (text: string) =>
 /** Class names in a stylesheet's selectors. */
 const cssClasses = (css: string) =>
   new Set([...uncomment(css).matchAll(/\.(ow-[\w-]+)/g)].map((m) => m[1] as string));
-/** Class names a source file renders: string literals that start with ow-. */
+/**
+ * Class names a source file renders: string literals that start with ow-. A Tailwind candidate
+ * that begins with a custom variant (`ow-input-invalid:bg-red-500`) is a utility, not a class.
+ */
 const sourceClasses = (source: string) =>
-  new Set([...uncomment(source).matchAll(/["'`](ow-[^"'`\s]*)/g)].map((m) => m[1] as string));
+  new Set(
+    [...uncomment(source).matchAll(/["'`](ow-[^"'`\s]*)/g)]
+      .map((m) => m[1] as string)
+      .filter((name) => !name.includes(":")),
+  );
 
 const rendered = new Set(Object.values(sources).flatMap((source) => [...sourceClasses(source)]));
 

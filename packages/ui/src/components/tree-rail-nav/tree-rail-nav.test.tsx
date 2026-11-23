@@ -536,6 +536,7 @@ test("every part has its data-slot", async () => {
   expect([nav.dataset.slot, ...slots]).toEqual([
     "tree-rail-nav",
     "tree-rail-nav-tree",
+    "glide",
     "tree-rail-nav-rail",
     "tree-rail-nav-origin",
     "tree-rail-nav-list",

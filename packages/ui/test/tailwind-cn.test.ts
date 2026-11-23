@@ -14,12 +14,22 @@ import {
 } from "../src/tailwind/input/input-variants";
 import { kbdSlots } from "../src/tailwind/kbd/kbd-variants";
 import { cn } from "../src/tailwind/lib/cn";
+import { glideSlots } from "../src/tailwind/lib/glide/glide-variants";
 import { popoverSlots } from "../src/tailwind/popover/popover-variants";
+import {
+  radioGroupSlots,
+  radioGroupVariants,
+} from "../src/tailwind/radio-group/radio-group-variants";
 import { scrollAreaSlots } from "../src/tailwind/scroll-area/scroll-area-variants";
 import { separatorSlots } from "../src/tailwind/separator/separator-variants";
 import { switchSlots, switchVariants } from "../src/tailwind/switch/switch-variants";
 import { tableSlots, tableVariants } from "../src/tailwind/table/table-variants";
+import { tabsListVariants, tabsSlots } from "../src/tailwind/tabs/tabs-variants";
 import { toggleSlots, toggleVariants } from "../src/tailwind/toggle/toggle-variants";
+import {
+  toggleGroupSlots,
+  toggleGroupVariants,
+} from "../src/tailwind/toggle-group/toggle-group-variants";
 import { tooltipSlots } from "../src/tailwind/tooltip/tooltip-variants";
 import { classNames } from "./parity";
 
@@ -35,14 +45,18 @@ const all = classNames(
     fieldSlots,
     fieldsetSlots,
     formSlots,
+    glideSlots,
     iconMorphSlots,
     inputSlots,
     kbdSlots,
     popoverSlots,
+    radioGroupSlots,
     scrollAreaSlots,
     separatorSlots,
     switchSlots,
     tableSlots,
+    tabsSlots,
+    toggleGroupSlots,
     tooltipSlots,
   ].flatMap((slots) => Object.values(slots)),
   ...Object.values(toggleSlots),
@@ -51,6 +65,9 @@ const all = classNames(
     checkboxVariants({ size }),
     switchVariants({ size }),
     toggleVariants({ size }),
+    radioGroupVariants({ size }),
+    toggleGroupVariants({ size }),
+    tabsListVariants({ size }),
     inputVariants({ size }),
     inputWrapperVariants({ size }),
     ...(["primary", "secondary", "outline", "ghost", "link", "destructive"] as const).flatMap(
@@ -87,6 +104,7 @@ const BUILT_IN: Record<string, string> = {
   py: "py-1",
   rounded: "rounded-none",
   scale: "scale-50",
+  "scroll-p": "scroll-p-1",
   shadow: "shadow-none",
   size: "size-4",
   text: "text-red-500",
@@ -137,5 +155,60 @@ describe("cn and the shorthands of the class maps", () => {
 
   test("a plain utility still merges", () => {
     expect(cn("px-4", false, undefined, "px-8")).toBe("px-8");
+  });
+});
+
+describe("a user's className wins over Radio Group, Toggle Group, and Tabs", () => {
+  // The shorthands above are replaced by built-ins; these are the parts a user reaches first.
+  const tokens = (value: string) => value.split(" ");
+
+  test("on the root", () => {
+    const group = cn(radioGroupVariants({ size: "sm" }), "text-lg [--py:1em] gap-2 rounded-none");
+    expect(tokens(group)).toContain("text-lg");
+    expect(tokens(group)).toContain("[--py:1em]");
+    expect(tokens(group)).not.toContain("text-[0.8125rem]");
+    expect(tokens(group)).not.toContain("[--py:0.6058em]");
+    expect(tokens(cn(tabsSlots.root, "gap-0 flex-col"))).not.toContain("gap-[0.75em]");
+    const toggles = cn(toggleGroupVariants({ size: "lg" }), "text-sm p-0 rounded-none gap-0");
+    for (const gone of ["text-[16px]", "p-(--_inset)", "gap-[2px]"]) {
+      expect(tokens(toggles), gone).not.toContain(gone);
+    }
+  });
+
+  test("on the list", () => {
+    const list = cn(tabsListVariants({ size: "md" }), "text-lg p-0 overflow-visible bg-red-500");
+    for (const gone of ["text-[14px]", "p-(--_inset)", "overflow-x-auto", "bg-(color:--_well)"]) {
+      expect(tokens(list), gone).not.toContain(gone);
+    }
+    expect(tokens(list)).toContain("overflow-visible");
+  });
+
+  test("on an item, a tab, and a radio", () => {
+    const item = tokens(cn(toggleGroupSlots.item, "px-8 py-1 text-red-500 rounded-none"));
+    for (const gone of [
+      "px-(--px)",
+      "py-(--_py)",
+      "text-(color:--_muted)",
+      "rounded-(--_radius)",
+    ]) {
+      expect(item, gone).not.toContain(gone);
+    }
+    const tab = tokens(
+      cn(tabsSlots.tab, "px-8 py-1 text-red-500 rounded-none data-active:bg-red-500"),
+    );
+    for (const gone of [
+      "px-(--px)",
+      "py-(--_py)",
+      "text-(color:--_muted)",
+      "rounded-(--_radius)",
+    ]) {
+      expect(tab, gone).not.toContain(gone);
+    }
+    expect(tab).toContain("data-active:bg-red-500");
+    const radio = tokens(cn(radioGroupSlots.radio, "rounded-none cursor-default size-4"));
+    for (const gone of ["rounded-[50%]", "cursor-pointer", "size-(--icon)"]) {
+      expect(radio, gone).not.toContain(gone);
+    }
+    expect(tokens(cn(glideSlots.root, "opacity-100 rounded-none"))).not.toContain("opacity-0");
   });
 });

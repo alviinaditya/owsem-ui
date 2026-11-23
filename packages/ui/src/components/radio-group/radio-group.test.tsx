@@ -707,5 +707,5 @@ test("every part has its data-slot", async () => {
   const slots = [...screen.container.querySelectorAll("[data-slot]")].map((el) =>
     el.getAttribute("data-slot"),
   );
-  expect(slots).toEqual(["radio-group", "radio-group-radio", "radio-group-indicator"]);
+  expect(slots).toEqual(["radio-group", "glide", "radio-group-radio", "radio-group-indicator"]);
 });

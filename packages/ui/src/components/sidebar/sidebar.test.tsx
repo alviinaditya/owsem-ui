@@ -461,6 +461,7 @@ test("every part has its data-slot", async () => {
     "sidebar",
     "sidebar-header",
     "sidebar-content",
+    "glide",
     "sidebar-indicator",
     "sidebar-liquid",
     "sidebar-pulse",

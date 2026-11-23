@@ -160,3 +160,8 @@
 
 /* The viewport of a Scroll Area with `fade`; the Root is the group. */
 @custom-variant ow-scroll-area-fade (:where(.group\/ow-scroll-area[data-fade]) > &);
+
+/* A radio held down, itself or through its row, never while disabled or read only. */
+@custom-variant ow-radio-group-held (
+  &:where(:active, label:active *):where(:not([data-disabled], [data-readonly]))
+);

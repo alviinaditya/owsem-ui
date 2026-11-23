@@ -8,4 +8,9 @@ export {
   type GlideAxis,
   type GlideOptions,
 } from "./glide/glide";
-export { GlideHighlight, type UseGlide, useGlide } from "./glide/use-glide";
+export {
+  GlideHighlight,
+  type GlideHighlightProps,
+  type UseGlide,
+  useGlide,
+} from "./glide/use-glide";

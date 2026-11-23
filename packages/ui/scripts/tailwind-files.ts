@@ -2,8 +2,9 @@
  * The Tailwind CSS v4 version of the components: whole-file swaps. A component's
  * `<name>-variants.tailwind.ts` replaces its `<name>-variants.ts`, the component file loses its
  * CSS import, and `core/` files it imports are copied to lib/ (the Tailwind `cn` replaces the
- * plain one). Pure, so the freshness test runs it in the browser; the script build-tailwind.ts
- * writes the result to src/tailwind/.
+ * plain one, and a core module has a `.tailwind.ts` twin the same way: Glide's classes). Pure, so
+ * the freshness test runs it in the browser; the script build-tailwind.ts writes the result to
+ * src/tailwind/.
  */
 
 /**
@@ -28,11 +29,17 @@ export const components: string[] = [
   "dialog",
   "scroll-area",
   "table",
+  "radio-group",
+  "toggle-group",
+  "tabs",
 ];
 
 const HEADER = "// Generated from";
+// A core module a component imports, such as "../../core/glide/use-glide".
 const CORE = /"\.\.\/\.\.\/core\/([^"]+)"/g;
-const SIBLING = /"\.\/([^"./]+)"/g;
+// What a core module imports: its siblings ("./glide") and its parents ("../cn").
+const RELATIVE = /"(\.{1,2}\/[^"]+)"/g;
+const CORE_CSS = /^import "\.\/[^"]+\.css";\n/m;
 // Another component's folder: "../input/input". The same path resolves in src/tailwind/.
 const COMPONENT = /"\.\.\/([a-z][a-z0-9-]*)\/[^"]+"/g;
 
@@ -42,9 +49,20 @@ export type Sources = Record<string, string>;
 /** Core modules the Tailwind flavor has its own copy of, by name under core/. */
 const TAILWIND_CORE: Record<string, string> = { cn: "tailwind-src/cn.ts" };
 
+/** What an import (`spec`) in the folder `dir` of core/ points to, as a path under core/. */
+const within = (dir: string, spec: string): string => {
+  const parts = dir ? dir.split("/") : [];
+  for (const part of spec.split("/")) {
+    if (part === "..") parts.pop();
+    else if (part !== ".") parts.push(part);
+  }
+  return parts.join("/");
+};
+
 /** The files of src/tailwind/, by path under src/tailwind/. */
 export function generate(sources: Sources): Sources {
   const files: Sources = {};
+  // Core modules by their path under core/ without the extension ("glide/use-glide").
   const lib = new Set<string>();
   const need = (path: string): string => {
     const code = sources[path];
@@ -52,11 +70,18 @@ export function generate(sources: Sources): Sources {
     return code;
   };
   const header = (from: string) => `${HEADER} ${from} by scripts/build-tailwind.ts; do not edit.\n`;
+  /** The file a core module is copied from, and its extension: a Tailwind twin comes first. */
+  const coreFile = (core: string): { from: string; ext: string } | undefined => {
+    const twin = `core/${core}.tailwind.ts`;
+    const own = TAILWIND_CORE[core];
+    if (own) return { from: own, ext: ".ts" };
+    if (sources[twin] !== undefined) return { from: twin, ext: ".ts" };
+    const ext = [".ts", ".tsx"].find((end) => sources[`core/${core}${end}`] !== undefined);
+    return ext ? { from: `core/${core}${ext}`, ext } : undefined;
+  };
   /** A core module a file imports: it moves to lib/, and is noted for copying. */
   const take = (file: string, core: string): void => {
-    if (!sources[`core/${core}.ts`] && !TAILWIND_CORE[core]) {
-      throw new Error(`${file}: core/${core} is not a module.`);
-    }
+    if (!coreFile(core)) throw new Error(`${file}: core/${core} is not a module.`);
     lib.add(core);
   };
   /** Imports of core/ move to lib/; another component must have a Tailwind flavor too. */
@@ -88,17 +113,19 @@ export function generate(sources: Sources): Sources {
         header(`components/${name}`) + relink(`${name}/${file}`, code, name);
     }
   }
-  // A core module may take its siblings, so this walks a set that grows.
+  // A core module may take its siblings and parents, so this walks a set that grows. They sit
+  // side by side in lib/ as in core/, so their paths stay as written.
   for (const core of lib) {
-    const tailwind = TAILWIND_CORE[core];
-    const from = tailwind ?? `core/${core}.ts`;
-    // A core module imports its siblings as "./x"; they sit side by side in lib/ too.
-    const code = need(from).replace(SIBLING, (match, next: string) => {
-      if (!sources[`core/${next}.ts`]) return match;
-      take(from, next);
-      return match;
-    });
-    files[`lib/${core}.ts`] = header(from) + code;
+    const { from, ext } = coreFile(core) as { from: string; ext: string };
+    const dir = core.slice(0, Math.max(0, core.lastIndexOf("/")));
+    const code = need(from)
+      .replace(CORE_CSS, "")
+      .replace(RELATIVE, (match, spec: string) => {
+        const next = within(dir, spec);
+        if (coreFile(next)) take(from, next);
+        return match;
+      });
+    files[`lib/${core}${ext}`] = header(from) + code;
   }
   return files;
 }

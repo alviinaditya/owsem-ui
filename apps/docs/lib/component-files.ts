@@ -345,9 +345,10 @@ export function componentFiles(
     const found = new Set<string>();
     reached.set(
       path,
-      path.endsWith(".css")
+      // A lib file keeps its relative imports: its siblings and parents install beside it.
+      path.endsWith(".css") || !component
         ? code
-        : rewriteImports(component ?? name, code, found, source.tailwind ? "tailwind" : "css"),
+        : rewriteImports(component, code, found, source.tailwind ? "tailwind" : "css"),
     );
     const specs = path.endsWith(".css")
       ? [...code.matchAll(/@import\s+(?:url\()?["']?(\.{1,2}\/[^"')\s;]+)/g)]

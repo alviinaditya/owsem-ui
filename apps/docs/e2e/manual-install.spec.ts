@@ -107,10 +107,42 @@ test("Copy takes the whole file, and Expand shows all of a collapsed one", async
 
 test("Manual lists only the files the component imports", async ({ page }) => {
   await openManual(page, "/en/tabs");
-  const titles = manual(page).locator(".ow-code-block__title");
+  const titles = manual(page).locator(".ow-code-block__title:visible");
   await expect(titles.filter({ hasText: "components/owsem/toggle-group/thumb.ts" })).toHaveCount(1);
   await expect(titles.filter({ hasText: "toggle-group/toggle-group.tsx" })).toHaveCount(0);
   await expect(titles.filter({ hasText: "toggle-group/toggle-group.css" })).toHaveCount(0);
+  // Glide installs with its CSS in the CSS flavor.
+  for (const path of ["lib/owsem/glide/use-glide.tsx", "lib/owsem/glide/glide.css"]) {
+    await expect(titles.filter({ hasText: path })).toHaveCount(1);
+  }
+});
+
+test("Tailwind Tabs: the thumb and Glide with its classes, no CSS file", async ({ page }) => {
+  test.skip(
+    !existsSync(join(process.cwd(), "../../packages/ui/src/tailwind/tabs")),
+    "packages/ui/src/tailwind/tabs/ does not exist yet",
+  );
+  await openTailwindManual(page, "/en/tabs");
+  const titles = manual(page).locator(".ow-code-block__title:visible");
+  for (const path of [
+    "components/owsem/tabs/tabs.tsx",
+    "components/owsem/tabs/tabs-variants.ts",
+    "components/owsem/toggle-group/thumb.ts",
+    "lib/owsem/glide/use-glide.tsx",
+    "lib/owsem/glide/glide.ts",
+    "lib/owsem/glide/glide-variants.ts",
+    "lib/owsem/cn.ts",
+  ]) {
+    await expect(titles.filter({ hasText: path })).toHaveCount(1);
+  }
+  await expect(titles.filter({ hasText: ".css" }).filter({ hasText: "glide" })).toHaveCount(0);
+  await expect(titles.filter({ hasText: "tabs.css" })).toHaveCount(0);
+  const classes = await copyVisibleFile(page, "lib/owsem/glide/glide-variants.ts");
+  expect(classes).toContain("relative isolate");
+  const hook = await copyVisibleFile(page, "lib/owsem/glide/use-glide.tsx");
+  expect(hook).toContain('from "./glide-variants"');
+  expect(hook).toContain('from "../cn"');
+  expect(hook).not.toContain(".css");
 });
 
 test("the tokens file keeps only the tokens the component reads", async ({ page }) => {

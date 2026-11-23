@@ -480,6 +480,7 @@ test("every part has its data-slot", async () => {
   );
   expect(slots).toEqual([
     "toggle-group",
+    "glide",
     "toggle-group-thumb",
     "toggle-group-item",
     "toggle-group-label",

@@ -802,6 +802,7 @@ test("every part has its data-slot", async () => {
   expect(slots).toEqual([
     "tabs",
     "tabs-list",
+    "glide",
     "tabs-indicator",
     "tabs-tab",
     "tabs-label",

@@ -1,8 +1,8 @@
 "use client";
 
 import {
-  type ComponentPropsWithoutRef,
-  type JSX,
+  type ComponentProps,
+  type ReactElement,
   type RefCallback,
   type RefObject,
   useCallback,
@@ -10,10 +10,10 @@ import {
   useRef,
   useState,
 } from "react";
+import { cn } from "../cn";
 import { createGlide, type Glide, type GlideOptions } from "./glide";
+import { glideSlots } from "./glide-variants";
 import "./glide.css";
-
-const cls = { root: "ow-glide" } as const;
 
 export interface UseGlide<T extends HTMLElement> {
   /** For the container: the items and the highlight go inside it. */
@@ -58,20 +58,22 @@ export function useGlide<T extends HTMLElement = HTMLElement>(
   return { ref: setContainer, highlightRef, setActive, refresh };
 }
 
-/** The highlight; decorative, so hidden from assistive technology. */
-export function GlideHighlight({
-  glide,
-  className,
-  ...props
-}: Omit<ComponentPropsWithoutRef<"span">, "children"> & {
+export interface GlideHighlightProps
+  extends Omit<ComponentProps<"span">, "children" | "className" | "ref"> {
+  /** What `useGlide` returned. */
   glide: Pick<UseGlide<HTMLElement>, "highlightRef">;
-}): JSX.Element {
+  className?: string | undefined;
+}
+
+/** The highlight; decorative, so hidden from assistive technology. */
+export function GlideHighlight({ glide, className, ...props }: GlideHighlightProps): ReactElement {
   return (
     <span
+      data-slot="glide"
       {...props}
       ref={glide.highlightRef}
       aria-hidden="true"
-      className={className ? `${cls.root} ${className}` : cls.root}
+      className={cn(glideSlots.root, className)}
     />
   );
 }

@@ -9,3 +9,4 @@ export type {
   TableRowProps,
 } from "./table";
 export * as Table from "./table.parts";
+export type { TableSize } from "./table-variants";

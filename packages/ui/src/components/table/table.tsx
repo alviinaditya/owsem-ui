@@ -4,9 +4,7 @@ import { useRender } from "@base-ui/react/use-render";
 import {
   type ComponentPropsWithRef,
   createContext,
-  type ForwardRefExoticComponent,
-  forwardRef,
-  type RefAttributes,
+  type ReactElement,
   useCallback,
   useContext,
   useEffect,
@@ -16,23 +14,10 @@ import {
   useRef,
   useState,
 } from "react";
+import { cn } from "../../core/cn";
+import { useMergedRefs } from "../../core/merge-refs";
+import { type TableSize, tableSlots, tableVariants } from "./table-variants";
 import "./table.css";
-
-const cls = {
-  root: "ow-table",
-  scroll: "ow-table__scroll",
-  table: "ow-table__table",
-  caption: "ow-table__caption",
-  header: "ow-table__header",
-  body: "ow-table__body",
-  footer: "ow-table__footer",
-  row: "ow-table__row",
-  head: "ow-table__head",
-  cell: "ow-table__cell",
-  value: "ow-table__value",
-} as const;
-
-const join = (base: string, extra: string | undefined) => (extra ? `${base} ${extra}` : base);
 
 export type TableLayout = "table" | "stack" | "auto";
 
@@ -55,18 +40,19 @@ const SectionContext = createContext<Section>("body");
 /** In a stacked table the display types are overridden, so the table roles are stated again. */
 const useRole = (role: string) => (useContext(TableContext).stacked ? role : undefined);
 
-export interface TableRootProps extends useRender.ComponentProps<"div"> {
+export interface TableRootProps extends Omit<useRender.ComponentProps<"div">, "className"> {
+  className?: string | undefined;
   /**
    * `"table"` always draws a table that scrolls sideways when it is wider; `"stack"` always shows
    * each row as a block; `"auto"` stacks when the Root is narrower than `stackBelow`.
    */
-  layout?: TableLayout;
+  layout?: TableLayout | undefined;
   /** Cell padding: `"sm"` is tighter. */
-  size?: "default" | "sm";
+  size?: TableSize | undefined;
   /** The Root width in pixels under which `layout="auto"` stacks. */
-  stackBelow?: number;
+  stackBelow?: number | undefined;
   /** Props for the `<table>` inside the Root. */
-  tableProps?: ComponentPropsWithRef<"table">;
+  tableProps?: ComponentPropsWithRef<"table"> | undefined;
 }
 
 /**
@@ -75,23 +61,19 @@ export interface TableRootProps extends useRender.ComponentProps<"div"> {
  * its edges fading on the sides that have more; it is focusable then, so the keyboard can scroll
  * it, and `aria-label` or `aria-labelledby` (else the Caption) name it. Narrow, rows can stack.
  */
-export const TableRoot: ForwardRefExoticComponent<
-  Omit<TableRootProps, "ref"> & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, Omit<TableRootProps, "ref">>(function TableRoot(
-  {
-    className,
-    render,
-    layout = "auto",
-    stackBelow = 480,
-    size,
-    tableProps,
-    children,
-    "aria-label": ariaLabel,
-    "aria-labelledby": labelledby,
-    ...props
-  },
+export function TableRoot({
+  className,
+  render,
+  layout = "auto",
+  stackBelow = 480,
+  size,
+  tableProps,
+  children,
+  "aria-label": ariaLabel,
+  "aria-labelledby": labelledby,
   ref,
-) {
+  ...props
+}: TableRootProps): ReactElement {
   const own = useRef<HTMLDivElement | null>(null);
   const scroller = useRef<HTMLDivElement | null>(null);
   const [narrow, setNarrow] = useState(false);
@@ -149,14 +131,7 @@ export const TableRoot: ForwardRefExoticComponent<
     };
   }, []);
 
-  const setRef = useCallback(
-    (el: HTMLDivElement | null) => {
-      own.current = el;
-      if (typeof ref === "function") ref(el);
-      else if (ref) ref.current = el;
-    },
-    [ref],
-  );
+  const merged = useMergedRefs(own, ref);
 
   const name = labelledby ?? captionId;
   // While it scrolls it is a named region, so the keyboard user knows what they reached.
@@ -171,23 +146,26 @@ export const TableRoot: ForwardRefExoticComponent<
       {useRender({
         defaultTagName: "div",
         render,
-        ref: setRef,
+        ref: merged,
         props: {
+          "data-slot": "table",
           ...props,
-          className: join(cls.root, className),
+          className: cn(tableVariants({ size }), className),
           "data-layout": stacked ? "stack" : "table",
           "data-size": size,
           children: (
             <div
+              data-slot="table-scroll"
               ref={scroller}
-              className={cls.scroll}
+              className={tableSlots.scroll}
               // Focusable only while it scrolls, so a keyboard can reach what is off to the side.
               tabIndex={overflowing ? 0 : undefined}
               {...(overflowing ? region : null)}
             >
               <table
+                data-slot="table-table"
                 {...table}
-                className={join(cls.table, tableClass)}
+                className={cn(tableSlots.table, tableClass)}
                 role={role ?? (stacked ? "table" : undefined)}
               >
                 {children}
@@ -198,175 +176,200 @@ export const TableRoot: ForwardRefExoticComponent<
       })}
     </TableContext.Provider>
   );
-});
+}
 
-export type TableCaptionProps = useRender.ComponentProps<"caption"> & {
+export interface TableCaptionProps extends Omit<useRender.ComponentProps<"caption">, "className"> {
+  className?: string | undefined;
   /** Hides it from sight but keeps it as the table's name. */
-  visuallyHidden?: boolean;
-};
+  visuallyHidden?: boolean | undefined;
+}
 
 /** The table's title, above the card; it names the table. */
-export const TableCaption: ForwardRefExoticComponent<
-  Omit<TableCaptionProps, "ref"> & RefAttributes<HTMLTableCaptionElement>
-> = forwardRef<HTMLTableCaptionElement, Omit<TableCaptionProps, "ref">>(function TableCaption(
-  { className, render, visuallyHidden, ...props },
+export function TableCaption({
+  className,
+  render,
+  visuallyHidden,
   ref,
-) {
+  ...props
+}: TableCaptionProps): ReactElement {
   const id = useId();
   return useRender({
     defaultTagName: "caption",
     render,
     ref,
     props: {
+      "data-slot": "table-caption",
       id,
       ...props,
-      className: join(cls.caption, className),
+      className: cn(tableSlots.caption, className),
       "data-visually-hidden": visuallyHidden ? "" : undefined,
     },
   });
-});
-
-function section(
-  name: "header" | "body" | "footer",
-  tag: "thead" | "tbody" | "tfoot",
-  kind: Section,
-) {
-  const Part = forwardRef<HTMLTableSectionElement, Omit<useRender.ComponentProps<"tbody">, "ref">>(
-    function Part({ className, render, ...props }, ref) {
-      const role = useRole("rowgroup");
-      return (
-        <SectionContext.Provider value={kind}>
-          {useRender({
-            defaultTagName: tag,
-            render,
-            ref,
-            props: { role, ...props, className: join(cls[name], className) },
-          })}
-        </SectionContext.Provider>
-      );
-    },
-  );
-  return Part;
 }
 
-export type TableHeaderProps = useRender.ComponentProps<"thead">;
-export type TableBodyProps = useRender.ComponentProps<"tbody">;
-export type TableFooterProps = useRender.ComponentProps<"tfoot">;
+export interface TableHeaderProps extends Omit<useRender.ComponentProps<"thead">, "className"> {
+  className?: string | undefined;
+}
 
 /** The header rows: their cells name the columns, and label the stacked cells. */
-export const TableHeader: ForwardRefExoticComponent<
-  Omit<TableHeaderProps, "ref"> & RefAttributes<HTMLTableSectionElement>
-> = section("header", "thead", "head");
-TableHeader.displayName = "TableHeader";
+export function TableHeader({ className, render, ref, ...props }: TableHeaderProps): ReactElement {
+  const role = useRole("rowgroup");
+  return (
+    <SectionContext.Provider value="head">
+      {useRender({
+        defaultTagName: "thead",
+        render,
+        ref,
+        props: {
+          "data-slot": "table-header",
+          role,
+          ...props,
+          className: cn(tableSlots.header, className),
+        },
+      })}
+    </SectionContext.Provider>
+  );
+}
+
+export interface TableBodyProps extends Omit<useRender.ComponentProps<"tbody">, "className"> {
+  className?: string | undefined;
+}
 
 /** The body rows. */
-export const TableBody: ForwardRefExoticComponent<
-  Omit<TableBodyProps, "ref"> & RefAttributes<HTMLTableSectionElement>
-> = section("body", "tbody", "body");
-TableBody.displayName = "TableBody";
+export function TableBody({ className, render, ref, ...props }: TableBodyProps): ReactElement {
+  const role = useRole("rowgroup");
+  return (
+    <SectionContext.Provider value="body">
+      {useRender({
+        defaultTagName: "tbody",
+        render,
+        ref,
+        props: {
+          "data-slot": "table-body",
+          role,
+          ...props,
+          className: cn(tableSlots.body, className),
+        },
+      })}
+    </SectionContext.Provider>
+  );
+}
+
+export interface TableFooterProps extends Omit<useRender.ComponentProps<"tfoot">, "className"> {
+  className?: string | undefined;
+}
 
 /** The footer rows, such as totals. */
-export const TableFooter: ForwardRefExoticComponent<
-  Omit<TableFooterProps, "ref"> & RefAttributes<HTMLTableSectionElement>
-> = section("footer", "tfoot", "foot");
-TableFooter.displayName = "TableFooter";
+export function TableFooter({ className, render, ref, ...props }: TableFooterProps): ReactElement {
+  const role = useRole("rowgroup");
+  return (
+    <SectionContext.Provider value="foot">
+      {useRender({
+        defaultTagName: "tfoot",
+        render,
+        ref,
+        props: {
+          "data-slot": "table-footer",
+          role,
+          ...props,
+          className: cn(tableSlots.footer, className),
+        },
+      })}
+    </SectionContext.Provider>
+  );
+}
 
-export type TableRowProps = useRender.ComponentProps<"tr">;
+export interface TableRowProps extends Omit<useRender.ComponentProps<"tr">, "className"> {
+  className?: string | undefined;
+}
 
 /** A row. Stacked, it is a block with its first cell as the title. */
-export const TableRow: ForwardRefExoticComponent<
-  Omit<TableRowProps, "ref"> & RefAttributes<HTMLTableRowElement>
-> = forwardRef<HTMLTableRowElement, Omit<TableRowProps, "ref">>(function TableRow(
-  { className, render, ...props },
-  ref,
-) {
+export function TableRow({ className, render, ref, ...props }: TableRowProps): ReactElement {
   const role = useRole("row");
   return useRender({
     defaultTagName: "tr",
     render,
     ref,
-    props: { role, ...props, className: join(cls.row, className) },
+    props: { "data-slot": "table-row", role, ...props, className: cn(tableSlots.row, className) },
   });
-});
+}
 
-export type TableHeadProps = useRender.ComponentProps<"th">;
+export interface TableHeadProps extends Omit<useRender.ComponentProps<"th">, "className"> {
+  className?: string | undefined;
+}
 
 /**
  * A heading cell (`th`). In the header it is a column heading (`scope="col"`) and its text labels
  * that column's cells when stacked; elsewhere it is a row heading (`scope="row"`).
  */
-export const TableHead: ForwardRefExoticComponent<
-  Omit<TableHeadProps, "ref"> & RefAttributes<HTMLTableCellElement>
-> = forwardRef<HTMLTableCellElement, Omit<TableHeadProps, "ref">>(function TableHead(
-  { className, render, scope, ...props },
+export function TableHead({
+  className,
+  render,
+  scope,
   ref,
-) {
+  ...props
+}: TableHeadProps): ReactElement {
   const kind = useContext(SectionContext);
   const { setLabel } = useContext(TableContext);
   const el = useRef<HTMLTableCellElement | null>(null);
+  const merged = useMergedRefs(el, ref);
   // Registers the text by column index; runs again when the content changes.
   useLayoutEffect(() => {
     const cell = el.current;
     if (cell && kind === "head") setLabel(cell.cellIndex, cell.textContent?.trim() ?? "");
   });
-  const setRef = useCallback(
-    (node: HTMLTableCellElement | null) => {
-      el.current = node;
-      if (typeof ref === "function") ref(node);
-      else if (ref) ref.current = node;
-    },
-    [ref],
-  );
   const role = useRole(kind === "head" ? "columnheader" : "rowheader");
   return useRender({
     defaultTagName: "th",
     render,
-    ref: setRef,
+    ref: merged,
     props: {
+      "data-slot": "table-head",
       role,
       scope: scope ?? (kind === "head" ? "col" : "row"),
       ...props,
-      className: join(cls.head, className),
+      className: cn(tableSlots.head, className),
     },
   });
-});
+}
 
-export type TableCellProps = useRender.ComponentProps<"td">;
+export interface TableCellProps extends Omit<useRender.ComponentProps<"td">, "className"> {
+  className?: string | undefined;
+}
 
 /** A data cell (`td`). Stacked, it shows its column's heading before its value. */
-export const TableCell: ForwardRefExoticComponent<
-  Omit<TableCellProps, "ref"> & RefAttributes<HTMLTableCellElement>
-> = forwardRef<HTMLTableCellElement, Omit<TableCellProps, "ref">>(function TableCell(
-  { className, render, children, ...props },
+export function TableCell({
+  className,
+  render,
+  children,
   ref,
-) {
+  ...props
+}: TableCellProps): ReactElement {
   const { labels } = useContext(TableContext);
   const el = useRef<HTMLTableCellElement | null>(null);
+  const merged = useMergedRefs(el, ref);
   const [label, setLabel] = useState<string>();
   useLayoutEffect(() => {
     const index = el.current?.cellIndex;
     setLabel(index === undefined ? undefined : labels[index]);
   }, [labels]);
-  const setRef = useCallback(
-    (node: HTMLTableCellElement | null) => {
-      el.current = node;
-      if (typeof ref === "function") ref(node);
-      else if (ref) ref.current = node;
-    },
-    [ref],
-  );
   const role = useRole("cell");
   return useRender({
     defaultTagName: "td",
     render,
-    ref: setRef,
+    ref: merged,
     props: {
+      "data-slot": "table-cell",
       role,
       "data-label": label || undefined,
       ...props,
-      className: join(cls.cell, className),
+      className: cn(tableSlots.cell, className),
       // One box for the value, so stacked it sits beside its heading, however it is made up.
-      children: <span className={cls.value}>{children}</span>,
+      children: (
+        <span data-slot="table-value" className={tableSlots.value}>
+          {children}
+        </span>
+      ),
     },
   });
-});
+}

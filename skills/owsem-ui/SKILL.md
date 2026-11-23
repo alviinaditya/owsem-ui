@@ -678,9 +678,8 @@ import { Separator } from "owsem-ui/base"; // or "@/components/owsem/separator"
 - Renders `<div role="separator">` with `aria-orientation`, `data-orientation`, and the
   `ow-separator` class: one 1 px hairline, a border in the line color. Not
   focusable, with no keyboard interaction. Use it instead of `<hr>` or a bordered `div`.
-- Props: `orientation` (`"horizontal"`, the default, or `"vertical"`), `className` (a string or
-  `(state) => string`), `style`, and `render`. Other props pass through to Base UI. The ref goes
-  to the `div`.
+- Props: `orientation` (`"horizontal"`, the default, or `"vertical"`), `className` (a string),
+  `style`, and `render`. Other props pass through to Base UI. The ref goes to the `div`.
 - Reads `--ow-line`.
 
 ### Kbd

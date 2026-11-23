@@ -19,14 +19,17 @@
  *   arrives, on a new click, or before the revert.
  */
 
+import { sidebarSlots } from "./sidebar-variants";
+
 export interface Indicator {
   destroy(): void;
 }
 
 export const PENDING_MS = 3000;
 
-const ITEM = ".ow-sidebar__link";
-const LIST = ".ow-sidebar__list";
+// The parts are found by their data-slot, never by class.
+const ITEM = '[data-slot="sidebar-link"]';
+const LIST = '[data-slot="sidebar-list"]';
 const DISABLED = '[data-disabled], [aria-disabled="true"]';
 const SVG = "http://www.w3.org/2000/svg";
 
@@ -120,21 +123,23 @@ export function createIndicator(root: HTMLElement, pill: HTMLElement): Indicator
     el.setAttribute("class", name);
     return el;
   };
-  const svg = shape("svg", "ow-sidebar__liquid");
+  const svg = shape("svg", sidebarSlots.liquid);
+  svg.setAttribute("data-slot", "sidebar-liquid");
   svg.setAttribute("width", "1");
   svg.setAttribute("height", "1");
   svg.setAttribute("aria-hidden", "true");
-  const neck = shape("path", "ow-sidebar__liquid-part");
-  const rem = shape("circle", "ow-sidebar__liquid-part");
-  const tail = shape("path", "ow-sidebar__liquid-part");
-  const back = shape("circle", "ow-sidebar__liquid-part");
-  const body = shape("rect", "ow-sidebar__liquid-part");
-  const bead = shape("circle", "ow-sidebar__liquid-dot");
+  const neck = shape("path", sidebarSlots.liquidPart);
+  const rem = shape("circle", sidebarSlots.liquidPart);
+  const tail = shape("path", sidebarSlots.liquidPart);
+  const back = shape("circle", sidebarSlots.liquidPart);
+  const body = shape("rect", sidebarSlots.liquidPart);
+  const bead = shape("circle", sidebarSlots.liquidDot);
   for (const el of [neck, rem, tail, back, body, bead]) svg.append(el);
   pill.append(svg);
   // The loading pulse: an HTML dot over the bead, shown by `data-waiting`, animated in CSS.
   const pulse = document.createElement("span");
-  pulse.className = "ow-sidebar__pulse";
+  pulse.className = sidebarSlots.pulse;
+  pulse.setAttribute("data-slot", "sidebar-pulse");
   pulse.setAttribute("aria-hidden", "true");
   pill.append(pulse);
 

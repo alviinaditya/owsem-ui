@@ -1,6 +1,7 @@
 /**
  * The rail of Tree Rail Nav: a base line per level, and a trail from the origin (an Origin label,
- * or else the first row) down through each parent to the current item. Framework-free; the React parts render the markup.
+ * or else the first row) down through each parent to the current item. Framework-free; the React
+ * parts render the markup.
  *
  * Geometry is read from the DOM: x positions from the root's --_r0 … --_r2 (one rail per level),
  * y positions from the rows and from the Origin label, when there is one. Redraws run from a
@@ -8,6 +9,8 @@
  * travels (back to the shared branch, then down to the new item, with a pulse on arrival). The SVG
  * is mirrored in CSS for right-to-left text, so x is always measured from the left.
  */
+
+import { treeRailNavSlots } from "./tree-rail-nav-variants";
 
 export interface TreeRail {
   refresh(): void;
@@ -19,33 +22,12 @@ type Segment =
   | { t: "C"; x0: number; y0: number; x1: number; y1: number };
 type Route = Segment[] & { limit?: number };
 
-/** Class names of every part, the React parts' and the rail's (FR-6a). */
-export const cls = {
-  root: "ow-tree-rail-nav",
-  tree: "ow-tree-rail-nav__tree",
-  list: "ow-tree-rail-nav__list",
-  node: "ow-tree-rail-nav__node",
-  item: "ow-tree-rail-nav__item",
-  chevron: "ow-tree-rail-nav__chevron",
-  panel: "ow-tree-rail-nav__panel",
-  icon: "ow-tree-rail-nav__icon",
-  origin: "ow-tree-rail-nav__origin",
-  label: "ow-tree-rail-nav__label",
-  labelText: "ow-tree-rail-nav__label-text",
-  rail: "ow-tree-rail-nav__rail",
-  railBase: "ow-tree-rail-nav__rail-base",
-  railActive: "ow-tree-rail-nav__rail-active",
-  railTrail: "ow-tree-rail-nav__rail-trail",
-  railNodes: "ow-tree-rail-nav__rail-nodes",
-  railNode: "ow-tree-rail-nav__rail-node",
-  railMarker: "ow-tree-rail-nav__rail-marker",
-  railHalo: "ow-tree-rail-nav__rail-halo",
-  railDot: "ow-tree-rail-nav__rail-dot",
-} as const;
-
 const NS = "http://www.w3.org/2000/svg";
-const ROW = `.${cls.item}`;
-const PANEL = `.${cls.panel}`;
+// The parts are found by their data-slot, never by class. A row is a Link or a Toggle.
+export const ROW = ':is([data-slot="tree-rail-nav-link"], [data-slot="tree-rail-nav-toggle"])';
+export const PANEL = '[data-slot="tree-rail-nav-panel"]';
+const ORIGIN = '[data-slot="tree-rail-nav-origin"]';
+const LIST = '[data-slot="tree-rail-nav-list"]';
 /** How long a row keeps its tint while it closes: the transition in tree-rail-nav.css, plus a frame. */
 const LEAVE_MS = 340;
 
@@ -175,17 +157,17 @@ function svgEl<K extends keyof SVGElementTagNameMap>(
 export function createTreeRail(tree: HTMLElement, svg: SVGSVGElement): TreeRail {
   // The SVG's parts; the markup stays out of React so redraws never re-render.
   svg.replaceChildren();
-  const base = svg.appendChild(svgEl("g", { class: cls.railBase }));
+  const base = svg.appendChild(svgEl("g", { class: treeRailNavSlots.railBase }));
   const rootRail = base.appendChild(svgEl("path", {}));
-  const active = svg.appendChild(svgEl("g", { class: cls.railActive }));
-  const trail = active.appendChild(svgEl("path", { class: cls.railTrail }));
-  const nodeLayer = svg.appendChild(svgEl("g", { class: cls.railNodes }));
-  const markerLayer = svg.appendChild(svgEl("g", { class: cls.railActive }));
-  const marker = markerLayer.appendChild(svgEl("g", { class: cls.railMarker }));
+  const active = svg.appendChild(svgEl("g", { class: treeRailNavSlots.railActive }));
+  const trail = active.appendChild(svgEl("path", { class: treeRailNavSlots.railTrail }));
+  const nodeLayer = svg.appendChild(svgEl("g", { class: treeRailNavSlots.railNodes }));
+  const markerLayer = svg.appendChild(svgEl("g", { class: treeRailNavSlots.railActive }));
+  const marker = markerLayer.appendChild(svgEl("g", { class: treeRailNavSlots.railMarker }));
   // Circles sit at 0,0 of a translated group, so CSS and WAAPI scale them about their centre.
   // The surface-coloured stroke on top cuts each dot out of the rail.
-  const halo = marker.appendChild(svgEl("circle", { class: cls.railHalo, r: "4" }));
-  const dot = marker.appendChild(svgEl("circle", { class: cls.railDot, r: "4.5" }));
+  const halo = marker.appendChild(svgEl("circle", { class: treeRailNavSlots.railHalo, r: "4" }));
+  const dot = marker.appendChild(svgEl("circle", { class: treeRailNavSlots.railDot, r: "4.5" }));
 
   const panelPaths = new Map<Element, SVGPathElement>();
   const nodeDots = new Map<HTMLElement, SVGGElement>();
@@ -234,8 +216,8 @@ export function createTreeRail(tree: HTMLElement, svg: SVGSVGElement): TreeRail 
     );
     // An Origin label puts the origin at its middle; without one the rail starts at the first row.
     const start =
-      tree.querySelector<HTMLElement>(`:scope > .${cls.origin}`) ??
-      tree.querySelector<HTMLElement>(`:scope > .${cls.list} > li > ${ROW}`);
+      tree.querySelector<HTMLElement>(`:scope > ${ORIGIN}`) ??
+      tree.querySelector<HTMLElement>(`:scope > ${LIST} > li > ${ROW}`);
     if (start) {
       locate();
       const at = span(start);
@@ -411,7 +393,7 @@ export function createTreeRail(tree: HTMLElement, svg: SVGSVGElement): TreeRail 
       let c = nodeDots.get(row);
       if (!c) {
         // Made as it is drawn: a dot made shown and then hidden faded out at the rail's corner.
-        const attrs: Record<string, string> = { class: cls.railNode };
+        const attrs: Record<string, string> = { class: treeRailNavSlots.railNode };
         if (!shown) attrs["data-hidden"] = "";
         if (disabled(row)) attrs["data-disabled"] = "";
         c = nodeLayer.appendChild(svgEl("g", attrs));

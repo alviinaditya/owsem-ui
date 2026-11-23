@@ -4,15 +4,12 @@ import { Collapsible } from "@base-ui/react/collapsible";
 import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
 import {
-  type ComponentPropsWithoutRef,
+  type ComponentProps,
   type CSSProperties,
   createContext,
-  type ForwardRefExoticComponent,
-  forwardRef,
   type KeyboardEvent,
+  type ReactElement,
   type Ref,
-  type RefAttributes,
-  useCallback,
   useContext,
   useEffect,
   useId,
@@ -20,23 +17,22 @@ import {
   useRef,
   useState,
 } from "react";
-import { withClassName } from "../../core/class-name";
+import { cn } from "../../core/cn";
 import { GlideHighlight, useGlide } from "../../core/glide/use-glide";
-import { cls, createTreeRail } from "./tree-rail";
+import { useMergedRefs } from "../../core/merge-refs";
+import { createTreeRail, PANEL, ROW } from "./tree-rail";
+import { treeRailNavSlots } from "./tree-rail-nav-variants";
 import "./tree-rail-nav.css";
 
 // Marquee: px between the two copies of a label, and how fast they travel (px per second).
 const MARQUEE_GAP = 32;
 const MARQUEE_SPEED = 40;
 
-const ROW = `.${cls.item}`;
-
 // Drawing before the first paint keeps a nav mounted on the client (a route change) from showing
 // a frame without its trail; the server has no layout, so it falls back to an effect there.
 const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 // The level of the list a row is in: 1 for the top list. Panels pass their row's level on.
-//
 const DepthContext = createContext(0);
 // The id of the node's row, which labels the node's nested list.
 const RowIdContext = createContext<string | undefined>(undefined);
@@ -50,7 +46,7 @@ function onArrowKey(tree: HTMLElement, event: KeyboardEvent<HTMLElement>): void 
   if (!row || !tree.contains(row)) return;
   const rows = [...tree.querySelectorAll<HTMLElement>(ROW)].filter(visible);
   const i = rows.indexOf(row);
-  const panel = row.parentElement?.querySelector<HTMLElement>(`:scope > .${cls.panel}`);
+  const panel = row.parentElement?.querySelector<HTMLElement>(`:scope > ${PANEL}`);
   const expanded = row.getAttribute("aria-expanded");
   let next: HTMLElement | null | undefined = null;
   switch (event.key) {
@@ -74,7 +70,7 @@ function onArrowKey(tree: HTMLElement, event: KeyboardEvent<HTMLElement>): void 
     case "ArrowLeft":
       if (expanded === "true") row.click();
       else {
-        const parent = row.parentElement?.closest(`.${cls.panel}`);
+        const parent = row.parentElement?.closest(PANEL);
         next = parent?.parentElement?.querySelector<HTMLElement>(`:scope > ${ROW}`);
       }
       break;
@@ -85,21 +81,24 @@ function onArrowKey(tree: HTMLElement, event: KeyboardEvent<HTMLElement>): void 
   next?.focus();
 }
 
-export type TreeRailNavRootProps = ComponentPropsWithoutRef<"nav">;
+export interface TreeRailNavRootProps extends Omit<ComponentProps<"nav">, "className"> {
+  className?: string | undefined;
+}
 
 /**
  * The navigation: a `<nav>` that holds the rail, the hover highlight (Glide), and one `List`. The
  * trail travels along the rail to a new current row and pulses on arrival.
  */
-export const TreeRailNavRoot: ForwardRefExoticComponent<
-  TreeRailNavRootProps & RefAttributes<HTMLElement>
-> = forwardRef<HTMLElement, TreeRailNavRootProps>(function TreeRailNavRoot(
-  { className, children, onKeyDown, ...props },
-  ref,
-) {
+export function TreeRailNavRoot({
+  className,
+  children,
+  onKeyDown,
+  ...props
+}: TreeRailNavRootProps): ReactElement {
   const glide = useGlide<HTMLDivElement>({ items: ROW, maxDistance: 40 });
   const tree = useRef<HTMLDivElement | null>(null);
   const svg = useRef<SVGSVGElement>(null);
+  const merged = useMergedRefs(tree, glide.ref);
 
   useBeforePaint(() => {
     if (!tree.current || !svg.current) return;
@@ -107,178 +106,192 @@ export const TreeRailNavRoot: ForwardRefExoticComponent<
     return () => rail.destroy();
   }, []);
 
-  const glideRef = glide.ref;
-  const setTree = useCallback(
-    (el: HTMLDivElement | null) => {
-      tree.current = el;
-      glideRef(el);
-    },
-    [glideRef],
-  );
-
   return (
     <nav
-      ref={ref}
-      className={className ? `${cls.root} ${className}` : cls.root}
+      data-slot="tree-rail-nav"
       onKeyDown={(event) => {
         onKeyDown?.(event);
         if (!event.defaultPrevented && tree.current) onArrowKey(tree.current, event);
       }}
       {...props}
+      className={cn(treeRailNavSlots.root, className)}
     >
-      <div ref={setTree} className={cls.tree}>
+      <div data-slot="tree-rail-nav-tree" ref={merged} className={treeRailNavSlots.tree}>
         <GlideHighlight glide={glide} />
-        <svg ref={svg} className={cls.rail} aria-hidden="true" focusable="false" />
+        <svg
+          ref={svg}
+          data-slot="tree-rail-nav-rail"
+          className={treeRailNavSlots.rail}
+          aria-hidden="true"
+          focusable="false"
+        />
         {children}
       </div>
     </nav>
   );
-});
+}
 
-export type TreeRailNavListProps = ComponentPropsWithoutRef<"ul">;
+export interface TreeRailNavListProps extends Omit<ComponentProps<"ul">, "className"> {
+  className?: string | undefined;
+}
 
 /** A level of rows. Nested in a `Panel`, it is labelled by the row it hangs from. */
-export const TreeRailNavList: ForwardRefExoticComponent<
-  TreeRailNavListProps & RefAttributes<HTMLUListElement>
-> = forwardRef<HTMLUListElement, TreeRailNavListProps>(function TreeRailNavList(
-  { className, children, ...props },
-  ref,
-) {
+export function TreeRailNavList({
+  className,
+  children,
+  ...props
+}: TreeRailNavListProps): ReactElement {
   const depth = useContext(DepthContext) + 1;
   const labelledBy = useContext(RowIdContext);
   return (
     <ul
-      ref={ref}
-      className={className ? `${cls.list} ${className}` : cls.list}
       data-depth={depth}
       aria-labelledby={depth > 1 ? labelledBy : undefined}
       {...props}
+      // Found by this, so it stays.
+      data-slot="tree-rail-nav-list"
+      className={cn(treeRailNavSlots.list, className)}
     >
       <DepthContext.Provider value={depth}>{children}</DepthContext.Provider>
     </ul>
   );
-});
+}
 
-export type TreeRailNavNodeProps = Omit<Collapsible.Root.Props, "ref">;
+export interface TreeRailNavNodeProps extends Omit<Collapsible.Root.Props, "className" | "ref"> {
+  className?: string | undefined;
+  /** Base UI types the ref for its default `<div>`; it lands on the rendered `<li>`. */
+  ref?: Ref<HTMLLIElement> | undefined;
+}
 
 /** A list item: one row (`Link` or `Toggle`) and, for a group, a `Panel` with the next level. */
-export const TreeRailNavNode: ForwardRefExoticComponent<
-  TreeRailNavNodeProps & RefAttributes<HTMLLIElement>
-> = forwardRef<HTMLLIElement, TreeRailNavNodeProps>(function TreeRailNavNode(
-  { className, ...props },
-  ref,
-) {
+export function TreeRailNavNode({ className, ref, ...props }: TreeRailNavNodeProps): ReactElement {
   const rowId = useId();
   return (
     <RowIdContext.Provider value={rowId}>
       <Collapsible.Root
-        // Base UI types the ref for its default <div>; it lands on the rendered <li>.
-        ref={ref as unknown as Ref<HTMLDivElement>}
+        data-slot="tree-rail-nav-node"
         render={<li />}
-        className={withClassName(cls.node, className)}
         {...props}
+        ref={ref as Ref<HTMLDivElement> | undefined}
+        className={cn(treeRailNavSlots.node, className)}
       />
     </RowIdContext.Provider>
   );
-});
+}
 
-export type TreeRailNavToggleProps = Omit<Collapsible.Trigger.Props, "ref">;
+export interface TreeRailNavToggleProps extends Omit<Collapsible.Trigger.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** A group's row: a button that opens and closes the node's `Panel`. */
-export const TreeRailNavToggle: ForwardRefExoticComponent<
-  TreeRailNavToggleProps & RefAttributes<HTMLButtonElement>
-> = forwardRef<HTMLButtonElement, TreeRailNavToggleProps>(function TreeRailNavToggle(
-  { className, children, ...props },
-  ref,
-) {
+export function TreeRailNavToggle({
+  className,
+  children,
+  ...props
+}: TreeRailNavToggleProps): ReactElement {
   const depth = useContext(DepthContext);
   const rowId = useContext(RowIdContext);
   return (
     <Collapsible.Trigger
-      ref={ref}
       id={rowId}
       data-depth={depth}
-      className={withClassName(cls.item, className)}
       {...props}
+      // Found by this, so it stays.
+      data-slot="tree-rail-nav-toggle"
+      className={cn(treeRailNavSlots.item, className)}
     >
       {children}
-      <svg className={cls.chevron} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <svg
+        data-slot="tree-rail-nav-chevron"
+        className={treeRailNavSlots.chevron}
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        focusable="false"
+      >
         <path d="m6 9 6 6 6-6" />
       </svg>
     </Collapsible.Trigger>
   );
-});
+}
 
-export interface TreeRailNavLinkProps extends useRender.ComponentProps<"a"> {
+export interface TreeRailNavLinkProps extends Omit<useRender.ComponentProps<"a">, "className"> {
+  className?: string | undefined;
   /** The page shown (`true` or `"page"`) or the step being read (`"step"`): the trail ends here. */
   current?: boolean | "page" | "step" | undefined;
   disabled?: boolean | undefined;
 }
 
 /** A row that navigates. `render` swaps the `<a>` for a router's link. */
-export const TreeRailNavLink: ForwardRefExoticComponent<
-  Omit<TreeRailNavLinkProps, "ref"> & RefAttributes<HTMLAnchorElement>
-> = forwardRef<HTMLAnchorElement, Omit<TreeRailNavLinkProps, "ref">>(function TreeRailNavLink(
-  { current, disabled, className, render, onClick, ...props },
+export function TreeRailNavLink({
+  current,
+  disabled,
+  className,
+  render,
+  onClick,
   ref,
-) {
+  ...props
+}: TreeRailNavLinkProps): ReactElement {
   const depth = useContext(DepthContext);
   const rowId = useContext(RowIdContext);
   // A disabled row neither navigates nor runs the app's own click handler.
   const click: typeof onClick = disabled ? (event) => event.preventDefault() : onClick;
+  const defaults = {
+    id: rowId,
+    "data-depth": depth,
+    "data-current": current ? "" : undefined,
+    "aria-current": current === true ? "page" : current || undefined,
+    "aria-disabled": disabled || undefined,
+    onClick: click,
+  } as const;
+  const forced = {
+    // Found by this, so it stays.
+    "data-slot": "tree-rail-nav-link",
+    className: cn(treeRailNavSlots.item, className),
+  };
   return useRender({
     defaultTagName: "a",
     render,
     ref,
-    props: mergeProps<"a">(
-      {
-        id: rowId,
-        className: className ? `${cls.item} ${className}` : cls.item,
-        "data-depth": depth,
-        "data-current": current ? "" : undefined,
-        "aria-current": current === true ? "page" : current || undefined,
-        "aria-disabled": disabled || undefined,
-        onClick: click,
-      } as ComponentPropsWithoutRef<"a">,
-      props,
-    ),
+    props: mergeProps<"a">(defaults, props, forced),
   });
-});
+}
 
-export type TreeRailNavPanelProps = Omit<Collapsible.Panel.Props, "ref">;
+export interface TreeRailNavPanelProps extends Omit<Collapsible.Panel.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** The next level of a node. It stays mounted while closed, so the rail can end at its row. */
-export const TreeRailNavPanel: ForwardRefExoticComponent<
-  TreeRailNavPanelProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, TreeRailNavPanelProps>(function TreeRailNavPanel(
-  { className, ...props },
-  ref,
-) {
+export function TreeRailNavPanel({ className, ...props }: TreeRailNavPanelProps): ReactElement {
   const depth = useContext(DepthContext);
   return (
     <Collapsible.Panel
-      ref={ref}
       keepMounted
       data-depth={depth}
-      className={withClassName(cls.panel, className)}
       {...props}
+      // Found by this, so it stays.
+      data-slot="tree-rail-nav-panel"
+      className={cn(treeRailNavSlots.panel, className)}
     />
   );
-});
+}
 
-export type TreeRailNavLabelProps = ComponentPropsWithoutRef<"span">;
+export interface TreeRailNavLabelProps extends Omit<ComponentProps<"span">, "className"> {
+  className?: string | undefined;
+}
 
 /**
  * A row's text on one line. Text that does not fit fades out at the end, and runs left in a loop
  * while the row is hovered or focused; with reduced motion it stays put and shows a tooltip.
  */
-export const TreeRailNavLabel: ForwardRefExoticComponent<
-  TreeRailNavLabelProps & RefAttributes<HTMLSpanElement>
-> = forwardRef<HTMLSpanElement, TreeRailNavLabelProps>(function TreeRailNavLabel(
-  { className, children, style, ...props },
+export function TreeRailNavLabel({
+  className,
+  children,
+  style,
   ref,
-) {
+  ...props
+}: TreeRailNavLabelProps): ReactElement {
   const outer = useRef<HTMLSpanElement | null>(null);
+  const merged = useMergedRefs(outer, ref);
   // The width of one copy of the text, while it overflows; 0 while it fits.
   const [overflow, setOverflow] = useState(0);
 
@@ -311,20 +324,10 @@ export const TreeRailNavLabel: ForwardRefExoticComponent<
     return () => reduce.removeEventListener("change", tooltip);
   }, [overflow]);
 
-  const setRef = useCallback(
-    (el: HTMLSpanElement | null) => {
-      outer.current = el;
-      if (typeof ref === "function") ref(el);
-      else if (ref) ref.current = el;
-    },
-    [ref],
-  );
-
   const loop = overflow + MARQUEE_GAP;
   return (
     <span
-      ref={setRef}
-      className={className ? `${cls.label} ${className}` : cls.label}
+      data-slot="tree-rail-nav-label"
       data-overflow={overflow ? "" : undefined}
       style={
         overflow
@@ -336,50 +339,57 @@ export const TreeRailNavLabel: ForwardRefExoticComponent<
           : style
       }
       {...props}
+      ref={merged}
+      className={cn(treeRailNavSlots.label, className)}
     >
-      <span className={cls.labelText}>{children}</span>
+      <span data-slot="tree-rail-nav-label-text" className={treeRailNavSlots.labelText}>
+        {children}
+      </span>
       {/* The loop's second copy, for the eye only. */}
       {overflow ? (
-        <span className={cls.labelText} aria-hidden="true">
+        <span
+          data-slot="tree-rail-nav-label-text"
+          className={treeRailNavSlots.labelText}
+          aria-hidden="true"
+        >
           {children}
         </span>
       ) : null}
     </span>
   );
-});
+}
 
-export type TreeRailNavOriginProps = ComponentPropsWithoutRef<"div">;
+export interface TreeRailNavOriginProps extends Omit<ComponentProps<"div">, "className"> {
+  className?: string | undefined;
+}
 
 /**
  * A label beside the rail's origin, before the first `List`: the trail starts from it. Without one,
  * the rail and the trail start at the first row.
  */
-export const TreeRailNavOrigin: ForwardRefExoticComponent<
-  TreeRailNavOriginProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, TreeRailNavOriginProps>(function TreeRailNavOrigin(
-  { className, ...props },
-  ref,
-) {
+export function TreeRailNavOrigin({ className, ...props }: TreeRailNavOriginProps): ReactElement {
   return (
-    <div ref={ref} className={className ? `${cls.origin} ${className}` : cls.origin} {...props} />
-  );
-});
-
-export type TreeRailNavIconProps = ComponentPropsWithoutRef<"span">;
-
-/** A row's icon (decorative); top-level rails line up with it. */
-export const TreeRailNavIcon: ForwardRefExoticComponent<
-  TreeRailNavIconProps & RefAttributes<HTMLSpanElement>
-> = forwardRef<HTMLSpanElement, TreeRailNavIconProps>(function TreeRailNavIcon(
-  { className, ...props },
-  ref,
-) {
-  return (
-    <span
-      ref={ref}
-      aria-hidden="true"
-      className={className ? `${cls.icon} ${className}` : cls.icon}
+    <div
       {...props}
+      // Found by this, so it stays.
+      data-slot="tree-rail-nav-origin"
+      className={cn(treeRailNavSlots.origin, className)}
     />
   );
-});
+}
+
+export interface TreeRailNavIconProps extends Omit<ComponentProps<"span">, "className"> {
+  className?: string | undefined;
+}
+
+/** A row's icon (decorative); top-level rails line up with it. */
+export function TreeRailNavIcon({ className, ...props }: TreeRailNavIconProps): ReactElement {
+  return (
+    <span
+      data-slot="tree-rail-nav-icon"
+      aria-hidden="true"
+      {...props}
+      className={cn(treeRailNavSlots.icon, className)}
+    />
+  );
+}

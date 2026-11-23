@@ -508,3 +508,79 @@ describe("Tree Rail Nav", () => {
     expect(await measureIdle()).toEqual({ rafCalls: 0, runningAnimations: [] });
   });
 });
+
+test("every part has its data-slot", async () => {
+  const { nav } = await mount(
+    <TreeRailNav.Root aria-label="Docs">
+      <TreeRailNav.Origin>Docs</TreeRailNav.Origin>
+      <TreeRailNav.List>
+        <TreeRailNav.Node defaultOpen>
+          <TreeRailNav.Toggle>
+            <TreeRailNav.Icon />
+            <TreeRailNav.Label>Settings</TreeRailNav.Label>
+          </TreeRailNav.Toggle>
+          <TreeRailNav.Panel>
+            <TreeRailNav.List>
+              <TreeRailNav.Node>
+                <TreeRailNav.Link href="#a">A</TreeRailNav.Link>
+              </TreeRailNav.Node>
+            </TreeRailNav.List>
+          </TreeRailNav.Panel>
+        </TreeRailNav.Node>
+      </TreeRailNav.List>
+    </TreeRailNav.Root>,
+  );
+  const slots = [
+    ...new Set([...nav.querySelectorAll("[data-slot]")].map((el) => el.getAttribute("data-slot"))),
+  ];
+  expect([nav.dataset.slot, ...slots]).toEqual([
+    "tree-rail-nav",
+    "tree-rail-nav-tree",
+    "tree-rail-nav-rail",
+    "tree-rail-nav-origin",
+    "tree-rail-nav-list",
+    "tree-rail-nav-node",
+    "tree-rail-nav-toggle",
+    "tree-rail-nav-icon",
+    "tree-rail-nav-label",
+    "tree-rail-nav-label-text",
+    "tree-rail-nav-chevron",
+    "tree-rail-nav-panel",
+    "tree-rail-nav-link",
+  ]);
+});
+
+test("the rail and the arrow keys survive another data-slot on rows, lists, panels, and origin", async () => {
+  const { tree, row } = await mount(
+    <TreeRailNav.Root aria-label="Docs">
+      <TreeRailNav.Origin data-slot="mine">Docs</TreeRailNav.Origin>
+      <TreeRailNav.List data-slot="mine">
+        <TreeRailNav.Node defaultOpen>
+          <TreeRailNav.Toggle data-slot="mine">Settings</TreeRailNav.Toggle>
+          <TreeRailNav.Panel data-slot="mine">
+            <TreeRailNav.List data-slot="mine">
+              <TreeRailNav.Node>
+                <TreeRailNav.Link data-slot="mine" href="#a" current>
+                  A
+                </TreeRailNav.Link>
+              </TreeRailNav.Node>
+            </TreeRailNav.List>
+          </TreeRailNav.Panel>
+        </TreeRailNav.Node>
+      </TreeRailNav.List>
+    </TreeRailNav.Root>,
+  );
+  expect(row("Settings").dataset.slot).toBe("tree-rail-nav-toggle");
+  expect(row("A").dataset.slot).toBe("tree-rail-nav-link");
+  expect(tree.hasAttribute("data-rail")).toBe(true);
+  // One dot per row, and the current row is on the trail.
+  await expect.poll(() => tree.querySelectorAll(".ow-tree-rail-nav__rail-node").length).toBe(2);
+  const press = (key: string) =>
+    document.activeElement?.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
+  row("Settings").focus();
+  press("ArrowDown");
+  expect(document.activeElement).toBe(row("A"));
+  press("ArrowLeft");
+  expect(document.activeElement).toBe(row("Settings"));
+  expect(row("Settings").hasAttribute("data-trail")).toBe(true);
+});

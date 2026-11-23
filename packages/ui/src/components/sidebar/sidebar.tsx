@@ -5,14 +5,12 @@ import { useDirection } from "@base-ui/react/direction-provider";
 import { useRender } from "@base-ui/react/use-render";
 import {
   Children,
-  type ComponentPropsWithoutRef,
+  type ComponentProps,
   createContext,
-  type ForwardRefExoticComponent,
-  forwardRef,
   type MouseEvent,
+  type ReactElement,
   type ReactNode,
   type Ref,
-  type RefAttributes,
   type RefObject,
   useCallback,
   useContext,
@@ -22,33 +20,17 @@ import {
   useRef,
   useState,
   useSyncExternalStore,
-  version,
 } from "react";
+import { cn } from "../../core/cn";
 import { GlideHighlight, useGlide } from "../../core/glide/use-glide";
+import { useMergedRefs } from "../../core/merge-refs";
 import { trackPointerType, useScrollLock } from "../../core/scroll-lock";
 import { createIndicator } from "./sidebar.indicator";
+import { sidebarSlots } from "./sidebar-variants";
 import "./sidebar.css";
 
-const cls = {
-  provider: "ow-sidebar__provider",
-  root: "ow-sidebar",
-  backdrop: "ow-sidebar__backdrop",
-  header: "ow-sidebar__header",
-  content: "ow-sidebar__content",
-  footer: "ow-sidebar__footer",
-  group: "ow-sidebar__group",
-  groupLabel: "ow-sidebar__group-label",
-  list: "ow-sidebar__list",
-  item: "ow-sidebar__item",
-  link: "ow-sidebar__link",
-  label: "ow-sidebar__label",
-  icon: "ow-sidebar__icon",
-  badge: "ow-sidebar__badge",
-  indicator: "ow-sidebar__indicator",
-  trigger: "ow-sidebar__trigger",
-} as const;
-
-const join = (base: string, extra: string | undefined) => (extra ? `${base} ${extra}` : base);
+// The link is found by its data-slot, never by class.
+const LINK = '[data-slot="sidebar-link"]';
 
 export interface SidebarContextValue {
   /** Whether the desktop sidebar is open. */
@@ -109,7 +91,8 @@ function useMediaQuery(query: string): boolean {
   );
 }
 
-export interface SidebarProviderProps extends useRender.ComponentProps<"div"> {
+export interface SidebarProviderProps extends Omit<useRender.ComponentProps<"div">, "className"> {
+  className?: string | undefined;
   /** Controlled desktop state. */
   open?: boolean | undefined;
   /** @default true */
@@ -132,24 +115,20 @@ export interface SidebarProviderProps extends useRender.ComponentProps<"div"> {
  * current mode and `data-sidebar-mobile` while the sidebar is a drawer, so the page around the
  * sidebar can be laid out from CSS.
  */
-export const SidebarProvider: ForwardRefExoticComponent<
-  Omit<SidebarProviderProps, "ref"> & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, Omit<SidebarProviderProps, "ref">>(function SidebarProvider(
-  {
-    open: openProp,
-    defaultOpen = true,
-    onOpenChange,
-    mobileOpen: mobileOpenProp,
-    defaultMobileOpen = false,
-    onMobileOpenChange,
-    mobileQuery = "(max-width: 767px)",
-    shortcut = "b",
-    className,
-    render,
-    ...props
-  },
+export function SidebarProvider({
+  open: openProp,
+  defaultOpen = true,
+  onOpenChange,
+  mobileOpen: mobileOpenProp,
+  defaultMobileOpen = false,
+  onMobileOpenChange,
+  mobileQuery = "(max-width: 767px)",
+  shortcut = "b",
+  className,
+  render,
   ref,
-) {
+  ...props
+}: SidebarProviderProps): ReactElement {
   const rootId = useId();
   const [open, setOpen] = useOpenFlag(openProp, defaultOpen, onOpenChange);
   const [mobileOpen, setMobileOpen] = useOpenFlag(
@@ -192,19 +171,20 @@ export const SidebarProvider: ForwardRefExoticComponent<
         render,
         ref,
         props: {
+          "data-slot": "sidebar-provider",
           ...props,
-          className: join(cls.provider, className),
+          className: cn(sidebarSlots.provider, className),
           "data-sidebar-state": shown ? "open" : "closed",
           "data-sidebar-mobile": mobile ? "" : undefined,
         },
       })}
     </SidebarContext.Provider>
   );
-});
+}
 
-const isReact19 = Number.parseInt(version, 10) >= 19;
-
-export type SidebarRootProps = useRender.ComponentProps<"nav">;
+export interface SidebarRootProps extends Omit<useRender.ComponentProps<"nav">, "className"> {
+  className?: string | undefined;
+}
 
 /**
  * The sidebar. On desktop a `nav` labelled "Sidebar" (set `aria-label` to rename it): closed, it
@@ -213,12 +193,14 @@ export type SidebarRootProps = useRender.ComponentProps<"nav">;
  * a focus trap, Esc, a scrim, and a quiet scroll lock. Its width is its CSS `inline-size`
  * (default 248px), set it with a class or `style`.
  */
-export const SidebarRoot: ForwardRefExoticComponent<
-  Omit<SidebarRootProps, "ref"> & RefAttributes<HTMLElement>
-> = forwardRef<HTMLElement, Omit<SidebarRootProps, "ref">>(function SidebarRoot(
-  { className, render, children, "aria-label": label = "Sidebar", ...props },
+export function SidebarRoot({
+  className,
+  render,
+  children,
+  "aria-label": label = "Sidebar",
   ref,
-) {
+  ...props
+}: SidebarRootProps): ReactElement {
   const sidebar = useSidebar() as InternalContext;
   if (sidebar.mobile) {
     return (
@@ -249,7 +231,7 @@ export const SidebarRoot: ForwardRefExoticComponent<
       {children}
     </DesktopRoot>
   );
-});
+}
 
 function DesktopRoot({
   open,
@@ -266,21 +248,21 @@ function DesktopRoot({
   className: string | undefined;
   render: SidebarRootProps["render"];
   label: string;
-  forwardedRef: Ref<HTMLElement>;
+  forwardedRef: Ref<HTMLElement> | undefined;
   rest: Record<string, unknown>;
   children: ReactNode;
-}) {
-  const inert = open ? {} : { inert: isReact19 ? true : "" };
+}): ReactElement {
   return useRender({
     defaultTagName: "nav",
     render,
     ref: forwardedRef,
     props: {
+      "data-slot": "sidebar",
       id,
       "aria-label": label,
       ...rest,
-      ...inert,
-      className: join(cls.root, className),
+      ...(open ? undefined : { inert: true }),
+      className: cn(sidebarSlots.root, className),
       "data-state": open ? "open" : "closed",
       children,
     },
@@ -304,37 +286,34 @@ function MobileDrawer({
   className: string | undefined;
   render: SidebarRootProps["render"];
   label: string;
-  forwardedRef: Ref<HTMLElement>;
+  forwardedRef: Ref<HTMLElement> | undefined;
   rest: Record<string, unknown>;
   children: ReactNode;
-}) {
+}): ReactElement {
   const direction = useDirection();
   const [self, setSelf] = useState<HTMLElement | null>(null);
   const popup = useRef<HTMLElement | null>(null);
   useEffect(trackPointerType, []);
   useScrollLock(self, open);
-  const setRef = useCallback(
-    (el: HTMLElement | null) => {
-      popup.current = el;
-      setSelf(el);
-      if (typeof forwardedRef === "function") forwardedRef(el);
-      else if (forwardedRef) (forwardedRef as RefObject<HTMLElement | null>).current = el;
-    },
-    [forwardedRef],
-  );
+  const merged = useMergedRefs(popup, useMergedRefs(setSelf, forwardedRef));
   return (
     <BaseDialog.Root open={open} onOpenChange={(next) => onOpenChange(next)}>
       <BaseDialog.Portal>
-        <BaseDialog.Backdrop className={cls.backdrop} forceRender />
+        <BaseDialog.Backdrop
+          data-slot="sidebar-backdrop"
+          className={sidebarSlots.backdrop}
+          forceRender
+        />
         <BaseDialog.Popup
+          data-slot="sidebar"
           {...(rest as object)}
           id={id}
-          ref={setRef as never}
+          ref={merged as never}
           dir={direction}
           // The drawer itself, so no row shows a focus ring at once; Tab goes to the first.
           initialFocus={() => popup.current}
           aria-label={label}
-          className={join(cls.root, className)}
+          className={cn(sidebarSlots.root, className)}
           data-mobile=""
           render={render as never}
         >
@@ -345,63 +324,78 @@ function MobileDrawer({
   );
 }
 
-export type SidebarHeaderProps = useRender.ComponentProps<"div">;
+export interface SidebarHeaderProps extends Omit<useRender.ComponentProps<"div">, "className"> {
+  className?: string | undefined;
+}
 
 /** Fixed above the scrolling `Content`: a logo, a search field, a trigger. */
-export const SidebarHeader: ForwardRefExoticComponent<
-  Omit<SidebarHeaderProps, "ref"> & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, Omit<SidebarHeaderProps, "ref">>(function SidebarHeader(
-  { className, render, ...props },
+export function SidebarHeader({
+  className,
+  render,
   ref,
-) {
+  ...props
+}: SidebarHeaderProps): ReactElement {
   return useRender({
     defaultTagName: "div",
     render,
     ref,
-    props: { ...props, className: join(cls.header, className) },
+    props: {
+      "data-slot": "sidebar-header",
+      ...props,
+      className: cn(sidebarSlots.header, className),
+    },
   });
-});
+}
 
-export type SidebarFooterProps = useRender.ComponentProps<"div">;
+export interface SidebarFooterProps extends Omit<useRender.ComponentProps<"div">, "className"> {
+  className?: string | undefined;
+}
 
 /** Fixed below the scrolling `Content`. */
-export const SidebarFooter: ForwardRefExoticComponent<
-  Omit<SidebarFooterProps, "ref"> & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, Omit<SidebarFooterProps, "ref">>(function SidebarFooter(
-  { className, render, ...props },
+export function SidebarFooter({
+  className,
+  render,
   ref,
-) {
+  ...props
+}: SidebarFooterProps): ReactElement {
   return useRender({
     defaultTagName: "div",
     render,
     ref,
-    props: { ...props, className: join(cls.footer, className) },
+    props: {
+      "data-slot": "sidebar-footer",
+      ...props,
+      className: cn(sidebarSlots.footer, className),
+    },
   });
-});
+}
 
 const ScrollerContext = createContext<RefObject<HTMLElement | null> | null>(null);
 const GroupContext = createContext<string | undefined>(undefined);
 
-export type SidebarContentProps = useRender.ComponentProps<"div">;
+export interface SidebarContentProps extends Omit<useRender.ComponentProps<"div">, "className"> {
+  className?: string | undefined;
+}
 
 /**
  * The scrolling middle, which also holds the hover highlight (Glide) that slides between items and
  * stays off the active one. The active item scrolls into view in it, and the page never scrolls.
  */
-export const SidebarContent: ForwardRefExoticComponent<
-  Omit<SidebarContentProps, "ref"> & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, Omit<SidebarContentProps, "ref">>(function SidebarContent(
-  { className, render, children, ...props },
+export function SidebarContent({
+  className,
+  render,
+  children,
   ref,
-) {
+  ...props
+}: SidebarContentProps): ReactElement {
   const glide = useGlide<HTMLDivElement>({
-    items: `.${cls.link}`,
+    items: LINK,
     skip: "[data-active], [data-disabled]",
     // Disabled rows keep their box, so the highlight fades over them, not onto a neighbor.
     isDisabled: () => false,
   });
-  const scroller = useRef<HTMLElement | null>(null);
-  const glideRef = glide.ref;
+  const scroller = useRef<HTMLDivElement | null>(null);
+  const merged = useMergedRefs(scroller, useMergedRefs(glide.ref, ref));
   // Edge fades: data-overflow-start/-end say which side has more to scroll. Passive, idle-free.
   useEffect(() => {
     const el = scroller.current;
@@ -421,24 +415,16 @@ export const SidebarContent: ForwardRefExoticComponent<
       observer.disconnect();
     };
   }, []);
-  const setRef = useCallback(
-    (el: HTMLDivElement | null) => {
-      scroller.current = el;
-      glideRef(el);
-      if (typeof ref === "function") ref(el);
-      else if (ref) ref.current = el;
-    },
-    [glideRef, ref],
-  );
   return (
     <ScrollerContext.Provider value={scroller}>
       {useRender({
         defaultTagName: "div",
         render,
-        ref: setRef,
+        ref: merged,
         props: {
+          "data-slot": "sidebar-content",
           ...props,
-          className: join(cls.content, className),
+          className: cn(sidebarSlots.content, className),
           children: (
             <>
               <GlideHighlight glide={glide} />
@@ -449,9 +435,11 @@ export const SidebarContent: ForwardRefExoticComponent<
       })}
     </ScrollerContext.Provider>
   );
-});
+}
 
-export type SidebarIndicatorProps = useRender.ComponentProps<"span">;
+export interface SidebarIndicatorProps extends Omit<useRender.ComponentProps<"span">, "className"> {
+  className?: string | undefined;
+}
 
 /**
  * The marker of the current page: a tinted background behind the active `Item`, with a small dot
@@ -461,45 +449,45 @@ export type SidebarIndicatorProps = useRender.ComponentProps<"span">;
  * it there at once, before the page catches up, and it returns if `active` does not change within
  * 3 seconds. Hidden while no item is active. It draws an SVG inside its `span`.
  */
-export const SidebarIndicator: ForwardRefExoticComponent<
-  Omit<SidebarIndicatorProps, "ref"> & RefAttributes<HTMLSpanElement>
-> = forwardRef<HTMLSpanElement, Omit<SidebarIndicatorProps, "ref">>(function SidebarIndicator(
-  { className, render, ...props },
+export function SidebarIndicator({
+  className,
+  render,
   ref,
-) {
+  ...props
+}: SidebarIndicatorProps): ReactElement {
   const scroller = useContext(ScrollerContext);
   const own = useRef<HTMLElement | null>(null);
+  const merged = useMergedRefs(own, ref);
   useEffect(() => {
     const root = scroller?.current;
     const pill = own.current;
     if (!root || !pill) return;
     return createIndicator(root, pill).destroy;
   }, [scroller]);
-  const setRef = useCallback(
-    (el: HTMLSpanElement | null) => {
-      own.current = el;
-      if (typeof ref === "function") ref(el);
-      else if (ref) ref.current = el;
-    },
-    [ref],
-  );
   return useRender({
     defaultTagName: "span",
     render,
-    ref: setRef,
-    props: { "aria-hidden": true, ...props, className: join(cls.indicator, className) },
+    ref: merged,
+    props: {
+      "data-slot": "sidebar-indicator",
+      "aria-hidden": true,
+      ...props,
+      className: cn(sidebarSlots.indicator, className),
+    },
   });
-});
+}
 
-export type SidebarGroupProps = useRender.ComponentProps<"div">;
+export interface SidebarGroupProps extends Omit<useRender.ComponentProps<"div">, "className"> {
+  className?: string | undefined;
+}
 
 /** A labelled set of items; its `GroupLabel` names it. */
-export const SidebarGroup: ForwardRefExoticComponent<
-  Omit<SidebarGroupProps, "ref"> & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, Omit<SidebarGroupProps, "ref">>(function SidebarGroup(
-  { className, render, ...props },
+export function SidebarGroup({
+  className,
+  render,
   ref,
-) {
+  ...props
+}: SidebarGroupProps): ReactElement {
   const labelId = useId();
   return (
     <GroupContext.Provider value={labelId}>
@@ -508,51 +496,62 @@ export const SidebarGroup: ForwardRefExoticComponent<
         render,
         ref,
         props: {
+          "data-slot": "sidebar-group",
           role: "group",
           "aria-labelledby": labelId,
           ...props,
-          className: join(cls.group, className),
+          className: cn(sidebarSlots.group, className),
         },
       })}
     </GroupContext.Provider>
   );
-});
+}
 
-export type SidebarGroupLabelProps = useRender.ComponentProps<"div">;
+export interface SidebarGroupLabelProps extends Omit<useRender.ComponentProps<"div">, "className"> {
+  className?: string | undefined;
+}
 
 /** The small uppercase heading of a group; `render` can make it a real heading. */
-export const SidebarGroupLabel: ForwardRefExoticComponent<
-  Omit<SidebarGroupLabelProps, "ref"> & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, Omit<SidebarGroupLabelProps, "ref">>(function SidebarGroupLabel(
-  { className, render, ...props },
+export function SidebarGroupLabel({
+  className,
+  render,
   ref,
-) {
+  ...props
+}: SidebarGroupLabelProps): ReactElement {
   const id = useContext(GroupContext);
   return useRender({
     defaultTagName: "div",
     render,
     ref,
-    props: { id, ...props, className: join(cls.groupLabel, className) },
+    props: {
+      "data-slot": "sidebar-group-label",
+      id,
+      ...props,
+      className: cn(sidebarSlots.groupLabel, className),
+    },
   });
-});
+}
 
-export type SidebarListProps = useRender.ComponentProps<"ul">;
+export interface SidebarListProps extends Omit<useRender.ComponentProps<"ul">, "className"> {
+  className?: string | undefined;
+}
 
 /** The items of a group (`ul`). */
-export const SidebarList: ForwardRefExoticComponent<
-  Omit<SidebarListProps, "ref"> & RefAttributes<HTMLUListElement>
-> = forwardRef<HTMLUListElement, Omit<SidebarListProps, "ref">>(function SidebarList(
-  { className, render, ...props },
-  ref,
-) {
+export function SidebarList({ className, render, ref, ...props }: SidebarListProps): ReactElement {
   return useRender({
     defaultTagName: "ul",
     render,
     ref,
-    // Safari drops the list role from a list without bullets.
-    props: { role: "list", ...props, className: join(cls.list, className) },
+    props: {
+      // Safari drops the list role from a list without bullets.
+      role: "list",
+      ...props,
+      // Found by this, so it stays.
+      "data-slot": "sidebar-list",
+      className: cn(sidebarSlots.list, className),
+    },
   });
-});
+}
 
 /** Scrolls `el` into view inside `scroller` only, by the least distance. */
 function reveal(scroller: HTMLElement, el: HTMLElement, smooth: boolean): void {
@@ -573,13 +572,16 @@ function reveal(scroller: HTMLElement, el: HTMLElement, smooth: boolean): void {
 const label = (children: ReactNode) =>
   Children.map(children, (child) =>
     typeof child === "string" || typeof child === "number" ? (
-      <span className={cls.label}>{child}</span>
+      <span data-slot="sidebar-label" className={sidebarSlots.label}>
+        {child}
+      </span>
     ) : (
       child
     ),
   );
 
-export interface SidebarItemProps extends useRender.ComponentProps<"a"> {
+export interface SidebarItemProps extends Omit<useRender.ComponentProps<"a">, "className"> {
+  className?: string | undefined;
   /** Marks the current page; the same as `aria-current="page"`. */
   active?: boolean | undefined;
   /** Not available yet: muted, no highlight, no navigation, out of the tab order. */
@@ -591,17 +593,23 @@ export interface SidebarItemProps extends useRender.ComponentProps<"a"> {
  * `className` and `ref` included, goes to that link). Text children are truncated with an
  * ellipsis. The current one has `aria-current="page"` and `data-active`.
  */
-export const SidebarItem: ForwardRefExoticComponent<
-  Omit<SidebarItemProps, "ref"> & RefAttributes<HTMLAnchorElement>
-> = forwardRef<HTMLAnchorElement, Omit<SidebarItemProps, "ref">>(function SidebarItem(
-  { className, render, active, disabled, children, onClick, href, ...props },
+export function SidebarItem({
+  className,
+  render,
+  active,
+  disabled,
+  children,
+  onClick,
+  href,
   ref,
-) {
+  ...props
+}: SidebarItemProps): ReactElement {
   const sidebar = useContext(SidebarContext);
   const scroller = useContext(ScrollerContext);
   const current = props["aria-current"];
   const isActive = active ?? (current !== undefined && current !== false && current !== "false");
   const link = useRef<HTMLAnchorElement | null>(null);
+  const merged = useMergedRefs(link, ref);
   const first = useRef(true);
 
   useEffect(() => {
@@ -610,14 +618,6 @@ export const SidebarItem: ForwardRefExoticComponent<
     first.current = false;
   }, [isActive, scroller]);
 
-  const setRef = useCallback(
-    (el: HTMLAnchorElement | null) => {
-      link.current = el;
-      if (typeof ref === "function") ref(el);
-      else if (ref) ref.current = el;
-    },
-    [ref],
-  );
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
     if (disabled) {
       event.preventDefault();
@@ -631,70 +631,72 @@ export const SidebarItem: ForwardRefExoticComponent<
     "data-disabled": disabled ? "" : undefined,
   };
   return (
-    <li className={cls.item} {...state}>
+    <li data-slot="sidebar-item" className={sidebarSlots.item} {...state}>
       {useRender({
         defaultTagName: "a",
         render,
-        ref: setRef,
+        ref: merged,
         props: {
           ...props,
           href: disabled ? undefined : href,
-          className: join(cls.link, className),
+          className: cn(sidebarSlots.link, className),
           "aria-current": isActive ? "page" : current,
           "aria-disabled": disabled ? true : undefined,
           tabIndex: disabled ? -1 : props.tabIndex,
           onClick: handleClick,
           ...state,
+          // Found by this, so it stays.
+          "data-slot": "sidebar-link",
           children: label(children),
         },
       })}
     </li>
   );
-});
+}
 
-export type SidebarItemIconProps = ComponentPropsWithoutRef<"span">;
+export interface SidebarItemIconProps extends Omit<ComponentProps<"span">, "className"> {
+  className?: string | undefined;
+}
 
 /** An optional leading icon, sized 1rem; decorative unless you set `aria-label`. */
-export const SidebarItemIcon: ForwardRefExoticComponent<
-  SidebarItemIconProps & RefAttributes<HTMLSpanElement>
-> = forwardRef<HTMLSpanElement, SidebarItemIconProps>(function SidebarItemIcon(
-  { className, ...props },
-  ref,
-) {
+export function SidebarItemIcon({ className, ...props }: SidebarItemIconProps): ReactElement {
   return (
     <span
-      ref={ref}
+      data-slot="sidebar-item-icon"
       aria-hidden={props["aria-label"] ? undefined : true}
       {...props}
-      className={join(cls.icon, className)}
+      className={cn(sidebarSlots.icon, className)}
     />
   );
-});
+}
 
-export type SidebarItemBadgeProps = ComponentPropsWithoutRef<"span">;
+export interface SidebarItemBadgeProps extends Omit<ComponentProps<"span">, "className"> {
+  className?: string | undefined;
+}
 
 /** A small tag at the end of an item, such as "New". */
-export const SidebarItemBadge: ForwardRefExoticComponent<
-  SidebarItemBadgeProps & RefAttributes<HTMLSpanElement>
-> = forwardRef<HTMLSpanElement, SidebarItemBadgeProps>(function SidebarItemBadge(
-  { className, ...props },
-  ref,
-) {
-  return <span ref={ref} {...props} className={join(cls.badge, className)} />;
-});
+export function SidebarItemBadge({ className, ...props }: SidebarItemBadgeProps): ReactElement {
+  return (
+    <span data-slot="sidebar-item-badge" {...props} className={cn(sidebarSlots.badge, className)} />
+  );
+}
 
-export type SidebarTriggerProps = useRender.ComponentProps<"button">;
+export interface SidebarTriggerProps extends Omit<useRender.ComponentProps<"button">, "className"> {
+  className?: string | undefined;
+}
 
 /**
  * A button that toggles the sidebar of the current mode (the drawer on mobile). It can sit
  * anywhere under the Provider. Named "Toggle sidebar" unless you pass `aria-label` or children.
  */
-export const SidebarTrigger: ForwardRefExoticComponent<
-  Omit<SidebarTriggerProps, "ref"> & RefAttributes<HTMLButtonElement>
-> = forwardRef<HTMLButtonElement, Omit<SidebarTriggerProps, "ref">>(function SidebarTrigger(
-  { className, render, children, onClick, ...props },
+export function SidebarTrigger({
+  className,
+  render,
+  children,
+  onClick,
   ref,
-) {
+  ...props
+}: SidebarTriggerProps): ReactElement {
   const sidebar = useSidebar() as InternalContext;
   const shown = sidebar.mobile ? sidebar.mobileOpen : sidebar.open;
   return useRender({
@@ -702,12 +704,13 @@ export const SidebarTrigger: ForwardRefExoticComponent<
     render,
     ref,
     props: {
+      "data-slot": "sidebar-trigger",
       type: "button",
       "aria-label": children ? undefined : "Toggle sidebar",
       "aria-expanded": shown,
       "aria-controls": !sidebar.mobile || sidebar.mobileOpen ? sidebar.rootId : undefined,
       ...props,
-      className: join(cls.trigger, className),
+      className: cn(sidebarSlots.trigger, className),
       "data-state": shown ? "open" : "closed",
       "data-mobile": sidebar.mobile ? "" : undefined,
       onClick: (event: MouseEvent<HTMLButtonElement>) => {
@@ -717,9 +720,9 @@ export const SidebarTrigger: ForwardRefExoticComponent<
       children: children ?? <PanelLeftIcon />,
     },
   });
-});
+}
 
-function PanelLeftIcon() {
+function PanelLeftIcon(): ReactElement {
   return (
     <svg
       viewBox="0 0 16 16"

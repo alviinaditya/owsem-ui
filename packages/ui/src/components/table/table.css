@@ -34,7 +34,7 @@
     line-height: 1.5;
   }
 
-  .ow-table:where([data-size="sm"]) {
+  .ow-table--sm {
     --_py: 6px;
     --_px: 12px;
   }

@@ -474,3 +474,42 @@ describe("Table of Contents", () => {
     expect(await measureIdle()).toEqual({ rafCalls: 0, runningAnimations: [] });
   });
 });
+
+test("every part has its data-slot", async () => {
+  const { nav } = await mount();
+  const slots = [
+    ...new Set([...nav.querySelectorAll("[data-slot]")].map((el) => el.getAttribute("data-slot"))),
+  ];
+  expect([nav.dataset.slot, ...slots]).toEqual([
+    "table-of-contents",
+    "table-of-contents-list",
+    "table-of-contents-item",
+    "table-of-contents-link",
+    "table-of-contents-marker",
+  ]);
+});
+
+test("tracking survives another data-slot on a link and a list", async () => {
+  const { nav, marker, link } = await mount(
+    <div style={{ display: "flex", gap: 24, alignItems: "start" }}>
+      <Article style={{ blockSize: 300 }} />
+      <TableOfContents.Root aria-label="On this page" style={{ inlineSize: 200 }}>
+        <TableOfContents.List data-slot="mine" style={{ paddingInlineStart: 20 }}>
+          <TableOfContents.Item>
+            <TableOfContents.Link data-slot="mine" href="#install">
+              Installation
+            </TableOfContents.Link>
+          </TableOfContents.Item>
+        </TableOfContents.List>
+      </TableOfContents.Root>
+    </div>,
+  );
+  expect(link("Installation").dataset.slot).toBe("table-of-contents-link");
+  expect(nav.querySelector("ul")?.dataset.slot).toBe("table-of-contents-list");
+  link("Installation").click();
+  await expect.poll(() => marker.hasAttribute("data-visible")).toBe(true);
+  expect(link("Installation").getAttribute("aria-current")).toBe("location");
+  // The marker rests on the list's rail: the list's start edge, not the link's.
+  const rail = (nav.querySelector("ul") as HTMLElement).getBoundingClientRect();
+  expect(Math.abs(marker.getBoundingClientRect().left - rail.left)).toBeLessThan(1.5);
+});

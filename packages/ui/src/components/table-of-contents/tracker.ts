@@ -18,15 +18,6 @@ export interface Tracker {
   destroy(): void;
 }
 
-/** Class names of every part (FR-6a). */
-export const cls = {
-  root: "ow-table-of-contents",
-  list: "ow-table-of-contents__list",
-  item: "ow-table-of-contents__item",
-  link: "ow-table-of-contents__link",
-  marker: "ow-table-of-contents__marker",
-} as const;
-
 interface Box {
   x: number;
   y: number;
@@ -36,8 +27,9 @@ interface Box {
 /** The reading line, as a share of the scroll area's height from its top. */
 const LINE = 0.3;
 const SCROLL_KEYS = new Set(["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "]);
-const LINK = `.${cls.link}`;
-const RAIL = `.${cls.list}[data-depth="1"]`;
+// The parts are found by their data-slot, never by class.
+const LINK = '[data-slot="table-of-contents-link"]';
+const RAIL = '[data-slot="table-of-contents-list"][data-depth="1"]';
 
 const px = (n: number) => `${n}px`;
 const same = (a: Box, b: Box) =>

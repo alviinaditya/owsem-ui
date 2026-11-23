@@ -1,4 +1,4 @@
-import { type ComponentProps, forwardRef, type ReactNode, useState } from "react";
+import { type ComponentProps, type ReactNode, useState } from "react";
 import { afterEach, describe, expect, test } from "vitest";
 import { commands, userEvent } from "vitest/browser";
 import { render } from "vitest-browser-react";
@@ -267,9 +267,7 @@ describe("Sidebar", () => {
 
   test("className, style, render, and refs reach the parts", async () => {
     const refs: Record<string, HTMLElement | null> = {};
-    const Link = forwardRef<HTMLAnchorElement, ComponentProps<"a">>(function Link(props, ref) {
-      return <a {...props} ref={ref} data-custom="yes" />;
-    });
+    const Link = (props: ComponentProps<"a">) => <a {...props} data-custom="yes" />;
     await render(
       <Sidebar.Provider className="mine-provider">
         <Sidebar.Root
@@ -427,4 +425,88 @@ describe("Sidebar as a drawer (mobile)", () => {
     expect(q(".ow-sidebar")?.getAttribute("role")).toBe("dialog");
     await screen.unmount();
   });
+});
+
+test("every part has its data-slot", async () => {
+  await render(
+    <Sidebar.Provider>
+      <Sidebar.Trigger />
+      <Sidebar.Root aria-label="Docs">
+        <Sidebar.Header>Logo</Sidebar.Header>
+        <Sidebar.Content>
+          <Sidebar.Indicator />
+          <Sidebar.Group>
+            <Sidebar.GroupLabel>Display</Sidebar.GroupLabel>
+            <Sidebar.List>
+              <Sidebar.Item href="/button" active>
+                <Sidebar.ItemIcon />
+                Button
+                <Sidebar.ItemBadge>New</Sidebar.ItemBadge>
+              </Sidebar.Item>
+            </Sidebar.List>
+          </Sidebar.Group>
+        </Sidebar.Content>
+        <Sidebar.Footer>footer</Sidebar.Footer>
+      </Sidebar.Root>
+    </Sidebar.Provider>,
+  );
+  const slots = (scope: ParentNode) => [
+    ...new Set(
+      [...scope.querySelectorAll("[data-slot]")].map((el) => (el as HTMLElement).dataset.slot),
+    ),
+  ];
+  expect(slots(document.body)).toEqual([
+    "sidebar-provider",
+    "sidebar-trigger",
+    "sidebar",
+    "sidebar-header",
+    "sidebar-content",
+    "sidebar-indicator",
+    "sidebar-liquid",
+    "sidebar-pulse",
+    "sidebar-group",
+    "sidebar-group-label",
+    "sidebar-list",
+    "sidebar-item",
+    "sidebar-link",
+    "sidebar-item-icon",
+    "sidebar-label",
+    "sidebar-item-badge",
+    "sidebar-footer",
+  ]);
+});
+
+test("the drawer's root and backdrop have their data-slot", async () => {
+  await render(
+    <Sidebar.Provider mobileQuery="all" mobileOpen>
+      <Sidebar.Root aria-label="Docs">x</Sidebar.Root>
+    </Sidebar.Provider>,
+  );
+  expect(q('[data-slot="sidebar"][data-mobile]')).not.toBeNull();
+  expect(q('[data-slot="sidebar-backdrop"]')).not.toBeNull();
+});
+
+test("the indicator and the highlight survive another data-slot on a link and a list", async () => {
+  await render(
+    <Sidebar.Provider>
+      <Sidebar.Root aria-label="Docs">
+        <Sidebar.Content>
+          <Sidebar.Indicator />
+          <Sidebar.List data-slot="mine">
+            <Sidebar.Item data-slot="mine" href="/button" active>
+              Button
+            </Sidebar.Item>
+            <Sidebar.Item data-slot="mine" href="/input">
+              Input
+            </Sidebar.Item>
+          </Sidebar.List>
+        </Sidebar.Content>
+      </Sidebar.Root>
+    </Sidebar.Provider>,
+  );
+  const button = link("Button");
+  expect(button.dataset.slot).toBe("sidebar-link");
+  expect(q("ul")?.dataset.slot).toBe("sidebar-list");
+  await expect.poll(() => button.hasAttribute("data-landed")).toBe(true);
+  expect(q(".ow-sidebar__indicator")?.hasAttribute("data-visible")).toBe(true);
 });

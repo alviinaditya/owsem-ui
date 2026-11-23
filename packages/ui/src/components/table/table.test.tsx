@@ -565,3 +565,41 @@ describe("Table theming", () => {
     expect(await measureIdle(1500)).toEqual({ rafCalls: 0, runningAnimations: [] });
   });
 });
+
+test("every part has its data-slot, and an outer part's data-slot wins", async () => {
+  await render(<Plain caption="Props" />);
+  const slots = [
+    ...new Set(
+      [...document.querySelectorAll("[data-slot]")].map((el) => el.getAttribute("data-slot")),
+    ),
+  ];
+  expect(slots).toEqual([
+    "table",
+    "table-scroll",
+    "table-table",
+    "table-caption",
+    "table-header",
+    "table-row",
+    "table-head",
+    "table-body",
+    "table-cell",
+    "table-value",
+    "table-footer",
+  ]);
+  await render(
+    <Table.Root>
+      <Table.Body>
+        <Table.Row data-slot="mine">
+          <Table.Cell>x</Table.Cell>
+        </Table.Row>
+      </Table.Body>
+    </Table.Root>,
+  );
+  expect(document.querySelector("tr[data-slot='mine']")).not.toBeNull();
+});
+
+test("size sm adds a modifier class and keeps data-size", async () => {
+  await render(<Plain size="sm" />);
+  expect(q(".ow-table").classList.contains("ow-table--sm")).toBe(true);
+  expect(q(".ow-table").getAttribute("data-size")).toBe("sm");
+});

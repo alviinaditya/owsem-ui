@@ -43,7 +43,7 @@ test("the Command tab keeps the npm install; Manual lists the steps and the file
     "lib/owsem/tokens.css",
     "components/owsem/switch/switch.tsx",
     "components/owsem/switch/switch.css",
-    "lib/owsem/class-name.ts",
+    "lib/owsem/cn.ts",
   ]) {
     await expect(titles.filter({ hasText: path })).toHaveCount(1);
   }

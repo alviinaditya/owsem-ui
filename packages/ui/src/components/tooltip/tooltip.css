@@ -51,7 +51,8 @@
   /*
    * A shortcut, such as <kbd>⌘B</kbd>, after the label, whatever the app's kbd style. Its chip is a
    * line tall, so at the end it sits as far from the edge as from the top and bottom (FR-10), with
-   * corners concentric with the popup's (FR-10b).
+   * corners concentric with the popup's (FR-10b). It reads the tokens, not the popup's --_fg and
+   * --_radius: a Kbd has its own.
    */
   .ow-tooltip__popup kbd {
     display: inline-block;
@@ -59,9 +60,9 @@
     margin-inline-start: 0.5em;
     padding-inline: 0.3em;
     border: 0;
-    border-radius: max(2px, var(--_radius) - var(--_py));
-    background-color: color-mix(in oklab, var(--_fg) 14%, transparent);
-    color: color-mix(in oklab, var(--_fg) 80%, transparent);
+    border-radius: max(2px, var(--ow-radius) - var(--_py));
+    background-color: color-mix(in oklab, var(--ow-tooltip-fg) 14%, transparent);
+    color: color-mix(in oklab, var(--ow-tooltip-fg) 80%, transparent);
     font: inherit;
   }
 

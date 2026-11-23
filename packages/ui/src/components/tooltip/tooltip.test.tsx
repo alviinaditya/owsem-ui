@@ -4,7 +4,9 @@ import { describe, expect, onTestFinished, test } from "vitest";
 import { commands, userEvent } from "vitest/browser";
 import { render } from "vitest-browser-react";
 import { axeReport } from "../../../test/a11y.ts";
+import { composite, contrast } from "../../../test/contrast.ts";
 import { measureIdle, settle } from "../../../test/raf-counter.ts";
+import { Kbd } from "../kbd";
 import { Tooltip } from "./index";
 
 const root = document.documentElement;
@@ -366,3 +368,37 @@ test("every part has its data-slot", async () => {
   );
   expect(slots).toEqual(["tooltip-positioner", "tooltip-popup", "tooltip-arrow"]);
 });
+
+test.each(["light", "dark"])(
+  "a Kbd reads on the tooltip as a plain kbd does (%s)",
+  async (theme) => {
+    root.dataset.theme = theme;
+    onTestFinished(() => {
+      delete root.dataset.theme;
+    });
+    await render(
+      <Tooltip.Root open>
+        <Tooltip.Trigger>Save</Tooltip.Trigger>
+        <Tooltip.Portal>
+          <Tooltip.Positioner>
+            <Tooltip.Popup>
+              Save <kbd>S</kbd> <Kbd>S</Kbd>
+            </Tooltip.Popup>
+          </Tooltip.Positioner>
+        </Tooltip.Portal>
+      </Tooltip.Root>,
+    );
+    const keys = () => [...document.querySelectorAll(".ow-tooltip__popup kbd")];
+    await expect.poll(() => keys().length).toBe(2);
+    const [plain, key] = keys().map((el) => getComputedStyle(el)) as [
+      CSSStyleDeclaration,
+      CSSStyleDeclaration,
+    ];
+    expect(key.color).toBe(plain.color);
+    expect(key.backgroundColor).toBe(plain.backgroundColor);
+    expect(key.borderRadius).toBe(plain.borderRadius);
+    const popup = document.querySelector(".ow-tooltip__popup") as Element;
+    const chip = [getComputedStyle(popup).backgroundColor, key.backgroundColor];
+    expect(contrast(composite(...chip), composite(...chip, key.color))).toBeGreaterThan(4.5);
+  },
+);

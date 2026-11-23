@@ -115,23 +115,19 @@ describe("Toggle", () => {
 
   test("passes className, style, render, and ref through (FR-2, FR-5)", async () => {
     const ref = createRef<HTMLButtonElement>();
-    const [byString, byFunction, rendered] = await mount(
+    const [plain, rendered] = await mount(
       <>
         <Toggle ref={ref} className="mine" style={{ marginInline: "3px" }}>
           A
-        </Toggle>
-        <Toggle defaultPressed className={(state) => (state.pressed ? "is-on" : "is-off")}>
-          B
         </Toggle>
         <Toggle render={<span />} nativeButton={false}>
           C
         </Toggle>
       </>,
     );
-    expect(ref.current).toBe(byString);
-    expect(byString?.className).toBe("ow-toggle mine");
-    expect(byString?.style.marginInline).toBe("3px");
-    expect(byFunction?.className).toBe("ow-toggle is-on");
+    expect(ref.current).toBe(plain);
+    expect(plain?.className).toBe("ow-toggle ow-toggle--md mine");
+    expect(plain?.style.marginInline).toBe("3px");
     expect(rendered?.tagName).toBe("SPAN");
     expect(rendered?.getAttribute("role")).toBe("button");
   });
@@ -333,4 +329,12 @@ describe("Toggle", () => {
     await settle();
     expect(await measureIdle()).toEqual({ rafCalls: 0, runningAnimations: [] });
   });
+});
+
+test("every part has its data-slot", async () => {
+  const screen = await render(<Toggle aria-label="T" startIcon={<i />} endIcon={<i />} />);
+  const slots = [...screen.container.querySelectorAll("[data-slot]")].map((el) =>
+    el.getAttribute("data-slot"),
+  );
+  expect(slots).toEqual(["toggle", "toggle-icon", "toggle-icon"]);
 });

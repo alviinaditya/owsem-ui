@@ -83,23 +83,21 @@ Utility membaca token `--ow-*` di tempat ia dipakai, jadi `data-theme` dan token
 sebuah elemen tetap berlaku. Easing spring berpasangan dengan durasinya, yang tidak punya utility
 sendiri: `ease-ow-spring-glide duration-(--ow-spring-glide-duration)`.
 
-Setiap part menerima `className` berupa string; part yang dibangun di atas Base UI juga menerima
-fungsi dari state-nya. State berupa atribut data, dan Tailwind v4 mengubahnya menjadi variant tanpa
-plugin, seperti `data-highlighted:`, `data-pressed:`, atau `data-[size=sm]:`:
+Setiap part menerima `className` berupa string. State berupa atribut data, dan Tailwind v4
+mengubahnya menjadi variant tanpa plugin, seperti `data-highlighted:`, `data-pressed:`, atau
+`data-[size=sm]:`:
 
 ```tsx
 <Separator className="data-[orientation=vertical]:mx-2" />
-<Separator className={(state) => (state.orientation === "vertical" ? "mx-2" : "my-4")} />
 <TreeRailNav.Toggle className="data-panel-open:text-ow-accent">Settings</TreeRailNav.Toggle>
 ```
 
 OwsemUI menambahkan class-nya sendiri ke class Anda dan tidak butuh `cn()`: utility Anda menang
 karena urutan layer, bukan karena penggabungan class. Kalau project Anda punya helper `cn()`, helper
-itu tetap bisa dipakai di `className` seperti biasa, juga di dalam fungsinya:
+itu tetap bisa dipakai di `className` seperti biasa:
 
 ```tsx
 <Separator className={cn("my-4", inset && "mx-4")} />
-<Separator className={(state) => cn("my-4", state.orientation === "vertical" && "mx-2")} />
 ```
 
 Variant `dark:` Tailwind mengikuti tema sistem. Supaya mengikuti `data-theme` seperti token, dengan

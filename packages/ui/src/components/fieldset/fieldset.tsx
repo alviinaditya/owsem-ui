@@ -1,34 +1,37 @@
 "use client";
 
 import { Fieldset as BaseFieldset } from "@base-ui/react/fieldset";
-import { type ForwardRefExoticComponent, forwardRef, type RefAttributes } from "react";
-import { withClassName } from "../../core/class-name";
+import type { ReactElement } from "react";
+import { cn } from "../../core/cn";
+import { fieldsetSlots } from "./fieldset-variants";
 import "./fieldset.css";
 
-const cls = { root: "ow-fieldset", legend: "ow-fieldset__legend" } as const;
-
-export type FieldsetRootProps = Omit<BaseFieldset.Root.Props, "ref">;
+export interface FieldsetRootProps extends Omit<BaseFieldset.Root.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** A group of fields with even gaps. `disabled` reaches every control inside. */
-export const FieldsetRoot: ForwardRefExoticComponent<
-  FieldsetRootProps & RefAttributes<HTMLFieldSetElement>
-> = forwardRef<HTMLFieldSetElement, FieldsetRootProps>(function FieldsetRoot(
-  { className, ...props },
-  ref,
-) {
-  return <BaseFieldset.Root ref={ref} className={withClassName(cls.root, className)} {...props} />;
-});
+export function FieldsetRoot({ className, ...props }: FieldsetRootProps): ReactElement {
+  return (
+    <BaseFieldset.Root
+      data-slot="fieldset"
+      {...props}
+      className={cn(fieldsetSlots.root, className)}
+    />
+  );
+}
 
-export type FieldsetLegendProps = Omit<BaseFieldset.Legend.Props, "ref">;
+export interface FieldsetLegendProps extends Omit<BaseFieldset.Legend.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** Names the group, over a hairline. */
-export const FieldsetLegend: ForwardRefExoticComponent<
-  FieldsetLegendProps & RefAttributes<HTMLDivElement>
-> = forwardRef<HTMLDivElement, FieldsetLegendProps>(function FieldsetLegend(
-  { className, ...props },
-  ref,
-) {
+export function FieldsetLegend({ className, ...props }: FieldsetLegendProps): ReactElement {
   return (
-    <BaseFieldset.Legend ref={ref} className={withClassName(cls.legend, className)} {...props} />
+    <BaseFieldset.Legend
+      data-slot="fieldset-legend"
+      {...props}
+      className={cn(fieldsetSlots.legend, className)}
+    />
   );
-});
+}

@@ -64,11 +64,11 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  .ow-switch:where([data-size="sm"]) {
+  .ow-switch--sm {
     font-size: 0.8125rem;
   }
 
-  .ow-switch:where([data-size="lg"]) {
+  .ow-switch--lg {
     font-size: 1rem;
   }
 

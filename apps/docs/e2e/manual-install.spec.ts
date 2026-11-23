@@ -86,7 +86,7 @@ test("Copy takes the whole file, and Expand shows all of a collapsed one", async
   const copied = await page.evaluate(() => navigator.clipboard.readText());
   // Lines past the collapsed 240px are in what was copied.
   expect(copied.split("\n").length).toBeGreaterThan(40);
-  expect(copied).toContain("export const Switch");
+  expect(copied).toContain("export function SwitchRoot");
 
   const toggle = block.getByRole("button", { name: "Expand" });
   await toggle.click();

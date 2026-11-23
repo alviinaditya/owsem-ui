@@ -38,17 +38,15 @@ describe("Separator", () => {
 
   test("passes className, style, render, and ref through (FR-2, FR-5)", async () => {
     const ref = createRef<HTMLDivElement>();
-    const [byString, byFunction, rendered] = await mount(
+    const [plain, rendered] = await mount(
       <>
         <Separator ref={ref} className="mine" style={{ marginBlock: "3px" }} />
-        <Separator orientation="vertical" className={(state) => `is-${state.orientation}`} />
         <Separator render={<span />} />
       </>,
     );
-    expect(ref.current).toBe(byString);
-    expect(byString?.className).toBe("ow-separator mine");
-    expect(byString?.style.marginBlock).toBe("3px");
-    expect(byFunction?.className).toBe("ow-separator is-vertical");
+    expect(ref.current).toBe(plain);
+    expect(plain?.className).toBe("ow-separator mine");
+    expect(plain?.style.marginBlock).toBe("3px");
     expect(rendered?.tagName).toBe("SPAN");
     expect(rendered?.className).toBe("ow-separator");
   });
@@ -162,4 +160,12 @@ describe("Separator", () => {
     await settle();
     expect(await measureIdle()).toEqual({ rafCalls: 0, runningAnimations: [] });
   });
+});
+
+test("every part has its data-slot", async () => {
+  const screen = await render(<Separator />);
+  const slots = [...screen.container.querySelectorAll("[data-slot]")].map((el) =>
+    el.getAttribute("data-slot"),
+  );
+  expect(slots).toEqual(["separator"]);
 });

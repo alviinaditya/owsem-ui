@@ -45,7 +45,7 @@ describe("Field", () => {
     const control = screen.getByRole("textbox", { name: "Email" });
     await expect.element(control).toBeVisible();
     expect(q(".ow-field__label").tagName).toBe("LABEL");
-    expect(q("input").className).toBe("ow-input");
+    expect(q("input").className).toBe("ow-input ow-input--md");
     await userEvent.click(q(".ow-field__label"));
     expect(document.activeElement).toBe(q("input"));
   });
@@ -61,7 +61,7 @@ describe("Field", () => {
     const input = q<HTMLInputElement>(".ow-input");
     expect(ref.current).toBe(input);
     expect(input.dataset.size).toBe("lg");
-    expect(input.className).toBe("ow-input mine");
+    expect(input.className).toBe("ow-input ow-input--lg mine");
     expect(q(".ow-input__wrapper").dataset.size).toBe("lg");
   });
 
@@ -75,7 +75,7 @@ describe("Field", () => {
     );
     await expect.element(screen.getByRole("textbox", { name: "Note" })).toBeVisible();
     const area = q("textarea");
-    expect(area.className).toBe("ow-input");
+    expect(area.className).toBe("ow-input ow-input--md");
     expect(area.getAttribute("aria-describedby")).toBe(q(".ow-field__description").id);
   });
 
@@ -93,14 +93,14 @@ describe("Field", () => {
   test("every part passes className, style, render, and ref through (FR-2, FR-5)", async () => {
     const refs = {
       root: createRef<HTMLDivElement>(),
-      label: createRef<HTMLElement>(),
+      label: createRef<HTMLLabelElement>(),
       description: createRef<HTMLParagraphElement>(),
       error: createRef<HTMLDivElement>(),
       item: createRef<HTMLDivElement>(),
     };
     const { q } = await mount(
       <Field.Root ref={refs.root} invalid className="r" style={{ marginBlock: "1px" }}>
-        <Field.Item ref={refs.item} className={() => "i"}>
+        <Field.Item ref={refs.item} className="i">
           <Field.Label ref={refs.label} className="l">
             Name
           </Field.Label>
@@ -313,4 +313,28 @@ describe("Field", () => {
     await settle();
     expect(await measureIdle()).toEqual({ rafCalls: 0, runningAnimations: [] });
   });
+});
+
+test("every part has its data-slot", async () => {
+  const screen = await render(
+    <Field.Root invalid>
+      <Field.Item>
+        <Field.Label>Name</Field.Label>
+        <Field.Control />
+      </Field.Item>
+      <Field.Description>Help</Field.Description>
+      <Field.Error match>Wrong</Field.Error>
+    </Field.Root>,
+  );
+  const slots = [...screen.container.querySelectorAll("[data-slot]")].map((el) =>
+    el.getAttribute("data-slot"),
+  );
+  expect(slots).toEqual([
+    "field",
+    "field-item",
+    "field-label",
+    "input",
+    "field-description",
+    "field-error",
+  ]);
 });

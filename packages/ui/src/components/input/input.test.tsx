@@ -93,18 +93,14 @@ describe("Input", () => {
         />,
       );
       expect(ref.current).toBe(input);
-      expect(input.className).toBe("ow-input mine");
+      expect(input.className).toBe("ow-input ow-input--md mine");
       expect(input.style.marginBlock).toBe("3px");
       expect(input.placeholder).toBe("Your name");
       expect(input.dataset.x).toBe("1");
     }
   });
 
-  test("className may be a function of the state, and render swaps the element", async () => {
-    const byFunction = await mount(
-      <Input aria-label="F" disabled className={(state) => `is-${state.disabled}`} />,
-    );
-    expect(byFunction.className).toBe("ow-input is-true");
+  test("render swaps the element", async () => {
     const area = await mount(<Input aria-label="R" render={<textarea rows={3} />} />);
     expect(area.tagName).toBe("TEXTAREA");
     expect(area.getBoundingClientRect().height).toBeGreaterThan(50);
@@ -116,7 +112,7 @@ describe("Input", () => {
     expect(bare.closest(".ow-input__wrapper")).toBeNull();
     const input = await mount(<Input aria-label="Both" startIcon={<Star />} endIcon={<Star />} />);
     const wrapper = input.parentElement;
-    expect(wrapper?.className).toBe("ow-input__wrapper");
+    expect(wrapper?.className).toBe("ow-input__wrapper ow-input__wrapper--md");
     const icons = [...(wrapper?.querySelectorAll(".ow-input__icon") ?? [])];
     expect(icons.map((icon) => icon.getAttribute("data-side"))).toEqual(["start", "end"]);
     expect(icons.every((icon) => icon.getAttribute("aria-hidden") === "true")).toBe(true);
@@ -379,4 +375,12 @@ describe("Input", () => {
     await settle();
     expect(await measureIdle()).toEqual({ rafCalls: 0, runningAnimations: [] });
   });
+});
+
+test("every part has its data-slot", async () => {
+  const screen = await render(<Input aria-label="I" startIcon={<i />} endIcon={<i />} />);
+  const slots = [...screen.container.querySelectorAll("[data-slot]")].map((el) =>
+    el.getAttribute("data-slot"),
+  );
+  expect(slots).toEqual(["input-wrapper", "input-icon", "input", "input-icon"]);
 });

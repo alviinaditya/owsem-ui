@@ -5,6 +5,8 @@ import { commands, userEvent } from "vitest/browser";
 import { render } from "vitest-browser-react";
 import { axeReport } from "../../../test/a11y.ts";
 import { measureIdle, settle } from "../../../test/raf-counter.ts";
+import { Input } from "../input";
+import { Switch } from "../switch";
 import { Toggle } from "../toggle";
 import { Toolbar } from "./index";
 
@@ -130,7 +132,7 @@ describe("Toolbar", () => {
     const { q } = await mount();
     await pointerAway();
     const bold = q<HTMLButtonElement>('[aria-label="Bold"]');
-    expect(bold.className).toBe("ow-toggle ow-toolbar__button");
+    expect(bold.className).toBe("ow-toggle ow-toggle--md ow-toolbar__button");
     expect(bold.dataset.size).toBe("md");
     expect(bold.hasAttribute("data-icon-only")).toBe(true);
     await userEvent.click(bold);
@@ -141,6 +143,23 @@ describe("Toolbar", () => {
     expect(style.boxShadow).toBe("none");
     await pointerAway();
     expect(getComputedStyle(bold).backgroundColor).toBe(resolve("color", ON));
+  });
+
+  test("an Input or a Switch rendered as an item takes the toolbar's size", async () => {
+    const { q } = await mount(
+      <Toolbar.Root aria-label="Small" size="sm">
+        <Toolbar.Input aria-label="Search" render={<Input />} />
+        <Toolbar.Button aria-label="Alerts" render={<Switch.Root />} />
+      </Toolbar.Root>,
+    );
+    const input = q('[aria-label="Search"]');
+    expect(input.classList.contains("ow-input--sm")).toBe(true);
+    expect(input.dataset.size).toBe("sm");
+    expect(getComputedStyle(input).fontSize).toBe("13px");
+    const track = q('[aria-label="Alerts"]');
+    expect(track.classList.contains("ow-switch--sm")).toBe(true);
+    expect(track.dataset.size).toBe("sm");
+    expect(getComputedStyle(track).fontSize).toBe("13px");
   });
 
   test("items take the toolbar's size unless they set their own (FR-3)", async () => {

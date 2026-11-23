@@ -20,12 +20,12 @@
     vertical-align: top;
   }
 
-  .ow-radio-group:where([data-size="sm"]) {
+  .ow-radio-group--sm {
     --py: 0.6058em;
     font-size: 0.8125rem;
   }
 
-  .ow-radio-group:where([data-size="lg"]) {
+  .ow-radio-group--lg {
     --py: 0.875em;
     font-size: 1rem;
   }

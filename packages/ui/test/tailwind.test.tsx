@@ -119,15 +119,12 @@ describe("Tailwind CSS v4 (FR-8)", () => {
     }
   });
 
-  test("utilities in className beat the component CSS, as a string or a function", async () => {
+  test("utilities in className beat the component CSS", async () => {
     loadTailwind();
     const screen = await render(
       <>
         <Separator className="border-red-500" />
-        <Separator
-          orientation="vertical"
-          className={(state) => (state.orientation === "vertical" ? "border-[rgb(0,0,255)]" : "")}
-        />
+        <Separator orientation="vertical" className="border-[rgb(0,0,255)]" />
         <Nav toggle="data-panel-open:text-[rgb(0,128,0)]" link="data-current:text-[rgb(255,0,0)]" />
       </>,
     );

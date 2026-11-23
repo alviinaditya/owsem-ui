@@ -1,25 +1,23 @@
 "use client";
 
 import { Input as BaseInput } from "@base-ui/react/input";
-import {
-  type CSSProperties,
-  type ForwardRefExoticComponent,
-  forwardRef,
-  type ReactNode,
-  type RefAttributes,
-} from "react";
-import { withClassName } from "../../core/class-name";
+import type { CSSProperties, ReactElement, ReactNode } from "react";
+import { cn } from "../../core/cn";
 import { useShakeGate } from "../../core/shake";
+import {
+  type InputSize,
+  type InputVariantProps,
+  inputSlots,
+  inputVariants,
+  inputWrapperVariants,
+} from "./input-variants";
 import "./input.css";
 
-const cls = { root: "ow-input", wrapper: "ow-input__wrapper", icon: "ow-input__icon" } as const;
-
-export type InputSize = "sm" | "md" | "lg";
-
 // `size` is the type scale here, not the input's width in characters; set `inline-size` instead.
-export interface InputProps extends Omit<BaseInput.Props, "ref" | "size"> {
-  /** Button's sizes (FR-11): 32, 40, or 48 px tall. @default "md" */
-  size?: InputSize | undefined;
+export interface InputProps extends Omit<BaseInput.Props, "className" | "size">, InputVariantProps {
+  className?: string | undefined;
+  /** The size of an outer part that renders this one, such as Toolbar.Button. */
+  "data-size"?: InputSize | undefined;
   /** An icon before the text, the font size plus 2px. Decorative: the input needs a name. */
   startIcon?: ReactNode;
   /** An icon after the text. */
@@ -28,7 +26,7 @@ export interface InputProps extends Omit<BaseInput.Props, "ref" | "size"> {
 
 const icon = (node: ReactNode, side: "start" | "end") =>
   node == null ? null : (
-    <span className={cls.icon} data-side={side} aria-hidden="true">
+    <span data-slot="input-icon" data-side={side} aria-hidden="true" className={inputSlots.icon}>
       {node}
     </span>
   );
@@ -46,29 +44,39 @@ function forIcons(style: InputProps["style"]): CSSProperties | undefined {
  * `className`, `style`, and every other prop always reach the input; icons add a wrapper that
  * only places them.
  */
-export const Input: ForwardRefExoticComponent<InputProps & RefAttributes<HTMLInputElement>> =
-  forwardRef<HTMLInputElement, InputProps>(function Input(
-    { className, size = "md", startIcon, endIcon, ...props },
-    ref,
-  ) {
-    const gate = useShakeGate(ref);
-    const input = (
-      <BaseInput
-        ref={gate}
-        className={withClassName(cls.root, className)}
-        data-size={size}
-        {...props}
-      />
-    );
-    if (startIcon == null && endIcon == null) return input;
-    return (
-      <span className={cls.wrapper} data-size={size} style={forIcons(props.style)}>
-        {icon(startIcon, "start")}
-        {input}
-        {icon(endIcon, "end")}
-      </span>
-    );
-  });
+export function Input({
+  "data-size": outerSize,
+  size = outerSize ?? "md",
+  startIcon,
+  endIcon,
+  className,
+  ref,
+  ...props
+}: InputProps): ReactElement {
+  const gate = useShakeGate(ref);
+  const input = (
+    <BaseInput
+      data-slot="input"
+      {...props}
+      ref={gate}
+      className={cn(inputVariants({ size }), className)}
+      data-size={size}
+    />
+  );
+  if (startIcon == null && endIcon == null) return input;
+  return (
+    <span
+      data-slot="input-wrapper"
+      data-size={size}
+      className={inputWrapperVariants({ size })}
+      style={forIcons(props.style)}
+    >
+      {icon(startIcon, "start")}
+      {input}
+      {icon(endIcon, "end")}
+    </span>
+  );
+}
 
 export declare namespace Input {
   type Props = InputProps;

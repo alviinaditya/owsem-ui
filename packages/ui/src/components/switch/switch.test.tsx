@@ -193,32 +193,23 @@ describe("Switch", () => {
   test("passes className, style, render, and ref through on both parts (FR-2, FR-5)", async () => {
     const trackRef = createRef<HTMLElement>();
     const thumbRef = createRef<HTMLSpanElement>();
-    const [plain, byFunction, rendered] = await mount(
+    const [plain, rendered] = await mount(
       <>
         <Switch.Root ref={trackRef} aria-label="A" className="mine" style={{ marginInline: "3px" }}>
           <Switch.Thumb ref={thumbRef} className="key" style={{ opacity: 0.5 }} />
-        </Switch.Root>
-        <Switch.Root
-          aria-label="B"
-          defaultChecked
-          className={(state) => (state.checked ? "is-on" : "is-off")}
-        >
-          <Switch.Thumb className={(state) => (state.checked ? "key-on" : "key-off")} />
         </Switch.Root>
         <Switch.Root aria-label="C" render={<button type="button" />} nativeButton>
           <Switch.Thumb render={<i />} />
         </Switch.Root>
       </>,
     );
-    if (!plain || !byFunction || !rendered) throw new Error("no switches");
+    if (!plain || !rendered) throw new Error("no switches");
     expect(trackRef.current).toBe(plain);
     expect(thumbRef.current).toBe(thumbOf(plain));
-    expect(plain.className).toBe("ow-switch mine");
+    expect(plain.className).toBe("ow-switch ow-switch--md mine");
     expect(plain.style.marginInline).toBe("3px");
     expect(thumbOf(plain).className).toBe("ow-switch__thumb key");
     expect(thumbOf(plain).style.opacity).toBe("0.5");
-    expect(byFunction.className).toBe("ow-switch is-on");
-    expect(thumbOf(byFunction).className).toBe("ow-switch__thumb key-on");
     expect(rendered.tagName).toBe("BUTTON");
     expect(thumbOf(rendered).tagName).toBe("I");
   });
@@ -569,4 +560,12 @@ describe("Switch", () => {
     await settle();
     expect(await measureIdle()).toEqual({ rafCalls: 0, runningAnimations: [] });
   });
+});
+
+test("every part has its data-slot", async () => {
+  const screen = await render(<Switch.Root aria-label="S" />);
+  const slots = [...screen.container.querySelectorAll("[data-slot]")].map((el) =>
+    el.getAttribute("data-slot"),
+  );
+  expect(slots).toEqual(["switch", "switch-thumb"]);
 });

@@ -220,3 +220,11 @@ describe("Form", () => {
     expect(await measureIdle()).toEqual({ rafCalls: 0, runningAnimations: [] });
   });
 });
+
+test("every part has its data-slot", async () => {
+  const screen = await render(<Form />);
+  const slots = [...screen.container.querySelectorAll("[data-slot]")].map((el) =>
+    el.getAttribute("data-slot"),
+  );
+  expect(slots).toEqual(["form"]);
+});

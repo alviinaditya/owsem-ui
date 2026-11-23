@@ -81,23 +81,19 @@ The utilities read the `--ow-*` tokens where they are used, so `data-theme` and 
 element still apply. A spring easing pairs with its duration, which has no utility of its own:
 `ease-ow-spring-glide duration-(--ow-spring-glide-duration)`.
 
-Every part takes `className` as a string; parts built on Base UI also take a function of their
-state. States are data attributes, and Tailwind v4 turns them into variants with no plugin, such as
-`data-highlighted:`, `data-pressed:`, or `data-[size=sm]:`:
+Every part takes `className` as a string. States are data attributes, and Tailwind v4 turns them
+into variants with no plugin, such as `data-highlighted:`, `data-pressed:`, or `data-[size=sm]:`:
 
 ```tsx
 <Separator className="data-[orientation=vertical]:mx-2" />
-<Separator className={(state) => (state.orientation === "vertical" ? "mx-2" : "my-4")} />
 <TreeRailNav.Toggle className="data-panel-open:text-ow-accent">Settings</TreeRailNav.Toggle>
 ```
 
 OwsemUI adds its own class to yours and needs no `cn()`: your utilities win by the layer order, not
-by merging classes. If your project has a `cn()` helper, it works in `className` as anywhere else,
-also inside the function:
+by merging classes. If your project has a `cn()` helper, it works in `className` as anywhere else:
 
 ```tsx
 <Separator className={cn("my-4", inset && "mx-4")} />
-<Separator className={(state) => cn("my-4", state.orientation === "vertical" && "mx-2")} />
 ```
 
 Tailwind's `dark:` variant follows the system theme. To make it follow `data-theme` as the tokens

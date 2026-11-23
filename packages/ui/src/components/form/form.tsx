@@ -1,19 +1,26 @@
 "use client";
 
 import { Form as BaseForm } from "@base-ui/react/form";
-import { forwardRef } from "react";
-import { withClassName } from "../../core/class-name";
+import type { ReactElement } from "react";
+import { cn } from "../../core/cn";
 import { ARMED_ATTR, INVALID } from "../../core/shake";
+import { formSlots } from "./form-variants";
 import "./form.css";
 
-const cls = { root: "ow-form" } as const;
+// Base UI's constraint on the form values.
+// biome-ignore lint/suspicious/noExplicitAny: matches Base UI
+type FormValues = Record<string, any>;
 
-type Props = Omit<BaseForm.Props, "ref">;
+export interface FormProps<Values extends FormValues = FormValues>
+  extends Omit<BaseForm.Props<Values>, "className"> {
+  className?: string | undefined;
+}
 
 /**
  * A submit that leaves a field invalid shakes the first one again. A field shakes by CSS when it
- * becomes invalid, so one that already is invalid (even from the start) gets its animation restarted: data-shake="off"
- * stops it, a reflow commits that, and removing the attribute plays it from the start.
+ * becomes invalid, so one that already is invalid (even from the start) gets its animation
+ * restarted: data-shake="off" stops it, a reflow commits that, and removing the attribute plays it
+ * from the start.
  */
 function shakeFirstInvalid(form: HTMLFormElement) {
   for (const el of form.querySelectorAll<HTMLElement>(INVALID)) {
@@ -35,29 +42,28 @@ function shakeFirstInvalid(form: HTMLFormElement) {
  * A native form with Base UI's validation: it checks its fields, takes server errors through
  * `errors`, and focuses the first invalid field. It draws only the gap between them.
  */
-// The cast keeps Base UI's generic form values.
-export const Form: typeof BaseForm = forwardRef<HTMLFormElement, Props>(function Form(
-  { className, onSubmitCapture, ...props },
-  ref,
-) {
+export function Form<Values extends FormValues = FormValues>({
+  className,
+  onSubmitCapture,
+  ...props
+}: FormProps<Values>): ReactElement {
   return (
     <BaseForm
-      ref={ref}
-      className={withClassName(cls.root, className)}
+      data-slot="form"
+      {...props}
+      className={cn(formSlots.root, className)}
       // Base UI validates in its own submit handler; after it, the invalid fields show.
       onSubmitCapture={(event) => {
         onSubmitCapture?.(event);
         const form = event.currentTarget;
         requestAnimationFrame(() => shakeFirstInvalid(form));
       }}
-      {...props}
     />
   );
-}) as typeof BaseForm;
+}
 
 export declare namespace Form {
-  type Props<Values extends Record<string, unknown> = Record<string, unknown>> =
-    BaseForm.Props<Values>;
+  type Props<Values extends FormValues = FormValues> = FormProps<Values>;
   type State = BaseForm.State;
   type Actions = BaseForm.Actions;
   type ValidationMode = BaseForm.ValidationMode;

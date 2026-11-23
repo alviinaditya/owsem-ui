@@ -40,14 +40,14 @@
     line-height: 1.25;
   }
 
-  .ow-input:where([data-size="sm"]),
-  .ow-input__wrapper:where([data-size="sm"]) {
+  .ow-input--sm,
+  .ow-input__wrapper--sm {
     --py: 0.6058em;
     font-size: 0.8125rem;
   }
 
-  .ow-input:where([data-size="lg"]),
-  .ow-input__wrapper:where([data-size="lg"]) {
+  .ow-input--lg,
+  .ow-input__wrapper--lg {
     --py: 0.875em;
     font-size: 1rem;
   }

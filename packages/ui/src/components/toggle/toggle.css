@@ -47,12 +47,12 @@
     transition: transform var(--ow-spring-settle-duration) var(--ow-spring-settle);
   }
 
-  .ow-toggle[data-size="sm"] {
+  .ow-toggle--sm {
     --py: 0.6058em;
     font-size: 0.8125rem;
   }
 
-  .ow-toggle[data-size="lg"] {
+  .ow-toggle--lg {
     --py: 0.875em;
     font-size: 1rem;
   }

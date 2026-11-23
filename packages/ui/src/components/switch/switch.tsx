@@ -1,48 +1,58 @@
 "use client";
 
 import { Switch as BaseSwitch } from "@base-ui/react/switch";
-import { type ForwardRefExoticComponent, forwardRef, type RefAttributes } from "react";
-import { withClassName } from "../../core/class-name";
+import type { ReactElement } from "react";
+import { cn } from "../../core/cn";
+import {
+  type SwitchSize,
+  type SwitchVariantProps,
+  switchSlots,
+  switchVariants,
+} from "./switch-variants";
 import "./switch.css";
 
-const cls = { root: "ow-switch", thumb: "ow-switch__thumb" } as const;
-
-export type SwitchSize = "sm" | "md" | "lg";
-
-export type SwitchThumbProps = Omit<BaseSwitch.Thumb.Props, "ref">;
+export interface SwitchThumbProps extends Omit<BaseSwitch.Thumb.Props, "className"> {
+  className?: string | undefined;
+}
 
 /** The raised key that moves. It can hold an icon; the icon is decorative. */
-export const SwitchThumb: ForwardRefExoticComponent<
-  SwitchThumbProps & RefAttributes<HTMLSpanElement>
-> = forwardRef<HTMLSpanElement, SwitchThumbProps>(function SwitchThumb(
-  { className, ...props },
-  ref,
-) {
-  return <BaseSwitch.Thumb ref={ref} className={withClassName(cls.thumb, className)} {...props} />;
-});
+export function SwitchThumb({ className, ...props }: SwitchThumbProps): ReactElement {
+  return (
+    <BaseSwitch.Thumb
+      data-slot="switch-thumb"
+      {...props}
+      className={cn(switchSlots.thumb, className)}
+    />
+  );
+}
 
-export interface SwitchRootProps extends Omit<BaseSwitch.Root.Props, "ref"> {
-  /** Follows Button's font sizes: 13, 14, or 16 px. @default "md" */
-  size?: SwitchSize | undefined;
+export interface SwitchRootProps
+  extends Omit<BaseSwitch.Root.Props, "className">,
+    SwitchVariantProps {
+  className?: string | undefined;
+  /** The size of an outer part that renders this one, such as Toolbar.Button. */
+  "data-size"?: SwitchSize | undefined;
 }
 
 /** The track. Without children it draws its own Thumb. It needs a name, from a label or aria-label. */
-export const SwitchRoot: ForwardRefExoticComponent<SwitchRootProps & RefAttributes<HTMLElement>> =
-  forwardRef<HTMLElement, SwitchRootProps>(function SwitchRoot(
-    { className, size = "md", children, ...props },
-    ref,
-  ) {
-    return (
-      <BaseSwitch.Root
-        ref={ref}
-        className={withClassName(cls.root, className)}
-        data-size={size}
-        {...props}
-      >
-        {children ?? <SwitchThumb />}
-      </BaseSwitch.Root>
-    );
-  });
+export function SwitchRoot({
+  "data-size": outerSize,
+  size = outerSize ?? "md",
+  className,
+  children,
+  ...props
+}: SwitchRootProps): ReactElement {
+  return (
+    <BaseSwitch.Root
+      data-slot="switch"
+      {...props}
+      className={cn(switchVariants({ size }), className)}
+      data-size={size}
+    >
+      {children ?? <SwitchThumb />}
+    </BaseSwitch.Root>
+  );
+}
 
 export declare namespace SwitchRoot {
   type Props = SwitchRootProps;

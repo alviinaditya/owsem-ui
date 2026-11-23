@@ -49,11 +49,11 @@
     transition: transform var(--ow-spring-settle-duration) var(--ow-spring-settle);
   }
 
-  .ow-checkbox:where([data-size="sm"]) {
+  .ow-checkbox--sm {
     font-size: 0.8125rem;
   }
 
-  .ow-checkbox:where([data-size="lg"]) {
+  .ow-checkbox--lg {
     font-size: 1rem;
   }
 

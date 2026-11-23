@@ -44,7 +44,7 @@ describe("Kbd", () => {
 
   test("passes className, style, render, and ref through (FR-2, FR-5)", async () => {
     const ref = createRef<HTMLElement>();
-    const [byString, rendered] = await mount(
+    const [plain, rendered] = await mount(
       <>
         <Kbd ref={ref} className="mine" style={{ marginInline: "3px" }} title="Search">
           K
@@ -52,10 +52,10 @@ describe("Kbd", () => {
         <Kbd render={<span />}>Esc</Kbd>
       </>,
     );
-    expect(ref.current).toBe(byString);
-    expect(byString?.className).toBe("ow-kbd mine");
-    expect(byString?.style.marginInline).toBe("3px");
-    expect(byString?.title).toBe("Search");
+    expect(ref.current).toBe(plain);
+    expect(plain?.className).toBe("ow-kbd mine");
+    expect(plain?.style.marginInline).toBe("3px");
+    expect(plain?.title).toBe("Search");
     expect(rendered?.tagName).toBe("SPAN");
     expect(rendered?.className).toBe("ow-kbd");
   });
@@ -138,4 +138,12 @@ describe("Kbd", () => {
     await settle();
     expect(await measureIdle()).toEqual({ rafCalls: 0, runningAnimations: [] });
   });
+});
+
+test("every part has its data-slot", async () => {
+  const screen = await render(<Kbd>K</Kbd>);
+  const slots = [...screen.container.querySelectorAll("[data-slot]")].map((el) =>
+    el.getAttribute("data-slot"),
+  );
+  expect(slots).toEqual(["kbd"]);
 });

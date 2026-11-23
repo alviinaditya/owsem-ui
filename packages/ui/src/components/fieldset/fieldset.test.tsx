@@ -57,7 +57,7 @@ describe("Fieldset", () => {
       <Fieldset.Root ref={refs.root} className="r" style={{ marginBlock: "1px" }}>
         <Fieldset.Legend
           ref={refs.legend}
-          className={() => "l"}
+          className="l"
           render={<h3 aria-label="Address">Address</h3>}
         />
       </Fieldset.Root>,
@@ -164,4 +164,16 @@ describe("Fieldset", () => {
     await settle();
     expect(await measureIdle()).toEqual({ rafCalls: 0, runningAnimations: [] });
   });
+});
+
+test("every part has its data-slot", async () => {
+  const screen = await render(
+    <Fieldset.Root>
+      <Fieldset.Legend>Legend</Fieldset.Legend>
+    </Fieldset.Root>,
+  );
+  const slots = [...screen.container.querySelectorAll("[data-slot]")].map((el) =>
+    el.getAttribute("data-slot"),
+  );
+  expect(slots).toEqual(["fieldset", "fieldset-legend"]);
 });

@@ -172,7 +172,7 @@ describe("Checkbox", () => {
   test("passes className, style, render, and ref through on both parts (FR-2, FR-5)", async () => {
     const rootRef = createRef<HTMLElement>();
     const indicatorRef = createRef<HTMLSpanElement>();
-    const [byString, byFunction, rendered] = await mount(
+    const [plain, withIcon, rendered] = await mount(
       <>
         <Checkbox.Root
           ref={rootRef}
@@ -187,26 +187,18 @@ describe("Checkbox", () => {
             style={{ marginInline: "1px" }}
           />
         </Checkbox.Root>
-        <Checkbox.Root
-          aria-label="B"
-          defaultChecked
-          className={(state) => (state.checked ? "is-on" : "is-off")}
-        >
-          <Checkbox.Indicator
-            render={<i />}
-            className={(state) => (state.checked ? "on" : "off")}
-          />
+        <Checkbox.Root aria-label="B" defaultChecked>
+          <Checkbox.Indicator render={<i />} />
         </Checkbox.Root>
         <Checkbox.Root aria-label="C" render={<b />} />
       </>,
     );
-    expect(rootRef.current).toBe(byString);
-    expect(byString?.className).toBe("ow-checkbox mine");
-    expect(byString?.style.marginInline).toBe("3px");
+    expect(rootRef.current).toBe(plain);
+    expect(plain?.className).toBe("ow-checkbox ow-checkbox--md mine");
+    expect(plain?.style.marginInline).toBe("3px");
     expect(indicatorRef.current?.className).toBe("ow-checkbox__indicator mine-too");
     expect(indicatorRef.current?.style.marginInline).toBe("1px");
-    expect(byFunction?.className).toBe("ow-checkbox is-on");
-    expect(byFunction?.querySelector("i")?.className).toBe("ow-checkbox__indicator on");
+    expect(withIcon?.querySelector("i")?.className).toBe("ow-checkbox__indicator");
     expect(rendered?.tagName).toBe("B");
     expect(rendered?.getAttribute("role")).toBe("checkbox");
   });
@@ -675,4 +667,12 @@ describe("Checkbox", () => {
     await settle();
     expect(await measureIdle()).toEqual({ rafCalls: 0, runningAnimations: [] });
   });
+});
+
+test("every part has its data-slot", async () => {
+  const screen = await render(<Checkbox.Root aria-label="C" defaultChecked />);
+  const slots = [...screen.container.querySelectorAll("[data-slot]")].map((el) =>
+    el.getAttribute("data-slot"),
+  );
+  expect(slots).toEqual(["checkbox", "checkbox-indicator"]);
 });

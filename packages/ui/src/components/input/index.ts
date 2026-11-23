@@ -1,1 +1,2 @@
-export { Input, type InputProps, type InputSize } from "./input";
+export { Input, type InputProps } from "./input";
+export type { InputSize } from "./input-variants";

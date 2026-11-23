@@ -251,7 +251,7 @@ describe("Radio Group", () => {
         <Radio.Root ref={radioRef} value="a" className="mine-radio" style={{ marginInline: "4px" }}>
           <Radio.Indicator
             ref={dotRef}
-            className={(state) => (state.checked ? "is-on" : "is-off")}
+            className="mine-dot"
             style={{ marginInline: "5px" }}
             render={<b />}
           />
@@ -260,12 +260,12 @@ describe("Radio Group", () => {
       </RadioGroup>,
     );
     expect(groupRef.current).toBe(group);
-    expect(group.className).toBe("ow-radio-group mine-group");
+    expect(group.className).toBe("ow-radio-group ow-radio-group--md mine-group");
     expect(group.style.marginInline).toBe("3px");
     expect(radioRef.current?.className).toBe("ow-radio-group__radio mine-radio");
     expect(radioRef.current?.style.marginInline).toBe("4px");
     expect(dotRef.current?.tagName).toBe("B");
-    expect(dotRef.current?.className).toBe("ow-radio-group__indicator is-on");
+    expect(dotRef.current?.className).toBe("ow-radio-group__indicator mine-dot");
     expect(dotRef.current?.style.marginInline).toBe("5px");
     const button = group.querySelector("button") as HTMLElement;
     expect(button.getAttribute("role")).toBe("radio");
@@ -696,4 +696,16 @@ describe("Radio Group", () => {
     await settle();
     expect(await measureIdle()).toEqual({ rafCalls: 0, runningAnimations: [] });
   });
+});
+
+test("every part has its data-slot", async () => {
+  const screen = await render(
+    <RadioGroup defaultValue="a" aria-label="R">
+      <Radio.Root value="a" aria-label="A" />
+    </RadioGroup>,
+  );
+  const slots = [...screen.container.querySelectorAll("[data-slot]")].map((el) =>
+    el.getAttribute("data-slot"),
+  );
+  expect(slots).toEqual(["radio-group", "radio-group-radio", "radio-group-indicator"]);
 });

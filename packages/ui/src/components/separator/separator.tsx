@@ -1,18 +1,24 @@
 import { Separator as BaseSeparator } from "@base-ui/react/separator";
-import { type ForwardRefExoticComponent, forwardRef, type RefAttributes } from "react";
-import { withClassName } from "../../core/class-name";
+import type { ReactElement } from "react";
+import { cn } from "../../core/cn";
+import { separatorSlots } from "./separator-variants";
 import "./separator.css";
 
-const cls = { root: "ow-separator" } as const;
+export interface SeparatorProps extends Omit<BaseSeparator.Props, "className"> {
+  className?: string | undefined;
+}
 
-type Props = Omit<BaseSeparator.Props, "ref">;
-
-export const Separator: ForwardRefExoticComponent<Props & RefAttributes<HTMLDivElement>> =
-  forwardRef<HTMLDivElement, Props>(function Separator({ className, ...props }, ref) {
-    return <BaseSeparator ref={ref} className={withClassName(cls.root, className)} {...props} />;
-  });
+export function Separator({ className, ...props }: SeparatorProps): ReactElement {
+  return (
+    <BaseSeparator
+      data-slot="separator"
+      {...props}
+      className={cn(separatorSlots.root, className)}
+    />
+  );
+}
 
 export declare namespace Separator {
-  type Props = BaseSeparator.Props;
+  type Props = SeparatorProps;
   type State = BaseSeparator.State;
 }

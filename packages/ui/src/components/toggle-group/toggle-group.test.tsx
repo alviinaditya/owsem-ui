@@ -215,9 +215,15 @@ describe("Toggle Group", () => {
         .filter((a) => (a.effect as KeyframeEffect | null)?.pseudoElement === "::before");
     expect(stretches()).toEqual([]);
     item("Month").click();
-    await expect.poll(() => stretches().length).toBe(1);
-    const effect = stretches()[0]?.effect as KeyframeEffect;
-    const frames = effect.getKeyframes();
+    // Read the frames inside the poll: the stretch may be over by the next look.
+    let frames: Keyframe[] = [];
+    await expect
+      .poll(() => {
+        const [stretch, ...others] = stretches();
+        if (stretch) frames = (stretch.effect as KeyframeEffect).getKeyframes();
+        return stretch ? 1 + others.length : 0;
+      })
+      .toBe(1);
     // Moving toward the end, it grows from its end edge, the leading one, and only transform animates.
     expect(frames.every((f) => f.transformOrigin === "100% 50%")).toBe(true);
     expect(frames.map((f) => f.transform)).toEqual([

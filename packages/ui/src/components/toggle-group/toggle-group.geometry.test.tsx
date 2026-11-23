@@ -173,13 +173,19 @@ describe("Toggle Group geometry", () => {
     await expect.poll(() => thumb.hasAttribute("data-visible")).toBe(true);
     await new Promise((resolve) => setTimeout(resolve, 800));
     (itemsOf(group)[0] as HTMLElement).click();
-    const find = () =>
-      thumb
-        .getAnimations({ subtree: true })
-        .find((a) => (a.effect as KeyframeEffect).pseudoElement === "::before");
-    await expect.poll(find).toBeDefined();
+    // Read the frames inside the poll: the stretch may be over by the next look.
+    let frames: Keyframe[] = [];
+    await expect
+      .poll(() => {
+        const stretch = thumb
+          .getAnimations({ subtree: true })
+          .find((a) => (a.effect as KeyframeEffect).pseudoElement === "::before");
+        if (stretch) frames = (stretch.effect as KeyframeEffect).getKeyframes();
+        return frames.length;
+      })
+      .toBeGreaterThan(0);
     // Going left, the left edge leads and stays put: the origin is on it.
-    for (const frame of ((find() as Animation).effect as KeyframeEffect).getKeyframes()) {
+    for (const frame of frames) {
       expect(String(frame.transformOrigin).startsWith("0% 50%")).toBe(true);
     }
   });

@@ -427,9 +427,15 @@ describe("Tabs", () => {
         .filter((a) => (a.effect as KeyframeEffect | null)?.pseudoElement === "::before");
     expect(stretches()).toEqual([]);
     tab("Settings").click();
-    await expect.poll(() => stretches().length).toBe(1);
-    const effect = stretches()[0]?.effect as KeyframeEffect;
-    const frames = effect.getKeyframes();
+    // Read the frames inside the poll: the stretch may be over by the next look.
+    let frames: Keyframe[] = [];
+    await expect
+      .poll(() => {
+        const [stretch, ...others] = stretches();
+        if (stretch) frames = (stretch.effect as KeyframeEffect).getKeyframes();
+        return stretch ? 1 + others.length : 0;
+      })
+      .toBe(1);
     expect(frames.every((f) => f.transformOrigin === "100% 50%")).toBe(true);
     expect(frames.map((f) => f.transform)[1]).toMatch(/^scale\(1\.[1-3]\d*, 1\)$/);
     await expect.poll(() => stretches().length).toBe(0);

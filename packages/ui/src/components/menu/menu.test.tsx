@@ -94,6 +94,8 @@ function Edit({
 
 const popups = () => [...document.querySelectorAll<HTMLElement>(".ow-menu__popup")];
 const popup = () => popups()[0] ?? null;
+/** Waits until the open menu has focus: a key before that is lost. */
+const focused = () => expect.poll(() => popup()?.contains(document.activeElement)).toBe(true);
 const item = (name: string) => {
   const el = [...document.querySelectorAll<HTMLElement>(".ow-menu__item")].find(
     (candidate) => candidate.textContent?.replace(/⌘./, "").trim() === name,
@@ -158,8 +160,9 @@ describe("Menu", () => {
     expect(group?.getAttribute("aria-labelledby")).toBe(
       document.querySelector(".ow-menu__group-label")?.id,
     );
+    await focused();
     await userEvent.keyboard("{ArrowDown}");
-    expect(document.activeElement).toBe(item("Cut"));
+    await expect.poll(() => document.activeElement).toBe(item("Cut"));
     await userEvent.keyboard("{Enter}");
     expect(cuts).toBe(1);
     await gone();
@@ -297,8 +300,10 @@ describe("Menu", () => {
       (viewport as HTMLElement).clientHeight,
     );
     // The lit item still lines up after the list scrolls.
+    await focused();
     (viewport as HTMLElement).scrollTop = 40;
     await userEvent.keyboard("{ArrowDown}");
+    await expect.poll(() => document.activeElement).toBe(item("Cut"));
     await settle();
     const lit = document.activeElement as HTMLElement;
     const glow = outer.querySelector<HTMLElement>(".ow-glide")?.getBoundingClientRect();

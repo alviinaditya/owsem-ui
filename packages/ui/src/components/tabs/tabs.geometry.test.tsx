@@ -215,11 +215,21 @@ describe("Tabs geometry", () => {
       if (sampling) requestAnimationFrame(sample);
     };
     requestAnimationFrame(sample);
-    await userEvent.click(first);
     const stretch = () =>
       thumb
         .getAnimations({ subtree: true })
         .find((a) => (a.effect as KeyframeEffect).pseudoElement === "::before");
+    // A slow runner can outlast the 520 ms stretch while the clicks are still being sent, so
+    // hold it open from the frame it starts until the hover has been checked.
+    let slowed = true;
+    const slow = () => {
+      const running = stretch();
+      if (running) running.playbackRate = 0.02;
+      if (slowed) requestAnimationFrame(slow);
+    };
+    requestAnimationFrame(slow);
+    await userEvent.click(first);
+    await expect.poll(stretch).toBeDefined();
     const key = stretch();
     expect(key?.playState).toBe("running");
     const style = thumb.getAttribute("style");
@@ -228,6 +238,8 @@ describe("Tabs geometry", () => {
     expect(thumb.getAttribute("style")).toBe(style);
     expect(stretch()).toBe(key);
     expect(key?.playState).toBe("running");
+    slowed = false;
+    if (key) key.playbackRate = 1;
     await new Promise((resolve) => setTimeout(resolve, 900));
     sampling = false;
     // Travelling left, it never steps back to the right (the press release may breathe a pixel).
@@ -265,18 +277,19 @@ describe("Tabs geometry", () => {
     };
     requestAnimationFrame(sample);
     first.click();
+    // Read the frames inside the poll: the stretch may be over by the next look.
+    let frames: Keyframe[] = [];
     await expect
-      .poll(() =>
-        thumb
+      .poll(() => {
+        const stretch = thumb
           .getAnimations({ subtree: true })
-          .find((a) => (a.effect as KeyframeEffect).pseudoElement === "::before"),
-      )
-      .toBeDefined();
-    const stretch = thumb
-      .getAnimations({ subtree: true })
-      .find((a) => (a.effect as KeyframeEffect).pseudoElement === "::before");
+          .find((a) => (a.effect as KeyframeEffect).pseudoElement === "::before");
+        if (stretch) frames = (stretch.effect as KeyframeEffect).getKeyframes();
+        return frames.length;
+      })
+      .toBeGreaterThan(0);
     // Going left, the left edge leads and stays put: the origin is on it.
-    for (const frame of ((stretch as Animation).effect as KeyframeEffect).getKeyframes()) {
+    for (const frame of frames) {
       expect(String(frame.transformOrigin).startsWith("0% 50%")).toBe(true);
     }
     await new Promise((resolve) => setTimeout(resolve, 1000));

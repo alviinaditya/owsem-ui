@@ -17,7 +17,8 @@ function Row({ big }: { big: boolean }) {
   return (
     <p style={{ display: "flex", alignItems: "center", gap: 8, margin: 0, fontSize: 16 }}>
       <span className="before">Copy</span>
-      <IconMorph>
+      {/* Long enough to measure mid-swap on a slow runner; the test finishes it. */}
+      <IconMorph duration="20s">
         {big ? (
           <Glyph key="big" name="big" size={24} />
         ) : (
@@ -59,6 +60,7 @@ describe("Icon Morph geometry", () => {
     const after = get(".after").getBoundingClientRect().left;
     // The leaving icon goes, and the text after it stays where it was. Polled, not settle(),
     // which times out in WebKit on CI.
+    for (const animation of root.getAnimations({ subtree: true })) animation.finish();
     await expect
       .poll(() => screen.container.querySelectorAll(".ow-icon-morph__item").length, {
         timeout: 5000,

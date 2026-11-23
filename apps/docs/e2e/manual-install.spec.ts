@@ -321,3 +321,22 @@ test("Tailwind Scroll Area: its one custom variant in the bridge", async ({ page
   expect(bridge).not.toContain("@custom-variant ow-label-hover");
   expect(bridge).not.toContain("@keyframes");
 });
+
+test("Tailwind Toolbar and Command Menu: the variants they use in the bridge", async ({ page }) => {
+  test.skip(
+    !existsSync(join(process.cwd(), "../../packages/ui/src/tailwind/toolbar")),
+    "packages/ui/src/tailwind/toolbar/ does not exist yet",
+  );
+  await openTailwindManual(page, "/en/toolbar");
+  const toolbar = await copyVisibleFile(page, "lib/owsem/tailwind.css");
+  expect(toolbar).toContain("@custom-variant ow-toolbar-quiet (:where(&));");
+  expect(toolbar).not.toContain("@custom-variant ow-reduced-transparency");
+  await openTailwindManual(page, "/en/command-menu");
+  const menu = await copyVisibleFile(page, "lib/owsem/tailwind.css");
+  expect(menu).toContain("@custom-variant ow-reduced-transparency");
+  expect(menu).not.toContain("@custom-variant ow-toolbar-quiet");
+  await openTailwindManual(page, "/en/select");
+  const select = await copyVisibleFile(page, "lib/owsem/tailwind.css");
+  expect(select).toContain("@keyframes ow-select-shake");
+  expect(select).toContain("@custom-variant ow-input-invalid");
+});

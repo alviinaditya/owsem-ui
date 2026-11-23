@@ -165,3 +165,39 @@
 @custom-variant ow-radio-group-held (
   &:where(:active, label:active *):where(:not([data-disabled], [data-readonly]))
 );
+
+/* Select rejects with a shake, and with a blink when motion is reduced. */
+@keyframes ow-select-shake {
+  20% {
+    transform: translateX(calc(-4px * var(--ow-motion-scale)));
+  }
+  40% {
+    transform: translateX(calc(4px * var(--ow-motion-scale)));
+  }
+  60% {
+    transform: translateX(calc(-2px * var(--ow-motion-scale)));
+  }
+  80% {
+    transform: translateX(calc(2px * var(--ow-motion-scale)));
+  }
+}
+
+@keyframes ow-select-blink {
+  from {
+    opacity: 0.6;
+  }
+}
+
+/*
+ * A Toolbar item's rules have no specificity, so a control rendered as an item (a Toggle, a
+ * Button) keeps its own look. Write it last: `hover:ow-toolbar-quiet:bg-ow-hover`.
+ */
+@custom-variant ow-toolbar-quiet (:where(&));
+
+/* A user who asks for less transparency, where the browser knows it. */
+@custom-variant ow-reduced-transparency {
+  /* biome-ignore lint/nursery/useBaseline: progressive enhancement */
+  @media (prefers-reduced-transparency: reduce) {
+    @slot;
+  }
+}

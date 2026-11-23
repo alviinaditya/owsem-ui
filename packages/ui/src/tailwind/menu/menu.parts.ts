@@ -1,0 +1,44 @@
+// Generated from components/menu by scripts/build-tailwind.ts; do not edit.
+// No "use client" here: the namespace object must be readable from Server Components.
+
+export type {
+  MenuCheckboxItemIndicatorProps,
+  MenuCheckboxItemProps,
+  MenuGroupLabelProps,
+  MenuGroupProps,
+  MenuItemProps,
+  MenuLinkItemProps,
+  MenuPopupProps,
+  MenuPortalProps,
+  MenuPositionerProps,
+  MenuRadioGroupProps,
+  MenuRadioItemIndicatorProps,
+  MenuRadioItemProps,
+  MenuRootProps,
+  MenuSeparatorProps,
+  MenuSubmenuRootProps,
+  MenuSubmenuTriggerProps,
+  MenuTriggerProps,
+} from "./menu";
+export {
+  createMenuHandle as createHandle,
+  MenuCheckboxItem as CheckboxItem,
+  MenuCheckboxItemIndicator as CheckboxItemIndicator,
+  MenuGroup as Group,
+  MenuGroupLabel as GroupLabel,
+  MenuItem as Item,
+  MenuLinkItem as LinkItem,
+  MenuPopup as Popup,
+  MenuPortal as Portal,
+  MenuPositioner as Positioner,
+  MenuRadioGroup as RadioGroup,
+  MenuRadioItem as RadioItem,
+  MenuRadioItemIndicator as RadioItemIndicator,
+  MenuRoot as Root,
+  MenuSeparator as Separator,
+  MenuSubmenuRoot as SubmenuRoot,
+  MenuSubmenuTrigger as SubmenuTrigger,
+  MenuTrigger as Trigger,
+  MenuViewport as Viewport,
+} from "./menu";
+export type { MenuSize } from "./menu-variants";

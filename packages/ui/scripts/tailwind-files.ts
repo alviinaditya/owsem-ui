@@ -32,6 +32,11 @@ export const components: string[] = [
   "radio-group",
   "toggle-group",
   "tabs",
+  "menu",
+  "select",
+  "toolbar",
+  "code-block",
+  "command-menu",
 ];
 
 const HEADER = "// Generated from";

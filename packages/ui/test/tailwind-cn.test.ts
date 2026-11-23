@@ -1,6 +1,12 @@
 import { describe, expect, test } from "vitest";
 import { buttonSlots, buttonVariants } from "../src/tailwind/button/button-variants";
 import { checkboxSlots, checkboxVariants } from "../src/tailwind/checkbox/checkbox-variants";
+import { codeBlockSlots } from "../src/tailwind/code-block/code-block-variants";
+import {
+  commandMenuPopupVariants,
+  commandMenuSlots,
+  commandMenuTriggerVariants,
+} from "../src/tailwind/command-menu/command-menu-variants";
 import { copyButtonSlots } from "../src/tailwind/copy-button/copy-button-variants";
 import { dialogSlots } from "../src/tailwind/dialog/dialog-variants";
 import { fieldSlots } from "../src/tailwind/field/field-variants";
@@ -15,12 +21,18 @@ import {
 import { kbdSlots } from "../src/tailwind/kbd/kbd-variants";
 import { cn } from "../src/tailwind/lib/cn";
 import { glideSlots } from "../src/tailwind/lib/glide/glide-variants";
+import { menuPopupVariants, menuSlots } from "../src/tailwind/menu/menu-variants";
 import { popoverSlots } from "../src/tailwind/popover/popover-variants";
 import {
   radioGroupSlots,
   radioGroupVariants,
 } from "../src/tailwind/radio-group/radio-group-variants";
 import { scrollAreaSlots } from "../src/tailwind/scroll-area/scroll-area-variants";
+import {
+  selectPopupVariants,
+  selectSlots,
+  selectTriggerVariants,
+} from "../src/tailwind/select/select-variants";
 import { separatorSlots } from "../src/tailwind/separator/separator-variants";
 import { switchSlots, switchVariants } from "../src/tailwind/switch/switch-variants";
 import { tableSlots, tableVariants } from "../src/tailwind/table/table-variants";
@@ -30,6 +42,13 @@ import {
   toggleGroupSlots,
   toggleGroupVariants,
 } from "../src/tailwind/toggle-group/toggle-group-variants";
+import {
+  toolbarButtonVariants,
+  toolbarInputVariants,
+  toolbarLinkVariants,
+  toolbarSlots,
+  toolbarVariants,
+} from "../src/tailwind/toolbar/toolbar-variants";
 import { tooltipSlots } from "../src/tailwind/tooltip/tooltip-variants";
 import { classNames } from "./parity";
 
@@ -40,6 +59,8 @@ const all = classNames(
   ...[
     buttonSlots,
     checkboxSlots,
+    codeBlockSlots,
+    commandMenuSlots,
     copyButtonSlots,
     dialogSlots,
     fieldSlots,
@@ -49,14 +70,17 @@ const all = classNames(
     iconMorphSlots,
     inputSlots,
     kbdSlots,
+    menuSlots,
     popoverSlots,
     radioGroupSlots,
     scrollAreaSlots,
+    selectSlots,
     separatorSlots,
     switchSlots,
     tableSlots,
     tabsSlots,
     toggleGroupSlots,
+    toolbarSlots,
     tooltipSlots,
   ].flatMap((slots) => Object.values(slots)),
   ...Object.values(toggleSlots),
@@ -70,6 +94,15 @@ const all = classNames(
     tabsListVariants({ size }),
     inputVariants({ size }),
     inputWrapperVariants({ size }),
+    commandMenuPopupVariants({ size }),
+    commandMenuTriggerVariants({ size }),
+    menuPopupVariants({ size }),
+    selectPopupVariants({ size }),
+    selectTriggerVariants({ size }),
+    toolbarButtonVariants({ size }),
+    toolbarInputVariants({ size }),
+    toolbarLinkVariants({ size }),
+    toolbarVariants({ size }),
     ...(["primary", "secondary", "outline", "ghost", "link", "destructive"] as const).flatMap(
       (variant) => [false, true].map((soft) => buttonVariants({ variant, size, soft })),
     ),
@@ -90,21 +123,33 @@ const BUILT_IN: Record<string, string> = {
   me: "me-1",
   "max-w": "max-w-4",
   mb: "mb-1",
+  end: "end-1",
+  top: "top-1",
+  pe: "pe-1",
   mt: "mt-1",
   "min-h": "min-h-4",
+  "min-w": "min-w-4",
+  "max-h": "max-h-4",
   ms: "ms-1",
   mx: "mx-1",
+  pt: "pt-1",
   my: "my-1",
+  "backdrop-blur": "backdrop-blur-none",
   origin: "origin-center",
   outline: "outline-red-500",
   p: "p-1",
-  pe: "pe-1",
   ps: "ps-1",
   px: "px-1",
   py: "py-1",
+  "rounded-b": "rounded-b-none",
+  "rounded-es": "rounded-es-none",
+  "rounded-ee": "rounded-ee-none",
+  "rounded-ss": "rounded-ss-none",
+  "rounded-se": "rounded-se-none",
   rounded: "rounded-none",
   scale: "scale-50",
   "scroll-p": "scroll-p-1",
+  "scroll-py": "scroll-py-1",
   shadow: "shadow-none",
   size: "size-4",
   text: "text-red-500",
@@ -210,5 +255,90 @@ describe("a user's className wins over Radio Group, Toggle Group, and Tabs", () 
       expect(radio, gone).not.toContain(gone);
     }
     expect(tokens(cn(glideSlots.root, "opacity-100 rounded-none"))).not.toContain("opacity-0");
+  });
+});
+
+describe("a user's className wins over Menu, Select, Toolbar, Code Block, and Command Menu", () => {
+  const tokens = (value: string) => value.split(" ");
+  const gone = (value: string, names: string[]) => {
+    for (const name of names) expect(tokens(value), name).not.toContain(name);
+  };
+
+  test("on a trigger", () => {
+    gone(
+      cn(selectTriggerVariants({ size: "sm" }), "px-8 py-1 rounded-none text-lg gap-0 bg-red-500"),
+      [
+        "px-(--px)",
+        "py-(--_py)",
+        "rounded-(--ow-radius)",
+        "text-[0.8125rem]",
+        "gap-[0.5em]",
+        "bg-(color:--_bg)",
+      ],
+    );
+    gone(cn(commandMenuTriggerVariants({ size: "lg" }), "px-8 rounded-none text-sm bg-red-500"), [
+      "px-(--px)",
+      "rounded-(--ow-radius)",
+      "text-[16px]",
+      "bg-(color:--_bg)",
+    ]);
+  });
+
+  test("on a popup", () => {
+    gone(cn(menuPopupVariants({ size: "lg" }), "rounded-none text-sm shadow-none bg-red-500"), [
+      "rounded-(--ow-radius)",
+      "text-[1rem]",
+      "shadow-(shadow:--_shadow)",
+      "bg-(color:--_bg)",
+    ]);
+    gone(cn(selectPopupVariants({ size: "sm" }), "rounded-none text-lg bg-red-500 max-w-4"), [
+      "rounded-(--ow-radius)",
+      "text-[0.8125rem]",
+      "bg-(color:--_bg)",
+    ]);
+    gone(cn(commandMenuPopupVariants({ size: "md" }), "rounded-none text-lg bg-red-500 w-4"), [
+      "rounded-(--ow-radius)",
+      "text-[14px]",
+      "bg-(color:--_bg)",
+      "w-[min(100%,560px)]",
+    ]);
+  });
+
+  test("on an item", () => {
+    for (const slot of [menuSlots.item, selectSlots.item, commandMenuSlots.item]) {
+      gone(cn(slot, "px-8 py-1 rounded-none text-red-500 gap-0"), [
+        "px-(--px)",
+        "py-(--_py)",
+        "gap-[0.5em]",
+      ]);
+    }
+    gone(cn(menuSlots.item, "rounded-none text-red-500"), [
+      "rounded-(--_inner)",
+      "text-(color:--_fg)",
+    ]);
+    gone(cn(commandMenuSlots.item, "rounded-none"), ["rounded-(--_radius)"]);
+  });
+
+  test("on the root, and the tabs and the panel of a Code Block", () => {
+    gone(cn(toolbarVariants({ size: "lg" }), "rounded-none text-sm gap-0 p-0 bg-red-500"), [
+      "rounded-(--ow-radius)",
+      "text-[1rem]",
+      "gap-[4px]",
+      "p-(--_pad)",
+      "bg-(color:--_bg)",
+    ]);
+    gone(cn(codeBlockSlots.root, "rounded-none bg-red-500 text-red-500"), [
+      "rounded-(--_corner)",
+      "bg-(color:--_panel)",
+      "text-(color:--_fg)",
+    ]);
+    gone(cn(codeBlockSlots.tab, "px-8 py-1 rounded-none"), ["rounded-(--_radius)"]);
+    gone(cn(codeBlockSlots.panel, "rounded-none text-sm"), ["text-[0.8125rem]"]);
+  });
+
+  test("a toolbar item's own utilities have no specificity, so a user's utility needs no merge", () => {
+    const button = cn(toolbarButtonVariants({ size: "md" }), "px-8 rounded-none");
+    expect(tokens(button)).toContain("ow-toolbar-quiet:px-(--px)");
+    expect(tokens(button)).toContain("px-8");
   });
 });

@@ -1,0 +1,46 @@
+// Generated from components/select by scripts/build-tailwind.ts; do not edit.
+// No "use client" here: the namespace object must be readable from Server Components.
+
+export type {
+  SelectArrowProps,
+  SelectBackdropProps,
+  SelectGroupLabelProps,
+  SelectGroupProps,
+  SelectIconProps,
+  SelectItemIndicatorProps,
+  SelectItemProps,
+  SelectItemTextProps,
+  SelectLabelProps,
+  SelectListProps,
+  SelectPopupProps,
+  SelectPortalProps,
+  SelectPositionerProps,
+  SelectRootProps,
+  SelectScrollDownArrowProps,
+  SelectScrollUpArrowProps,
+  SelectSeparatorProps,
+  SelectTriggerProps,
+  SelectValueProps,
+} from "./select";
+export {
+  SelectArrow as Arrow,
+  SelectBackdrop as Backdrop,
+  SelectGroup as Group,
+  SelectGroupLabel as GroupLabel,
+  SelectIcon as Icon,
+  SelectItem as Item,
+  SelectItemIndicator as ItemIndicator,
+  SelectItemText as ItemText,
+  SelectLabel as Label,
+  SelectList as List,
+  SelectPopup as Popup,
+  SelectPortal as Portal,
+  SelectPositioner as Positioner,
+  SelectRoot as Root,
+  SelectScrollDownArrow as ScrollDownArrow,
+  SelectScrollUpArrow as ScrollUpArrow,
+  SelectSeparator as Separator,
+  SelectTrigger as Trigger,
+  SelectValue as Value,
+} from "./select";
+export type { SelectSize } from "./select-variants";

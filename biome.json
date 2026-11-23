@@ -83,6 +83,10 @@
       }
     },
     {
+      "includes": ["packages/ui/src/tailwind/**"],
+      "assist": { "actions": { "source": { "organizeImports": "off" } } }
+    },
+    {
       "includes": ["packages/ui/src/tailwind.css"],
       "css": { "parser": { "tailwindDirectives": true } }
     }

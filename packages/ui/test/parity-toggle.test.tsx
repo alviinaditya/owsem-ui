@@ -144,6 +144,7 @@ describe("Toggle in Tailwind CSS v4 against toggle.css", () => {
     // The authored transition while held, read with a real pointer.
     await tw.states(cases, "md", "held", {
       props: ["transitionDuration", "transitionTimingFunction", "transitionProperty"],
+      live: true,
     });
   });
 });

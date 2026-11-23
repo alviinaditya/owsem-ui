@@ -223,13 +223,14 @@ export function trimTokens(css: string, used: Iterable<string>): string {
 
 /**
  * The Tailwind setup a component's classes need: the layer statement, the --animate-* theme
- * lines, their keyframes, and the custom variants the classes use. Found at any depth in the
- * bridge, written at the top level.
+ * lines, their keyframes, the registered properties (@property) the classes name, and the custom
+ * variants the classes use. Found at any depth in the bridge, written at the top level.
  */
 export function trimTailwind(css: string, classes: string): string {
   const root = parseCss(css);
   const variants: (Decl | Block)[] = [];
   const keyframes = new Map<string, Block>();
+  const properties = new Map<string, Block>();
   const animate: Decl[] = [];
   const layers: Decl[] = [];
   const walk = (block: Block, top: boolean) => {
@@ -238,6 +239,8 @@ export function trimTailwind(css: string, classes: string): string {
         if (item.head.startsWith("@custom-variant")) variants.push(item);
         else if (item.head.startsWith("@keyframes")) {
           keyframes.set(item.head.split(/\s+/)[1] ?? "", item);
+        } else if (item.head.startsWith("@property")) {
+          properties.set(item.head.split(/\s+/)[1] ?? "", item);
         } else walk(item, false);
       } else if (item.text.startsWith("@custom-variant")) variants.push(item);
       else if (item.name.startsWith("--animate-")) animate.push(item);
@@ -268,10 +271,18 @@ export function trimTailwind(css: string, classes: string): string {
   for (const [name, block] of keyframes) {
     if (names.has(name)) parts.push(showBlock({ ...block, depth: 0 }, 0));
   }
+  // A registered property the classes name, such as the --_switch-travel a thumb transitions.
+  for (const [name, block] of properties) {
+    if (classes.includes(name)) parts.push(showBlock({ ...block, depth: 0 }, 0));
+  }
   for (const item of variants) {
     const head = isBlock(item) ? item.head : item.text;
     const name = /^@custom-variant\s+([\w-]+)/.exec(head)?.[1] ?? "";
-    if (!new RegExp(`(?<![A-Za-z0-9])${name}:`).test(classes)) continue;
+    // A variant stands alone or follows not-, has-, or in-; a longer name that ends the same
+    // (ow-switch-held for held) is another variant.
+    if (!new RegExp(`(?:(?<![\\w-])|(?<=(?:^|[^\\w-])(?:not|has|in)-))${name}:`).test(classes)) {
+      continue;
+    }
     parts.push(isBlock(item) ? showBlock(item, 0) : showDecl({ ...item, depth: 0 }, 0));
   }
   return `${parts.join("\n\n")}\n`;

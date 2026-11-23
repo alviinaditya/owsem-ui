@@ -19,6 +19,11 @@ export const components: string[] = [
   "field",
   "fieldset",
   "form",
+  "switch",
+  "checkbox",
+  "icon-morph",
+  "tooltip",
+  "copy-button",
 ];
 
 const HEADER = "// Generated from";

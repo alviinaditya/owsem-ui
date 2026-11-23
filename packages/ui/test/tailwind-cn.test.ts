@@ -1,8 +1,11 @@
 import { describe, expect, test } from "vitest";
 import { buttonSlots, buttonVariants } from "../src/tailwind/button/button-variants";
+import { checkboxSlots, checkboxVariants } from "../src/tailwind/checkbox/checkbox-variants";
+import { copyButtonSlots } from "../src/tailwind/copy-button/copy-button-variants";
 import { fieldSlots } from "../src/tailwind/field/field-variants";
 import { fieldsetSlots } from "../src/tailwind/fieldset/fieldset-variants";
 import { formSlots } from "../src/tailwind/form/form-variants";
+import { iconMorphSlots } from "../src/tailwind/icon-morph/icon-morph-variants";
 import {
   inputSlots,
   inputVariants,
@@ -11,7 +14,9 @@ import {
 import { kbdSlots } from "../src/tailwind/kbd/kbd-variants";
 import { cn } from "../src/tailwind/lib/cn";
 import { separatorSlots } from "../src/tailwind/separator/separator-variants";
+import { switchSlots, switchVariants } from "../src/tailwind/switch/switch-variants";
 import { toggleSlots, toggleVariants } from "../src/tailwind/toggle/toggle-variants";
+import { tooltipSlots } from "../src/tailwind/tooltip/tooltip-variants";
 import { classNames } from "./parity";
 
 // The classes the Tailwind flavor writes with a shorthand of ours, such as px-(--px), must lose to
@@ -20,15 +25,22 @@ const SIZES = ["sm", "md", "lg"] as const;
 const all = classNames(
   ...[
     buttonSlots,
+    checkboxSlots,
+    copyButtonSlots,
     fieldSlots,
     fieldsetSlots,
     formSlots,
+    iconMorphSlots,
     inputSlots,
     kbdSlots,
     separatorSlots,
+    switchSlots,
+    tooltipSlots,
   ].flatMap((slots) => Object.values(slots)),
   ...Object.values(toggleSlots),
   ...SIZES.flatMap((size) => [
+    checkboxVariants({ size }),
+    switchVariants({ size }),
     toggleVariants({ size }),
     inputVariants({ size }),
     inputWrapperVariants({ size }),
@@ -42,6 +54,7 @@ const all = classNames(
 const BUILT_IN: Record<string, string> = {
   animate: "animate-none",
   bg: "bg-red-500",
+  blur: "blur-none",
   border: "border-red-500",
   duration: "duration-75",
   ease: "ease-linear",
@@ -49,6 +62,7 @@ const BUILT_IN: Record<string, string> = {
   me: "me-1",
   "min-h": "min-h-4",
   ms: "ms-1",
+  origin: "origin-center",
   outline: "outline-red-500",
   pe: "pe-1",
   ps: "ps-1",

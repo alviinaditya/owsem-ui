@@ -201,7 +201,7 @@ export function pick(style: CSSStyleDeclaration, names: readonly string[]): Styl
 
 const round = (n: number) => Math.round(n * 100) / 100;
 
-interface Part {
+export interface Part {
   index: number;
   label: string;
   /** The box from the side's top left corner; zeros when nothing is laid out. */
@@ -214,8 +214,19 @@ interface Part {
 
 /** Every element of a side: the geometry from its container, and its computed styles. */
 export function measure(side: Element, props: readonly string[] = PROPS): Part[] {
-  const origin = side.getBoundingClientRect();
-  const root = side.firstElementChild as HTMLElement;
+  return measureFrom(side, side.firstElementChild as Element, props);
+}
+
+/**
+ * The parts of `root` and everything in it, with boxes from the corner of `origin`. For a popup
+ * that renders in a portal outside its side: its trigger is the origin.
+ */
+export function measureFrom(
+  origin: Element,
+  root: Element,
+  props: readonly string[] = PROPS,
+): Part[] {
+  const corner = origin.getBoundingClientRect();
   return [root, ...root.querySelectorAll("*")].map((el, index) => {
     const box = el.getBoundingClientRect();
     const slot = el.getAttribute("data-slot");
@@ -224,9 +235,12 @@ export function measure(side: Element, props: readonly string[] = PROPS): Part[]
       index,
       label: `${index} ${el.tagName.toLowerCase()}${slot ? ` ${slot}` : ""}`,
       // Nothing is laid out (display: none, here or above): the box has no place.
+      // A fixed element, such as Base UI's hidden input, is placed in the viewport, not in its side.
       box: (el.getClientRects().length === 0
         ? [0, 0, 0, 0]
-        : [box.x - origin.x, box.y - origin.y, box.width, box.height]
+        : getComputedStyle(el).position === "fixed"
+          ? [box.x, box.y, box.width, box.height]
+          : [box.x - corner.x, box.y - corner.y, box.width, box.height]
       ).map(round),
       style: pick(getComputedStyle(el), props),
       before: pick(getComputedStyle(el, "::before"), PSEUDO),
@@ -251,8 +265,13 @@ export interface Accepted {
   what: RegExp;
   /** Limits the rule to parts whose label ("0 button", "2 span input-icon") matches. */
   part?: RegExp;
+  /** Lengths in px that differ by no more than this are the same (layout rounds to 1/64 px). */
+  within?: number;
   reason: string;
 }
+
+const px = (value: string): number | undefined =>
+  /^-?[\d.]+px$/.test(value) ? Number.parseFloat(value) : undefined;
 
 /** Input's one accepted difference, which every test that draws an Input lists. */
 export const INPUT_RESIZE: Accepted = {
@@ -262,7 +281,14 @@ export const INPUT_RESIZE: Accepted = {
     "Only a textarea resizes, so an input computes `vertical` and draws nothing of it; the class stays so a user's resize utility can replace it.",
 };
 
-function compare(name: string, css: Part[], tw: Part[]): Problem[] {
+/** The Button's ripple, in a test that draws a Button: hidden when motion is reduced. */
+export const BUTTON_RIPPLE: Accepted = {
+  what: /^transform$/,
+  part: /button-ripple/,
+  reason: "The ripple is display: none when motion is reduced; only its unseen scale differs.",
+};
+
+export function compare(name: string, css: Part[], tw: Part[]): Problem[] {
   const problems: Problem[] = [];
   if (css.length !== tw.length) {
     return [
@@ -293,7 +319,7 @@ function compare(name: string, css: Part[], tw: Part[]): Problem[] {
 }
 
 /** One line per kind of difference, with the first case it shows in and how many cases have it. */
-function summarize(problems: Problem[]): string[] {
+export function summarize(problems: Problem[]): string[] {
   const kinds = new Map<string, { first: Problem; count: number }>();
   for (const problem of problems) {
     const kind = `[${problem.part}] ${problem.what}: ${problem.css} / ${problem.tailwind}`;
@@ -320,6 +346,18 @@ export interface Options {
   target?: string;
   /** Properties to compare instead of PROPS. */
   props?: readonly string[];
+  /**
+   * Runs on each side after it is rendered and before it is measured, to put it in a state the
+   * component sets itself, such as `data-ending-style`. It must do the same to both sides.
+   */
+  prepare?: (side: Element) => void | Promise<void>;
+  /**
+   * Leaves transitions and animations running, so a state's authored transition can be read
+   * (computed `transition-duration` of an element held down). Only for tests that read the motion
+   * properties: the end states of a running transition are not the end states, so `states()`
+   * compares no boxes then.
+   */
+  live?: boolean;
 }
 
 export type Media = "reduced-motion" | "forced-colors" | "more-contrast";
@@ -373,6 +411,11 @@ export interface Parity {
   motion(cases: Case[], options?: Options): Promise<void>;
   /** Renders the cases with the Tailwind CSS loaded, motion frozen. */
   mount(cases: Case[], options?: Options): Promise<{ container: Element }>;
+  /**
+   * Parts measured by the test itself, for a popup that renders in a portal outside its side:
+   * `measureFrom` its trigger. Compared like any other parts, with the accepted differences.
+   */
+  expectParts(name: string, css: Part[], tailwind: Part[]): void;
   /** Loads the compiled Tailwind CSS first, as an app's global CSS: its layer order wins. */
   load(): void;
 }
@@ -417,7 +460,13 @@ export function tailwindParity(candidates: Iterable<string>, accepted: Accepted[
   const unaccepted = (problems: Problem[]) =>
     problems.filter(
       (p) =>
-        !accepted.some((rule) => rule.what.test(p.what) && (!rule.part || rule.part.test(p.part))),
+        !accepted.some(
+          (rule) =>
+            rule.what.test(p.what) &&
+            (!rule.part || rule.part.test(p.part)) &&
+            (rule.within === undefined ||
+              Math.abs((px(p.css) ?? Number.NaN) - (px(p.tailwind) ?? Number.NaN)) <= rule.within),
+        ),
     );
 
   /** Moves the pointer to a corner nothing is drawn in, so no case starts hovered. */
@@ -436,13 +485,21 @@ export function tailwindParity(candidates: Iterable<string>, accepted: Accepted[
     );
   };
 
+  const prepare = async (container: Element, options: Options) => {
+    if (!options.prepare) return;
+    for (const side of container.querySelectorAll(":scope [data-side=css], :scope [data-side=tw]"))
+      await options.prepare(side);
+    await frame();
+  };
+
   const mount = async (cases: Case[], options: Options = {}) => {
     load();
-    freeze();
+    if (!options.live) freeze();
     await park();
     const screen = await show(cases, options);
     await frame();
     await frame();
+    await prepare(screen.container, options);
     return screen;
   };
 
@@ -500,7 +557,11 @@ export function tailwindParity(candidates: Iterable<string>, accepted: Accepted[
     }
     const [x, y] = taken;
     if (!x || !y) throw new Error("not measured");
-    expect(summarize(unaccepted(compare(`${name} ${state}`, x, y)))).toEqual([]);
+    // Motion left running is measured part way, each side at its own moment: no box to compare.
+    const problems = compare(`${name} ${state}`, x, y).filter(
+      (problem) => !options.live || !problem.what.startsWith("box "),
+    );
+    expect(summarize(unaccepted(problems))).toEqual([]);
   };
 
   const motion = async (cases: Case[], options: Options = {}) => {
@@ -509,6 +570,7 @@ export function tailwindParity(candidates: Iterable<string>, accepted: Accepted[
     const screen = await show(cases, options);
     await frame();
     await frame();
+    await prepare(screen.container, options);
     const names = options.names ?? cases.map((one) => one.name);
     const problems = names.flatMap((name) => {
       const { css: a, tw: b } = sides(screen.container, name);
@@ -517,7 +579,11 @@ export function tailwindParity(candidates: Iterable<string>, accepted: Accepted[
     expect(summarize(unaccepted(problems))).toEqual([]);
   };
 
-  return { parity, states, motion, mount, load };
+  const expectParts = (name: string, a: Part[], b: Part[]) => {
+    expect(summarize(unaccepted(compare(name, a, b)))).toEqual([]);
+  };
+
+  return { parity, states, motion, mount, expectParts, load };
 }
 
 /** The computed style the user's className should have put on an element. */

@@ -167,6 +167,13 @@ describe("Button in Tailwind CSS v4 against button.css", () => {
     await tw.motion(cases);
   });
 
+  test("a held press lets in over 90 ms, in both", { timeout: 60_000 }, async () => {
+    await tw.states(cases, "primary md", "held", {
+      props: ["transitionDuration", "transitionTimingFunction", "transitionProperty"],
+      live: true,
+    });
+  });
+
   test("the spinner animates the same way, and pulses when motion is reduced", async () => {
     tw.load();
     const screen = await render(

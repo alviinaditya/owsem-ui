@@ -101,3 +101,59 @@
     opacity: 0.6;
   }
 }
+
+/*
+ * Switch: the thumb's progress along its travel, and how far a press holds it in. Registered, so
+ * they can transition; without @property the thumb goes to its place at once.
+ */
+/* biome-ignore lint/nursery/useBaseline: progressive enhancement */
+@property --_switch-travel {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+/* biome-ignore lint/nursery/useBaseline: progressive enhancement */
+@property --_switch-held {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+/* A control or its label under a fine pointer that can hover: pointing at either counts. */
+@custom-variant ow-label-hover {
+  @media (hover: hover) and (pointer: fine) {
+    &:where(:hover, label:hover *) {
+      @slot;
+    }
+  }
+}
+
+/* A checkbox that is checked or mixed. */
+@custom-variant ow-checkbox-on (&:where([data-checked], [data-indeterminate]));
+
+/*
+ * A held checkbox: pressed itself or through its label, never while disabled or read only. :is, not
+ * :where, so a hold outranks the hover under the same pointer whatever order the classes come in.
+ */
+@custom-variant ow-checkbox-held (
+  &:is(:active, label:active *):not([data-disabled], [data-readonly])
+);
+
+/* A thumb in a Switch that is held, never while disabled or read only. */
+@custom-variant ow-switch-held (
+  :where(.group\/ow-switch:active:not([data-disabled], [data-readonly])) > &
+);
+
+/* Copy Button's check draws its stroke in as it enters. */
+@keyframes ow-copy-button-draw {
+  from {
+    stroke-dasharray: 1;
+    stroke-dashoffset: -1;
+  }
+
+  to {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+}

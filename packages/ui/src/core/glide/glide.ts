@@ -265,6 +265,8 @@ export function createGlide(
       return active;
     },
     setActive(item) {
+      // The keyboard speaks last: a fade-out the pointer's exit began must not take it down.
+      clearTimeout(hideTimer);
       if (!item) return light(null);
       const rect = item.getBoundingClientRect();
       light({ item, rect, distance: 0 });

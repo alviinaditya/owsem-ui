@@ -239,6 +239,37 @@ describe("Glide", () => {
     expect(lit(items)).toEqual([]);
   });
 
+  test("an item lit from code outlives the fade the pointer's exit began", async () => {
+    function Keyboard() {
+      const glide = useGlide<HTMLDivElement>({ hideDelay: 30 });
+      return (
+        <div ref={glide.ref} data-testid="list" style={{ width: 200 }}>
+          <GlideHighlight glide={glide} />
+          {["One", "Two"].map((label) => (
+            <button
+              key={label}
+              type="button"
+              data-glide-item=""
+              style={{ display: "block", blockSize: 32 }}
+              onFocus={(event) => glide.setActive(event.currentTarget)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      );
+    }
+    const { list, highlight, items } = await mount(<Keyboard />);
+    const one = items[0] && box(items[0]);
+    if (!one) throw new Error("no items");
+    move(list, one.left + 20, one.top + 10);
+    list.dispatchEvent(new PointerEvent("pointerleave", { pointerType: "mouse" }));
+    items[1]?.focus();
+    await new Promise((resolve) => setTimeout(resolve, 90));
+    expect(lit(items)).toEqual(["Two"]);
+    expect(highlight.hasAttribute("data-visible")).toBe(true);
+  });
+
   test("forgets the pointer while hidden, as a closed popup that stays mounted", async () => {
     const { list, items } = await mount(<List />);
     const two = items[1] && box(items[1]);

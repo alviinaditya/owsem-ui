@@ -262,13 +262,16 @@ describe("Tabs geometry", () => {
     expect(slides.size).toBe(1);
     expect(samples.length).toBeGreaterThan(2);
     samples.sort((a, b) => a.time - b.time);
-    const back = samples.filter(
-      (at, i) => i > 0 && at.center > (samples[i - 1]?.center ?? 0) + 0.5,
-    );
-    expect(back, JSON.stringify(samples)).toEqual([]);
-    // Once there, it stays there.
     expect(landed.length).toBeGreaterThan(2);
-    for (const center of landed) close(center, rect(first).left + rect(first).width / 2);
+    // From the slide's start to where it rests, landing included.
+    const path = [...samples.map((at) => at.center), ...landed];
+    const rest = rect(first).left + rect(first).width / 2;
+    const report = JSON.stringify({ rest, landed: landed.slice(0, 4), samples });
+    const back = path.filter((center, k) => k > 0 && center > (path[k - 1] as number) + 0.5);
+    expect(back, report).toEqual([]);
+    // It never passes its tab, and once there it stays there.
+    expect(Math.min(...path), report).toBeGreaterThanOrEqual(rest - 0.5);
+    for (const center of landed) close(center, rest);
     // The thumb reaches out by the well's padding, 4px, around its key.
     close(rect(thumb).left + 4, rect(first).left);
   });

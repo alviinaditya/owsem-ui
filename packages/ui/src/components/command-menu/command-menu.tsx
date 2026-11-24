@@ -318,7 +318,7 @@ export function CommandMenuList({
     const highlight = highlightRef.current;
     if (!el || !highlight) return;
     const glide = createGlide(el, highlight, GLIDE);
-    // How far the list runs past each edge, for its fades (command-menu.css).
+    // How far the list runs past each edge, for its fades.
     const fade = () => {
       const below = el.scrollHeight - el.clientHeight - el.scrollTop;
       el.style.setProperty("--_above", `${el.scrollTop}px`);

@@ -4,7 +4,7 @@ import { useMergedRefs } from "./merge-refs";
 
 /** What a field's shake reads as invalid (Base UI's attribute, or the author's). */
 export const INVALID = '[data-invalid], [aria-invalid="true"]';
-/** Set while the field is valid, so only a field that becomes invalid shakes (input.css). */
+/** Set while the field is valid, so only a field that becomes invalid shakes. */
 export const ARMED_ATTR = "data-armed";
 
 /**

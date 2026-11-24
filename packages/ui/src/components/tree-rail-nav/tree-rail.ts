@@ -28,7 +28,7 @@ export const ROW = ':is([data-slot="tree-rail-nav-link"], [data-slot="tree-rail-
 export const PANEL = '[data-slot="tree-rail-nav-panel"]';
 const ORIGIN = '[data-slot="tree-rail-nav-origin"]';
 const LIST = '[data-slot="tree-rail-nav-list"]';
-/** How long a row keeps its tint while it closes: the transition in tree-rail-nav.css, plus a frame. */
+/** How long a row keeps its tint while it closes: its CSS transition, plus a frame. */
 const LEAVE_MS = 340;
 
 const round = (n: number) => Math.round(n * 100) / 100;
@@ -621,7 +621,7 @@ export function createTreeRail(tree: HTMLElement, svg: SVGSVGElement): TreeRail 
   measure();
   observe();
   goTo(findTarget());
-  // The script's rail replaces the resting one CSS draws until now (tree-rail-nav.css).
+  // The script's rail replaces the resting one CSS draws until now.
   tree.setAttribute("data-rail", "");
 
   return {

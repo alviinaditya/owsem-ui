@@ -1,10 +1,9 @@
 // The Tailwind CSS v4 twin of glide-variants.ts: the same exports, with the styles as utility classes.
 // Needs tokens.css.
 //
-// glide.css styles the container through [data-glide], which the script sets: position and
-// isolation. Here each container carries `relative isolate` in its own classes instead, so the
-// highlight's z-index: -1 stays inside it. A container sets --_radius on the highlight to its
-// items' corners with `[&>[data-slot=glide]]:[--_radius:…]`.
+// Each container carries `relative isolate` in its own classes, so the highlight's z-index: -1 stays
+// inside it, and sets --_radius on the highlight to its items' corners with
+// `[&>[data-slot=glide]]:[--_radius:…]`.
 
 // The script writes the lit item's box as --_x, --_y (offset) and --_sx, --_sy (scale from the size
 // it appeared at, --_w by --_h); everything that moves is a transform, so a glide costs no layout.

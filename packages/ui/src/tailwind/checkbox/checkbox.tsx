@@ -25,7 +25,7 @@ const glyph = (name: "check" | "minus", path: string) => (
     aria-hidden="true"
     focusable="false"
   >
-    {/* Length 1, so CSS draws the check in with one dash (checkbox.css). */}
+    {/* Length 1, so CSS draws the check in with one dash. */}
     <path className={checkboxSlots.stroke} d={path} pathLength={1} />
   </svg>
 );

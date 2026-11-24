@@ -1,5 +1,5 @@
 // Generated from components/field by scripts/build-tailwind.ts; do not edit.
-// No "use client" here: the namespace object must be readable from Server Components (FR-5).
+// No "use client" here: the namespace object must be readable from Server Components.
 
 export type { InputProps as FieldControlProps } from "../input/input";
 // The control is Input: its look, sizes, and icons, tied to the field by Base UI's context.

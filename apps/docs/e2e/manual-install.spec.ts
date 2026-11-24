@@ -73,6 +73,10 @@ test("every component page's Manual offers the Tailwind choice", async ({ reques
       data.tailwind.files.filter((file: { path: string }) => file.path.endsWith(".css")),
       name,
     ).toEqual([]);
+    // Comments for this repo are not for a copied file.
+    for (const { path, code } of [...data.css.files, ...data.tailwind.files]) {
+      expect(code, path).not.toMatch(/Generated from|Tailwind CSS v4 twin/);
+    }
   }
 });
 

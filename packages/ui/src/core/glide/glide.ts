@@ -2,7 +2,7 @@
  * Glide (PRD, Core): one highlight that glides to the item nearest the pointer.
  *
  * - The nearest enabled item wins, gaps included, so the highlight never blinks between items.
- * - It moves by `transform` only, through a CSS transition (glide.css): no frames when idle.
+ * - It moves by `transform` only, through a CSS transition: no frames when idle.
  * - A click in a gap goes to the lit item, within `gapClick.maxDistance`.
  * - Focus is never moved. Keyboard-driven components light items with `setActive()`.
  */
@@ -54,7 +54,7 @@ interface Hit {
 }
 
 /**
- * Wires Glide to `container` (positioned by glide.css) and `highlight`, an element
+ * Wires Glide to `container` (positioned) and `highlight`, an element
  * inside it with the `ow-glide` class. `options` is read on every event, so it can change.
  */
 export function createGlide(

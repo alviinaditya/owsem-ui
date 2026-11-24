@@ -3,8 +3,8 @@
  *
  * - It rests where layout puts the pressed item's box, untransformed, so it is painted on the
  *   same pixels as the item; a thumb placed by translate fell between pixels at a fractional
- *   zoom. It slides there by `translate` and `transform` through CSS transitions
- *   (toggle-group.css), which end at none, so it costs no frames once it lands.
+ *   zoom. It slides there by `translate` and `transform` through CSS transitions, which
+ *   end at none, so it costs no frames once it lands.
  * - Its first placement after mount is instant: nothing sweeps in on load or hydration. After
  *   that, a new pressed item slides it there (FLIP); a resize snaps it.
  * - It is gooey: when it travels, its key (the ::before) stretches along the axis from its leading

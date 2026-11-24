@@ -18,9 +18,14 @@ export const baseUiVersion = (uiSrc = defaultUiSrc): string =>
 export const isSource = (file: string): boolean =>
   /\.(tsx?|css)$/.test(file) && !/\.(test|tailwind)\.tsx?$/.test(file);
 
-/** The generator's "do not edit" header is for the repo, not for a copied file. */
-const stripGeneratedHeader = (code: string): string =>
-  code.replace(/^\/\/ Generated from [^\n]*\n/, "");
+/**
+ * Comments for this repo, not for a copied file: the generator's "do not edit" header, and the
+ * first paragraph of a Tailwind class map, which says whose twin it is.
+ */
+const stripRepoHeader = (code: string): string =>
+  code
+    .replace(/^\/\/ Generated from [^\n]*\n/, "")
+    .replace(/^\/\/ The Tailwind CSS v4 twin of (?:[^\n]+\n)(?:\/\/ [^\n]+\n)*(?:\/\/)?\n/, "");
 
 /** Packages the app provides itself, so they are not installed with a component. */
 const PEERS = new Set(["react", "react-dom"]);
@@ -339,7 +344,7 @@ export function componentFiles(
     if (reached.has(path)) continue;
     const source = sourceOf(path);
     if (!source) continue;
-    const code = stripGeneratedHeader(read(source.file));
+    const code = stripRepoHeader(read(source.file));
     raw.set(path, code);
     for (const dependency of npmDependencies(code, uiSrc)) dependencies.add(dependency);
     const component = /^components\/owsem\/([^/]+)\//.exec(path)?.[1];

@@ -207,11 +207,26 @@ describe("Tabs geometry", () => {
     await userEvent.unhover(first);
     await expect.poll(() => thumb.hasAttribute("data-visible")).toBe(true);
     await new Promise((resolve) => setTimeout(resolve, 800));
-    const centers: number[] = [];
+    // Each position with the slide's own time, so that positions are judged in the slide's order and
+    // not in the order the frames were read.
+    const slides = new Set<Animation>();
+    const samples: { time: number; center: number }[] = [];
+    const landed: number[] = [];
     let sampling = true;
+    const slide = () =>
+      thumb
+        .getAnimations()
+        .find((a) => a instanceof CSSTransition && a.transitionProperty === "translate");
     const sample = () => {
+      const running = slide();
       const box = thumb.getBoundingClientRect();
-      centers.push(box.left + box.width / 2);
+      const center = box.left + box.width / 2;
+      if (running) {
+        slides.add(running);
+        samples.push({ time: Number(running.currentTime), center });
+      } else if (slides.size > 0) {
+        landed.push(center);
+      }
       if (sampling) requestAnimationFrame(sample);
     };
     requestAnimationFrame(sample);
@@ -242,10 +257,18 @@ describe("Tabs geometry", () => {
     if (key) key.playbackRate = 1;
     await new Promise((resolve) => setTimeout(resolve, 900));
     sampling = false;
-    // Travelling left, it never steps back to the right (the press release may breathe a pixel).
-    for (let i = 1; i < centers.length; i++) {
-      expect(centers[i] as number).toBeLessThanOrEqual((centers[i - 1] as number) + 0.5);
-    }
+    // One slide from start to end, and travelling left it never steps back to the right (the press
+    // release may breathe a pixel).
+    expect(slides.size).toBe(1);
+    expect(samples.length).toBeGreaterThan(2);
+    samples.sort((a, b) => a.time - b.time);
+    const back = samples.filter(
+      (at, i) => i > 0 && at.center > (samples[i - 1]?.center ?? 0) + 0.5,
+    );
+    expect(back, JSON.stringify(samples)).toEqual([]);
+    // Once there, it stays there.
+    expect(landed.length).toBeGreaterThan(2);
+    for (const center of landed) close(center, rect(first).left + rect(first).width / 2);
     // The thumb reaches out by the well's padding, 4px, around its key.
     close(rect(thumb).left + 4, rect(first).left);
   });

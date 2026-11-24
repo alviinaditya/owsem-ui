@@ -490,8 +490,13 @@ describe("Select", () => {
     expect(getComputedStyle(down() as HTMLElement).color).toBe(resolve("color", "var(--ow-muted)"));
     // The scrollbar gives way to the arrows.
     expect(list().classList.contains("base-ui-disable-scrollbar")).toBe(true);
-    list().scrollTop = 200;
-    await expect.poll(up).not.toBeNull();
+    // Base UI grows the popup by what is scrolled, and scrolls the list once it cannot grow.
+    await expect
+      .poll(() => {
+        list().scrollTop = 200;
+        return up();
+      })
+      .not.toBeNull();
     // The highlight scrolls with the items, inside the list.
     expect(list().querySelector(".ow-glide")).not.toBeNull();
     await userEvent.keyboard("{Escape}");

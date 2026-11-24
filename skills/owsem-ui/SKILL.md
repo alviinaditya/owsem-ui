@@ -173,8 +173,8 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
 **Accordion**, **Avatar**, **Button**, **Checkbox**, **Checkbox Group**, **Collapsible**, **Dialog**,
-**Field**, **Fieldset**, **Form**, **Input**, **Kbd**, **Menu**, **Meter**, **Number Field**, **Popover**, **Progress**, **Radio Group**, **Scroll Area**,
-**Select**, **Separator**, **Switch**, **Tabs**, **Toggle**, **Toggle Group**, **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`)
+**Field**, **Fieldset**, **Form**, **Input**, **Kbd**, **Menu**, **Meter**, **Number Field**, **OTP Field**, **Popover**, **Progress**, **Radio Group**, **Scroll Area**,
+**Select**, **Separator**, **Slider**, **Switch**, **Tabs**, **Toggle**, **Toggle Group**, **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`)
 and **Code Block**, **Color Picker**, **Command Menu**, **Copy Button**, **Icon Morph**,
 **Sidebar**, **Table**, **Table of Contents**, and **Tree Rail Nav** (Owsem, from
 `owsem-ui/owsem`) are built. Base
@@ -756,6 +756,98 @@ import { Field, NumberField } from "owsem-ui/base"; // or "@/components/owsem/nu
   `data-size` on `Root`.
 - Reads `--ow-fg`, `--ow-muted`, `--ow-hover`, `--ow-pressed-bg`, `--ow-critical`, `--ow-focus`,
   `--ow-edge`, `--ow-bg` (the cursor's halo), `--ow-radius`, and `--ow-motion-scale`.
+
+### Slider
+
+A value picker along a track: one thumb, or one for each number of a range. Registry item: `slider`.
+
+```tsx
+import { Field, Slider } from "owsem-ui/base"; // or "@/components/owsem/slider"
+<Slider.Root defaultValue={40} aria-label="Volume" />
+<Slider.Root defaultValue={[20, 80]} aria-label="Price" />
+<Slider.Root defaultValue={40}>
+  <Slider.Label>Volume</Slider.Label>
+  <Slider.Value />
+  <Slider.Control />
+</Slider.Root>
+<Field.Root name="volume">
+  <Field.Label>Volume</Field.Label>
+  <Slider.Root defaultValue={40} />
+</Field.Root>
+<Slider.Root orientation="vertical" defaultValue={40} aria-label="Bass" />
+```
+
+- Parts, as Base UI's: `Root`, `Label`, `Value`, `Control`, `Track`, `Indicator`, `Thumb`. `Root` with
+  no children draws a `Control`; `Control` with no children draws a `Track`; `Track` with no children
+  draws an `Indicator` and one `Thumb` for each number of `value` or `defaultValue` (each with its
+  `index`, so it renders on the server). Children replace any of them; put the `Thumb` inside the
+  `Track`, which it is placed against.
+- Props are Base UI's: `value`, `defaultValue` (a number, or an array for a range), `onValueChange`,
+  `onValueCommitted`, `min`, `max`, `step`, `largeStep`, `orientation`, `format`, `locale`, `name`,
+  `disabled`, `minStepsBetweenValues`, `thumbCollisionBehavior`. OwsemUI adds `size` on `Root` (`"sm"`,
+  `"md"` default, `"lg"`: a 4, 6, 8 px track with a 16, 20, 24 px thumb), which every part reads; no
+  part takes a `size`.
+- Name it with a `Slider.Label`, a Field label, or `aria-label` (and `aria-describedby`) on a `Root`
+  with no children: they go to the thumbs it draws. With children they stay on the Root as in Base UI:
+  name each `Slider.Thumb`, or label the Root. A range drawn by `Root` names both thumbs alike: write
+  the thumbs yourself, each with its own `aria-label` ("Lowest price", "Highest price").
+- The label is at the start and the value at the end, above the control, whose height is at least
+  24px; the track is a 10% tint of the text color and the fill `--ow-accent` (`--ow-critical-solid`
+  when invalid). The thumb is a white key with the surface shadow that grows a little under a mouse and
+  while dragged (not with reduced motion). Base UI places the thumb and the fill by inline inset and
+  size, so they follow the pointer at once and are not eased.
+  The Track and the fill are drawn half a thumb past each end, so they start at the same line as the
+  label; a background on either still shows. The Control has `touch-action: pan-y` (`pan-x` upright).
+- Upright, it is a column 12rem tall: set `block-size` on the Root to change that. Set `inline-size` for
+  the width of a horizontal one.
+- States: `data-dragging`, `data-disabled`, `data-invalid`, `data-orientation` on every part;
+  `data-size` on `Root`.
+- Reads `--ow-fg`, `--ow-muted`, `--ow-accent`, `--ow-critical-solid`, `--ow-on-accent`,
+  `--ow-surface-shadow`, `--ow-focus`, `--ow-edge` (more contrast), and `--ow-motion-scale`.
+
+### OTP Field
+
+A one-time code, one character to a slot. Registry item: `otp-field`.
+
+```tsx
+import { Field, OTPField } from "owsem-ui/base"; // or "@/components/owsem/otp-field"
+<Field.Root name="code">
+  <Field.Label>Verification code</Field.Label>
+  <OTPField.Root length={6} />
+</Field.Root>
+<OTPField.Root length={4} size="sm" mask aria-label="PIN" />
+<Field.Root>
+  <Field.Label>Code</Field.Label>
+  <OTPField.Root length={6}>
+    <OTPField.Input />
+    <OTPField.Input aria-label="2" />
+    <OTPField.Input aria-label="3" />
+    <span aria-hidden="true">-</span>
+    <OTPField.Input aria-label="4" />
+    <OTPField.Input aria-label="5" />
+    <OTPField.Input aria-label="6" />
+  </OTPField.Root>
+</Field.Root>
+```
+
+- Parts, as Base UI's: `Root` and `Input`. `Root` with no children draws one `Input` for each of
+  `length`; with children the slots are yours, and a separator is plain markup.
+- Props are Base UI's: `length` (required), `value`, `defaultValue`, `onValueChange`,
+  `onValueComplete`, `onValueInvalid`, `validationType` (`"numeric"` default, `"alpha"`,
+  `"alphanumeric"`, `"none"`), `mask`, `autoSubmit`, `readOnly`, `disabled`, `required`, `name`,
+  `normalizeValue`. A pasted code fills every slot. OwsemUI adds `size` on `Root` (`"sm"`, `"md"`
+  default, `"lg"`: each slot is a 32, 40, 48 px square, as Input is tall).
+- Name the group with a Field label, or `aria-label` or `aria-labelledby` on the `Root`; when `Root`
+  draws the slots, `aria-label` also names them: "Code" for the first (through a hidden label) and
+  "Code 2/6" for the rest. With your own slots, Base UI names the first from the label and ignores
+  its `aria-label`: give the others an `aria-label`.
+- Slots are drawn as Input (a 6% tint, 9% on hover, a focus ring, critical when invalid, dim when
+  disabled) with a centered tabular digit, 0.5em apart, the row from the start edge. Invalid shakes
+  the row once (a blink with reduced motion); a complete code looks like any other. Six slots at `md` are 275px.
+- States: `data-invalid`, `data-disabled`, `data-complete`, `data-filled` (slots) on the parts;
+  `data-size` on `Root`.
+- Reads `--ow-fg`, `--ow-critical`, `--ow-radius`, `--ow-focus`, `--ow-edge` (more contrast), and
+  `--ow-motion-scale`.
 
 ### Separator
 

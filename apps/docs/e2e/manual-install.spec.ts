@@ -63,7 +63,7 @@ test("the Manual files are not in the page until the tab opens", async ({ page, 
 
 test("every component page's Manual offers the Tailwind choice", async ({ request }) => {
   const names = catalog.filter(isAvailable).map((entry) => entry.name);
-  expect(names.length).toBe(36);
+  expect(names.length).toBe(38);
   for (const name of names) {
     const data = await (await request.get(`/api/manual/${name}`)).json();
     expect(data.css.flavor, name).toBe("css");
@@ -427,6 +427,43 @@ test("Tailwind Number Field: its class map and its shake, no CSS file", async ({
   expect(bridge).not.toContain("@keyframes ow-progress-travel");
   const classes = await copyVisibleFile(page, "number-field/number-field-variants.ts");
   expect(classes).toContain("ow-number-field-shake");
+  expect(classes).not.toMatch(/import .*\.css/);
+});
+
+test("Tailwind Slider: its class map, and no CSS file", async ({ page }) => {
+  await openTailwindManual(page, "/en/slider");
+  const titles = manual(page).locator(".ow-code-block__title:visible");
+  for (const path of [
+    "components/owsem/slider/slider.tsx",
+    "components/owsem/slider/slider-variants.ts",
+    "lib/owsem/tokens.css",
+  ]) {
+    await expect(titles.filter({ hasText: path })).toHaveCount(1);
+  }
+  await expect(titles.filter({ hasText: "slider.css" })).toHaveCount(0);
+  const classes = await copyVisibleFile(page, "slider/slider-variants.ts");
+  expect(classes).toContain("data-dragging:has-[:focus]");
+  expect(classes).not.toMatch(/import .*\.css/);
+});
+
+test("Tailwind OTP Field: its class map and its shake, no CSS file", async ({ page }) => {
+  await openTailwindManual(page, "/en/otp-field");
+  const titles = manual(page).locator(".ow-code-block__title:visible");
+  for (const path of [
+    "components/owsem/otp-field/otp-field.tsx",
+    "components/owsem/otp-field/otp-field-variants.ts",
+    "lib/owsem/tailwind.css",
+    "lib/owsem/tokens.css",
+    "lib/owsem/shake.ts",
+  ]) {
+    await expect(titles.filter({ hasText: path })).toHaveCount(1);
+  }
+  await expect(titles.filter({ hasText: "otp-field.css" })).toHaveCount(0);
+  const bridge = await copyVisibleFile(page, "lib/owsem/tailwind.css");
+  expect(bridge).toContain("@keyframes ow-otp-field-shake");
+  expect(bridge).toContain("@keyframes ow-otp-field-blink");
+  const classes = await copyVisibleFile(page, "otp-field/otp-field-variants.ts");
+  expect(classes).toContain("ow-otp-field-shake");
   expect(classes).not.toMatch(/import .*\.css/);
 });
 

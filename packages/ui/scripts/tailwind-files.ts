@@ -48,6 +48,8 @@ export const components: string[] = [
   "accordion",
   "checkbox-group",
   "number-field",
+  "slider",
+  "otp-field",
 ];
 
 const HEADER = "// Generated from";

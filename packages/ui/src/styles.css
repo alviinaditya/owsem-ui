@@ -20,12 +20,14 @@
 @import "./components/menu/menu.css";
 @import "./components/meter/meter.css";
 @import "./components/number-field/number-field.css";
+@import "./components/otp-field/otp-field.css";
 @import "./components/popover/popover.css";
 @import "./components/progress/progress.css";
 @import "./components/scroll-area/scroll-area.css";
 @import "./components/radio-group/radio-group.css";
 @import "./components/select/select.css";
 @import "./components/separator/separator.css";
+@import "./components/slider/slider.css";
 @import "./components/tabs/tabs.css";
 @import "./components/switch/switch.css";
 @import "./components/toggle/toggle.css";

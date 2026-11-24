@@ -1,0 +1,174 @@
+---
+title: Slider
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Untuk menyalin kode sumbernya ke project Anda, pakai item `slider`
+dari registry.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Slider } from "owsem-ui/base";
+
+export function VolumeSlider() {
+  return (
+    <Slider.Root defaultValue={40}>
+      <Slider.Label>Volume</Slider.Label>
+      <Slider.Value />
+      <Slider.Control />
+    </Slider.Root>
+  );
+}
+```
+
+Slider memilih satu angka, atau dua untuk rentang, dengan menyeret thumb di sepanjang track. Label
+ada di awal dan nilai di akhir, di atas control yang menggambar track, isian, dan thumb sendiri.
+Tanpa children, `Slider.Root` menggambar control juga, jadi
+`<Slider.Root defaultValue={40} aria-label="Volume" />` adalah slider bernama yang juga dirender di
+server. Beri array, `defaultValue={[20, 80]}`, untuk rentang dengan satu thumb untuk tiap angka.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Base UI merender tiap thumb sebagai `<div>` dengan `<input type="range">` tersembunyi di dalamnya,
+yang dipakai keyboard, form, dan screen reader. Taruh Thumb di dalam Track: ia ditempatkan
+terhadap track, dan Control memberi padding setengah thumb di kedua ujung agar thumb di ujung tetap
+di dalam slider.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-slider` | `role="group"`; menggambar Control-nya bila tanpa children |
+| <Part name="Label" /> | `div.ow-slider__label` | Menamai thumb lewat `aria-labelledby` |
+| <Part name="Value" /> | `output.ow-slider__value` | Nilai terformat, `20 – 80` untuk rentang |
+| <Part name="Control" /> | `div.ow-slider__control` | Menerima pointer; tinggi minimal 24px; menggambar Track-nya bila tanpa children |
+| <Part name="Track" /> | `div.ow-slider__track` | Alurnya: 4, 6, atau 8px; menggambar Indicator dan thumb-nya bila tanpa children |
+| <Part name="Indicator" /> | `div.ow-slider__indicator` | Isiannya, dari awal sampai thumb, atau di antara dua thumb |
+| <Part name="Thumb" /> | `div.ow-slider__thumb` | Kuncinya: 16, 20, atau 24px, dengan input range di dalamnya |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### Slider.Root
+
+Tanpa children, ia menggambar `Slider.Control` dengan satu `Slider.Thumb` untuk tiap angka di
+`value` atau `defaultValue`. Tiap thumb diberi `index`-nya, sehingga rentang dirender di server.
+Lalu `aria-label` dan `aria-describedby` diteruskan ke thumb, yang memang dinamai olehnya; rentang
+juga menyimpan `aria-label` pada grupnya, dan menamai kedua thumb dengan nama yang sama. Rentang
+sebaiknya menulis thumb-nya sendiri, masing-masing dengan `aria-label` sendiri ("Harga terendah",
+"Harga tertinggi"), seperti pada contoh Rentang. Dengan children, nama tetap di Root, seperti di
+Base UI.
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Track 4, 6, atau 8px dengan thumb 16, 20, atau 24px, dan ukuran font Button; dibaca semua bagian |
+
+#### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-size` | Selalu; ukuran yang dipilih |
+
+### Slider.Control dan Slider.Track
+
+Tanpa children, `Slider.Control` menggambar `Slider.Track`, dan `Slider.Track` menggambar
+`Slider.Indicator` dan satu `Slider.Thumb` untuk tiap nilai.
+
+### Slider.Track
+
+Track digambar setengah thumb melewati tiap ujung, yaitu tepi Slider sendiri menurut padding
+Control: track dan label mulai pada garis yang sama. Caranya border transparan dan margin negatif
+sebesar itu, sehingga thumb, yang ditempatkan terhadap kotak padding track, tidak bergeser, dan
+latar yang Anda berikan pada Track tetap terlihat. Indicator digambar setengah thumb lebih panjang
+di awalnya, sampai awal track (pada rentang, di bawah thumb).
+
+### Slider.Thumb
+
+Base UI menempatkan thumb dengan `inset-inline-start` (`bottom` bila tegak) dan `translate` -50%,
+dan isian dengan inset dan ukuran inline. OwsemUI membiarkan keduanya apa adanya, sehingga thumb
+mengikuti pointer tanpa jeda, di arah tulisan mana pun. Pembesarannya adalah properti `scale`
+sendiri, jadi tidak pernah melawan penempatan itu.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-slider` | Root |
+| `ow-slider--sm`, `ow-slider--md`, `ow-slider--lg` | Root, menurut `size` |
+| `ow-slider__label` | Label |
+| `ow-slider__value` | Value |
+| `ow-slider__control` | Control |
+| `ow-slider__track` | Track |
+| `ow-slider__indicator` | Indicator |
+| `ow-slider__thumb` | Thumb |
+
+## Aksesibilitas [#accessibility]
+
+- Tiap thumb adalah `input[type=range]` native: ia menerima tombol panah, Page Up dan Page Down,
+  Home, dan End, serta menyebutkan nilainya dan, pada rentang, "start" atau "end". Panah kiri
+  menaikkan nilai di halaman kanan-ke-kiri.
+- Beri nama dengan `Slider.Label`, `Field.Label`, atau `aria-label`; salah satunya wajib.
+  `aria-labelledby` pada Root menamai thumb.
+- Control dan thumb adalah target minimal 24px, untuk pointer maupun sentuhan. Jari menyeret di
+  sepanjang control, dan masih bisa menggeser halaman pada sumbu lainnya: control memakai
+  `touch-action: pan-y` (`pan-x` bila tegak).
+- Isian punya kontras 3:1 terhadap track dan halaman, di terang dan gelap: setidaknya 3,2:1 dalam
+  tes. Thumb putih menonjol dari isian sebesar 4,6:1 atau lebih, dan ia punya bayangan permukaan.
+  Dengan `prefers-contrast: more` track mendapat tepi 1px dan thumb mendapat cincin `--ow-edge`.
+  Pada forced colors track mempertahankan outline-nya, isian memakai highlight sistem, dan thumb
+  digambar solid dengan border.
+- Cincin fokus muncul setelah tombol, bukan setelah ditekan. `Slider.Value` adalah `output` yang
+  tidak mengumumkan saat Anda menyeret.
+
+## Tema [#theming]
+
+Slider membaca token tema ini. Setel salah satunya pada slider, atau pada elemen di sekitarnya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-fg` | Label, dan tint track (10%) |
+| `--ow-muted` | Nilai |
+| `--ow-accent` | Isian |
+| `--ow-critical-solid` | Isian saat field invalid |
+| `--ow-on-accent`, `--ow-surface-shadow` | Thumb: warna dan bayangannya |
+| `--ow-focus` | Cincin fokus |
+| `--ow-edge` | Tepi track dan thumb saat kontras lebih diminta |
+| `--ow-spring-settle`, `--ow-spring-settle-duration` | Pembesaran thumb |
+| `--ow-motion-scale` | Seberapa besar thumb membesar |
+
+<ForMode mode="isolated">
+
+Pada mode isolated, nilainya ada di root tiap Slider, jadi setel pada slider-nya sendiri.
+
+</ForMode>
+
+Setel `inline-size` pada root, atau pada induknya, dengan CSS biasa; control selebar root. Slider
+tegak setinggi 12rem: beri `block-size` sendiri. Selain ukuran track dan thumb yang 4, 6, dan 8px
+serta 16, 20, dan 24px, semuanya berasal dari `font-size` dalam `em`.
+
+## Gerak [#motion]
+
+Menyeret berlangsung seketika. Thumb dan isian berada di tempat nilainya, dan tidak ada yang
+melunakkan posisinya, sehingga mereka mengikuti pointer tanpa jeda; tombol atau klik pada track
+langsung melompat ke nilai baru. Angka di `Slider.Value` ikut berubah, dan tidak ada yang lain yang
+beranimasi.
+
+Thumb membesar sedikit di bawah mouse (10%) dan sedikit lebih saat diseret (15%), dengan `scale`
+pada spring settle, dan melepas dengan cara yang sama. Besarnya mengikuti `--ow-motion-scale`.
+Dengan `prefers-reduced-motion` ia tidak membesar. Tidak ada yang berjalan saat slider diam.

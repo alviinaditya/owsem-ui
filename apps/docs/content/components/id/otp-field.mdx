@@ -1,0 +1,133 @@
+---
+title: OTP Field
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Untuk menyalin kode sumbernya ke project Anda, pakai item `otp-field`
+dari registry.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Field, OTPField } from "owsem-ui/base";
+
+export function VerifyCode() {
+  return (
+    <Field.Root name="code">
+      <Field.Label>Kode verifikasi</Field.Label>
+      <OTPField.Root length={6} />
+    </Field.Root>
+  );
+}
+```
+
+OTP Field menerima kode sekali pakai, satu karakter per slot. Mengetik pindah ke slot berikutnya,
+Backspace kembali, dan menempel satu kode utuh mengisi semua slot. `OTPField.Root length={6}` tanpa
+children menggambar satu `OTPField.Input` untuk tiap karakter, dalam satu baris dari tepi awal, sejajar dengan label dan errornya; dengan
+children, slotnya milik Anda. Beri nama grup dengan `Field.Label`, atau `aria-label` (atau
+`aria-labelledby`) bila tidak ada Field.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Base UI merender `<div>` dengan role `group` dan satu `<input>` untuk tiap slot, serta input
+tersembunyi yang mengirim seluruh kode dengan `name`-nya.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-otp-field` | `role="group"`; menggambar slot-nya bila tanpa children; barisnya bergetar saat invalid |
+| <Part name="Input" /> | `input.ow-otp-field__input` | Satu slot: persegi setinggi Input |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### OTPField.Root
+
+Tanpa children, ia menggambar satu `OTPField.Input` untuk tiap `length`, dan bila Anda memberi
+`aria-label`, slotnya ikut dinamai: yang pertama dari label tersembunyi berisi teks itu, karena
+Base UI mengabaikan `aria-label` pada slot pertama, dan sisanya "Kode 2/6" dan seterusnya. Dengan `aria-labelledby`, semua slot memakai nama itu. Dengan children, slotnya
+milik Anda, dan pemisah di antaranya adalah markup biasa; namai slot pertama dari `Field.Label`
+atau `aria-labelledby` pada Root, dan beri sisanya `aria-label`, karena Base UI mengabaikan
+`aria-label` pada slot pertama. `aria-describedby` tetap di grup.
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Ukuran font Button; tiap slot adalah persegi 32, 40, atau 48px, setinggi Input |
+
+#### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-size` | Selalu; ukuran yang dipilih |
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-otp-field` | Root |
+| `ow-otp-field--sm`, `ow-otp-field--md`, `ow-otp-field--lg` | Root, menurut `size` |
+| `ow-otp-field__input` | Input |
+
+## Aksesibilitas [#accessibility]
+
+- Grup punya role `group` dan nama dari label Field, `aria-label`, atau `aria-labelledby`. Tiap
+  slot adalah kolom teks yang juga punya nama: dari label, atau, bila Root yang menggambarnya dan
+  punya `aria-label`, "Kode" untuk yang pertama dan "Kode 2/6" dan seterusnya untuk sisanya.
+- Tombol panah berpindah antar slot (dibalik di halaman kanan-ke-kiri), Home ke slot pertama
+  dan End ke slot kosong pertama, dan Backspace menghapus lalu mundur. Kode yang ditempel
+  mengisi semua slot. Hanya satu slot yang menjadi perhentian Tab.
+- `validationType` mengatur karakter yang diterima dan keyboard yang tampil di ponsel: numerik
+  secara default; `mask` menampilkan titik. Slot pertama memakai `autocomplete="one-time-code"`
+  untuk saran kode SMS.
+- Invalid mewarnai slot critical dan menggetarkan baris sekali, atau mengedipkannya saat gerak
+  dikurangi; teks error di `Field.Error` yang memberi tahu pengguna. Kode lengkap tidak menampilkan
+  apa pun yang khusus.
+- Teks slot punya kontras 4,5:1 terhadap tint-nya. Dengan `prefers-contrast: more` tiap slot
+  mendapat tepi 1px; pada forced colors ia mempertahankan outline-nya, fokus memakai highlight
+  sistem, dan slot yang disabled berwarna abu-abu.
+
+## Tema [#theming]
+
+OTP Field membaca token tema ini. Setel salah satunya pada field, atau pada elemen di sekitarnya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-fg` | Angka, dan tint slot (6%, 9% saat hover) |
+| `--ow-critical` | Tint slot saat invalid (14%) |
+| `--ow-radius` | Sudut slot |
+| `--ow-focus` | Cincin fokus |
+| `--ow-edge` | Tepi slot saat kontras lebih diminta |
+| `--ow-ease-out`, `--ow-motion-scale` | Getaran |
+
+<ForMode mode="isolated">
+
+Pada mode isolated, nilainya ada di root tiap OTP Field, jadi setel pada field-nya sendiri.
+
+</ForMode>
+
+Semuanya berasal dari `font-size` dalam `em`: sisi slot setinggi Input, dan jaraknya 0,5em. Baris
+yang terlalu lebar untuk induknya mengecilkan slot-nya, bukan meluap; enam slot pada `md` selebar
+275px, muat di ponsel 320px.
+
+## Gerak [#motion]
+
+Saat field menjadi invalid, seluruh baris bergetar sekali, 4px ke tiap sisi dalam 320 ms, dengan
+`transform` pada layer sendiri; baris yang invalid sejak awal tetap diam, dan Form yang menolak
+pengiriman menggetarkannya lagi. Dengan `prefers-reduced-motion` ia berkedip. Tidak ada yang lain
+yang bergerak, dan tidak ada yang berjalan saat field diam.

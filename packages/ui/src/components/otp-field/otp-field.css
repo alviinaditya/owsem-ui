@@ -1,0 +1,139 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * OTP Field (Base). A row of slots, one character each, drawn as Input is: a 6% tint of the text
+ * color, 9% on hover, a focus ring around the slot that has focus, critical when invalid, dim when
+ * disabled. Each slot is a square on an Input's height, 0.5em from the next, and the row starts at
+ * the start edge, like its label and error. Invalid shakes the row once, not each slot. The Root's
+ * size is its font and --py, which every slot reads.
+ */
+@layer owsem.components {
+  .ow-otp-field {
+    --py: 0.8036em;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.5em;
+    max-inline-size: 100%;
+    min-inline-size: 0;
+    color: var(--ow-fg);
+    font-size: 0.875rem;
+    line-height: 1.25;
+  }
+
+  .ow-otp-field--sm {
+    --py: 0.6058em;
+    font-size: 0.8125rem;
+  }
+
+  .ow-otp-field--lg {
+    --py: 0.875em;
+    font-size: 1rem;
+  }
+
+  /*
+   * Rejects once when it becomes invalid. data-armed is set while it is valid (core/shake.ts), so a
+   * field invalid from the start stays still; a Form re-plays it with data-shake="off" (a reflow).
+   */
+  .ow-otp-field:where([data-invalid])[data-armed]:not([data-shake="off"]) {
+    will-change: transform;
+    animation: ow-otp-field-shake 320ms var(--ow-ease-out);
+  }
+
+  @keyframes ow-otp-field-shake {
+    20% {
+      transform: translateX(calc(-4px * var(--ow-motion-scale)));
+    }
+    40% {
+      transform: translateX(calc(4px * var(--ow-motion-scale)));
+    }
+    60% {
+      transform: translateX(calc(-2px * var(--ow-motion-scale)));
+    }
+    80% {
+      transform: translateX(calc(2px * var(--ow-motion-scale)));
+    }
+  }
+
+  @keyframes ow-otp-field-blink {
+    from {
+      opacity: 0.6;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ow-otp-field:where([data-invalid])[data-armed]:not([data-shake="off"]) {
+      animation: ow-otp-field-blink 160ms var(--ow-ease-out);
+    }
+  }
+
+  /* A square on Input's height; narrower only when the row does not fit its parent. */
+  .ow-otp-field__input {
+    --_bg: color-mix(in oklab, var(--ow-fg) 6%, transparent);
+    --_py: max(var(--py), (24px - 1lh) / 2);
+    --_side: calc(2 * var(--_py) + 1lh);
+    box-sizing: border-box;
+    flex: 0 1 auto;
+    inline-size: var(--_side);
+    block-size: var(--_side);
+    min-inline-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: var(--ow-radius);
+    /* Invisible until forced colors draw it as the edge. */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--_bg);
+    color: var(--ow-fg);
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+  }
+
+  /* The tint deepens on hover. */
+  @media (hover: hover) and (pointer: fine) {
+    .ow-otp-field__input:where(:hover):where(:not([data-disabled], :disabled)) {
+      --_bg: color-mix(in oklab, var(--ow-fg) 9%, transparent);
+    }
+  }
+
+  .ow-otp-field__input:where([data-invalid], [aria-invalid="true"]) {
+    --_bg: color-mix(in oklab, var(--ow-critical) 14%, transparent);
+  }
+
+  .ow-otp-field__input:focus-visible {
+    outline: 2px solid var(--ow-focus);
+    outline-offset: 2px;
+  }
+
+  .ow-otp-field__input:where([data-disabled], :disabled) {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
+  /* More contrast asked for: the edge comes back at 3:1. */
+  @media (prefers-contrast: more) {
+    .ow-otp-field__input {
+      box-shadow: inset 0 0 0 1px var(--ow-edge);
+    }
+  }
+
+  /* The transparent outline is the edge; invalid thickens it, since its color is gone. */
+  @media (forced-colors: active) {
+    .ow-otp-field__input:where([data-invalid], [aria-invalid="true"]) {
+      outline-width: 2px;
+      outline-offset: -2px;
+    }
+
+    .ow-otp-field__input:focus-visible {
+      outline-color: Highlight;
+      outline-offset: 2px;
+    }
+
+    .ow-otp-field__input:where([data-disabled], :disabled) {
+      color: GrayText;
+      opacity: 1;
+    }
+  }
+}

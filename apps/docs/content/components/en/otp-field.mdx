@@ -1,0 +1,133 @@
+---
+title: OTP Field
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. To copy the source into your project instead, use the `otp-field`
+item of the registry.
+
+## Usage [#usage]
+
+```tsx
+import { Field, OTPField } from "owsem-ui/base";
+
+export function VerifyCode() {
+  return (
+    <Field.Root name="code">
+      <Field.Label>Verification code</Field.Label>
+      <OTPField.Root length={6} />
+    </Field.Root>
+  );
+}
+```
+
+OTP Field takes a one-time code, one character to a slot. Typing moves to the next slot, Backspace
+goes back, and pasting a whole code fills every slot. `OTPField.Root length={6}` without children
+draws one `OTPField.Input` for each character, in a row from the start edge, in line with the label and the error; with children the slots are
+yours. Name the group with a `Field.Label`, or with `aria-label` (or `aria-labelledby`) when there
+is no Field.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Base UI renders a `<div>` with the `group` role and one `<input>` for each slot, and a hidden input
+that submits the whole code under the `name`.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-otp-field` | `role="group"`; draws its slots without children; the row shakes when invalid |
+| <Part name="Input" /> | `input.ow-otp-field__input` | One slot: a square as tall as an Input |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### OTPField.Root
+
+Without children it draws one `OTPField.Input` for each of `length`, and when you give `aria-label`
+it names the slots too: the first from a hidden label of that text, since Base UI ignores
+`aria-label` on the first slot, and the rest as "Code 2/6" and so on. With
+`aria-labelledby` every slot takes that name. With children the slots are yours, and a separator
+between them is plain markup; name the first from a `Field.Label` or an `aria-labelledby` on the
+Root, and give the others an `aria-label`, because Base UI ignores `aria-label` on the first slot.
+`aria-describedby` stays on the group.
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Button's font sizes; each slot is a 32, 40, or 48px square, the height of an Input |
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-size` | Always; the chosen size |
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-otp-field` | Root |
+| `ow-otp-field--sm`, `ow-otp-field--md`, `ow-otp-field--lg` | Root, by `size` |
+| `ow-otp-field__input` | Input |
+
+## Accessibility [#accessibility]
+
+- The group has the `group` role and a name from a Field label, `aria-label`, or `aria-labelledby`.
+  Every slot is a text field with a name too: from the label, or, when Root draws them and has an
+  `aria-label`, "Code" for the first and "Code 2/6" and so on for the rest.
+- The arrow keys move between slots (mirrored in a right-to-left page), Home goes to the first
+  slot and End to the first empty one, and Backspace clears and goes back. A pasted code fills
+  every slot. Only one slot is a tab stop.
+- `validationType` sets which characters are accepted and the keyboard a phone shows: numeric by
+  default; `mask` shows dots. The first slot has `autocomplete="one-time-code"` for the SMS code
+  suggestion.
+- Invalid turns the slots critical and shakes the row once, or blinks it under reduced motion; the
+  error text in a `Field.Error` is what tells the user. A complete code shows nothing special.
+- The slot's text has 4.5:1 against its tint. With `prefers-contrast: more` each slot gets a 1px
+  edge; in forced colors it keeps its outline, focus is the system's highlight, and a disabled slot
+  is gray.
+
+## Theming [#theming]
+
+OTP Field reads these theme tokens. Set one on a field, or on anything around it.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-fg` | The digit, and the slot's tint (6%, 9% on hover) |
+| `--ow-critical` | The slot's tint when invalid (14%) |
+| `--ow-radius` | The slot's corners |
+| `--ow-focus` | The focus ring |
+| `--ow-edge` | The slot's edge when more contrast is asked for |
+| `--ow-ease-out`, `--ow-motion-scale` | The shake |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each OTP Field's root, so set yours on the field itself.
+
+</ForMode>
+
+Everything comes from `font-size` in `em`: the slot's side is the height of an Input, and the gap is
+0.5em. A row too wide for its parent shrinks its slots instead of overflowing; six slots at `md`
+are 275px wide, which fits a 320px phone.
+
+## Motion [#motion]
+
+When the field becomes invalid the whole row shakes once, 4px to each side in 320 ms, with
+`transform` on its own layer; a row that is invalid from the start stays still, and a Form that
+refuses a submit shakes it again. With `prefers-reduced-motion` it blinks instead. Nothing else
+moves, and nothing runs while the field is at rest.

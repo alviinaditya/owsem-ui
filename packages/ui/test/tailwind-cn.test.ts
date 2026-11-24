@@ -49,6 +49,7 @@ import {
   numberFieldSlots,
   numberFieldVariants,
 } from "../src/tailwind/number-field/number-field-variants";
+import { otpFieldSlots, otpFieldVariants } from "../src/tailwind/otp-field/otp-field-variants";
 import { popoverSlots } from "../src/tailwind/popover/popover-variants";
 import { progressSlots, progressVariants } from "../src/tailwind/progress/progress-variants";
 import {
@@ -63,6 +64,7 @@ import {
 } from "../src/tailwind/select/select-variants";
 import { separatorSlots } from "../src/tailwind/separator/separator-variants";
 import { sidebarSlots } from "../src/tailwind/sidebar/sidebar-variants";
+import { sliderSlots, sliderVariants } from "../src/tailwind/slider/slider-variants";
 import { switchSlots, switchVariants } from "../src/tailwind/switch/switch-variants";
 import { tableSlots, tableVariants } from "../src/tailwind/table/table-variants";
 import { tableOfContentsSlots } from "../src/tailwind/table-of-contents/table-of-contents-variants";
@@ -108,12 +110,14 @@ const all = classNames(
     menuSlots,
     meterSlots,
     numberFieldSlots,
+    otpFieldSlots,
     popoverSlots,
     progressSlots,
     radioGroupSlots,
     scrollAreaSlots,
     selectSlots,
     separatorSlots,
+    sliderSlots,
     sidebarSlots,
     switchSlots,
     tableOfContentsSlots,
@@ -145,6 +149,8 @@ const all = classNames(
     checkboxVariants({ size }),
     checkboxGroupVariants({ size }),
     numberFieldVariants({ size }),
+    otpFieldVariants({ size }),
+    sliderVariants({ size }),
     switchVariants({ size }),
     toggleVariants({ size }),
     radioGroupVariants({ size }),

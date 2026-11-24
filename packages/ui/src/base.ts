@@ -14,12 +14,14 @@ export { Kbd } from "./components/kbd";
 export * from "./components/menu";
 export * from "./components/meter";
 export * from "./components/number-field";
+export * from "./components/otp-field";
 export * from "./components/popover";
 export * from "./components/progress";
 export * from "./components/radio-group";
 export * from "./components/scroll-area";
 export * from "./components/select";
 export { Separator } from "./components/separator";
+export * from "./components/slider";
 export * from "./components/switch";
 export * from "./components/tabs";
 export {

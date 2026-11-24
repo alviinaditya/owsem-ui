@@ -1,0 +1,277 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * Slider (Base; Tactile and Kinetic). A label at the start and the value at the end above a pill
+ * track: the track is a 10% tint of the text color and the fill is the accent. The thumb is a white
+ * key with the surface shadow, as Switch's. Base UI places the thumb and the fill by inline
+ * inset and size, so they follow the pointer with no lag and are never eased; the thumb grows a
+ * little under the pointer and while dragged, on the settle spring. The label follows the number
+ * and nothing else animates. The Thumb sits inside the Track, which it is placed against; the
+ * Control pads both ends by half a thumb, so the thumb at either end stays within the Slider, and
+ * the track and the fill are drawn that half thumb longer, so they start at the Slider's own edge.
+ */
+@layer owsem.components {
+  .ow-slider {
+    --_track-size: 6px;
+    --_thumb: 20px;
+    --_track: color-mix(in oklab, var(--ow-fg) 10%, transparent);
+    --_fill: var(--ow-accent);
+    --_key: var(--ow-on-accent);
+    --_key-shadow: var(--ow-surface-shadow);
+    --_muted: var(--ow-muted);
+    --_focus: var(--ow-focus);
+    /* How much the thumb grows under the pointer, and while dragged. */
+    --_hover: calc(1 + 0.1 * var(--ow-motion-scale));
+    --_drag: calc(1 + 0.15 * var(--ow-motion-scale));
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 12px;
+    min-inline-size: 0;
+    color: var(--ow-fg);
+    font-size: 0.875rem;
+    line-height: 1.25;
+  }
+
+  .ow-slider--sm {
+    --_track-size: 4px;
+    --_thumb: 16px;
+    font-size: 0.8125rem;
+  }
+
+  .ow-slider--lg {
+    --_track-size: 8px;
+    --_thumb: 24px;
+    font-size: 1rem;
+  }
+
+  /* Upright, it is a column as tall as its height, which is 12rem unless you set one. */
+  .ow-slider:where([data-orientation="vertical"]) {
+    display: inline-grid;
+    grid-template-columns: auto;
+    grid-template-rows: auto auto minmax(0, 1fr);
+    justify-items: center;
+    block-size: 12rem;
+  }
+
+  /* On one baseline; the control does not take part. */
+  .ow-slider__label {
+    grid-area: 1 / 1;
+    align-self: baseline;
+    margin-block-end: 8px;
+    font-weight: 500;
+  }
+
+  .ow-slider__value {
+    grid-area: 1 / 2;
+    align-self: baseline;
+    margin-block-end: 8px;
+    color: var(--_muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ow-slider__value:where([data-orientation="vertical"]) {
+    grid-area: 2 / 1;
+  }
+
+  /* At least 24px tall, and the pointer's: a press anywhere on it moves the nearest thumb. */
+  .ow-slider__control {
+    grid-area: 2 / 1 / 3 / -1;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    block-size: max(var(--_thumb), 24px);
+    min-inline-size: 0;
+    padding-inline: calc(var(--_thumb) / 2);
+    cursor: pointer;
+    /* A finger may pan the page across the control's other axis; Base UI keeps tracking it. */
+    touch-action: pan-y;
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement */
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ow-slider__control:where([data-orientation="vertical"]) {
+    grid-area: 3 / 1;
+    flex-direction: column;
+    block-size: auto;
+    min-block-size: 0;
+    inline-size: max(var(--_thumb), 24px);
+    padding-inline: 0;
+    padding-block: calc(var(--_thumb) / 2);
+    touch-action: pan-x;
+  }
+
+  .ow-slider__control:where([data-disabled]) {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
+  /*
+   * Base UI positions it, and the thumb and fill inside it. It is drawn half a thumb past each end,
+   * which is where the Control's padding puts the Slider's own edge: a transparent border that far
+   * with a negative margin the same, so the background and the outline reach the edge while the
+   * padding box, which the thumb is placed against, stays as long as the track.
+   */
+  .ow-slider__track {
+    box-sizing: content-box;
+    flex: 1 1 0;
+    min-inline-size: 0;
+    block-size: var(--_track-size);
+    margin-inline: calc(var(--_thumb) / -2);
+    border: 0 solid transparent;
+    border-inline-width: calc(var(--_thumb) / 2);
+    /* literal: a pill, whatever the theme's radius */
+    border-radius: 999px;
+    /* Invisible until forced colors draw it as the edge. */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--_track);
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement */
+    print-color-adjust: exact;
+  }
+
+  .ow-slider__track:where([data-orientation="vertical"]) {
+    block-size: auto;
+    inline-size: var(--_track-size);
+    min-block-size: 0;
+    margin-inline: 0;
+    margin-block: calc(var(--_thumb) / -2);
+    border-inline-width: 0;
+    border-block-width: calc(var(--_thumb) / 2);
+  }
+
+  /* Base UI writes its inset and size inline; the part only rounds and colors it. */
+  .ow-slider__indicator {
+    /* literal: a pill, whatever the theme's radius */
+    border-radius: 999px;
+    background-color: var(--_fill);
+    /* Drawn half a thumb longer at its start, to the groove's start; in a range that lies under the
+     * thumb. Base UI sets only its inset and size, which stay the content. */
+    box-sizing: content-box;
+    margin-inline-start: calc(var(--_thumb) / -2);
+    padding-inline-start: calc(var(--_thumb) / 2);
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement */
+    print-color-adjust: exact;
+  }
+
+  .ow-slider__indicator:where([data-orientation="vertical"]) {
+    margin-inline-start: 0;
+    padding-inline-start: 0;
+    margin-block-end: calc(var(--_thumb) / -2);
+    padding-block-end: calc(var(--_thumb) / 2);
+  }
+
+  .ow-slider__indicator:where([data-invalid]) {
+    --_fill: var(--ow-critical-solid);
+  }
+
+  /*
+   * A white round key. Base UI places it by inset and a translate; the scale is its own property,
+   * so growing never fights the placement. Only the thumb under the pointer grows, and the one
+   * being dragged (the one with focus; every thumb of a range has data-dragging).
+   */
+  .ow-slider__thumb {
+    --_scale: 1;
+    box-sizing: border-box;
+    inline-size: var(--_thumb);
+    block-size: var(--_thumb);
+    border-radius: 50%;
+    background-color: var(--_key);
+    box-shadow: var(--_key-shadow);
+    scale: var(--_scale);
+    /* Its own layer, so it lands without a pixel jump. Let go on the settle spring. */
+    will-change: scale;
+    transition: scale var(--ow-spring-settle-duration) var(--ow-spring-settle);
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement */
+    print-color-adjust: exact;
+  }
+
+  /* The target is at least 24px each way. */
+  .ow-slider__thumb::before {
+    content: "";
+    position: absolute;
+    inset: min(0px, (100% - 24px) / 2);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .ow-slider__thumb:where(:hover):where(:not([data-disabled], [data-dragging]:has(:focus))) {
+      --_scale: var(--_hover);
+    }
+  }
+
+  .ow-slider__thumb:where([data-dragging]:has(:focus)) {
+    --_scale: var(--_drag);
+    /* In within 120 ms, and let go on the settle spring. */
+    transition: scale 120ms var(--ow-ease-out);
+  }
+
+  /* Base UI focuses the range input inside the thumb. */
+  .ow-slider__thumb:where(:has(:focus-visible)) {
+    outline: 2px solid var(--_focus);
+    outline-offset: 2px;
+  }
+
+  .ow-slider__thumb:where([data-disabled]) {
+    cursor: not-allowed;
+  }
+
+  /* No growing: the thumb stays its size. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-slider__thumb {
+      scale: none;
+      transition: none;
+    }
+  }
+
+  /* More contrast asked for: the track's edge comes back, and the thumb gets one at 3:1. */
+  @media (prefers-contrast: more) {
+    .ow-slider__track {
+      outline-color: var(--ow-edge);
+    }
+
+    .ow-slider__thumb {
+      box-shadow:
+        var(--_key-shadow),
+        0 0 0 1px var(--ow-edge);
+    }
+  }
+
+  /* The groove keeps its outline as the edge, the fill is the highlight, the key is drawn solid. */
+  @media (forced-colors: active) {
+    .ow-slider__indicator {
+      background-color: Highlight;
+    }
+
+    .ow-slider__thumb {
+      forced-color-adjust: none;
+      border: 2px solid CanvasText;
+      background-color: Canvas;
+      box-shadow: none;
+    }
+
+    .ow-slider__thumb:where(:has(:focus-visible)) {
+      outline-color: Highlight;
+    }
+
+    .ow-slider__control:where([data-disabled]) {
+      opacity: 1;
+    }
+
+    .ow-slider__track {
+      /* The transparent border would be drawn in a system color, as solid ends. */
+      border-color: Canvas;
+    }
+
+    .ow-slider__track:where([data-disabled]) {
+      outline-color: GrayText;
+    }
+
+    .ow-slider__indicator:where([data-disabled]) {
+      background-color: GrayText;
+    }
+
+    .ow-slider__thumb:where([data-disabled]) {
+      border-color: GrayText;
+    }
+  }
+}

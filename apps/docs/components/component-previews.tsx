@@ -16,6 +16,7 @@ import {
   Menu,
   Meter,
   NumberField,
+  OTPField,
   Popover,
   Progress,
   Radio,
@@ -23,6 +24,7 @@ import {
   ScrollArea,
   Select,
   Separator,
+  Slider,
   Switch,
   Tabs,
   Toggle,
@@ -90,6 +92,8 @@ const TEXT = {
     focus: "Fokus",
     meetings: "Rapat",
     quantity: "Jumlah",
+    volume: "Volume",
+    code: "Kode",
     details: "Detail",
     shipping: "Pengiriman",
     returns: "Pengembalian",
@@ -141,6 +145,8 @@ const TEXT = {
     focus: "Focus",
     meetings: "Meetings",
     quantity: "Quantity",
+    volume: "Volume",
+    code: "Code",
     details: "Details",
     shipping: "Shipping",
     returns: "Returns",
@@ -425,6 +431,15 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
       </NumberField.Group>
     </NumberField.Root>
   ),
+  slider: (t) => (
+    <Slider.Root
+      size="sm"
+      defaultValue={62}
+      aria-label={t.volume}
+      className="component-preview-bar"
+    />
+  ),
+  "otp-field": (t) => <OTPField.Root size="sm" length={4} defaultValue="48" aria-label={t.code} />,
   accordion: (t) => (
     <div className="component-preview-bar">
       <Accordion.Root size="sm" defaultValue={[t.shipping]}>
@@ -705,13 +720,6 @@ const B = (x: number, y: number, w: number, h: number, r = 5) => (
 );
 
 const SKETCHES: Partial<Record<ComponentName, ReactNode>> = {
-  slider: (
-    <>
-      {F(26, 46, 108, 4, 0.3)}
-      {F(26, 46, 62, 4, 0.7)}
-      <circle cx={88} cy={48} r={9} fill="var(--docs-surface)" />
-    </>
-  ),
   combobox: (
     <>
       {B(30, 12, 100, 20, 5)}
@@ -753,18 +761,6 @@ const SKETCHES: Partial<Record<ComponentName, ReactNode>> = {
       <rect x={40} y={46} width={100} height={32} rx={7} fill="var(--docs-surface)" />
       {F(50, 56, 50)}
       {F(50, 66, 34, 4, 0.35)}
-    </>
-  ),
-  "otp-field": (
-    <>
-      {[0, 1, 2, 3, 4, 5].map((i) => (
-        <g key={i}>
-          {B(29 + i * 18 + (i > 2 ? 4 : 0), 36, 14, 22, 4)}
-          {i < 3 ? (
-            <circle cx={36 + i * 18} cy={47} r={2.5} fill="currentColor" stroke="none" />
-          ) : null}
-        </g>
-      ))}
     </>
   ),
   drawer: (

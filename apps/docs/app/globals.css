@@ -2349,6 +2349,26 @@ body {
   font-size: 0.875rem;
 }
 
+/* Slider's demos: a comfortable width, and upright sliders side by side. */
+.demo-slider {
+  inline-size: min(340px, calc(100vw - 64px));
+}
+
+.demo-slider-columns {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+}
+
+/* OTP Field's demos: a row that fits a phone, and the dash between two groups. */
+.demo-otp {
+  inline-size: min(340px, calc(100vw - 64px));
+}
+
+.demo-otp-dash {
+  color: var(--ow-muted);
+}
+
 /* Number Field's demos: a comfortable width, and the labels above the fields. */
 .demo-number-field {
   inline-size: min(260px, calc(100vw - 64px));

@@ -21,6 +21,7 @@ import KbdPage from "./kbd";
 import MenuPage from "./menu";
 import MeterPage from "./meter";
 import NumberFieldPage from "./number-field";
+import OTPFieldPage from "./otp-field";
 import PopoverPage from "./popover";
 import ProgressPage from "./progress";
 import RadioGroupPage from "./radio-group";
@@ -28,6 +29,7 @@ import ScrollAreaPage from "./scroll-area";
 import SelectPage from "./select";
 import SeparatorPage from "./separator";
 import SidebarPage from "./sidebar";
+import SliderPage from "./slider";
 import SwitchPage from "./switch";
 import TablePage from "./table";
 import TableOfContentsPage from "./table-of-contents";
@@ -79,6 +81,8 @@ export const examples: Partial<Record<ComponentName, ComponentType<ExamplePagePr
   meter: MeterPage,
   "checkbox-group": CheckboxGroupPage,
   "number-field": NumberFieldPage,
+  slider: SliderPage,
+  "otp-field": OTPFieldPage,
   "icon-morph": IconMorphPage,
   "code-block": CodeBlockPage,
 };

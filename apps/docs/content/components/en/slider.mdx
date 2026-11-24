@@ -1,0 +1,173 @@
+---
+title: Slider
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. To copy the source into your project instead, use the `slider`
+item of the registry.
+
+## Usage [#usage]
+
+```tsx
+import { Slider } from "owsem-ui/base";
+
+export function VolumeSlider() {
+  return (
+    <Slider.Root defaultValue={40}>
+      <Slider.Label>Volume</Slider.Label>
+      <Slider.Value />
+      <Slider.Control />
+    </Slider.Root>
+  );
+}
+```
+
+Slider picks a number, or two for a range, by dragging a thumb along a track. The label sits at
+the start and the value at the end, above the control, which draws its own track, fill, and thumb.
+Without children `Slider.Root` draws the control too, so
+`<Slider.Root defaultValue={40} aria-label="Volume" />` is a named slider that also renders on the
+server. Pass an array, `defaultValue={[20, 80]}`, for a range with a thumb for each number.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Base UI renders each thumb as a `<div>` with a visually hidden `<input type="range">` inside, which
+is what the keyboard, forms, and screen readers use. Put the Thumb inside the Track: it is placed
+against the track, and the Control pads both ends by half a thumb so a thumb at either end stays
+within the slider.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-slider` | `role="group"`; draws its Control without children |
+| <Part name="Label" /> | `div.ow-slider__label` | Names the thumbs through `aria-labelledby` |
+| <Part name="Value" /> | `output.ow-slider__value` | The formatted value, `20 – 80` for a range |
+| <Part name="Control" /> | `div.ow-slider__control` | Takes the pointer; at least 24px tall; draws its Track without children |
+| <Part name="Track" /> | `div.ow-slider__track` | The groove: 4, 6, or 8px; draws its Indicator and thumbs without children |
+| <Part name="Indicator" /> | `div.ow-slider__indicator` | The fill, from the start to the thumb, or between two thumbs |
+| <Part name="Thumb" /> | `div.ow-slider__thumb` | The key: 16, 20, or 24px, with the range input inside |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### Slider.Root
+
+Without children it draws a `Slider.Control`, with one `Slider.Thumb` for each number in `value` or
+`defaultValue`. It gives each thumb its `index`, so a range renders on the server. Then
+`aria-label` and `aria-describedby` go to the thumbs, which are what they name; a range keeps its
+`aria-label` on the group too, and names both thumbs alike. A range should write its own thumbs,
+each with its own `aria-label` ("Lowest price", "Highest price"), as the Range example does. With
+children the names stay on the Root, as in Base UI.
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | A 4, 6, or 8px track with a 16, 20, or 24px thumb, and Button's font sizes; every part reads it |
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-size` | Always; the chosen size |
+
+### Slider.Control and Slider.Track
+
+Without children `Slider.Control` draws a `Slider.Track`, and `Slider.Track` draws a
+`Slider.Indicator` and a `Slider.Thumb` for each value.
+
+### Slider.Track
+
+The Track is drawn half a thumb past each end, which is where the Control's padding puts the
+Slider's own edge: the track and the label start at the same line. It does this with a transparent
+border and a negative margin of that size, so the thumb, which is placed against the track's
+padding box, does not move, and a background you give the Track still shows. The Indicator is drawn
+half a thumb longer at its start, to the track's start (in a range, under the thumb).
+
+### Slider.Thumb
+
+Base UI places the thumb with `inset-inline-start` (`bottom` upright) and a `translate` of -50%,
+and the fill with an inline inset and size. OwsemUI leaves both as they are, so the thumb follows
+the pointer with no lag, in either direction of writing. The growth is its own `scale` property, so
+it never fights the placement.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-slider` | Root |
+| `ow-slider--sm`, `ow-slider--md`, `ow-slider--lg` | Root, by `size` |
+| `ow-slider__label` | Label |
+| `ow-slider__value` | Value |
+| `ow-slider__control` | Control |
+| `ow-slider__track` | Track |
+| `ow-slider__indicator` | Indicator |
+| `ow-slider__thumb` | Thumb |
+
+## Accessibility [#accessibility]
+
+- Each thumb is a native `input[type=range]`: it takes the arrow keys, Page Up and Page Down,
+  Home, and End, and says its value and, in a range, "start" or "end". Arrow Left raises the value
+  in a right-to-left page.
+- Name it with a `Slider.Label`, a `Field.Label`, or an `aria-label`; one of them is required.
+  `aria-labelledby` on the Root names the thumbs.
+- The control and the thumb are targets of at least 24px, for the pointer and touch alike. A finger
+  drags along the control, and may still pan the page across the other axis: the control has
+  `touch-action: pan-y` (`pan-x` upright).
+- The fill has 3:1 against the track and the page, in light and dark: at least 3.2:1 in the
+  tests. The white thumb stands out from the fill by 4.6:1 or more, and it has the surface shadow.
+  With `prefers-contrast: more` the track gets a 1px edge and the thumb a ring in `--ow-edge`. In
+  forced colors the track keeps its outline, the fill is the system's highlight, and the thumb is
+  drawn solid with a border.
+- The focus ring shows after a key, not after a press. The value, `Slider.Value`, is an `output`
+  that does not announce while you drag.
+
+## Theming [#theming]
+
+Slider reads these theme tokens. Set one on a slider, or on anything around it.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-fg` | Label, and the track's tint (10%) |
+| `--ow-muted` | The value |
+| `--ow-accent` | The fill |
+| `--ow-critical-solid` | The fill when the field is invalid |
+| `--ow-on-accent`, `--ow-surface-shadow` | The thumb: its fill and its shadow |
+| `--ow-focus` | The focus ring |
+| `--ow-edge` | The track's and the thumb's edge when more contrast is asked for |
+| `--ow-spring-settle`, `--ow-spring-settle-duration` | The thumb's growth |
+| `--ow-motion-scale` | How far the thumb grows |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Slider's root, so set yours on the slider itself.
+
+</ForMode>
+
+Set `inline-size` on the root, or on a parent, with plain CSS; the control is as wide as the root.
+An upright slider is 12rem tall: give it your own `block-size`. Everything else comes from
+`font-size` in `em`, except the track and thumb sizes, which are 4, 6, and 8px and 16, 20, and
+24px.
+
+## Motion [#motion]
+
+Dragging is immediate. The thumb and the fill sit where the value is, and nothing eases their
+place, so they follow the pointer with no lag; a key or a click on the track jumps to the new
+value. The number in `Slider.Value` follows it too, and nothing else animates.
+
+The thumb grows a little under a mouse (10%) and a little more while dragged (15%), with `scale` on
+the settle spring, and lets go the same way. It scales with `--ow-motion-scale`. With
+`prefers-reduced-motion` it does not grow. Nothing runs while the slider is at rest.

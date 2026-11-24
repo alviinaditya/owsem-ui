@@ -55,6 +55,8 @@ for (const path of [
   "/en/accordion",
   "/id/checkbox-group",
   "/en/number-field",
+  "/id/slider",
+  "/en/otp-field",
   "/id/collapsible",
 ]) {
   test(`${path} has no horizontal scroll (DS-9)`, async ({ page }) => {

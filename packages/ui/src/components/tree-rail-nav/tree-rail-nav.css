@@ -570,8 +570,16 @@
     }
   }
 
-  /* DP-8: system colors for the rail and the trail; the current row is underlined. */
+  /* DP-8: every part of the rail takes its system color from these; the current row is underlined. */
   @media (forced-colors: active) {
+    .ow-tree-rail-nav {
+      --_muted: CanvasText;
+      --_rail: GrayText;
+      --_node: GrayText;
+      --_trail: Highlight;
+      --_surface: Canvas;
+    }
+
     .ow-tree-rail-nav__item {
       outline: 1px solid transparent;
       outline-offset: -1px;
@@ -586,34 +594,14 @@
       outline-offset: -2px;
     }
 
-    .ow-tree-rail-nav__rail .ow-tree-rail-nav__rail-base path {
-      stroke: GrayText;
-    }
-
-    .ow-tree-rail-nav__rail .ow-tree-rail-nav__rail-trail {
-      stroke: Highlight;
-    }
-
-    .ow-tree-rail-nav__rail :is(.ow-tree-rail-nav__rail-dot, [data-lit] circle) {
-      fill: Highlight;
-    }
-
-    .ow-tree-rail-nav__tree > .ow-tree-rail-nav__origin::before {
+    /* Origin's dot and, before the script draws the rail, its resting parts. */
+    .ow-tree-rail-nav__tree > .ow-tree-rail-nav__origin::before,
+    .ow-tree-rail-nav__tree:not([data-rail]) .ow-tree-rail-nav__origin::after,
+    .ow-tree-rail-nav__tree:not([data-rail]) .ow-tree-rail-nav__list::before,
+    .ow-tree-rail-nav__tree:not([data-rail]) .ow-tree-rail-nav__node::before,
+    .ow-tree-rail-nav__tree:not([data-rail]) .ow-tree-rail-nav__panel::before,
+    .ow-tree-rail-nav__tree:not([data-rail]) .ow-tree-rail-nav__item::after {
       forced-color-adjust: none;
-      background-color: Highlight;
-    }
-
-    /* The resting rail before the script draws it. */
-    .ow-tree-rail-nav__tree:not([data-rail])
-      :is(
-        .ow-tree-rail-nav__list::before,
-        .ow-tree-rail-nav__origin::after,
-        .ow-tree-rail-nav__node::before,
-        .ow-tree-rail-nav__panel::before,
-        .ow-tree-rail-nav__item::after
-      ) {
-      forced-color-adjust: none;
-      background-color: GrayText;
     }
   }
 }

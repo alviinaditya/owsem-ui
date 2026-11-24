@@ -14,6 +14,10 @@ const root = [
   "[--_focus:var(--ow-focus)] [--_radius:var(--ow-radius)] [--_ease:cubic-bezier(0.22,1,0.36,1)]",
   "[--_r0:9px] [--_r1:34px] [--_r2:59px] [--_row-mid:16px]",
   "text-[13.5px] leading-[1.4]",
+  // Every part of the rail takes its system color from these.
+  "forced-colors:[--_muted:CanvasText] forced-colors:[--_rail:GrayText]",
+  "forced-colors:[--_node:GrayText] forced-colors:[--_trail:Highlight]",
+  "forced-colors:[--_surface:Canvas]",
 ];
 
 // Glide's container (relative isolate). Until the script has drawn the rail (it marks the tree with
@@ -40,13 +44,13 @@ const origin = [
   "ow-tree-rail-nav-top:before:start-[calc(var(--_r0)_-_var(--_x)_-_6px)]",
   "ow-tree-rail-nav-top:before:[mask:url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%22-6%20-6%2012%2012%22%3E%3Ccircle%20r=%225%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-opacity=%22.35%22%20stroke-width=%221.25%22/%3E%3Ccircle%20r=%222.5%22/%3E%3C/svg%3E')_0_0/100%_100%_no-repeat]",
   "forced-colors:ow-tree-rail-nav-top:before:forced-color-adjust-none",
-  "forced-colors:ow-tree-rail-nav-top:before:bg-[Highlight]",
   // The resting rail from the label's middle down to the first row.
   "ow-tree-rail-nav-resting-top:after:content-[''] ow-tree-rail-nav-resting-top:after:absolute",
   "ow-tree-rail-nav-resting-top:after:start-[calc(var(--_r0)_-_var(--_x)_-_var(--_line)_/_2)]",
   "ow-tree-rail-nav-resting-top:after:w-(--_line) ow-tree-rail-nav-resting-top:after:top-1/2",
   "ow-tree-rail-nav-resting-top:after:-bottom-[6px]",
   "ow-tree-rail-nav-resting-top:after:bg-(color:--_rail)",
+  "forced-colors:ow-tree-rail-nav-resting-top:after:forced-color-adjust-none",
 ];
 
 // The rail the script draws: the base, the trail along it, a dot per row, and the marker. The
@@ -57,15 +61,12 @@ const rail = [
   "[&_path]:fill-none [&_path]:[stroke-linecap:round] [&_path]:[stroke-linejoin:round]",
 ];
 
-const railBase = [
-  "[&_path]:stroke-(color:--_rail) [&_path]:[stroke-width:1.25]",
-  "forced-colors:[&_path]:stroke-[GrayText]",
-];
+const railBase = ["[&_path]:stroke-(color:--_rail) [&_path]:[stroke-width:1.25]"];
 
 // The trail, and the marker's layer, appear with data-on.
 const railActive = ["opacity-0 transition-[opacity] duration-250 ease-[ease] data-on:opacity-100"];
 
-const railTrail = ["stroke-(color:--_trail) [stroke-width:1.75] forced-colors:stroke-[Highlight]"];
+const railTrail = ["stroke-(color:--_trail) [stroke-width:1.75]"];
 
 // The dot cut out of the rail with a surface-coloured stroke; hollow while it rests on a row that
 // is hidden.
@@ -78,7 +79,6 @@ const railDot = [
   "group-data-hollow/ow-tree-rail-nav-marker:fill-(--_surface)",
   "group-data-hollow/ow-tree-rail-nav-marker:stroke-(color:--_trail)",
   "group-data-hollow/ow-tree-rail-nav-marker:[stroke-width:1.5]",
-  "forced-colors:fill-[Highlight]",
 ];
 
 // A dot per row. It warms when its row is hot (Glide's), takes the trail's color and grows when the
@@ -106,6 +106,7 @@ const list = [
   "ow-tree-rail-nav-resting-first:before:start-[calc(var(--_rail-x,var(--_r0))_-_var(--_line)_/_2)]",
   "ow-tree-rail-nav-resting-first:before:w-(--_line) ow-tree-rail-nav-resting-first:before:bg-(color:--_rail)",
   "ow-tree-rail-nav-resting-first:before:top-0 ow-tree-rail-nav-resting-first:before:h-(--_row-mid)",
+  "forced-colors:ow-tree-rail-nav-resting:[&::before]:forced-color-adjust-none",
 ];
 
 // The resting rail of a row: from its middle to the next row's, and on into its own open group.
@@ -119,6 +120,7 @@ const node = [
   // The last row has one only with an open group, so no content here.
   "ow-tree-rail-nav-resting:last:[&::before]:top-(--_row-mid)",
   "ow-tree-rail-nav-resting:last:[&::before]:h-(--_row-mid)",
+  "forced-colors:ow-tree-rail-nav-resting:[&::before]:forced-color-adjust-none",
 ];
 
 // Closed it holds no height; it clips only while it animates (data-clip comes from the script while
@@ -139,6 +141,7 @@ const panel = [
   "ow-tree-rail-nav-resting-open:before:bg-(color:--_rail)",
   "ow-tree-rail-nav-resting-open:before:[mask:url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2026.25%2019.25%22%20preserveAspectRatio=%22none%22%3E%3Cpath%20d=%22M.625.625C.625%209.625%2025.625%209.625%2025.625%2018.625%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%221.25%22%20stroke-linecap=%22round%22%20vector-effect=%22non-scaling-stroke%22/%3E%3C/svg%3E')_0_0/100%_100%_no-repeat]",
   "ow-tree-rail-nav-resting-open:[&:dir(rtl)]:before:[scale:-1_1]",
+  "forced-colors:ow-tree-rail-nav-resting:[&::before]:forced-color-adjust-none",
 ];
 
 // A row, a link or a toggle. First-level rows stand out by color and icon; every level shares one
@@ -201,6 +204,7 @@ const item = [
   "ow-tree-rail-nav-resting:disabled:after:opacity-45",
   "ow-tree-rail-nav-resting:aria-disabled:after:opacity-45",
   "ow-tree-rail-nav-resting:data-disabled:after:opacity-45",
+  "forced-colors:ow-tree-rail-nav-resting:after:forced-color-adjust-none",
   // The system colors; the current row is underlined.
   "forced-colors:outline-1 forced-colors:-outline-offset-1 forced-colors:outline-transparent",
   "forced-colors:data-current:underline",

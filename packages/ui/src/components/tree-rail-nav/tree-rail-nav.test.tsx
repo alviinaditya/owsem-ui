@@ -456,6 +456,48 @@ describe("Tree Rail Nav", () => {
     expect(trail && getComputedStyle(trail).stroke).toBe(getComputedStyle(probe).color);
   });
 
+  test("every part of the rail is a system color in forced colors, drawn and resting", async () => {
+    onTestFinished(() => commands.setForcedColors("none"));
+    const { tree } = await mount(<Nav />);
+    await expect.poll(() => tree.querySelector("[data-lit] circle")).not.toBeNull();
+    await commands.setForcedColors("active");
+    const system = (color: string) => {
+      const probe = document.createElement("span");
+      probe.style.cssText = `forced-color-adjust: none; color: ${color}`;
+      document.body.append(probe);
+      const value = getComputedStyle(probe).color;
+      probe.remove();
+      return value;
+    };
+    const style = (selector: string, pseudo?: string) =>
+      getComputedStyle(tree.querySelector(selector) as Element, pseudo);
+    const rail = ".ow-tree-rail-nav__rail";
+    // A dot's fill takes 220 ms.
+    await expect.poll(() => style("[data-lit] circle").fill).toBe(system("Highlight"));
+    expect(style(`${rail}-dot`).fill).toBe(system("Highlight"));
+    expect(style(`${rail}-dot`).stroke).toBe(system("Canvas"));
+    expect(style(`${rail}-halo`).fill).toBe(system("Highlight"));
+    expect(style(`${rail}-base path`).stroke).toBe(system("GrayText"));
+    await expect
+      .poll(() => style(`${rail}-node:not([data-lit], [data-hot]) circle`).fill)
+      .toBe(system("GrayText"));
+    const marker = tree.querySelector(`${rail}-marker`) as Element;
+    marker.setAttribute("data-hollow", "");
+    expect(style(`${rail}-dot`).fill).toBe(system("Canvas"));
+    expect(style(`${rail}-dot`).stroke).toBe(system("Highlight"));
+
+    // Before the script draws it, as in server-rendered HTML.
+    tree.removeAttribute("data-rail");
+    for (const [selector, pseudo] of [
+      [".ow-tree-rail-nav__node:has(+ .ow-tree-rail-nav__node)", "::before"],
+      [".ow-tree-rail-nav__panel:not([hidden])", "::before"],
+      [".ow-tree-rail-nav__item", "::after"],
+    ] as const) {
+      expect(style(selector, pseudo).content, selector).toBe('""');
+      expect(style(selector, pseudo).backgroundColor, selector).toBe(system("GrayText"));
+    }
+  });
+
   test("mirrors the rail for right-to-left text (FR-16)", async () => {
     const screen = await render(
       <div dir="rtl">

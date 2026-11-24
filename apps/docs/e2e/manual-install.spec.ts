@@ -119,14 +119,104 @@ test("Copy takes the whole file, and Expand shows all of a collapsed one", async
   const toggle = block.getByRole("button", { name: "Expand" });
   await toggle.click();
   await expect(code).not.toHaveAttribute("data-collapsed", "true");
-  expect(copied).toBe(await code.innerText());
-  expect((await code.boundingBox())?.height ?? 0).toBeGreaterThan(collapsed);
+  // All of it is drawn once the height has landed.
+  await expect.poll(() => code.innerText()).toBe(copied);
+  await expect
+    .poll(async () => (await code.boundingBox())?.height ?? 0)
+    .toBeGreaterThan(collapsed + 200);
   await expect(block.getByRole("button", { name: "Collapse" })).toHaveAttribute(
     "aria-expanded",
     "true",
   );
   await block.getByRole("button", { name: "Collapse" }).click();
   await expect(code).toHaveAttribute("data-collapsed", "true");
+});
+
+test("a folder is named once, above its files, and a file's whole name is in its header", async ({
+  page,
+}) => {
+  await openManual(page, "/en/field");
+  await expect(manual(page).locator(".manual-folder__path:visible")).toHaveText([
+    "lib/owsem/",
+    "components/owsem/field/",
+    "components/owsem/input/",
+    "lib/owsem/",
+  ]);
+  // Read out with its folder, but only the name is seen, and it is never cut.
+  const titles = await manual(page)
+    .locator(".manual-folder .ow-code-block__title:visible")
+    .evaluateAll((els) =>
+      els.map((el) => ({
+        path: el.textContent,
+        seen: [...el.childNodes]
+          .filter((n) => n instanceof Text)
+          .map((n) => n.data.trim())
+          .join(""),
+        cut: el.scrollWidth > el.clientWidth,
+      })),
+    );
+  expect(titles).toContainEqual({
+    path: "components/owsem/field/field.tsx",
+    seen: "field.tsx",
+    cut: false,
+  });
+  expect(titles.filter((title) => title.cut)).toEqual([]);
+});
+
+test("Expand and Collapse ease the height, and turn around mid-way", async ({ page }) => {
+  await openManual(page, "/en/color-picker");
+  const block = manual(page)
+    .locator(".manual-file:visible")
+    .filter({
+      has: page.locator(".ow-code-block__title", { hasText: "color-picker/color-picker.tsx" }),
+    });
+  /** The panel's heights over 700 ms after the button is pressed (and again, after `again` ms). */
+  const heights = (again?: number) =>
+    block.evaluate(async (el, wait) => {
+      const code = el.querySelector(".manual-file__code") as HTMLElement;
+      const button = el.querySelector(".manual-file__toggle") as HTMLElement;
+      const seen: number[] = [];
+      let on = true;
+      const tick = () => {
+        seen.push(Math.round(code.getBoundingClientRect().height));
+        if (on) requestAnimationFrame(tick);
+      };
+      button.click();
+      if (wait !== undefined) setTimeout(() => button.click(), wait);
+      requestAnimationFrame(tick);
+      await new Promise((resolve) => setTimeout(resolve, 700));
+      on = false;
+      return seen;
+    }, again);
+  const opening = await heights();
+  expect(new Set(opening).size).toBeGreaterThan(4);
+  // The whole file is drawn once it rests.
+  await expect
+    .poll(() => block.locator(".manual-file__code").innerText())
+    .toContain("export function ColorPickerPopover");
+  const closing = await heights();
+  expect(new Set(closing).size).toBeGreaterThan(4);
+  expect(closing.at(-1)).toBeLessThanOrEqual(241);
+  const turned = await heights(120);
+  expect(Math.max(...turned)).toBeGreaterThan(241);
+  expect(turned.at(-1)).toBeLessThanOrEqual(241);
+});
+
+test("reduced motion: Expand shows the file at once", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await openManual(page, "/en/color-picker");
+  const block = manual(page)
+    .locator(".manual-file:visible")
+    .filter({
+      has: page.locator(".ow-code-block__title", { hasText: "color-picker/color-picker.tsx" }),
+    });
+  await block.getByRole("button", { name: "Expand" }).click();
+  await expect
+    .poll(() => block.locator(".manual-file__code").evaluate((el) => el.getAnimations().length))
+    .toBe(0);
+  await expect(block.locator(".manual-file__code")).toContainText(
+    "export function ColorPickerPopover",
+  );
 });
 
 test("Manual lists only the files the component imports", async ({ page }) => {

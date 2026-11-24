@@ -3750,11 +3750,81 @@ body {
   margin: 0;
 }
 
-/* A long file shows 240px, fading out, until Expand. The Code Block's panel scrolls sideways. */
+/*
+ * A long file shows 240px, fading out, until Expand, which eases the height (manual-install.tsx).
+ * The Code Block's panel scrolls sideways only. The fade is a layer over the code, so it costs
+ * nothing on a file that is all shown.
+ */
+.manual-file[data-long] {
+  position: relative;
+}
+
+.manual-file[data-long]::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  block-size: 64px;
+  border-end-start-radius: var(--ow-radius);
+  border-end-end-radius: var(--ow-radius);
+  background: linear-gradient(to top, var(--ow-panel), transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 240ms var(--ease);
+}
+
+.manual-file[data-collapsed]::after {
+  opacity: 1;
+}
+
+.manual-file__code {
+  overflow-y: hidden;
+}
+
 .manual-file__code[data-collapsed] {
   max-block-size: 240px;
-  overflow-y: hidden;
-  mask-image: linear-gradient(to bottom, #000 calc(100% - 64px), transparent);
+}
+
+/* A folder is named once, above its files, so a file's header has room for its whole name. */
+.manual-folder {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+
+.manual-folder + .manual-folder {
+  margin-block-start: 12px;
+}
+
+.manual-folder__path {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding-inline-start: 4px;
+  color: var(--docs-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.manual-folder__path svg {
+  flex: none;
+  inline-size: 15px;
+  block-size: 15px;
+}
+
+.manual-folder__path span {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Never cut: on a phone, the longest names take a second line. */
+.manual-file__name {
+  padding-block: 6px;
+  color: var(--ow-fg);
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .manual-file__toggle {

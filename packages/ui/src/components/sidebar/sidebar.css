@@ -372,6 +372,11 @@
         visibility 0s linear 200ms;
     }
 
+    /* Only leaving waits for the fade; opening shows it at once. */
+    .ow-sidebar:where([data-state="open"]) {
+      transition-delay: 0s;
+    }
+
     .ow-sidebar[data-mobile] {
       transition: opacity 200ms var(--ow-ease-out);
     }

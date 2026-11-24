@@ -245,6 +245,17 @@ describe("Sidebar", () => {
     expect(style.transitionProperty).toContain("opacity");
   });
 
+  test("reduced motion: leaving waits for the fade, opening shows it at once", async () => {
+    await commands.setReducedMotion("reduce");
+    await render(<Shell defaultOpen={false} />);
+    const nav = q(".ow-sidebar") as HTMLElement;
+    expect(getComputedStyle(nav).transitionDelay).toBe("0s, 0.2s");
+    (q(".ow-sidebar__trigger") as HTMLElement).click();
+    await expect.poll(() => nav.dataset.state).toBe("open");
+    expect(getComputedStyle(nav).transitionDelay).toBe("0s");
+    expect(getComputedStyle(nav).visibility).toBe("visible");
+  });
+
   test("tokens theme the parts (TK-9)", async () => {
     root.style.setProperty("--ow-fg", "rgb(10, 20, 30)");
     root.style.setProperty("--ow-radius", "40px");

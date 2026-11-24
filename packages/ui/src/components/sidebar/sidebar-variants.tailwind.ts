@@ -44,7 +44,7 @@ const root = [
   "motion-reduce:data-mobile:data-ending-style:[translate:0]",
   "motion-reduce:transition-[opacity,visibility] motion-reduce:duration-[200ms,0s]",
   "motion-reduce:ease-[var(--ow-ease-out),linear] motion-reduce:delay-[0s,200ms]",
-  "motion-reduce:data-[state=open]:delay-[0s,200ms]",
+  "motion-reduce:data-[state=open]:delay-0",
   "motion-reduce:data-mobile:transition-[opacity] motion-reduce:data-mobile:duration-200",
   "motion-reduce:data-mobile:ease-(--ow-ease-out) motion-reduce:data-mobile:delay-0",
   "motion-reduce:data-mobile:data-ending-style:duration-200",

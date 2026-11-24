@@ -5,6 +5,7 @@ import {
   Avatar,
   Button,
   Checkbox,
+  CheckboxGroup,
   Collapsible,
   Dialog,
   Field,
@@ -14,6 +15,7 @@ import {
   Kbd,
   Menu,
   Meter,
+  NumberField,
   Popover,
   Progress,
   Radio,
@@ -87,6 +89,7 @@ const TEXT = {
     workWeek: "Minggu kerja",
     focus: "Fokus",
     meetings: "Rapat",
+    quantity: "Jumlah",
     details: "Detail",
     shipping: "Pengiriman",
     returns: "Pengembalian",
@@ -137,6 +140,7 @@ const TEXT = {
     workWeek: "Working week",
     focus: "Focus",
     meetings: "Meetings",
+    quantity: "Quantity",
     details: "Details",
     shipping: "Shipping",
     returns: "Returns",
@@ -390,6 +394,36 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
       <Switch.Root checked aria-label={t.alerts} />
       <Switch.Root aria-label={t.sounds} />
     </div>
+  ),
+  "checkbox-group": (t) => (
+    <CheckboxGroup
+      size="sm"
+      aria-label={t.guides}
+      defaultValue={["docs"]}
+      allValues={["docs", "blog"]}
+    >
+      <label>
+        <Checkbox.Root parent />
+        {t.guides}
+      </label>
+      <label>
+        <Checkbox.Root value="docs" />
+        {t.docs}
+      </label>
+      <label>
+        <Checkbox.Root value="blog" />
+        {t.blog}
+      </label>
+    </CheckboxGroup>
+  ),
+  "number-field": (t) => (
+    <NumberField.Root size="sm" defaultValue={3} min={0} className="component-preview-bar">
+      <NumberField.Group>
+        <NumberField.Decrement />
+        <NumberField.Input aria-label={t.quantity} />
+        <NumberField.Increment />
+      </NumberField.Group>
+    </NumberField.Root>
   ),
   accordion: (t) => (
     <div className="component-preview-bar">
@@ -671,38 +705,6 @@ const B = (x: number, y: number, w: number, h: number, r = 5) => (
 );
 
 const SKETCHES: Partial<Record<ComponentName, ReactNode>> = {
-  "checkbox-group": (
-    <>
-      {[26, 48, 70].map((y, i) => (
-        <g key={y}>
-          {i < 2 ? (
-            <>
-              <rect
-                x={44}
-                y={y - 8}
-                width={16}
-                height={16}
-                rx={4}
-                fill="currentColor"
-                opacity={0.6}
-              />
-              <path d={`m47 ${y} 3 3 7-7`} stroke="var(--docs-surface)" strokeWidth={2} />
-            </>
-          ) : (
-            <rect x={44} y={y - 8} width={16} height={16} rx={4} />
-          )}
-          {F(68, y - 2.5, 44 - i * 6)}
-        </g>
-      ))}
-    </>
-  ),
-  "number-field": (
-    <>
-      {B(36, 36, 88, 24, 6)}
-      <path d="M60 36v24M100 36v24M43 48h10M107 48h10M112 43v10" />
-      {F(72, 46, 16)}
-    </>
-  ),
   slider: (
     <>
       {F(26, 46, 108, 4, 0.3)}

@@ -239,8 +239,8 @@ export const checkboxDefinition = defineComponent({
       id: "group",
       title: { id: "Grup", en: "Group" },
       description: {
-        id: "Checkbox Group belum ada; Fieldset memberi grup namanya, dan name yang sama mengirim semua yang dicentang.",
-        en: "Checkbox Group is not built yet; a Fieldset names the group, and one shared name submits every checked box.",
+        id: "Fieldset memberi grup namanya, dan name yang sama mengirim semua yang dicentang. Checkbox Group menambah value bersama dan kotak induk.",
+        en: "A Fieldset names the group, and one shared name submits every checked box. Checkbox Group adds a shared value and a parent box.",
       },
       uses: ["Checkbox", "Fieldset"],
       demo: (lang) => <Group lang={lang} />,

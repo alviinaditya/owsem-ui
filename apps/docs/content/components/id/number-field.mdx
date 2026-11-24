@@ -1,0 +1,182 @@
+---
+title: Number Field
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Untuk menyalin kode sumbernya ke project Anda, pakai item `number-field`
+dari registry.
+
+## Penggunaan [#usage]
+
+```tsx
+import { NumberField } from "owsem-ui/base";
+
+export function Quantity() {
+  return <NumberField.Root aria-label="Jumlah" defaultValue={2} min={0} max={20} />;
+}
+```
+
+Number Field adalah input angka dengan tombol di kedua ujungnya. `NumberField.Root` memegang state dan,
+tanpa children, menggambar `NumberField.Group` berisi Decrement, Input, dan Increment; Group tanpa
+children menggambar ketiganya juga. Berikan bagian-bagiannya sendiri untuk mengubahnya, atau untuk
+menambahkan `ScrubArea` di sekeliling label. Beri nama input dengan label [Field](/id/field), atau `aria-label` (juga `aria-labelledby` dan `aria-describedby`) pada Root: bila Root menggambar Group sendiri,
+ketiganya pergi ke Input dan tidak ada yang tersisa di div. Dengan children Anda, ketiganya tetap di
+Root, seperti di Base UI, jadi beri nama pada `NumberField.Input`.
+
+Fieldnya digambar seperti [Input](/id/input): tint 6% dari warna teks, 9% saat hover, cincin fokus selama
+input fokus, critical saat invalid, dan redup saat nonaktif. Tombolnya persegi datar, masuk 4px dari
+ujung. Menahannya mengulang langkah, seperti di Base UI.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-number-field` | State dan tata letak, dengan `input` tersembunyi untuk form. Menggambar Group tanpa children |
+| <Part name="ScrubArea" /> | `span.ow-number-field__scrub-area` | Membungkus label; menyeretnya mengubah nilai |
+| <Part name="Group" /> | `div.ow-number-field__group` | Fieldnya, dengan role group. Menggambar ketiga bagiannya tanpa children |
+| <Part name="Decrement" /> | `button.ow-number-field__decrement` | Persegi datar di awal. Menggambar minus tanpa children; bukan perhentian Tab |
+| <Part name="Input" /> | `input.ow-number-field__input` | Kolom teks: di tengah, tabular, tanpa spinner bawaan |
+| <Part name="Increment" /> | `button.ow-number-field__increment` | Persegi datar di akhir. Menggambar plus tanpa children; bukan perhentian Tab |
+| ScrubAreaCursor | `span.ow-number-field__scrub-cursor` | Di dalam portal, hanya saat menyeret. Menggambar panah dua arah tanpa children |
+
+| Ukuran | Font | Field | Tombol |
+| --- | --- | --- | --- |
+| `sm` | 13px | 32px | 24px |
+| `md` (bawaan) | 14px | 40px | 32px |
+| `lg` | 16px | 48px | 40px |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### NumberField.Root
+
+#### Props
+
+| Prop | Tipe | Bawaan | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Font dan tinggi field; semua bagian membacanya, jadi bagian tidak punya `size` sendiri |
+| `children` | `ReactNode` | Sebuah Group | Mengganti Group |
+
+#### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-size` | Selalu: `sm`, `md`, atau `lg` |
+
+### NumberField.Group
+
+Tanpa children ia menggambar Decrement, Input, dan Increment. Saat field menjadi invalid ia menolak dengan
+satu getaran, dan dengan kedipan saat gerak dikurangi; field yang sudah invalid sejak awal, atau dari
+server, tetap diam, dan [Form](/id/form) yang dikirim dalam keadaan invalid memutarnya lagi.
+
+### NumberField.Decrement dan NumberField.Increment
+
+Tanpa children keduanya menggambar minus dan plus, sebesar ukuran font ditambah 2px, disembunyikan dari
+screen reader. Base UI menamainya "Decrease" dan "Increase"; beri `aria-label` untuk bahasa lain. Pada
+`min` atau `max` Base UI menonaktifkan tombolnya, dan ia meredup. Pada field hanya-baca keduanya tidak
+berbuat apa-apa dan tampil seperti biasa.
+
+### NumberField.ScrubArea
+
+`direction` adalah `"horizontal"` (kursornya `ew-resize`) atau `"vertical"` (`ns-resize`).
+
+### NumberField.ScrubAreaCursor
+
+Tanpa children ia menggambar panah dua arah dalam `--ow-fg` dengan halo `--ow-bg`, sehingga terlihat di
+permukaan apa pun; di dalam ScrubArea vertikal ia menunjuk atas dan bawah. Base UI merendernya dalam
+portal di body dokumen, jadi ia membaca token tema dan tidak ada yang privat milik field.
+
+### Class CSS
+
+| Class CSS | Bagian |
+| --- | --- |
+| `ow-number-field` | Root |
+| `ow-number-field--sm`, `ow-number-field--md`, `ow-number-field--lg` | Root, menurut `size` |
+| `ow-number-field__scrub-area` | ScrubArea |
+| `ow-number-field__group` | Group |
+| `ow-number-field__input` | Input |
+| `ow-number-field__stepper` | Decrement dan Increment |
+| `ow-number-field__decrement`, `ow-number-field__increment` | Decrement, Increment |
+| `ow-number-field__scrub-cursor` | ScrubAreaCursor |
+
+## Aksesibilitas [#accessibility]
+
+| Tombol | Aksi |
+| --- | --- |
+| Panah Atas, Panah Bawah | Melangkah sebesar `step` |
+| Shift Panah | Melangkah sebesar `largeStep` |
+| Alt Panah | Melangkah sebesar `smallStep` |
+| Home, End | `min` atau `max`, bila disetel |
+
+- Input adalah kolom teks dengan roledescription "Number field", dinamai oleh label Field atau
+  `aria-label`-nya sendiri; deskripsi dan error Field dibacakan bersamanya, dan field invalid bernilai
+  `aria-invalid`.
+- Tombolnya bukan perhentian Tab: keyboard melangkah dari input. Ukurannya paling sedikit 24px, dan
+  menekannya dengan pointer memindahkan fokus ke input, jadi cincin tampil dan tuts bisa melanjutkan.
+- Menyeret ScrubArea butuh pointer. Ia memakai pointer lock, yang bisa ditolak browser; nilai tetap bisa
+  dilangkahi dengan tombol dan tuts.
+- Dengan `prefers-contrast: more` field mendapat tepi 1 px dalam `--ow-edge`. Pada forced colors outline-nya
+  adalah tepi, fokus adalah `Highlight`, dan tombol di batasnya `GrayText`. Kanan ke kiri, Decrement tetap
+  di awal, yaitu di kanan.
+- Hover hanya memberi tint pada perangkat yang bisa hover, jadi layar sentuh tidak meninggalkan sorotan.
+- Dalam form, `name` mengirim angkanya, dan `required`, `min`, `max`, serta `step` memvalidasinya.
+
+## Tema [#theming]
+
+Number Field membaca token tema ini. Setel satu pada field, atau pada apa pun di sekitarnya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-fg` | Teks, dan tint field: 6%, 9% saat hover |
+| `--ow-muted` | Ikon tombol, sampai di-hover |
+| `--ow-hover` | Tombol di bawah pointer |
+| `--ow-pressed-bg` | Tombol yang ditahan |
+| `--ow-critical` | Tint field invalid: 14% |
+| `--ow-focus` | Cincin fokus keyboard |
+| `--ow-edge` | Tepi field saat kontras lebih diminta |
+| `--ow-bg` | Halo kursor geser |
+| `--ow-radius` | Sudut field, dan sudut tombol dikurangi 4px |
+| `--ow-spring-settle`, `--ow-spring-settle-duration` | Tombol yang ditahan saat dilepas |
+| `--ow-motion-scale` | Seberapa jauh tekanan dan getaran bergerak (0 mematikan keduanya) |
+
+<ForMode mode="isolated">
+
+Dalam mode terisolasi nilainya ada di root tiap field, jadi setel milik Anda pada field itu sendiri.
+
+</ForMode>
+
+Setel `inline-size` pada root, atau pada induknya, dengan CSS biasa; bawaannya 11em dan ia memenuhi
+lebar yang diberikan. Selebihnya berasal dari `font-size` dalam `em`, dan `--py` mengatur tinggi.
+
+```css
+.quantity {
+  inline-size: 100%;
+}
+
+.quantity .ow-number-field__group {
+  background-color: var(--ow-raised-bg);
+}
+```
+
+## Gerak [#motion]
+
+Tidak ada yang menganimasikan angkanya. Tombol yang ditahan menekan masuk ke 0,97 dalam 90 ms, memakai
+bahan tekan, dan lepas dengan spring settle; menahannya mengulang langkah, seperti di Base UI. Saat
+field menjadi invalid ia bergetar sekali (`--ow-motion-scale` mengatur jaraknya). Dengan
+`prefers-reduced-motion` tombol yang ditahan hanya mengubah bahannya, dan field invalid berkedip, bukan
+bergetar.

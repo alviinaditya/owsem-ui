@@ -172,8 +172,8 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Accordion**, **Avatar**, **Button**, **Checkbox**, **Collapsible**, **Dialog**, **Field**,
-**Fieldset**, **Form**, **Input**, **Kbd**, **Menu**, **Meter**, **Popover**, **Progress**, **Radio Group**, **Scroll Area**,
+**Accordion**, **Avatar**, **Button**, **Checkbox**, **Checkbox Group**, **Collapsible**, **Dialog**,
+**Field**, **Fieldset**, **Form**, **Input**, **Kbd**, **Menu**, **Meter**, **Number Field**, **Popover**, **Progress**, **Radio Group**, **Scroll Area**,
 **Select**, **Separator**, **Switch**, **Tabs**, **Toggle**, **Toggle Group**, **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`)
 and **Code Block**, **Color Picker**, **Command Menu**, **Copy Button**, **Icon Morph**,
 **Sidebar**, **Table**, **Table of Contents**, and **Tree Rail Nav** (Owsem, from
@@ -250,8 +250,9 @@ import { Checkbox } from "owsem-ui/base"; // or "@/components/owsem/checkbox"
   the font size plus 6px (19, 20, 22 px), in `em`: `font-size` on it scales the box and its glyphs,
   and `--icon` sets it directly. A pseudo-element extends the press target to 24 px without adding
   layout, so do not pad it. It has no margin.
-- A parent box is your own state for now (`checked` for all, `indeterminate` for some); Checkbox Group
-  is a later component.
+- Inside a Checkbox Group it takes the group's `size`, unless it has its own. A parent box is
+  `<Checkbox.Root parent />` in a Checkbox Group with `allValues`; outside a group it is your own
+  state (`checked` for all, `indeterminate` for some).
 - Off is a 10% tint of the text color with no edge (13% on hover of the box or its label, 16% held);
   on is the primary material (5% black deeper on hover), and the fill changes at once. Reads `--ow-fg`, `--ow-accent`,
   `--ow-primary-shadow`, `--ow-on-accent`, `--ow-edge` (high contrast), `--ow-focus`, `--ow-radius` (half of it), and `--ow-motion-scale`. One class of
@@ -627,6 +628,46 @@ import { ScrollArea } from "owsem-ui/base"; // or "@/components/owsem/scroll-are
   unless the app is wrapped in `<CSPProvider disableStyleElements>`, which a strict CSP needs.
 - Reads `--ow-muted` (the thumb, at 72%), `--ow-radius`, `--ow-focus`, and `--ow-ease-out`.
 
+### Checkbox Group
+
+Several checkboxes with one shared value. Each option is a `<label>` row holding a Checkbox, laid out as
+Radio Group's. Registry item: `checkbox-group` (the box is `checkbox`).
+
+```tsx
+import { Checkbox, CheckboxGroup } from "owsem-ui/base"; // or "@/components/owsem/checkbox-group"
+<CheckboxGroup aria-label="Toppings" defaultValue={["cheese"]}>
+  <label>
+    <Checkbox.Root value="cheese" />
+    Cheese
+  </label>
+  <label>
+    <Checkbox.Root value="olives" />
+    Olives
+  </label>
+</CheckboxGroup>
+<CheckboxGroup aria-label="Toppings" allValues={["cheese", "olives"]}>
+  <label>
+    <Checkbox.Root parent />
+    All
+  </label>
+  {/* ...the rows, in a div with padding-inline-start if you want them indented */}
+</CheckboxGroup>
+```
+
+- `CheckboxGroup` is Base UI's: `value` and `defaultValue` (the names of the ticked boxes),
+  `onValueChange(value, eventDetails)`, `allValues`, and `disabled`. OwsemUI adds `size` (`"sm"`, `"md"`
+  default, `"lg"`: Button's fonts and row heights), which reaches the Checkboxes in it by context; a
+  Checkbox's own `size` wins. Name it with `aria-label`, `aria-labelledby`, or a Field label. In a
+  `<form>`, each box with a `name` and a `value` submits its value when ticked.
+- A parent ("select all") box is `<Checkbox.Root parent />` with `allValues` on the group; it shows the
+  minus while some are ticked. A nested, indented list is plain layout: no part, no prop.
+- Rows, Glide, no width, no margin, a flex column, and no orientation prop: all as Radio Group. A press on
+  a row toggles its box; do not add a hover style. A box with no label row gets no row styling.
+- States: `data-disabled` and `data-size` on the group; `data-glide-active` on the lit row; the box's own
+  states are Checkbox's.
+- Sizes are in `em`; `--py` sets the rows' height. Reads `--ow-fg`, `--ow-muted` (disabled rows), and
+  `--ow-hover` and `--ow-radius` (Glide); Checkbox's tokens are its own.
+
 ### Radio Group
 
 One choice from a few options, all in view. Each option is a `<label>` row holding a round radio.
@@ -667,6 +708,54 @@ import { Radio, RadioGroup } from "owsem-ui/base"; // or "@/components/owsem/rad
 - Reads `--ow-fg` (the tint), `--ow-accent` and `--ow-primary-shadow` (on), `--ow-on-accent` (the
   dot), `--ow-muted`, `--ow-focus`, `--ow-edge` (high contrast),
   `--ow-hover` and `--ow-radius` (Glide).
+
+### Number Field
+
+A number input with a decrement and an increment button, and a scrub area. Registry item: `number-field`.
+
+```tsx
+import { Field, NumberField } from "owsem-ui/base"; // or "@/components/owsem/number-field"
+<Field.Root name="quantity">
+  <Field.Label>Quantity</Field.Label>
+  <NumberField.Root defaultValue={2} min={0} max={20} />
+</Field.Root>
+<NumberField.Root defaultValue={3} aria-label="Quantity" />
+<NumberField.Root defaultValue={50} size="sm">
+  <NumberField.ScrubArea>
+    <label htmlFor={id}>Amount</label>
+    <NumberField.ScrubAreaCursor />
+  </NumberField.ScrubArea>
+  <NumberField.Group>
+    <NumberField.Decrement />
+    <NumberField.Input id={id} />
+    <NumberField.Increment />
+  </NumberField.Group>
+</NumberField.Root>
+```
+
+- Parts, as Base UI's: `Root`, `Group`, `Input`, `Decrement`, `Increment`, `ScrubArea`, `ScrubAreaCursor`.
+  `Root` with no children draws a `Group`; a `Group` with no children draws a `Decrement`, an `Input`, and
+  an `Increment`; the buttons draw a minus and a plus, and the cursor a two-way arrow, when left empty.
+  Children replace any of them.
+- Props are Base UI's: `value`, `defaultValue`, `onValueChange(value, eventDetails)`, `min`, `max`,
+  `step`, `smallStep`, `largeStep`, `format` (Intl.NumberFormat options: currency, percent, unit),
+  `locale`, `name`, `required`, `disabled`, `readOnly`, `allowOutOfRange`, `snapOnStep`, and `ScrubArea`'s
+  `direction`. OwsemUI adds `size` on `Root` (`"sm"`, `"md"` default, `"lg"`: 32, 40, 48 px tall, as
+  Input), which sets the font and `--py` that every part reads; no part takes a `size`.
+- Name the input with a Field label, or `aria-label`, `aria-labelledby`, `aria-describedby` on a `Root`
+  with no children (they go to the Input it draws, nothing stays on the div). With children they stay on
+  the Root as in Base UI: name `NumberField.Input` itself. The buttons are not tab stops, as in Base UI: the arrows, Shift, Alt, Home, and End step
+  from the input. Base UI names them "Decrease" and "Increase": give an `aria-label` in another language.
+- The `Group` is the field, drawn as Input: a 6% tint, 9% on hover, a focus ring while the input has
+  focus, critical when invalid (shaking once), dim when disabled. The buttons are flat squares inset 4px,
+  with the radius less that inset; at the `min` or `max`, Base UI disables a button and it dims.
+- The field is `11em` wide by default; set `inline-size` on the Root. `ScrubArea` wraps the label with an
+  `ew-resize` (or `ns-resize`) cursor; the cursor part is in a portal and appears only while dragging
+  with a pointer that can lock.
+- States: `data-disabled`, `data-readonly`, `data-invalid`, `data-focused`, `data-scrubbing` on every part;
+  `data-size` on `Root`.
+- Reads `--ow-fg`, `--ow-muted`, `--ow-hover`, `--ow-pressed-bg`, `--ow-critical`, `--ow-focus`,
+  `--ow-edge`, `--ow-bg` (the cursor's halo), `--ow-radius`, and `--ow-motion-scale`.
 
 ### Separator
 

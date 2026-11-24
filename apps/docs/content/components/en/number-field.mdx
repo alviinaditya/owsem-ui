@@ -1,0 +1,180 @@
+---
+title: Number Field
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. To copy the source into your project instead, use the `number-field`
+item of the registry.
+
+## Usage [#usage]
+
+```tsx
+import { NumberField } from "owsem-ui/base";
+
+export function Quantity() {
+  return <NumberField.Root aria-label="Quantity" defaultValue={2} min={0} max={20} />;
+}
+```
+
+Number Field is a number input with a button at each end. `NumberField.Root` holds the state and, with no
+children, draws a `NumberField.Group` with a Decrement, an Input, and an Increment; a Group with no
+children draws the same three. Pass the parts yourself to change them, or to add a `ScrubArea` around a
+label. Name the input with a [Field](/en/field) label, or an `aria-label` (also `aria-labelledby` and
+`aria-describedby`) on the Root: when the Root draws its own Group they go to the Input, and nothing is
+left on the div. With your own children they stay on the Root, as in Base UI, so name the
+`NumberField.Input` there.
+
+The field is drawn as [Input](/en/input) is: a 6% tint of the text color, 9% on hover, a focus ring while
+the input has focus, critical when invalid, and dim when disabled. The buttons are flat squares inset 4px
+from its ends. Holding one repeats it, as Base UI does.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-number-field` | State and layout, with a hidden `input` for forms. Draws a Group without children |
+| <Part name="ScrubArea" /> | `span.ow-number-field__scrub-area` | Wraps the label; dragging it changes the value |
+| <Part name="Group" /> | `div.ow-number-field__group` | The field, with the group role. Draws its three parts without children |
+| <Part name="Decrement" /> | `button.ow-number-field__decrement` | A flat square at the start. Draws a minus without children; not a tab stop |
+| <Part name="Input" /> | `input.ow-number-field__input` | The text field: centered, tabular, no native spinner |
+| <Part name="Increment" /> | `button.ow-number-field__increment` | A flat square at the end. Draws a plus without children; not a tab stop |
+| ScrubAreaCursor | `span.ow-number-field__scrub-cursor` | In a portal, only while dragging. Draws a two-way arrow without children |
+
+| Size | Font | Field | Buttons |
+| --- | --- | --- | --- |
+| `sm` | 13px | 32px | 24px |
+| `md` (default) | 14px | 40px | 32px |
+| `lg` | 16px | 48px | 40px |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### NumberField.Root
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | The font and the field's height; every part reads them, so a part takes no `size` of its own |
+| `children` | `ReactNode` | A Group | Replaces the Group |
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-size` | Always: `sm`, `md`, or `lg` |
+
+### NumberField.Group
+
+Without children it draws a Decrement, an Input, and an Increment. When the field becomes invalid it
+rejects with one shake, and with a blink under reduced motion; a field that is invalid from the start,
+or from the server, stays still, and a [Form](/en/form) that is submitted invalid plays it again.
+
+### NumberField.Decrement and NumberField.Increment
+
+Without children they draw a minus and a plus, the font size plus 2px, hidden from screen readers. Base
+UI names them "Decrease" and "Increase"; give an `aria-label` for another language. At the `min` or `max`
+Base UI disables the button, and it dims. Under a read-only field they do nothing and look as they normally do.
+
+### NumberField.ScrubArea
+
+`direction` is `"horizontal"` (the cursor is `ew-resize`) or `"vertical"` (`ns-resize`).
+
+### NumberField.ScrubAreaCursor
+
+Without children it draws a two-way arrow in `--ow-fg` with a halo of `--ow-bg`, so it shows on any
+surface; it points up and down inside a vertical ScrubArea. Base UI renders it in a portal on the
+document's body, so it reads theme tokens and nothing private to the field.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-number-field` | Root |
+| `ow-number-field--sm`, `ow-number-field--md`, `ow-number-field--lg` | Root, by `size` |
+| `ow-number-field__scrub-area` | ScrubArea |
+| `ow-number-field__group` | Group |
+| `ow-number-field__input` | Input |
+| `ow-number-field__stepper` | Decrement and Increment |
+| `ow-number-field__decrement`, `ow-number-field__increment` | Decrement, Increment |
+| `ow-number-field__scrub-cursor` | ScrubAreaCursor |
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| Arrow Up, Arrow Down | Step by `step` |
+| Shift Arrow | Step by `largeStep` |
+| Alt Arrow | Step by `smallStep` |
+| Home, End | The `min` or the `max`, when set |
+
+- The input is a text field with the roledescription "Number field", named by a Field label or its own
+  `aria-label`; a Field description and error are read with it, and an invalid field is `aria-invalid`.
+- The buttons are not tab stops: the keyboard steps from the input. They are at least 24px, and a
+  pointer press on one moves the focus to the input, so the ring shows and the keys carry on.
+- Dragging a ScrubArea needs a pointer. It uses pointer lock, which a browser may refuse; the value
+  still steps with the buttons and the keys.
+- With `prefers-contrast: more` the field gets a 1 px edge in `--ow-edge`. In forced colors its outline
+  is the edge, focus is `Highlight`, and a stepper at its limit is `GrayText`. Right to left, the
+  Decrement stays at the start, on the right.
+- Hover only tints on a device that can hover, so a touch screen leaves nothing lit.
+- In a form, `name` submits the number, and `required`, `min`, `max`, and `step` validate it.
+
+## Theming [#theming]
+
+Number Field reads these theme tokens. Set one on a field, or on anything around it.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-fg` | The text, and the field's tint: 6%, 9% on hover |
+| `--ow-muted` | The buttons' icons, until hovered |
+| `--ow-hover` | A button under the pointer |
+| `--ow-pressed-bg` | A button held down |
+| `--ow-critical` | An invalid field's tint: 14% |
+| `--ow-focus` | The keyboard focus ring |
+| `--ow-edge` | The field's edge when more contrast is asked for |
+| `--ow-bg` | The scrub cursor's halo |
+| `--ow-radius` | The field's corners, and the buttons' less 4px |
+| `--ow-spring-settle`, `--ow-spring-settle-duration` | A held button letting go |
+| `--ow-motion-scale` | How far a press goes, and the shake (0 turns both off) |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each field's root, so set yours on the field itself.
+
+</ForMode>
+
+Set `inline-size` on the root, or on a parent, with plain CSS; it is 11em by default and fills the width
+it is given. Everything else comes from `font-size` in `em`, and `--py` sets the height.
+
+```css
+.quantity {
+  inline-size: 100%;
+}
+
+.quantity .ow-number-field__group {
+  background-color: var(--ow-raised-bg);
+}
+```
+
+## Motion [#motion]
+
+Nothing animates the number. A held button presses in to 0.97 within 90 ms, takes the pressed material,
+and lets go on the settle spring; holding it repeats the step, as Base UI does. When the field turns
+invalid it shakes once (`--ow-motion-scale` sets how far). With `prefers-reduced-motion` a held button
+only changes its material, and the invalid field blinks instead of shaking.

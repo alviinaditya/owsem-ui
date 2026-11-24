@@ -46,6 +46,8 @@ export const components: string[] = [
   "meter",
   "collapsible",
   "accordion",
+  "checkbox-group",
+  "number-field",
 ];
 
 const HEADER = "// Generated from";

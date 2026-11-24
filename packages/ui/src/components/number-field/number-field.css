@@ -1,0 +1,289 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * Number Field (Base). The Group is the field, drawn as Input is: a 6% tint of the text color, 9%
+ * on hover, a focus ring while the input has focus, critical when invalid, dim when disabled. It is
+ * as tall as an Input of the size. The steppers are flat squares inset 4px from its ends, with the
+ * radius less that inset (as Toggle Group's items); the input between them centers its digits.
+ * The Root's size is its font and --py, which every part inherits.
+ */
+@layer owsem.components {
+  .ow-number-field {
+    --py: 0.8036em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    inline-size: 11em;
+    max-inline-size: 100%;
+    min-inline-size: 0;
+    color: var(--ow-fg);
+    font-size: 0.875rem;
+    line-height: 1.25;
+  }
+
+  .ow-number-field--sm {
+    --py: 0.6058em;
+    font-size: 0.8125rem;
+  }
+
+  .ow-number-field--lg {
+    --py: 0.875em;
+    font-size: 1rem;
+  }
+
+  .ow-number-field__group {
+    --_bg: color-mix(in oklab, var(--ow-fg) 6%, transparent);
+    --_py: max(var(--py), (24px - 1lh) / 2);
+    --_inset: 4px;
+    /* Input's height, and the steppers' side: that less the inset on both sides. */
+    --_height: calc(2 * var(--_py) + 1lh);
+    --_stepper: calc(var(--_height) - 2 * var(--_inset));
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    inline-size: 100%;
+    min-inline-size: 0;
+    block-size: var(--_height);
+    padding: var(--_inset);
+    border-radius: var(--ow-radius);
+    /* Invisible until forced colors draw it as the edge. */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--_bg);
+  }
+
+  /* The tint deepens on hover. */
+  @media (hover: hover) and (pointer: fine) {
+    .ow-number-field__group:where(:hover):where(:not([data-disabled])) {
+      --_bg: color-mix(in oklab, var(--ow-fg) 9%, transparent);
+    }
+  }
+
+  .ow-number-field__group:where([data-invalid]) {
+    --_bg: color-mix(in oklab, var(--ow-critical) 14%, transparent);
+  }
+
+  /*
+   * Rejects once when it becomes invalid. data-armed is set while it is valid (core/shake.ts), so a
+   * field invalid from the start stays still; a Form re-plays it with data-shake="off" (a reflow).
+   */
+  .ow-number-field__group:where([data-invalid])[data-armed]:not([data-shake="off"]) {
+    will-change: transform;
+    animation: ow-number-field-shake 320ms var(--ow-ease-out);
+  }
+
+  @keyframes ow-number-field-shake {
+    20% {
+      transform: translateX(calc(-4px * var(--ow-motion-scale)));
+    }
+    40% {
+      transform: translateX(calc(4px * var(--ow-motion-scale)));
+    }
+    60% {
+      transform: translateX(calc(-2px * var(--ow-motion-scale)));
+    }
+    80% {
+      transform: translateX(calc(2px * var(--ow-motion-scale)));
+    }
+  }
+
+  @keyframes ow-number-field-blink {
+    from {
+      opacity: 0.6;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ow-number-field__group:where([data-invalid])[data-armed]:not([data-shake="off"]) {
+      animation: ow-number-field-blink 160ms var(--ow-ease-out);
+    }
+  }
+
+  /* The ring is the Group's, while the input has focus. */
+  .ow-number-field__group:where(:has(.ow-number-field__input:focus-visible)) {
+    outline: 2px solid var(--ow-focus);
+    outline-offset: 2px;
+  }
+
+  .ow-number-field__group:where([data-disabled]) {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
+  .ow-number-field__input {
+    flex: 1 1 0;
+    align-self: stretch;
+    box-sizing: border-box;
+    min-inline-size: 0;
+    margin: 0;
+    padding: 0 0.5em;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    /* The Group draws the ring. */
+    outline: none;
+  }
+
+  .ow-number-field__input:where([data-disabled], :disabled) {
+    cursor: not-allowed;
+  }
+
+  .ow-number-field__stepper {
+    --icon: calc(1em + 2px);
+    /* The field's radius less the inset (as Toggle Group's items). */
+    --_radius: max(0px, var(--ow-radius) - var(--_inset));
+    --_press: calc(1 - 0.03 * var(--ow-motion-scale));
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    box-sizing: border-box;
+    inline-size: var(--_stepper);
+    block-size: var(--_stepper);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: var(--_radius);
+    /* Invisible until forced colors draw it as the edge. */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: transparent;
+    color: var(--ow-muted);
+    font: inherit;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    /* Its own layer, so it lands without a pixel jump. */
+    will-change: transform;
+    /* A press lets go on the settle spring. */
+    transition: transform var(--ow-spring-settle-duration) var(--ow-spring-settle);
+  }
+
+  .ow-number-field__stepper > :where(svg, img) {
+    display: block;
+    inline-size: var(--icon);
+    block-size: var(--icon);
+  }
+
+  @media (hover: hover) {
+    .ow-number-field__stepper:where(:hover):where(
+        :not([data-disabled], :disabled, [data-readonly])
+      ) {
+      background-color: var(--ow-hover);
+      color: var(--ow-fg);
+    }
+  }
+
+  /* Held down: in to 0.97 and the pressed material within 90 ms. */
+  .ow-number-field__stepper:where(:active):where(
+    :not([data-disabled], :disabled, [data-readonly])
+  ) {
+    background-color: var(--ow-pressed-bg);
+    color: var(--ow-fg);
+    transform: scale(var(--_press));
+    transition-duration: 90ms;
+    transition-timing-function: var(--ow-ease-out);
+  }
+
+  .ow-number-field__stepper:where(:focus-visible) {
+    outline: 2px solid var(--ow-focus);
+    outline-offset: 2px;
+  }
+
+  /* At the min or the max, or read only: dim. A disabled field is dim as a whole already. */
+  .ow-number-field__stepper:where([data-disabled], :disabled) {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
+  /* Read only: the same as Input, so the steppers only do nothing. */
+  .ow-number-field__stepper:where([data-readonly]) {
+    cursor: default;
+  }
+
+  .ow-number-field__group:where([data-disabled]) > .ow-number-field__stepper {
+    opacity: 1;
+  }
+
+  /* Wraps the label, and takes only its width. */
+  .ow-number-field__scrub-area {
+    align-self: flex-start;
+    cursor: ew-resize;
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement */
+    user-select: none;
+  }
+
+  .ow-number-field__scrub-area:where([data-direction="vertical"]) {
+    cursor: ns-resize;
+  }
+
+  .ow-number-field__scrub-area:where([data-disabled], [data-readonly]) {
+    cursor: default;
+  }
+
+  /* Takes the pointer's place, a 1.5rem box centered on it; it is in a portal, so it reads tokens. */
+  .ow-number-field__scrub-cursor {
+    display: block;
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
+    color: var(--ow-fg);
+  }
+
+  .ow-number-field__scrub-cursor > :where(svg, img) {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ow-number-field__stepper {
+      --_press: 1;
+    }
+  }
+
+  /* More contrast asked for: the edge comes back at 3:1. */
+  @media (prefers-contrast: more) {
+    .ow-number-field__group {
+      box-shadow: inset 0 0 0 1px var(--ow-edge);
+    }
+  }
+
+  /* The transparent outline is the edge; invalid thickens it, since its color is gone. */
+  @media (forced-colors: active) {
+    .ow-number-field__group:where([data-invalid]) {
+      outline-width: 2px;
+      outline-offset: -2px;
+    }
+
+    .ow-number-field__group:where(:has(.ow-number-field__input:focus-visible)) {
+      outline-color: Highlight;
+      outline-offset: 2px;
+    }
+
+    .ow-number-field__stepper:where(:active):where(
+        :not([data-disabled], :disabled, [data-readonly])
+      ) {
+      outline-color: Highlight;
+    }
+
+    @media (hover: hover) {
+      .ow-number-field__stepper:where(:hover):where(
+          :not([data-disabled], :disabled, [data-readonly])
+        ) {
+        outline-color: Highlight;
+      }
+    }
+
+    .ow-number-field__stepper:where(:focus-visible) {
+      outline-color: Highlight;
+    }
+
+    .ow-number-field__group:where([data-disabled]),
+    .ow-number-field__stepper:where([data-disabled], :disabled) {
+      color: GrayText;
+      opacity: 1;
+    }
+  }
+}

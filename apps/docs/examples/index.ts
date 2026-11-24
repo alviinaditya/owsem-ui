@@ -5,6 +5,7 @@ import AccordionPage from "./accordion";
 import AvatarPage from "./avatar";
 import ButtonPage from "./button";
 import CheckboxPage from "./checkbox";
+import CheckboxGroupPage from "./checkbox-group";
 import CodeBlockPage from "./code-block";
 import CollapsiblePage from "./collapsible";
 import ColorPickerPage from "./color-picker";
@@ -19,6 +20,7 @@ import InputPage from "./input";
 import KbdPage from "./kbd";
 import MenuPage from "./menu";
 import MeterPage from "./meter";
+import NumberFieldPage from "./number-field";
 import PopoverPage from "./popover";
 import ProgressPage from "./progress";
 import RadioGroupPage from "./radio-group";
@@ -75,6 +77,8 @@ export const examples: Partial<Record<ComponentName, ComponentType<ExamplePagePr
   avatar: AvatarPage,
   progress: ProgressPage,
   meter: MeterPage,
+  "checkbox-group": CheckboxGroupPage,
+  "number-field": NumberFieldPage,
   "icon-morph": IconMorphPage,
   "code-block": CodeBlockPage,
 };

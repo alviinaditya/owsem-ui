@@ -63,7 +63,7 @@ test("the Manual files are not in the page until the tab opens", async ({ page, 
 
 test("every component page's Manual offers the Tailwind choice", async ({ request }) => {
   const names = catalog.filter(isAvailable).map((entry) => entry.name);
-  expect(names.length).toBe(34);
+  expect(names.length).toBe(36);
   for (const name of names) {
     const data = await (await request.get(`/api/manual/${name}`)).json();
     expect(data.css.flavor, name).toBe("css");
@@ -406,6 +406,46 @@ test("Tailwind Accordion: its class map, and no keyframes or CSS file", async ({
   const classes = await copyVisibleFile(page, "accordion/accordion-variants.ts");
   expect(classes).toContain("group/ow-accordion");
   expect(classes).not.toMatch(/import .*\.css/);
+});
+
+test("Tailwind Number Field: its class map and its shake, no CSS file", async ({ page }) => {
+  await openTailwindManual(page, "/en/number-field");
+  const titles = manual(page).locator(".ow-code-block__title:visible");
+  for (const path of [
+    "components/owsem/number-field/number-field.tsx",
+    "components/owsem/number-field/number-field-variants.ts",
+    "lib/owsem/tailwind.css",
+    "lib/owsem/tokens.css",
+    "lib/owsem/shake.ts",
+  ]) {
+    await expect(titles.filter({ hasText: path })).toHaveCount(1);
+  }
+  await expect(titles.filter({ hasText: "number-field.css" })).toHaveCount(0);
+  const bridge = await copyVisibleFile(page, "lib/owsem/tailwind.css");
+  expect(bridge).toContain("@keyframes ow-number-field-shake");
+  expect(bridge).toContain("@keyframes ow-number-field-blink");
+  expect(bridge).not.toContain("@keyframes ow-progress-travel");
+  const classes = await copyVisibleFile(page, "number-field/number-field-variants.ts");
+  expect(classes).toContain("ow-number-field-shake");
+  expect(classes).not.toMatch(/import .*\.css/);
+});
+
+test("Tailwind Checkbox Group: its class map, Glide, and the size Checkbox reads", async ({
+  page,
+}) => {
+  await openTailwindManual(page, "/en/checkbox-group");
+  const titles = manual(page).locator(".ow-code-block__title:visible");
+  for (const path of [
+    "components/owsem/checkbox-group/checkbox-group.tsx",
+    "components/owsem/checkbox-group/checkbox-group-variants.ts",
+    "lib/owsem/checkbox-group-size.ts",
+    "lib/owsem/glide/use-glide.tsx",
+  ]) {
+    await expect(titles.filter({ hasText: path })).toHaveCount(1);
+  }
+  await expect(titles.filter({ hasText: "checkbox-group.css" })).toHaveCount(0);
+  const classes = await copyVisibleFile(page, "checkbox-group/checkbox-group-variants.ts");
+  expect(classes).toContain("label:has([role=checkbox])");
 });
 
 test("Tailwind Copy Button: the components it draws, and its keyframes", async ({ page }) => {

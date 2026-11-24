@@ -1,0 +1,149 @@
+---
+title: Checkbox Group
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import `CheckboxGroup` and `Checkbox` from `owsem-ui/base`. In the registry they are the `checkbox-group` and
+`checkbox` items.
+
+## Usage [#usage]
+
+```tsx
+import { Checkbox, CheckboxGroup } from "owsem-ui/base";
+
+export function Toppings() {
+  return (
+    <CheckboxGroup aria-label="Toppings" defaultValue={["cheese"]}>
+      <label>
+        <Checkbox.Root value="cheese" />
+        Cheese
+      </label>
+      <label>
+        <Checkbox.Root value="olives" />
+        Olives
+      </label>
+    </CheckboxGroup>
+  );
+}
+```
+
+Checkbox Group shares one state between several checkboxes: its `value` lists the names of the ones that
+are ticked. It is laid out as [Radio Group](/en/radio-group) is: each option is a `<label>` row with
+Button's geometry, the pointer lights the row under it with Glide, and `size` on the group reaches the
+Checkboxes in it. Name the group with `aria-label`, `aria-labelledby`, or a [Field](/en/field) label; each
+box takes its name from its row.
+
+A parent box ("select all") is `<Checkbox.Root parent />` with `allValues` on the group. It is ticked when
+every box is, shows Checkbox's minus when only some are, and ticks or clears them all when pressed.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Group" /> | `div.ow-checkbox-group` | `CheckboxGroup`, with the group role. Holds the rows and Glide's highlight |
+| <Part name="Row" /> | `label` | Yours, with no class of its own: any `label` holding a Checkbox, at any depth |
+| <Part name="Checkbox" /> | `span.ow-checkbox` | The ordinary [Checkbox](/en/checkbox), with its own Indicator and glyphs |
+
+A row has Button's geometry: its padding comes from `--py`, and the box sits where Button has its icon,
+on the first line of a label that wraps. A nested list is plain layout: indent a `div` of rows, as the
+Select all example does; it needs no part.
+
+| Size | Font | Box | Row |
+| --- | --- | --- | --- |
+| `sm` | 13px | 19px | 32px |
+| `md` (default) | 14px | 20px | 40px |
+| `lg` | 16px | 22px | 48px |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### CheckboxGroup
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | The type scale and row height; the Checkboxes in the group take it, unless they have their own `size` |
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-size` | Always: `sm`, `md`, or `lg` |
+| `data-glide-active` | On a row: Glide is lighting it |
+
+### Checkbox.Root
+
+Inside a group it reads the group's `size`; a `size` of its own wins. Nothing else about it changes.
+
+The group sets no width and no margin: it fits its rows, and it is a flex column, so one rule on
+`className` lays it out another way. There is no orientation prop.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-checkbox-group` | Group |
+| `ow-checkbox-group--sm`, `ow-checkbox-group--md`, `ow-checkbox-group--lg` | Group, by `size` |
+
+## Accessibility [#accessibility]
+
+- The group has the `group` role, named by `aria-label`, `aria-labelledby`, or a Field label, and a Field
+  description is read with it. Every box is its own tab stop, as with separate checkboxes.
+- Space ticks or unticks the focused box. A parent box has `aria-controls` pointing at the boxes it
+  controls, and reads as mixed when some are ticked.
+- A press anywhere on a row toggles it. A pointer press moves focus to the box without showing the ring;
+  keyboard focus draws a 2 px ring, 2 px out.
+- `disabled` on the group turns off every box, and the rows turn gray. A box can be disabled alone.
+- With `prefers-contrast: more` the boxes get a 1 px edge in `--ow-edge`. In forced colors a ticked box is
+  `Highlight` and a disabled row is `GrayText`. Right to left, the box sits on the right.
+- In a form, every box with a `name` and a `value` submits its value when ticked.
+
+## Theming [#theming]
+
+Checkbox Group reads these theme tokens, and [Checkbox](/en/checkbox) reads its own. Set one on a group,
+or on anything around it.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-fg` | The rows' text |
+| `--ow-muted` | Disabled rows, which turn to half of it |
+| `--ow-hover` | The hover highlight (Glide) |
+| `--ow-radius` | The highlight's corners |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each group's root, so set yours on the group itself.
+
+</ForMode>
+
+A `className` wins over the component's own values with no `!important`. Every size is in `em`, so
+`font-size` scales the rows and the boxes; `--py` sets the rows' density.
+
+```css
+.toppings {
+  font-size: 1.125rem;
+  --py: 0.5em;
+}
+```
+
+## Motion [#motion]
+
+The group has none of its own: each box moves as a [Checkbox](/en/checkbox) does, and Glide's highlight
+slides between rows. With `prefers-reduced-motion` the highlight only fades and a held box only changes
+its fill.

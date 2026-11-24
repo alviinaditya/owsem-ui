@@ -2,6 +2,7 @@
 
 import { Checkbox as BaseCheckbox } from "@base-ui/react/checkbox";
 import type { ReactElement } from "react";
+import { useCheckboxGroupSize } from "../../core/checkbox-group-size";
 import { cn } from "../../core/cn";
 import {
   type CheckboxSize,
@@ -69,14 +70,19 @@ export interface CheckboxRootProps
   "data-size"?: CheckboxSize | undefined;
 }
 
-/** The box. Without children it draws its Indicator; it needs a `<label>` or an `aria-label`. */
+/**
+ * The box. Without children it draws its Indicator; it needs a `<label>` or an `aria-label`. In a
+ * Checkbox Group it takes the group's `size`, unless it has its own.
+ */
 export function CheckboxRoot({
   "data-size": outerSize,
-  size = outerSize ?? "md",
+  size: ownSize,
   className,
   children = <CheckboxIndicator />,
   ...props
 }: CheckboxRootProps): ReactElement {
+  const grouped = useCheckboxGroupSize();
+  const size = ownSize ?? outerSize ?? grouped ?? "md";
   return (
     <BaseCheckbox.Root
       data-slot="checkbox"

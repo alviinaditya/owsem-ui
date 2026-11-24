@@ -1,0 +1,151 @@
+---
+title: Checkbox Group
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor `CheckboxGroup` dan `Checkbox` dari `owsem-ui/base`. Di registry keduanya adalah item
+`checkbox-group` dan `checkbox`.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Checkbox, CheckboxGroup } from "owsem-ui/base";
+
+export function Toppings() {
+  return (
+    <CheckboxGroup aria-label="Topping" defaultValue={["cheese"]}>
+      <label>
+        <Checkbox.Root value="cheese" />
+        Keju
+      </label>
+      <label>
+        <Checkbox.Root value="olives" />
+        Zaitun
+      </label>
+    </CheckboxGroup>
+  );
+}
+```
+
+Checkbox Group membagi satu state untuk beberapa checkbox: `value`-nya berisi nama kotak yang dicentang.
+Tata letaknya seperti [Radio Group](/id/radio-group): tiap opsi adalah baris `<label>` dengan geometri
+Button, pointer menyorot baris di bawahnya dengan Glide, dan `size` pada grup sampai ke Checkbox di
+dalamnya. Beri nama grup dengan `aria-label`, `aria-labelledby`, atau label [Field](/id/field); tiap kotak
+mengambil namanya dari barisnya.
+
+Kotak induk ("pilih semua") adalah `<Checkbox.Root parent />` dengan `allValues` pada grup. Ia tercentang
+bila semua kotak tercentang, menampilkan minus milik Checkbox bila hanya sebagian, dan mencentang atau
+mengosongkan semuanya saat ditekan.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Group" /> | `div.ow-checkbox-group` | `CheckboxGroup`, dengan role group. Memegang baris dan sorotan Glide |
+| <Part name="Row" /> | `label` | Milik Anda, tanpa class sendiri: label apa pun yang memegang Checkbox, di kedalaman berapa pun |
+| <Part name="Checkbox" /> | `span.ow-checkbox` | [Checkbox](/id/checkbox) biasa, dengan Indicator dan glyph-nya sendiri |
+
+Baris punya geometri Button: padding-nya dari `--py`, dan kotaknya duduk di tempat ikon Button, di baris
+pertama label yang membungkus. Daftar bersarang hanyalah tata letak biasa: indentasi `div` berisi baris,
+seperti pada contoh Pilih semua; ia tidak butuh bagian.
+
+| Ukuran | Font | Kotak | Baris |
+| --- | --- | --- | --- |
+| `sm` | 13px | 19px | 32px |
+| `md` (bawaan) | 14px | 20px | 40px |
+| `lg` | 16px | 22px | 48px |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### CheckboxGroup
+
+#### Props
+
+| Prop | Tipe | Bawaan | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Skala tipe dan tinggi baris; Checkbox di dalam grup memakainya, kecuali punya `size` sendiri |
+
+#### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-size` | Selalu: `sm`, `md`, atau `lg` |
+| `data-glide-active` | Pada baris: Glide sedang menyorotnya |
+
+### Checkbox.Root
+
+Di dalam grup ia membaca `size` grup; `size` miliknya sendiri menang. Selebihnya tidak berubah.
+
+Grup tidak menetapkan lebar atau margin: ia muat pada barisnya, dan ia kolom flex, jadi satu aturan pada
+`className` menatanya dengan cara lain. Tidak ada prop orientasi.
+
+### Class CSS
+
+| Class CSS | Bagian |
+| --- | --- |
+| `ow-checkbox-group` | Group |
+| `ow-checkbox-group--sm`, `ow-checkbox-group--md`, `ow-checkbox-group--lg` | Group, menurut `size` |
+
+## Aksesibilitas [#accessibility]
+
+- Grup punya role `group`, dinamai oleh `aria-label`, `aria-labelledby`, atau label Field, dan deskripsi
+  Field dibacakan bersamanya. Setiap kotak adalah perhentian Tab sendiri, seperti checkbox terpisah.
+- Spasi mencentang atau membatalkan kotak yang fokus. Kotak induk punya `aria-controls` ke kotak yang
+  dikendalikannya, dan terbaca campuran bila sebagian tercentang.
+- Menekan di mana saja pada baris mengubahnya. Tekan pointer memindahkan fokus ke kotak tanpa menampilkan
+  cincin; fokus keyboard menggambar cincin 2 px, 2 px di luar.
+- `disabled` pada grup mematikan semua kotak, dan barisnya menjadi abu-abu. Satu kotak juga bisa nonaktif
+  sendiri.
+- Dengan `prefers-contrast: more` kotak mendapat tepi 1 px dalam `--ow-edge`. Pada forced colors kotak
+  tercentang adalah `Highlight` dan baris nonaktif `GrayText`. Kanan ke kiri, kotak ada di kanan.
+- Dalam form, setiap kotak dengan `name` dan `value` mengirim nilainya saat tercentang.
+
+## Tema [#theming]
+
+Checkbox Group membaca token tema ini, dan [Checkbox](/id/checkbox) membaca tokennya sendiri. Setel satu
+pada grup, atau pada apa pun di sekitarnya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-fg` | Teks baris |
+| `--ow-muted` | Baris nonaktif, yang menjadi setengahnya |
+| `--ow-hover` | Sorotan hover (Glide) |
+| `--ow-radius` | Sudut sorotan |
+
+<ForMode mode="isolated">
+
+Dalam mode terisolasi nilainya ada di root tiap grup, jadi setel milik Anda pada grup itu sendiri.
+
+</ForMode>
+
+`className` mengalahkan nilai bawaan komponen tanpa `!important`. Semua ukuran memakai `em`, jadi
+`font-size` menskalakan baris dan kotak; `--py` mengatur kerapatan baris.
+
+```css
+.toppings {
+  font-size: 1.125rem;
+  --py: 0.5em;
+}
+```
+
+## Gerak [#motion]
+
+Grup tidak punya gerak sendiri: setiap kotak bergerak seperti [Checkbox](/id/checkbox), dan sorotan Glide
+meluncur antar baris. Dengan `prefers-reduced-motion` sorotan hanya memudar dan kotak yang ditahan hanya
+mengubah isiannya.

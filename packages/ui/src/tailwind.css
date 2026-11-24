@@ -297,3 +297,25 @@
     translate: calc(var(--_dir) * 250%) 0;
   }
 }
+
+/* Number Field rejects with a shake, and with a blink when motion is reduced. */
+@keyframes ow-number-field-shake {
+  20% {
+    transform: translateX(calc(-4px * var(--ow-motion-scale)));
+  }
+  40% {
+    transform: translateX(calc(4px * var(--ow-motion-scale)));
+  }
+  60% {
+    transform: translateX(calc(-2px * var(--ow-motion-scale)));
+  }
+  80% {
+    transform: translateX(calc(2px * var(--ow-motion-scale)));
+  }
+}
+
+@keyframes ow-number-field-blink {
+  from {
+    opacity: 0.6;
+  }
+}

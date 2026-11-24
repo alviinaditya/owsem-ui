@@ -55,6 +55,7 @@ describe("src/tailwind (generated)", () => {
         .filter((path) => path.startsWith("lib/"))
         .sort(),
     ).toEqual([
+      "lib/checkbox-group-size.ts",
       "lib/cn.ts",
       "lib/glide/glide-variants.ts",
       "lib/glide/glide.ts",
@@ -122,7 +123,7 @@ describe("src/tailwind (generated)", () => {
         .filter((name): name is string => !!name),
     );
     expect([...folders].sort()).toEqual([...components].sort());
-    expect(folders.size).toBe(34);
+    expect(folders.size).toBe(36);
   });
 
   test("a listed component without a Tailwind variants file fails, naming it", () => {

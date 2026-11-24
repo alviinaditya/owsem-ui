@@ -7,6 +7,7 @@ import {
 import { avatarSlots, avatarVariants } from "../src/tailwind/avatar/avatar-variants";
 import { buttonSlots, buttonVariants } from "../src/tailwind/button/button-variants";
 import { checkboxSlots, checkboxVariants } from "../src/tailwind/checkbox/checkbox-variants";
+import { checkboxGroupVariants } from "../src/tailwind/checkbox-group/checkbox-group-variants";
 import { codeBlockSlots } from "../src/tailwind/code-block/code-block-variants";
 import {
   collapsibleContentVariants,
@@ -44,6 +45,10 @@ import {
   meterSlots,
   meterVariants,
 } from "../src/tailwind/meter/meter-variants";
+import {
+  numberFieldSlots,
+  numberFieldVariants,
+} from "../src/tailwind/number-field/number-field-variants";
 import { popoverSlots } from "../src/tailwind/popover/popover-variants";
 import { progressSlots, progressVariants } from "../src/tailwind/progress/progress-variants";
 import {
@@ -102,6 +107,7 @@ const all = classNames(
     kbdSlots,
     menuSlots,
     meterSlots,
+    numberFieldSlots,
     popoverSlots,
     progressSlots,
     radioGroupSlots,
@@ -137,6 +143,8 @@ const all = classNames(
     meterLegendVariants({ size }),
     progressVariants({ size }),
     checkboxVariants({ size }),
+    checkboxGroupVariants({ size }),
+    numberFieldVariants({ size }),
     switchVariants({ size }),
     toggleVariants({ size }),
     radioGroupVariants({ size }),

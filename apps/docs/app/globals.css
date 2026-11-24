@@ -2272,6 +2272,15 @@ body {
   padding-inline-start: 1.5em;
 }
 
+/* Checkbox Group's demos: groups side by side. */
+.demo-checkbox-group-set {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8px 32px;
+}
+
 /* Switch's settings card, and its large switch. A width from plain CSS: the thumb follows. */
 .demo-switch-row {
   display: flex;
@@ -2338,6 +2347,11 @@ body {
   align-items: center;
   gap: 12px;
   font-size: 0.875rem;
+}
+
+/* Number Field's demos: a comfortable width, and the labels above the fields. */
+.demo-number-field {
+  inline-size: min(260px, calc(100vw - 64px));
 }
 
 /* Input's demos. */

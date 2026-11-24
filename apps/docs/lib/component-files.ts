@@ -279,8 +279,10 @@ export function trimTailwind(css: string, classes: string): string {
     const head = isBlock(item) ? item.head : item.text;
     const name = /^@custom-variant\s+([\w-]+)/.exec(head)?.[1] ?? "";
     // A variant stands alone or follows not-, has-, or in-; a longer name that ends the same
-    // (ow-switch-held for held) is another variant.
-    if (!new RegExp(`(?:(?<![\\w-])|(?<=(?:^|[^\\w-])(?:not|has|in)-))${name}:`).test(classes)) {
+    // (ow-switch-held for held) is another variant, and `held: Type` in a script is not one.
+    if (
+      !new RegExp(`(?:(?<![\\w-])|(?<=(?:^|[^\\w-])(?:not|has|in)-))${name}:(?=\\S)`).test(classes)
+    ) {
       continue;
     }
     parts.push(isBlock(item) ? showBlock(item, 0) : showDecl({ ...item, depth: 0 }, 0));

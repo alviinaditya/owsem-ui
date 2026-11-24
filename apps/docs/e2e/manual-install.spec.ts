@@ -1,11 +1,10 @@
-import { existsSync } from "node:fs";
-import { join } from "node:path";
 import { expect, type Page, test } from "@playwright/test";
+import { catalog, isAvailable } from "../lib/catalog.ts";
 import { docs, visit } from "./example-page.ts";
 
 // The Manual install in a component page's Docs (Installation): files to copy, in numbered steps.
-// Sidebar is the CSS-only example: it has no Tailwind flavor yet. Move these to another component
-// that has none when it gets one.
+// Every component has both flavors; both are in the page and one is hidden, so a check looks at
+// what is visible. CSS is the flavor until the visitor picks Tailwind.
 const manual = (page: Page) => docs(page).locator(".manual");
 
 async function openManual(page: Page, path: string) {
@@ -32,15 +31,17 @@ test("the Command tab keeps the npm install; Manual lists the steps and the file
 
   await docs(page).getByRole("tab", { name: "Manual" }).click();
   await expect(docs(page).getByText("pnpm add owsem-ui")).toBeHidden();
-  const steps = manual(page).locator(".manual-step__title");
+  const steps = manual(page).locator(".manual-step__title:visible");
   await expect(steps).toHaveText([
     "Install the dependencies",
     "Add the theme tokens",
     "Copy the component files",
     "Update the import paths",
   ]);
-  await expect(manual(page).locator(".manual-step").first()).toContainText("@base-ui/react");
-  const titles = manual(page).locator(".ow-code-block__title");
+  await expect(manual(page).locator(".manual-step:visible").first()).toContainText(
+    "@base-ui/react",
+  );
+  const titles = manual(page).locator(".ow-code-block__title:visible");
   for (const path of [
     "lib/owsem/tokens.css",
     "components/owsem/sidebar/sidebar.tsx",
@@ -60,15 +61,34 @@ test("the Manual files are not in the page until the tab opens", async ({ page, 
   await expect(manual(page)).toContainText("button-variants");
 });
 
-test("a component without a Tailwind flavor shows a note that it is coming", async ({ page }) => {
-  await openManual(page, "/en/sidebar");
-  await expect(manual(page).getByRole("group", { name: "Styling" })).toHaveCount(0);
-  await expect(manual(page)).toContainText("Tailwind v4 version of this component is coming");
+test("every component page's Manual offers the Tailwind choice", async ({ request }) => {
+  const names = catalog.filter(isAvailable).map((entry) => entry.name);
+  expect(names.length).toBe(29);
+  for (const name of names) {
+    const data = await (await request.get(`/api/manual/${name}`)).json();
+    expect(data.css.flavor, name).toBe("css");
+    expect(data.tailwind?.flavor, name).toBe("tailwind");
+    expect(data.tailwind.files.length, name).toBeGreaterThan(0);
+    expect(
+      data.tailwind.files.filter((file: { path: string }) => file.path.endsWith(".css")),
+      name,
+    ).toEqual([]);
+  }
+});
+
+test("Sidebar and Tree Rail Nav show the Styling choice, and no note that Tailwind is coming", async ({
+  page,
+}) => {
+  for (const path of ["/en/sidebar", "/en/tree-rail-nav"]) {
+    await openManual(page, path);
+    await expect(manual(page).getByRole("group", { name: "Styling" })).toBeVisible();
+    await expect(manual(page)).not.toContainText("is coming");
+  }
 });
 
 test("dependencies are a command per package manager", async ({ page }) => {
   await openManual(page, "/en/sidebar");
-  const block = manual(page).locator(".manual-step").first();
+  const block = manual(page).locator(".manual-step:visible").first();
   await expect(block).toContainText("pnpm add @base-ui/react@~");
   await block.getByRole("tab", { name: "npm", exact: true }).click();
   await expect(block).toContainText("npm install @base-ui/react@~");
@@ -77,7 +97,7 @@ test("dependencies are a command per package manager", async ({ page }) => {
 test("Copy takes the whole file, and Expand shows all of a collapsed one", async ({ page }) => {
   await openManual(page, "/en/sidebar");
   const block = manual(page)
-    .locator(".manual-file")
+    .locator(".manual-file:visible")
     .filter({
       has: page.locator(".ow-code-block__title", { hasText: "sidebar/sidebar.tsx" }),
     });
@@ -118,10 +138,6 @@ test("Manual lists only the files the component imports", async ({ page }) => {
 });
 
 test("Tailwind Tabs: the thumb and Glide with its classes, no CSS file", async ({ page }) => {
-  test.skip(
-    !existsSync(join(process.cwd(), "../../packages/ui/src/tailwind/tabs")),
-    "packages/ui/src/tailwind/tabs/ does not exist yet",
-  );
   await openTailwindManual(page, "/en/tabs");
   const titles = manual(page).locator(".ow-code-block__title:visible");
   for (const path of [
@@ -148,7 +164,7 @@ test("Tailwind Tabs: the thumb and Glide with its classes, no CSS file", async (
 test("the tokens file keeps only the tokens the component reads", async ({ page }) => {
   await openManual(page, "/en/button");
   const tokens = manual(page)
-    .locator(".manual-file")
+    .locator(".manual-file:visible")
     .filter({ has: page.locator(".ow-code-block__title", { hasText: "lib/owsem/tokens.css" }) })
     .first();
   await tokens.getByRole("button", { name: "Copy" }).click();
@@ -173,13 +189,9 @@ test("the page does not scroll sideways in the narrow column", async ({ page }) 
   expect(scroll).toEqual({ page: 0, docs: 0 });
 });
 
-// The Tailwind flavor exists once packages/ui/src/tailwind/button/ does.
-const tailwindButton = existsSync(join(process.cwd(), "../../packages/ui/src/tailwind/button"));
-
 test("a component with a Tailwind flavor: the switch swaps the files, and is remembered", async ({
   page,
 }) => {
-  test.skip(!tailwindButton, "packages/ui/src/tailwind/button/ does not exist yet");
   await openManual(page, "/en/button");
   const flavor = manual(page).getByRole("group", { name: "Styling" });
   await expect(flavor.getByRole("button", { name: "CSS" })).toHaveAttribute("aria-pressed", "true");
@@ -229,10 +241,6 @@ async function copyVisibleFile(page: Page, path: string): Promise<string> {
 test("Tailwind Switch: its class map and only the bridge parts it uses, no CSS file", async ({
   page,
 }) => {
-  test.skip(
-    !existsSync(join(process.cwd(), "../../packages/ui/src/tailwind/switch")),
-    "packages/ui/src/tailwind/switch/ does not exist yet",
-  );
   await openTailwindManual(page, "/en/switch");
   const titles = manual(page).locator(".ow-code-block__title:visible");
   for (const path of [
@@ -263,10 +271,6 @@ test("Tailwind Switch: its class map and only the bridge parts it uses, no CSS f
 });
 
 test("Tailwind Copy Button: the components it draws, and its keyframes", async ({ page }) => {
-  test.skip(
-    !existsSync(join(process.cwd(), "../../packages/ui/src/tailwind/copy-button")),
-    "packages/ui/src/tailwind/copy-button/ does not exist yet",
-  );
   await openTailwindManual(page, "/en/copy-button");
   const titles = manual(page).locator(".ow-code-block__title:visible");
   for (const path of [
@@ -286,10 +290,6 @@ test("Tailwind Copy Button: the components it draws, and its keyframes", async (
 });
 
 test("Tailwind Popover: the Core modules it imports, no CSS file", async ({ page }) => {
-  test.skip(
-    !existsSync(join(process.cwd(), "../../packages/ui/src/tailwind/popover")),
-    "packages/ui/src/tailwind/popover/ does not exist yet",
-  );
   await openTailwindManual(page, "/en/popover");
   const titles = manual(page).locator(".ow-code-block__title:visible");
   for (const path of [
@@ -305,13 +305,12 @@ test("Tailwind Popover: the Core modules it imports, no CSS file", async ({ page
   await expect(titles.filter({ hasText: "popover.css" })).toHaveCount(0);
   const classes = await copyVisibleFile(page, "popover/popover-variants.ts");
   expect(classes).toContain("group/ow-popover");
+  // scroll-lock.ts has a `held:` of its own, which is no class.
+  const bridge = await copyVisibleFile(page, "lib/owsem/tailwind.css");
+  expect(bridge).not.toContain("@custom-variant");
 });
 
 test("Tailwind Scroll Area: its one custom variant in the bridge", async ({ page }) => {
-  test.skip(
-    !existsSync(join(process.cwd(), "../../packages/ui/src/tailwind/scroll-area")),
-    "packages/ui/src/tailwind/scroll-area/ does not exist yet",
-  );
   await openTailwindManual(page, "/en/scroll-area");
   await expect(
     manual(page).locator(".ow-code-block__title:visible", { hasText: "scroll-area.css" }),
@@ -323,10 +322,6 @@ test("Tailwind Scroll Area: its one custom variant in the bridge", async ({ page
 });
 
 test("Tailwind Toolbar and Command Menu: the variants they use in the bridge", async ({ page }) => {
-  test.skip(
-    !existsSync(join(process.cwd(), "../../packages/ui/src/tailwind/toolbar")),
-    "packages/ui/src/tailwind/toolbar/ does not exist yet",
-  );
   await openTailwindManual(page, "/en/toolbar");
   const toolbar = await copyVisibleFile(page, "lib/owsem/tailwind.css");
   expect(toolbar).toContain("@custom-variant ow-toolbar-quiet (:where(&));");
@@ -344,10 +339,6 @@ test("Tailwind Toolbar and Command Menu: the variants they use in the bridge", a
 test("Tailwind Color Picker: its class map, the held variant, and its helpers, no CSS file", async ({
   page,
 }) => {
-  test.skip(
-    !existsSync(join(process.cwd(), "../../packages/ui/src/tailwind/color-picker")),
-    "packages/ui/src/tailwind/color-picker/ does not exist yet",
-  );
   await openTailwindManual(page, "/en/color-picker");
   const titles = manual(page).locator(".ow-code-block__title:visible");
   for (const path of [
@@ -373,10 +364,6 @@ test("Tailwind Color Picker: its class map, the held variant, and its helpers, n
 });
 
 test("Tailwind Table of Contents: its class map and the tracker, no CSS file", async ({ page }) => {
-  test.skip(
-    !existsSync(join(process.cwd(), "../../packages/ui/src/tailwind/table-of-contents")),
-    "packages/ui/src/tailwind/table-of-contents/ does not exist yet",
-  );
   await openTailwindManual(page, "/en/table-of-contents");
   const titles = manual(page).locator(".ow-code-block__title:visible");
   for (const path of [
@@ -393,4 +380,62 @@ test("Tailwind Table of Contents: its class map and the tracker, no CSS file", a
   expect(bridge).not.toContain("@keyframes");
   const classes = await copyVisibleFile(page, "table-of-contents/table-of-contents-variants.ts");
   expect(classes).toContain("data-visible:opacity-100");
+});
+
+test("Tailwind Sidebar: its class map, the indicator, and the pulse's keyframes, no CSS file", async ({
+  page,
+}) => {
+  await openTailwindManual(page, "/en/sidebar");
+  const titles = manual(page).locator(".ow-code-block__title:visible");
+  for (const path of [
+    "components/owsem/sidebar/sidebar.tsx",
+    "components/owsem/sidebar/sidebar-variants.ts",
+    "components/owsem/sidebar/sidebar.indicator.ts",
+    "lib/owsem/glide/glide-variants.ts",
+    "lib/owsem/scroll-lock.ts",
+    "lib/owsem/tailwind.css",
+    "lib/owsem/cn.ts",
+  ]) {
+    await expect(titles.filter({ hasText: path })).toHaveCount(1);
+  }
+  await expect(titles.filter({ hasText: ".css" })).toHaveCount(2);
+  await expect(titles.filter({ hasText: "sidebar.css" })).toHaveCount(0);
+  const bridge = await copyVisibleFile(page, "lib/owsem/tailwind.css");
+  expect(bridge).toContain("@keyframes ow-sidebar-swell");
+  expect(bridge).toContain("@keyframes ow-sidebar-ping");
+  expect(bridge).toContain("@custom-variant ow-sidebar-lit");
+  expect(bridge).not.toContain("ow-tree-rail-nav");
+  const classes = await copyVisibleFile(page, "sidebar/sidebar-variants.ts");
+  expect(classes).toContain("group/ow-sidebar-indicator");
+  expect(classes).not.toMatch(/import .*\.css/);
+  const indicator = await copyVisibleFile(page, "sidebar/sidebar.indicator.ts");
+  expect(indicator).toContain("sidebarSlots.liquid");
+  expect(indicator).not.toContain(".css");
+});
+
+test("Tailwind Tree Rail Nav: its class map and the rail, with the marquee and its variants", async ({
+  page,
+}) => {
+  await openTailwindManual(page, "/en/tree-rail-nav");
+  const titles = manual(page).locator(".ow-code-block__title:visible");
+  for (const path of [
+    "components/owsem/tree-rail-nav/tree-rail-nav.tsx",
+    "components/owsem/tree-rail-nav/tree-rail-nav-variants.ts",
+    "components/owsem/tree-rail-nav/tree-rail.ts",
+    "lib/owsem/glide/use-glide.tsx",
+    "lib/owsem/glide/glide-variants.ts",
+    "lib/owsem/tailwind.css",
+    "lib/owsem/cn.ts",
+  ]) {
+    await expect(titles.filter({ hasText: path })).toHaveCount(1);
+  }
+  await expect(titles.filter({ hasText: "tree-rail-nav.css" })).toHaveCount(0);
+  const bridge = await copyVisibleFile(page, "lib/owsem/tailwind.css");
+  expect(bridge).toContain("@keyframes ow-tree-rail-nav-marquee-rtl");
+  expect(bridge).toContain("@custom-variant ow-tree-rail-nav-resting-current");
+  expect(bridge).toContain("@custom-variant ow-tree-rail-nav-running");
+  expect(bridge).not.toContain("ow-sidebar");
+  const classes = await copyVisibleFile(page, "tree-rail-nav/tree-rail-nav-variants.ts");
+  expect(classes).toContain("group/ow-tree-rail-nav-item");
+  expect(classes).not.toMatch(/import .*\.css/);
 });

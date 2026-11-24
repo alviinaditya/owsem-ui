@@ -38,6 +38,7 @@ import {
   selectTriggerVariants,
 } from "../src/tailwind/select/select-variants";
 import { separatorSlots } from "../src/tailwind/separator/separator-variants";
+import { sidebarSlots } from "../src/tailwind/sidebar/sidebar-variants";
 import { switchSlots, switchVariants } from "../src/tailwind/switch/switch-variants";
 import { tableSlots, tableVariants } from "../src/tailwind/table/table-variants";
 import { tableOfContentsSlots } from "../src/tailwind/table-of-contents/table-of-contents-variants";
@@ -55,6 +56,7 @@ import {
   toolbarVariants,
 } from "../src/tailwind/toolbar/toolbar-variants";
 import { tooltipSlots } from "../src/tailwind/tooltip/tooltip-variants";
+import { treeRailNavSlots } from "../src/tailwind/tree-rail-nav/tree-rail-nav-variants";
 import { classNames } from "./parity";
 
 // The classes the Tailwind flavor writes with a shorthand of ours, such as px-(--px), must lose to
@@ -82,6 +84,7 @@ const all = classNames(
     scrollAreaSlots,
     selectSlots,
     separatorSlots,
+    sidebarSlots,
     switchSlots,
     tableOfContentsSlots,
     tableSlots,
@@ -89,6 +92,7 @@ const all = classNames(
     toggleGroupSlots,
     toolbarSlots,
     tooltipSlots,
+    treeRailNavSlots,
   ].flatMap((slots) => Object.values(slots)),
   ...Object.values(toggleSlots),
   ...(["default", "sm"] as const).map((size) => tableVariants({ size })),
@@ -130,6 +134,7 @@ const BUILT_IN: Record<string, string> = {
   duration: "duration-75",
   gap: "gap-1",
   ease: "ease-linear",
+  fill: "fill-red-500",
   h: "h-4",
   me: "me-1",
   "max-w": "max-w-4",
@@ -163,6 +168,7 @@ const BUILT_IN: Record<string, string> = {
   "scroll-py": "scroll-py-1",
   shadow: "shadow-none",
   size: "size-4",
+  stroke: "stroke-red-500",
   text: "text-red-500",
   w: "w-4",
 };
@@ -428,6 +434,50 @@ describe("a user's className wins over Color Picker and Table of Contents", () =
       "w-[2px]",
       "opacity-0",
       "bg-(color:--_marker)",
+    ]);
+  });
+});
+
+describe("a user's className wins over Tree Rail Nav and Sidebar", () => {
+  const tokens = (value: string) => value.split(" ");
+  const gone = (value: string, names: string[]) => {
+    for (const name of names) expect(tokens(value), name).not.toContain(name);
+  };
+
+  test("on the root", () => {
+    gone(cn(treeRailNavSlots.root, "text-lg leading-none"), ["text-[13.5px]", "leading-[1.4]"]);
+    gone(cn(sidebarSlots.root, "w-64 text-sm rounded-none bg-red-500 opacity-100"), [
+      "w-[248px]",
+      "text-[0.875rem]",
+    ]);
+    gone(cn(sidebarSlots.provider, "min-w-8"), ["min-w-0"]);
+  });
+
+  test("on a row and a link", () => {
+    gone(cn(treeRailNavSlots.item, "min-h-10 px-8 rounded-none text-red-500 cursor-default"), [
+      "min-h-[32px]",
+      "px-[10px]",
+      "rounded-(--_radius)",
+      "text-(color:--_muted)",
+      "cursor-pointer",
+    ]);
+    gone(cn(sidebarSlots.link, "h-10 px-8 rounded-none text-red-500 cursor-default"), [
+      "h-[calc(32em_/_14)]",
+      "rounded-(--_radius)",
+      "cursor-pointer",
+    ]);
+    expect(cn(sidebarSlots.link, "data-active:font-bold")).toContain("data-active:font-bold");
+  });
+
+  test("on a header and a trigger", () => {
+    gone(cn(sidebarSlots.header, "p-0"), ["p-[12px]"]);
+    gone(cn(sidebarSlots.trigger, "size-10 rounded-none bg-red-500 text-lg"), [
+      "size-[calc(32em_/_14)]",
+      "bg-transparent",
+    ]);
+    gone(cn(treeRailNavSlots.panel, "duration-700 h-8"), [
+      "duration-340",
+      "h-(--collapsible-panel-height)",
     ]);
   });
 });

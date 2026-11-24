@@ -201,3 +201,89 @@
     @slot;
   }
 }
+
+/* Sidebar's loading pulse: the dot swells, and a ring spreads from it. */
+@keyframes ow-sidebar-swell {
+  50% {
+    transform: scale(1.5);
+  }
+}
+
+@keyframes ow-sidebar-ping {
+  from {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+
+  to {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+/* Tree Rail Nav's label runs left in a loop (two copies, --_loop apart), or right in a mirrored page. */
+@keyframes ow-tree-rail-nav-marquee {
+  to {
+    transform: translateX(calc(-1 * var(--_loop)));
+  }
+}
+
+@keyframes ow-tree-rail-nav-marquee-rtl {
+  to {
+    transform: translateX(var(--_loop));
+  }
+}
+
+/* A Tree Rail Nav row with the current row's tint: current, arriving, or leaving. */
+@custom-variant ow-tree-rail-nav-tinted (&:is([data-current], [data-arrived], [data-leaving]));
+
+/* A Tree Rail Nav row in the text color: first level, lit by Glide, on the trail, or current. */
+@custom-variant ow-tree-rail-nav-bright (
+  &:where([data-depth="1"], [data-glide-active], [data-trail], [data-current])
+);
+
+/* The row of a tree that is hovered or focused: its label runs. */
+@custom-variant ow-tree-rail-nav-running (
+  :where(.group\/ow-tree-rail-nav-item):is([data-glide-active], :focus-visible) &
+);
+
+/* A direct child of the tree: the Origin. */
+@custom-variant ow-tree-rail-nav-top ([data-slot="tree-rail-nav-tree"] > &);
+
+/*
+ * Until the script has drawn the rail (it marks the tree with data-rail), CSS draws its resting
+ * shape. A part inside the tree, a direct child, the List after the Origin, a Node that has a rail
+ * line (not the last, or with an open panel), an open Panel, and the deepest current row.
+ */
+@custom-variant ow-tree-rail-nav-resting ([data-slot="tree-rail-nav-tree"]:not([data-rail]) &);
+
+@custom-variant ow-tree-rail-nav-resting-top (
+  [data-slot="tree-rail-nav-tree"]:not([data-rail]) > &
+);
+
+@custom-variant ow-tree-rail-nav-resting-first (
+  [data-slot="tree-rail-nav-tree"]:not([data-rail]) > [data-slot="tree-rail-nav-origin"] + &
+);
+
+@custom-variant ow-tree-rail-nav-resting-node (
+  [data-slot="tree-rail-nav-tree"]:not([data-rail])
+    &:is(:not(:last-child), :has(> [data-slot="tree-rail-nav-panel"]:not([hidden])))
+);
+
+@custom-variant ow-tree-rail-nav-resting-open (
+  [data-slot="tree-rail-nav-tree"]:not([data-rail]) &:not([hidden])
+);
+
+@custom-variant ow-tree-rail-nav-resting-current (
+  [data-slot="tree-rail-nav-tree"]:not([data-rail])
+    [data-slot="tree-rail-nav-node"]:not(
+      :has(
+        [data-slot="tree-rail-nav-panel"]
+          :is([data-slot="tree-rail-nav-link"], [data-slot="tree-rail-nav-toggle"])[data-current]
+      )
+    )
+    > &[data-current]
+);
+
+/* A Sidebar row that shows as active: the active item the liquid has not left, or the one it is on. */
+@custom-variant ow-sidebar-lit (&:where([data-active]:not([data-away]), [data-landed]));

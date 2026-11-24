@@ -108,11 +108,21 @@ describe("src/tailwind (generated)", () => {
   });
 
   test("a component that uses one without a Tailwind flavor fails, naming it", () => {
-    const code = 'export { SidebarRoot as Control } from "../sidebar/sidebar";\n';
-    const withSidebar = { ...under(sources, "../src/"), "components/field/field.parts.ts": code };
-    expect(() => generate(withSidebar)).toThrow(
-      /field\/field\.parts\.ts: imports sidebar, which has no Tailwind flavor/,
+    const code = 'export { GhostRoot as Control } from "../ghost/ghost";\n';
+    const withGhost = { ...under(sources, "../src/"), "components/field/field.parts.ts": code };
+    expect(() => generate(withGhost)).toThrow(
+      /field\/field\.parts\.ts: imports ghost, which has no Tailwind flavor/,
     );
+  });
+
+  test("every component folder is listed, so each has a Tailwind flavor", () => {
+    const folders = new Set(
+      Object.keys(sources)
+        .map((path) => /^\.\.\/src\/components\/([^/]+)\//.exec(path)?.[1])
+        .filter((name): name is string => !!name),
+    );
+    expect([...folders].sort()).toEqual([...components].sort());
+    expect(folders.size).toBe(29);
   });
 
   test("a listed component without a Tailwind variants file fails, naming it", () => {

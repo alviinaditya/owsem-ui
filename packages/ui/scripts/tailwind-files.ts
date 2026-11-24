@@ -37,6 +37,8 @@ export const components: string[] = [
   "toolbar",
   "code-block",
   "command-menu",
+  "color-picker",
+  "table-of-contents",
 ];
 
 const HEADER = "// Generated from";

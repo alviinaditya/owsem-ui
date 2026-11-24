@@ -3,6 +3,10 @@ import { buttonSlots, buttonVariants } from "../src/tailwind/button/button-varia
 import { checkboxSlots, checkboxVariants } from "../src/tailwind/checkbox/checkbox-variants";
 import { codeBlockSlots } from "../src/tailwind/code-block/code-block-variants";
 import {
+  colorPickerSlots,
+  colorPickerTriggerVariants,
+} from "../src/tailwind/color-picker/color-picker-variants";
+import {
   commandMenuPopupVariants,
   commandMenuSlots,
   commandMenuTriggerVariants,
@@ -36,6 +40,7 @@ import {
 import { separatorSlots } from "../src/tailwind/separator/separator-variants";
 import { switchSlots, switchVariants } from "../src/tailwind/switch/switch-variants";
 import { tableSlots, tableVariants } from "../src/tailwind/table/table-variants";
+import { tableOfContentsSlots } from "../src/tailwind/table-of-contents/table-of-contents-variants";
 import { tabsListVariants, tabsSlots } from "../src/tailwind/tabs/tabs-variants";
 import { toggleSlots, toggleVariants } from "../src/tailwind/toggle/toggle-variants";
 import {
@@ -60,6 +65,7 @@ const all = classNames(
     buttonSlots,
     checkboxSlots,
     codeBlockSlots,
+    colorPickerSlots,
     commandMenuSlots,
     copyButtonSlots,
     dialogSlots,
@@ -77,6 +83,7 @@ const all = classNames(
     selectSlots,
     separatorSlots,
     switchSlots,
+    tableOfContentsSlots,
     tableSlots,
     tabsSlots,
     toggleGroupSlots,
@@ -96,6 +103,8 @@ const all = classNames(
     inputWrapperVariants({ size }),
     commandMenuPopupVariants({ size }),
     commandMenuTriggerVariants({ size }),
+    colorPickerTriggerVariants({ size }),
+    colorPickerTriggerVariants({ size, variant: "swatch" }),
     menuPopupVariants({ size }),
     selectPopupVariants({ size }),
     selectTriggerVariants({ size }),
@@ -116,8 +125,10 @@ const BUILT_IN: Record<string, string> = {
   blur: "blur-none",
   border: "border-red-500",
   "border-b": "border-b-red-500",
+  "border-s": "border-s-red-500",
   "border-t": "border-t-red-500",
   duration: "duration-75",
+  gap: "gap-1",
   ease: "ease-linear",
   h: "h-4",
   me: "me-1",
@@ -340,5 +351,83 @@ describe("a user's className wins over Menu, Select, Toolbar, Code Block, and Co
     const button = cn(toolbarButtonVariants({ size: "md" }), "px-8 rounded-none");
     expect(tokens(button)).toContain("ow-toolbar-quiet:px-(--px)");
     expect(tokens(button)).toContain("px-8");
+  });
+});
+
+describe("a user's className wins over Color Picker and Table of Contents", () => {
+  const tokens = (value: string) => value.split(" ");
+  const gone = (value: string, names: string[]) => {
+    for (const name of names) expect(tokens(value), name).not.toContain(name);
+  };
+
+  test("on the root", () => {
+    gone(cn(colorPickerSlots.root, "w-64 gap-2 rounded-none p-0 text-lg bg-red-500 shadow-none"), [
+      "w-[256px]",
+      "gap-(--_pad)",
+      "rounded-(--_radius)",
+      "p-(--_pad)",
+      "text-[13px]",
+      "bg-(color:--_bg)",
+      "shadow-(shadow:--_panel-shadow)",
+    ]);
+    gone(cn(tableOfContentsSlots.root, "text-lg leading-none"), ["text-[13.5px]", "leading-[1.4]"]);
+  });
+
+  test("on the trigger, in each size and in the swatch variant", () => {
+    gone(
+      cn(
+        colorPickerTriggerVariants({ size: "sm" }),
+        "px-8 py-1 rounded-none text-lg gap-0 bg-red-500",
+      ),
+      [
+        "px-(--px)",
+        "py-(--_py)",
+        "rounded-(--_radius)",
+        "text-[13px]",
+        "gap-[0.5em]",
+        "bg-(color:--_surface)",
+      ],
+    );
+    gone(
+      cn(colorPickerTriggerVariants({ size: "lg", variant: "swatch" }), "size-8 p-1 shadow-md"),
+      ["size-[calc(2_*_var(--_py)_+_1lh)]", "shadow-none"],
+    );
+  });
+
+  test("on the parts inside the picker", () => {
+    gone(cn(colorPickerSlots.area, "rounded-none h-20 shadow-none"), [
+      "rounded-(--_radius)",
+      "h-[160px]",
+      "shadow-(shadow:--_color-edge)",
+    ]);
+    gone(cn(colorPickerSlots.tool, "rounded-none size-8 bg-red-500"), [
+      "rounded-(--_radius)",
+      "size-(--_tool)",
+      "bg-(color:--_key)",
+    ]);
+    gone(cn(colorPickerSlots.input, "rounded-none px-4 text-lg bg-red-500"), [
+      "rounded-(--_radius)",
+      "px-[2px]",
+      "text-[13px]",
+      "bg-(color:--_field)",
+    ]);
+    gone(cn(colorPickerSlots.swatch, "rounded-none text-red-500"), [
+      "rounded-[calc(var(--_radius)_-_2px)]",
+      "text-[#fff]",
+    ]);
+  });
+
+  test("on a link and a list of a Table of Contents", () => {
+    gone(cn(tableOfContentsSlots.link, "px-8 py-1 rounded-none text-red-500"), [
+      "py-[4px]",
+      "rounded-(--_radius)",
+      "text-(color:--_muted)",
+    ]);
+    gone(cn(tableOfContentsSlots.list, "p-2 m-2"), ["m-0", "p-0"]);
+    gone(cn(tableOfContentsSlots.marker, "w-1 opacity-100 bg-red-500"), [
+      "w-[2px]",
+      "opacity-0",
+      "bg-(color:--_marker)",
+    ]);
   });
 });

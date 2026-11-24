@@ -4,8 +4,8 @@ import { expect, type Page, test } from "@playwright/test";
 import { docs, visit } from "./example-page.ts";
 
 // The Manual install in a component page's Docs (Installation): files to copy, in numbered steps.
-// Color Picker is the CSS-only example: it has no Tailwind flavor yet. Move these to another
-// component that has none when it gets one.
+// Sidebar is the CSS-only example: it has no Tailwind flavor yet. Move these to another component
+// that has none when it gets one.
 const manual = (page: Page) => docs(page).locator(".manual");
 
 async function openManual(page: Page, path: string) {
@@ -23,7 +23,7 @@ test.beforeEach(async ({ context }, testInfo) => {
 test("the Command tab keeps the npm install; Manual lists the steps and the files", async ({
   page,
 }) => {
-  await visit(page, "/en/color-picker#installation");
+  await visit(page, "/en/sidebar#installation");
   await expect(docs(page).getByRole("tab", { name: "Command" })).toHaveAttribute(
     "aria-selected",
     "true",
@@ -43,8 +43,8 @@ test("the Command tab keeps the npm install; Manual lists the steps and the file
   const titles = manual(page).locator(".ow-code-block__title");
   for (const path of [
     "lib/owsem/tokens.css",
-    "components/owsem/color-picker/color-picker.tsx",
-    "components/owsem/color-picker/color-picker.css",
+    "components/owsem/sidebar/sidebar.tsx",
+    "components/owsem/sidebar/sidebar.css",
     "lib/owsem/cn.ts",
   ]) {
     await expect(titles.filter({ hasText: path })).toHaveCount(1);
@@ -61,13 +61,13 @@ test("the Manual files are not in the page until the tab opens", async ({ page, 
 });
 
 test("a component without a Tailwind flavor shows a note that it is coming", async ({ page }) => {
-  await openManual(page, "/en/color-picker");
+  await openManual(page, "/en/sidebar");
   await expect(manual(page).getByRole("group", { name: "Styling" })).toHaveCount(0);
   await expect(manual(page)).toContainText("Tailwind v4 version of this component is coming");
 });
 
 test("dependencies are a command per package manager", async ({ page }) => {
-  await openManual(page, "/en/color-picker");
+  await openManual(page, "/en/sidebar");
   const block = manual(page).locator(".manual-step").first();
   await expect(block).toContainText("pnpm add @base-ui/react@~");
   await block.getByRole("tab", { name: "npm", exact: true }).click();
@@ -75,11 +75,11 @@ test("dependencies are a command per package manager", async ({ page }) => {
 });
 
 test("Copy takes the whole file, and Expand shows all of a collapsed one", async ({ page }) => {
-  await openManual(page, "/en/color-picker");
+  await openManual(page, "/en/sidebar");
   const block = manual(page)
     .locator(".manual-file")
     .filter({
-      has: page.locator(".ow-code-block__title", { hasText: "color-picker/color-picker.tsx" }),
+      has: page.locator(".ow-code-block__title", { hasText: "sidebar/sidebar.tsx" }),
     });
   const code = block.locator(".manual-file__code");
   await expect(code).toHaveAttribute("data-collapsed", "true");
@@ -90,7 +90,7 @@ test("Copy takes the whole file, and Expand shows all of a collapsed one", async
   const copied = await page.evaluate(() => navigator.clipboard.readText());
   // Lines past the collapsed 240px are in what was copied.
   expect(copied.split("\n").length).toBeGreaterThan(40);
-  expect(copied).toContain("export function ColorPicker");
+  expect(copied).toContain("export function SidebarRoot");
 
   const toggle = block.getByRole("button", { name: "Expand" });
   await toggle.click();
@@ -161,7 +161,7 @@ test("the tokens file keeps only the tokens the component reads", async ({ page 
 
 test("the page does not scroll sideways in the narrow column", async ({ page }) => {
   await page.setViewportSize({ width: 1000, height: 800 });
-  await visit(page, "/en/color-picker#installation");
+  await visit(page, "/en/sidebar#installation");
   await docs(page).getByRole("tab", { name: "Manual" }).click();
   const scroll = await page.evaluate(() => ({
     page: document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -339,4 +339,58 @@ test("Tailwind Toolbar and Command Menu: the variants they use in the bridge", a
   const select = await copyVisibleFile(page, "lib/owsem/tailwind.css");
   expect(select).toContain("@keyframes ow-select-shake");
   expect(select).toContain("@custom-variant ow-input-invalid");
+});
+
+test("Tailwind Color Picker: its class map, the held variant, and its helpers, no CSS file", async ({
+  page,
+}) => {
+  test.skip(
+    !existsSync(join(process.cwd(), "../../packages/ui/src/tailwind/color-picker")),
+    "packages/ui/src/tailwind/color-picker/ does not exist yet",
+  );
+  await openTailwindManual(page, "/en/color-picker");
+  const titles = manual(page).locator(".ow-code-block__title:visible");
+  for (const path of [
+    "components/owsem/color-picker/color-picker.tsx",
+    "components/owsem/color-picker/color-picker-variants.ts",
+    "components/owsem/color-picker/color.ts",
+    "lib/owsem/resting-anchor.ts",
+    "lib/owsem/merge-refs.ts",
+    "lib/owsem/tailwind.css",
+    "lib/owsem/cn.ts",
+  ]) {
+    await expect(titles.filter({ hasText: path })).toHaveCount(1);
+  }
+  await expect(titles.filter({ hasText: "color-picker.css" })).toHaveCount(0);
+  const bridge = await copyVisibleFile(page, "lib/owsem/tailwind.css");
+  expect(bridge).toContain("@custom-variant held ");
+  expect(bridge).not.toContain("@keyframes");
+  const classes = await copyVisibleFile(page, "color-picker/color-picker-variants.ts");
+  expect(classes).toContain("group/ow-color-picker-area");
+  expect(classes).not.toMatch(/import .*\.css/);
+  const code = await copyVisibleFile(page, "color-picker/color-picker.tsx");
+  expect(code).not.toContain(".css");
+});
+
+test("Tailwind Table of Contents: its class map and the tracker, no CSS file", async ({ page }) => {
+  test.skip(
+    !existsSync(join(process.cwd(), "../../packages/ui/src/tailwind/table-of-contents")),
+    "packages/ui/src/tailwind/table-of-contents/ does not exist yet",
+  );
+  await openTailwindManual(page, "/en/table-of-contents");
+  const titles = manual(page).locator(".ow-code-block__title:visible");
+  for (const path of [
+    "components/owsem/table-of-contents/table-of-contents.tsx",
+    "components/owsem/table-of-contents/table-of-contents-variants.ts",
+    "components/owsem/table-of-contents/tracker.ts",
+    "lib/owsem/cn.ts",
+  ]) {
+    await expect(titles.filter({ hasText: path })).toHaveCount(1);
+  }
+  await expect(titles.filter({ hasText: "table-of-contents.css" })).toHaveCount(0);
+  const bridge = await copyVisibleFile(page, "lib/owsem/tailwind.css");
+  expect(bridge).not.toContain("@custom-variant");
+  expect(bridge).not.toContain("@keyframes");
+  const classes = await copyVisibleFile(page, "table-of-contents/table-of-contents-variants.ts");
+  expect(classes).toContain("data-visible:opacity-100");
 });

@@ -36,6 +36,7 @@ export const colorPickerSlots = {
   root: "ow-color-picker",
   area: "ow-color-picker__area",
   thumb: "ow-color-picker__thumb",
+  areaThumb: "ow-color-picker__thumb",
   tools: "ow-color-picker__tools",
   tool: "ow-color-picker__tool",
   sliders: "ow-color-picker__sliders",

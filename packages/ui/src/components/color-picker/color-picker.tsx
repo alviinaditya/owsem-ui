@@ -258,7 +258,7 @@ function Area({
     >
       <span
         data-slot="color-picker-thumb"
-        className={colorPickerSlots.thumb}
+        className={colorPickerSlots.areaThumb}
         style={{
           insetInlineStart: `${hsva.s}%`,
           insetBlockStart: `${100 - hsva.v}%`,

@@ -108,10 +108,10 @@ describe("src/tailwind (generated)", () => {
   });
 
   test("a component that uses one without a Tailwind flavor fails, naming it", () => {
-    const code = 'export { ColorPicker as Control } from "../color-picker/color-picker";\n';
-    const withPicker = { ...under(sources, "../src/"), "components/field/field.parts.ts": code };
-    expect(() => generate(withPicker)).toThrow(
-      /field\/field\.parts\.ts: imports color-picker, which has no Tailwind flavor/,
+    const code = 'export { SidebarRoot as Control } from "../sidebar/sidebar";\n';
+    const withSidebar = { ...under(sources, "../src/"), "components/field/field.parts.ts": code };
+    expect(() => generate(withSidebar)).toThrow(
+      /field\/field\.parts\.ts: imports sidebar, which has no Tailwind flavor/,
     );
   });
 

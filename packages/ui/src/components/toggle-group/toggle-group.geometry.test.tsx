@@ -189,4 +189,36 @@ describe("Toggle Group geometry", () => {
       expect(String(frame.transformOrigin).startsWith("0% 50%")).toBe(true);
     }
   });
+
+  test("a solid thumb sits on the same pixels as a soft one, also between pixels", async () => {
+    // Each group is shifted by a fraction of a pixel, as a zoom of 110% does to its neighbors.
+    const { groups, thumbOf, itemsOf } = await mount(
+      <div>
+        {[undefined, "solid" as const].map((variant) => (
+          <div key={variant ?? "soft"} style={{ paddingBlockStart: 0.3, paddingInlineStart: 0.4 }}>
+            <Group pressed="b" variant={variant} />
+          </div>
+        ))}
+      </div>,
+    );
+    const [soft, solid] = groups as [HTMLElement, HTMLElement];
+    const local = (group: HTMLElement) => {
+      const box = rect(thumbOf(group));
+      const track = rect(group);
+      return [box.left - track.left, box.top - track.top, box.width, box.height];
+    };
+    for (const [a, b] of local(soft).map((n, i) => [n, local(solid)[i] as number] as const)) {
+      close(a, b);
+    }
+    for (const group of [soft, solid]) {
+      const thumb = thumbOf(group);
+      for (const side of keyGaps(itemsOf(group)[1] as Element, thumb)) close(side, 0);
+      const style = getComputedStyle(thumb);
+      expect(style.borderTopWidth).toBe(getComputedStyle(group).paddingTop);
+      expect(style.borderBottomWidth).toBe(style.borderTopWidth);
+    }
+    expect(getComputedStyle(thumbOf(solid)).borderTopLeftRadius).toBe(
+      getComputedStyle(thumbOf(soft)).borderTopLeftRadius,
+    );
+  });
 });

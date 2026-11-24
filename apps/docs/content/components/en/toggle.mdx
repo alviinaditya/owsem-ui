@@ -29,7 +29,8 @@ export function PinButton() {
 
 A toggle is a button with two states, on and off. Its sizes and spacing are Button's. Without
 children it is a square icon button and needs an `aria-label`. For a set of related toggles, see
-Toggle Group.
+Toggle Group. While on it is a tint of the accent; `variant="solid"` fills it like the primary
+Button instead.
 
 ## Examples [#examples]
 
@@ -56,6 +57,7 @@ Base UI renders a `<button>` with `aria-pressed`; OwsemUI adds the `ow-toggle` c
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `size` | `"sm" \| "md" \| "lg"` | `"md"` | 32, 40, or 48px tall, as a Button of its size |
+| `variant` | `"soft" \| "solid"` | `"soft"` | The on state: a tint of the accent, or the primary Button's fill with its text and edge. Off, hovered, and focus look the same in both |
 | `startIcon`, `endIcon` | `ReactNode` | | An icon before or after the label, the font size plus 2px; decorative, so the toggle needs a name |
 
 ### Data attributes
@@ -63,6 +65,7 @@ Base UI renders a `<button>` with `aria-pressed`; OwsemUI adds the `ow-toggle` c
 | Data attribute | Present when |
 | --- | --- |
 | `data-size` | Always: `sm`, `md`, or `lg` |
+| `data-variant` | Always: `soft` or `solid` |
 | `data-icon-only` | An icon and no children |
 
 Set `--py` in `style` to change the height. It never drops under 24px, the smallest target WCAG 2.5.8 allows.
@@ -74,6 +77,7 @@ Set `--py` in `style` to change the height. It never drops under 24px, the small
 | `ow-toggle` | Root |
 | `ow-toggle__icon` | Icon |
 | `ow-toggle--sm`, `ow-toggle--md`, `ow-toggle--lg` | Root, by `size` |
+| `ow-toggle--soft`, `ow-toggle--solid` | Root, by `variant` |
 
 ## Accessibility [#accessibility]
 
@@ -86,7 +90,9 @@ Set `--py` in `style` to change the height. It never drops under 24px, the small
 - Keep the name the same in both states, such as "Bold": the state is what changes.
 - A toggle without children needs an `aria-label`; its icons are `aria-hidden`.
 - With `prefers-contrast: more` it gets no new edge; the tint and the focus ring carry it. In forced
-  colors an on toggle is filled with `Highlight`.
+  colors an on toggle is filled with `Highlight`, in both variants.
+- The solid fill keeps 4.5:1 for its text and 3:1 against the page in light and dark, as the primary
+  Button does.
 - Right to left, `startIcon` sits on the right.
 
 ## Theming [#theming]
@@ -100,7 +106,9 @@ Toggle reads these theme tokens. Set one on a toggle, or on anything around it.
 | `--ow-muted` | Text while off |
 | `--ow-hover` | Tint under the pointer while off |
 | `--ow-fg` | Text under the pointer while off, and the base of the accent text |
-| `--ow-accent` | The on tint (14%, 18% on hover, 22% held) and its text |
+| `--ow-accent` | The on tint (14%, 18% on hover, 22% held) and its text; with `solid`, the fill |
+| `--ow-on-accent` | `solid` only: the text on the fill |
+| `--ow-primary-shadow` | `solid` only: the light line inside the fill's top edge |
 | `--ow-radius` | Corners |
 | `--ow-motion-scale` | How far a press goes in |
 | `--ow-focus` | Focus ring |
@@ -114,5 +122,6 @@ In isolated mode the values sit on each Toggle's root, so set yours on the toggl
 ## Motion [#motion]
 
 A press goes in first: held, the toggle shrinks to 0.97 and takes the deepest tint within 90 ms, then
-lets go on the settle spring with a small overshoot. Off to on only changes tone; nothing slides.
+lets go on the settle spring with a small overshoot. A solid toggle that is on takes the primary
+Button's hover tint over its fill, and 10% black while held. Off to on only changes tone; nothing slides.
 With `prefers-reduced-motion`, the tone changes and the toggle does not move.

@@ -7,9 +7,16 @@ import { cn } from "../lib/cn";
 
 export type ToggleGroupSize = "sm" | "md" | "lg";
 
+export type ToggleGroupVariant = "soft" | "solid";
+
 export interface ToggleGroupVariantProps {
   /** Font size and padding of the items. @default "md" */
   size?: ToggleGroupSize | undefined;
+  /**
+   * The thumb and the pressed keys: a tint of the accent, or the primary Button's fill.
+   * @default "soft"
+   */
+  variant?: ToggleGroupVariant | undefined;
 }
 
 // A track (a tint of the text color, no shadow) and a thumb that slides under the pressed item. It
@@ -17,10 +24,6 @@ export interface ToggleGroupVariantProps {
 const root = [
   "group/ow-toggle-group",
   "[--_track:color-mix(in_oklab,var(--ow-fg)_6%,transparent)]",
-  // The accent over the track, opaque so the thumb hides nothing it should not.
-  "[--_thumb:color-mix(in_oklab,var(--ow-accent)_14%,var(--ow-raised-bg))]",
-  // The accent text leans toward the text color, to read on its own tint in both themes.
-  "[--_on:color-mix(in_oklab,var(--ow-accent)_70%,var(--ow-fg))]",
   // A key's fill with multiple selection: the thumb's, shifted a little on hover (in the item).
   "[--_key:var(--_thumb)] [--_fg:var(--ow-fg)] [--_muted:var(--ow-muted)] [--_focus:var(--ow-focus)]",
   // The items' and the thumb's radius: the track's, --ow-radius, less its padding.
@@ -49,14 +52,35 @@ const sizeStyles = {
   lg: "text-[16px]",
 };
 
+// Soft: a tint of the accent. The thumb is the accent over the track, opaque so it hides nothing it
+// should not; the accent text leans toward the text color, to read on its own tint in both themes.
+const soft = [
+  "[--_thumb:color-mix(in_oklab,var(--ow-accent)_14%,var(--ow-raised-bg))]",
+  "[--_on:color-mix(in_oklab,var(--ow-accent)_70%,var(--ow-fg))]",
+  "[--_key-shadow:none] [--_color-time:150ms]",
+];
+
+// Solid: the thumb and the pressed keys are the primary Button's: the accent with its edge, and the
+// text that goes on it. With the thumb, an item's text turns as the thumb reaches it or leaves it:
+// white on the track would not read, nor would gray on the fill. A short turn, since a slow one
+// passes through the fill's own tone. Lighting an item turns its text at once, as in soft. The
+// thumb only fades under reduced motion and in forced colors, so there the text turns with it.
+const solid = [
+  "[--_thumb:var(--ow-accent)] [--_on:var(--ow-on-accent)] [--_key-shadow:var(--ow-primary-shadow)]",
+  "[--_color-time:40ms] [--_color-delay:calc(0.22_*_var(--ow-spring-travel-duration))]",
+  "[--_leave-delay:calc(0.18_*_var(--ow-spring-travel-duration))]",
+  "motion-reduce:[--_color-delay:0s] motion-reduce:[--_leave-delay:0s]",
+  "forced-colors:[--_color-delay:0s] forced-colors:[--_leave-delay:0s]",
+];
+
 const variants = cva(root, {
-  variants: { size: sizeStyles },
-  defaultVariants: { size: "md" },
+  variants: { size: sizeStyles, variant: { soft, solid } },
+  defaultVariants: { size: "md", variant: "soft" },
 });
 
 /** The group's classes. */
-export function toggleGroupVariants({ size }: ToggleGroupVariantProps = {}): string {
-  return cn(variants({ size }));
+export function toggleGroupVariants({ size, variant }: ToggleGroupVariantProps = {}): string {
+  return cn(variants({ size, variant }));
 }
 
 // The thumb reaches out to the track's edges and keeps the track's padding as a clear border. Its
@@ -79,7 +103,7 @@ const thumb = [
   "ease-[var(--ow-spring-travel),var(--ow-spring-travel),var(--ow-spring-settle),ease]",
   // The key, inside the clear border.
   "before:absolute before:content-[''] before:inset-0 before:rounded-(--_radius)",
-  "before:bg-(color:--_thumb) before:will-change-transform",
+  "before:bg-(color:--_thumb) before:[box-shadow:var(--_key-shadow)] before:will-change-transform",
   "data-visible:opacity-100",
   // Pressed in quickly, released with the settle spring.
   "data-held:scale-(--_press)",
@@ -92,6 +116,7 @@ const thumb = [
   "motion-reduce:data-held:data-visible:opacity-80",
   // The label turns as the fill arrives, so the fill does not travel.
   "forced-colors:before:forced-color-adjust-none forced-colors:before:bg-[Highlight]",
+  "forced-colors:before:[box-shadow:none]",
   "forced-colors:not-data-held:transition-[opacity] forced-colors:not-data-held:duration-150",
   "forced-colors:not-data-held:ease-[ease]",
   // The first placement and every jump: nothing transitions.
@@ -112,7 +137,7 @@ const item = [
   // Type.
   "text-(color:--_muted) leading-[1.25] whitespace-nowrap",
   "cursor-pointer touch-manipulation will-change-[scale]",
-  "transition-[color,scale] duration-[150ms,var(--ow-spring-settle-duration)]",
+  "transition-[color,scale] duration-[var(--_color-time),var(--ow-spring-settle-duration)]",
   "ease-[ease,var(--ow-spring-settle)]",
   // Lit by Glide, or pressed: the text color; pressed, the accent leaning toward it.
   "data-glide-active:not-data-pressed:text-(color:--_fg) data-pressed:text-(color:--_on)",
@@ -120,16 +145,26 @@ const item = [
   // thumb (server-rendered HTML). It changes with the state, at once.
   "group-not-data-thumb/ow-toggle-group:data-pressed:bg-(color:--_key)",
   "group-data-multiple/ow-toggle-group:data-pressed:bg-(color:--_key)",
+  "group-not-data-thumb/ow-toggle-group:data-pressed:[box-shadow:var(--_key-shadow)]",
+  "group-data-multiple/ow-toggle-group:data-pressed:[box-shadow:var(--_key-shadow)]",
   // A hovered key with multiple selection, which a click turns off: its fill moves 3% toward the
   // label color. The thumb is not an action, so it keeps its fill.
-  "group-data-multiple/ow-toggle-group:data-glide-active:[--_key:color-mix(in_oklab,var(--_thumb),var(--_fg)_3%)]",
-  "data-held:scale-(--_press) data-held:duration-[150ms,90ms] data-held:ease-[ease,var(--ow-ease-out)]",
+  "group-data-multiple/ow-toggle-group:group-data-[variant=soft]/ow-toggle-group:data-glide-active:[--_key:color-mix(in_oklab,var(--_thumb),var(--_fg)_3%)]",
+  // A solid key takes the primary Button's hover: the hover tint over its fill.
+  "group-data-multiple/ow-toggle-group:group-data-[variant=solid]/ow-toggle-group:data-pressed:data-glide-active:bg-[linear-gradient(var(--ow-hover)_0_0)]",
+  // The text of an item the thumb arrives at or leaves turns with it (see the solid variant).
+  "group-data-thumb/ow-toggle-group:group-not-data-multiple/ow-toggle-group:group-data-[variant=solid]/ow-toggle-group:data-pressed:delay-[var(--_color-delay),0s]",
+  "group-data-thumb/ow-toggle-group:group-not-data-multiple/ow-toggle-group:group-data-[variant=solid]/ow-toggle-group:not-data-pressed:not-data-glide-active:delay-[var(--_leave-delay),0s]",
+  "group-data-thumb/ow-toggle-group:group-not-data-multiple/ow-toggle-group:group-data-[variant=solid]/ow-toggle-group:data-glide-active:not-data-pressed:[--_color-time:150ms]",
+  "data-held:scale-(--_press) data-held:duration-[var(--_color-time),90ms] data-held:ease-[ease,var(--ow-ease-out)]",
   // Above its neighbors, so a raised one beside it never covers the ring.
   "focus-visible:z-1 focus-visible:outline-2 focus-visible:outline-offset-2",
   "focus-visible:outline-(color:--_focus)",
   // Disabled is the last word on the text, also when pressed.
   "[--_dim:color-mix(in_oklab,var(--_muted)_50%,transparent)] disabled:cursor-not-allowed",
   "disabled:text-(color:--_dim) disabled:data-pressed:text-(color:--_dim)",
+  // A disabled solid key keeps its fill, so its text dims toward it.
+  "group-data-[variant=solid]/ow-toggle-group:disabled:data-pressed:text-[color-mix(in_oklab,var(--_on)_60%,transparent)]",
   // The icon is the font size plus 2px, as far from the edge as from the top. With both margins,
   // an item with only an icon is square.
   "[&>svg]:flex-none [&>svg]:size-(--icon)",
@@ -148,6 +183,11 @@ const item = [
   "forced-colors:group-data-multiple/ow-toggle-group:data-pressed:bg-[Highlight]",
   "forced-colors:focus-visible:outline-[Highlight] forced-colors:disabled:text-[GrayText]",
   "forced-colors:disabled:data-pressed:text-[GrayText]",
+  "forced-colors:group-data-[variant=solid]/ow-toggle-group:disabled:data-pressed:text-[GrayText]",
+  "forced-colors:data-pressed:bg-none forced-colors:data-pressed:[box-shadow:none]",
+  "forced-colors:group-not-data-thumb/ow-toggle-group:data-pressed:[box-shadow:none]",
+  "forced-colors:group-data-multiple/ow-toggle-group:data-pressed:[box-shadow:none]",
+  "forced-colors:group-data-multiple/ow-toggle-group:group-data-[variant=solid]/ow-toggle-group:data-pressed:data-glide-active:bg-none",
 ];
 
 // Room for glyphs whose ink passes their advance (a monospace "m"), without changing the width.

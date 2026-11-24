@@ -66,6 +66,7 @@ Tiga bagian, dua di antaranya Anda tulis sendiri: Root dan Item. Highlight hover
 | Prop | Tipe | Default | Deskripsi |
 | --- | --- | --- | --- |
 | `size` | `"sm" \| "md" \| "lg"` | `"md"` | Ukuran font dan padding item. Grup setinggi 32, 40, atau 48px, seperti Button seukuran itu; itemnya 8px lebih pendek |
+| `variant` | `"soft" \| "solid"` | `"soft"` | Thumb, dan tiap item yang ditekan pada `multiple`: tint aksen, atau isian Button utama dengan tepi dan teks di atasnya |
 | `equal` | `boolean` | `false` | Tiap item selebar yang terlebar, atau bagian yang sama dari grup yang direntangkan |
 
 #### Atribut data
@@ -73,6 +74,7 @@ Tiga bagian, dua di antaranya Anda tulis sendiri: Root dan Item. Highlight hover
 | Atribut data | Ada saat |
 | --- | --- |
 | `data-size` | Selalu: `sm`, `md`, atau `lg` |
+| `data-variant` | Selalu: `soft` atau `solid` |
 | `data-equal` | `equal` diatur |
 
 ### ToggleGroup.Item
@@ -96,6 +98,7 @@ Nilai yang disimpan di storage baru diketahui setelah hidrasi. Render kosong di 
 | `ow-toggle-group__label` | Teks item |
 | `ow-toggle-group__thumb` | Thumb |
 | `ow-toggle-group--sm`, `ow-toggle-group--md`, `ow-toggle-group--lg` | Root, menurut `size` |
+| `ow-toggle-group--soft`, `ow-toggle-group--solid` | Root, menurut `variant` |
 
 ## Aksesibilitas [#accessibility]
 
@@ -112,7 +115,9 @@ Grup adalah satu perhentian Tab; keyboard-nya berasal dari Base UI.
 - Screen reader mengumumkan tiap item sebagai tombol toggle dengan statusnya. Beri nama grup dengan
   `aria-label` atau `aria-labelledby`, dan item berisi ikon saja dengan `aria-label`.
 - Dengan `prefers-reduced-motion`, thumb langsung pindah dan tidak ada yang menyusut saat ditahan.
-- Pada forced colors, item yang ditekan diisi `Highlight` dan track tetap punya tepi yang terlihat.
+- Pada forced colors, item yang ditekan diisi `Highlight` dan track tetap punya tepi yang terlihat,
+  di kedua varian.
+- Isian solid menjaga 4,5:1 untuk labelnya dan 3:1 terhadap track dan halaman di tema terang dan gelap.
 
 ## Tema [#theming]
 
@@ -124,7 +129,9 @@ Toggle Group membaca token tema ini. Setel pada grup, atau pada elemen di sekita
 | --- | --- |
 | `--ow-fg` | Label item yang di-hover, tint 6% track, dan dasar teks aksen |
 | `--ow-muted` | Label lainnya |
-| `--ow-accent` | Thumb (14% di atas `--ow-raised-bg`) dan label yang ditekan |
+| `--ow-accent` | Thumb (14% di atas `--ow-raised-bg`) dan label yang ditekan; dengan `solid`, isian thumb dan tombolnya |
+| `--ow-on-accent` | Hanya `solid`: label yang ditekan |
+| `--ow-primary-shadow` | Hanya `solid`: garis terang di dalam tepi atas isian |
 | `--ow-raised-bg` | Yang diberi tint oleh thumb, dan item yang ditekan pada `multiple` |
 | `--ow-hover` | Highlight hover (Glide) |
 | `--ow-radius` | Sudut track; item, thumb, dan highlight memakainya dikurangi 4px |
@@ -145,6 +152,12 @@ memanjang dari sisi depan sepanjang jalan lalu mengendap pada lebar baru. Beruba
 jalan, ia berbalik dari posisinya. Pada render pertama, dan saat nilai baru tiba setelah hidrasi, ia
 muncul di tempatnya. Glide menyalakan item terdekat sepanjang sumbu, jadi sorotnya tidak pernah
 padam di celah.
+
+Dengan `variant="solid"`, label tidak boleh putih di atas track kosong: label item yang tiba berganti
+sekitar 140 ms setelah klik, saat thumb sampai, dan yang pergi sekitar 120 ms setelahnya, saat thumb
+meninggalkannya, keduanya dengan pudar 40 ms. Menyalakan item dengan pointer mengubah labelnya
+seketika, seperti `soft`; hanya label yang kembali ke posisi istirahat yang menunggu. Dengan
+`multiple`, `prefers-reduced-motion`, atau forced colors, tidak ada jeda.
 
 Saat ditahan, item dan thumb menyusut ke 0,97 dalam 90 ms dan kembali dengan spring saat dilepas.
 Dengan `prefers-reduced-motion`, thumb hanya memudar dan thumb yang ditahan meredup.

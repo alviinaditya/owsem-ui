@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { demo, pageTests, picker, visit } from "./example-page.ts";
 
 pageTests("toolbar", {
-  examples: ["Default", "Sizes", "Vertical", "Link and field"],
+  examples: ["Default", "Sizes", "Solid", "Vertical", "Link and field"],
   parts: ["Root", "Group", "Toggle", "Button", "Icon", "Separator", "Link", "Input"],
   specimen: ".ow-toolbar__input",
 });

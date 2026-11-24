@@ -136,7 +136,7 @@ describe("Toolbar", () => {
     await pointerAway();
     const bold = q<HTMLButtonElement>('[aria-label="Bold"]');
     expect(bold.className).toBe(
-      "ow-toggle ow-toggle--md ow-toolbar__button ow-toolbar__button--md",
+      "ow-toggle ow-toggle--soft ow-toggle--md ow-toolbar__button ow-toolbar__button--md",
     );
     expect(bold.dataset.size).toBe("md");
     expect(bold.hasAttribute("data-icon-only")).toBe(true);
@@ -148,6 +148,44 @@ describe("Toolbar", () => {
     expect(style.boxShadow).toBe("none");
     await pointerAway();
     expect(getComputedStyle(bold).backgroundColor).toBe(resolve("color", ON));
+  });
+
+  test("a solid Toggle rendered as an item keeps its fill and text, and its variant, in every size", async () => {
+    onTestFinished(() => {
+      delete root.dataset.theme;
+    });
+    for (const size of ["sm", "md", "lg"] as const) {
+      const { q } = await mount(
+        <Toolbar.Root aria-label="Bar" size={size}>
+          <Toolbar.Button
+            render={<Toggle variant="solid" defaultPressed />}
+            aria-label="On"
+            startIcon={<Glyph />}
+          />
+          <Toolbar.Button render={<Toggle variant="solid" />} aria-label="Off" />
+        </Toolbar.Root>,
+      );
+      await pointerAway();
+      const on = q<HTMLButtonElement>('[aria-label="On"]');
+      const off = q<HTMLButtonElement>('[aria-label="Off"]');
+      expect(on.dataset.variant).toBe("solid");
+      expect(on.dataset.size).toBe(size);
+      for (const theme of ["light", "dark"]) {
+        root.dataset.theme = theme;
+        const style = getComputedStyle(on);
+        expect(style.backgroundColor, `${size} ${theme}`).toBe(
+          resolve("color", "var(--ow-accent)"),
+        );
+        expect(style.color).toBe(resolve("color", "var(--ow-on-accent)"));
+        expect(style.boxShadow).toBe(resolve("box-shadow", "var(--ow-primary-shadow)"));
+        expect(getComputedStyle(off).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+      }
+      // Hovered, the hover tint lies over the fill; the toolbar's own tint does not replace it.
+      await userEvent.hover(on);
+      expect(getComputedStyle(on).backgroundColor).toBe(resolve("color", "var(--ow-accent)"));
+      expect(getComputedStyle(on).color).toBe(resolve("color", "var(--ow-on-accent)"));
+      expect(getComputedStyle(on).backgroundImage).not.toBe("none");
+    }
   });
 
   test("an Input or a Switch rendered as an item takes the toolbar's size", async () => {

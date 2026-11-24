@@ -2,7 +2,8 @@
 
 /*
  * A ghost button that stays up while on: flat and tinted on hover while off, a tint of the accent
- * with accent text while on, and a deeper tint only while held down (DP-4). Button's geometry (FR-9 to FR-11):
+ * with accent text while on (solid: the primary Button's fill), and a deeper tint only while held
+ * down (DP-4). Button's geometry (FR-9 to FR-11):
  * --py is the only input.
  */
 @layer owsem.components {
@@ -115,6 +116,29 @@
     transition-timing-function: var(--ow-ease-out);
   }
 
+  /*
+   * Solid: while on, the primary Button's fill, text, and edge. Hovered, the hover tint lies over
+   * the fill; held down, the fill takes 10% black. Off, hovered, and focused it is soft.
+   */
+  .ow-toggle--solid[data-pressed] {
+    background-color: var(--ow-accent);
+    color: var(--ow-on-accent);
+    box-shadow: var(--ow-primary-shadow);
+  }
+
+  @media (hover: hover) {
+    .ow-toggle--solid[data-pressed]:hover:not(:active, [data-disabled]) {
+      background-image: linear-gradient(var(--_hover) 0 0);
+      background-color: var(--ow-accent);
+    }
+  }
+
+  .ow-toggle--solid[data-pressed]:active:not([data-disabled]) {
+    /* literal: black darkens any fill */
+    background-color: color-mix(in oklab, var(--ow-accent), black 10%);
+    color: var(--ow-on-accent);
+  }
+
   .ow-toggle:focus-visible {
     outline: 2px solid var(--ow-focus);
     outline-offset: 2px;
@@ -134,8 +158,12 @@
 
   /* DP-8: the tint is gone, so on is the system's highlight. */
   @media (forced-colors: active) {
-    .ow-toggle[data-pressed] {
+    .ow-toggle[data-pressed],
+    .ow-toggle--solid[data-pressed]:hover:not(:active, [data-disabled]),
+    .ow-toggle--solid[data-pressed]:active:not([data-disabled]) {
       background-color: Highlight;
+      background-image: none;
+      box-shadow: none;
       color: HighlightText;
     }
 

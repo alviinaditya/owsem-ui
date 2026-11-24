@@ -17,6 +17,8 @@
     --_on: color-mix(in oklab, var(--ow-accent) 70%, var(--ow-fg));
     /* A key's fill with multiple selection: the thumb's, shifted a little on hover (below). */
     --_key: var(--_thumb);
+    --_key-shadow: none;
+    --_color-time: 150ms;
     --_fg: var(--ow-fg);
     --_muted: var(--ow-muted);
     --_focus: var(--ow-focus);
@@ -41,6 +43,24 @@
     /* A layer like the thumb's (NF-8), so both snap to device pixels alike and the thumb's gaps to
      * the track stay even at a fractional zoom. */
     will-change: transform;
+  }
+
+  /*
+   * Solid: the thumb and the pressed keys are the primary Button's: the accent with its edge, and
+   * the text that goes on it.
+   */
+  .ow-toggle-group--solid {
+    --_thumb: var(--ow-accent);
+    --_on: var(--ow-on-accent);
+    --_key-shadow: var(--ow-primary-shadow);
+    /*
+     * With the thumb, an item's text turns as the thumb reaches it or leaves it: white on the
+     * track would not read, nor would gray on the fill. A short turn, since a slow one passes
+     * through the fill's own tone. Lighting an item turns its text at once, as in soft.
+     */
+    --_color-time: 40ms;
+    --_color-delay: calc(0.22 * var(--ow-spring-travel-duration));
+    --_leave-delay: calc(0.18 * var(--ow-spring-travel-duration));
   }
 
   .ow-toggle-group--sm {
@@ -109,6 +129,7 @@
     inset: 0;
     border-radius: var(--_radius);
     background-color: var(--_thumb);
+    box-shadow: var(--_key-shadow);
     will-change: transform;
   }
 
@@ -158,7 +179,7 @@
     touch-action: manipulation;
     will-change: scale;
     transition:
-      color 150ms ease,
+      color var(--_color-time) ease,
       scale var(--_settle);
   }
 
@@ -184,20 +205,41 @@
    */
   .ow-toggle-group:is(:not([data-thumb]), [data-multiple]) > .ow-toggle-group__item[data-pressed] {
     background-color: var(--_key);
+    box-shadow: var(--_key-shadow);
   }
 
   /*
    * A hovered key with multiple selection, which a click turns off: its fill moves 3% toward the
    * label color. The thumb is not an action, so it keeps its fill.
    */
-  .ow-toggle-group[data-multiple] > .ow-toggle-group__item[data-glide-active] {
+  .ow-toggle-group:not(.ow-toggle-group--solid)[data-multiple]
+  > .ow-toggle-group__item[data-glide-active] {
     --_key: color-mix(in oklab, var(--_thumb), var(--_fg) 3%);
+  }
+
+  /* A solid key takes the primary Button's hover: the hover tint over its fill. */
+  .ow-toggle-group--solid[data-multiple] > .ow-toggle-group__item[data-pressed][data-glide-active] {
+    background-image: linear-gradient(var(--ow-hover) 0 0);
+  }
+
+  .ow-toggle-group--solid[data-thumb]:not([data-multiple]) > .ow-toggle-group__item[data-pressed] {
+    transition-delay: var(--_color-delay), 0s;
+  }
+
+  .ow-toggle-group--solid[data-thumb]:not([data-multiple])
+    > .ow-toggle-group__item:not([data-pressed], [data-glide-active]) {
+    transition-delay: var(--_leave-delay), 0s;
+  }
+
+  .ow-toggle-group--solid[data-thumb]:not([data-multiple])
+    > .ow-toggle-group__item[data-glide-active]:not([data-pressed]) {
+    --_color-time: 150ms;
   }
 
   .ow-toggle-group__item[data-held] {
     scale: var(--_press);
     transition:
-      color 150ms ease,
+      color var(--_color-time) ease,
       scale var(--_press-in);
   }
 
@@ -211,6 +253,11 @@
   .ow-toggle-group__item:disabled {
     color: color-mix(in oklab, var(--_muted) 50%, transparent);
     cursor: not-allowed;
+  }
+
+  /* A disabled solid key keeps its fill, so its text dims toward it. */
+  .ow-toggle-group--solid .ow-toggle-group__item[data-pressed]:disabled {
+    color: color-mix(in oklab, var(--_on) 60%, transparent);
   }
 
   /* FR-10: the icon is the font size plus 2px, as far from the edge as from the top. */
@@ -255,6 +302,12 @@
     .ow-toggle-group__thumb[data-held][data-visible] {
       opacity: 0.8;
     }
+
+    /* The thumb only fades, so the text turns with it. */
+    .ow-toggle-group--solid {
+      --_color-delay: 0s;
+      --_leave-delay: 0s;
+    }
   }
 
   /* DP-8: the track's edge shows, and the pressed items are filled with the system highlight. */
@@ -273,16 +326,26 @@
       outline-color: Highlight;
     }
 
-    .ow-toggle-group__item:disabled {
+    .ow-toggle-group__item:disabled,
+    .ow-toggle-group--solid .ow-toggle-group__item[data-pressed]:disabled {
       color: GrayText;
+    }
+
+    /* The fill does not travel, so the text turns at once. */
+    .ow-toggle-group--solid {
+      --_color-delay: 0s;
+      --_leave-delay: 0s;
     }
 
     /* The label turns as the fill arrives, so the fill does not travel. */
     .ow-toggle-group__thumb::before,
-    .ow-toggle-group:is(:not([data-thumb]), [data-multiple])
-      > .ow-toggle-group__item[data-pressed] {
+    .ow-toggle-group:is(:not([data-thumb]), [data-multiple]) > .ow-toggle-group__item[data-pressed],
+    .ow-toggle-group--solid[data-multiple]
+      > .ow-toggle-group__item[data-pressed][data-glide-active] {
       forced-color-adjust: none;
       background-color: Highlight;
+      background-image: none;
+      box-shadow: none;
     }
 
     .ow-toggle-group__thumb {

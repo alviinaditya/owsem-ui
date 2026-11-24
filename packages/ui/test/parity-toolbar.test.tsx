@@ -82,6 +82,7 @@ const candidates = classNames(
     toolbarLinkVariants({ size }),
     toolbarInputVariants({ size }),
     toggleVariants({ size }),
+    toggleVariants({ size, variant: "solid" }),
     inputVariants({ size }),
     inputWrapperVariants({ size }),
     switchVariants({ size }),
@@ -157,7 +158,7 @@ interface BarProps {
   size?: ToolbarSize;
   orientation?: "horizontal" | "vertical";
   /** Which items it holds. */
-  kind: "text" | "controls" | "fields";
+  kind: "text" | "controls" | "fields" | "solid";
   className?: string;
   itemClassName?: string;
 }
@@ -186,6 +187,22 @@ function Bar({ kit, size, orientation, kind, className, itemClassName }: BarProp
         <Toolbar.Link href="#help" data-item="link" endIcon={<Glyph />} className={itemClassName}>
           Help
         </Toolbar.Link>
+      </>
+    ) : kind === "solid" ? (
+      <>
+        <Toolbar.Button
+          render={<Toggle variant="solid" defaultPressed />}
+          aria-label="Solid on"
+          startIcon={<Glyph />}
+        />
+        <Toolbar.Button
+          render={<Toggle variant="solid" />}
+          aria-label="Solid off"
+          startIcon={<Glyph />}
+        />
+        <Toolbar.Button render={<Toggle variant="solid" defaultPressed />} aria-label="Solid text">
+          Bold
+        </Toolbar.Button>
       </>
     ) : kind === "controls" ? (
       <>
@@ -250,7 +267,7 @@ const make = (name: string, bar: Omit<BarProps, "kit">): Case => ({
   tw: <Bar kit={twind} {...bar} />,
 });
 
-const KINDS = ["text", "controls", "fields"] as const;
+const KINDS = ["text", "controls", "fields", "solid"] as const;
 const cases: Case[] = [
   ...KINDS.flatMap((kind) => [
     ...SIZES.map((size) => make(`${kind} ${size}`, { kind, size })),
@@ -356,6 +373,13 @@ describe("Toolbar in Tailwind CSS v4 against toolbar.css", () => {
     await tw.states(cases, "controls md", "hover", on("[data-item=button]"));
     await tw.states(cases, "controls md", "hover", on("[aria-label=Alerts]"));
     await tw.states(cases, "controls md", "hover", on("[aria-label=Plain]"));
+    await tw.states(cases, "solid md", "hover", on("[aria-label=Solid\\ on]"));
+    await tw.states(cases, "solid md", "hover", on("[aria-label=Solid\\ off]"));
+    await tw.states(cases, "solid lg", "hover", on("[aria-label=Solid\\ on]"));
+    await tw.states(cases, "solid md", "hover", {
+      ...on("[aria-label=Solid\\ on]"),
+      theme: "dark",
+    });
     await tw.states(cases, "fields md", "hover", on("[aria-label=Search]"));
     await tw.states(cases, "fields md", "hover", on("[aria-label=Name]"));
     await tw.states(cases, "fields md", "hover", on("[aria-label=Pick]"));
@@ -369,6 +393,8 @@ describe("Toolbar in Tailwind CSS v4 against toolbar.css", () => {
     await tw.states(cases, "text md", "held", on("[aria-label=Italic]"));
     await tw.states(cases, "controls md", "held", on("[data-item=button]"));
     await tw.states(cases, "controls md", "held", on("[aria-label=Plain]"));
+    await tw.states(cases, "solid md", "held", on("[aria-label=Solid\\ on]"));
+    await tw.states(cases, "solid sm", "held", on("[aria-label=Solid\\ on]"));
     await tw.states(cases, "controls md", "held", on("[aria-label=Alerts]"));
     await tw.states(cases, "fields md", "held", on("[aria-label=Find]"));
     await setMedia("reduced-motion");
@@ -398,6 +424,7 @@ describe("Toolbar in Tailwind CSS v4 against toolbar.css", () => {
       for (const selector of {
         text: ["[data-item=share]", "[data-item=link]", "[aria-label=Bold]"],
         controls: ["[data-item=button]", "[aria-label=Alerts]", "[aria-label=Plain]"],
+        solid: ["[aria-label=Solid\\ on]", "[aria-label=Solid\\ off]"],
         fields: ["[aria-label=Search]", "[aria-label=Pick]", "[aria-label=Find]"],
       }[kind]) {
         await acted(`${kind} md`, focus(selector));
@@ -413,6 +440,7 @@ describe("Toolbar in Tailwind CSS v4 against toolbar.css", () => {
     await setMedia("forced-colors");
     await tw.states(cases, "text md", "hover", on("[data-item=share]"));
     await tw.states(cases, "text md", "hover", on("[aria-label=Bold]"));
+    await tw.states(cases, "solid md", "hover", on("[aria-label=Solid\\ on]"));
   });
 });
 
@@ -428,6 +456,28 @@ describe("Toolbar in Tailwind CSS v4 behaves as in CSS", () => {
     expect(getComputedStyle(button).fontSize).toBe("13px");
     expect(q("[aria-label=Alerts]").dataset.size).toBe("sm");
     expect(q('[aria-label="Own size"]').dataset.size).toBe("lg");
+  });
+
+  test("a solid Toggle rendered as an item keeps its fill, its text, and its variant in every size", async () => {
+    tw.load();
+    const probe = (color: string) => {
+      const el = document.createElement("span");
+      el.style.color = color;
+      document.body.append(el);
+      const resolved = getComputedStyle(el).color;
+      el.remove();
+      return resolved;
+    };
+    for (const size of SIZES) {
+      const screen = await render(<Bar kit={twind} kind="solid" size={size} />);
+      const solid = screen.container.querySelector<HTMLElement>("[aria-label='Solid on']");
+      if (!solid) throw new Error("not rendered");
+      expect(solid.dataset.variant).toBe("solid");
+      expect(solid.dataset.size).toBe(size);
+      expect(getComputedStyle(solid).backgroundColor).toBe(probe("var(--ow-accent)"));
+      expect(getComputedStyle(solid).color).toBe(probe("var(--ow-on-accent)"));
+      await screen.unmount();
+    }
   });
 
   test("a Toggle rendered as an item keeps the toolbar's radius over a user's plain utility", async () => {

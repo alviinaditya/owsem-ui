@@ -29,7 +29,8 @@ export function PinButton() {
 
 Toggle adalah tombol dengan dua state, menyala dan mati. Ukuran dan jaraknya mengikuti Button. Tanpa
 children ia menjadi tombol ikon persegi dan butuh `aria-label`. Untuk sekumpulan toggle yang
-berkaitan, lihat Toggle Group.
+berkaitan, lihat Toggle Group. Saat menyala ia berupa tint aksen; `variant="solid"` mengisinya
+seperti Button utama.
 
 ## Contoh [#examples]
 
@@ -56,6 +57,7 @@ Base UI merender `<button>` dengan `aria-pressed`; OwsemUI menambah kelas `ow-to
 | Prop | Tipe | Default | Deskripsi |
 | --- | --- | --- | --- |
 | `size` | `"sm" \| "md" \| "lg"` | `"md"` | Tinggi 32, 40, atau 48px, seperti Button seukurannya |
+| `variant` | `"soft" \| "solid"` | `"soft"` | State menyala: tint aksen, atau isian Button utama dengan teks dan tepinya. Mati, hover, dan fokus sama di keduanya |
 | `startIcon`, `endIcon` | `ReactNode` | | Ikon sebelum atau sesudah label, ukuran font ditambah 2px; dekoratif, jadi toggle perlu nama |
 
 ### Atribut data
@@ -63,6 +65,7 @@ Base UI merender `<button>` dengan `aria-pressed`; OwsemUI menambah kelas `ow-to
 | Atribut data | Ada saat |
 | --- | --- |
 | `data-size` | Selalu: `sm`, `md`, atau `lg` |
+| `data-variant` | Selalu: `soft` atau `solid` |
 | `data-icon-only` | Ada ikon dan tanpa children |
 
 Setel `--py` di `style` untuk mengubah tingginya. Tingginya tidak pernah di bawah 24px, target terkecil yang diizinkan WCAG 2.5.8.
@@ -74,6 +77,7 @@ Setel `--py` di `style` untuk mengubah tingginya. Tingginya tidak pernah di bawa
 | `ow-toggle` | Root |
 | `ow-toggle__icon` | Icon |
 | `ow-toggle--sm`, `ow-toggle--md`, `ow-toggle--lg` | Root, menurut `size` |
+| `ow-toggle--soft`, `ow-toggle--solid` | Root, menurut `variant` |
 
 ## Aksesibilitas [#accessibility]
 
@@ -86,7 +90,9 @@ Setel `--py` di `style` untuk mengubah tingginya. Tingginya tidak pernah di bawa
 - Biarkan namanya sama di kedua state, misalnya "Tebal": yang berubah adalah statenya.
 - Toggle tanpa children butuh `aria-label`; ikonnya `aria-hidden`.
 - Dengan `prefers-contrast: more` ia tidak mendapat tepi baru; tint dan cincin fokus yang
-  menandainya. Pada forced colors, toggle yang menyala diisi `Highlight`.
+  menandainya. Pada forced colors, toggle yang menyala diisi `Highlight`, di kedua varian.
+- Isian solid menjaga 4,5:1 untuk teksnya dan 3:1 terhadap halaman di tema terang dan gelap, seperti
+  Button utama.
 - Kanan ke kiri, `startIcon` berada di sisi kanan.
 
 ## Tema [#theming]
@@ -100,7 +106,9 @@ Toggle membaca token tema ini. Setel salah satunya pada toggle, atau pada elemen
 | `--ow-muted` | Teks saat mati |
 | `--ow-hover` | Tint di bawah pointer saat mati |
 | `--ow-fg` | Teks di bawah pointer saat mati, dan dasar teks aksen |
-| `--ow-accent` | Tint menyala (14%, 18% saat hover, 22% saat ditahan) dan teksnya |
+| `--ow-accent` | Tint menyala (14%, 18% saat hover, 22% saat ditahan) dan teksnya; dengan `solid`, isiannya |
+| `--ow-on-accent` | Hanya `solid`: teks di atas isian |
+| `--ow-primary-shadow` | Hanya `solid`: garis terang di dalam tepi atas isian |
 | `--ow-radius` | Sudut |
 | `--ow-motion-scale` | Seberapa dalam tekanan masuk |
 | `--ow-focus` | Cincin fokus |
@@ -114,6 +122,7 @@ Pada mode isolated, nilainya ada di root tiap Toggle, jadi setel pada toggle-nya
 ## Gerak [#motion]
 
 Tekanan masuk lebih dulu: saat ditahan, toggle menyusut ke 0,97 dan mengambil tint terdalam dalam 90
-ms, lalu lepas dengan spring settle dan sedikit overshoot. Dari mati ke menyala hanya warnanya yang
+ms, lalu lepas dengan spring settle dan sedikit overshoot. Toggle solid yang menyala mengambil tint hover
+Button utama di atas isiannya, dan hitam 10% saat ditahan. Dari mati ke menyala hanya warnanya yang
 berubah; tidak ada yang bergeser. Dengan `prefers-reduced-motion`, warnanya berubah dan toggle tidak
 bergerak.

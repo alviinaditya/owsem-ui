@@ -1,6 +1,6 @@
 "use client";
 
-import { ToggleGroup, type ToggleGroupSize } from "owsem-ui/base";
+import { ToggleGroup, type ToggleGroupSize, type ToggleGroupVariant } from "owsem-ui/base";
 import { type CSSProperties, useState } from "react";
 import { ComponentPage, type ExamplePageProps } from "@/components/component-page/component-page";
 import { Icon, type IconName } from "@/components/icons/icon";
@@ -68,12 +68,14 @@ const SIZES: readonly ToggleGroupSize[] = ["sm", "md", "lg"];
 function Views({
   lang,
   size,
+  variant,
   equal,
   disabled,
   content = "text",
 }: {
   lang: Lang;
   size?: ToggleGroupSize;
+  variant?: ToggleGroupVariant;
   equal?: boolean;
   disabled?: boolean;
   content?: "text" | "icon";
@@ -85,6 +87,7 @@ function Views({
       <ToggleGroup.Root
         aria-label={t.view}
         size={size}
+        variant={variant}
         equal={equal}
         disabled={disabled}
         value={[view]}
@@ -218,6 +221,24 @@ export const toggleGroupDefinition = defineComponent({
       ],
     },
     {
+      id: "solid",
+      title: { id: "Solid", en: "Solid" },
+      description: {
+        id: 'variant="solid" mengisi thumb, dan tiap item yang menyala dengan multiple, dengan warna aksen.',
+        en: 'variant="solid" fills the thumb, and each pressed item with multiple, with the accent.',
+      },
+      uses: ["ToggleGroup"],
+      demo: (lang) => <Views lang={lang} variant="solid" />,
+      code: (setup, lang) => [
+        exampleFile(
+          "SolidViews",
+          viewImports(setup),
+          viewGroup(lang, ['variant="solid"']),
+          viewState,
+        ),
+      ],
+    },
+    {
       id: "icons",
       title: { id: "Ikon", en: "Icons" },
       description: {
@@ -335,8 +356,8 @@ export const toggleGroupDefinition = defineComponent({
       name: "Thumb",
       selector: ".ow-toggle-group__thumb",
       note: {
-        id: "Tint aksen di atas warna raised, tanpa tepi dan bayangan, di bawah item yang ditekan; labelnya berubah menjadi aksen. Dekoratif; hanya di pilihan tunggal.",
-        en: "A tint of the accent over the raised color, with no edge or shadow, under the pressed item, whose label turns accent. Decorative; single selection only.",
+        id: "Tint aksen di atas warna raised, tanpa tepi dan bayangan, di bawah item yang ditekan; labelnya berubah menjadi aksen. Dengan variant solid, isian aksen dengan tepi atas terang seperti Button utama, dan labelnya putih. Dekoratif; hanya di pilihan tunggal.",
+        en: "A tint of the accent over the raised color, with no edge or shadow, under the pressed item, whose label turns accent. With variant solid, the accent fill with the primary Button's light top edge, and a label that goes on it. Decorative; single selection only.",
       },
       tokens: {
         "--ow-accent": "--_thumb",

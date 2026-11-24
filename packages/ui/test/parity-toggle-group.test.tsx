@@ -8,6 +8,7 @@ import { glideSlots } from "../src/tailwind/lib/glide/glide-variants";
 import { ToggleGroup as TwToggleGroup } from "../src/tailwind/toggle-group/index";
 import {
   type ToggleGroupSize,
+  type ToggleGroupVariant,
   toggleGroupSlots,
   toggleGroupVariants,
 } from "../src/tailwind/toggle-group/toggle-group-variants";
@@ -34,7 +35,10 @@ const tw = tailwindParity(
   classNames(
     ...Object.values(toggleGroupSlots),
     ...Object.values(glideSlots),
-    ...SIZES.map((size) => toggleGroupVariants({ size })),
+    ...SIZES.flatMap((size) => [
+      toggleGroupVariants({ size }),
+      toggleGroupVariants({ size, variant: "solid" }),
+    ]),
     OVERRIDES,
     ITEM_OVERRIDES,
     "data-pressed:text-green-500 data-pressed:bg-red-500",
@@ -72,6 +76,7 @@ const Lines = () => (
 interface GroupProps {
   kit: Kit;
   size?: ToggleGroupSize;
+  variant?: ToggleGroupVariant;
   value?: string[];
   multiple?: boolean;
   orientation?: "horizontal" | "vertical";
@@ -89,6 +94,7 @@ interface GroupProps {
 function Group({
   kit,
   size,
+  variant,
   value = ["b"],
   multiple,
   orientation,
@@ -117,6 +123,7 @@ function Group({
     <Root
       aria-label="Group"
       size={size}
+      variant={variant}
       defaultValue={value}
       multiple={multiple}
       orientation={orientation}
@@ -183,6 +190,33 @@ const cases: Case[] = [
   },
 ];
 
+// Solid: the thumb and the pressed keys are the primary Button's.
+const solid: [string, Omit<GroupProps, "kit">][] = [
+  ["solid", { variant: "solid" }],
+  ["solid sm", { variant: "solid", size: "sm" }],
+  ["solid lg", { variant: "solid", size: "lg" }],
+  ["solid none pressed", { variant: "solid", value: [] }],
+  ["solid first pressed", { variant: "solid", value: ["a"] }],
+  ["solid multiple", { variant: "solid", multiple: true, value: ["a", "c"] }],
+  ["solid multiple, none pressed", { variant: "solid", multiple: true, value: [] }],
+  ["solid vertical", { variant: "solid", orientation: "vertical" }],
+  [
+    "solid vertical, multiple",
+    { variant: "solid", orientation: "vertical", multiple: true, value: ["a", "b"] },
+  ],
+  ["solid equal, stretched", { variant: "solid", equal: true, width: 340 }],
+  ["solid disabled group", { variant: "solid", disabled: true }],
+  ["solid disabled group, multiple", { variant: "solid", disabled: true, multiple: true }],
+  ["solid one disabled and pressed", { variant: "solid", one: true, value: ["b"] }],
+  ["solid icon only", { variant: "solid", items: "icons" }],
+  [
+    "solid icon only, multiple",
+    { variant: "solid", items: "icons", multiple: true, value: ["a", "c"] },
+  ],
+  ["solid lg, vertical", { variant: "solid", size: "lg", orientation: "vertical" }],
+];
+cases.push(...solid.map(([name, group]) => make(name, group)));
+
 // The moment before the script places the thumb: server-rendered HTML has no layout, and the
 // pressed item draws its own key.
 const beforeThumb = (side: Element) => {
@@ -219,6 +253,11 @@ describe("Toggle Group in Tailwind CSS v4 against toggle-group.css", () => {
     await tw.states(cases, "md", "hover", { ...item, theme: "dark" });
     await tw.states(cases, "md", "hover", { ...item, dir: "rtl" });
     await tw.states(cases, "md", "hover", pressed);
+    for (const name of ["solid", "solid multiple", "solid vertical", "solid icon only"]) {
+      await tw.states(cases, name, "hover", item);
+    }
+    await tw.states(cases, "solid", "hover", { ...item, theme: "dark" });
+    await tw.states(cases, "solid", "hover", pressed);
   });
 
   test("a pressed item that Glide lights (a skipped one keeps the mark) keeps its text color", async () => {
@@ -235,21 +274,45 @@ describe("Toggle Group in Tailwind CSS v4 against toggle-group.css", () => {
   test("a hovered key with multiple selection moves toward the label color", {
     timeout: 60_000,
   }, async () => {
-    for (const name of ["multiple", "vertical, multiple", "icon only, multiple"]) {
+    for (const name of [
+      "multiple",
+      "vertical, multiple",
+      "icon only, multiple",
+      "solid multiple",
+      "solid vertical, multiple",
+      "solid icon only, multiple",
+    ]) {
       await tw.states(cases, name, "hover", pressed);
       await tw.states(cases, name, "hover", item);
     }
   });
 
   test("a held press presses the item in, and the thumb with it", { timeout: 60_000 }, async () => {
-    for (const name of ["md", "multiple", "vertical", "icon only", "disabled group"]) {
+    for (const name of [
+      "md",
+      "multiple",
+      "vertical",
+      "icon only",
+      "disabled group",
+      "solid",
+      "solid multiple",
+      "solid disabled group",
+    ]) {
       await tw.states(cases, name, "held", pressed);
       await tw.states(cases, name, "held", item);
     }
   });
 
   test("keyboard focus draws the ring", { timeout: 60_000 }, async () => {
-    for (const name of ["md", "multiple", "icon only", "vertical", "none pressed"]) {
+    for (const name of [
+      "md",
+      "multiple",
+      "icon only",
+      "vertical",
+      "none pressed",
+      "solid",
+      "solid multiple",
+    ]) {
       await tw.states(cases, name, "focus", { ...run, target: "[aria-pressed]" });
     }
   });
@@ -264,6 +327,8 @@ describe("Toggle Group in Tailwind CSS v4 against toggle-group.css", () => {
     await tw.states(cases, "multiple", "hover", pressed);
     await tw.states(cases, "md", "focus", { ...run, target: "[aria-pressed]" });
     await tw.states(cases, "md", "held", pressed);
+    await tw.states(cases, "solid multiple", "hover", pressed);
+    await tw.states(cases, "solid", "held", pressed);
   });
 
   test("reduced motion matches: nothing slides or presses, a held thumb dims", {
@@ -274,6 +339,7 @@ describe("Toggle Group in Tailwind CSS v4 against toggle-group.css", () => {
     await tw.states(cases, "md", "held", pressed);
     await tw.states(cases, "md", "held", item);
     await tw.states(cases, "md", "hover", item);
+    await tw.states(cases, "solid", "held", pressed);
   });
 
   test("more contrast changes nothing", async () => {

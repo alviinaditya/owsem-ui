@@ -20,7 +20,10 @@ const OVERRIDES =
 const tw = tailwindParity(
   classNames(
     ...Object.values(toggleSlots),
-    ...SIZES.map((size) => toggleVariants({ size })),
+    ...SIZES.flatMap((size) => [
+      toggleVariants({ size }),
+      toggleVariants({ size, variant: "solid" }),
+    ]),
     OVERRIDES,
     "data-pressed:bg-red-500 data-pressed:text-green-500",
   ),
@@ -50,6 +53,36 @@ const cases: Case[] = [
       <Toggle size={size} startIcon={<Plus />} aria-label="Add" />
     )),
   ]),
+  ...SIZES.flatMap((size) => [
+    make(`${size} solid`, (Toggle) => (
+      <Toggle size={size} variant="solid">
+        Bold
+      </Toggle>
+    )),
+    make(`${size} solid pressed`, (Toggle) => (
+      <Toggle size={size} variant="solid" defaultPressed>
+        Bold
+      </Toggle>
+    )),
+    make(`${size} solid icon only pressed`, (Toggle) => (
+      <Toggle size={size} variant="solid" startIcon={<Plus />} defaultPressed aria-label="Add" />
+    )),
+  ]),
+  make("solid disabled", (Toggle) => (
+    <Toggle variant="solid" disabled>
+      Bold
+    </Toggle>
+  )),
+  make("solid disabled pressed", (Toggle) => (
+    <Toggle variant="solid" disabled defaultPressed>
+      Bold
+    </Toggle>
+  )),
+  make("solid with icons pressed", (Toggle) => (
+    <Toggle variant="solid" startIcon={<Plus />} endIcon={<Plus />} defaultPressed>
+      Add
+    </Toggle>
+  )),
   make("default", (Toggle) => <Toggle>Italic</Toggle>),
   make("disabled", (Toggle) => <Toggle disabled>Bold</Toggle>),
   make("disabled pressed", (Toggle) => (
@@ -93,7 +126,16 @@ describe("Toggle in Tailwind CSS v4 against toggle.css", () => {
   test("hover tints an off toggle, steps an on one up, and leaves a disabled one", {
     timeout: 60_000,
   }, async () => {
-    for (const name of ["md", "md pressed", "disabled", "disabled pressed", "icon only pressed"]) {
+    for (const name of [
+      "md",
+      "md pressed",
+      "disabled",
+      "disabled pressed",
+      "icon only pressed",
+      "md solid",
+      "md solid pressed",
+      "solid disabled pressed",
+    ]) {
       await tw.states(cases, name, "hover");
     }
   });
@@ -101,13 +143,22 @@ describe("Toggle in Tailwind CSS v4 against toggle.css", () => {
   test("a held press, with a real pointer, goes deepest and in to 0.97", {
     timeout: 60_000,
   }, async () => {
-    for (const name of ["md", "md pressed", "lg", "disabled", "md icon only"]) {
+    for (const name of [
+      "md",
+      "md pressed",
+      "lg",
+      "disabled",
+      "md icon only",
+      "md solid",
+      "md solid pressed",
+      "lg solid pressed",
+    ]) {
       await tw.states(cases, name, "held");
     }
   });
 
   test("keyboard focus draws the ring", async () => {
-    for (const name of ["md", "md pressed", "icon only pressed"]) {
+    for (const name of ["md", "md pressed", "icon only pressed", "md solid pressed"]) {
       await tw.states(cases, name, "focus");
     }
   });
@@ -120,6 +171,9 @@ describe("Toggle in Tailwind CSS v4 against toggle.css", () => {
     await tw.states(cases, "md pressed", "hover");
     await tw.states(cases, "md pressed", "focus");
     await tw.states(cases, "md", "held");
+    await tw.states(cases, "md solid pressed", "hover");
+    await tw.states(cases, "md solid pressed", "held");
+    await tw.states(cases, "md solid pressed", "focus");
   });
 
   test("reduced motion matches: a held press does not move", { timeout: 60_000 }, async () => {
@@ -127,6 +181,7 @@ describe("Toggle in Tailwind CSS v4 against toggle.css", () => {
     await tw.parity(cases);
     await tw.states(cases, "md", "held");
     await tw.states(cases, "md pressed", "held");
+    await tw.states(cases, "md solid pressed", "held");
   });
 
   test("more contrast changes nothing", async () => {
@@ -187,6 +242,18 @@ describe("className on Toggle in Tailwind CSS v4", () => {
     if (!on || !off) throw new Error("not rendered");
     expectStyles(on, { backgroundColor: "oklch(0.637 0.237 25.331)" });
     expectStyles(off, { opacity: "1" });
+  });
+
+  test("a user's utility with a state's variant beats the solid fill's", async () => {
+    tw.load();
+    const screen = await render(
+      <TwToggle variant="solid" defaultPressed className="data-pressed:bg-red-500">
+        On
+      </TwToggle>,
+    );
+    const on = screen.container.querySelector("button");
+    if (!on) throw new Error("not rendered");
+    expectStyles(on, { backgroundColor: "oklch(0.637 0.237 25.331)" });
   });
 
   test("toggleVariants() output merges with a className, the user's last", () => {

@@ -38,6 +38,7 @@ export interface ToggleGroupRootProps<Value extends string = string>
  */
 export function ToggleGroupRoot<Value extends string = string>({
   size = "md",
+  variant = "soft",
   equal,
   className,
   children,
@@ -64,8 +65,9 @@ export function ToggleGroupRoot<Value extends string = string>({
       data-slot="toggle-group"
       {...props}
       ref={merged}
-      className={cn(toggleGroupVariants({ size }), className)}
+      className={cn(toggleGroupVariants({ size, variant }), className)}
       data-size={size}
+      data-variant={variant}
       data-equal={equal ? "" : undefined}
     >
       <GlideHighlight glide={glide} />

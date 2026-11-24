@@ -3,10 +3,19 @@ import { cn } from "../../core/cn";
 
 export type ToggleSize = "sm" | "md" | "lg";
 
+export type ToggleVariant = "soft" | "solid";
+
 export interface ToggleVariantProps {
   /** Button's sizes: 32, 40, or 48 px tall. @default "md" */
   size?: ToggleSize | undefined;
+  /** While on: a tint of the accent, or the primary Button's fill. @default "soft" */
+  variant?: ToggleVariant | undefined;
 }
+
+const variantClass: Record<ToggleVariant, string> = {
+  soft: "ow-toggle--soft",
+  solid: "ow-toggle--solid",
+};
 
 const sizeClass: Record<ToggleSize, string> = {
   sm: "ow-toggle--sm",
@@ -15,8 +24,8 @@ const sizeClass: Record<ToggleSize, string> = {
 };
 
 /** The root's classes. */
-export function toggleVariants({ size = "md" }: ToggleVariantProps = {}): string {
-  return cn("ow-toggle", sizeClass[size]);
+export function toggleVariants({ size = "md", variant = "soft" }: ToggleVariantProps = {}): string {
+  return cn("ow-toggle", variantClass[variant], sizeClass[size]);
 }
 
 /** The classes of the inner parts. */

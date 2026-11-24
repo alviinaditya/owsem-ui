@@ -3,7 +3,7 @@ import { demo, pageTests, picker, visit } from "./example-page.ts";
 import { thumbKey } from "./helpers.ts";
 
 pageTests("toggle-group", {
-  examples: ["Default", "Sizes", "Icons", "Multiple", "Equal", "Disabled"],
+  examples: ["Default", "Sizes", "Solid", "Icons", "Multiple", "Equal", "Disabled"],
   parts: ["Root", "Item", "Thumb"],
   specimen: ".ow-toggle-group__thumb",
 });

@@ -82,3 +82,35 @@ describe("Toolbar geometry (FR-9 to FR-11, FR-10b)", () => {
     });
   }
 });
+
+describe("Toolbar, a solid Toggle", () => {
+  for (const size of ["sm", "md", "lg"] as const) {
+    test(`${size}: it has the box and the radius of a soft one, and the item's height`, async () => {
+      const { all } = await mount(
+        <Toolbar.Root aria-label="Bar" size={size}>
+          <Toolbar.Button
+            render={<Toggle defaultPressed />}
+            aria-label="Soft"
+            startIcon={<Glyph />}
+          />
+          <Toolbar.Button
+            render={<Toggle variant="solid" defaultPressed />}
+            aria-label="Solid"
+            startIcon={<Glyph />}
+          />
+        </Toolbar.Root>,
+      );
+      const [soft, solid] = all(".ow-toggle") as [HTMLElement, HTMLElement];
+      expect(solid.dataset.variant).toBe("solid");
+      expect(solid.dataset.size).toBe(size);
+      const a = soft.getBoundingClientRect();
+      const b = solid.getBoundingClientRect();
+      expect(b.width).toBeCloseTo(a.width, 2);
+      expect(Math.abs(b.height - SIZES[size].height)).toBeLessThanOrEqual(TOL);
+      expect(getComputedStyle(solid).borderTopLeftRadius).toBe(
+        getComputedStyle(soft).borderTopLeftRadius,
+      );
+      expect(getComputedStyle(solid).padding).toBe(getComputedStyle(soft).padding);
+    });
+  }
+});

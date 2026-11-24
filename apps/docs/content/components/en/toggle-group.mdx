@@ -66,6 +66,7 @@ Three parts, two of them yours to write: Root and Item. The hover highlight is G
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `size` | `"sm" \| "md" \| "lg"` | `"md"` | Font size and padding of the items. The group is 32, 40, or 48px tall, as a Button of that size; its items are 8px shorter |
+| `variant` | `"soft" \| "solid"` | `"soft"` | The thumb, and each pressed item with `multiple`: a tint of the accent, or the primary Button's fill with its edge and the text that goes on it |
 | `equal` | `boolean` | `false` | Every item as wide as the widest, or an equal share of a stretched group |
 
 #### Data attributes
@@ -73,6 +74,7 @@ Three parts, two of them yours to write: Root and Item. The hover highlight is G
 | Data attribute | Present when |
 | --- | --- |
 | `data-size` | Always: `sm`, `md`, or `lg` |
+| `data-variant` | Always: `soft` or `solid` |
 | `data-equal` | `equal` is set |
 
 ### ToggleGroup.Item
@@ -96,6 +98,7 @@ A value kept in storage is only known after hydration. Render none on the server
 | `ow-toggle-group__label` | An item's text |
 | `ow-toggle-group__thumb` | Thumb |
 | `ow-toggle-group--sm`, `ow-toggle-group--md`, `ow-toggle-group--lg` | Root, by `size` |
+| `ow-toggle-group--soft`, `ow-toggle-group--solid` | Root, by `variant` |
 
 ## Accessibility [#accessibility]
 
@@ -112,7 +115,9 @@ The group is one tab stop; its keyboard comes from Base UI.
 - Screen readers announce each item as a toggle button with its pressed state. Name the group with
   `aria-label` or `aria-labelledby`, and an item with only an icon with `aria-label`.
 - With `prefers-reduced-motion`, the thumb moves at once and nothing scales when held.
-- In forced colors, the pressed item is filled with `Highlight` and the track keeps a visible edge.
+- In forced colors, the pressed item is filled with `Highlight` and the track keeps a visible edge,
+  in both variants.
+- The solid fill keeps 4.5:1 for its label and 3:1 against the track and the page in light and dark.
 
 ## Theming [#theming]
 
@@ -124,7 +129,9 @@ Toggle Group reads these theme tokens. Set them on the group, or on an element a
 | --- | --- |
 | `--ow-fg` | Labels of hovered items, the track's 6% tint, and the base of the accent text |
 | `--ow-muted` | Other labels |
-| `--ow-accent` | The thumb (14% over `--ow-raised-bg`) and the pressed label |
+| `--ow-accent` | The thumb (14% over `--ow-raised-bg`) and the pressed label; with `solid`, the thumb's and the keys' fill |
+| `--ow-on-accent` | `solid` only: the pressed label |
+| `--ow-primary-shadow` | `solid` only: the light line inside the fill's top edge |
 | `--ow-raised-bg` | What the thumb tints, and pressed items with `multiple` |
 | `--ow-hover` | The hover highlight (Glide) |
 | `--ow-radius` | The track's corners; the items, thumb, and highlight take it less 4px |
@@ -144,6 +151,12 @@ The thumb is gooey: pick another item and it slides there on the travel spring, 
 from the leading edge along the way and settling at the new width. Change your mind mid-slide and it
 turns from where it is. On the first render, and when a value arrives after hydration, it appears in
 place. Glide lights the nearest item along the axis, so the highlight never blinks out in the gaps.
+
+With `variant="solid"` the label must not be white on the bare track: the arriving item's label turns
+about 140 ms after the click, as the thumb reaches it, and the leaving one about 120 ms after, as the
+thumb leaves it, both in a 40 ms fade. Lighting an item with the pointer turns its label at once, as
+in `soft`; only the label that goes back to rest waits. With `multiple`, and with
+`prefers-reduced-motion` or forced colors, there is no delay.
 
 Held down, the item and the thumb scale to 0.97 in 90 ms and spring back on release. With
 `prefers-reduced-motion`, the thumb only fades and a held thumb dims instead.

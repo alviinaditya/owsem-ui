@@ -97,3 +97,34 @@ describe("Toggle geometry (FR-9 to FR-11, Button's)", () => {
     expect(wrapped?.getBoundingClientRect().height).toBeCloseTo(SIZES.md.height, 1);
   });
 });
+
+describe("Toggle, solid", () => {
+  for (const size of ["sm", "md", "lg"] as const) {
+    test(`${size}: a solid toggle has the box of a soft one, on or off`, async () => {
+      const [soft, solid, softOn, solidOn] = await mount(
+        <>
+          <Toggle size={size} startIcon={<Icon />}>
+            Label
+          </Toggle>
+          <Toggle size={size} variant="solid" startIcon={<Icon />}>
+            Label
+          </Toggle>
+          <Toggle size={size} defaultPressed startIcon={<Icon />}>
+            Label
+          </Toggle>
+          <Toggle size={size} variant="solid" defaultPressed startIcon={<Icon />}>
+            Label
+          </Toggle>
+        </>,
+      );
+      const box = (el: HTMLElement | undefined) => el?.getBoundingClientRect();
+      expect(box(solid)?.width).toBeCloseTo(box(soft)?.width ?? 0, 2);
+      expect(box(solid)?.height).toBeCloseTo(box(soft)?.height ?? 0, 2);
+      expect(box(solidOn)?.width).toBeCloseTo(box(softOn)?.width ?? 0, 2);
+      expect(box(solidOn)?.height).toBeCloseTo(box(softOn)?.height ?? 0, 2);
+      expect(getComputedStyle(solidOn as HTMLElement).borderTopLeftRadius).toBe(
+        getComputedStyle(softOn as HTMLElement).borderTopLeftRadius,
+      );
+    });
+  }
+});

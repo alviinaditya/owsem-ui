@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { demo, pageTests, picker, visit } from "./example-page.ts";
 
 pageTests("toggle", {
-  examples: ["Default", "Sizes", "Icon only", "Disabled", "Controlled"],
+  examples: ["Default", "Sizes", "Solid", "Icon only", "Disabled", "Controlled"],
   parts: ["Root", "Icon"],
   specimen: ".ow-toggle[data-pressed] .ow-toggle__icon",
 });

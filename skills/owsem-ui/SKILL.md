@@ -769,8 +769,8 @@ import { Switch } from "owsem-ui/base"; // or "@/components/owsem/switch"
 ### Toggle
 
 A two-state button: flat with muted text while off, a 14% tint of the accent with accent text while
-on (18% on hover, 22% held). Registry
-item: `toggle`.
+on (18% on hover, 22% held); with `variant="solid"`, while on it is the primary Button's fill:
+the accent with `--ow-on-accent` text. Registry item: `toggle`.
 
 ```tsx
 import { Toggle } from "owsem-ui/base"; // or "@/components/owsem/toggle"
@@ -782,7 +782,8 @@ import { Toggle } from "owsem-ui/base"; // or "@/components/owsem/toggle"
 - Renders a `<button>` with `aria-pressed`, `data-pressed` while on, and `data-disabled`.
   Controlled with `pressed` and `onPressedChange(pressed, eventDetails)`, or uncontrolled with
   `defaultPressed`. Keep its name the same in both states; the state is what changes.
-- Props: `size` (`"sm"`, `"md"` default, `"lg"`: Button's heights), `startIcon` and `endIcon`
+- Props: `size` (`"sm"`, `"md"` default, `"lg"`: Button's heights), `variant` (`"soft"` default,
+  or `"solid"`; written as `data-variant`), `startIcon` and `endIcon`
   (any icon; sized to the font plus 2px, no size props needed), plus Base UI's `disabled`,
   `value`, `className`, `style`, and `render`. Without children it is a square icon button: give
   it an `aria-label`. The ref goes to the `button`.
@@ -793,7 +794,9 @@ import { Toggle } from "owsem-ui/base"; // or "@/components/owsem/toggle"
 ### Toggle Group
 
 Toggle buttons that work as one, and the segmented control: a flat track (a tint of the text
-color), with a thumb (an accent tint, with accent text on the item) that slides to the pressed item. Registry item: `toggle-group`.
+color), with a thumb (an accent tint, with accent text on the item) that slides to the pressed
+item; with `variant="solid"` the thumb is the accent, and the item's text `--ow-on-accent`. Registry
+item: `toggle-group`.
 
 ```tsx
 import { ToggleGroup } from "owsem-ui/base"; // or "@/components/owsem/toggle-group"
@@ -810,8 +813,9 @@ const [view, setView] = useState("list");
 
 - `Root` is Base UI's ToggleGroup: `value` and `defaultValue` are arrays, `multiple` lets several
   items be pressed (each is a key of its own, with no thumb), plus `orientation`, `disabled`,
-  and `loopFocus`. OwsemUI adds `size` (`"sm"`, `"md"`, the default, or `"lg"`) and `equal`
-  (every item as wide as the widest; equal shares when the group is stretched).
+  and `loopFocus`. OwsemUI adds `size` (`"sm"`, `"md"`, the default, or `"lg"`), `variant` (`"soft"`, the default, or
+  `"solid"`: with `multiple`, each pressed item is filled with the accent), and `equal` (every item
+  as wide as the widest; equal shares when the group is stretched).
 - `Item` is Base UI's Toggle with a `value`. Give an item with only an icon an `aria-label`; it is
   square. Icons are any `svg`, sized to the font plus 2px.
 - Never give an item an empty `value` (`""`): Base UI replaces it with a generated id, so that item
@@ -847,7 +851,8 @@ import { Toggle, Toolbar } from "owsem-ui/base"; // or "@/components/owsem/toolb
   Give it an `aria-label`. `size` (`"sm"`, `"md"` default, `"lg"`) sets every item's size.
 - `Button` and `Link` are quiet ghost buttons with `size`, `startIcon`, and `endIcon`; without a
   label they are square and need an `aria-label`. A disabled `Button` stays focusable. A Toggle
-  passed to `render` keeps its own look: an accent tint while on.
+  passed to `render` keeps its own look: an accent tint while on, or the accent fill with
+  `<Toggle variant="solid" />`; the toolbar has no variant prop.
 - On/off items: pass a Toggle to `render` (`render={<Toggle pressed={on} onPressedChange={setOn} />}`)
   and keep the item's other props on `Toolbar.Button`. A Base UI popup trigger goes the same way
   (`render={<Menu.Trigger />}`).

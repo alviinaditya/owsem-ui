@@ -66,6 +66,19 @@ function Sizes({ lang }: { lang: Lang }) {
   );
 }
 
+function Solid({ lang }: { lang: Lang }) {
+  return (
+    <div className="demo-buttons">
+      <Toggle variant="solid" startIcon={<Icon name="pin" />} defaultPressed>
+        {TEXT[lang].pin}
+      </Toggle>
+      <Toggle variant="solid" startIcon={<Icon name="pin" />}>
+        {TEXT[lang].pin}
+      </Toggle>
+    </div>
+  );
+}
+
 function Formatting({ lang }: { lang: Lang }) {
   const t = TEXT[lang];
   const [format, setFormat] = useState<Record<Format, boolean>>({
@@ -172,6 +185,26 @@ export const toggleDefinition = defineComponent({
       ],
     },
     {
+      id: "solid",
+      title: { id: "Solid", en: "Solid" },
+      description: {
+        id: 'variant="solid" mengisi toggle yang menyala dengan warna aksen, seperti Button utama.',
+        en: 'variant="solid" fills an on toggle with the accent, like the primary Button.',
+      },
+      uses: ["Toggle"],
+      demo: (lang) => <Solid lang={lang} />,
+      code: (setup, lang) => [
+        exampleFile(
+          "SolidToggles",
+          [
+            `import { Toggle } from "${importPath(setup, "toggle")}";`,
+            'import { Pin } from "lucide-react";',
+          ],
+          [pin(lang, ' variant="solid" defaultPressed'), pin(lang, ' variant="solid"')],
+        ),
+      ],
+    },
+    {
       id: "icon",
       title: { id: "Hanya ikon", en: "Icon only" },
       description: {
@@ -262,8 +295,8 @@ export const toggleDefinition = defineComponent({
       name: "Root",
       selector: ".ow-toggle",
       note: {
-        id: "button dari Base UI, dengan aria-pressed. Datar saat mati; saat menyala tint aksen 14% dengan teks aksen (18% hover, 22% ditekan).",
-        en: "Base UI's button, with aria-pressed. Flat while off; while on, a 14% tint of the accent with accent text (18% on hover, 22% held).",
+        id: "button dari Base UI, dengan aria-pressed. Datar saat mati; saat menyala tint aksen 14% dengan teks aksen (18% hover, 22% ditekan), atau dengan variant solid, isian aksen seperti Button utama.",
+        en: "Base UI's button, with aria-pressed. Flat while off; while on, a 14% tint of the accent with accent text (18% on hover, 22% held), or with variant solid, the accent fill of the primary Button.",
       },
       tokens: {
         "--ow-muted": "--_muted",

@@ -15,7 +15,12 @@ export * from "./components/select";
 export { Separator } from "./components/separator";
 export * from "./components/switch";
 export * from "./components/tabs";
-export { Toggle, type ToggleProps, type ToggleSize } from "./components/toggle";
+export {
+  Toggle,
+  type ToggleProps,
+  type ToggleSize,
+  type ToggleVariant,
+} from "./components/toggle";
 export * from "./components/toggle-group";
 export * from "./components/toolbar";
 export * from "./components/tooltip";

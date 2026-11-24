@@ -3,10 +3,16 @@ import { describe, expect, onTestFinished, test } from "vitest";
 import { commands, userEvent } from "vitest/browser";
 import { render } from "vitest-browser-react";
 import { axeReport } from "../../../test/a11y.ts";
+import { composite, contrast } from "../../../test/contrast.ts";
 import { measureIdle, settle } from "../../../test/raf-counter.ts";
 import { Toggle } from "./index";
 
 const root = document.documentElement;
+
+// Solid, as the primary Button: the accent fill, its text and edge, the hover tint over the fill,
+// and 10% black while held.
+const SOLID_HELD = "color-mix(in oklab, var(--ow-accent), black 10%)";
+const SOLID_HOVER = "linear-gradient(var(--ow-hover) 0 0)";
 
 // An on toggle's fill: a tint of the text color, so it reads on any surface; held, a deeper one.
 const ON = "color-mix(in oklab, var(--ow-accent) 14%, transparent)";
@@ -32,7 +38,11 @@ async function one(ui: ReactNode): Promise<HTMLButtonElement> {
 }
 
 /** Resolves a value (e.g. `var(--ow-raised-bg)`) of `property` to its computed form in `scope`. */
-function resolve(property: "color" | "box-shadow", value: string, scope: Element = document.body) {
+function resolve(
+  property: "color" | "box-shadow" | "background-image",
+  value: string,
+  scope: Element = document.body,
+) {
   const probe = document.createElement("span");
   probe.style.setProperty(property, value);
   scope.append(probe);
@@ -126,7 +136,7 @@ describe("Toggle", () => {
       </>,
     );
     expect(ref.current).toBe(plain);
-    expect(plain?.className).toBe("ow-toggle ow-toggle--md mine");
+    expect(plain?.className).toBe("ow-toggle ow-toggle--soft ow-toggle--md mine");
     expect(plain?.style.marginInline).toBe("3px");
     expect(rendered?.tagName).toBe("SPAN");
     expect(rendered?.getAttribute("role")).toBe("button");
@@ -328,6 +338,223 @@ describe("Toggle", () => {
     );
     await settle();
     expect(await measureIdle()).toEqual({ rafCalls: 0, runningAnimations: [] });
+  });
+});
+
+describe("Toggle, solid", () => {
+  test("marks its variant, with soft as the default, as a class and as data-variant", async () => {
+    const [soft, solid, plain] = await mount(
+      <>
+        <Toggle variant="soft">A</Toggle>
+        <Toggle variant="solid" size="lg" className="mine">
+          B
+        </Toggle>
+        <Toggle>C</Toggle>
+      </>,
+    );
+    expect(soft?.dataset.variant).toBe("soft");
+    expect(plain?.dataset.variant).toBe("soft");
+    expect(plain?.className).toBe(soft?.className);
+    expect(solid?.dataset.variant).toBe("solid");
+    expect(solid?.className).toBe("ow-toggle ow-toggle--solid ow-toggle--lg mine");
+  });
+
+  test("is the primary Button's fill, text, and edge while on, in light and dark", async () => {
+    onTestFinished(() => {
+      delete root.dataset.theme;
+    });
+    const [off, on] = await mount(
+      <>
+        <Toggle variant="solid">Off</Toggle>
+        <Toggle variant="solid" defaultPressed>
+          On
+        </Toggle>
+      </>,
+    );
+    if (!off || !on) throw new Error("no toggles");
+    await pointerAway();
+    for (const theme of ["light", "dark"]) {
+      root.dataset.theme = theme;
+      const offStyle = getComputedStyle(off);
+      expect(offStyle.backgroundColor).toBe("rgba(0, 0, 0, 0)");
+      expect(offStyle.boxShadow).toBe("none");
+      expect(offStyle.color).toBe(resolve("color", "var(--ow-muted)"));
+      const onStyle = getComputedStyle(on);
+      expect(onStyle.backgroundColor).toBe(resolve("color", "var(--ow-accent)"));
+      expect(onStyle.backgroundImage).toBe("none");
+      expect(onStyle.color).toBe(resolve("color", "var(--ow-on-accent)"));
+      expect(onStyle.boxShadow).toBe(resolve("box-shadow", "var(--ow-primary-shadow)"));
+    }
+  });
+
+  test("hovered, it lays the hover tint over the fill when on and is soft's when off", async () => {
+    const [off, on] = await mount(
+      <>
+        <Toggle variant="solid">Off</Toggle>
+        <Toggle variant="solid" defaultPressed>
+          On
+        </Toggle>
+      </>,
+    );
+    if (!off || !on) throw new Error("no toggles");
+    await userEvent.hover(off);
+    expect(getComputedStyle(off).backgroundColor).toBe(resolve("color", "var(--ow-hover)"));
+    expect(getComputedStyle(off).color).toBe(resolve("color", "var(--ow-fg)"));
+    await userEvent.hover(on);
+    const style = getComputedStyle(on);
+    expect(style.backgroundColor).toBe(resolve("color", "var(--ow-accent)"));
+    expect(style.backgroundImage).toBe(resolve("background-image", SOLID_HOVER));
+    expect(style.color).toBe(resolve("color", "var(--ow-on-accent)"));
+    expect(style.boxShadow).toBe(resolve("box-shadow", "var(--ow-primary-shadow)"));
+  });
+
+  test("held while on, it goes in to 0.97 on the fill with 10% black, and keeps its edge", async () => {
+    const [off, on] = await mount(
+      <>
+        <Toggle variant="solid">Off</Toggle>
+        <Toggle variant="solid" defaultPressed>
+          On
+        </Toggle>
+      </>,
+    );
+    if (!off || !on) throw new Error("no toggles");
+    await pointerAway();
+    on.focus();
+    await userEvent.keyboard("{Space>}");
+    await wait(150);
+    const held = getComputedStyle(on);
+    expect(held.transform).toBe("matrix(0.97, 0, 0, 0.97, 0, 0)");
+    expect(held.backgroundColor).toBe(resolve("color", SOLID_HELD));
+    expect(held.backgroundImage).toBe("none");
+    expect(held.color).toBe(resolve("color", "var(--ow-on-accent)"));
+    expect(held.boxShadow).toBe(resolve("box-shadow", "var(--ow-primary-shadow)"));
+    await userEvent.keyboard("{/Space}");
+    expect(on.getAttribute("aria-pressed")).toBe("false");
+    // Held while off it is soft's deepest tint, with accent text.
+    off.focus();
+    await userEvent.keyboard("{Space>}");
+    await wait(150);
+    expect(getComputedStyle(off).backgroundColor).toBe(resolve("color", HELD));
+    expect(getComputedStyle(off).color).toBe(resolve("color", ON_FG));
+    await userEvent.keyboard("{/Space}");
+  });
+
+  test("keeps the focus ring and dims when disabled, on or off", async () => {
+    const [on, disabled] = await mount(
+      <>
+        <Toggle variant="solid" defaultPressed>
+          On
+        </Toggle>
+        <Toggle variant="solid" defaultPressed disabled>
+          Off
+        </Toggle>
+      </>,
+    );
+    if (!on || !disabled) throw new Error("no toggles");
+    await userEvent.tab();
+    expect(document.activeElement).toBe(on);
+    expect(getComputedStyle(on).outlineColor).toBe(resolve("color", "var(--ow-focus)"));
+    expect(getComputedStyle(on).outlineWidth).toBe("2px");
+    expect(getComputedStyle(disabled).opacity).toBe("0.45");
+    expect(getComputedStyle(disabled).backgroundColor).toBe(resolve("color", "var(--ow-accent)"));
+  });
+
+  test("a theme token set on it changes it alone", async () => {
+    const [custom, other] = await mount(
+      <>
+        <Toggle
+          variant="solid"
+          defaultPressed
+          style={{ "--ow-accent": "rgb(255, 0, 0)" } as CSSProperties}
+        >
+          A
+        </Toggle>
+        <Toggle variant="solid" defaultPressed>
+          B
+        </Toggle>
+      </>,
+    );
+    if (!custom || !other) throw new Error("no toggles");
+    await pointerAway();
+    expect(getComputedStyle(custom).backgroundColor).toBe("rgb(255, 0, 0)");
+    expect(getComputedStyle(other).backgroundColor).toBe(resolve("color", "var(--ow-accent)"));
+  });
+
+  test("reads: the label has 4.5:1 on the fill, and the fill 3:1 on the page, in light and dark", async () => {
+    onTestFinished(() => {
+      delete root.dataset.theme;
+    });
+    const toggle = await one(
+      <Toggle variant="solid" defaultPressed>
+        On
+      </Toggle>,
+    );
+    await pointerAway();
+    for (const theme of ["light", "dark"]) {
+      root.dataset.theme = theme;
+      const style = getComputedStyle(toggle);
+      const fill = composite(style.backgroundColor);
+      const page = composite(getComputedStyle(document.body).backgroundColor);
+      expect(contrast(composite(style.color), fill)).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(fill, page)).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  test("shows on as the system highlight in forced colors, also hovered and held", async () => {
+    onTestFinished(() => commands.setForcedColors("none"));
+    const on = await one(
+      <Toggle variant="solid" defaultPressed>
+        On
+      </Toggle>,
+    );
+    await commands.setForcedColors("active");
+    const style = getComputedStyle(on);
+    expect(style.backgroundColor).toBe(resolve("color", "Highlight"));
+    expect(style.color).toBe(resolve("color", "HighlightText"));
+    expect(style.boxShadow).toBe("none");
+    await userEvent.hover(on);
+    expect(getComputedStyle(on).backgroundColor).toBe(resolve("color", "Highlight"));
+    expect(getComputedStyle(on).backgroundImage).toBe("none");
+    expect(getComputedStyle(on).color).toBe(resolve("color", "HighlightText"));
+  });
+
+  test("under reduced motion a held press changes the material only", async () => {
+    onTestFinished(() => commands.setReducedMotion("no-preference"));
+    await commands.setReducedMotion("reduce");
+    const on = await one(
+      <Toggle variant="solid" defaultPressed>
+        On
+      </Toggle>,
+    );
+    on.focus();
+    await userEvent.keyboard("{Space>}");
+    await wait(150);
+    expect(getComputedStyle(on).transform).toBe("none");
+    expect(getComputedStyle(on).backgroundColor).toBe(resolve("color", SOLID_HELD));
+    await userEvent.keyboard("{/Space}");
+  });
+
+  test("has no axe violations in light and dark", async () => {
+    onTestFinished(() => {
+      delete root.dataset.theme;
+    });
+    const screen = await render(
+      <main>
+        <Toggle variant="solid" startIcon={<Star />}>
+          Star
+        </Toggle>
+        <Toggle variant="solid" defaultPressed startIcon={<Star />}>
+          Starred
+        </Toggle>
+        <Toggle variant="solid" disabled defaultPressed>
+          Disabled
+        </Toggle>
+      </main>,
+    );
+    for (const theme of ["light", "dark"]) {
+      root.dataset.theme = theme;
+      expect(await axeReport(screen.container)).toEqual({ violations: [], contrastUnknown: [] });
+    }
   });
 });
 

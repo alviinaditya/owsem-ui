@@ -35,6 +35,7 @@ const icon = (node: ReactNode, side: "start" | "end") =>
 export function Toggle({
   "data-size": outerSize,
   size = outerSize ?? "md",
+  variant = "soft",
   startIcon,
   endIcon,
   className,
@@ -47,8 +48,9 @@ export function Toggle({
       data-slot="toggle"
       data-icon-only={iconOnly ? "" : undefined}
       {...props}
-      className={cn(toggleVariants({ size }), className)}
+      className={cn(toggleVariants({ size, variant }), className)}
       data-size={size}
+      data-variant={variant}
     >
       {icon(startIcon, "start")}
       {children}

@@ -4,6 +4,7 @@ import { describe, expect, onTestFinished, test } from "vitest";
 import { commands, userEvent } from "vitest/browser";
 import { render } from "vitest-browser-react";
 import { axeReport } from "../../../test/a11y.ts";
+import { composite, contrast } from "../../../test/contrast.ts";
 import { measureIdle, settle } from "../../../test/raf-counter.ts";
 import { ToggleGroup } from "./index";
 
@@ -71,6 +72,16 @@ function resolveColor(value: string, scope: Element = document.body): string {
   return color;
 }
 
+/** Resolves a box-shadow or a background-image the way `resolveColor` does a color. */
+function resolveProp(property: "box-shadow" | "background-image", value: string): string {
+  const probe = document.createElement("span");
+  probe.style.setProperty(property, value);
+  document.body.append(probe);
+  const resolved = getComputedStyle(probe).getPropertyValue(property);
+  probe.remove();
+  return resolved;
+}
+
 /** The accent tint of the thumb, and of a pressed key, over the raised fill. */
 const TRACK = "color-mix(in oklab, var(--ow-fg) 6%, transparent)";
 const TINT = "color-mix(in oklab, var(--ow-accent) 14%, var(--ow-raised-bg))";
@@ -122,7 +133,7 @@ describe("Toggle Group", () => {
       </ToggleGroup.Root>,
     );
     expect(rootRef.current).toBe(group);
-    expect(group.className).toBe("ow-toggle-group ow-toggle-group--md mine");
+    expect(group.className).toBe("ow-toggle-group ow-toggle-group--soft ow-toggle-group--md mine");
     expect(group.style.marginBlock).toBe("3px");
     expect(itemRef.current).toBe(item("Left"));
     expect(item("Left").className).toBe("ow-toggle-group__item on");
@@ -466,6 +477,341 @@ describe("Toggle Group", () => {
     expect(getComputedStyle(thumb).scale).toBe("none");
     expect(getComputedStyle(month).scale).toBe("none");
     window.dispatchEvent(new PointerEvent("pointerup", { button: 0 }));
+  });
+});
+
+describe("Toggle Group, solid", () => {
+  const SHADOW = "var(--ow-primary-shadow)";
+  const HOVER = "linear-gradient(var(--ow-hover) 0 0)";
+
+  test("marks its variant, with soft as the default, as a class and as data-variant", async () => {
+    const solid = await mount(<Views variant="solid" size="lg" className="mine" />);
+    expect(solid.group.className).toBe(
+      "ow-toggle-group ow-toggle-group--solid ow-toggle-group--lg mine",
+    );
+    expect(solid.group.dataset.variant).toBe("solid");
+    const plain = await mount(<Views />);
+    expect(plain.group.dataset.variant).toBe("soft");
+  });
+
+  test("the thumb is the accent with the primary Button's edge, and the pressed label goes on it, in light and dark", async () => {
+    onTestFinished(() => {
+      delete root.dataset.theme;
+    });
+    const { group, thumb, item } = await mount(<Views variant="solid" />);
+    for (const theme of ["light", "dark"]) {
+      root.dataset.theme = theme;
+      // The track is soft's.
+      expect(getComputedStyle(group).backgroundColor, theme).toBe(resolveColor(TRACK));
+      expect(keyOf(thumb).backgroundColor, theme).toBe(resolveColor("var(--ow-accent)"));
+      expect(keyOf(thumb).boxShadow, theme).toBe(resolveProp("box-shadow", SHADOW));
+      expect(getComputedStyle(thumb).boxShadow, theme).toBe("none");
+      await expect
+        .poll(() => getComputedStyle(item("Week")).color, { message: theme })
+        .toBe(resolveColor("var(--ow-on-accent)"));
+      await expect
+        .poll(() => getComputedStyle(item("Day")).color, { message: theme })
+        .toBe(resolveColor("var(--ow-muted)"));
+    }
+  });
+
+  test("a theme token set on it changes it alone", async () => {
+    const { thumb } = await mount(
+      <Views variant="solid" style={{ "--ow-accent": "rgb(255, 0, 0)" } as CSSProperties} />,
+    );
+    expect(keyOf(thumb).backgroundColor).toBe("rgb(255, 0, 0)");
+    const other = await mount(<Views variant="solid" />);
+    expect(keyOf(other.thumb).backgroundColor).toBe(resolveColor("var(--ow-accent)"));
+  });
+
+  test("the thumb sits on the same pixels as soft's, and presses the same", async () => {
+    const soft = await mount(<Views />);
+    const solid = await mount(<Views variant="solid" />);
+    const box = (el: Element) => {
+      const r = el.getBoundingClientRect();
+      return [r.width, r.height].map((n) => Math.round(n * 100) / 100);
+    };
+    expect(box(solid.thumb)).toEqual(box(soft.thumb));
+    expect(over(solid.thumb, solid.item("Week"))).toBe(true);
+    const style = getComputedStyle(solid.thumb);
+    const reference = getComputedStyle(soft.thumb);
+    for (const name of [
+      "borderTopWidth",
+      "borderRadius",
+      "transitionProperty",
+      "transitionDuration",
+    ] as const) {
+      expect(style[name], name).toBe(reference[name]);
+    }
+    expect(getComputedStyle(solid.thumb, "::before").borderRadius).toBe(
+      getComputedStyle(soft.thumb, "::before").borderRadius,
+    );
+  });
+
+  test("with multiple selection, each pressed item is an accent key; a hovered one steps by the hover tint", async () => {
+    const hover = (group: Element, el: Element) => {
+      const r = el.getBoundingClientRect();
+      group.dispatchEvent(
+        new PointerEvent("pointermove", {
+          bubbles: true,
+          clientX: r.left + r.width / 2,
+          clientY: r.top + r.height / 2,
+          pointerType: "mouse",
+        }),
+      );
+    };
+    const { group, thumb, item } = await mount(
+      <Views variant="solid" multiple defaultValue={["day", "month"]} />,
+    );
+    expect(getComputedStyle(thumb).opacity).toBe("0");
+    const accent = resolveColor("var(--ow-accent)");
+    for (const name of ["Day", "Month"]) {
+      const style = getComputedStyle(item(name));
+      expect(style.backgroundColor, name).toBe(accent);
+      expect(style.boxShadow, name).toBe(resolveProp("box-shadow", SHADOW));
+      expect(style.backgroundImage, name).toBe("none");
+      expect(style.color, name).toBe(resolveColor("var(--ow-on-accent)"));
+    }
+    expect(getComputedStyle(item("Week")).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+    hover(group, item("Month"));
+    expect(item("Month").hasAttribute("data-glide-active")).toBe(true);
+    const lit = getComputedStyle(item("Month"));
+    expect(lit.backgroundColor).toBe(accent);
+    expect(lit.backgroundImage).toBe(resolveProp("background-image", HOVER));
+    expect(getComputedStyle(item("Day")).backgroundImage).toBe("none");
+  });
+
+  test("a disabled pressed key keeps its fill and dims its text toward it", async () => {
+    const { item } = await mount(
+      <Views variant="solid" multiple defaultValue={["day"]} disabled />,
+    );
+    const style = getComputedStyle(item("Day"));
+    expect(style.backgroundColor).toBe(resolveColor("var(--ow-accent)"));
+    expect(style.color).toBe(
+      resolveColor("color-mix(in oklab, var(--ow-on-accent) 60%, transparent)"),
+    );
+  });
+
+  test("the pressed item is the accent key until the thumb is placed", async () => {
+    const { group, item } = await mount(<Views variant="solid" />);
+    group.removeAttribute("data-thumb");
+    const style = getComputedStyle(item("Week"));
+    expect(style.backgroundColor).toBe(resolveColor("var(--ow-accent)"));
+    expect(style.boxShadow).toBe(resolveProp("box-shadow", SHADOW));
+  });
+
+  test("reads: the label has 4.5:1 on the fill, and the fill 3:1 on the track and the page, in light and dark", async () => {
+    onTestFinished(() => {
+      delete root.dataset.theme;
+    });
+    const { group, thumb, item } = await mount(<Views variant="solid" />);
+    for (const theme of ["light", "dark"]) {
+      root.dataset.theme = theme;
+      await expect
+        .poll(() => getComputedStyle(item("Week")).color, { message: theme })
+        .toBe(resolveColor("var(--ow-on-accent)"));
+      const page = composite(getComputedStyle(document.body).backgroundColor);
+      const track = composite(
+        getComputedStyle(document.body).backgroundColor,
+        getComputedStyle(group).backgroundColor,
+      );
+      const fill = composite(keyOf(thumb).backgroundColor);
+      expect(
+        contrast(composite(getComputedStyle(item("Week")).color), fill),
+        theme,
+      ).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(fill, track), theme).toBeGreaterThanOrEqual(3);
+      expect(contrast(fill, page), theme).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  test("hovered, a pressed solid item keeps its text on the fill; a lit one turns at once, as in soft", async () => {
+    const hover = (group: Element, el: Element) => {
+      const r = el.getBoundingClientRect();
+      group.dispatchEvent(
+        new PointerEvent("pointermove", {
+          bubbles: true,
+          clientX: r.left + r.width / 2,
+          clientY: r.top + r.height / 2,
+          pointerType: "mouse",
+        }),
+      );
+    };
+    const { group, item } = await mount(<Views variant="solid" />);
+    await settle();
+    hover(group, item("Week"));
+    expect(item("Week").hasAttribute("data-glide-active")).toBe(true);
+    expect(getComputedStyle(item("Week")).color).toBe(resolveColor("var(--ow-on-accent)"));
+    hover(group, item("Day"));
+    expect(item("Day").hasAttribute("data-glide-active")).toBe(true);
+    const lit = getComputedStyle(item("Day"));
+    expect(lit.transitionDelay).toBe("0s, 0s");
+    expect(lit.transitionDuration.split(",")[0]).toBe("0.15s");
+    await expect.poll(() => getComputedStyle(item("Day")).color).toBe(resolveColor("var(--ow-fg)"));
+  });
+
+  test("the label turns as the thumb reaches or leaves it; no delay with multiple, reduced motion, or a lit item", async () => {
+    onTestFinished(() => commands.setReducedMotion("no-preference"));
+    const { item } = await mount(<Views variant="solid" />);
+    const delay = (el: Element) => getComputedStyle(el).transitionDelay;
+    const time = (el: Element) => getComputedStyle(el).transitionDuration.split(",")[0];
+    // 22% of the travel's 650 ms to arrive, 18% to leave, and a 40 ms turn.
+    expect(delay(item("Week"))).toBe("0.143s, 0s");
+    expect(time(item("Week"))).toBe("0.04s");
+    expect(delay(item("Day"))).toBe("0.117s, 0s");
+    expect(time(item("Day"))).toBe("0.04s");
+    const soft = await mount(<Views />);
+    for (const name of ["Week", "Day"]) {
+      expect(delay(soft.item(name))).toBe("0s, 0s");
+      expect(time(soft.item(name))).toBe("0.15s");
+    }
+    const multiple = await mount(<Views variant="solid" multiple defaultValue={["day"]} />);
+    for (const name of ["Day", "Week"]) expect(delay(multiple.item(name))).toBe("0s, 0s");
+    await commands.setReducedMotion("reduce");
+    for (const name of ["Week", "Day"]) expect(delay(item(name))).toBe("0s, 0s");
+  });
+
+  /**
+   * Seeks every animation of a move (the thumb's slide and stretch, both labels' color) to each
+   * 5 ms step of 0 to 700 ms and counts the steps where a label is under 3:1 against what is under
+   * its centre: the key, or the track. It runs no clock, so it cannot be flaky.
+   */
+  async function unreadable(from: string, to: string) {
+    const { group, thumb, item } = await mount(<Views variant="solid" defaultValue={[from]} />);
+    await settle();
+    const track = composite(
+      getComputedStyle(document.body).backgroundColor,
+      getComputedStyle(group).backgroundColor,
+    );
+    const fill = composite(keyOf(thumb).backgroundColor);
+    const named = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
+    const arriving = item(named(to));
+    const leaving = item(named(from));
+    // The colors are read before the click, so the transitions start from them.
+    const before = [getComputedStyle(arriving).color, getComputedStyle(leaving).color];
+    expect(before[0]).not.toBe(before[1]);
+    arriving.click();
+    await expect
+      .poll(
+        () =>
+          thumb.getAnimations({ subtree: true }).length > 0 &&
+          arriving.getAnimations().length > 0 &&
+          leaving.getAnimations().length > 0,
+      )
+      .toBe(true);
+    const all = [
+      ...thumb.getAnimations({ subtree: true }),
+      ...arriving.getAnimations(),
+      ...leaving.getAnimations(),
+    ];
+    for (const animation of all) animation.pause();
+    // The key's extent at this moment, with the stretch along the way.
+    const key = () => {
+      const box = thumb.getBoundingClientRect();
+      const border = Number.parseFloat(getComputedStyle(thumb).borderTopWidth);
+      const style = keyOf(thumb);
+      const scale = style.transform === "none" ? 1 : new DOMMatrixReadOnly(style.transform).a;
+      const origin = Number.parseFloat(style.transformOrigin);
+      const left = box.left + border + origin * (1 - scale);
+      return [left, left + (box.width - 2 * border) * scale];
+    };
+    const readable = (el: HTMLElement) => {
+      const label = el.getBoundingClientRect();
+      const [start = 0, end = 0] = key();
+      const middle = (label.left + label.right) / 2;
+      const under = middle >= start && middle <= end ? fill : track;
+      return contrast(composite(getComputedStyle(el).color), under);
+    };
+    const bad = { arriving: 0, leaving: 0 };
+    for (let at = 0; at <= 700; at += 5) {
+      for (const animation of all) animation.currentTime = at;
+      if (readable(arriving) < 3) bad.arriving += 5;
+      if (readable(leaving) < 3) bad.leaving += 5;
+    }
+    // Settled, both read.
+    for (const animation of all) animation.finish();
+    expect(readable(arriving)).toBeGreaterThanOrEqual(4.5);
+    expect(readable(leaving)).toBeGreaterThanOrEqual(4.5);
+    return bad;
+  }
+
+  test("the label stays readable while the thumb travels, in light and dark", async () => {
+    onTestFinished(() => {
+      delete root.dataset.theme;
+    });
+    // Measured at 5 ms steps (worst of the three moves): light 60 and 70 ms, dark 20 and 50 ms.
+    // With no delays, the arriving label is unreadable for 205 ms in light, the leaving one for
+    // 170 ms in light and 165 ms in dark.
+    const limits = { light: { arriving: 70, leaving: 80 }, dark: { arriving: 30, leaving: 60 } };
+    for (const theme of ["light", "dark"] as const) {
+      root.dataset.theme = theme;
+      const worst = { arriving: 0, leaving: 0 };
+      for (const [from, to] of [
+        ["day", "week"],
+        ["day", "month"],
+        ["month", "day"],
+      ] as const) {
+        const bad = await unreadable(from, to);
+        worst.arriving = Math.max(worst.arriving, bad.arriving);
+        worst.leaving = Math.max(worst.leaving, bad.leaving);
+      }
+      expect(worst.arriving, `${theme} arriving`).toBeLessThanOrEqual(limits[theme].arriving);
+      expect(worst.leaving, `${theme} leaving`).toBeLessThanOrEqual(limits[theme].leaving);
+    }
+  });
+
+  test("forced colors: the thumb is Highlight with no edge, and the label turns at once", async () => {
+    onTestFinished(() => commands.setForcedColors("none"));
+    const { thumb, item } = await mount(<Views variant="solid" />);
+    await commands.setForcedColors("active");
+    expect(keyOf(thumb).backgroundColor).toBe(resolveColor("Highlight"));
+    expect(keyOf(thumb).boxShadow).toBe("none");
+    await expect
+      .poll(() => getComputedStyle(item("Week")).color)
+      .toBe(resolveColor("HighlightText"));
+    expect(getComputedStyle(item("Week")).transitionDelay).toBe("0s, 0s");
+    const multiple = await mount(<Views variant="solid" multiple defaultValue={["day"]} />);
+    const key = getComputedStyle(multiple.item("Day"));
+    expect(key.backgroundColor).toBe(resolveColor("Highlight"));
+    expect(key.boxShadow).toBe("none");
+    expect(key.color).toBe(resolveColor("HighlightText"));
+  });
+
+  test("has no axe violations in light and dark, single and multiple", async () => {
+    onTestFinished(() => {
+      delete root.dataset.theme;
+    });
+    // axe does not see the thumb's key (a pseudo-element) under the pressed label: on a light page
+    // it reads white on the track. The single group is checked in dark, and for its contrast in
+    // the test of the fill above.
+    const keys = await render(
+      <main>
+        <Views
+          variant="solid"
+          multiple
+          defaultValue={["day", "month"]}
+          size="sm"
+          aria-label="Days"
+        />
+        <Views variant="solid" disabled size="lg" aria-label="Locked" />
+      </main>,
+    );
+    const single = await render(
+      <main>
+        <Views variant="solid" />
+      </main>,
+    );
+    for (const theme of ["light", "dark"]) {
+      root.dataset.theme = theme;
+      await settle();
+      expect(await axeReport(keys.container), theme).toEqual({
+        violations: [],
+        contrastUnknown: [],
+      });
+    }
+    root.dataset.theme = "dark";
+    await settle();
+    expect(await axeReport(single.container)).toEqual({ violations: [], contrastUnknown: [] });
   });
 });
 

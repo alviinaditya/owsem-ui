@@ -106,6 +106,25 @@ function Sized({ lang, size }: { lang: Lang; size: ToolbarSize }) {
   );
 }
 
+function SolidBar({ lang }: { lang: Lang }) {
+  const t = TEXT[lang];
+  return (
+    <Toolbar.Root aria-label={t.toolbar}>
+      {FORMATS.map((key) => (
+        <Toolbar.Button
+          key={key}
+          render={<Toggle variant="solid" defaultPressed={key === "bold"} />}
+          aria-label={t[key]}
+          startIcon={<Icon name={key} />}
+        />
+      ))}
+      <Toolbar.Separator />
+      <Toolbar.Button aria-label={t.undo} startIcon={<Icon name="undo-2" />} />
+      <Toolbar.Button aria-label={t.redo} startIcon={<Icon name="redo-2" />} disabled />
+    </Toolbar.Root>
+  );
+}
+
 function Sizes({ lang }: { lang: Lang }) {
   return (
     <div className="demo-toggle-stack">
@@ -262,6 +281,34 @@ export const toolbarDefinition = defineComponent({
           "Sizes",
           imports(setup, ["Bold", "Italic", "Redo2", "Undo2"], true),
           SIZES.flatMap((size) => basic(lang, ` size="${size}"`)),
+        ),
+      ],
+    },
+    {
+      id: "solid",
+      title: { id: "Solid", en: "Solid" },
+      description: {
+        id: 'Toolbar tidak punya prop varian: render Toggle dengan variant="solid" dan item yang menyala terisi warna aksen.',
+        en: 'The toolbar has no variant prop: render a Toggle with variant="solid" and the on item is filled with the accent.',
+      },
+      uses: ["Toolbar", "Toggle"],
+      demo: (lang) => <SolidBar lang={lang} />,
+      code: (setup, lang) => [
+        exampleFile(
+          "SolidToolbar",
+          imports(setup, ["Bold", "Italic", "Redo2", "Underline", "Undo2"], true),
+          [
+            `<Toolbar.Root aria-label="${TEXT[lang].toolbar}">`,
+            ...FORMATS.flatMap((key) =>
+              toggle(lang, key, ` variant="solid"${key === "bold" ? " defaultPressed" : ""}`).map(
+                (line) => `  ${line}`,
+              ),
+            ),
+            "  <Toolbar.Separator />",
+            `  ${button(lang, "undo")}`,
+            `  ${button(lang, "redo", " disabled")}`,
+            "</Toolbar.Root>",
+          ],
         ),
       ],
     },

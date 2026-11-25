@@ -1,0 +1,176 @@
+---
+title: Accordion
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. To copy the source into your project instead, use the `accordion`
+item of the registry.
+
+## Usage [#usage]
+
+```tsx
+import { Accordion } from "owsem-ui/base";
+
+export function Faq() {
+  return (
+    <Accordion.Root defaultValue={["1"]}>
+      <Accordion.Item value="1">
+        <Accordion.Trigger>What is OwsemUI?</Accordion.Trigger>
+        <Accordion.Panel>React components on top of Base UI.</Accordion.Panel>
+      </Accordion.Item>
+      <Accordion.Item value="2">
+        <Accordion.Trigger>Is it free?</Accordion.Trigger>
+        <Accordion.Panel>Yes, under the MIT license.</Accordion.Panel>
+      </Accordion.Item>
+    </Accordion.Root>
+  );
+}
+```
+
+An Accordion is a stack of sections, each a full-width row that opens its panel. One item is open
+at a time unless you set `multiple`. `Accordion.Trigger` draws its own heading (an `h3`), so the
+shortest use is the one above. For a single panel, use [Collapsible](/en/collapsible).
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Base UI renders a `<div>` for the root and each item, a heading around each trigger, a `<button>`
+with `aria-expanded` and `aria-controls`, and a panel that is in the page only while it is open
+(unless you ask otherwise).
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-accordion` | Holds the items; `size` reaches every trigger |
+| <Part name="Item" /> | `div.ow-accordion__item` | A header and its panel; a hairline above it, except the first |
+| <Part name="Header" /> | `h3.ow-accordion__header` | The heading around a trigger |
+| <Part name="Trigger" /> | `button.ow-accordion__trigger` | The label, then the chevron in `span.ow-accordion__icon`; `data-panel-open` while open |
+| <Part name="Panel" /> | `div.ow-accordion__panel` | The box whose size moves; its children sit in `div.ow-accordion__content` |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### Accordion.Root
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | A 32, 40, or 48px row for every trigger, with Button's font sizes |
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-size` | Always; the chosen size |
+
+### Accordion.Trigger
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `icon` | `ReactNode` | the chevron | Replaces the chevron at the end; `null` leaves it out |
+
+A trigger inside an `Accordion.Header` uses that heading. Outside one it draws its own `h3`, and
+it knows which by context, so a header that a wrapper component renders is found too. To change the
+level, write the header yourself: `<Accordion.Header render={<h2 />}>`.
+
+### Accordion.Panel
+
+The panel wraps its children in `div.ow-accordion__content`, which has the Root's size for its text
+(13, 14, or 16px, weight 400, line height 1.5, `--ow-fg`) and the padding: 0.25em above, 4px at the
+sides, 1em below. The box that moves has none, so nothing jumps while it opens. The text is set in
+the component layer, so a rule of yours wins.
+
+`keepMounted` and `hiddenUntilFound` on the root work as in Base UI: closed panels stay in the
+page, hidden, and with `hiddenUntilFound` find in page opens the one that holds the match. The
+component never sets `display` on a hidden panel.
+
+### Horizontal
+
+`orientation="horizontal"` lays the items side by side. Each panel opens in width, from Base UI's
+`--accordion-panel-width`, and keeps the width of its content so its text does not wrap while it
+moves, so give a horizontal panel content that has a width of its own. The hairlines run
+vertically and the chevron points toward the panel. Base UI's Accordion has no arrow-key
+navigation: Tab moves between the triggers in both orientations.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-accordion` | Root |
+| `ow-accordion__item` | Item |
+| `ow-accordion__header` | Header |
+| `ow-accordion__trigger` | Trigger |
+| `ow-accordion__trigger--sm`, `ow-accordion__trigger--md`, `ow-accordion__trigger--lg` | Trigger, by the Root's `size` |
+| `ow-accordion__icon` | The span that holds the chevron or your `icon` |
+| `ow-accordion__stroke` | One of the chevron's two strokes |
+| `ow-accordion__panel` | Panel |
+| `ow-accordion__content`, `ow-accordion__content--sm`, `ow-accordion__content--md`, `ow-accordion__content--lg` | The padded element inside the panel, by the Root's `size` |
+
+## Accessibility [#accessibility]
+
+- Each trigger is a native button inside a heading, with `aria-expanded` and `aria-controls`, so a
+  screen reader lists the sections as headings and says whether each is open. Enter and Space open
+  and close the focused one; Tab moves to the next.
+- The chevron is `aria-hidden`; the label names the trigger.
+- A disabled item, or a disabled root, does not open and is dimmed. In forced colors a disabled
+  label is `GrayText`, the hairlines stay, and the focus ring is `Highlight`.
+- The label has 17.7:1 against the page in light and 16.1:1 in dark. The muted chevron has 6.0:1 in
+  light and 7.3:1 in dark, and more when it takes the text color. With `prefers-contrast: more`
+  the hairlines use `--ow-edge`, at 3.8:1 in light and 3.7:1 in dark.
+- A trigger is never under 24px tall. Its focus ring sits 2px outside the row and the panel does
+  not paint over it.
+- With `hiddenUntilFound`, find in page opens the panel that holds the match. Closed panels stay
+  closed when printed.
+
+## Theming [#theming]
+
+Accordion reads these theme tokens. Set one on an accordion, or on anything around it.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-fg` | The label, and the chevron on hover and while open |
+| `--ow-muted` | The chevron at rest |
+| `--ow-line` | The hairline between items |
+| `--ow-edge` | The hairline when more contrast is asked for |
+| `--ow-radius` | The row's corners, which round its focus ring |
+| `--ow-focus` | The focus ring |
+| `--ow-motion-scale` | How long the panel takes; `0` opens it at once |
+| `--ow-ease-drawer`, `--ow-ease-out` | The panel's size and its fade |
+| `--ow-spring-settle`, `--ow-spring-settle-duration` | The chevron's turn |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each element, so set yours on the accordion itself.
+
+</ForMode>
+
+Set `inline-size` on the root, or on a parent, with plain CSS; the rows fill its width. Sizes come
+from `font-size` in `em`.
+
+## Motion [#motion]
+
+A panel's height (its width, when horizontal) moves from Base UI's `--accordion-panel-height` over
+300ms on a curve with no overshoot (`--ow-ease-drawer`), clipped, while the content fades over
+210ms. Open another item and the first closes as the second opens, each from where it is. Base UI
+leaves the size at `auto` once a panel is open, so content that arrives late is not cut off.
+
+The chevron is two strokes that each turn a quarter about their own centers, so the down chevron
+becomes the up chevron through a flat line, on the settle spring, and its color moves from muted to
+the text color. A full-width row does not shrink when pressed, and has no fill on hover.
+
+With `prefers-reduced-motion` the chevron changes at once and the panel opens at once with a short
+fade. Setting `--ow-motion-scale` to `0` does the same everywhere it is set.

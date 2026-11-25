@@ -6,6 +6,7 @@ import {
   setColorScheme,
   setContrast,
   setForcedColors,
+  setPrint,
   setReducedMotion,
   setReducedTransparency,
 } from "./test/commands.ts";
@@ -38,6 +39,7 @@ export default defineConfig({
       commands: {
         setColorScheme,
         setForcedColors,
+        setPrint,
         setContrast,
         setReducedMotion,
         setReducedTransparency,

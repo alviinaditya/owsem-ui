@@ -63,7 +63,7 @@ test("the Manual files are not in the page until the tab opens", async ({ page, 
 
 test("every component page's Manual offers the Tailwind choice", async ({ request }) => {
   const names = catalog.filter(isAvailable).map((entry) => entry.name);
-  expect(names.length).toBe(29);
+  expect(names.length).toBe(34);
   for (const name of names) {
     const data = await (await request.get(`/api/manual/${name}`)).json();
     expect(data.css.flavor, name).toBe("css");
@@ -361,6 +361,50 @@ test("Tailwind Switch: its class map and only the bridge parts it uses, no CSS f
   expect(bridge).not.toContain("@keyframes");
   const classes = await copyVisibleFile(page, "switch/switch-variants.ts");
   expect(classes).toContain("group/ow-switch");
+  expect(classes).not.toMatch(/import .*\.css/);
+});
+
+test("Tailwind Progress: its class map and only the keyframes it names, no CSS file", async ({
+  page,
+}) => {
+  await openTailwindManual(page, "/en/progress");
+  const titles = manual(page).locator(".ow-code-block__title:visible");
+  for (const path of [
+    "components/owsem/progress/progress.tsx",
+    "components/owsem/progress/progress-variants.ts",
+    "lib/owsem/tailwind.css",
+    "lib/owsem/tokens.css",
+    "lib/owsem/cn.ts",
+  ]) {
+    await expect(titles.filter({ hasText: path })).toHaveCount(1);
+  }
+  await expect(titles.filter({ hasText: "progress.css" })).toHaveCount(0);
+  const bridge = await copyVisibleFile(page, "lib/owsem/tailwind.css");
+  expect(bridge).toContain("@keyframes ow-progress-travel");
+  expect(bridge).not.toContain("@keyframes ow-spin");
+  expect(bridge).not.toContain("@custom-variant");
+  const classes = await copyVisibleFile(page, "progress/progress-variants.ts");
+  expect(classes).toContain("ow-progress-travel");
+  expect(classes).not.toMatch(/import .*\.css/);
+});
+
+test("Tailwind Accordion: its class map, and no keyframes or CSS file", async ({ page }) => {
+  await openTailwindManual(page, "/en/accordion");
+  const titles = manual(page).locator(".ow-code-block__title:visible");
+  for (const path of [
+    "components/owsem/accordion/accordion.tsx",
+    "components/owsem/accordion/accordion-variants.ts",
+    "lib/owsem/tailwind.css",
+    "lib/owsem/tokens.css",
+    "lib/owsem/cn.ts",
+  ]) {
+    await expect(titles.filter({ hasText: path })).toHaveCount(1);
+  }
+  await expect(titles.filter({ hasText: "accordion.css" })).toHaveCount(0);
+  const bridge = await copyVisibleFile(page, "lib/owsem/tailwind.css");
+  expect(bridge).not.toContain("@keyframes ow-progress-travel");
+  const classes = await copyVisibleFile(page, "accordion/accordion-variants.ts");
+  expect(classes).toContain("group/ow-accordion");
   expect(classes).not.toMatch(/import .*\.css/);
 });
 

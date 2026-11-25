@@ -1,0 +1,274 @@
+---
+title: Meter
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Untuk menyalin kode sumbernya ke project Anda, pakai item `meter` dari
+registry.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Meter } from "owsem-ui/base";
+
+export function StorageMeter() {
+  return (
+    <Meter.Root value={62}>
+      <Meter.Label>Penyimpanan</Meter.Label>
+      <Meter.Value />
+      <Meter.Track />
+    </Meter.Root>
+  );
+}
+```
+
+Meter menunjukkan nilai dalam rentang yang diketahui, seperti ruang disk, baterai, atau skor.
+Tampilannya seperti [Progress](/id/progress) dan ia komponen tersendiri: ia punya role `meter`, dan
+tidak mengenal tugas yang sedang berjalan atau selesai. Beri nama dengan `Meter.Label` atau
+`aria-label`.
+
+Pakai Meter bila satu angka berada dalam rentang yang diketahui. Untuk menunjukkan tugas yang sedang
+berjalan atau selesai, pakai [Progress](/id/progress): ia tidak punya role `meter` dan bisa tak
+tentu. Bila nilainya tersusun dari bagian-bagian, seperti ke mana jam-jam dalam seminggu pergi,
+gambarlah sebagai rincian: `Meter.Segment` di dalam track dan `Meter.Legend` yang menamainya. Tiap
+bagian adalah pil berwarna sendiri, sebaris dengan sisa rentang yang belum terisi.
+
+```tsx
+import { Meter } from "owsem-ui/base";
+
+export function RincianMinggu() {
+  return (
+    <Meter.Group defaultActive="focus">
+      <Meter.Root value={32} max={40} aria-label="Minggu kerja">
+        <Meter.Track>
+          <Meter.Segment name="focus" value={14} />
+          <Meter.Segment name="meetings" value={9} />
+          <Meter.Segment name="reviews" value={9} />
+        </Meter.Track>
+      </Meter.Root>
+      <Meter.Legend aria-label="Bagian minggu kerja">
+        <Meter.LegendItem name="focus">
+          Fokus <Meter.LegendValue>14 jam</Meter.LegendValue>
+        </Meter.LegendItem>
+        <Meter.LegendItem name="meetings">
+          Rapat <Meter.LegendValue>9 jam</Meter.LegendValue>
+        </Meter.LegendItem>
+        <Meter.LegendItem name="reviews">
+          Tinjauan <Meter.LegendValue>9 jam</Meter.LegendValue>
+        </Meter.LegendItem>
+      </Meter.Legend>
+    </Meter.Group>
+  );
+}
+```
+
+Bagian-bagian sebaiknya berjumlah sama dengan nilainya: `Meter.Root` mengambil sisa rentang dari
+`value`-nya sendiri, dan satu bagian adalah porsinya dari `min` sampai `max`. Menekan item legenda
+memilih bagiannya; bagian lain memudar sampai ditekan lagi. Mengarahkan mouse ke item atau segmen
+menampilkan bagiannya selama pointer di sana. Anak berupa fungsi pada `Meter.Group` menerima bagian
+itu, untuk dituliskan di `Meter.Value`.
+
+Halaman yang memilih nadanya. Tidak ada `low`, `high`, atau `optimum`: putuskan di kode Anda, lalu
+berikan `tone="good"`, `"warning"`, atau `"critical"`.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Base UI merender `<div>` dengan role `meter`, dan huruf `x` tersembunyi yang menjaga teksnya tidak
+kosong.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Group" /> | `div` | Menyimpan bagian yang dipilih dan yang disorot pointer; tanpa kelas |
+| <Part name="Root" /> | `div.ow-meter` | `role="meter"` dan `aria-valuenow`; menggambar Track-nya bila tanpa children |
+| <Part name="Label" /> | `span.ow-meter__label` | Menamai meter lewat `aria-labelledby` |
+| <Part name="Value" /> | `span.ow-meter__value` | Nilai terformat, disembunyikan dari screen reader |
+| <Part name="Track" /> | `div.ow-meter__track` | Alurnya: 4, 8, atau 12px; menggambar Indicator-nya bila tanpa children |
+| <Part name="Indicator" /> | `div.ow-meter__indicator` | Isiannya, dalam nada yang dipilih |
+| <Part name="Segment" /> | `span.ow-meter__segment` | Satu bagian dari keseluruhan di Track, selebar porsinya |
+| <Part name="Legend" /> | `div.ow-meter__legend` | `role="group"`; di luar Root, membungkus baris |
+| <Part name="LegendItem" /> | `button.ow-meter__legend-item` | `aria-pressed`; titik berwarna bagiannya |
+| <Part name="LegendValue" /> | `span.ow-meter__legend-value` | Angka redup di akhir item |
+
+Track yang berisi Segment menjadi satu baris pil berjarak 3px, tanpa alur di belakangnya. Sisa
+rentang digambar sebagai satu pil lagi setelah yang terakhir (`::after` dari Track, dari nilai
+Root), dan hilang saat meter penuh. Legenda bersaudara dengan Root, tidak pernah di dalamnya: anak
+Root tidak dibacakan oleh screen reader, sedangkan tombol legenda harus terbaca.
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### Meter.Root
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Track 4, 8, atau 12px, dengan ukuran font Button untuk label |
+| `tone` | `"accent" \| "good" \| "warning" \| "critical"` | `"accent"` | Warna isian: `--ow-accent`, `--ow-good`, `--ow-warning`, atau `--ow-critical` |
+
+#### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-size` | Selalu; ukuran yang dipilih |
+| `data-tone` | Selalu; nada yang dipilih |
+
+### Meter.Group
+
+`div` biasa yang membagikan state lewat context. Tanpa Group, `Meter.Segment` dan `Meter.LegendItem`
+tetap dirender, dan tidak ada yang aktif.
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `active` | `string \| null` | | Bagian yang dipilih, terkontrol |
+| `defaultActive` | `string \| null` | `null` | Bagian yang dipilih di awal |
+| `onActiveChange` | `(name: string \| null) => void` | | Dipanggil saat tekanan memilih bagian, atau melepasnya dengan `null` |
+| `size` | `"sm" \| "md" \| "lg"` | | Sampai ke Root dan Legend; `size` milik mereka yang menang |
+| `children` | `ReactNode \| (shown: string \| null) => ReactNode` | | Fungsi menerima bagian yang ditampilkan: di bawah pointer, kalau tidak yang dipilih |
+
+### Meter.Segment
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `name` | `string` | | Nama yang dipakai item Legend dan Group |
+| `value` | `number` | | Berapa banyak dari `min` sampai `max`; di luar rentang dibatasi, `NaN` dianggap nol |
+| `tone` | `"accent" \| "good" \| "warning" \| "critical"` | | Mewarnai bagian dengan token itu, bukan warna dari posisinya |
+
+#### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-active` | Bagian ini yang ditampilkan |
+| `data-dimmed` | Bagian lain yang ditampilkan |
+| `data-empty` | Porsinya 0; tidak digambar |
+| `data-tone` | `tone` diberikan |
+
+Tanpa `tone`, warna bagian melangkah dari aksen ke warna teks menurut posisinya: 0, 22, 44, 66, dan
+88%, lalu mulai lagi dari yang keenam. Tiap langkah punya kontras 3:1 terhadap halaman di kedua
+tema. Mengarahkan mouse ke segmen menampilkan bagiannya; sentuhan tidak, karena tidak ada hover.
+
+### Meter.Legend
+
+`div` dengan `role="group"`; beri `aria-label`. Ia menerima `size`, dari Group bila Anda
+melewatkannya, kalau tidak `md`.
+
+### Meter.LegendItem
+
+`Button` Base UI, jadi `render`, `disabled`, dan `nativeButton` bekerja seperti di sana.
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `name` | `string` | | Bagian yang dipilihnya: `name` sebuah Segment |
+| `tone` | `"accent" \| "good" \| "warning" \| "critical"` | | `tone` Segment-nya, agar titiknya sama; lewatkan bila Segment-nya tanpa nada |
+
+Ia punya `aria-pressed`: menekannya memilih bagiannya, menekan lagi melepasnya. Titiknya berwarna
+sama dengan Segment di posisi yang sama.
+
+### Meter.LegendValue
+
+`span` untuk angka di akhir item. Warnanya mengikuti item saat item ditekan.
+
+### Meter.Track
+
+Tanpa children, ia menggambar `Meter.Indicator`.
+
+### Meter.Indicator
+
+Base UI menulis `width` dan `height` indicator secara inline. `Meter.Indicator` memberikan keduanya sebagai `undefined`, sehingga tidak ditulis, dan kelasnya yang mengukur isian: selebar track (40% saat tak tentu), lalu `translate` menggesernya. `style` yang Anda berikan digabung sesudahnya, jadi lebar inline Anda yang menang. `Meter.Root` menulis bagian isiannya ke `--_value`, angka 0 sampai 100. Semua atribut yang disetel Base UI, termasuk `aria-valuenow`, tetap apa adanya.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-meter` | Root |
+| `ow-meter--sm`, `ow-meter--md`, `ow-meter--lg` | Root, menurut `size` |
+| `ow-meter--accent`, `ow-meter--good`, `ow-meter--warning`, `ow-meter--critical` | Root, menurut `tone` |
+| `ow-meter__label` | Label |
+| `ow-meter__value` | Value |
+| `ow-meter__track` | Track |
+| `ow-meter__indicator` | Indicator |
+| `ow-meter__segment` | Segment |
+| `ow-meter__segment--accent`, `ow-meter__segment--good`, `ow-meter__segment--warning`, `ow-meter__segment--critical` | Segment, menurut `tone` |
+| `ow-meter__legend` | Legend |
+| `ow-meter__legend--sm`, `ow-meter__legend--md`, `ow-meter__legend--lg` | Legend, menurut `size` |
+| `ow-meter__legend-item` | LegendItem |
+| `ow-meter__legend-item--accent`, `ow-meter__legend-item--good`, `ow-meter__legend-item--warning`, `ow-meter__legend-item--critical` | LegendItem, menurut `tone` |
+| `ow-meter__legend-value` | LegendValue |
+
+## Aksesibilitas [#accessibility]
+
+- Screen reader mengumumkan role, `aria-valuenow`, dan `aria-valuetext`: "62%" secara default, atau
+  hasil `getAriaValueText`.
+- Warna tidak pernah menjadi satu-satunya penanda. Nada peringatan tidak berarti bagi orang yang
+  tidak bisa membedakannya dari aksen, jadi pertahankan `Meter.Value` atau `aria-valuetext` yang
+  menyebutkannya, seperti "62 GB terpakai dari 100 GB, hampir penuh".
+- Meter tidak bisa difokus dan tidak menerima tombol. Nilai yang terlihat disembunyikan dari screen
+  reader, karena Root yang menyampaikannya.
+- Legenda sengaja di luar meter. Role `meter` membuat anak-anaknya presentasional, jadi tombol di
+  dalamnya tidak akan dibacakan atau terjangkau. Item legenda adalah tombol sungguhan dalam satu
+  grup, masuk urutan tab, dan `aria-pressed` menyebutkan yang dipilih; Spasi dan Enter menekannya.
+  Bagian-bagiannya sendiri tidak dibacakan: sebutkan yang penting di `aria-valuetext`, seperti
+  contohnya, dan tulis angkanya di legenda sebagai teks.
+- Hover menampilkan bagian hanya dengan mouse, jadi setiap cara melihatnya juga bisa dengan menekan.
+- Isian tiap nada punya kontras 3:1 terhadap track dan halaman, di terang dan gelap. Dengan
+  `prefers-contrast: more` track mendapat tepi 1px; pada forced colors track mempertahankan
+  outline-nya dan isian memakai highlight sistem, apa pun nadanya. Dengan bagian-bagian, tiap pil
+  mempertahankan tepinya: bagian yang ditampilkan memakai highlight, yang lain abu-abu, dan item
+  legenda yang ditekan memakai highlight beserta teksnya.
+
+## Tema [#theming]
+
+Meter membaca token tema ini. Setel salah satunya pada meter, atau pada elemen di sekitarnya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-fg` | Label, tint track (10%), dan langkah warna bagian menuju warna teks |
+| `--ow-muted` | Nilai, serta teks dan angka legenda |
+| `--ow-hover` | Item legenda yang di-hover |
+| `--ow-focus` | Cincin fokus item legenda |
+| `--ow-accent` | Isian, untuk nada `accent`; awal warna bagian, dan tint item yang ditekan |
+| `--ow-good` | Isian, untuk nada `good` |
+| `--ow-warning` | Isian, untuk nada `warning` |
+| `--ow-critical` | Isian, untuk nada `critical` |
+| `--ow-edge` | Tepi track, bagian, dan sisanya saat kontras lebih diminta |
+| `--ow-spring-glide`, `--ow-spring-glide-duration` | Perpindahan isian ke nilai baru |
+| `--ow-spring-settle`, `--ow-spring-settle-duration` | Item legenda kembali dari tekanan |
+| `--ow-ease-out` | Bagian lain memudar, dan tekanan yang masuk |
+
+<ForMode mode="isolated">
+
+Pada mode isolated, nilainya ada di root tiap Meter, jadi setel pada meter-nya sendiri.
+
+</ForMode>
+
+Setel `inline-size` pada root, atau pada induknya, dengan CSS biasa; track selebar root. Selain
+ketebalan track yang 4, 8, atau 12px, semuanya berasal dari `font-size` dalam `em`.
+
+## Gerak [#motion]
+
+Isian bergerak dengan `translate` pada spring glide saat nilai berubah, jadi tidak pernah menghitung
+ulang layout. Ubah nilai di tengah gerakan dan ia berbalik dari posisinya. Tidak ada yang berjalan
+saat diam. Dengan `prefers-reduced-motion`, isian langsung ke tempatnya.
+
+Saat satu bagian ditampilkan, bagian lain memudar ke opasitas 0,38 dalam 180ms; sisa rentang tidak.
+Item legenda mengecil ke 0,97 saat ditahan dan kembali dengan spring settle. Dengan reduced motion
+item tidak mengecil dan pemudaran tetap ada, karena tidak ada yang bergerak.

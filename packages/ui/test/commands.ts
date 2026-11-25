@@ -22,6 +22,12 @@ export const setContrast: BrowserCommand<[mode: "more" | "no-preference"]> = asy
   await ctx.page.emulateMedia({ contrast: mode });
 };
 
+// Print: a closed panel stays closed on paper.
+export const setPrint: BrowserCommand<[mode: "print" | "screen"]> = async (ctx, mode) => {
+  if (ctx.provider.name !== "playwright") throw new Error("requires the playwright provider");
+  await ctx.page.emulateMedia({ media: mode });
+};
+
 // FR-20: motion has a prefers-reduced-motion version.
 export const setReducedMotion: BrowserCommand<[mode: "reduce" | "no-preference"]> = async (
   ctx,
@@ -74,6 +80,7 @@ declare module "vitest/browser" {
     setForcedColors: (mode: "active" | "none") => Promise<void>;
     setContrast: (mode: "more" | "no-preference") => Promise<void>;
     setReducedMotion: (mode: "reduce" | "no-preference") => Promise<void>;
+    setPrint: (mode: "print" | "screen") => Promise<void>;
     mouse: (action: "down" | "up") => Promise<void>;
     setReducedTransparency: (mode: "reduce" | "no-preference") => Promise<void>;
     compileTailwind: (css: string, candidates: string[]) => Promise<string>;

@@ -71,6 +71,9 @@
   }
 }
 
+/* A Track that holds Segments: a row of pills instead of a groove. */
+@custom-variant ow-meter-parts (&:has(> [data-slot="meter-segment"]));
+
 /* A held press: a pointer or a key down, never while disabled. */
 @custom-variant held (&:is(:active, [data-held]):not([data-disabled]));
 
@@ -287,3 +290,10 @@
 
 /* A Sidebar row that shows as active: the active item the liquid has not left, or the one it is on. */
 @custom-variant ow-sidebar-lit (&:where([data-active]:not([data-away]), [data-landed]));
+
+/* Progress's indeterminate segment travels from before the track's start to past its end. */
+@keyframes ow-progress-travel {
+  to {
+    translate: calc(var(--_dir) * 250%) 0;
+  }
+}

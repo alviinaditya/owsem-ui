@@ -1,0 +1,163 @@
+---
+title: Avatar
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Untuk menyalin kode sumbernya ke project Anda, pakai item `avatar` dari
+registry.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Avatar } from "owsem-ui/base";
+
+export function Profile() {
+  return (
+    <Avatar.Root>
+      <Avatar.Image src="/ana.jpg" alt="Ana Rahman" />
+      <Avatar.Fallback>AR</Avatar.Fallback>
+    </Avatar.Root>
+  );
+}
+```
+
+Avatar menampilkan seseorang atau sebuah tim: gambar, dengan inisial atau ikon di belakangnya.
+Fallback tampil sampai gambar termuat, dan setiap kali tidak ada gambar. Beri gambar `alt` yang
+menyebut nama orangnya, atau biarkan `alt=""` bila nama sudah ada di sebelah avatar. `Avatar.Group`
+menata beberapa avatar berdampingan.
+
+### Nama dengan Tooltip
+
+Untuk menampilkan nama saat disorot atau difokus, gabungkan avatar dengan [Tooltip](/id/tooltip):
+render avatar sebagai `button` lalu berikan ke `Tooltip.Trigger`. Avatar tidak mengimpor apa pun dari
+Tooltip, dan Tooltip tidak menambah pembungkus, jadi grup tetap melihat avatarnya. Bungkus grup
+dalam satu `Tooltip.Provider` dan nama berikutnya terbuka seketika. Pilih `delay`-nya untuk nama:
+bawaan 600 ms untuk tooltip pertama terasa lambat pada deretan wajah, jadi `delay={100}` lebih
+cocok. Beri tiap avatar `aria-label` berisi namanya.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Base UI merender `<span>`, sebuah `<img>` yang hanya ada setelah gambar termuat, dan `<span>` untuk
+fallback yang hilang saat itu.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Group" /> | `div.ow-avatar__group` | `role="group"`; menumpuk avatarnya dan memotong tiap avatar dari yang sebelumnya |
+| <Part name="Root" /> | `span.ow-avatar` | Lingkaran 32, 40, atau 48px |
+| <Part name="Image" /> | `img.ow-avatar__image` | Menutupi lingkaran; memudar masuk di atas tint, setelah fallback hilang |
+| <Part name="Fallback" /> | `span.ow-avatar__fallback` | Inisial atau ikon, di tengah |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### Avatar.Root
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | milik grup, atau `"md"` | 32, 40, atau 48px, setinggi Button |
+
+#### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-size` | Selalu; ukuran yang dipilih |
+
+### Avatar.Image
+
+Milik Base UI, tanpa perubahan. Ia memudar masuk dengan `data-starting-style`, dan keluar dengan
+`data-ending-style`.
+
+### Avatar.Fallback
+
+`svg` di dalamnya seukuran font ditambah 2px.
+
+### Avatar.Group
+
+Buatan kami: `<div>` dengan `role="group"` yang menerima `render` dan `ref`. Beri `aria-label`.
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | | Ukuran avatar di dalamnya; `size` milik avatar sendiri menang |
+
+#### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-size` | `size` diberikan |
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-avatar` | Root |
+| `ow-avatar--sm`, `ow-avatar--md`, `ow-avatar--lg` | Root, menurut `size` |
+| `ow-avatar__image` | Image |
+| `ow-avatar__fallback` | Fallback |
+| `ow-avatar__group` | Group |
+
+## Aksesibilitas [#accessibility]
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab | Memindahkan fokus ke avatar yang berupa tautan atau tombol; dengan Tooltip, namanya terbuka |
+
+- Avatar tidak bisa difokus dengan sendirinya. Render sebagai tautan dengan
+  `render={<a href="/ana" />}`, atau sebagai tombol, dan ia menerima fokus serta menampilkan cincin
+  fokus 2px utuh, bahkan di dalam grup. Tautan atau tombol juga tampil utuh di depan tetangganya saat
+  disorot, dan avatar sesudahnya dipotong di sisi awalnya tempat avatar depan berada, sehingga jarak
+  2px tetap ada; avatar biasa tidak bereaksi terhadap penunjuk.
+- Sebutkan nama orangnya. `alt` gambar dibacakan; teks fallback hanya dibacakan selama gambar belum
+  termuat, jadi nama yang penting ditaruh di `alt`, `aria-label`, atau teks di sebelahnya.
+- Hitungan seperti "+3" adalah teks sebuah Fallback: sebutkan apa yang dihitung lewat `aria-label`.
+- Ikon di fallback dekoratif: beri `aria-hidden`.
+- Dengan `prefers-contrast: more` lingkaran mendapat tepi 1px; pada forced colors ia mempertahankan
+  outline-nya.
+
+## Tema [#theming]
+
+Avatar membaca token tema ini. Setel salah satunya pada avatar, atau pada elemen di sekitarnya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-fg` | Tint lingkaran (10%) dan inisial |
+| `--ow-focus` | Cincin fokus |
+| `--ow-edge` | Tepi lingkaran saat kontras lebih diminta |
+| `--ow-ease-out` | Pemudaran gambar |
+
+<ForMode mode="isolated">
+
+Pada mode isolated, nilainya ada di root tiap Avatar, jadi setel pada avatarnya sendiri.
+
+</ForMode>
+
+Ukurannya piksel tetap pada skala Button, jadi tetap pas di zoom berapa pun. Setel `inline-size`
+dan `block-size` dengan CSS biasa untuk ukuran lain; tumpukan grup mengikuti ukuran tiap avatar.
+
+Dalam grup, potongannya adalah mask, bukan cincin berwarna latar halaman, jadi celahnya menampakkan
+apa pun di belakang grup: permukaan mana pun, terang atau gelap. Halaman kanan-ke-kiri
+mencerminkannya.
+
+## Gerak [#motion]
+
+Gambar memudar masuk di atas tint dalam 150ms, memakai `data-starting-style`. Base UI merender fallback hanya selama gambar belum termuat, jadi pemudaran tidak bersilang dengan fallback: inisial sudah hilang saat ia mulai. Tidak ada yang lain
+bergerak, dan tidak ada yang berjalan saat diam. Dengan `prefers-reduced-motion`, gambar langsung
+muncul.

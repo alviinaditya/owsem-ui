@@ -1,9 +1,12 @@
 import type { ComponentType } from "react";
 import type { ExamplePageProps } from "@/components/component-page/component-page";
 import type { ComponentName } from "@/lib/catalog";
+import AccordionPage from "./accordion";
+import AvatarPage from "./avatar";
 import ButtonPage from "./button";
 import CheckboxPage from "./checkbox";
 import CodeBlockPage from "./code-block";
+import CollapsiblePage from "./collapsible";
 import ColorPickerPage from "./color-picker";
 import CommandMenuPage from "./command-menu";
 import CopyButtonPage from "./copy-button";
@@ -15,7 +18,9 @@ import IconMorphPage from "./icon-morph";
 import InputPage from "./input";
 import KbdPage from "./kbd";
 import MenuPage from "./menu";
+import MeterPage from "./meter";
 import PopoverPage from "./popover";
+import ProgressPage from "./progress";
 import RadioGroupPage from "./radio-group";
 import ScrollAreaPage from "./scroll-area";
 import SelectPage from "./select";
@@ -65,6 +70,11 @@ export const examples: Partial<Record<ComponentName, ComponentType<ExamplePagePr
   tooltip: TooltipPage,
   tabs: TabsPage,
   "scroll-area": ScrollAreaPage,
+  accordion: AccordionPage,
+  collapsible: CollapsiblePage,
+  avatar: AvatarPage,
+  progress: ProgressPage,
+  meter: MeterPage,
   "icon-morph": IconMorphPage,
   "code-block": CodeBlockPage,
 };

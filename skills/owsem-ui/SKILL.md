@@ -172,9 +172,9 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Button**, **Checkbox**, **Dialog**, **Field**, **Fieldset**, **Form**, **Input**, **Kbd**,
-**Menu**, **Popover**, **Radio Group**, **Scroll Area**, **Select**, **Separator**, **Switch**,
-**Tabs**, **Toggle**, **Toggle Group**, **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`)
+**Accordion**, **Avatar**, **Button**, **Checkbox**, **Collapsible**, **Dialog**, **Field**,
+**Fieldset**, **Form**, **Input**, **Kbd**, **Menu**, **Meter**, **Popover**, **Progress**, **Radio Group**, **Scroll Area**,
+**Select**, **Separator**, **Switch**, **Tabs**, **Toggle**, **Toggle Group**, **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`)
 and **Code Block**, **Color Picker**, **Command Menu**, **Copy Button**, **Icon Morph**,
 **Sidebar**, **Table**, **Table of Contents**, and **Tree Rail Nav** (Owsem, from
 `owsem-ui/owsem`) are built. Base
@@ -766,6 +766,165 @@ import { Switch } from "owsem-ui/base"; // or "@/components/owsem/switch"
 - Reads `--ow-fg` (the off track and the icon), `--ow-accent` and `--ow-primary-shadow` (on),
   `--ow-on-accent` (the thumb) and `--ow-surface-shadow` (its shadow), `--ow-edge` (high contrast), `--ow-radius`,
   `--ow-motion-scale`, and `--ow-focus`.
+
+### Avatar
+
+A circle for a person or a team: a picture with initials or an icon behind it, on Button's heights
+(32, 40, 48 px). A flat 10% tint of the text color with no edge. Registry item: `avatar`.
+
+```tsx
+import { Avatar } from "owsem-ui/base"; // or "@/components/owsem/avatar"
+<Avatar.Root>
+  <Avatar.Image src="/ana.jpg" alt="Ana Rahman" />
+  <Avatar.Fallback>AR</Avatar.Fallback>
+</Avatar.Root>
+<Avatar.Group size="sm" aria-label="Design team">
+  <Avatar.Root render={<a href="/ana" aria-label="Ana" />}>
+    <Avatar.Fallback>A</Avatar.Fallback>
+  </Avatar.Root>
+  <Avatar.Root><Avatar.Fallback>+3</Avatar.Fallback></Avatar.Root>
+</Avatar.Group>
+```
+
+- Base UI's parts: `Root`, `Image` (in the DOM only once loaded; fades in over the tint, since Base UI renders `Fallback` only while the picture is not loaded), and
+  `Fallback` (gone once the image has loaded; `delay` holds it back). Ours: `Group`.
+- `size` is `"sm"`, `"md"` (default), or `"lg"`. `Avatar.Group`'s `size` is the size of the avatars
+  in it; an avatar's own `size` wins.
+- `Group` is a `<div role="group">`: give it an `aria-label`. Its avatars overlap by an eighth and each
+  is cut out of the one before it with a mask, so it works on any surface; right to left mirrors it.
+  A count is just an `Avatar.Root` with `Avatar.Fallback` ("+3").
+- An avatar is not focusable. `render={<a href />}` (or a `button`) makes it interactive, with a 2px
+  focus ring shown whole in a group; a hovered button or link also shows whole, in front of its
+  neighbors, and the avatar after it is cut at its start where the front one sits (the same for a
+  focused one). A plain avatar does not react to the pointer. Names on hover: compose with Tooltip,
+  `<Tooltip.Trigger render={<Avatar.Root render={<button type="button" />} aria-label="Ana" />} />`,
+  inside one `Tooltip.Provider` (`delay={100}` suits names); Avatar needs no prop for it. Name the person with the image's `alt`, or an `aria-label`.
+- An `svg` in `Fallback` is the font's size plus 2px; keep it `aria-hidden`.
+- Reads `--ow-fg` (tint and initials), `--ow-focus`, `--ow-edge` (high contrast), and `--ow-ease-out`.
+
+### Progress
+
+How far a task has got: a label at the start and the value at the end above a pill track (a 10% tint
+of the text color), with an accent fill. Registry item: `progress`.
+
+```tsx
+import { Progress } from "owsem-ui/base"; // or "@/components/owsem/progress"
+<Progress.Root value={60}>
+  <Progress.Label>Uploading</Progress.Label>
+  <Progress.Value />
+  <Progress.Track />
+</Progress.Root>
+<Progress.Root value={null} aria-label="Loading" /> // indeterminate
+```
+
+- Base UI's parts: `Root`, `Track`, `Indicator`, `Value`, `Label`. `Root` without children draws its
+  `Track`, and a `Track` without children draws its `Indicator`; with a `Label` or `Value`, write
+  `<Progress.Track />` yourself. `value`, `min`, `max`, `format`, `locale`, and `getAriaValueText`
+  are Base UI's. Name it with a `Label` or an `aria-label`.
+- `size` is `"sm"`, `"md"` (default), or `"lg"`: a 4, 8, or 12 px track.
+- The fill is as wide as the track and moves with `translate` on the glide spring (Base UI's inline
+  `width` is left out by the part; `Root` writes the share to `--_value`). `value={null}`
+  runs a CSS animation of a segment along the track, the one animation that runs at rest; it stops
+  when a value is set. With reduced motion nothing moves and the segment sits still in the middle.
+- `Value` is hidden from screen readers: `Root` says it. Say when a task is done in text.
+- Reads `--ow-fg`, `--ow-muted` (value), `--ow-accent` (fill), `--ow-edge` (high contrast),
+  `--ow-spring-glide`, and `--ow-ease-in-out`.
+
+### Meter
+
+A value within a range, such as disk space: the same look as Progress, its own component with the
+`meter` role. Registry item: `meter`.
+
+```tsx
+import { Meter } from "owsem-ui/base"; // or "@/components/owsem/meter"
+<Meter.Root value={62} tone="warning">
+  <Meter.Label>Storage</Meter.Label>
+  <Meter.Value />
+  <Meter.Track />
+</Meter.Root>
+```
+
+- Parts and props as in Progress, with `value` always a number. `tone` is `"accent"` (default),
+  `"good"`, `"warning"`, or `"critical"`: the fill reads `--ow-accent`, `--ow-good`, `--ow-warning`,
+  or `--ow-critical`. The page decides the tone: there is no `low`, `high`, or `optimum`.
+- Color is never the only signal: keep `Meter.Value` or an `aria-valuetext`. In forced colors the fill
+  is the system's highlight whatever the tone.
+- Parts of a whole (a breakdown): put `Meter.Segment`s (`name`, `value`, optional `tone`) in the `Meter.Track`
+  and a `Meter.Legend` (`role="group"`, give it an `aria-label`) of `Meter.LegendItem`s (`name`, optional
+  `tone`, with a `Meter.LegendValue` for the figure) beside the Root inside a `Meter.Group`. The Legend must be
+  outside the Root: a meter's children are not read and its buttons must be. The parts should add up to the
+  Root's `value`; a part is its share of `min` to `max`, the unfilled rest is drawn from `value`, and a full
+  meter has none. Without a `tone` a part's color steps from the accent toward the text color by position
+  (every fifth restarts); a `tone` paints it in that token and its LegendItem needs the same `tone` for the dot.
+- `Meter.Group`: `active` / `defaultActive` / `onActiveChange(name | null)`, `size` (reaches the Root and the
+  Legend), and children that may be a function of `shown` (the part under a mouse, else the active one). Pressing
+  an item picks its part (`aria-pressed`) and the other segments fade to 0.38; pressing it again clears it.
+  Without a Group the parts render and nothing is active. `Meter.LegendItem` is a Base UI Button (`render`,
+  `disabled`).
+
+### Collapsible
+
+One panel that opens and closes: a quiet trigger (a ghost Button's look) with its label at the start and
+a chevron at the end, above a panel whose height animates. Registry item: `collapsible`.
+
+```tsx
+import { Collapsible } from "owsem-ui/base"; // or "@/components/owsem/collapsible"
+<Collapsible.Root>
+  <Collapsible.Trigger>Order details</Collapsible.Trigger>
+  <Collapsible.Panel>Two shirts and a pair of trousers.</Collapsible.Panel>
+</Collapsible.Root>
+<Collapsible.Root size="sm">
+  <Collapsible.Trigger icon={<Plus />}>FAQ</Collapsible.Trigger> {/* icon={null}: no chevron */}
+  <Collapsible.Panel>Answer.</Collapsible.Panel>
+</Collapsible.Root>
+```
+
+- Base UI's parts: `Root`, `Trigger`, `Panel`; `open`, `defaultOpen`, `onOpenChange`, `disabled`, and the
+  Panel's `keepMounted` and `hiddenUntilFound` are Base UI's. The panel is in the page only while open.
+- `Root` takes `size` (`"sm"`, `"md"` default, `"lg"`: 32, 40, 48 px triggers), which reaches the `Trigger` and
+  the `Panel` by context (a trigger in a wrapper or heading too); a `Trigger`'s own `size` wins for that
+  trigger only. `Trigger` takes `icon` (a node that replaces the chevron, `null` for none). An open trigger
+  has `data-panel-open` for your own icon's CSS.
+- `Panel` wraps its children in an inner element that has the size's text (13, 14, 16 px, weight 400, line
+  height 1.5) and the padding (0.5em above, 1em below, the trigger's formula at the sides so the text lines
+  up with the label), so the animated box has none. The height comes from Base UI's `--collapsible-panel-height` (pixels while moving, `auto`
+  at rest, so late content is not clipped). Never set `display` on a hidden panel.
+- Motion: 300ms on `--ow-ease-drawer` (no overshoot), the content fades; the chevron is two strokes that
+  turn on the settle spring. Reduced motion, or `--ow-motion-scale: 0`, opens at once.
+- Reads `--ow-fg`, `--ow-hover`, `--ow-pressed-bg`, `--ow-radius`, `--ow-focus`, `--ow-motion-scale`,
+  `--ow-ease-drawer`, `--ow-ease-out`, and `--ow-spring-settle`.
+
+### Accordion
+
+Sections told apart by one hairline, each a full-width row that opens its panel. Registry item: `accordion`.
+
+```tsx
+import { Accordion } from "owsem-ui/base"; // or "@/components/owsem/accordion"
+<Accordion.Root defaultValue={["1"]} size="sm">
+  <Accordion.Item value="1">
+    <Accordion.Trigger>What is OwsemUI?</Accordion.Trigger>
+    <Accordion.Panel>React components on top of Base UI.</Accordion.Panel>
+  </Accordion.Item>
+  <Accordion.Item value="2" disabled>
+    <Accordion.Trigger>Coming soon</Accordion.Trigger>
+    <Accordion.Panel>Not yet.</Accordion.Panel>
+  </Accordion.Item>
+</Accordion.Root>
+```
+
+- Base UI's parts: `Root`, `Item`, `Header`, `Trigger`, `Panel`; `value`, `defaultValue`, `onValueChange`,
+  `multiple`, `disabled`, `orientation`, `keepMounted`, `hiddenUntilFound` are Base UI's. Base UI's Accordion
+  has no arrow-key navigation: Tab moves between triggers.
+- `Root` takes `size` (`"sm"`, `"md"` default, `"lg"`), which applies to every `Trigger`. `Trigger` takes `icon`
+  as Collapsible's does. `Trigger` draws its own `Header` (an `h3`) unless it is already inside one,
+  found by context; write `<Accordion.Header render={<h2 />}>` to change the level.
+- The row has no fill on hover and no press scale; the chevron is muted and takes `--ow-fg` on hover and
+  while open. The panel's text takes the Root's size (weight 400, line height 1.5) and its padding is on an
+  inner element (0.25em above, 4px at the sides, 1em below); the size comes from `--accordion-panel-height`.
+- `orientation="horizontal"` puts the items side by side and animates the panel's width
+  (`--accordion-panel-width`); give its content a width of its own.
+- Reads `--ow-fg`, `--ow-muted`, `--ow-line` and `--ow-edge` (high contrast), `--ow-radius`, `--ow-focus`,
+  `--ow-motion-scale`, `--ow-ease-drawer`, `--ow-ease-out`, and `--ow-spring-settle`.
 
 ### Toggle
 

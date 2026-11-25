@@ -1,0 +1,191 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * Avatar (Base). A circle on the same heights as Button: a flat tint of the text color with no
+ * edge, holding a picture, initials, or an icon. The picture covers it and fades in over the
+ * tint: Base UI renders the fallback only while the picture has not loaded, so there is nothing
+ * else under it. In a group, the avatars overlap by an eighth and each is cut out of the one
+ * before it with a mask, so the gap shows whatever is behind the group, on any surface.
+ */
+@layer owsem.components {
+  .ow-avatar {
+    --_tint: color-mix(in oklab, var(--ow-fg) 10%, transparent);
+    --_ink: var(--ow-fg);
+    --_focus: var(--ow-focus);
+    --_size: 40px;
+    /* 1 toward the end of a line of text, -1 where the page runs right to left. */
+    --_dir: 1;
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    /* Looks the same rendered as a button or a link. */
+    margin: 0;
+    padding: 0;
+    border: 0;
+    inline-size: var(--_size);
+    block-size: var(--_size);
+    overflow: hidden;
+    border-radius: 50%;
+    /* Invisible until forced colors draw it as the edge. */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--_tint);
+    color: var(--_ink);
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1;
+    /* One width for every digit, so "+3" and "+8" fit the same. */
+    font-variant-numeric: tabular-nums;
+    text-decoration: none;
+    white-space: nowrap;
+    vertical-align: middle;
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement */
+    user-select: none;
+  }
+
+  .ow-avatar--sm {
+    --_size: 32px;
+    font-size: 0.8125rem;
+  }
+
+  .ow-avatar--lg {
+    --_size: 48px;
+    font-size: 1rem;
+  }
+
+  .ow-avatar:where(button, a) {
+    cursor: pointer;
+  }
+
+  .ow-avatar:where(:dir(rtl)) {
+    --_dir: -1;
+  }
+
+  /* 2px outside the circle. */
+  .ow-avatar:where(:focus-visible) {
+    outline: 2px solid var(--_focus);
+    outline-offset: 2px;
+  }
+
+  .ow-avatar__image {
+    flex: none;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    opacity: 1;
+    transition: opacity 150ms var(--ow-ease-out);
+  }
+
+  /* Fades in from the tint (the fallback is gone once it has loaded), and out when it goes. */
+  .ow-avatar__image:where([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+  }
+
+  .ow-avatar__fallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  /* An icon is the font's size plus 2px. */
+  .ow-avatar__fallback > :where(svg) {
+    flex: none;
+    inline-size: calc(1em + 2px);
+    block-size: calc(1em + 2px);
+  }
+
+  .ow-avatar__group {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    isolation: isolate;
+  }
+
+  /* Each overlaps the one before by an eighth of its own size. */
+  .ow-avatar__group > :where(.ow-avatar) ~ :where(.ow-avatar) {
+    margin-inline-start: calc(var(--_size) * -0.125);
+  }
+
+  /*
+   * An avatar with another after it is cut where that one sits: its center is seven eighths of a
+   * size along, and the cut is 2px wider than the circle. The anti-aliased edge is half a pixel.
+   */
+  .ow-avatar__group > :where(.ow-avatar) {
+    --_cut: calc(var(--_size) / 2 + 2px);
+    --_next: radial-gradient(
+      circle var(--_cut) at calc(50% + var(--_dir) * var(--_size) * 0.875) 50%,
+      transparent calc(var(--_cut) - 0.5px),
+      Canvas var(--_cut)
+    );
+    --_before: radial-gradient(
+      circle var(--_cut) at calc(50% - var(--_dir) * var(--_size) * 0.875) 50%,
+      transparent calc(var(--_cut) - 0.5px),
+      Canvas var(--_cut)
+    );
+  }
+
+  .ow-avatar__group > :where(.ow-avatar:has(~ .ow-avatar)) {
+    mask-image: var(--_next);
+  }
+
+  /*
+   * In front, whole, with its whole ring: when focused, and a button or a link when hovered. The
+   * one after it is then cut where it sits, so the gap stays. A plain avatar does not react.
+   */
+  .ow-avatar__group > :where(.ow-avatar:focus-visible + .ow-avatar) {
+    mask-image: var(--_before);
+  }
+
+  .ow-avatar__group > :where(.ow-avatar:focus-visible + .ow-avatar:has(~ .ow-avatar)) {
+    mask-image: var(--_before), var(--_next);
+    mask-composite: intersect;
+  }
+
+  .ow-avatar__group > :where(.ow-avatar:focus-visible) {
+    position: relative;
+    z-index: 1;
+    mask-image: none;
+  }
+
+  @media (hover: hover) {
+    .ow-avatar__group > :where(.ow-avatar:is(button, a):hover + .ow-avatar) {
+      mask-image: var(--_before);
+    }
+
+    .ow-avatar__group > :where(.ow-avatar:is(button, a):hover + .ow-avatar:has(~ .ow-avatar)) {
+      mask-image: var(--_before), var(--_next);
+      mask-composite: intersect;
+    }
+
+    .ow-avatar__group > :where(.ow-avatar:is(button, a):hover) {
+      position: relative;
+      z-index: 1;
+      mask-image: none;
+    }
+  }
+
+  /* No fade: the picture is there when it is there. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-avatar__image {
+      transition: none;
+    }
+  }
+
+  /* More contrast asked for: the edge comes back at 3:1. */
+  @media (prefers-contrast: more) {
+    .ow-avatar:where(:not(:focus-visible)) {
+      outline-color: var(--ow-edge);
+    }
+  }
+
+  /* The circle keeps its outline as the edge. */
+  @media (forced-colors: active) {
+    .ow-avatar:where(:focus-visible) {
+      outline-color: Highlight;
+    }
+  }
+}

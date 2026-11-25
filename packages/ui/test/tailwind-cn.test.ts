@@ -1,7 +1,18 @@
 import { describe, expect, test } from "vitest";
+import {
+  accordionContentVariants,
+  accordionSlots,
+  accordionTriggerVariants,
+} from "../src/tailwind/accordion/accordion-variants";
+import { avatarSlots, avatarVariants } from "../src/tailwind/avatar/avatar-variants";
 import { buttonSlots, buttonVariants } from "../src/tailwind/button/button-variants";
 import { checkboxSlots, checkboxVariants } from "../src/tailwind/checkbox/checkbox-variants";
 import { codeBlockSlots } from "../src/tailwind/code-block/code-block-variants";
+import {
+  collapsibleContentVariants,
+  collapsibleSlots,
+  collapsibleTriggerVariants,
+} from "../src/tailwind/collapsible/collapsible-variants";
 import {
   colorPickerSlots,
   colorPickerTriggerVariants,
@@ -26,7 +37,15 @@ import { kbdSlots } from "../src/tailwind/kbd/kbd-variants";
 import { cn } from "../src/tailwind/lib/cn";
 import { glideSlots } from "../src/tailwind/lib/glide/glide-variants";
 import { menuPopupVariants, menuSlots } from "../src/tailwind/menu/menu-variants";
+import {
+  meterLegendItemVariants,
+  meterLegendVariants,
+  meterSegmentVariants,
+  meterSlots,
+  meterVariants,
+} from "../src/tailwind/meter/meter-variants";
 import { popoverSlots } from "../src/tailwind/popover/popover-variants";
+import { progressSlots, progressVariants } from "../src/tailwind/progress/progress-variants";
 import {
   radioGroupSlots,
   radioGroupVariants,
@@ -64,9 +83,12 @@ import { classNames } from "./parity";
 const SIZES = ["sm", "md", "lg"] as const;
 const all = classNames(
   ...[
+    accordionSlots,
+    avatarSlots,
     buttonSlots,
     checkboxSlots,
     codeBlockSlots,
+    collapsibleSlots,
     colorPickerSlots,
     commandMenuSlots,
     copyButtonSlots,
@@ -79,7 +101,9 @@ const all = classNames(
     inputSlots,
     kbdSlots,
     menuSlots,
+    meterSlots,
     popoverSlots,
+    progressSlots,
     radioGroupSlots,
     scrollAreaSlots,
     selectSlots,
@@ -95,8 +119,23 @@ const all = classNames(
     treeRailNavSlots,
   ].flatMap((slots) => Object.values(slots)),
   ...Object.values(toggleSlots),
+  ...(["accent", "good", "warning", "critical"] as const).flatMap((tone) => [
+    meterVariants({ tone }),
+    meterSegmentVariants({ tone }),
+    meterLegendItemVariants({ tone }),
+  ]),
+  meterSegmentVariants(),
+  meterLegendItemVariants(),
   ...(["default", "sm"] as const).map((size) => tableVariants({ size })),
   ...SIZES.flatMap((size) => [
+    accordionTriggerVariants({ size }),
+    accordionContentVariants({ size }),
+    avatarVariants({ size }),
+    collapsibleTriggerVariants({ size }),
+    collapsibleContentVariants({ size }),
+    meterVariants({ size }),
+    meterLegendVariants({ size }),
+    progressVariants({ size }),
     checkboxVariants({ size }),
     switchVariants({ size }),
     toggleVariants({ size }),
@@ -135,6 +174,7 @@ const BUILT_IN: Record<string, string> = {
   gap: "gap-1",
   ease: "ease-linear",
   fill: "fill-red-500",
+  grow: "grow-0",
   h: "h-4",
   me: "me-1",
   "max-w": "max-w-4",

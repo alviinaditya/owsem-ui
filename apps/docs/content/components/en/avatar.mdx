@@ -1,0 +1,159 @@
+---
+title: Avatar
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. To copy the source into your project instead, use the `avatar` item
+of the registry.
+
+## Usage [#usage]
+
+```tsx
+import { Avatar } from "owsem-ui/base";
+
+export function Profile() {
+  return (
+    <Avatar.Root>
+      <Avatar.Image src="/ana.jpg" alt="Ana Rahman" />
+      <Avatar.Fallback>AR</Avatar.Fallback>
+    </Avatar.Root>
+  );
+}
+```
+
+An avatar shows a person or a team: a picture, with initials or an icon behind it. The fallback
+shows until the picture has loaded, and whenever there is none. Give the picture an `alt` that names
+the person, or leave `alt=""` when a name sits beside the avatar. `Avatar.Group` lays several side by
+side.
+
+### Names with a Tooltip
+
+To show a name on hover or focus, compose the avatar with [Tooltip](/en/tooltip): render the avatar
+as a `button` and pass it to `Tooltip.Trigger`. Avatar imports nothing from Tooltip, and a Tooltip
+adds no wrapper, so the group still sees its avatars. Wrap the group in one `Tooltip.Provider` and
+the next name opens at once. Choose its `delay` for names: the default 600 ms for the first tooltip
+feels slow on a row of faces, so `delay={100}` suits them. Give each avatar an `aria-label` with
+the name.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Base UI renders a `<span>`, an `<img>` that exists only once the picture has loaded, and a `<span>`
+for the fallback that goes when it has.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Group" /> | `div.ow-avatar__group` | `role="group"`; overlaps its avatars and cuts each out of the one before |
+| <Part name="Root" /> | `span.ow-avatar` | The circle: 32, 40, or 48px |
+| <Part name="Image" /> | `img.ow-avatar__image` | Covers the circle; fades in over the tint, once the fallback is gone |
+| <Part name="Fallback" /> | `span.ow-avatar__fallback` | Initials or an icon, centered |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### Avatar.Root
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | the group's, else `"md"` | 32, 40, or 48px, the heights of Button |
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-size` | Always; the chosen size |
+
+### Avatar.Image
+
+Base UI's, unchanged. It fades in with `data-starting-style`, and leaves with `data-ending-style`.
+
+### Avatar.Fallback
+
+An `svg` inside it is the font's size plus 2px.
+
+### Avatar.Group
+
+Ours: a `<div>` with `role="group"` that takes `render` and `ref`. Give it an `aria-label`.
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | | The size of the avatars in it; an avatar's own `size` wins |
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-size` | `size` is set |
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-avatar` | Root |
+| `ow-avatar--sm`, `ow-avatar--md`, `ow-avatar--lg` | Root, by `size` |
+| `ow-avatar__image` | Image |
+| `ow-avatar__fallback` | Fallback |
+| `ow-avatar__group` | Group |
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| Tab | Moves focus to an avatar that is a link or a button; with a Tooltip, its name opens |
+
+- An avatar is not focusable by itself. Render it as a link with `render={<a href="/ana" />}`, or
+  as a button, and it takes focus and shows its whole 2px focus ring, even inside a group. A link or
+  button also shows whole in front of its neighbors when hovered, and the avatar after it is cut at
+  its start where the front one sits, so the 2px gap stays; a plain avatar does not react to the
+  pointer.
+- Name the person. The picture's `alt` is announced; the fallback's text is announced only while the
+  picture has not loaded, so a name that matters belongs in `alt`, an `aria-label`, or the text beside it.
+- A count such as "+3" is the text of a Fallback: say what it counts in an `aria-label`.
+- An icon in the fallback is decorative: give it `aria-hidden`.
+- With `prefers-contrast: more` the circle gets a 1px edge; in forced colors it keeps its outline.
+
+## Theming [#theming]
+
+Avatar reads these theme tokens. Set one on an avatar, or on anything around it.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-fg` | The circle's tint (10%) and the initials |
+| `--ow-focus` | Focus ring |
+| `--ow-edge` | The circle's edge when more contrast is asked for |
+| `--ow-ease-out` | The picture's fade |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Avatar's root, so set yours on the avatar itself.
+
+</ForMode>
+
+The sizes are fixed pixels on Button's scale, so they stay exact at any zoom. Set `inline-size`
+and `block-size` with plain CSS for another size; a group's overlap follows each avatar's own size.
+
+In a group, the cut is a mask, not a ring in a page color, so the gap shows whatever is behind the
+group: any surface, light or dark. A right-to-left page mirrors it.
+
+## Motion [#motion]
+
+The picture fades in over the tint in 150ms, using `data-starting-style`. Base UI renders the fallback only while the picture has not loaded, so the fade does not cross-fade with it: the initials are gone when it starts. Nothing else moves, and
+nothing runs at rest. With `prefers-reduced-motion` the picture appears at once.

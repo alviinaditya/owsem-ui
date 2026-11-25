@@ -720,6 +720,10 @@ body {
   gap: 8px;
 }
 
+.component-preview-bar {
+  inline-size: 150px;
+}
+
 .component-preview-fieldset {
   inline-size: 100%;
 }
@@ -2281,6 +2285,59 @@ body {
 .demo-col {
   display: grid;
   gap: 12px;
+}
+
+/* Avatar's demos: a row of circles, and a bar that fills the stage up to a comfortable width. */
+.demo-avatar-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+.demo-avatar-captioned {
+  display: grid;
+  align-self: flex-start;
+  justify-items: center;
+  gap: 8px;
+  inline-size: 110px;
+  color: var(--ow-muted);
+  font-size: 0.8125rem;
+  text-align: center;
+}
+
+.demo-avatar-captioned > .ow-avatar {
+  color: var(--ow-fg);
+}
+
+.demo-bar {
+  inline-size: min(340px, calc(100vw - 64px));
+}
+
+.demo-parts {
+  inline-size: min(500px, calc(100vw - 64px));
+}
+
+/* Collapsible's demos: a plus that turns into a cross while open, and a button beside a state. */
+.demo-plus {
+  transition: rotate 200ms var(--ow-ease-out);
+}
+
+[data-panel-open] .demo-plus {
+  rotate: 45deg;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-plus {
+    transition: none;
+  }
+}
+
+.demo-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.875rem;
 }
 
 /* Input's demos. */

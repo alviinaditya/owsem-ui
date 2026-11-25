@@ -1,0 +1,272 @@
+---
+title: Meter
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. To copy the source into your project instead, use the `meter` item
+of the registry.
+
+## Usage [#usage]
+
+```tsx
+import { Meter } from "owsem-ui/base";
+
+export function StorageMeter() {
+  return (
+    <Meter.Root value={62}>
+      <Meter.Label>Storage</Meter.Label>
+      <Meter.Value />
+      <Meter.Track />
+    </Meter.Root>
+  );
+}
+```
+
+Meter shows a value within a known range, such as disk space, a battery, or a score. It looks like
+[Progress](/en/progress) and is its own component: it has the `meter` role, and no sense of a task
+that is under way or done. Name it with a `Meter.Label` or an `aria-label`.
+
+Reach for Meter when one number sits within a known range. To show that a task is under way or
+done, use [Progress](/en/progress): it has no `meter` role and can be indeterminate. When the value
+is made of parts, such as where the hours of a week went, draw them as a breakdown: `Meter.Segment`s
+in the track and a `Meter.Legend` that names them. Each part is a pill in its own color, in a row
+with the unfilled rest of the range.
+
+```tsx
+import { Meter } from "owsem-ui/base";
+
+export function WeekBreakdown() {
+  return (
+    <Meter.Group defaultActive="focus">
+      <Meter.Root value={32} max={40} aria-label="Working week">
+        <Meter.Track>
+          <Meter.Segment name="focus" value={14} />
+          <Meter.Segment name="meetings" value={9} />
+          <Meter.Segment name="reviews" value={9} />
+        </Meter.Track>
+      </Meter.Root>
+      <Meter.Legend aria-label="Parts of the week">
+        <Meter.LegendItem name="focus">
+          Focus <Meter.LegendValue>14 h</Meter.LegendValue>
+        </Meter.LegendItem>
+        <Meter.LegendItem name="meetings">
+          Meetings <Meter.LegendValue>9 h</Meter.LegendValue>
+        </Meter.LegendItem>
+        <Meter.LegendItem name="reviews">
+          Reviews <Meter.LegendValue>9 h</Meter.LegendValue>
+        </Meter.LegendItem>
+      </Meter.Legend>
+    </Meter.Group>
+  );
+}
+```
+
+The parts should add up to the value: `Meter.Root` takes the rest of the range from its own `value`, and a
+part is its share of `min` to `max`. Pressing a legend item picks its part; the others fade until
+it is pressed again. Hovering an item or a segment with a mouse shows its part for as long as the
+pointer is there. A function child of `Meter.Group` gets that part, to write it in the `Meter.Value`.
+
+The page picks the tone. There is no `low`, `high`, or `optimum`: decide in your code, then pass
+`tone="good"`, `"warning"`, or `"critical"`.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Base UI renders a `<div>` with the `meter` role, and a visually hidden `x` that keeps its text
+from being empty.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Group" /> | `div` | Holds the picked part and the one under the pointer; no class |
+| <Part name="Root" /> | `div.ow-meter` | `role="meter"` and `aria-valuenow`; draws its Track without children |
+| <Part name="Label" /> | `span.ow-meter__label` | Names the meter through `aria-labelledby` |
+| <Part name="Value" /> | `span.ow-meter__value` | The formatted value, hidden from screen readers |
+| <Part name="Track" /> | `div.ow-meter__track` | The groove: 4, 8, or 12px; draws its Indicator without children |
+| <Part name="Indicator" /> | `div.ow-meter__indicator` | The fill, in the tone |
+| <Part name="Segment" /> | `span.ow-meter__segment` | A part of a whole in the Track, as wide as its share |
+| <Part name="Legend" /> | `div.ow-meter__legend` | `role="group"`; outside the Root, wraps |
+| <Part name="LegendItem" /> | `button.ow-meter__legend-item` | `aria-pressed`; a dot in its part's color |
+| <Part name="LegendValue" /> | `span.ow-meter__legend-value` | A muted figure at the end of an item |
+
+A Track that has Segments is a row of pills 3px apart, with no groove behind them. The rest of the
+range is drawn as one more pill after the last (an `::after` of the Track, from the Root's value),
+and is gone once the meter is full. The legend is a sibling of the Root, never inside it: the Root's
+children are presentational to screen readers, and the legend's buttons must be read.
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### Meter.Root
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | A 4, 8, or 12px track, with Button's font sizes for the label |
+| `tone` | `"accent" \| "good" \| "warning" \| "critical"` | `"accent"` | The fill's color: `--ow-accent`, `--ow-good`, `--ow-warning`, or `--ow-critical` |
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-size` | Always; the chosen size |
+| `data-tone` | Always; the chosen tone |
+
+### Meter.Group
+
+A plain `div` that shares state by context. Without one, `Meter.Segment` and `Meter.LegendItem` still
+render, and nothing is active.
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `active` | `string \| null` | | The picked part, controlled |
+| `defaultActive` | `string \| null` | `null` | The part picked at first |
+| `onActiveChange` | `(name: string \| null) => void` | | Called when a press picks a part, or clears it with `null` |
+| `size` | `"sm" \| "md" \| "lg"` | | Reaches the Root and the Legend; their own `size` wins |
+| `children` | `ReactNode \| (shown: string \| null) => ReactNode` | | A function gets the part shown: under the pointer, else the picked one |
+
+### Meter.Segment
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | `string` | | What a Legend item and the Group call it |
+| `value` | `number` | | How much of `min` to `max` it takes; outside it is clamped, `NaN` is nothing |
+| `tone` | `"accent" \| "good" \| "warning" \| "critical"` | | Paints the part in that token, instead of the color its position gives |
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-active` | This part is the one shown |
+| `data-dimmed` | Another part is shown |
+| `data-empty` | Its share is 0; it is not drawn |
+| `data-tone` | A `tone` was given |
+
+Without a `tone`, a part's color steps from the accent toward the text color by its position: 0, 22,
+44, 66, and 88%, then it starts over from the sixth. Each step has 3:1 against the page in both
+themes. Hovering a segment with a mouse shows its part; a touch does not, since it has no hover.
+
+### Meter.Legend
+
+A `div` with `role="group"`; give it an `aria-label`. It takes `size`, from the Group when you leave it
+out, else `md`.
+
+### Meter.LegendItem
+
+A Base UI `Button`, so `render`, `disabled`, and `nativeButton` work as they do there.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | `string` | | The part it picks: the `name` of a Segment |
+| `tone` | `"accent" \| "good" \| "warning" \| "critical"` | | The `tone` of its Segment, so the dot matches; leave it out when the Segment has none |
+
+It has `aria-pressed`: pressing it picks its part, and pressing it again clears it. Its dot takes
+the color of the Segment at the same position.
+
+### Meter.LegendValue
+
+A `span` for the figure at the end of an item. It takes the item's color while the item is pressed.
+
+### Meter.Track
+
+Without children it draws a `Meter.Indicator`.
+
+### Meter.Indicator
+
+Base UI writes the indicator's `width` and `height` inline. `Meter.Indicator` passes both as `undefined`, so they are not written, and the class sizes the fill: as wide as the track (40% while indeterminate), then `translate` moves it. A `style` you pass is merged after, so your own inline width wins. `Meter.Root` writes the fill's share to `--_value`, a number from 0 to 100. Every attribute Base UI sets, `aria-valuenow` and the rest, is left as it is.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-meter` | Root |
+| `ow-meter--sm`, `ow-meter--md`, `ow-meter--lg` | Root, by `size` |
+| `ow-meter--accent`, `ow-meter--good`, `ow-meter--warning`, `ow-meter--critical` | Root, by `tone` |
+| `ow-meter__label` | Label |
+| `ow-meter__value` | Value |
+| `ow-meter__track` | Track |
+| `ow-meter__indicator` | Indicator |
+| `ow-meter__segment` | Segment |
+| `ow-meter__segment--accent`, `ow-meter__segment--good`, `ow-meter__segment--warning`, `ow-meter__segment--critical` | Segment, by `tone` |
+| `ow-meter__legend` | Legend |
+| `ow-meter__legend--sm`, `ow-meter__legend--md`, `ow-meter__legend--lg` | Legend, by `size` |
+| `ow-meter__legend-item` | LegendItem |
+| `ow-meter__legend-item--accent`, `ow-meter__legend-item--good`, `ow-meter__legend-item--warning`, `ow-meter__legend-item--critical` | LegendItem, by `tone` |
+| `ow-meter__legend-value` | LegendValue |
+
+## Accessibility [#accessibility]
+
+- Screen readers announce the role, `aria-valuenow`, and `aria-valuetext`: "62%" by default, or
+  what `getAriaValueText` returns.
+- Color is never the only signal. A warning tone means nothing to someone who cannot tell it from
+  the accent, so keep `Meter.Value` or an `aria-valuetext` that says it, such as "62 GB used of
+  100 GB, almost full".
+- The meter is not focusable and takes no keys. The visible value is hidden from screen readers, as
+  Root says it.
+- The legend is outside the meter on purpose. A `meter` role makes its children presentational, so a
+  button inside it would not be read or reachable. The legend items are real buttons in a group, in
+  the tab order, and `aria-pressed` says which is picked; Space and Enter press one. The parts
+  themselves are not read out: say what matters in `aria-valuetext`, as the example does, and give
+  the figures in the legend as text.
+- Hovering shows a part only with a mouse, so every way to see it is also a press.
+- Every tone's fill has 3:1 against the track and the page, in light and dark. With
+  `prefers-contrast: more` the track gets a 1px edge; in forced colors the track keeps its outline
+  and the fill is the system's highlight, whatever the tone. With parts, each pill keeps an edge:
+  the shown part is the highlight, the others gray, and a pressed legend item is the highlight with
+  its text.
+
+## Theming [#theming]
+
+Meter reads these theme tokens. Set one on a meter, or on anything around it.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-fg` | Label, the track's tint (10%), and the steps of a part's color toward the text |
+| `--ow-muted` | The value, and the legend's text and figures |
+| `--ow-hover` | A hovered legend item |
+| `--ow-focus` | The legend item's focus ring |
+| `--ow-accent` | The fill, for the `accent` tone; where a part's color starts, and a pressed item's tint |
+| `--ow-good` | The fill, for the `good` tone |
+| `--ow-warning` | The fill, for the `warning` tone |
+| `--ow-critical` | The fill, for the `critical` tone |
+| `--ow-edge` | The track's, the parts', and the rest's edge when more contrast is asked for |
+| `--ow-spring-glide`, `--ow-spring-glide-duration` | The fill's move to a new value |
+| `--ow-spring-settle`, `--ow-spring-settle-duration` | A legend item coming back from a press |
+| `--ow-ease-out` | The other parts fading, and a press going in |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Meter's root, so set yours on the meter itself.
+
+</ForMode>
+
+Set `inline-size` on the root, or on a parent, with plain CSS; the track is as wide as the root.
+Everything else comes from `font-size` in `em`, except the track's thickness, which is 4, 8, or 12px.
+
+## Motion [#motion]
+
+The fill moves with `translate` on the glide spring when the value changes, so it never lays out
+again. Change the value mid-move and it turns from where it is. Nothing runs at rest. With
+`prefers-reduced-motion` the fill goes to its place at once.
+
+When a part is shown, the others fade to 0.38 opacity in 180ms; the rest of the range does not.
+A legend item scales to 0.97 while held and lets go on the settle spring. With reduced motion the
+item does not scale and the fade stays, since it moves nothing.

@@ -1,0 +1,372 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * Meter (Base). The same bar as Progress for a value within a range: a label at the start and the
+ * value at the end above a pill track. The fill is the accent, or the tone the page picks; the
+ * tone is never the only signal, so keep the value or an aria-valuetext. The fill is as wide as
+ * the track and moves with a transform.
+ */
+@layer owsem.components {
+  .ow-meter {
+    --_track: color-mix(in oklab, var(--ow-fg) 10%, transparent);
+    --_fill: var(--ow-accent);
+    --_muted: var(--ow-muted);
+    --_height: 8px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 12px;
+    align-items: baseline;
+    color: var(--ow-fg);
+    font-size: 0.875rem;
+    line-height: 1.25;
+  }
+
+  .ow-meter--sm {
+    --_height: 4px;
+    font-size: 0.8125rem;
+  }
+
+  .ow-meter--lg {
+    --_height: 12px;
+    font-size: 1rem;
+  }
+
+  .ow-meter--good {
+    --_fill: var(--ow-good);
+  }
+
+  .ow-meter--warning {
+    --_fill: var(--ow-warning);
+  }
+
+  .ow-meter--critical {
+    --_fill: var(--ow-critical);
+  }
+
+  .ow-meter__label {
+    grid-area: 1 / 1;
+    margin-block-end: 8px;
+    font-weight: 500;
+  }
+
+  .ow-meter__value {
+    grid-area: 1 / 2;
+    margin-block-end: 8px;
+    color: var(--_muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Overflow hidden: the fill slides in from outside it, and the ends round it. */
+  .ow-meter__track {
+    grid-area: 2 / 1 / 3 / -1;
+    block-size: var(--_height);
+    /* Isolated: the track clips the fill's own layer to its rounded ends. */
+    isolation: isolate;
+    overflow: hidden;
+    /* literal: a pill, whatever the theme's radius */
+    border-radius: 999px;
+    /* Invisible until forced colors draw it as the edge. */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--_track);
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement */
+    print-color-adjust: exact;
+  }
+
+  /*
+   * As wide as the track, moved left by what is not filled; it ends in a pill, so the head is
+   * round. The part leaves out the width and height Base UI would set inline.
+   */
+  .ow-meter__indicator {
+    --_dir: 1;
+    inline-size: 100%;
+    block-size: 100%;
+    border-radius: inherit;
+    background-color: var(--_fill);
+    translate: calc(var(--_dir) * (var(--_value, 0) - 100) * 1%) 0;
+    transition: translate var(--ow-spring-glide-duration) var(--ow-spring-glide);
+    will-change: translate;
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement */
+    print-color-adjust: exact;
+  }
+
+  .ow-meter__indicator:where(:dir(rtl)) {
+    --_dir: -1;
+  }
+
+  /*
+   * With segments the track is a row of pills, 3px apart, with no groove behind them: the rest of
+   * the range is one more pill after the last, from the Root's value, and gone when it is full.
+   */
+  .ow-meter__track:has(> .ow-meter__segment) {
+    display: flex;
+    gap: 3px;
+    overflow: visible;
+    border-radius: 0;
+    outline-style: none;
+    background-color: transparent;
+  }
+
+  .ow-meter__track:has(> .ow-meter__segment)::after {
+    content: "";
+    flex-grow: calc(100 - var(--_value, 0));
+    flex-basis: 0;
+    min-inline-size: var(--_height);
+    /* literal: a pill, whatever the theme's radius */
+    border-radius: 999px;
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--_track);
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement */
+    print-color-adjust: exact;
+  }
+
+  .ow-meter[data-full] .ow-meter__track:has(> .ow-meter__segment)::after {
+    display: none;
+  }
+
+  /*
+   * From the accent toward the text color by position, so each part reads on the page in both
+   * themes. A tone sets the color itself.
+   */
+  .ow-meter__segment,
+  .ow-meter__legend-item {
+    --_step: 0%;
+    --_color: var(--_tone, color-mix(in oklab, var(--ow-accent), var(--ow-fg) var(--_step)));
+  }
+
+  .ow-meter__segment:nth-child(5n + 2),
+  .ow-meter__legend-item:nth-child(5n + 2) {
+    --_step: 22%;
+  }
+
+  .ow-meter__segment:nth-child(5n + 3),
+  .ow-meter__legend-item:nth-child(5n + 3) {
+    --_step: 44%;
+  }
+
+  .ow-meter__segment:nth-child(5n + 4),
+  .ow-meter__legend-item:nth-child(5n + 4) {
+    --_step: 66%;
+  }
+
+  .ow-meter__segment:nth-child(5n + 5),
+  .ow-meter__legend-item:nth-child(5n + 5) {
+    --_step: 88%;
+  }
+
+  .ow-meter__segment--accent,
+  .ow-meter__legend-item--accent {
+    --_tone: var(--ow-accent);
+  }
+
+  .ow-meter__segment--good,
+  .ow-meter__legend-item--good {
+    --_tone: var(--ow-good);
+  }
+
+  .ow-meter__segment--warning,
+  .ow-meter__legend-item--warning {
+    --_tone: var(--ow-warning);
+  }
+
+  .ow-meter__segment--critical,
+  .ow-meter__legend-item--critical {
+    --_tone: var(--ow-critical);
+  }
+
+  /* Its width is its share of the range; a part of nothing is not drawn. */
+  .ow-meter__segment {
+    flex-grow: var(--_share, 0);
+    flex-basis: 0;
+    min-inline-size: var(--_height);
+    /* literal: a pill, whatever the theme's radius */
+    border-radius: 999px;
+    /* Invisible until forced colors draw it as the edge. */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--_color);
+    transition: opacity 180ms var(--ow-ease-out);
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement */
+    print-color-adjust: exact;
+  }
+
+  .ow-meter__segment[data-empty] {
+    display: none;
+  }
+
+  /* One part is shown, by the pointer or the legend: the others step back. */
+  .ow-meter__segment[data-dimmed] {
+    opacity: 0.38;
+  }
+
+  /* The pills in a row of buttons below the bar, outside the meter, with the first dot under its start. */
+  .ow-meter__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    margin-block-start: 12px;
+    margin-inline: -0.75em;
+    font-size: 0.8125rem;
+    line-height: 1.25;
+  }
+
+  .ow-meter__legend--sm {
+    font-size: 0.75rem;
+  }
+
+  .ow-meter__legend--lg {
+    font-size: 0.875rem;
+  }
+
+  /* A flat button that stays tinted while pressed, as a Toggle that is on. */
+  .ow-meter__legend-item {
+    --_on-fg: color-mix(in oklab, var(--ow-accent) 70%, var(--ow-fg));
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6em;
+    box-sizing: border-box;
+    min-block-size: 24px;
+    margin: 0;
+    padding-block: 0.55em;
+    padding-inline: 0.75em 0.9em;
+    border: 0;
+    /* literal: a pill, whatever the theme's radius */
+    border-radius: 999px;
+    /* Invisible until forced colors draw it as the edge. */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: transparent;
+    color: var(--ow-muted);
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    touch-action: manipulation;
+    will-change: transform;
+    /* A press lets go on the settle spring. */
+    transition: transform var(--ow-spring-settle-duration) var(--ow-spring-settle);
+  }
+
+  .ow-meter__legend-item::before {
+    content: "";
+    flex: none;
+    inline-size: 0.6em;
+    block-size: 0.6em;
+    border-radius: 50%;
+    background-color: var(--_color);
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement */
+    print-color-adjust: exact;
+  }
+
+  .ow-meter__legend-item[aria-pressed="true"] {
+    background-color: color-mix(in oklab, var(--ow-accent) 14%, transparent);
+    color: var(--_on-fg);
+  }
+
+  @media (hover: hover) {
+    .ow-meter__legend-item:hover:not([aria-pressed="true"], [data-disabled]) {
+      background-color: var(--ow-hover);
+      color: var(--ow-fg);
+    }
+
+    .ow-meter__legend-item[aria-pressed="true"]:hover:not(:active, [data-disabled]) {
+      background-color: color-mix(in oklab, var(--ow-accent) 18%, transparent);
+    }
+  }
+
+  /* Held down, on or off: the deepest tint, going in to 0.97 within 90 ms. */
+  .ow-meter__legend-item:active:not([data-disabled]) {
+    background-color: color-mix(in oklab, var(--ow-accent) 22%, transparent);
+    color: var(--_on-fg);
+    transform: scale(0.97);
+    transition-duration: 90ms;
+    transition-timing-function: var(--ow-ease-out);
+  }
+
+  .ow-meter__legend-item:focus-visible {
+    outline: 2px solid var(--ow-focus);
+    outline-offset: 2px;
+  }
+
+  .ow-meter__legend-item[data-disabled] {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
+  .ow-meter__legend-value {
+    color: var(--ow-muted);
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ow-meter__legend-item[aria-pressed="true"] .ow-meter__legend-value {
+    color: inherit;
+  }
+
+  /* No fade or travel: the fill goes to its place, and a press does not scale. The fade stays. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-meter__indicator {
+      transition: none;
+    }
+
+    .ow-meter__legend-item:active:not([data-disabled]) {
+      transform: none;
+    }
+  }
+
+  /* More contrast asked for: the track's and the parts' edges come back at 3:1, over the fill too. */
+  @media (prefers-contrast: more) {
+    .ow-meter__track,
+    .ow-meter__track:has(> .ow-meter__segment)::after,
+    .ow-meter__segment {
+      outline-color: var(--ow-edge);
+    }
+  }
+
+  /*
+   * The track keeps its outline as the edge; the fill is the system's highlight, tone or not. A
+   * part is the text color, the shown one the highlight, the others gray; the pressed item is
+   * the highlight too.
+   */
+  @media (forced-colors: active) {
+    .ow-meter__indicator {
+      background-color: Highlight;
+    }
+
+    .ow-meter__segment {
+      background-color: CanvasText;
+    }
+
+    .ow-meter__segment[data-active] {
+      background-color: Highlight;
+    }
+
+    .ow-meter__segment[data-dimmed] {
+      background-color: GrayText;
+      opacity: 1;
+    }
+
+    .ow-meter__legend-item::before {
+      background-color: CanvasText;
+    }
+
+    .ow-meter__legend-item[aria-pressed="true"],
+    .ow-meter__legend-item[aria-pressed="true"]:is(:hover, :active):not([data-disabled]) {
+      background-color: Highlight;
+      color: HighlightText;
+    }
+
+    .ow-meter__legend-item[aria-pressed="true"]::before {
+      background-color: HighlightText;
+    }
+
+    .ow-meter__legend-item:focus-visible {
+      outline-color: Highlight;
+    }
+
+    .ow-meter__legend-item[data-disabled] {
+      color: GrayText;
+      opacity: 1;
+    }
+  }
+}

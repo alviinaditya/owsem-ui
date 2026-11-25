@@ -48,6 +48,12 @@ for (const path of [
   "/id/field",
   "/en/fieldset",
   "/id/form",
+  "/en/avatar",
+  "/id/progress",
+  "/en/meter",
+  "/id/meter",
+  "/en/accordion",
+  "/id/collapsible",
 ]) {
   test(`${path} has no horizontal scroll (DS-9)`, async ({ page }) => {
     await page.goto(path);

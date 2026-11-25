@@ -1,0 +1,138 @@
+---
+title: Progress
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. To copy the source into your project instead, use the `progress`
+item of the registry.
+
+## Usage [#usage]
+
+```tsx
+import { Progress } from "owsem-ui/base";
+
+export function UploadProgress() {
+  return (
+    <Progress.Root value={60}>
+      <Progress.Label>Uploading</Progress.Label>
+      <Progress.Value />
+      <Progress.Track />
+    </Progress.Root>
+  );
+}
+```
+
+Progress shows how far a task has got. The label sits at the start and the value at the end, above
+a track with its fill, which `Track` draws itself. Name it with a `Progress.Label` or an `aria-label`. For a
+task of unknown length use `value={null}`: a segment travels the track until you give it a number.
+For a value that is not a task, such as disk space, use [Meter](/en/meter).
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Base UI renders a `<div>` with the `progressbar` role, and a visually hidden `x` that keeps its
+text from being empty.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-progress` | `role="progressbar"`, `aria-valuenow`, and the state attributes; draws its Track without children |
+| <Part name="Label" /> | `span.ow-progress__label` | Names the bar through `aria-labelledby` |
+| <Part name="Value" /> | `span.ow-progress__value` | The formatted value, hidden from screen readers |
+| <Part name="Track" /> | `div.ow-progress__track` | The groove: 4, 8, or 12px; draws its Indicator without children |
+| <Part name="Indicator" /> | `div.ow-progress__indicator` | The fill |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### Progress.Root
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | A 4, 8, or 12px track, with Button's font sizes for the label |
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-size` | Always; the chosen size |
+
+### Progress.Track
+
+Without children it draws a `Progress.Indicator`.
+
+### Progress.Indicator
+
+Base UI writes the indicator's `width` and `height` inline. `Progress.Indicator` passes both as `undefined`, so they are not written, and the class sizes the fill: as wide as the track (40% while indeterminate), then `translate` moves it. A `style` you pass is merged after, so your own inline width wins. `Progress.Root` writes the fill's share to `--_value`, a number from 0 to 100. Every attribute Base UI sets, `aria-valuenow` and the rest, is left as it is.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-progress` | Root |
+| `ow-progress--sm`, `ow-progress--md`, `ow-progress--lg` | Root, by `size` |
+| `ow-progress__label` | Label |
+| `ow-progress__value` | Value |
+| `ow-progress__track` | Track |
+| `ow-progress__indicator` | Indicator |
+
+## Accessibility [#accessibility]
+
+- Screen readers announce the role, `aria-valuenow`, and `aria-valuetext`: "40%" by default, or
+  what `getAriaValueText` returns. Indeterminate has no `aria-valuenow`.
+- The bar is not focusable and takes no keys. The visible value is hidden from screen readers, as
+  Root says it.
+- Name it with a `Progress.Label` or an `aria-label`; one of them is required.
+- The fill has 3:1 against the track and the page, in light and dark. With `prefers-contrast: more`
+  the track gets a 1px edge; in forced colors the track keeps its outline and the fill is the
+  system's highlight.
+- When a task finishes or fails, say so in text near the bar; a bar that fills is not an
+  announcement.
+
+## Theming [#theming]
+
+Progress reads these theme tokens. Set one on a bar, or on anything around it.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-fg` | Label, and the track's tint (10%) |
+| `--ow-muted` | The value |
+| `--ow-accent` | The fill |
+| `--ow-edge` | The track's edge when more contrast is asked for |
+| `--ow-spring-glide`, `--ow-spring-glide-duration` | The fill's move to a new value |
+| `--ow-ease-in-out` | The indeterminate segment's travel |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Progress's root, so set yours on the bar itself.
+
+</ForMode>
+
+Set `inline-size` on the root, or on a parent, with plain CSS; the track is as wide as the root.
+Everything else comes from `font-size` in `em`, except the track's thickness, which is 4, 8, or 12px.
+
+## Motion [#motion]
+
+The fill moves with `translate` on the glide spring when the value changes, so it never lays out
+again. Change the value mid-move and it turns from where it is.
+
+With no value, a segment 40% as wide as the track travels along it, once every 1.6 seconds, on a
+CSS animation of `translate`. It is the one animation that runs while nothing else does. It stops
+when you give the bar a value, and when the part is removed. With `prefers-reduced-motion` nothing
+moves: the fill goes to its place at once, and an indeterminate bar shows a still segment in the
+middle of the track, which no value would draw.

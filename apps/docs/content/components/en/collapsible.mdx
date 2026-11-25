@@ -1,0 +1,165 @@
+---
+title: Collapsible
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. To copy the source into your project instead, use the `collapsible`
+item of the registry.
+
+## Usage [#usage]
+
+```tsx
+import { Collapsible } from "owsem-ui/base";
+
+export function OrderDetails() {
+  return (
+    <Collapsible.Root>
+      <Collapsible.Trigger>Order details</Collapsible.Trigger>
+      <Collapsible.Panel>Two shirts and a pair of trousers.</Collapsible.Panel>
+    </Collapsible.Root>
+  );
+}
+```
+
+A Collapsible shows and hides one panel. The trigger is a quiet button, like a ghost Button: its
+label sits at the start and a chevron at the end, and the chevron turns when the panel opens. For
+several panels that belong together, with one open at a time, use [Accordion](/en/accordion).
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Base UI renders a `<div>`, a `<button>` with `aria-expanded` and `aria-controls`, and the panel,
+a `<div>` that is in the page only while it is open (unless you ask otherwise).
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `div[data-slot="collapsible"]` | Groups the trigger and the panel; `size` reaches both; no look of its own |
+| <Part name="Trigger" /> | `button.ow-collapsible__trigger` | The label, then the chevron in `span.ow-collapsible__icon`; `data-panel-open` while open |
+| <Part name="Panel" /> | `div.ow-collapsible__panel` | The box whose height moves; its children sit in `div.ow-collapsible__content` |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### Collapsible.Root
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | A 32, 40, or 48px trigger with Button's font sizes; the panel's text takes the same font size |
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-size` | Always; the chosen size |
+
+### Collapsible.Trigger
+
+`size` comes from the Root by context, so a trigger inside a wrapper or a heading is sized too.
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | the Root's | An own size for this trigger only; the panel keeps the Root's |
+| `icon` | `ReactNode` | the chevron | Replaces the chevron at the end; `null` leaves it out |
+
+#### Data attributes
+
+| Data attribute | Present when |
+| --- | --- |
+| `data-size` | Always; the chosen size |
+
+### Collapsible.Panel
+
+The panel wraps its children in `div.ow-collapsible__content`, which has the size's text (13, 14, or
+16px, weight 400, line height 1.5, `--ow-fg`) and the padding: 0.5em above, 1em below, and at the
+sides the trigger's own formula (Button's `--py` for the size, plus half of the line's room around a
+capital), so the text lines up with the label in any font and in any size. The box that moves has
+none, so nothing jumps while it opens. The room at the sides also keeps the focus ring of a control
+inside the panel from being clipped. The text is set in the component layer, so a rule of yours on
+`.ow-collapsible__content` or on the elements inside wins.
+
+`keepMounted` and `hiddenUntilFound` work as in Base UI: a closed panel stays in the page, hidden,
+and with `hiddenUntilFound` the browser's find in page opens it. The component never sets `display`
+on a hidden panel.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-collapsible__trigger` | Trigger |
+| `ow-collapsible__trigger--sm`, `ow-collapsible__trigger--md`, `ow-collapsible__trigger--lg` | Trigger, by `size` |
+| `ow-collapsible__content--sm`, `ow-collapsible__content--md`, `ow-collapsible__content--lg` | The padded element, by the Root's `size` |
+| `ow-collapsible__icon` | The span that holds the chevron or your `icon` |
+| `ow-collapsible__stroke` | One of the chevron's two strokes |
+| `ow-collapsible__panel` | Panel |
+| `ow-collapsible__content` | The padded element inside the panel |
+
+## Accessibility [#accessibility]
+
+- The trigger is a native button. Enter and Space open and close the panel, and the button carries
+  `aria-expanded` and `aria-controls`, so a screen reader says "collapsed" or "expanded".
+- The chevron is `aria-hidden`; the label names the trigger. A custom `icon` should be decorative
+  too.
+- A disabled collapsible does not open and is dimmed. In forced colors the label takes the system's
+  colors, a disabled one is `GrayText`, and the focus ring is `Highlight`.
+- The label has 17.7:1 against the page in light and 16.1:1 in dark, and stays above 4.5:1 under the
+  hover tint. The chevron draws in the text color.
+- The trigger is never under 24px tall, and the focus ring sits 2px outside it.
+- With `hiddenUntilFound`, find in page opens the panel that holds the match. A closed panel stays
+  closed when printed.
+
+## Theming [#theming]
+
+Collapsible reads these theme tokens. Set one on a collapsible, or on anything around it.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-fg` | The label and the chevron |
+| `--ow-hover` | The trigger's hover tint |
+| `--ow-pressed-bg` | The trigger's fill while held |
+| `--ow-radius` | The trigger's corners |
+| `--ow-focus` | The focus ring |
+| `--ow-motion-scale` | How far a press moves, and how long the panel takes; `0` opens it at once |
+| `--ow-ease-drawer`, `--ow-ease-out` | The panel's height and its fade |
+| `--ow-spring-settle`, `--ow-spring-settle-duration` | The chevron's turn, and the press's release |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each trigger, so set yours on the trigger itself.
+
+</ForMode>
+
+Set `inline-size` on the root, or on a parent, with plain CSS; the trigger fills its width. Sizes
+come from `font-size` in `em`, so a larger font makes a taller trigger on the same scale.
+
+## Motion [#motion]
+
+The panel's height moves from Base UI's `--collapsible-panel-height` over 300ms on a curve with no
+overshoot (`--ow-ease-drawer`), clipped, while the content fades over 210ms. Interrupt it and it
+turns around from where it is. Base UI leaves the height at `auto` once the panel is open, so
+content that arrives late is not cut off.
+
+The chevron is two strokes that each turn a quarter about their own centers, so the down chevron
+becomes the up chevron through a flat line, on the settle spring. A held press scales the trigger
+to 0.97 and lets go on the same spring.
+
+With `prefers-reduced-motion` the chevron changes at once, the trigger does not scale, and the panel
+opens at once with a short fade. Setting `--ow-motion-scale` to `0` does the same everywhere it is
+set.

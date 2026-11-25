@@ -1,0 +1,177 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * Collapsible (Base). A quiet trigger like a ghost Button, with its label at the start and a
+ * chevron at the end, above a panel whose height opens and closes. Base UI measures the panel and
+ * writes --collapsible-panel-height: pixels while it moves, auto when it rests, so late content is
+ * never clipped. The box animated has no padding: that sits in the content inside it.
+ */
+@layer owsem.components {
+  .ow-collapsible__trigger {
+    /* Button's geometry: one number, --py; the block padding never drops a target below 24px. */
+    --py: 0.8036em;
+    --_py: max(var(--py), (24px - 1lh) / 2);
+    --px: calc(var(--_py) + (1lh - 1cap) / 2);
+    --icon: calc(1em + 2px);
+    --_press: calc(1 - 0.03 * var(--ow-motion-scale));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5em;
+    inline-size: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    padding: var(--_py) var(--px);
+    border: 0;
+    border-radius: var(--ow-radius);
+    background-color: transparent;
+    color: var(--ow-fg);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25;
+    text-align: start;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    /* Its own layer, so it lands without a pixel jump. */
+    will-change: transform;
+    /* Releasing settles with the Core spring. */
+    transition: transform var(--ow-spring-settle-duration) var(--ow-spring-settle);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .ow-collapsible__trigger:hover:not([data-disabled]) {
+      background-color: var(--ow-hover);
+    }
+  }
+
+  /* In within 90 ms, into the pressed fill, as a ghost Button. */
+  .ow-collapsible__trigger:active:not([data-disabled]) {
+    background-color: var(--ow-pressed-bg);
+    transform: scale(var(--_press));
+    transition-duration: 90ms;
+    transition-timing-function: var(--ow-ease-out);
+  }
+
+  .ow-collapsible__trigger:focus-visible {
+    outline: 2px solid var(--ow-focus);
+    outline-offset: 2px;
+  }
+
+  .ow-collapsible__trigger[data-disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Icon-sized, pulled toward the edge so it sits as far from it as from the top. */
+  .ow-collapsible__icon {
+    --_flip: 0;
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    inline-size: var(--icon);
+    block-size: var(--icon);
+    margin-inline-end: calc((1cap - var(--icon)) / 2);
+  }
+
+  .ow-collapsible__trigger[data-panel-open] .ow-collapsible__icon {
+    --_flip: 1;
+  }
+
+  .ow-collapsible__icon :where(svg, img) {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  /* Each stroke turns a quarter about its own center: down, flat halfway, then up. */
+  .ow-collapsible__stroke {
+    --_turn: -1;
+    /* biome-ignore lint/nursery/useBaseline: the strokes turn about their own centers */
+    transform-box: fill-box;
+    transform-origin: center;
+    rotate: calc(var(--_flip) * var(--_turn) * 90deg);
+    will-change: rotate;
+    transition: rotate calc(var(--ow-spring-settle-duration) * var(--ow-motion-scale))
+      var(--ow-spring-settle);
+  }
+
+  .ow-collapsible__stroke[data-side="end"] {
+    --_turn: 1;
+  }
+
+  /* The box that moves: clipped, with the height from Base UI and the content fading with it. */
+  .ow-collapsible__panel {
+    --_duration: calc(300ms * var(--ow-motion-scale));
+    block-size: var(--collapsible-panel-height);
+    overflow: hidden;
+    transition:
+      block-size var(--_duration) var(--ow-ease-drawer),
+      opacity calc(var(--_duration) * 0.7) var(--ow-ease-out);
+  }
+
+  .ow-collapsible__panel:where([data-starting-style], [data-ending-style]) {
+    block-size: 0;
+    opacity: 0;
+  }
+
+  /*
+   * The text under the trigger: the size's font, and side padding by the trigger's formula, so the
+   * two line up in any font. 1.25em stands for the trigger's 1lh. The padding also leaves the room a
+   * focus ring of the content needs (2px outside, 2px wide) inside the clip.
+   */
+  .ow-collapsible__content {
+    --py: 0.8036em;
+    --_py: max(var(--py), (24px - 1.25em) / 2);
+    --px: calc(var(--_py) + (1.25em - 1cap) / 2);
+    padding: 0.5em var(--px) 1em;
+    color: var(--ow-fg);
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  /* The size: Button's --py and font size, for the trigger and the content under it alike. */
+  .ow-collapsible__trigger--sm,
+  .ow-collapsible__content--sm {
+    --py: 0.6058em;
+    font-size: 0.8125rem;
+  }
+
+  .ow-collapsible__trigger--lg,
+  .ow-collapsible__content--lg {
+    --py: 0.875em;
+    font-size: 1rem;
+  }
+
+  /* No movement: the chevron changes at once and the panel opens at once, with a short fade. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-collapsible__trigger {
+      --_press: 1;
+    }
+
+    .ow-collapsible__stroke {
+      transition: none;
+    }
+
+    .ow-collapsible__panel {
+      transition: opacity calc(120ms * var(--ow-motion-scale)) var(--ow-ease-out);
+    }
+
+    .ow-collapsible__panel:where([data-starting-style], [data-ending-style]) {
+      block-size: var(--collapsible-panel-height);
+    }
+  }
+
+  @media (forced-colors: active) {
+    .ow-collapsible__trigger:focus-visible {
+      outline: 2px solid Highlight;
+      outline-offset: 2px;
+    }
+
+    .ow-collapsible__trigger[data-disabled] {
+      color: GrayText;
+    }
+  }
+}

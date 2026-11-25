@@ -1,0 +1,138 @@
+---
+title: Progress
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Untuk menyalin kode sumbernya ke project Anda, pakai item `progress`
+dari registry.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Progress } from "owsem-ui/base";
+
+export function UploadProgress() {
+  return (
+    <Progress.Root value={60}>
+      <Progress.Label>Mengunggah</Progress.Label>
+      <Progress.Value />
+      <Progress.Track />
+    </Progress.Root>
+  );
+}
+```
+
+Progress menunjukkan sejauh mana sebuah tugas berjalan. Label ada di awal dan nilai di akhir, di
+atas track yang tergambar sendiri beserta isiannya. Beri nama dengan `Progress.Label` atau
+`aria-label`. Untuk tugas yang panjangnya tak diketahui, pakai `value={null}`: sebuah segmen
+berjalan di track sampai Anda memberinya angka. Untuk nilai yang bukan tugas, seperti ruang disk,
+pakai [Meter](/id/meter).
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Base UI merender `<div>` dengan role `progressbar`, dan huruf `x` tersembunyi yang menjaga teksnya
+tidak kosong.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-progress` | `role="progressbar"`, `aria-valuenow`, dan atribut state; menggambar Track-nya bila tanpa children |
+| <Part name="Label" /> | `span.ow-progress__label` | Menamai bar lewat `aria-labelledby` |
+| <Part name="Value" /> | `span.ow-progress__value` | Nilai terformat, disembunyikan dari screen reader |
+| <Part name="Track" /> | `div.ow-progress__track` | Alurnya: 4, 8, atau 12px; menggambar Indicator-nya bila tanpa children |
+| <Part name="Indicator" /> | `div.ow-progress__indicator` | Isiannya |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### Progress.Root
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Track 4, 8, atau 12px, dengan ukuran font Button untuk label |
+
+#### Atribut data
+
+| Atribut data | Ada saat |
+| --- | --- |
+| `data-size` | Selalu; ukuran yang dipilih |
+
+### Progress.Track
+
+Tanpa children, ia menggambar `Progress.Indicator`.
+
+### Progress.Indicator
+
+Base UI menulis `width` dan `height` indicator secara inline. `Progress.Indicator` memberikan keduanya sebagai `undefined`, sehingga tidak ditulis, dan kelasnya yang mengukur isian: selebar track (40% saat tak tentu), lalu `translate` menggesernya. `style` yang Anda berikan digabung sesudahnya, jadi lebar inline Anda yang menang. `Progress.Root` menulis bagian isiannya ke `--_value`, angka 0 sampai 100. Semua atribut yang disetel Base UI, termasuk `aria-valuenow`, tetap apa adanya.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-progress` | Root |
+| `ow-progress--sm`, `ow-progress--md`, `ow-progress--lg` | Root, menurut `size` |
+| `ow-progress__label` | Label |
+| `ow-progress__value` | Value |
+| `ow-progress__track` | Track |
+| `ow-progress__indicator` | Indicator |
+
+## Aksesibilitas [#accessibility]
+
+- Screen reader mengumumkan role, `aria-valuenow`, dan `aria-valuetext`: "40%" secara default, atau
+  hasil `getAriaValueText`. Mode tak tentu tidak punya `aria-valuenow`.
+- Bar tidak bisa difokus dan tidak menerima tombol. Nilai yang terlihat disembunyikan dari screen
+  reader, karena Root yang menyampaikannya.
+- Beri nama dengan `Progress.Label` atau `aria-label`; salah satunya wajib.
+- Isian punya kontras 3:1 terhadap track dan halaman, di terang dan gelap. Dengan
+  `prefers-contrast: more` track mendapat tepi 1px; pada forced colors track mempertahankan
+  outline-nya dan isian memakai highlight sistem.
+- Saat tugas selesai atau gagal, katakan dalam teks di dekat bar; bar yang terisi bukan pengumuman.
+
+## Tema [#theming]
+
+Progress membaca token tema ini. Setel salah satunya pada bar, atau pada elemen di sekitarnya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-fg` | Label, dan tint track (10%) |
+| `--ow-muted` | Nilai |
+| `--ow-accent` | Isian |
+| `--ow-edge` | Tepi track saat kontras lebih diminta |
+| `--ow-spring-glide`, `--ow-spring-glide-duration` | Perpindahan isian ke nilai baru |
+| `--ow-ease-in-out` | Perjalanan segmen tak tentu |
+
+<ForMode mode="isolated">
+
+Pada mode isolated, nilainya ada di root tiap Progress, jadi setel pada bar-nya sendiri.
+
+</ForMode>
+
+Setel `inline-size` pada root, atau pada induknya, dengan CSS biasa; track selebar root. Selain
+ketebalan track yang 4, 8, atau 12px, semuanya berasal dari `font-size` dalam `em`.
+
+## Gerak [#motion]
+
+Isian bergerak dengan `translate` pada spring glide saat nilai berubah, jadi tidak pernah menghitung
+ulang layout. Ubah nilai di tengah gerakan dan ia berbalik dari posisinya.
+
+Tanpa nilai, segmen selebar 40% track berjalan sepanjang track, sekali tiap 1,6 detik, dengan
+animasi CSS `translate`. Ini satu-satunya animasi yang berjalan saat tidak ada yang lain. Ia
+berhenti saat bar diberi nilai, dan saat bagiannya dilepas. Dengan `prefers-reduced-motion` tidak
+ada yang bergerak: isian langsung ke tempatnya, dan bar tak tentu menampilkan segmen diam di tengah
+track, yang tidak akan digambar oleh nilai mana pun.

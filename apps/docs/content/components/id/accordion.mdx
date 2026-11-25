@@ -1,0 +1,181 @@
+---
+title: Accordion
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Untuk menyalin kode sumbernya ke project Anda, pakai item `accordion`
+dari registry.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Accordion } from "owsem-ui/base";
+
+export function Faq() {
+  return (
+    <Accordion.Root defaultValue={["1"]}>
+      <Accordion.Item value="1">
+        <Accordion.Trigger>Apa itu OwsemUI?</Accordion.Trigger>
+        <Accordion.Panel>Komponen React di atas Base UI.</Accordion.Panel>
+      </Accordion.Item>
+      <Accordion.Item value="2">
+        <Accordion.Trigger>Apakah gratis?</Accordion.Trigger>
+        <Accordion.Panel>Ya, berlisensi MIT.</Accordion.Panel>
+      </Accordion.Item>
+    </Accordion.Root>
+  );
+}
+```
+
+Accordion adalah tumpukan bagian, masing-masing baris selebar penuh yang membuka panelnya. Satu
+item terbuka pada satu waktu kecuali Anda mengatur `multiple`. `Accordion.Trigger` menggambar
+judulnya sendiri (`h3`), jadi pemakaian paling singkat adalah yang di atas. Untuk satu panel saja,
+pakai [Collapsible](/id/collapsible).
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Base UI merender `<div>` untuk root dan setiap item, judul di sekitar setiap pemicu, `<button>`
+dengan `aria-expanded` dan `aria-controls`, dan panel yang hanya ada di halaman selama terbuka
+(kecuali Anda meminta lain).
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-accordion` | Memuat item; `size` berlaku untuk setiap pemicu |
+| <Part name="Item" /> | `div.ow-accordion__item` | Header dan panelnya; garis tipis di atasnya, kecuali yang pertama |
+| <Part name="Header" /> | `h3.ow-accordion__header` | Judul di sekitar pemicu |
+| <Part name="Trigger" /> | `button.ow-accordion__trigger` | Label, lalu chevron di `span.ow-accordion__icon`; `data-panel-open` saat terbuka |
+| <Part name="Panel" /> | `div.ow-accordion__panel` | Kotak yang ukurannya bergerak; isinya duduk di `div.ow-accordion__content` |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### Accordion.Root
+
+#### Props
+
+| Prop | Tipe | Bawaan | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Baris setinggi 32, 40, atau 48px untuk setiap pemicu, dengan ukuran font Button |
+
+#### Atribut data
+
+| Atribut data | Ada ketika |
+| --- | --- |
+| `data-size` | Selalu; ukuran yang dipilih |
+
+### Accordion.Trigger
+
+| Prop | Tipe | Bawaan | Deskripsi |
+| --- | --- | --- | --- |
+| `icon` | `ReactNode` | chevron | Menggantikan chevron di akhir; `null` meniadakannya |
+
+Pemicu di dalam `Accordion.Header` memakai judul itu. Di luarnya ia menggambar `h3` sendiri, dan
+mengetahuinya lewat context, jadi header yang dirender komponen pembungkus pun ditemukan. Untuk
+mengubah tingkatnya, tulis headernya sendiri: `<Accordion.Header render={<h2 />}>`.
+
+### Accordion.Panel
+
+Panel membungkus anaknya dalam `div.ow-accordion__content` yang memakai ukuran Root untuk teksnya
+(13, 14, atau 16px, bobot 400, tinggi baris 1,5, `--ow-fg`) dan memegang padding: 0,25em di atas,
+4px di sisi, 1em di bawah. Kotak yang bergerak tidak punya padding, jadi tidak ada yang melompat
+saat ia terbuka. Teks diatur di layer komponen, jadi aturan Anda menang.
+
+`keepMounted` dan `hiddenUntilFound` pada root bekerja seperti di Base UI: panel tertutup tetap ada
+di halaman, tersembunyi, dan dengan `hiddenUntilFound` cari di halaman membuka panel yang memuat
+hasilnya. Komponen ini tidak pernah mengatur `display` pada panel yang tersembunyi.
+
+### Horizontal
+
+`orientation="horizontal"` menata item berdampingan. Setiap panel terbuka dalam lebar, dari
+`--accordion-panel-width` milik Base UI, dan mempertahankan lebar isinya agar teksnya tidak
+berpindah baris saat bergerak, jadi beri panel horizontal isi yang punya lebar sendiri. Garis
+tipisnya vertikal dan chevron menunjuk ke arah panel. Accordion Base UI tidak punya navigasi tombol
+panah: Tab berpindah antar pemicu di kedua orientasi.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-accordion` | Root |
+| `ow-accordion__item` | Item |
+| `ow-accordion__header` | Header |
+| `ow-accordion__trigger` | Trigger |
+| `ow-accordion__trigger--sm`, `ow-accordion__trigger--md`, `ow-accordion__trigger--lg` | Trigger, menurut `size` Root |
+| `ow-accordion__icon` | Span yang memuat chevron atau `icon` Anda |
+| `ow-accordion__stroke` | Salah satu dari dua goresan chevron |
+| `ow-accordion__panel` | Panel |
+| `ow-accordion__content`, `ow-accordion__content--sm`, `ow-accordion__content--md`, `ow-accordion__content--lg` | Elemen berpadding di dalam panel, menurut `size` Root |
+
+## Aksesibilitas [#accessibility]
+
+- Setiap pemicu adalah tombol native di dalam judul, dengan `aria-expanded` dan `aria-controls`,
+  sehingga screen reader mendaftar bagian sebagai judul dan menyebut apakah masing-masing terbuka.
+  Enter dan Space membuka dan menutup yang terfokus; Tab pindah ke berikutnya.
+- Chevron `aria-hidden`; label yang menamai pemicu.
+- Item yang nonaktif, atau root yang nonaktif, tidak terbuka dan diredupkan. Di forced colors label
+  nonaktif `GrayText`, garis tipis tetap ada, dan cincin fokus `Highlight`.
+- Label punya kontras 17,7:1 terhadap halaman di terang dan 16,1:1 di gelap. Chevron redup punya
+  6,0:1 di terang dan 7,3:1 di gelap, dan lebih saat memakai warna teks. Dengan
+  `prefers-contrast: more` garis tipisnya memakai `--ow-edge`, pada 3,8:1 di terang dan 3,7:1 di
+  gelap.
+- Pemicu tidak pernah lebih rendah dari 24px. Cincin fokusnya berada 2px di luar baris dan panel
+  tidak menimpanya.
+- Dengan `hiddenUntilFound`, cari di halaman membuka panel yang memuat hasilnya. Panel tertutup
+  tetap tertutup saat dicetak.
+
+## Tema [#theming]
+
+Accordion membaca token tema ini. Setel salah satunya pada accordion, atau pada elemen di
+sekelilingnya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-fg` | Label, dan chevron saat hover dan terbuka |
+| `--ow-muted` | Chevron saat diam |
+| `--ow-line` | Garis tipis di antara item |
+| `--ow-edge` | Garis tipis saat kontras lebih tinggi diminta |
+| `--ow-radius` | Sudut baris, yang membulatkan cincin fokusnya |
+| `--ow-focus` | Cincin fokus |
+| `--ow-motion-scale` | Selama apa panel bergerak; `0` membukanya seketika |
+| `--ow-ease-drawer`, `--ow-ease-out` | Ukuran panel dan pudarnya |
+| `--ow-spring-settle`, `--ow-spring-settle-duration` | Putaran chevron |
+
+<ForMode mode="isolated">
+
+Di mode terisolasi nilainya ada di setiap elemen, jadi setel milik Anda pada accordion itu sendiri.
+
+</ForMode>
+
+Atur `inline-size` pada root, atau pada induknya, dengan CSS biasa; baris memenuhi lebarnya. Ukuran
+berasal dari `font-size` dalam `em`.
+
+## Gerak [#motion]
+
+Tinggi panel (lebarnya, bila horizontal) bergerak dari `--accordion-panel-height` milik Base UI
+selama 300ms pada kurva tanpa overshoot (`--ow-ease-drawer`), terpotong, sementara isinya memudar
+selama 210ms. Buka item lain dan yang pertama menutup saat yang kedua membuka, masing-masing dari
+tempatnya sekarang. Base UI membiarkan ukuran `auto` setelah panel terbuka, jadi isi yang datang
+belakangan tidak terpotong.
+
+Chevron adalah dua goresan yang masing-masing berputar seperempat putaran di sekitar pusatnya
+sendiri, sehingga chevron bawah menjadi chevron atas lewat garis datar, dengan spring settle, dan
+warnanya beralih dari redup ke warna teks. Baris selebar penuh tidak mengecil saat ditekan, dan
+tidak berisi saat hover.
+
+Dengan `prefers-reduced-motion` chevron berubah seketika dan panel terbuka seketika dengan pudar
+singkat. Mengatur `--ow-motion-scale` ke `0` melakukan hal yang sama di mana pun ia diatur.

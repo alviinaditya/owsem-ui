@@ -122,7 +122,7 @@ describe("src/tailwind (generated)", () => {
         .filter((name): name is string => !!name),
     );
     expect([...folders].sort()).toEqual([...components].sort());
-    expect(folders.size).toBe(29);
+    expect(folders.size).toBe(34);
   });
 
   test("a listed component without a Tailwind variants file fails, naming it", () => {

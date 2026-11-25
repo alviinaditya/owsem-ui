@@ -1,0 +1,257 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * Accordion (Base). Items told apart by one hairline between them, each a full-width row: the
+ * label at the start in medium weight, a muted chevron at the end that takes the text color on
+ * hover and while open. A row is too wide to shrink, so a press changes nothing; only the focus
+ * ring says where you are. The panel opens as Collapsible's does, in height (in width, when the
+ * accordion is horizontal), with the padding in the content inside it.
+ */
+@layer owsem.components {
+  .ow-accordion {
+    display: flex;
+    flex-direction: column;
+    color: var(--ow-fg);
+  }
+
+  .ow-accordion[data-orientation="horizontal"] {
+    flex-direction: row;
+  }
+
+  .ow-accordion__item {
+    min-inline-size: 0;
+  }
+
+  .ow-accordion__item + .ow-accordion__item {
+    border-block-start: 1px solid var(--ow-line);
+  }
+
+  .ow-accordion__item[data-orientation="horizontal"] {
+    display: flex;
+  }
+
+  .ow-accordion__item + .ow-accordion__item[data-orientation="horizontal"] {
+    border-block-start: 0;
+    border-inline-start: 1px solid var(--ow-line);
+  }
+
+  .ow-accordion__header {
+    margin: 0;
+    font: inherit;
+  }
+
+  .ow-accordion__header[data-orientation="horizontal"] {
+    flex: none;
+  }
+
+  .ow-accordion__trigger {
+    /* Button's geometry: one number, --py; the block padding never drops a target below 24px. */
+    --py: 0.8036em;
+    --_py: max(var(--py), (24px - 1lh) / 2);
+    --icon: calc(1em + 2px);
+    /* Above the panel that follows it, so its focus ring is not painted over. */
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5em;
+    inline-size: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    /* The room a focus ring of the panel's content needs, so both align. */
+    padding: var(--_py) 4px;
+    border: 0;
+    border-radius: var(--ow-radius);
+    background: none;
+    color: var(--ow-fg);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25;
+    text-align: start;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ow-accordion__trigger--sm {
+    --py: 0.6058em;
+    font-size: 0.8125rem;
+  }
+
+  .ow-accordion__trigger--lg {
+    --py: 0.875em;
+    font-size: 1rem;
+  }
+
+  .ow-accordion__trigger[data-orientation="horizontal"] {
+    inline-size: auto;
+    padding-inline: 12px;
+    white-space: nowrap;
+  }
+
+  .ow-accordion__trigger:focus-visible {
+    outline: 2px solid var(--ow-focus);
+    outline-offset: 2px;
+  }
+
+  .ow-accordion__trigger[data-disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Muted, then the text color on hover and while open. */
+  .ow-accordion__icon {
+    --_flip: 0;
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    inline-size: var(--icon);
+    block-size: var(--icon);
+    margin-inline-end: calc((1cap - var(--icon)) / 2);
+    color: var(--ow-muted);
+    transition: color 150ms var(--ow-ease-out);
+  }
+
+  .ow-accordion__trigger[data-panel-open] .ow-accordion__icon {
+    --_flip: 1;
+    color: var(--ow-fg);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .ow-accordion__trigger:hover:not([data-disabled]) .ow-accordion__icon {
+      color: var(--ow-fg);
+    }
+  }
+
+  .ow-accordion__icon :where(svg, img) {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  /* Horizontal: the chevron points toward the panel, and away from it when open. */
+  .ow-accordion__trigger[data-orientation="horizontal"] .ow-accordion__icon > svg {
+    rotate: -90deg;
+  }
+
+  .ow-accordion__trigger[data-orientation="horizontal"] .ow-accordion__icon > svg:dir(rtl) {
+    rotate: 90deg;
+  }
+
+  /* Each stroke turns a quarter about its own center: down, flat halfway, then up. */
+  .ow-accordion__stroke {
+    --_turn: -1;
+    /* biome-ignore lint/nursery/useBaseline: the strokes turn about their own centers */
+    transform-box: fill-box;
+    transform-origin: center;
+    rotate: calc(var(--_flip) * var(--_turn) * 90deg);
+    will-change: rotate;
+    transition: rotate calc(var(--ow-spring-settle-duration) * var(--ow-motion-scale))
+      var(--ow-spring-settle);
+  }
+
+  .ow-accordion__stroke[data-side="end"] {
+    --_turn: 1;
+  }
+
+  /* The box that moves: clipped, with its size from Base UI and the content fading with it. */
+  .ow-accordion__panel {
+    --_duration: calc(300ms * var(--ow-motion-scale));
+    block-size: var(--accordion-panel-height);
+    overflow: hidden;
+    transition:
+      block-size var(--_duration) var(--ow-ease-drawer),
+      opacity calc(var(--_duration) * 0.7) var(--ow-ease-out);
+  }
+
+  .ow-accordion__panel:where([data-starting-style], [data-ending-style]) {
+    block-size: 0;
+    opacity: 0;
+  }
+
+  /* The room a focus ring of the content needs (2px outside, 2px wide) inside the clip. */
+  .ow-accordion__content {
+    padding: 0.25em 4px 1em;
+    color: var(--ow-fg);
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  .ow-accordion__content--sm {
+    font-size: 0.8125rem;
+  }
+
+  .ow-accordion__content--lg {
+    font-size: 1rem;
+  }
+
+  /* Horizontal: the width moves instead, and the content keeps its width so it does not rewrap. */
+  .ow-accordion__panel[data-orientation="horizontal"] {
+    inline-size: var(--accordion-panel-width);
+    block-size: auto;
+    transition:
+      inline-size var(--_duration) var(--ow-ease-drawer),
+      opacity calc(var(--_duration) * 0.7) var(--ow-ease-out);
+  }
+
+  .ow-accordion__panel[data-orientation="horizontal"]:where(
+    [data-starting-style],
+    [data-ending-style]
+  ) {
+    inline-size: 0;
+    block-size: auto;
+  }
+
+  .ow-accordion__panel[data-orientation="horizontal"] > .ow-accordion__content {
+    inline-size: max-content;
+  }
+
+  /* No movement: the chevron changes at once and the panel opens at once, with a short fade. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-accordion__icon {
+      transition: none;
+    }
+
+    .ow-accordion__stroke {
+      transition: none;
+    }
+
+    .ow-accordion__panel,
+    .ow-accordion__panel[data-orientation="horizontal"] {
+      transition: opacity calc(120ms * var(--ow-motion-scale)) var(--ow-ease-out);
+    }
+
+    .ow-accordion__panel:where([data-starting-style], [data-ending-style]) {
+      block-size: var(--accordion-panel-height);
+    }
+
+    .ow-accordion__panel[data-orientation="horizontal"]:where(
+        [data-starting-style],
+        [data-ending-style]
+      ) {
+      inline-size: var(--accordion-panel-width);
+    }
+  }
+
+  /* More contrast asked for: the hairlines come back at 3:1. */
+  @media (prefers-contrast: more) {
+    .ow-accordion__item + .ow-accordion__item,
+    .ow-accordion__item + .ow-accordion__item[data-orientation="horizontal"] {
+      border-color: var(--ow-edge);
+    }
+  }
+
+  @media (forced-colors: active) {
+    .ow-accordion__trigger:focus-visible {
+      outline: 2px solid Highlight;
+      outline-offset: 2px;
+    }
+
+    .ow-accordion__trigger[data-disabled] {
+      color: GrayText;
+    }
+  }
+}

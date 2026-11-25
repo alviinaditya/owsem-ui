@@ -41,6 +41,11 @@ export const components: string[] = [
   "table-of-contents",
   "tree-rail-nav",
   "sidebar",
+  "avatar",
+  "progress",
+  "meter",
+  "collapsible",
+  "accordion",
 ];
 
 const HEADER = "// Generated from";

@@ -1,0 +1,166 @@
+---
+title: Collapsible
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Untuk menyalin kode sumbernya ke project Anda, pakai item
+`collapsible` dari registry.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Collapsible } from "owsem-ui/base";
+
+export function OrderDetails() {
+  return (
+    <Collapsible.Root>
+      <Collapsible.Trigger>Detail pesanan</Collapsible.Trigger>
+      <Collapsible.Panel>Dua kemeja dan satu celana.</Collapsible.Panel>
+    </Collapsible.Root>
+  );
+}
+```
+
+Collapsible menampilkan dan menyembunyikan satu panel. Pemicunya tombol senyap, seperti Button
+ghost: label di awal dan chevron di akhir, dan chevron berputar saat panel terbuka. Untuk beberapa
+panel yang berkaitan, dengan satu terbuka pada satu waktu, pakai [Accordion](/id/accordion).
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Base UI merender `<div>`, `<button>` dengan `aria-expanded` dan `aria-controls`, dan panel berupa
+`<div>` yang hanya ada di halaman selama terbuka (kecuali Anda meminta lain).
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `div[data-slot="collapsible"]` | Mengelompokkan pemicu dan panel; `size` berlaku untuk keduanya; tanpa tampilan sendiri |
+| <Part name="Trigger" /> | `button.ow-collapsible__trigger` | Label, lalu chevron di `span.ow-collapsible__icon`; `data-panel-open` saat terbuka |
+| <Part name="Panel" /> | `div.ow-collapsible__panel` | Kotak yang tingginya bergerak; isinya duduk di `div.ow-collapsible__content` |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### Collapsible.Root
+
+#### Props
+
+| Prop | Tipe | Bawaan | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Pemicu setinggi 32, 40, atau 48px dengan ukuran font Button; teks panel memakai ukuran font yang sama |
+
+#### Atribut data
+
+| Atribut data | Ada ketika |
+| --- | --- |
+| `data-size` | Selalu; ukuran yang dipilih |
+
+### Collapsible.Trigger
+
+`size` datang dari Root lewat context, jadi pemicu di dalam pembungkus atau judul pun ikut berukuran.
+
+#### Props
+
+| Prop | Tipe | Bawaan | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | milik Root | Ukuran sendiri untuk pemicu ini saja; panel tetap memakai ukuran Root |
+| `icon` | `ReactNode` | chevron | Menggantikan chevron di akhir; `null` meniadakannya |
+
+#### Atribut data
+
+| Atribut data | Ada ketika |
+| --- | --- |
+| `data-size` | Selalu; ukuran yang dipilih |
+
+### Collapsible.Panel
+
+Panel membungkus anaknya dalam `div.ow-collapsible__content` yang memegang teks sesuai ukuran (13,
+14, atau 16px, bobot 400, tinggi baris 1,5, `--ow-fg`) dan padding: 0,5em di atas, 1em di bawah, dan
+di sisi memakai rumus pemicu sendiri (`--py` Button untuk ukuran itu, ditambah separuh ruang baris
+di sekitar huruf kapital), sehingga teks sejajar dengan label di font dan ukuran apa pun. Kotak yang
+bergerak tidak punya padding, jadi tidak ada yang melompat saat ia terbuka. Ruang di sisi juga
+menjaga cincin fokus kontrol di dalam panel agar tidak terpotong. Teks diatur di layer komponen,
+jadi aturan Anda pada `.ow-collapsible__content` atau pada elemen di dalamnya menang.
+
+`keepMounted` dan `hiddenUntilFound` bekerja seperti di Base UI: panel tertutup tetap ada di
+halaman, tersembunyi, dan dengan `hiddenUntilFound` fitur cari di halaman browser membukanya.
+Komponen ini tidak pernah mengatur `display` pada panel yang tersembunyi.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-collapsible__trigger` | Trigger |
+| `ow-collapsible__trigger--sm`, `ow-collapsible__trigger--md`, `ow-collapsible__trigger--lg` | Trigger, menurut `size` |
+| `ow-collapsible__content--sm`, `ow-collapsible__content--md`, `ow-collapsible__content--lg` | Elemen berpadding, menurut `size` Root |
+| `ow-collapsible__icon` | Span yang memuat chevron atau `icon` Anda |
+| `ow-collapsible__stroke` | Salah satu dari dua goresan chevron |
+| `ow-collapsible__panel` | Panel |
+| `ow-collapsible__content` | Elemen berpadding di dalam panel |
+
+## Aksesibilitas [#accessibility]
+
+- Pemicunya tombol native. Enter dan Space membuka dan menutup panel, dan tombol membawa
+  `aria-expanded` dan `aria-controls`, sehingga screen reader menyebut "diciutkan" atau "diperluas".
+- Chevron `aria-hidden`; label yang menamai pemicu. `icon` kustom sebaiknya dekoratif juga.
+- Collapsible yang nonaktif tidak terbuka dan diredupkan. Di forced colors label memakai warna
+  sistem, yang nonaktif `GrayText`, dan cincin fokus `Highlight`.
+- Label punya kontras 17,7:1 terhadap halaman di terang dan 16,1:1 di gelap, dan tetap di atas
+  4,5:1 di bawah tint hover. Chevron digambar dengan warna teks.
+- Pemicu tidak pernah lebih rendah dari 24px, dan cincin fokus berada 2px di luarnya.
+- Dengan `hiddenUntilFound`, cari di halaman membuka panel yang memuat hasilnya. Panel tertutup
+  tetap tertutup saat dicetak.
+
+## Tema [#theming]
+
+Collapsible membaca token tema ini. Setel salah satunya pada collapsible, atau pada elemen di
+sekelilingnya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-fg` | Label dan chevron |
+| `--ow-hover` | Tint hover pemicu |
+| `--ow-pressed-bg` | Isian pemicu saat ditahan |
+| `--ow-radius` | Sudut pemicu |
+| `--ow-focus` | Cincin fokus |
+| `--ow-motion-scale` | Sejauh apa tekanan bergerak dan selama apa panel bergerak; `0` membukanya seketika |
+| `--ow-ease-drawer`, `--ow-ease-out` | Tinggi panel dan pudarnya |
+| `--ow-spring-settle`, `--ow-spring-settle-duration` | Putaran chevron, dan lepasnya tekanan |
+
+<ForMode mode="isolated">
+
+Di mode terisolasi nilainya ada di setiap pemicu, jadi setel milik Anda pada pemicunya sendiri.
+
+</ForMode>
+
+Atur `inline-size` pada root, atau pada induknya, dengan CSS biasa; pemicu memenuhi lebarnya.
+Ukuran berasal dari `font-size` dalam `em`, jadi font yang lebih besar membuat pemicu lebih tinggi
+pada skala yang sama.
+
+## Gerak [#motion]
+
+Tinggi panel bergerak dari `--collapsible-panel-height` milik Base UI selama 300ms pada kurva tanpa
+overshoot (`--ow-ease-drawer`), terpotong, sementara isinya memudar selama 210ms. Interupsi dan ia
+berbalik dari tempatnya sekarang. Base UI membiarkan tinggi `auto` setelah panel terbuka, jadi isi
+yang datang belakangan tidak terpotong.
+
+Chevron adalah dua goresan yang masing-masing berputar seperempat putaran di sekitar pusatnya
+sendiri, sehingga chevron bawah menjadi chevron atas lewat garis datar, dengan spring settle.
+Tekanan menskalakan pemicu ke 0,97 dan melepasnya dengan spring yang sama.
+
+Dengan `prefers-reduced-motion` chevron berubah seketika, pemicu tidak diskalakan, dan panel
+terbuka seketika dengan pudar singkat. Mengatur `--ow-motion-scale` ke `0` melakukan hal yang sama
+di mana pun ia diatur.

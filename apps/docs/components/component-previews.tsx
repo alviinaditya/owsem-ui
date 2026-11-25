@@ -1,8 +1,11 @@
 "use client";
 
 import {
+  Accordion,
+  Avatar,
   Button,
   Checkbox,
+  Collapsible,
   Dialog,
   Field,
   Fieldset,
@@ -10,7 +13,9 @@ import {
   Input,
   Kbd,
   Menu,
+  Meter,
   Popover,
+  Progress,
   Radio,
   RadioGroup,
   ScrollArea,
@@ -77,6 +82,16 @@ const TEXT = {
     sections: ["Instalasi", "Tema", "Pemakaian", "API"],
     alerts: "Notifikasi",
     sounds: "Suara",
+    upload: "Mengunggah",
+    storage: "Penyimpanan",
+    workWeek: "Minggu kerja",
+    focus: "Fokus",
+    meetings: "Rapat",
+    details: "Detail",
+    shipping: "Pengiriman",
+    returns: "Pengembalian",
+    payment: "Pembayaran",
+    freeShipping: "Gratis ongkir.",
   },
   en: {
     create: "New",
@@ -117,6 +132,16 @@ const TEXT = {
     sections: ["Installation", "Theming", "Usage", "API"],
     alerts: "Alerts",
     sounds: "Sounds",
+    upload: "Uploading",
+    storage: "Storage",
+    workWeek: "Working week",
+    focus: "Focus",
+    meetings: "Meetings",
+    details: "Details",
+    shipping: "Shipping",
+    returns: "Returns",
+    payment: "Payment",
+    freeShipping: "Free shipping.",
   },
 };
 
@@ -364,6 +389,66 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
     <div className="component-preview-row">
       <Switch.Root checked aria-label={t.alerts} />
       <Switch.Root aria-label={t.sounds} />
+    </div>
+  ),
+  accordion: (t) => (
+    <div className="component-preview-bar">
+      <Accordion.Root size="sm" defaultValue={[t.shipping]}>
+        {[t.shipping, t.returns, t.payment].map((label) => (
+          <Accordion.Item key={label} value={label}>
+            <Accordion.Trigger>{label}</Accordion.Trigger>
+            <Accordion.Panel>{t.freeShipping}</Accordion.Panel>
+          </Accordion.Item>
+        ))}
+      </Accordion.Root>
+    </div>
+  ),
+  collapsible: (t) => (
+    <div className="component-preview-bar">
+      <Collapsible.Root size="sm" defaultOpen>
+        <Collapsible.Trigger>{t.details}</Collapsible.Trigger>
+        <Collapsible.Panel>{t.freeShipping}</Collapsible.Panel>
+      </Collapsible.Root>
+    </div>
+  ),
+  avatar: () => (
+    <Avatar.Group size="lg">
+      <Avatar.Root>
+        <Avatar.Fallback>AR</Avatar.Fallback>
+      </Avatar.Root>
+      <Avatar.Root>
+        <Avatar.Fallback>BS</Avatar.Fallback>
+      </Avatar.Root>
+      <Avatar.Root>
+        <Avatar.Fallback>+3</Avatar.Fallback>
+      </Avatar.Root>
+    </Avatar.Group>
+  ),
+  progress: (t) => (
+    <div className="component-preview-bar">
+      <Progress.Root value={64} size="sm">
+        <Progress.Label>{t.upload}</Progress.Label>
+        <Progress.Value />
+        <Progress.Track />
+      </Progress.Root>
+    </div>
+  ),
+  meter: (t) => (
+    <div className="component-preview-bar">
+      <Meter.Group defaultActive="focus" size="sm">
+        <Meter.Root value={32} max={40} aria-label={t.workWeek}>
+          <Meter.Track>
+            <Meter.Segment name="focus" value={14} />
+            <Meter.Segment name="meetings" value={9} />
+            <Meter.Segment name="reviews" value={6} />
+            <Meter.Segment name="support" value={3} />
+          </Meter.Track>
+        </Meter.Root>
+        <Meter.Legend aria-label={t.workWeek}>
+          <Meter.LegendItem name="focus">{t.focus}</Meter.LegendItem>
+          <Meter.LegendItem name="meetings">{t.meetings}</Meter.LegendItem>
+        </Meter.Legend>
+      </Meter.Group>
     </div>
   ),
   field: (t) => (
@@ -668,28 +753,6 @@ const SKETCHES: Partial<Record<ComponentName, ReactNode>> = {
       {F(50, 66, 34, 4, 0.35)}
     </>
   ),
-  accordion: (
-    <>
-      {F(30, 18, 52)}
-      <path d="m120 17 4 4 4-4M30 32h100" />
-      {F(30, 42, 44)}
-      <path d="m120 46 4-4 4 4" />
-      {F(30, 54, 84, 4, 0.35)}
-      {F(30, 63, 70, 4, 0.35)}
-      <path d="M30 74h100" />
-      {F(30, 82, 40)}
-    </>
-  ),
-  collapsible: (
-    <>
-      {F(36, 20, 56)}
-      <path d="m118 19 4 4 4-4" />
-      {B(36, 34, 88, 44, 6)}
-      {F(46, 46, 60, 4, 0.35)}
-      {F(46, 56, 44, 4, 0.35)}
-      {F(46, 66, 52, 4, 0.35)}
-    </>
-  ),
   "otp-field": (
     <>
       {[0, 1, 2, 3, 4, 5].map((i) => (
@@ -757,42 +820,6 @@ const SKETCHES: Partial<Record<ComponentName, ReactNode>> = {
       {F(86, 51, 32, 4, 0.35)}
       {F(86, 62, 40, 5, 0.6)}
       {F(86, 73, 28, 4, 0.35)}
-    </>
-  ),
-  avatar: (
-    <>
-      <circle cx={58} cy={48} r={16} fill="var(--docs-surface)" />
-      <circle cx={80} cy={48} r={16} fill="var(--docs-surface)" />
-      <circle cx={102} cy={48} r={16} fill="var(--docs-surface)" />
-      <circle cx={102} cy={43} r={5} />
-      <path d="M93 58a9 9 0 0 1 18 0" />
-    </>
-  ),
-  progress: (
-    <>
-      {F(30, 34, 40)}
-      {F(112, 34, 18, 5, 0.35)}
-      {F(30, 48, 100, 8, 0.25)}
-      {F(30, 48, 64, 8, 0.7)}
-    </>
-  ),
-  meter: (
-    <>
-      {F(30, 34, 46)}
-      {F(108, 34, 22, 5, 0.35)}
-      {[0, 1, 2, 3, 4].map((i) => (
-        <rect
-          key={i}
-          x={30 + i * 20.5}
-          y={48}
-          width={18}
-          height={8}
-          rx={2}
-          fill="currentColor"
-          opacity={i < 3 ? 0.7 : 0.25}
-          stroke="none"
-        />
-      ))}
     </>
   ),
   "lumen-rail-nav": (

@@ -25,8 +25,11 @@ const entry = (name, path, limit) => ({
 // One entry per component: Base 3 kB, Owsem 8 kB.
 export default [
   entry("core", "dist/core/index.js", "6 kB"),
+  entry("accordion", "dist/components/accordion/index.js", "3 kB"),
+  entry("avatar", "dist/components/avatar/index.js", "3 kB"),
   entry("button", "dist/components/button/index.js", "3 kB"),
   entry("checkbox", "dist/components/checkbox/index.js", "3 kB"),
+  entry("collapsible", "dist/components/collapsible/index.js", "3 kB"),
   entry("color-picker", "dist/components/color-picker/index.js", "8 kB"),
   entry("dialog", "dist/components/dialog/index.js", "3 kB"),
   entry("field", "dist/components/field/index.js", "3 kB"),
@@ -35,7 +38,9 @@ export default [
   entry("input", "dist/components/input/index.js", "3 kB"),
   entry("kbd", "dist/components/kbd/index.js", "3 kB"),
   entry("menu", "dist/components/menu/index.js", "3 kB"),
+  entry("meter", "dist/components/meter/index.js", "3 kB"),
   entry("popover", "dist/components/popover/index.js", "3 kB"),
+  entry("progress", "dist/components/progress/index.js", "3 kB"),
   entry("scroll-area", "dist/components/scroll-area/index.js", "3 kB"),
   entry("radio-group", "dist/components/radio-group/index.js", "3 kB"),
   entry("select", "dist/components/select/index.js", "3 kB"),

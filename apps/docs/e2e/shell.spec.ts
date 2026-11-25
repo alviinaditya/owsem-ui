@@ -21,8 +21,10 @@ test("the sidebar lists the available components by category; planned ones stay 
   const forms = sidebar.getByRole("group", { name: "Forms" });
   await expect(forms.getByRole("link", { name: "Switch", exact: true })).toBeVisible();
   await expect(forms).toHaveText(/Field/);
-  // Only categories with an available component have a group.
-  await expect(sidebar.getByRole("group", { name: "Disclosure" })).toHaveCount(0);
+  // Every category has an available component now, so every one has a group.
+  const disclosure = sidebar.getByRole("group", { name: "Disclosure" });
+  await expect(disclosure.getByRole("link", { name: "Accordion", exact: true })).toBeVisible();
+  await expect(disclosure.getByRole("link", { name: "Collapsible", exact: true })).toBeVisible();
 });
 
 test("the sidebar's content scrolls on its own, and the page does not", async ({
@@ -40,13 +42,13 @@ test("the sidebar's content scrolls on its own, and the page does not", async ({
 });
 
 test("planned components show Coming soon and stay out of search", async ({ page }) => {
-  await page.goto("/en/meter");
+  await page.goto("/en/combobox");
   const main = page.getByRole("main");
-  await expect(main.getByRole("heading", { level: 1, name: "Meter" })).toBeVisible();
+  await expect(main.getByRole("heading", { level: 1, name: "Combobox" })).toBeVisible();
   await expect(main.getByText("Coming soon", { exact: true })).toBeVisible();
-  await expect(main.getByRole("link", { name: "Meter", exact: true })).toHaveAttribute(
+  await expect(main.getByRole("link", { name: "Combobox", exact: true })).toHaveAttribute(
     "href",
-    "https://base-ui.com/react/components/meter",
+    "https://base-ui.com/react/components/combobox",
   );
   await expect(robots(page)).toHaveAttribute("content", /noindex/);
 

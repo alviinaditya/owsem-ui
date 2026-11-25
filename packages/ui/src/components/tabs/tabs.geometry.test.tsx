@@ -204,76 +204,61 @@ describe("Tabs geometry", () => {
     const list = lists[0] as HTMLElement;
     const thumb = thumbOf(list);
     const [first, , third] = tabsOf(list) as [HTMLElement, HTMLElement, HTMLElement];
-    await userEvent.unhover(first);
-    await expect.poll(() => thumb.hasAttribute("data-visible")).toBe(true);
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    // Each position with the slide's own time, so that positions are judged in the slide's order and
-    // not in the order the frames were read.
-    const slides = new Set<Animation>();
-    const samples: { time: number; center: number }[] = [];
-    const landed: number[] = [];
-    let sampling = true;
-    const slide = () =>
+    const center = (el: Element) => rect(el).left + rect(el).width / 2;
+    const slides = () =>
       thumb
         .getAnimations()
-        .find((a) => a instanceof CSSTransition && a.transitionProperty === "translate");
-    const sample = () => {
-      const running = slide();
-      const box = thumb.getBoundingClientRect();
-      const center = box.left + box.width / 2;
-      if (running) {
-        slides.add(running);
-        samples.push({ time: Number(running.currentTime), center });
-      } else if (slides.size > 0) {
-        landed.push(center);
-      }
-      if (sampling) requestAnimationFrame(sample);
-    };
-    requestAnimationFrame(sample);
+        .filter(
+          (a): a is CSSTransition =>
+            a instanceof CSSTransition && ["translate", "transform"].includes(a.transitionProperty),
+        );
     const stretch = () =>
       thumb
         .getAnimations({ subtree: true })
         .find((a) => (a.effect as KeyframeEffect).pseudoElement === "::before");
-    // A slow runner can outlast the 520 ms stretch while the clicks are still being sent, so
-    // hold it open from the frame it starts until the hover has been checked.
-    let slowed = true;
-    const slow = () => {
-      const running = stretch();
-      if (running) running.playbackRate = 0.02;
-      if (slowed) requestAnimationFrame(slow);
+    await userEvent.unhover(first);
+    await expect.poll(() => thumb.hasAttribute("data-visible")).toBe(true);
+    await expect.poll(() => thumb.getAnimations({ subtree: true }).length).toBe(0);
+    // Held at its start from the frame it begins, so a slow runner cannot outlast it.
+    let holding = true;
+    const hold = () => {
+      for (const running of [...slides(), stretch()]) running?.pause();
+      if (holding) requestAnimationFrame(hold);
     };
-    requestAnimationFrame(slow);
+    requestAnimationFrame(hold);
     await userEvent.click(first);
-    await expect.poll(stretch).toBeDefined();
-    const key = stretch();
-    expect(key?.playState).toBe("running");
-    const style = thumb.getAttribute("style");
+    const slide = () => slides().find((a) => a.transitionProperty === "translate");
+    await expect.poll(() => slide()?.playState).toBe("paused");
+    await expect.poll(() => stretch()?.playState).toBe("paused");
+    const [held, key, style] = [slide(), stretch(), thumb.getAttribute("style")];
     // The pointer moves onto the tab the indicator is leaving.
     await userEvent.hover(third);
     expect(thumb.getAttribute("style")).toBe(style);
+    expect(slide()).toBe(held);
     expect(stretch()).toBe(key);
-    expect(key?.playState).toBe("running");
-    slowed = false;
-    if (key) key.playbackRate = 1;
-    await new Promise((resolve) => setTimeout(resolve, 900));
-    sampling = false;
-    // One slide from start to end, and travelling left it never steps back to the right (the press
-    // release may breathe a pixel).
-    expect(slides.size).toBe(1);
-    expect(samples.length).toBeGreaterThan(2);
-    samples.sort((a, b) => a.time - b.time);
-    expect(landed.length).toBeGreaterThan(2);
-    // From the slide's start to where it rests, landing included.
-    const path = [...samples.map((at) => at.center), ...landed];
-    const rest = rect(first).left + rect(first).width / 2;
-    const report = JSON.stringify({ rest, landed: landed.slice(0, 4), samples });
-    const back = path.filter((center, k) => k > 0 && center > (path[k - 1] as number) + 0.5);
+    holding = false;
+    // Its whole way, step by step: travelling left, it never steps back to the right, never passes
+    // its tab, and ends on it.
+    const all = slides();
+    const end = Number(held?.effect?.getComputedTiming().endTime);
+    expect(end).toBeGreaterThan(300);
+    const path: number[] = [];
+    for (let time = 0; time <= end; time += 10) {
+      for (const running of all) running.currentTime = time;
+      path.push(center(thumb));
+    }
+    for (const running of [...all, key]) running?.finish();
+    path.push(center(thumb));
+    const rest = center(first);
+    const report = JSON.stringify({ rest, path });
+    expect(path[0], report).toBeGreaterThan(rest + 50);
+    const back = path.filter((at, k) => k > 0 && at > (path[k - 1] as number) + 0.5);
     expect(back, report).toEqual([]);
-    // It never passes its tab, and once there it stays there.
     expect(Math.min(...path), report).toBeGreaterThanOrEqual(rest - 0.5);
-    for (const center of landed) close(center, rest);
-    // The thumb reaches out by the well's padding, 4px, around its key.
-    close(rect(thumb).left + 4, rect(first).left);
+    close(path.at(-1) as number, rest);
+    // Once the press lets go: the thumb reaches out by the well's padding, 4px, around its key.
+    await expect.poll(() => Math.abs(rect(thumb).left + 4 - rect(first).left)).toBeLessThan(TOL);
+    expect(slides()).toEqual([]);
   });
 
   test("the stretch grows from the leading edge: the key never passes its tab or the well", async () => {

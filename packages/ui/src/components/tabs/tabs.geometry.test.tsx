@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import { userEvent } from "vitest/browser";
 import { render } from "vitest-browser-react";
 import { insets, nested, rect, TOL } from "../../../test/geometry.ts";
+import { holdThumb } from "../../../test/hold-thumb.ts";
 import { Tabs } from "./index";
 
 const ICON = (
@@ -205,63 +206,42 @@ describe("Tabs geometry", () => {
     const thumb = thumbOf(list);
     const [first, , third] = tabsOf(list) as [HTMLElement, HTMLElement, HTMLElement];
     const center = (el: Element) => rect(el).left + rect(el).width / 2;
-    const slides = () =>
-      thumb
-        .getAnimations()
-        .filter(
-          (a): a is CSSTransition =>
-            a instanceof CSSTransition && ["translate", "transform"].includes(a.transitionProperty),
-        );
-    const stretch = () =>
-      thumb
-        .getAnimations({ subtree: true })
-        .find((a) => (a.effect as KeyframeEffect).pseudoElement === "::before");
     await userEvent.unhover(first);
     await expect.poll(() => thumb.hasAttribute("data-visible")).toBe(true);
-    await expect.poll(() => thumb.getAnimations({ subtree: true }).length).toBe(0);
-    // Held at its start from the frame it begins, so a slow runner cannot outlast it.
-    let holding = true;
-    const hold = () => {
-      for (const running of [...slides(), stretch()]) running?.pause();
-      if (holding) requestAnimationFrame(hold);
-    };
-    requestAnimationFrame(hold);
+    const held = holdThumb(list, thumb);
     await userEvent.click(first);
-    const slide = () => slides().find((a) => a.transitionProperty === "translate");
-    await expect.poll(() => slide()?.playState).toBe("paused");
-    await expect.poll(() => stretch()?.playState).toBe("paused");
-    const [held, key, style] = [slide(), stretch(), thumb.getAttribute("style")];
+    await expect.poll(() => held.slide()).toBeDefined();
+    held.seek(0);
+    const [slide, style] = [held.slide(), thumb.getAttribute("style")];
     // The pointer moves onto the tab the indicator is leaving.
     await userEvent.hover(third);
     expect(thumb.getAttribute("style")).toBe(style);
-    expect(slide()).toBe(held);
-    expect(stretch()).toBe(key);
-    holding = false;
+    expect(held.slide()).toBe(slide);
+    expect(held.stretches.length).toBe(1);
     // Its whole way, step by step: travelling left, it never steps back to the right, never passes
     // its tab, and ends on it. Measured against the tab, so a list that scrolls takes both along.
-    const all = slides();
-    const end = Number(held?.effect?.getComputedTiming().endTime);
-    expect(end).toBeGreaterThan(300);
     const way: { off: number; tab: number; scroll: number }[] = [];
     const read = () => {
       way.push({ off: center(thumb) - center(first), tab: center(first), scroll: list.scrollLeft });
     };
-    for (let time = 0; time <= end; time += 10) {
-      for (const running of all) running.currentTime = time;
+    for (let ms = 0; ms <= held.duration; ms += 10) {
+      held.seek(ms);
       read();
     }
-    for (const running of [...all, key]) running?.finish();
+    held.finish();
     read();
     const path = way.map((at) => at.off);
     const report = JSON.stringify(way);
+    expect(path.length).toBeGreaterThan(30);
     expect(path[0], report).toBeGreaterThan(50);
     const back = path.filter((off, k) => k > 0 && off > (path[k - 1] as number) + 0.5);
     expect(back, report).toEqual([]);
     expect(Math.min(...path), report).toBeGreaterThanOrEqual(-0.5);
     close(path.at(-1) as number, 0);
     // Once the press lets go: the thumb reaches out by the well's padding, 4px, around its key.
-    await expect.poll(() => Math.abs(rect(thumb).left + 4 - rect(first).left)).toBeLessThan(TOL);
-    expect(slides()).toEqual([]);
+    await expect
+      .poll(() => Math.abs(rect(thumb).left + 4 - rect(first).left), { timeout: 10_000 })
+      .toBeLessThan(TOL);
   });
 
   test("the stretch grows from the leading edge: the key never passes its tab or the well", async () => {
@@ -270,44 +250,32 @@ describe("Tabs geometry", () => {
     const thumb = thumbOf(list);
     const [first] = tabsOf(list) as [HTMLElement];
     await expect.poll(() => thumb.hasAttribute("data-visible")).toBe(true);
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    const key = () => {
+    const held = holdThumb(list, thumb);
+    first.click();
+    await expect.poll(() => held.stretches.length).toBe(1);
+    // Going left, the left edge leads and stays put: the origin is on it.
+    const frames = ((held.stretches[0] as Animation).effect as KeyframeEffect).getKeyframes();
+    expect(frames.length).toBeGreaterThan(2);
+    for (const frame of frames) {
+      expect(String(frame.transformOrigin).startsWith("0% 50%")).toBe(true);
+    }
+    // The key's left edge at every step, with the stretch on it.
+    let passed = 0;
+    let outside = 0;
+    let widest = 1;
+    for (let ms = 0; ms <= held.duration; ms += 10) {
+      held.seek(ms);
       const box = thumb.getBoundingClientRect();
       const border = Number.parseFloat(getComputedStyle(thumb).borderTopWidth);
       const style = getComputedStyle(thumb, "::before");
       const scale = new DOMMatrixReadOnly(style.transform).a;
       const origin = Number.parseFloat(style.transformOrigin);
       const left = box.left + border + origin - origin * scale;
-      return { left, right: left + (box.width - 2 * border) * scale };
-    };
-    let passed = 0;
-    let outside = 0;
-    let sampling = true;
-    const sample = () => {
-      const { left } = key();
+      widest = Math.max(widest, scale);
       passed = Math.max(passed, first.getBoundingClientRect().left - left);
       outside = Math.max(outside, list.getBoundingClientRect().left - left);
-      if (sampling) requestAnimationFrame(sample);
-    };
-    requestAnimationFrame(sample);
-    first.click();
-    // Read the frames inside the poll: the stretch may be over by the next look.
-    let frames: Keyframe[] = [];
-    await expect
-      .poll(() => {
-        const stretch = thumb
-          .getAnimations({ subtree: true })
-          .find((a) => (a.effect as KeyframeEffect).pseudoElement === "::before");
-        if (stretch) frames = (stretch.effect as KeyframeEffect).getKeyframes();
-        return frames.length;
-      })
-      .toBeGreaterThan(0);
-    // Going left, the left edge leads and stays put: the origin is on it.
-    for (const frame of frames) {
-      expect(String(frame.transformOrigin).startsWith("0% 50%")).toBe(true);
     }
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    sampling = false;
+    expect(widest).toBeGreaterThan(1.15);
     expect(passed).toBeLessThanOrEqual(0.5);
     expect(outside).toBeLessThanOrEqual(0.5);
   });

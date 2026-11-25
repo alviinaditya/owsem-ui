@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 import { insets, nested, rect, TOL } from "../../../test/geometry.ts";
+import { holdThumb } from "../../../test/hold-thumb.ts";
 import { ToggleGroup } from "./index";
 
 const ICON = (
@@ -171,19 +172,11 @@ describe("Toggle Group geometry", () => {
     const group = groups[0] as HTMLElement;
     const thumb = thumbOf(group);
     await expect.poll(() => thumb.hasAttribute("data-visible")).toBe(true);
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    const held = holdThumb(group, thumb);
     (itemsOf(group)[0] as HTMLElement).click();
-    // Read the frames inside the poll: the stretch may be over by the next look.
-    let frames: Keyframe[] = [];
-    await expect
-      .poll(() => {
-        const stretch = thumb
-          .getAnimations({ subtree: true })
-          .find((a) => (a.effect as KeyframeEffect).pseudoElement === "::before");
-        if (stretch) frames = (stretch.effect as KeyframeEffect).getKeyframes();
-        return frames.length;
-      })
-      .toBeGreaterThan(0);
+    await expect.poll(() => held.stretches.length).toBe(1);
+    const frames = ((held.stretches[0] as Animation).effect as KeyframeEffect).getKeyframes();
+    expect(frames.length).toBeGreaterThan(2);
     // Going left, the left edge leads and stays put: the origin is on it.
     for (const frame of frames) {
       expect(String(frame.transformOrigin).startsWith("0% 50%")).toBe(true);

@@ -117,8 +117,8 @@
   }
 
   /*
-   * Solid: while on, the primary Button's fill, text, and edge. Hovered, the hover tint lies over
-   * the fill; held down, the fill takes 10% black. Off, hovered, and focused it is soft.
+   * Solid: while on, the primary Button's fill, text, and edge. Hovered, 5% black lies over the
+   * fill; held down, the fill takes 10% black. Off, hovered, and focused it is soft.
    */
   .ow-toggle--solid[data-pressed] {
     background-color: var(--ow-accent);
@@ -128,7 +128,8 @@
 
   @media (hover: hover) {
     .ow-toggle--solid[data-pressed]:hover:not(:active, [data-disabled]) {
-      background-image: linear-gradient(var(--_hover) 0 0);
+      /* literal: black darkens any fill */
+      background-image: linear-gradient(color-mix(in oklab, black 5%, transparent) 0 0);
       background-color: var(--ow-accent);
     }
   }

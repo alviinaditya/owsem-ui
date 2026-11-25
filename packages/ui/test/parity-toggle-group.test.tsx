@@ -260,6 +260,14 @@ describe("Toggle Group in Tailwind CSS v4 against toggle-group.css", () => {
     await tw.states(cases, "solid", "hover", pressed);
   });
 
+  test("a hovered solid key darkens the same way in the dark theme", {
+    timeout: 60_000,
+  }, async () => {
+    for (const name of ["multiple", "solid multiple", "solid vertical, multiple"]) {
+      await tw.states(cases, name, "hover", { ...pressed, theme: "dark" });
+    }
+  });
+
   test("a pressed item that Glide lights (a skipped one keeps the mark) keeps its text color", async () => {
     const lit = (side: Element) => {
       for (const el of side.querySelectorAll("button:not(:disabled)")) {

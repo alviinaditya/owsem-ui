@@ -149,8 +149,9 @@ const item = [
   // A hovered key with multiple selection, which a click turns off: its fill moves 3% toward the
   // label color. The thumb is not an action, so it keeps its fill.
   "group-data-multiple/ow-toggle-group:group-data-[variant=soft]/ow-toggle-group:data-glide-active:[--_key:color-mix(in_oklab,var(--_thumb),var(--_fg)_3%)]",
-  // A solid key takes the primary Button's hover: the hover tint over its fill.
-  "group-data-multiple/ow-toggle-group:group-data-[variant=solid]/ow-toggle-group:data-pressed:data-glide-active:bg-[linear-gradient(var(--ow-hover)_0_0)]",
+  // A solid key takes the primary Button's hover: 5% black over its fill.
+  // literal: black darkens any fill
+  "group-data-multiple/ow-toggle-group:group-data-[variant=solid]/ow-toggle-group:data-pressed:data-glide-active:bg-[linear-gradient(color-mix(in_oklab,black_5%,transparent)_0_0)]",
   // The text of an item the thumb arrives at or leaves turns with it (see the solid variant).
   "group-data-thumb/ow-toggle-group:group-not-data-multiple/ow-toggle-group:group-data-[variant=solid]/ow-toggle-group:data-pressed:delay-[var(--_color-delay),0s]",
   "group-data-thumb/ow-toggle-group:group-not-data-multiple/ow-toggle-group:group-data-[variant=solid]/ow-toggle-group:not-data-pressed:not-data-glide-active:delay-[var(--_leave-delay),0s]",

@@ -305,7 +305,6 @@ export const checkboxDefinition = defineComponent({
         "--ow-primary-shadow": "--_accent-shadow",
         "--ow-on-accent": "--_on-accent",
         "--ow-fg": "--_fg",
-        "--ow-hover": "--_hover",
         "--ow-focus": "--_focus",
       },
     },

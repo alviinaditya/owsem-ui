@@ -169,6 +169,14 @@
       --_tint: var(--_hover);
     }
 
+    /* A solid fill darkens in both themes: the light tint would wash white text out in dark. */
+    .ow-button:where(.ow-button--primary, .ow-button--destructive):not(.ow-button--soft):hover:not(
+        [data-disabled]
+      ) {
+      /* literal: black darkens any fill */
+      --_tint: color-mix(in oklab, black 5%, transparent);
+    }
+
     .ow-button--outline:hover:not([data-disabled]) {
       --_line: color-mix(in oklab, var(--_ink) 28%, transparent);
     }

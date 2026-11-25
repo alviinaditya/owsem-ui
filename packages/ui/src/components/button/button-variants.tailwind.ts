@@ -58,17 +58,27 @@ const edge = [
   "forced-colors:outline-1 forced-colors:-outline-offset-1 forced-colors:outline-transparent",
 ];
 
+// A solid fill darkens on hover in both themes: the light tint would wash white text out in dark.
+// literal: black darkens any fill
+const solidHover =
+  "pointer-fine:hover:not-data-disabled:[--_tint:color-mix(in_oklab,black_5%,transparent)]";
+
+// Soft keeps the theme's hover tint, which the solid variants above replace.
+const softHover = "pointer-fine:hover:not-data-disabled:[--_tint:var(--ow-hover)]";
+
 const variantStyles = {
   // A solid fill with the thin light line; held, the fill darkens a little.
   primary: [
     "text-(color:--ow-on-accent) before:bg-(color:--ow-accent) before:shadow-(shadow:--ow-primary-shadow) held:before:shadow-(shadow:--ow-primary-shadow)",
     "held:before:bg-[color-mix(in_oklab,var(--ow-accent),black_10%)]",
+    solidHover,
     ...edge,
   ],
   destructive: [
     "text-(color:--ow-on-critical) before:bg-(color:--ow-critical-solid) before:shadow-(shadow:--ow-primary-shadow)",
     "held:before:shadow-(shadow:--ow-primary-shadow)",
     "held:before:bg-[color-mix(in_oklab,var(--ow-critical-solid),black_10%)]",
+    solidHover,
     ...edge,
   ],
   // A tint of the text color, a step deeper when held.
@@ -106,6 +116,7 @@ const softTone = {
     "text-[color-mix(in_oklab,var(--ow-accent)_75%,var(--ow-fg))] before:shadow-none held:before:shadow-none",
     "before:bg-[color-mix(in_oklab,var(--ow-accent)_12%,transparent)]",
     "held:before:bg-[color-mix(in_oklab,var(--ow-accent)_18%,transparent)]",
+    softHover,
   ],
   secondary: [
     "text-[color-mix(in_oklab,var(--ow-fg)_75%,var(--ow-fg))] before:shadow-none held:before:shadow-none",
@@ -116,6 +127,7 @@ const softTone = {
     "text-[color-mix(in_oklab,var(--ow-critical)_75%,var(--ow-fg))] before:shadow-none held:before:shadow-none",
     "before:bg-[color-mix(in_oklab,var(--ow-critical)_12%,transparent)]",
     "held:before:bg-[color-mix(in_oklab,var(--ow-critical)_18%,transparent)]",
+    softHover,
   ],
 };
 

@@ -1,3 +1,5 @@
+import { expect } from "vitest";
+
 /** Paints `colors` in order on one pixel: the composite of a translucent tint over a page. */
 export function composite(...colors: string[]): number[] {
   const context = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
@@ -20,4 +22,41 @@ export function contrast(a: number[], b: number[]): number {
   };
   const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x);
   return ((hi ?? 0) + 0.05) / ((lo ?? 0) + 0.05);
+}
+
+/** The tint a hovered solid fill takes in both themes: black darkens any fill. */
+export const SOLID_HOVER_TINT = "color-mix(in oklab, black 5%, transparent)";
+
+/** A color (e.g. `var(--ow-accent)`) as its computed color string. */
+export function resolvedColor(value: string): string {
+  const probe = document.createElement("span");
+  probe.style.color = value;
+  document.body.append(probe);
+  const color = getComputedStyle(probe).color;
+  probe.remove();
+  return color;
+}
+
+/** The painted colors (rgb triplets) of one solid fill and its label. */
+export interface SolidPaint {
+  resting: number[];
+  hovered: number[];
+  held: number[];
+  text: number[];
+  /** What the fill painted when hover laid the `--ow-hover` tint over it, as before. */
+  before: number[];
+}
+
+/**
+ * One solid fill, hovered, in `theme`: the label keeps 4.5:1 on it, it differs from the resting
+ * and the held fill, and in light it is the very color `--ow-hover` painted. Returns the ratios
+ * (now, before) for the record.
+ */
+export function checkSolidHover(label: string, theme: string, paint: SolidPaint): number[] {
+  const now = contrast(paint.text, paint.hovered);
+  expect(now, `${label} ${theme}`).toBeGreaterThanOrEqual(4.5);
+  expect(paint.hovered, `${label} ${theme} vs resting`).not.toEqual(paint.resting);
+  expect(paint.hovered, `${label} ${theme} vs held`).not.toEqual(paint.held);
+  if (theme === "light") expect(paint.hovered, `${label} light`).toEqual(paint.before);
+  return [now, contrast(paint.text, paint.before)];
 }

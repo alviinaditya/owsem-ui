@@ -217,7 +217,8 @@ import { Button, buttonVariants, IconButton } from "owsem-ui/base"; // or "@/com
 - Reads `--ow-accent` with `--ow-on-accent` (primary; the link mixes the accent toward `--ow-fg`),
   `--ow-critical-solid` with `--ow-on-critical` (destructive; soft uses `--ow-critical`),
   `--ow-fg` (secondary's tint and text, outline's line), `--ow-primary-shadow` (the solid fills'
-  top highlight), `--ow-pressed-bg` (held down), `--ow-hover`, `--ow-focus`, `--ow-radius`,
+  top highlight), `--ow-pressed-bg` (held down), `--ow-hover` (every variant but the solid fills,
+  which darken 5% black on hover), `--ow-focus`, `--ow-radius`,
   and `--ow-motion-scale`.
 
 ### Checkbox
@@ -252,8 +253,8 @@ import { Checkbox } from "owsem-ui/base"; // or "@/components/owsem/checkbox"
 - A parent box is your own state for now (`checked` for all, `indeterminate` for some); Checkbox Group
   is a later component.
 - Off is a 10% tint of the text color with no edge (13% on hover of the box or its label, 16% held);
-  on is the primary material, and the fill changes at once. Reads `--ow-fg`, `--ow-accent`,
-  `--ow-primary-shadow`, `--ow-on-accent`, `--ow-hover`, `--ow-edge` (high contrast), `--ow-focus`, `--ow-radius` (half of it), and `--ow-motion-scale`. One class of
+  on is the primary material (5% black deeper on hover), and the fill changes at once. Reads `--ow-fg`, `--ow-accent`,
+  `--ow-primary-shadow`, `--ow-on-accent`, `--ow-edge` (high contrast), `--ow-focus`, `--ow-radius` (half of it), and `--ow-motion-scale`. One class of
   yours beats any of its states; write `[data-checked]` on it to style one.
 
 ### Field
@@ -770,7 +771,7 @@ import { Switch } from "owsem-ui/base"; // or "@/components/owsem/switch"
 
 A two-state button: flat with muted text while off, a 14% tint of the accent with accent text while
 on (18% on hover, 22% held); with `variant="solid"`, while on it is the primary Button's fill:
-the accent with `--ow-on-accent` text. Registry item: `toggle`.
+the accent with `--ow-on-accent` text, 5% black deeper on hover. Registry item: `toggle`.
 
 ```tsx
 import { Toggle } from "owsem-ui/base"; // or "@/components/owsem/toggle"
@@ -788,7 +789,7 @@ import { Toggle } from "owsem-ui/base"; // or "@/components/owsem/toggle"
   `value`, `className`, `style`, and `render`. Without children it is a square icon button: give
   it an `aria-label`. The ref goes to the `button`.
 - Height comes from `--py` (set it in `style` on the toggle, never under a 24 px target).
-- Reads `--ow-muted` (text while off), `--ow-hover`, `--ow-fg` (text, and the tint while on),
+- Reads `--ow-muted` (text while off), `--ow-hover` (the off tint), `--ow-fg` (text, and the tint while on),
   `--ow-radius`, and `--ow-focus`.
 
 ### Toggle Group

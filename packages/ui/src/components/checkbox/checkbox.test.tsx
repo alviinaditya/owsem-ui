@@ -4,7 +4,7 @@ import { describe, expect, onTestFinished, test } from "vitest";
 import { commands, userEvent } from "vitest/browser";
 import { render } from "vitest-browser-react";
 import { axeReport } from "../../../test/a11y.ts";
-import { composite, contrast } from "../../../test/contrast.ts";
+import { checkSolidHover, composite, contrast, SOLID_HOVER_TINT } from "../../../test/contrast.ts";
 import { measureIdle, settle } from "../../../test/raf-counter.ts";
 import { Checkbox } from "./index";
 
@@ -29,7 +29,11 @@ const glyph = (box: Element, name: "check" | "minus") => {
 };
 
 /** Resolves a value (e.g. `var(--ow-accent)`) of `property` to its computed form in `scope`. */
-function resolve(property: "color" | "box-shadow", value: string, scope: Element = document.body) {
+function resolve(
+  property: "color" | "box-shadow" | "background-image",
+  value: string,
+  scope: Element = document.body,
+) {
   const probe = document.createElement("span");
   probe.style.setProperty(property, value);
   scope.append(probe);
@@ -455,6 +459,46 @@ describe("Checkbox", () => {
     expect(box.getAttribute("aria-checked")).toBe("true");
     expect(getComputedStyle(box).transitionDuration).toBe("0.573s");
     await expect.poll(() => getComputedStyle(box).transform).toBe("none");
+  });
+
+  test("hovered, a checked box darkens by 5% black and keeps its check at 4.5:1, in both themes", async () => {
+    onTestFinished(() => {
+      delete root.dataset.theme;
+    });
+    const screen = await render(
+      <label>
+        <Checkbox.Root defaultChecked /> <span>Run</span>
+      </label>,
+    );
+    const box = screen.getByRole("checkbox").element();
+    for (const theme of ["light", "dark"]) {
+      root.dataset.theme = theme;
+      await userEvent.hover(document.body);
+      const resting = composite(getComputedStyle(box).backgroundColor);
+      await userEvent.hover(box);
+      const style = getComputedStyle(box);
+      expect(style.backgroundImage, theme).toBe(
+        resolve("background-image", `linear-gradient(${SOLID_HOVER_TINT} 0 0)`),
+      );
+      const [fill, text] = [style.backgroundColor, style.color];
+      const hovered = composite(fill, resolve("color", SOLID_HOVER_TINT));
+      await commands.mouse("down");
+      await wait(150);
+      const held = composite(getComputedStyle(box).backgroundColor);
+      await commands.mouse("up");
+      const ratios = checkSolidHover("checkbox checked", theme, {
+        resting,
+        hovered,
+        held,
+        text: composite(text),
+        before: composite(fill, resolve("color", "var(--ow-hover)")),
+      });
+      console.info(
+        `solid hover checkbox ${theme}: ${ratios.map((r) => r.toFixed(2))} (now, before)`,
+      );
+      // Pointing at the label counts too; click toggled it, so turn it back on.
+      if (box.getAttribute("aria-checked") !== "true") await userEvent.click(box);
+    }
   });
 
   test("a checked box darkens while held, and its label presses it too", async () => {

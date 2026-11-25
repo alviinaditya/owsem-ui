@@ -71,14 +71,15 @@ const soft = [
   "active:data-pressed:not-data-disabled:text-(color:--_on-fg)",
 ];
 
-// Solid: the primary Button's fill, text, and edge while on. Hovered, the hover tint lies over the
+// Solid: the primary Button's fill, text, and edge while on. Hovered, 5% black lies over the
 // fill; held down, the fill takes 10% black. A toolbar's hover rule has two pseudo-classes: these
 // have more, so a Toggle keeps its colors there.
 const solid = [
   "data-pressed:bg-(--ow-accent) data-pressed:text-(color:--ow-on-accent)",
   "data-pressed:shadow-(shadow:--ow-primary-shadow)",
   "hover:data-pressed:not-data-disabled:not-active:bg-(--ow-accent)",
-  "hover:data-pressed:not-data-disabled:not-active:bg-[linear-gradient(var(--ow-hover)_0_0)]",
+  // literal: black darkens any fill
+  "hover:data-pressed:not-data-disabled:not-active:bg-[linear-gradient(color-mix(in_oklab,black_5%,transparent)_0_0)]",
   "hover:data-pressed:not-data-disabled:not-active:text-(color:--ow-on-accent)",
   // literal: black darkens any fill
   "active:data-pressed:not-data-disabled:bg-[color-mix(in_oklab,var(--ow-accent),black_10%)]",

@@ -141,6 +141,15 @@ describe("Button in Tailwind CSS v4 against button.css", () => {
     for (const variant of VARIANTS) await tw.states(cases, `${variant} md`, "hover");
   });
 
+  test("hover matches in the dark theme: solid fills darken, the others keep the tint", {
+    timeout: 60_000,
+  }, async () => {
+    for (const variant of VARIANTS) {
+      await tw.states(cases, `${variant} md`, "hover", { theme: "dark" });
+      await tw.states(cases, `${variant} md soft`, "hover", { theme: "dark" });
+    }
+  });
+
   test("a held press, with a real pointer, matches", { timeout: 60_000 }, async () => {
     for (const variant of VARIANTS) await tw.states(cases, `${variant} soft held`, "held");
     for (const variant of VARIANTS) await tw.states(cases, `${variant} md`, "held");

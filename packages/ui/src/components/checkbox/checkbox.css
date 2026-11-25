@@ -14,7 +14,6 @@
     --_accent: var(--ow-accent);
     --_accent-shadow: var(--ow-primary-shadow);
     --_on-accent: var(--ow-on-accent);
-    --_hover: var(--ow-hover);
     --_focus: var(--ow-focus);
     /* Half the surface radius, a rounded square (FR-10b). */
     --_radius: calc(var(--ow-radius) / 2);
@@ -83,7 +82,8 @@
     .ow-checkbox:where(:hover, label:hover *):where([data-checked], [data-indeterminate]):where(
         :not([data-disabled], [data-readonly])
       ) {
-      background-image: linear-gradient(var(--_hover) 0 0);
+      /* literal: black darkens any fill */
+      background-image: linear-gradient(color-mix(in oklab, black 5%, transparent) 0 0);
     }
   }
 

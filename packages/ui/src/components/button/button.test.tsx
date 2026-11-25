@@ -3,7 +3,7 @@ import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { commands, userEvent } from "vitest/browser";
 import { render } from "vitest-browser-react";
 import { axeReport } from "../../../test/a11y.ts";
-import { composite, contrast } from "../../../test/contrast.ts";
+import { checkSolidHover, composite, contrast, SOLID_HOVER_TINT } from "../../../test/contrast.ts";
 import { measureIdle, settle } from "../../../test/raf-counter.ts";
 import { cn } from "../../core/cn";
 import { Button, buttonVariants, IconButton } from "./index";
@@ -323,19 +323,83 @@ describe("Button", () => {
   test("hover tints the face with --ow-hover, and leaves its edges alone", async () => {
     const screen = await render(
       <>
-        <Button variant="primary">Primary</Button>
+        <Button variant="secondary">Secondary</Button>
+        <Button variant="outline">Outline</Button>
         <p>Away</p>
       </>,
     );
-    const button = screen.container.querySelector<HTMLElement>(".ow-button");
-    if (!button) throw new Error("no button");
+    const [secondary, outline] = [...screen.container.querySelectorAll<HTMLElement>(".ow-button")];
+    if (!secondary || !outline) throw new Error("no buttons");
     // The pointer may still rest where an earlier test clicked.
     await userEvent.hover(screen.getByText("Away"));
-    expect(face(button).backgroundImage).toContain("rgba(0, 0, 0, 0)");
-    await userEvent.hover(button);
-    expect(face(button).backgroundImage).toContain(resolveColor("var(--ow-hover)"));
-    expect(face(button).boxShadow).toBe(resolveShadow("var(--ow-primary-shadow)"));
-    await userEvent.unhover(button);
+    expect(face(secondary).backgroundImage).toContain("rgba(0, 0, 0, 0)");
+    await userEvent.hover(secondary);
+    expect(face(secondary).backgroundImage).toContain(resolveColor("var(--ow-hover)"));
+    await userEvent.hover(outline);
+    expect(face(outline).backgroundImage).toContain(resolveColor("var(--ow-hover)"));
+    expect(face(outline).boxShadow).not.toBe("none");
+    await userEvent.unhover(outline);
+  });
+
+  test("hovered, a solid fill takes 5% black in both themes; soft, ghost, and link keep --ow-hover", async () => {
+    onTestFinished(() => {
+      delete root.dataset.theme;
+    });
+    const screen = await render(
+      <>
+        <Button variant="primary">Primary</Button>
+        <Button variant="destructive">Destructive</Button>
+        <Button variant="primary" soft>
+          Soft primary
+        </Button>
+        <Button variant="destructive" soft>
+          Soft destructive
+        </Button>
+        <Button variant="ghost">Ghost</Button>
+        <Button variant="link">Link</Button>
+        <p>Away</p>
+      </>,
+    );
+    const [primary, destructive, softPrimary, softDestructive, ghost] = [
+      ...screen.container.querySelectorAll<HTMLElement>(".ow-button"),
+    ];
+    if (!primary || !destructive || !softPrimary || !softDestructive || !ghost) {
+      throw new Error("no buttons");
+    }
+    const away = screen.getByText("Away");
+    for (const theme of ["light", "dark"]) {
+      root.dataset.theme = theme;
+      const tint = resolveColor(SOLID_HOVER_TINT);
+      const quiet = resolveColor("var(--ow-hover)");
+      for (const button of [primary, destructive]) {
+        await userEvent.hover(away);
+        const resting = composite(face(button).backgroundColor);
+        await userEvent.hover(button);
+        const fill = face(button).backgroundColor;
+        expect(face(button).backgroundImage, `${theme} ${button.textContent}`).toContain(tint);
+        const box = button.getBoundingClientRect();
+        pointer("pointerdown", button, box.left + 10, box.top + 10);
+        const held = composite(face(button).backgroundColor);
+        pointer("pointerup", button, box.left + 10, box.top + 10);
+        await userEvent.hover(button);
+        const ratios = checkSolidHover(button.textContent ?? "", theme, {
+          resting,
+          hovered: composite(fill, tint),
+          held,
+          text: composite(getComputedStyle(button).color),
+          before: composite(fill, quiet),
+        });
+        console.info(
+          `solid hover ${button.textContent} ${theme}: ${ratios.map((r) => r.toFixed(2))} (now, before)`,
+        );
+      }
+      for (const button of [softPrimary, softDestructive, ghost]) {
+        await userEvent.hover(button);
+        expect(face(button).backgroundImage, `${theme} ${button.textContent}`).toContain(quiet);
+        expect(face(button).backgroundImage).not.toContain(tint);
+      }
+    }
+    await userEvent.unhover(away);
   });
 
   test("a press scales the button into the pressed material (DP-4)", async () => {

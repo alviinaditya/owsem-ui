@@ -172,6 +172,15 @@ describe("Checkbox in Tailwind CSS v4 against checkbox.css", () => {
     }
   });
 
+  test("hover matches in the dark theme: a checked box darkens, an off one steps up", {
+    timeout: 60_000,
+  }, async () => {
+    for (const name of ["md", "md checked", "md indeterminate"]) {
+      await tw.states(cases, name, "hover", { ...box, theme: "dark" });
+    }
+    await tw.states(cases, "in a label, checked", "hover", { ...text, theme: "dark" });
+  });
+
   test("pointing at the label counts as pointing at the box", { timeout: 60_000 }, async () => {
     for (const name of ["in a label", "in a label, checked", "in a label, disabled"]) {
       await tw.states(cases, name, "hover", text);

@@ -140,6 +140,14 @@ describe("Toggle in Tailwind CSS v4 against toggle.css", () => {
     }
   });
 
+  test("hover matches in the dark theme: a solid one darkens, the others keep the tint", {
+    timeout: 60_000,
+  }, async () => {
+    for (const name of ["md", "md pressed", "md solid", "md solid pressed"]) {
+      await tw.states(cases, name, "hover", { theme: "dark" });
+    }
+  });
+
   test("a held press, with a real pointer, goes deepest and in to 0.97", {
     timeout: 60_000,
   }, async () => {

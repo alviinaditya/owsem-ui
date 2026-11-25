@@ -4,7 +4,7 @@ import { describe, expect, onTestFinished, test } from "vitest";
 import { commands, userEvent } from "vitest/browser";
 import { render } from "vitest-browser-react";
 import { axeReport } from "../../../test/a11y.ts";
-import { composite, contrast } from "../../../test/contrast.ts";
+import { checkSolidHover, composite, contrast, SOLID_HOVER_TINT } from "../../../test/contrast.ts";
 import { measureIdle, settle } from "../../../test/raf-counter.ts";
 import { ToggleGroup } from "./index";
 
@@ -482,7 +482,7 @@ describe("Toggle Group", () => {
 
 describe("Toggle Group, solid", () => {
   const SHADOW = "var(--ow-primary-shadow)";
-  const HOVER = "linear-gradient(var(--ow-hover) 0 0)";
+  const HOVER = `linear-gradient(${SOLID_HOVER_TINT} 0 0)`;
 
   test("marks its variant, with soft as the default, as a class and as data-variant", async () => {
     const solid = await mount(<Views variant="solid" size="lg" className="mine" />);
@@ -548,7 +548,7 @@ describe("Toggle Group, solid", () => {
     );
   });
 
-  test("with multiple selection, each pressed item is an accent key; a hovered one steps by the hover tint", async () => {
+  test("with multiple selection, each pressed item is an accent key; a hovered one is 5% black deeper", async () => {
     const hover = (group: Element, el: Element) => {
       const r = el.getBoundingClientRect();
       group.dispatchEvent(
@@ -579,6 +579,47 @@ describe("Toggle Group, solid", () => {
     expect(lit.backgroundColor).toBe(accent);
     expect(lit.backgroundImage).toBe(resolveProp("background-image", HOVER));
     expect(getComputedStyle(item("Day")).backgroundImage).toBe("none");
+  });
+
+  test("a hovered solid key keeps 4.5:1 for its label on the darkened fill, in both themes", async () => {
+    onTestFinished(() => {
+      delete root.dataset.theme;
+    });
+    const hover = (group: Element, el: Element) => {
+      const r = el.getBoundingClientRect();
+      group.dispatchEvent(
+        new PointerEvent("pointermove", {
+          bubbles: true,
+          clientX: r.left + r.width / 2,
+          clientY: r.top + r.height / 2,
+          pointerType: "mouse",
+        }),
+      );
+    };
+    const { group, item } = await mount(
+      <Views variant="solid" multiple defaultValue={["day", "month"]} />,
+    );
+    for (const theme of ["light", "dark"]) {
+      root.dataset.theme = theme;
+      hover(group, item("Week"));
+      const style = getComputedStyle(item("Day"));
+      const resting = composite(style.backgroundColor);
+      expect(style.backgroundImage, theme).toBe("none");
+      hover(group, item("Day"));
+      expect(item("Day").hasAttribute("data-glide-active")).toBe(true);
+      const lit = getComputedStyle(item("Day"));
+      expect(lit.backgroundImage, theme).toBe(resolveProp("background-image", HOVER));
+      const tint = resolveColor(SOLID_HOVER_TINT);
+      // A held key keeps its fill and presses in, so the fill to differ from is the resting one.
+      const ratios = checkSolidHover("toggle group solid", theme, {
+        resting,
+        hovered: composite(lit.backgroundColor, tint),
+        held: resting,
+        text: composite(lit.color),
+        before: composite(lit.backgroundColor, resolveColor("var(--ow-hover)")),
+      });
+      console.info(`solid hover group ${theme}: ${ratios.map((r) => r.toFixed(2))} (now, before)`);
+    }
   });
 
   test("a disabled pressed key keeps its fill and dims its text toward it", async () => {

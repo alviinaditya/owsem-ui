@@ -3,16 +3,16 @@ import { describe, expect, onTestFinished, test } from "vitest";
 import { commands, userEvent } from "vitest/browser";
 import { render } from "vitest-browser-react";
 import { axeReport } from "../../../test/a11y.ts";
-import { composite, contrast } from "../../../test/contrast.ts";
+import { checkSolidHover, composite, contrast, SOLID_HOVER_TINT } from "../../../test/contrast.ts";
 import { measureIdle, settle } from "../../../test/raf-counter.ts";
 import { Toggle } from "./index";
 
 const root = document.documentElement;
 
-// Solid, as the primary Button: the accent fill, its text and edge, the hover tint over the fill,
-// and 10% black while held.
+// Solid, as the primary Button: the accent fill, its text and edge, 5% black over the fill when
+// hovered, and 10% black while held.
 const SOLID_HELD = "color-mix(in oklab, var(--ow-accent), black 10%)";
-const SOLID_HOVER = "linear-gradient(var(--ow-hover) 0 0)";
+const SOLID_HOVER = `linear-gradient(${SOLID_HOVER_TINT} 0 0)`;
 
 // An on toggle's fill: a tint of the text color, so it reads on any surface; held, a deeper one.
 const ON = "color-mix(in oklab, var(--ow-accent) 14%, transparent)";
@@ -387,7 +387,7 @@ describe("Toggle, solid", () => {
     }
   });
 
-  test("hovered, it lays the hover tint over the fill when on and is soft's when off", async () => {
+  test("hovered, it lays 5% black over the fill when on and is soft's when off", async () => {
     const [off, on] = await mount(
       <>
         <Toggle variant="solid">Off</Toggle>
@@ -406,6 +406,52 @@ describe("Toggle, solid", () => {
     expect(style.backgroundImage).toBe(resolve("background-image", SOLID_HOVER));
     expect(style.color).toBe(resolve("color", "var(--ow-on-accent)"));
     expect(style.boxShadow).toBe(resolve("box-shadow", "var(--ow-primary-shadow)"));
+  });
+
+  test("hovered, a solid toggle's label keeps 4.5:1 on the darkened fill in both themes", async () => {
+    onTestFinished(() => {
+      delete root.dataset.theme;
+    });
+    const [off, on] = await mount(
+      <>
+        <Toggle variant="solid">Off</Toggle>
+        <Toggle variant="solid" defaultPressed>
+          On
+        </Toggle>
+      </>,
+    );
+    if (!off || !on) throw new Error("no toggles");
+    for (const theme of ["light", "dark"]) {
+      root.dataset.theme = theme;
+      await pointerAway();
+      const resting = composite(getComputedStyle(on).backgroundColor);
+      await userEvent.hover(on);
+      const style = getComputedStyle(on);
+      expect(style.backgroundImage, theme).toBe(resolve("background-image", SOLID_HOVER));
+      const [fill, text] = [style.backgroundColor, style.color];
+      const hovered = composite(fill, resolve("color", SOLID_HOVER_TINT));
+      on.focus();
+      await userEvent.keyboard("{Space>}");
+      await wait(150);
+      const held = composite(getComputedStyle(on).backgroundColor);
+      await userEvent.keyboard("{/Space}");
+      // The key press turned it off; turn it back on.
+      await userEvent.click(on);
+      await pointerAway();
+      const ratios = checkSolidHover("toggle solid", theme, {
+        resting,
+        hovered,
+        held,
+        text: composite(text),
+        before: composite(fill, resolve("color", "var(--ow-hover)")),
+      });
+      console.info(`solid hover toggle ${theme}: ${ratios.map((r) => r.toFixed(2))} (now, before)`);
+      // Off, the solid toggle keeps the soft tint.
+      await userEvent.hover(off);
+      expect(getComputedStyle(off).backgroundColor, theme).toBe(
+        resolve("color", "var(--ow-hover)"),
+      );
+    }
   });
 
   test("held while on, it goes in to 0.97 on the fill with 10% black, and keeps its edge", async () => {

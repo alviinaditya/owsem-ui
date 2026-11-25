@@ -217,9 +217,10 @@
     --_key: color-mix(in oklab, var(--_thumb), var(--_fg) 3%);
   }
 
-  /* A solid key takes the primary Button's hover: the hover tint over its fill. */
+  /* A solid key takes the primary Button's hover: 5% black over its fill. */
   .ow-toggle-group--solid[data-multiple] > .ow-toggle-group__item[data-pressed][data-glide-active] {
-    background-image: linear-gradient(var(--ow-hover) 0 0);
+    /* literal: black darkens any fill */
+    background-image: linear-gradient(color-mix(in oklab, black 5%, transparent) 0 0);
   }
 
   .ow-toggle-group--solid[data-thumb]:not([data-multiple]) > .ow-toggle-group__item[data-pressed] {

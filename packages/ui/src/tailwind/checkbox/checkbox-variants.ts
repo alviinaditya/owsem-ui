@@ -42,7 +42,8 @@ const root = [
   "ow-checkbox-on:[--_held:color-mix(in_oklab,var(--ow-accent),black_10%)]",
   // A label and its box are one control, so pointing at the text counts.
   "ow-label-hover:not-data-disabled:not-data-readonly:not-ow-checkbox-on:bg-[color-mix(in_oklab,var(--ow-fg)_13%,transparent)]",
-  "ow-label-hover:ow-checkbox-on:not-data-disabled:not-data-readonly:bg-[linear-gradient(var(--ow-hover)_0_0)]",
+  // literal: black darkens any fill
+  "ow-label-hover:ow-checkbox-on:not-data-disabled:not-data-readonly:bg-[linear-gradient(color-mix(in_oklab,black_5%,transparent)_0_0)]",
   // In to 0.97 within 90 ms, on a deeper fill.
   "ow-checkbox-held:bg-(color:--_held) ow-checkbox-held:bg-none",
   "ow-checkbox-held:transform-[scale(var(--_press))] ow-checkbox-held:duration-90",

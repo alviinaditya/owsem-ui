@@ -238,24 +238,27 @@ describe("Tabs geometry", () => {
     expect(stretch()).toBe(key);
     holding = false;
     // Its whole way, step by step: travelling left, it never steps back to the right, never passes
-    // its tab, and ends on it.
+    // its tab, and ends on it. Measured against the tab, so a list that scrolls takes both along.
     const all = slides();
     const end = Number(held?.effect?.getComputedTiming().endTime);
     expect(end).toBeGreaterThan(300);
-    const path: number[] = [];
+    const way: { off: number; tab: number; scroll: number }[] = [];
+    const read = () => {
+      way.push({ off: center(thumb) - center(first), tab: center(first), scroll: list.scrollLeft });
+    };
     for (let time = 0; time <= end; time += 10) {
       for (const running of all) running.currentTime = time;
-      path.push(center(thumb));
+      read();
     }
     for (const running of [...all, key]) running?.finish();
-    path.push(center(thumb));
-    const rest = center(first);
-    const report = JSON.stringify({ rest, path });
-    expect(path[0], report).toBeGreaterThan(rest + 50);
-    const back = path.filter((at, k) => k > 0 && at > (path[k - 1] as number) + 0.5);
+    read();
+    const path = way.map((at) => at.off);
+    const report = JSON.stringify(way);
+    expect(path[0], report).toBeGreaterThan(50);
+    const back = path.filter((off, k) => k > 0 && off > (path[k - 1] as number) + 0.5);
     expect(back, report).toEqual([]);
-    expect(Math.min(...path), report).toBeGreaterThanOrEqual(rest - 0.5);
-    close(path.at(-1) as number, rest);
+    expect(Math.min(...path), report).toBeGreaterThanOrEqual(-0.5);
+    close(path.at(-1) as number, 0);
     // Once the press lets go: the thumb reaches out by the well's padding, 4px, around its key.
     await expect.poll(() => Math.abs(rect(thumb).left + 4 - rect(first).left)).toBeLessThan(TOL);
     expect(slides()).toEqual([]);

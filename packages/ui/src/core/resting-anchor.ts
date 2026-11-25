@@ -32,15 +32,44 @@ export function restingRect(el: Element): DOMRect {
   if (m.isIdentity || m.b || m.c || m.a <= 0 || m.d <= 0) return rect;
   const [ox = 0, oy = 0] = style.transformOrigin.split(" ").map(Number.parseFloat);
   const box = el as HTMLElement;
+  const width = rect.width / m.a;
+  const height = rect.height / m.d;
   // Scaled ancestors scale the transform's offsets too.
-  const kx = box.offsetWidth ? rect.width / (m.a * box.offsetWidth) : 1;
-  const ky = box.offsetHeight ? rect.height / (m.d * box.offsetHeight) : 1;
+  const kx = ancestorScale(width, box.offsetWidth);
+  const ky = ancestorScale(height, box.offsetHeight);
   return new DOMRect(
     rect.left - kx * (ox * (1 - m.a) + m.e),
     rect.top - ky * (oy * (1 - m.d) + m.f),
-    rect.width / m.a,
-    rect.height / m.d,
+    width,
+    height,
   );
+}
+
+/** Offset sizes are whole px: anything under 1px apart is rounding, not a scale. */
+const ancestorScale = (size: number, offset: number) =>
+  offset && Math.abs(size - offset) >= 1 ? size / offset : 1;
+
+// Less than this many px apart, two measures are of the same box.
+const SAME = 0.05;
+const boxes = new WeakMap<Element, DOMRect>();
+
+/**
+ * The resting box, the same one for as long as it has not moved. What is left of a transform taken
+ * off differs a little from frame to frame, and Base UI rounds a popup to device pixels: with the
+ * trigger on half a pixel, that moved the popup back and forth while the press was settling.
+ */
+export function steadyRect(el: Element): DOMRect {
+  const box = restingRect(el);
+  const last = boxes.get(el);
+  const same =
+    last &&
+    Math.abs(last.left - box.left) < SAME &&
+    Math.abs(last.top - box.top) < SAME &&
+    Math.abs(last.width - box.width) < SAME &&
+    Math.abs(last.height - box.height) < SAME;
+  if (same) return last;
+  boxes.set(el, box);
+  return box;
 }
 
 /** The open trigger whose aria-controls names the positioner or something inside it. */
@@ -72,7 +101,7 @@ export function useRestingAnchor<T extends Element>(
   const anchor = useCallback((): RestingAnchor | null => {
     const trigger = own.current && findTrigger(own.current);
     if (!trigger) return null;
-    return { getBoundingClientRect: () => restingRect(trigger), contextElement: trigger };
+    return { getBoundingClientRect: () => steadyRect(trigger), contextElement: trigger };
   }, []);
   return { ref, anchor };
 }

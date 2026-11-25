@@ -1,5 +1,5 @@
 import { describe, expect, onTestFinished, test } from "vitest";
-import { restingRect } from "./resting-anchor";
+import { restingRect, steadyRect } from "./resting-anchor";
 
 /** A box at a fractional spot, as at 110% zoom, inside `parent` when given. */
 function box(style: string, parent: HTMLElement = document.body): HTMLElement {
@@ -56,5 +56,48 @@ describe("restingRect", () => {
       const el = box(style);
       expectSame(restingRect(el), el.getBoundingClientRect());
     }
+  });
+
+  test("a box of a fractional width gives the same box at every step of a press", () => {
+    const el = box("inline-size:88.425px");
+    const rest = atRest(el);
+    for (const scale of [0.97, 0.9755, 0.981, 0.9901, 0.9973, 0.9999]) {
+      el.style.transform = `scale(${scale})`;
+      const rect = restingRect(el);
+      for (const side of ["left", "top", "width", "height"] as const) {
+        expect(Math.abs(rect[side] - rest[side]), `${side} at ${scale}`).toBeLessThan(0.001);
+      }
+    }
+  });
+});
+
+describe("steadyRect", () => {
+  test("gives one box, to the last digit, while a press settles", () => {
+    const el = box("inline-size:88.425px");
+    const first = steadyRect(el);
+    for (const scale of [0.97, 0.9755, 0.981, 0.9901, 0.9973, 0.9999]) {
+      el.style.transform = `scale(${scale})`;
+      expect(steadyRect(el)).toBe(first);
+    }
+  });
+
+  test("follows its element when it moves or grows", () => {
+    const el = box("left:40px");
+    const first = steadyRect(el);
+    el.style.left = "40.75px";
+    const moved = steadyRect(el);
+    expect(moved.left).toBeCloseTo(first.left + 0.75, 3);
+    el.style.inlineSize = "121px";
+    expect(steadyRect(el).width).toBeCloseTo(121, 2);
+  });
+
+  test("many steps too small to see still add up to a move", () => {
+    const el = box("left:40px");
+    const first = steadyRect(el);
+    for (let i = 1; i <= 10; i++) {
+      el.style.left = `${40 + i * 0.03125}px`;
+      steadyRect(el);
+    }
+    expect(steadyRect(el).left - first.left).toBeGreaterThan(0.25);
   });
 });

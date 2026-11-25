@@ -24,7 +24,7 @@ import {
 } from "react";
 import { cn } from "../lib/cn";
 import { useMergedRefs } from "../lib/merge-refs";
-import { restingRect } from "../lib/resting-anchor";
+import { steadyRect } from "../lib/resting-anchor";
 import {
   type ColorFormat,
   type ColorResult,
@@ -795,7 +795,7 @@ export function ColorPickerPopover({
   const anchor = useMemo(
     () =>
       trigger
-        ? { getBoundingClientRect: () => restingRect(trigger), contextElement: trigger }
+        ? { getBoundingClientRect: () => steadyRect(trigger), contextElement: trigger }
         : null,
     [trigger],
   );

@@ -154,16 +154,16 @@ test("a touch swipe follows the finger and shuts it; on Content it scrolls first
 test("the four sides: each opens at its own edge", async ({ page }) => {
   await visit(page, "/en/drawer");
   await pick(page, "Four sides");
-  const win = await windowBox(page).boundingBox();
-  if (!win) throw new Error("no window");
   for (const side of ["up", "right", "down", "left"] as const) {
     await demo(page).locator(`[data-demo="open-${side}"]`).click();
     const popup = sheet(page);
     await expect(popup).toBeVisible();
     await expect(popup).toHaveAttribute("data-swipe-direction", side);
     await arrived(popup);
+    // Both boxes at the same moment: a click can scroll the page, and the window can move.
+    const win = await windowBox(page).boundingBox();
     const box = await popup.boundingBox();
-    if (!box) throw new Error("no sheet");
+    if (!win || !box) throw new Error("no window or sheet");
     if (side === "up") expect(Math.abs(box.y - win.y)).toBeLessThan(1);
     if (side === "down")
       expect(Math.abs(box.y + box.height - (win.y + win.height))).toBeLessThan(1);

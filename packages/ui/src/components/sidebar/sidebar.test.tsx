@@ -431,6 +431,25 @@ describe("Sidebar as a drawer (mobile)", () => {
     await expect.poll(() => q(".ow-sidebar")).toBeNull();
   });
 
+  test("container puts the drawer in an element of yours, not the body", async () => {
+    function Framed() {
+      const [frame, setFrame] = useState<HTMLElement | null>(null);
+      return (
+        <div ref={setFrame} data-testid="frame">
+          <Sidebar.Provider mobileQuery="all" mobileOpen>
+            <Sidebar.Root aria-label="Docs" container={frame}>
+              <Sidebar.Content>Rows</Sidebar.Content>
+            </Sidebar.Root>
+          </Sidebar.Provider>
+        </div>
+      );
+    }
+    const screen = await render(<Framed />);
+    await expect.poll(() => q('[data-testid="frame"] .ow-sidebar')).not.toBeNull();
+    expect(q('[data-testid="frame"] .ow-sidebar__backdrop')).not.toBeNull();
+    await screen.unmount();
+  });
+
   test("a controlled mobileOpen drives the drawer", async () => {
     const screen = await render(<Shell mobileQuery="all" mobileOpen />);
     expect(q(".ow-sidebar")?.getAttribute("role")).toBe("dialog");

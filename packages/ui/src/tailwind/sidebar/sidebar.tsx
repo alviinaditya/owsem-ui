@@ -184,6 +184,8 @@ export function SidebarProvider({
 
 export interface SidebarRootProps extends Omit<useRender.ComponentProps<"nav">, "className"> {
   className?: string | undefined;
+  /** Where the drawer is rendered on mobile. Default: `document.body`. */
+  container?: BaseDialog.Portal.Props["container"];
 }
 
 /**
@@ -195,6 +197,7 @@ export interface SidebarRootProps extends Omit<useRender.ComponentProps<"nav">, 
  */
 export function SidebarRoot({
   className,
+  container,
   render,
   children,
   "aria-label": label = "Sidebar",
@@ -209,6 +212,7 @@ export function SidebarRoot({
         onOpenChange={sidebar.setMobileOpen}
         id={sidebar.rootId}
         className={className}
+        container={container}
         render={render}
         label={label}
         forwardedRef={ref}
@@ -274,6 +278,7 @@ function MobileDrawer({
   onOpenChange,
   id,
   className,
+  container,
   render,
   label,
   forwardedRef,
@@ -284,6 +289,7 @@ function MobileDrawer({
   onOpenChange: (open: boolean) => void;
   id: string;
   className: string | undefined;
+  container: SidebarRootProps["container"];
   render: SidebarRootProps["render"];
   label: string;
   forwardedRef: Ref<HTMLElement> | undefined;
@@ -298,7 +304,7 @@ function MobileDrawer({
   const merged = useMergedRefs(popup, useMergedRefs(setSelf, forwardedRef));
   return (
     <BaseDialog.Root open={open} onOpenChange={(next) => onOpenChange(next)}>
-      <BaseDialog.Portal>
+      <BaseDialog.Portal container={container}>
         <BaseDialog.Backdrop
           data-slot="sidebar-backdrop"
           className={sidebarSlots.backdrop}

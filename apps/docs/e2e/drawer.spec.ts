@@ -22,11 +22,17 @@ const open = (page: Page) => demo(page).locator('[data-demo="open"]');
 const sheet = (page: Page, name = "Share the draft") => demo(page).getByRole("dialog", { name });
 const windowBox = (page: Page) => demo(page).locator(".demo-dialog");
 
-/** A pause-free wait for the sheet to arrive: the opening style gone, the transition ended. */
+/**
+ * The sheet at rest: the opening style gone, then every finite animation and transition ended.
+ * Reading a style first starts a transition still pending, so it is there to finish.
+ */
 async function arrived(popup: Locator) {
   await expect(popup).not.toHaveAttribute("data-starting-style", "");
-  await popup.evaluate(async (el) => {
-    await Promise.all(el.getAnimations().map((a) => a.finished.catch(() => undefined)));
+  await popup.evaluate((el) => {
+    getComputedStyle(el).transform;
+    for (const a of document.getAnimations()) {
+      if (a.effect?.getTiming().iterations !== Number.POSITIVE_INFINITY) a.finish();
+    }
   });
 }
 

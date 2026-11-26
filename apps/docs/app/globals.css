@@ -2787,6 +2787,11 @@ body {
   block-size: 250px;
 }
 
+/* Inspect measures the specimen as it mounts: its toasts are at rest at once, none slides in. */
+.demo-toast-specimen :is(.ow-toast, .ow-toast__content) {
+  transition: none;
+}
+
 .demo-toast-triggers {
   display: flex;
   flex-wrap: wrap;

@@ -234,13 +234,37 @@ describe("Toggle Group", () => {
     expect(frames.every((f) => f.transformOrigin === "100% 50%")).toBe(true);
     expect(frames.map((f) => f.transform)).toEqual([
       "scale(1, 1)",
-      expect.stringMatching(/^scale\(1\.[1-3]\d*, 1\)$/),
+      expect.stringMatching(/^scale\(1\.[0-2]\d*, 1\)$/),
       // Back to its size, and it stays: no squash below 1, no rebound.
       "scale(1, 1)",
       "scale(1, 1)",
     ]);
     await expect.poll(() => stretches().length).toBe(0);
     expect(keyOf(thumb).transform).toBe("none");
+  });
+
+  test("the key's tail never stands still or goes back while it slides (no stutter)", async () => {
+    const { thumb, item } = await mount(<Views />);
+    item("Month").click();
+    await expect.poll(() => thumb.getAnimations({ subtree: true }).length).toBeGreaterThan(1);
+    const all = thumb.getAnimations({ subtree: true });
+    for (const animation of all) animation.pause();
+    const border = Number.parseFloat(getComputedStyle(thumb).borderTopWidth);
+    // Sliding toward the end, the key's start edge is its tail: the end edge less the stretched width.
+    const tail = (ms: number) => {
+      for (const animation of all) animation.currentTime = ms;
+      const box = thumb.getBoundingClientRect();
+      const scale = new DOMMatrixReadOnly(keyOf(thumb).transform).a;
+      return box.right - border - (box.width - 2 * border) * scale;
+    };
+    let last = tail(0);
+    // 10 ms steps: a stall shows as a step of nothing, a reversal as a step back.
+    for (let ms = 10; ms <= 300; ms += 10) {
+      const now = tail(ms);
+      expect(now - last).toBeGreaterThan(0.05);
+      last = now;
+    }
+    for (const animation of all) animation.finish();
   });
 
   test("with reduced motion, the key does not stretch (FR-20)", async () => {

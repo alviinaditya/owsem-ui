@@ -10,7 +10,10 @@
  *   that, a new pressed item slides it there (FLIP); a resize snaps it.
  * - It is gooey: when it travels, its key (the ::before) stretches along the axis from its leading
  *   edge, which arrives with the box and never passes it, while the tail lags and catches up, then
- *   settles back to its size with no squash and no rebound. Only transform animates, and a new move picks up from the current stretch.
+ *   settles back to its size with no squash and no rebound. Only transform animates, and a new
+ *   move picks up from the current stretch. The stretch eases in and out and stays small: a
+ *   stretch that grows as fast as the box moves holds the tail still for a few frames, which
+ *   reads as a stutter.
  * - While the pointer holds an item, the item presses in, and the thumb with it when the item is
  *   the one it sits under. Keys press without it: a keyboard change needs no motion to be felt.
  */
@@ -30,10 +33,12 @@ const DISABLED = ':disabled, [aria-disabled="true"], [data-disabled]';
 // A quick tap still shows the whole press.
 const PRESS_MS = 90;
 
-// The stretch: 1.15 up to 1.35 by distance (in sizes of the thumb), then back to 1.
-const STRETCH_MIN = 0.15;
-const STRETCH_MAX = 0.35;
+// The stretch: 1.08 up to 1.2 by distance (in sizes of the thumb), then back to 1.
+const STRETCH_MIN = 0.08;
+const STRETCH_MAX = 0.2;
 const STRETCH_MS = 520;
+// Eases in and out, so the tail's speed never jumps.
+const STRETCH_EASE = "cubic-bezier(0.37, 0, 0.63, 1)";
 
 const px = (n: number) => `${n}px`;
 const same = (a: Box, b: Box) =>
@@ -134,11 +139,10 @@ export function createThumb(
     blobOrigin = origin;
     blob = thumb.animate(
       [
-        // Slow to start, so the tail stays within the track the key leaves.
-        { transform: along(start), offset: 0, easing: "cubic-bezier(0.7, 0, 0.84, 0)" },
-        { transform: along(1 + amount), offset: 0.3, easing: "cubic-bezier(0.25, 0, 0.35, 1)" },
-        // Back to its size well before the slide lands, and it stays there: no squash, no rebound.
-        { transform: along(1), offset: 0.6, easing: "ease-out" },
+        { transform: along(start), offset: 0, easing: STRETCH_EASE },
+        { transform: along(1 + amount), offset: 0.28, easing: STRETCH_EASE },
+        // Back to its size before the slide lands, and it stays there: no squash, no rebound.
+        { transform: along(1), offset: 0.8 },
         { transform: along(1), offset: 1 },
       ].map((frame) => ({ ...frame, transformOrigin: origin })),
       { duration: STRETCH_MS, pseudoElement: "::before" },

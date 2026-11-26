@@ -275,7 +275,7 @@ describe("Tabs geometry", () => {
       passed = Math.max(passed, first.getBoundingClientRect().left - left);
       outside = Math.max(outside, list.getBoundingClientRect().left - left);
     }
-    expect(widest).toBeGreaterThan(1.15);
+    expect(widest).toBeGreaterThan(1.1);
     expect(passed).toBeLessThanOrEqual(0.5);
     expect(outside).toBeLessThanOrEqual(0.5);
   });

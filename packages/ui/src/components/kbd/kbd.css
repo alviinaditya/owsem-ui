@@ -30,4 +30,19 @@
     line-height: 1.25;
     white-space: nowrap;
   }
+
+  /*
+   * A line box is centered on its font's ascent and descent, which puts capitals above the middle
+   * of the key (about 0.9px at 12px in Geist). Trimmed to the capitals, the label is centered on
+   * them. A flex container has no line to trim, so a key of text alone is a block here; the
+   * padding keeps its height at 1.5em. A key with an icon stays flex.
+   */
+  @supports (text-box: trim-both cap alphabetic) {
+    .ow-kbd:not(:has(> *)) {
+      display: inline-block;
+      padding-block: calc((1.5em - 1cap) / 2);
+      text-align: center;
+      text-box: trim-both cap alphabetic;
+    }
+  }
 }

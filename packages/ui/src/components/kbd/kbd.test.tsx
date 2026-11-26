@@ -97,6 +97,45 @@ describe("Kbd", () => {
     expect(small.width).toBeGreaterThanOrEqual(1.75 * 9 - 0.01);
   });
 
+  test("a capital label sits in the middle of the key, as far from the top as from the bottom", async () => {
+    // Trimming needs the browser to know text-box; where it does not, the line box centers it.
+    if (!CSS.supports("text-box", "trim-both cap alphabetic")) return;
+    const [key] = await mount(
+      <p style={{ fontSize: 16 }}>
+        <Kbd>K</Kbd>
+      </p>,
+    );
+    if (!key?.firstChild) throw new Error("no key");
+    const style = getComputedStyle(key);
+    const canvas = document.createElement("canvas").getContext("2d");
+    if (!canvas) throw new Error("no canvas");
+    canvas.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+    const glyph = canvas.measureText("K");
+    const range = document.createRange();
+    range.selectNodeContents(key.firstChild);
+    const text = range.getBoundingClientRect();
+    const box = key.getBoundingClientRect();
+    const baseline = text.top + glyph.fontBoundingBoxAscent;
+    const above = baseline - glyph.actualBoundingBoxAscent - box.top;
+    const below = box.bottom - baseline - glyph.actualBoundingBoxDescent;
+    expect(Math.abs(above - below)).toBeLessThanOrEqual(0.5);
+    // Trimmed, the padding alone gives the 1.5em height.
+    expect(box.height).toBeCloseTo(1.5 * Number.parseFloat(style.fontSize), 1);
+  });
+
+  test("a key with an icon stays flex: the icon and the text keep their gap", async () => {
+    const [key] = await mount(
+      <Kbd>
+        <svg aria-hidden="true" width="10" height="10" viewBox="0 0 10 10" />
+        Shift
+      </Kbd>,
+    );
+    if (!key) throw new Error("no key");
+    const style = getComputedStyle(key);
+    expect(style.display).toBe("inline-flex");
+    expect(style.columnGap).toBe(`${0.25 * Number.parseFloat(style.fontSize)}px`);
+  });
+
   test("a theme token set on it changes it alone (TK-9)", async () => {
     const [key] = await mount(
       <Kbd style={{ "--ow-fg": "rgb(255, 0, 0)" } as CSSProperties}>K</Kbd>,

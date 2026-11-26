@@ -53,6 +53,7 @@ export const components: string[] = [
   "alert-dialog",
   "preview-card",
   "drawer",
+  "toast",
 ];
 
 const HEADER = "// Generated from";

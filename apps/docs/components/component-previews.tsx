@@ -29,6 +29,7 @@ import {
   Slider,
   Switch,
   Tabs,
+  Toast,
   Toggle,
   ToggleGroup,
   Toolbar,
@@ -109,6 +110,10 @@ const TEXT = {
     returns: "Pengembalian",
     payment: "Pembayaran",
     freeShipping: "Gratis ongkir.",
+    toastInfo: "Versi baru tersedia",
+    toastWarning: "Penyimpanan hampir penuh",
+    toastSaved: "Perubahan disimpan",
+    toastSavedBody: "Draf sudah diperbarui.",
   },
   en: {
     create: "New",
@@ -170,6 +175,10 @@ const TEXT = {
     returns: "Returns",
     payment: "Payment",
     freeShipping: "Free shipping.",
+    toastInfo: "A new version is out",
+    toastWarning: "Storage almost full",
+    toastSaved: "Changes saved",
+    toastSavedBody: "The draft is up to date.",
   },
 };
 
@@ -252,6 +261,39 @@ function DrawerPreview({ t }: { t: Text }) {
           </Drawer.Popup>
         </Drawer.Portal>
       </Drawer.Root>
+      {portal.box}
+    </>
+  );
+}
+
+/**
+ * A stack of three toasts held in the card: no timers and no focus taken, and nothing announced
+ * (the whole preview is inert and hidden from assistive technology). globals.css places the
+ * viewport against the card, not the window.
+ */
+function ToastPreview({ t }: { t: Text }) {
+  const portal = usePortal();
+  const [manager] = useState(() => Toast.createToastManager());
+  useEffect(() => {
+    manager.add({ id: "p1", title: t.toastInfo, type: "info", timeout: 0 });
+    manager.add({ id: "p2", title: t.toastWarning, type: "warning", timeout: 0 });
+    manager.add({
+      id: "p3",
+      title: t.toastSaved,
+      description: t.toastSavedBody,
+      type: "success",
+      timeout: 0,
+      actionProps: { children: t.undo },
+    });
+    return () => manager.close();
+  }, [manager, t]);
+  return (
+    <>
+      <Toast.Provider toastManager={manager}>
+        <Toast.Portal container={portal.container}>
+          <Toast.Viewport />
+        </Toast.Portal>
+      </Toast.Provider>
       {portal.box}
     </>
   );
@@ -704,6 +746,7 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
   popover: (t) => <PopoverPreview t={t} />,
   "alert-dialog": (t) => <AlertDialogPreview t={t} />,
   drawer: (t) => <DrawerPreview t={t} />,
+  toast: (t) => <ToastPreview t={t} />,
   "preview-card": (t) => <PreviewCardPreview t={t} />,
   "scroll-area": (t) => (
     <ScrollArea.Root className="component-preview-scroll" fade>
@@ -830,15 +873,6 @@ const SKETCHES: Partial<Record<ComponentName, ReactNode>> = {
       <rect x={34} y={44} width={92} height={12} rx={4} fill="currentColor" opacity={0.18} />
       {F(40, 47, 50)}
       {F(40, 62, 38, 5, 0.35)}
-    </>
-  ),
-  toast: (
-    <>
-      <rect x={52} y={26} width={84} height={24} rx={6} opacity={0.4} />
-      <rect x={46} y={36} width={92} height={28} rx={6} opacity={0.6} />
-      <rect x={40} y={46} width={100} height={32} rx={7} fill="var(--docs-surface)" />
-      {F(50, 56, 50)}
-      {F(50, 66, 34, 4, 0.35)}
     </>
   ),
   "context-menu": (

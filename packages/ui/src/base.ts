@@ -27,6 +27,7 @@ export { Separator } from "./components/separator";
 export * from "./components/slider";
 export * from "./components/switch";
 export * from "./components/tabs";
+export * from "./components/toast";
 export {
   Toggle,
   type ToggleProps,

@@ -174,7 +174,7 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
 **Accordion**, **Alert Dialog**, **Avatar**, **Button**, **Checkbox**, **Checkbox Group**, **Collapsible**, **Dialog**, **Drawer**,
 **Field**, **Fieldset**, **Form**, **Input**, **Kbd**, **Menu**, **Meter**, **Number Field**, **OTP Field**, **Popover**, **Preview Card**, **Progress**, **Radio Group**, **Scroll Area**,
-**Select**, **Separator**, **Slider**, **Switch**, **Tabs**, **Toggle**, **Toggle Group**, **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`)
+**Select**, **Separator**, **Slider**, **Switch**, **Tabs**, **Toast**, **Toggle**, **Toggle Group**, **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`)
 and **Code Block**, **Color Picker**, **Command Menu**, **Copy Button**, **Icon Morph**,
 **Sidebar**, **Table**, **Table of Contents**, and **Tree Rail Nav** (Owsem, from
 `owsem-ui/owsem`) are built. Base
@@ -573,6 +573,51 @@ import { Button, Drawer } from "owsem-ui/base"; // or "@/components/owsem/drawer
   Portal's class to reach the scrim too.
 - Reads `--ow-backdrop`, `--ow-raised-bg`, `--ow-popup-shadow`, `--ow-fg`, `--ow-muted`,
   `--ow-radius`, `--ow-edge`, `--ow-focus`, `--ow-bg`, `--ow-well-bg`, and `--ow-ease-drawer`.
+
+### Toast
+
+Short notifications that stack and can be swiped away. Registry item: `toast` (it draws its Action
+with `button`).
+
+```tsx
+import { Button, Toast } from "owsem-ui/base"; // or "@/components/owsem/toast" and ".../button"
+
+// Once, around the app:
+<Toast.Provider>
+  {children}
+  <Toast.Portal>
+    <Toast.Viewport />
+  </Toast.Portal>
+</Toast.Provider>;
+
+// In any component inside the Provider:
+const toastManager = Toast.useToastManager();
+toastManager.add({ title: "Changes saved", description: "Your edits are in the draft." });
+```
+
+- A `Toast.Viewport` with no children draws every toast: title, description, an Action when the toast
+  has `actionProps`, a mark when it has a known `type`, and a close button. Explicit children replace
+  that list (use `Toast.Root` per toast; a Root with no children draws the same body). Timers, the
+  live region, the stack, the swipe, and F6 come from Base UI.
+- `type`: `success`, `error`, `warning`, `info`, or `loading` (a quiet spinner) draw a small mark in
+  a theme tone; any other type looks plain. `Toast.Mark` is OwsemUI's, for children you write.
+- `actionProps: { children, onClick }` shows a small secondary Button (swap it with `render`).
+  `toastManager.promise(promise, { loading, success, error })` turns one toast through the three states.
+  `timeout: 0` keeps a toast until closed. Add toasts from outside React with
+  `Toast.createToastManager()` passed to the Provider.
+- The card sits at the bottom end of the window (bottom right, bottom left in RTL), at most 22rem
+  and never wider than the window minus a 16px gutter. The newest is in front, older ones peek
+  behind, hover or focus opens the stack into a list, and a swipe down or toward the end dismisses
+  one (`swipeDirection` on the Root). The Provider's `limit` (3) hides the rest.
+- Anchored toast: `positionerProps: { anchor, side }` in `add` draws it with a Positioner and an
+  Arrow, like a Popover, outside the stack. Give anchored toasts their own Provider and Viewport.
+- The Close button's name is `aria-label="Close"`: set it to translate. The Viewport's is
+  `"Notifications"`.
+- Motion is transform and opacity on the Core drawer curve; under reduced motion toasts fade in place
+  and the spinner stops. Toast is not for anything that must be seen: it leaves after 5 seconds.
+- Reads `--ow-raised-bg`, `--ow-popup-shadow`, `--ow-fg`, `--ow-muted`, `--ow-good`, `--ow-warning`,
+  `--ow-critical`, `--ow-accent`, `--ow-hover`, `--ow-edge`, `--ow-radius`, `--ow-focus`,
+  `--ow-ease-drawer`, and `--ow-ease-out`.
 
 ### Select
 

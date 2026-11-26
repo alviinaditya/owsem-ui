@@ -1,0 +1,227 @@
+---
+title: Toast
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. In the registry it is the `toast` item; the Action is a `button`, so
+that item comes with it.
+
+## Usage [#usage]
+
+Set it up once: a Provider around the app, and a Viewport in a Portal.
+
+```tsx
+import { Toast } from "owsem-ui/base";
+
+export function App({ children }: { children: React.ReactNode }) {
+  return (
+    <Toast.Provider>
+      {children}
+      <Toast.Portal>
+        <Toast.Viewport />
+      </Toast.Portal>
+    </Toast.Provider>
+  );
+}
+```
+
+Then any component inside the Provider adds a toast:
+
+```tsx
+import { Button, Toast } from "owsem-ui/base";
+
+export function ShowToast() {
+  const toastManager = Toast.useToastManager();
+  return (
+    <Button
+      variant="outline"
+      onClick={() => toastManager.add({ title: "Changes saved", description: "Your edits are in the draft." })}
+    >
+      Show toast
+    </Button>
+  );
+}
+```
+
+A Viewport with no children draws every toast itself: its title and description, an Action when the
+toast has `actionProps`, a mark when it has a `type`, and a close button. Write the children to draw
+them your way; they replace that list. Toast is a card on the raised fill with the popup shadow, up
+to 22rem wide and never wider than the window minus a gutter, at the bottom end of the window: bottom
+right, and bottom left in a right-to-left page. The newest is in front and older ones peek behind it;
+hover or focus opens the stack into a list, and a swipe dismisses one.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Base UI renders the parts, the timers, the live region, the stack's index and offsets, the swipe, and
+F6. OwsemUI styles the viewport, the card, the content, the title, the description, the close button,
+and the arrow, draws the Action with a small Button and the mark for the type, and carries the text
+direction into the portal. Provider and Portal add no look of their own. Provider renders no element,
+so in Inspect it is the window that holds the stack. The Positioner and the Arrow belong to an
+anchored toast, which has a Provider of its own.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Provider" /> | none | State only: `limit` (3), `timeout` (5000 ms), and `toastManager` |
+| Portal | `div` | Moves the viewport to the end of the body, or into `container` |
+| <Part name="Viewport" /> | `div.ow-toast__viewport` | `role="region"`, `aria-live="polite"`, `aria-label="Notifications"`, and `data-expanded` while the stack is open; no children draws every toast |
+| <Part name="Root" /> | `div.ow-toast` | One toast, `role="dialog"`; `data-type`, `data-expanded`, `data-limited`, `data-swiping`, `data-swipe-direction`, and `data-anchored` |
+| <Part name="Content" /> | `div.ow-toast__content` | `data-behind` while another toast is in front of it in a closed stack |
+| <Part name="Mark" /> | `span.ow-toast__mark` | For a `type` it knows; `aria-hidden` |
+| <Part name="Title" /> | `h2.ow-toast__title` | Names the toast; shows the toast's `title` when it has no children |
+| <Part name="Description" /> | `p.ow-toast__description` | Describes the toast, muted |
+| <Part name="Action" /> | `button.ow-toast__action` | A small Button; only when the toast has `actionProps` |
+| <Part name="Close" /> | `button.ow-toast__close` | A small quiet icon button in the end corner, with `aria-label="Close"` |
+| <Part name="Positioner" /> | `div.ow-toast__positioner` | Anchored toasts: `side`, `align`, `sideOffset` (10), `arrowPadding` (12), and `dir` |
+| <Part name="Arrow" /> | `div.ow-toast__arrow` | Anchored toasts: a turned square, half of it showing, with the card's edge |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+Toast takes all of Base UI's parts and props: the Provider's `limit`, `timeout`, and `toastManager`,
+and a toast's `title`, `description`, `type`, `priority`, `timeout`, `actionProps`, `onClose`, and
+`data`, with `add`, `update`, `close`, and `promise` on the manager. The props below are what
+OwsemUI adds or changes.
+
+### Toast.Viewport
+
+Left without children it draws every toast of the manager, newest first. A toast added with
+`positionerProps` is drawn anchored, with its Positioner and Arrow. The viewport's `aria-label`
+("Notifications") can be changed: translate it.
+
+### Toast.Root
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `swipeDirection` | `string \| string[]` | `["down", "end"]` | Where a swipe dismisses it: down, and toward the end of the line (right, left in RTL). Base UI's default is `["down", "right"]` |
+
+Left without children, a Root draws the mark, the title, the description, the Action, and the Close.
+
+### Toast.Action
+
+Draws a small secondary Button by default; pass your own button to `render` to change it. Its label
+and handler come from the toast's `actionProps`, and it renders nothing when the toast has none.
+
+### Toast.Close
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `aria-label` | `string` | `"Close"` | The button's name; set it to translate it |
+
+Draws a cross when it has no children.
+
+### Toast.Mark
+
+Not in Base UI: the small mark for the toast's `type` (`success`, `error`, `warning`, `info`, or
+`loading`), read from the Root it sits in. Any other type draws nothing. Use it in children you
+write yourself.
+
+### Toast.Positioner
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `sideOffset` | `number \| function` | `10` | Gap to the anchor, with room for the arrow. Base UI's default is `0` |
+| `arrowPadding` | `number` | `12` | Keeps the arrow off the rounded corners. Base UI's default is `5` |
+
+An anchored toast looks like a Popover and leaves the stack. Give anchored toasts a Provider of
+their own, and a Viewport that holds only them: such a viewport takes no room.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-toast__viewport` | Viewport |
+| `ow-toast` | Root |
+| `ow-toast__content` | Content |
+| `ow-toast__mark` | Mark |
+| `ow-toast__text` | The column that holds the title, the description, and the action in the default body |
+| `ow-toast__title` | Title |
+| `ow-toast__description` | Description |
+| `ow-toast__action` | Action |
+| `ow-toast__close` | Close |
+| `ow-toast__positioner` | Positioner |
+| `ow-toast__arrow` | Arrow |
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| F6 | Moves focus to the viewport, from anywhere on the page; the timers stop and the stack opens |
+| Tab, Shift + Tab | From the viewport, through the toasts and their buttons; Shift + Tab on the viewport goes back where focus was |
+| Enter, Space | On the Action or Close: run it |
+| Escape | On a toast: dismisses it |
+
+- The viewport is a labelled `region` with `aria-live="polite"`, so a new toast is announced without
+  taking focus; a toast with `priority: "high"` is announced urgently. Each toast is a `dialog`
+  named by its title and described by its description, so give it a title.
+- A toast is not a place for something that must be seen: it leaves after 5 seconds, and a person who
+  needs longer has no way to get it back. Do not make it the only way to learn a result; `timeout: 0`
+  keeps one until it is closed. Timers stop on hover and focus, and while the window is not focused.
+- The mark is `aria-hidden`: its meaning is in the title. The Close button has a name you can
+  translate with `aria-label`.
+- Swiping is a pointer gesture only: Escape and the Close button do the same.
+- The text is 4.5:1 against the card, and the marks and the buttons 3:1. With `prefers-contrast:
+  more` the card gains a 1px ring in `--ow-edge`. In forced colors it keeps a 1px edge in the system
+  color and the marks are drawn in the text color.
+
+## Theming [#theming]
+
+Toast reads these theme tokens. Set them on a toast with a class, or for every toast on `:root`. A
+class around the app does not reach: the viewport renders in a portal, outside the app's subtree.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-raised-bg` | Surface, the arrow's too |
+| `--ow-popup-shadow` | Shadow, the arrow's too |
+| `--ow-edge` | The ring under `prefers-contrast: more` |
+| `--ow-fg` | Text, and the close button on hover |
+| `--ow-muted` | The description, the close button, and a mark with no tone |
+| `--ow-good` | The mark of `success` |
+| `--ow-critical` | The mark of `error` |
+| `--ow-warning` | The mark of `warning` |
+| `--ow-accent` | The mark of `info` |
+| `--ow-hover` | The close button on hover |
+| `--ow-radius` | Corners |
+| `--ow-focus` | The ring on the viewport and the close button |
+| `--ow-ease-drawer` | The stack's movement |
+| `--ow-ease-out` | Fades |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each toast, so set yours on it with a class.
+
+</ForMode>
+
+Each of Toast's rules weighs one class, so a class of yours, or a Tailwind utility, wins without
+`!important`. A toast is 22rem wide at most, with 12px by 14px of padding; the width is on the
+Viewport, so set it there.
+
+```css
+.wide-toasts {
+  inline-size: 28rem; /* 22rem by default */
+}
+```
+
+## Motion [#motion]
+
+A toast slides in from the bottom edge in 400 ms on the Core drawer curve, and leaves the way it was
+swiped, or downward, fading. Older toasts settle behind the newest: each is 5% narrower and peeks 8px,
+and opening the stack moves them into a list with 8px between the cards, with the same curve. While
+a toast is swiped it follows the finger without easing. Only `transform` and `opacity` move, apart
+from the height change of a card whose text changes, and nothing runs while the toasts rest except
+Base UI's timers and the spinner of a `loading` toast. With `prefers-reduced-motion`, a toast fades
+in place without sliding or peeking, and the spinner stops.

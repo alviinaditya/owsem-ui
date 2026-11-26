@@ -859,6 +859,15 @@ body {
   max-inline-size: none;
 }
 
+/*
+ * Toast's index preview: a static stack at the bottom end of the card's own box, which holds the
+ * viewport instead of the window.
+ */
+.component-preview .ow-toast__viewport {
+  --_edge: 12px;
+  position: absolute;
+}
+
 .component-preview-live[data-preview="tooltip"] {
   margin-block-start: 32px;
 }
@@ -2765,6 +2774,35 @@ body {
 
 .demo-drawer-snap:not([data-expanded]) .ow-drawer__content {
   overflow-y: hidden;
+}
+
+/* The Toast page: the same window; the stack sits at its bottom end, as at the screen's. */
+.demo-toast .ow-toast__viewport {
+  position: absolute;
+}
+
+/* Inspect's window is smaller, so the stack is magnified more and its names have room. */
+.demo-toast-specimen {
+  inline-size: 420px;
+  block-size: 250px;
+}
+
+.demo-toast-triggers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+/* A row the app archives. */
+.demo-toast-row {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 10px 10px 16px;
+  border-block-end: 1px solid var(--ow-line);
 }
 
 /* Token setup panel (components/token-setup.tsx, an owsem-ui Popover): under a component page's toolbar, or

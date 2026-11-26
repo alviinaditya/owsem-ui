@@ -37,6 +37,7 @@ import SwitchPage from "./switch";
 import TablePage from "./table";
 import TableOfContentsPage from "./table-of-contents";
 import TabsPage from "./tabs";
+import ToastPage from "./toast";
 import TogglePage from "./toggle";
 import ToggleGroupPage from "./toggle-group";
 import ToolbarPage from "./toolbar";
@@ -88,6 +89,7 @@ export const examples: Partial<Record<ComponentName, ComponentType<ExamplePagePr
   "otp-field": OTPFieldPage,
   "alert-dialog": AlertDialogPage,
   drawer: DrawerPage,
+  toast: ToastPage,
   "preview-card": PreviewCardPage,
   "icon-morph": IconMorphPage,
   "code-block": CodeBlockPage,

@@ -72,6 +72,7 @@ import { switchSlots, switchVariants } from "../src/tailwind/switch/switch-varia
 import { tableSlots, tableVariants } from "../src/tailwind/table/table-variants";
 import { tableOfContentsSlots } from "../src/tailwind/table-of-contents/table-of-contents-variants";
 import { tabsListVariants, tabsSlots } from "../src/tailwind/tabs/tabs-variants";
+import { toastSlots } from "../src/tailwind/toast/toast-variants";
 import { toggleSlots, toggleVariants } from "../src/tailwind/toggle/toggle-variants";
 import {
   toggleGroupSlots,
@@ -129,6 +130,7 @@ const all = classNames(
     tableOfContentsSlots,
     tableSlots,
     tabsSlots,
+    toastSlots,
     toggleGroupSlots,
     toolbarSlots,
     tooltipSlots,

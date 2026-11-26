@@ -60,7 +60,7 @@ export const catalog = [
   { name: "combobox", title: "Combobox", family: "base", category: "form", phase: 2, status: "planned" },
   { name: "autocomplete", title: "Autocomplete", family: "base", category: "form", phase: 2, status: "planned" },
   { name: "alert-dialog", title: "Alert Dialog", family: "base", category: "overlay", phase: 2, status: "prototype" },
-  { name: "toast", title: "Toast", family: "base", category: "overlay", phase: 2, expressions: ["kinetic"], status: "planned" },
+  { name: "toast", title: "Toast", family: "base", category: "overlay", phase: 2, expressions: ["kinetic"], status: "prototype" },
   { name: "accordion", title: "Accordion", family: "base", category: "disclosure", phase: 2, expressions: ["kinetic"], status: "prototype" },
   { name: "collapsible", title: "Collapsible", family: "base", category: "disclosure", phase: 2, status: "prototype" },
   { name: "otp-field", title: "OTP Field", family: "base", category: "form", phase: 3, status: "prototype" },

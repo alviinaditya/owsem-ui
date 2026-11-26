@@ -63,7 +63,7 @@ test("the Manual files are not in the page until the tab opens", async ({ page, 
 
 test("every component page's Manual offers the Tailwind choice", async ({ request }) => {
   const names = catalog.filter(isAvailable).map((entry) => entry.name);
-  expect(names.length).toBe(41);
+  expect(names.length).toBe(42);
   for (const name of names) {
     const data = await (await request.get(`/api/manual/${name}`)).json();
     expect(data.css.flavor, name).toBe("css");
@@ -557,6 +557,26 @@ test("Tailwind Drawer: the Core modules it imports, no CSS file", async ({ page 
   await expect(titles.filter({ hasText: "drawer.css" })).toHaveCount(0);
   const classes = await copyVisibleFile(page, "drawer/drawer-variants.ts");
   expect(classes).not.toMatch(/import .*\.css/);
+});
+
+test("Tailwind Toast: the Button it draws, no CSS file, and the spinner's keyframes", async ({
+  page,
+}) => {
+  await openTailwindManual(page, "/en/toast");
+  const titles = manual(page).locator(".ow-code-block__title:visible");
+  for (const path of [
+    "components/owsem/toast/toast.tsx",
+    "components/owsem/toast/toast-variants.ts",
+    "components/owsem/button/button.tsx",
+    "lib/owsem/cn.ts",
+  ]) {
+    await expect(titles.filter({ hasText: path })).toHaveCount(1);
+  }
+  await expect(titles.filter({ hasText: "toast.css" })).toHaveCount(0);
+  const classes = await copyVisibleFile(page, "toast/toast-variants.ts");
+  expect(classes).not.toMatch(/import .*\.css/);
+  const bridge = await copyVisibleFile(page, "lib/owsem/tailwind.css");
+  expect(bridge).toContain("@keyframes ow-spin");
 });
 
 test("Tailwind Preview Card: the Core modules it imports, no CSS file", async ({ page }) => {

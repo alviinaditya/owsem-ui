@@ -1,0 +1,445 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * A raised card on the popup material, at the bottom end of the window. Newest in front, older
+ * ones peek behind it a little smaller; hover or focus opens the stack into a list. Everything
+ * moves from Base UI's variables: the index and offset place a card, the swipe movement follows
+ * the finger, and the stack settles on the Core drawer curve. Each rule weighs one class, so a
+ * class of yours sets the width, the padding, or a color.
+ */
+@layer owsem.components {
+  /*
+   * The region is as tall as the front card, which Base UI measures for it, so the focus ring F6
+   * draws hugs that card. The cards sit against its bottom edge; the others peek or open above.
+   */
+  .ow-toast__viewport {
+    --_edge: 16px;
+    position: fixed;
+    inset-block-end: max(var(--_edge), env(safe-area-inset-bottom));
+    inset-inline-end: var(--_edge);
+    z-index: 100;
+    box-sizing: border-box;
+    inline-size: 22rem;
+    max-inline-size: calc(100% - 2 * var(--_edge));
+    block-size: var(--toast-frontmost-height, 0px);
+  }
+
+  /* A viewport that only holds anchored toasts takes no room: each one places itself. */
+  .ow-toast__viewport:where(:has(> .ow-toast__positioner)) {
+    position: static;
+    inline-size: 0;
+    block-size: 0;
+  }
+
+  .ow-toast__viewport:where(:focus-visible) {
+    outline: 2px solid var(--ow-focus);
+    outline-offset: 2px;
+    border-radius: var(--ow-radius);
+  }
+
+  .ow-toast {
+    --_bg: var(--ow-raised-bg);
+    --_shadow: var(--ow-popup-shadow);
+    --_fg: var(--ow-fg);
+    --_muted: var(--ow-muted);
+    --_r: var(--ow-radius);
+    /* The gap in an opened list, how much of each card behind shows, and how much it shrinks. */
+    --_gap: 8px;
+    --_peek: 8px;
+    --_step: 0.05;
+    --_scale: max(0, calc(1 - var(--toast-index) * var(--_step)));
+    /* Behind the front card, a closed stack is as tall as the front card. */
+    --_height: var(--toast-frontmost-height, var(--toast-height));
+    /*
+     * Where it rests, closed: up by its peek, and up again for the height its scale gives away.
+     * Leaving, Base UI drops the heights; it then keeps the place it had.
+     */
+    --_y: calc(
+      var(--toast-swipe-movement-y, 0px) -
+      var(--toast-index) *
+      var(--_peek) -
+      (1 - var(--_scale)) *
+      var(--_height, 0px)
+    );
+    --_x: var(--toast-swipe-movement-x, 0px);
+    --_away: calc(100% + 16px);
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline: 0;
+    z-index: calc(100 - var(--toast-index));
+    box-sizing: border-box;
+    inline-size: 100%;
+    block-size: var(--_height);
+    padding: 12px 14px;
+    border-radius: var(--_r);
+    /* Invisible until forced colors draw it as the edge. */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--_bg);
+    box-shadow: var(--_shadow);
+    color: var(--_fg);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    transform-origin: 50% 100%;
+    transform: translate(var(--_x), var(--_y)) scale(var(--_scale));
+    /* Its own layer, so it lands without a pixel jump. */
+    will-change: transform;
+    transition:
+      transform 400ms var(--ow-ease-drawer),
+      opacity 250ms var(--ow-ease-out),
+      block-size 150ms var(--ow-ease-out);
+  }
+
+  /* Opened: a list, each card at its own height, with the gap between. */
+  .ow-toast:where([data-expanded]) {
+    --_y: calc(
+      var(--toast-swipe-movement-y, 0px) -
+      var(--toast-offset-y) -
+      var(--toast-index) *
+      var(--_gap)
+    );
+    --_scale: 1;
+    block-size: var(--toast-height);
+  }
+
+  /* Past the limit: kept for its animation, never seen or reached. */
+  .ow-toast:where([data-limited]) {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* The gap between two cards belongs to them, so the pointer crossing it does not close the list. */
+  .ow-toast::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: 100%;
+    block-size: calc(var(--_gap) + 1px);
+  }
+
+  /* Arrives from the edge it sits at. */
+  .ow-toast:where([data-starting-style]) {
+    opacity: 0;
+    transform: translate(var(--_x), calc(var(--_y) + var(--_away))) scale(var(--_scale));
+  }
+
+  /* Leaves where the finger sent it, or downward when it was not swiped. */
+  .ow-toast:where([data-ending-style]) {
+    opacity: 0;
+    transform: translate(var(--_x), calc(var(--_y) + var(--_away))) scale(var(--_scale));
+  }
+
+  .ow-toast:where([data-ending-style][data-swipe-direction="up"]) {
+    transform: translate(var(--_x), calc(var(--_y) - var(--_away))) scale(var(--_scale));
+  }
+
+  .ow-toast:where([data-ending-style][data-swipe-direction="left"]) {
+    transform: translate(calc(var(--_x) - var(--_away)), var(--_y)) scale(var(--_scale));
+  }
+
+  .ow-toast:where([data-ending-style][data-swipe-direction="right"]) {
+    transform: translate(calc(var(--_x) + var(--_away)), var(--_y)) scale(var(--_scale));
+  }
+
+  /* Base UI follows the finger with the card's inline transform, without easing. */
+  .ow-toast:where([data-swiping]) {
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement */
+    user-select: none;
+  }
+
+  /* Anchored: a popup at its anchor, not a card in the stack. */
+  .ow-toast:where([data-anchored]) {
+    position: static;
+    inline-size: max-content;
+    max-inline-size: min(22rem, var(--available-width, 22rem));
+    block-size: auto;
+    transform: none;
+    transform-origin: var(--transform-origin);
+    transition:
+      opacity 180ms var(--ow-ease-out),
+      transform 180ms var(--ow-ease-out);
+  }
+
+  .ow-toast:where([data-anchored])::after {
+    content: none;
+  }
+
+  .ow-toast:where([data-anchored]:is([data-starting-style], [data-ending-style])) {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  /* Leaving is quicker than arriving. */
+  .ow-toast:where([data-anchored][data-ending-style]) {
+    transition-duration: 120ms;
+  }
+
+  .ow-toast__positioner {
+    z-index: 100;
+  }
+
+  .ow-toast__content {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    /* Room for the close button in the corner. */
+    padding-inline-end: 20px;
+    transition: opacity 250ms var(--ow-ease-out);
+  }
+
+  /* A card behind the front one, in a closed stack, shows only its edge. */
+  .ow-toast__content:where([data-behind]:not([data-expanded])) {
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  /* A small icon in the tone of the type, level with the first line of text. */
+  .ow-toast__mark {
+    --_tone: var(--_muted);
+    flex: none;
+    display: grid;
+    place-items: center;
+    inline-size: 16px;
+    block-size: 16px;
+    margin-block-start: calc((1lh - 16px) / 2);
+    color: var(--_tone);
+  }
+
+  .ow-toast__mark > svg {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  .ow-toast:where([data-type="success"]) .ow-toast__mark {
+    --_tone: var(--ow-good);
+  }
+
+  .ow-toast:where([data-type="error"]) .ow-toast__mark {
+    --_tone: var(--ow-critical);
+  }
+
+  .ow-toast:where([data-type="warning"]) .ow-toast__mark {
+    --_tone: var(--ow-warning);
+  }
+
+  .ow-toast:where([data-type="info"]) .ow-toast__mark {
+    --_tone: var(--ow-accent);
+  }
+
+  .ow-toast__text {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+  }
+
+  .ow-toast__title {
+    margin: 0;
+    font-size: 1em;
+    font-weight: 600;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  .ow-toast__description {
+    margin: 0;
+    color: var(--_muted);
+    overflow-wrap: anywhere;
+  }
+
+  .ow-toast__action {
+    margin-block-start: 8px;
+  }
+
+  /* The corner button: quiet until pointed at, a 24px target with a 14px cross. */
+  .ow-toast__close {
+    position: absolute;
+    inset-block-start: 8px;
+    inset-inline-end: 8px;
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    inline-size: 24px;
+    block-size: 24px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: calc(var(--_r) / 2);
+    background: none;
+    color: var(--_muted);
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background-color 150ms var(--ow-ease-out),
+      color 150ms var(--ow-ease-out);
+  }
+
+  .ow-toast__close > svg {
+    display: block;
+    inline-size: 14px;
+    block-size: 14px;
+  }
+
+  /* The spinner turns only while the toast is loading. */
+  .ow-toast:where([data-type="loading"]) .ow-toast__mark > svg {
+    animation: ow-toast-spin 0.8s linear infinite;
+  }
+
+  @keyframes ow-toast-spin {
+    to {
+      transform: rotate(1turn);
+    }
+  }
+
+  @media (hover: hover) {
+    .ow-toast__close:where(:hover) {
+      background-color: var(--ow-hover);
+      color: var(--_fg);
+    }
+  }
+
+  .ow-toast__close:where(:focus-visible) {
+    outline: 2px solid var(--ow-focus);
+    outline-offset: 1px;
+  }
+
+  /*
+   * A 14px box centered on the card's edge; its outer half shows a square turned 45 degrees with
+   * the card's surface and shadow, as the Popover's arrow does. Base UI places it on the anchor.
+   */
+  .ow-toast__arrow {
+    /* The half that shows when the arrow points right or left. */
+    --_right-half: polygon(
+      50% 0,
+      100% 0,
+      100% 100%,
+      50% 100%,
+      50% 11px,
+      calc(50% - 1px) 11px,
+      calc(50% - 1px) 3px,
+      50% 3px
+    );
+    --_left-half: polygon(
+      0 0,
+      50% 0,
+      50% 3px,
+      calc(50% + 1px) 3px,
+      calc(50% + 1px) 11px,
+      50% 11px,
+      50% 100%,
+      0 100%
+    );
+    inline-size: 14px;
+    block-size: 14px;
+  }
+
+  /* With the 1px ring outside it, the square's diagonal is the box: (7.9 + 2) × √2 = 14. */
+  .ow-toast__arrow::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    inline-size: 7.9px;
+    block-size: 7.9px;
+    margin: auto;
+    /* Invisible until forced colors draw it as the edge. */
+    outline: 1px solid transparent;
+    background-color: var(--_bg);
+    box-shadow: var(--_shadow);
+    transform: rotate(45deg);
+  }
+
+  /* biome-ignore-start lint/nursery/useLogicalProperties: Base UI's physical sides */
+  .ow-toast__arrow[data-side="top"] {
+    top: calc(100% - 7px);
+    clip-path: polygon(
+      0 50%,
+      3px 50%,
+      3px calc(50% - 1px),
+      11px calc(50% - 1px),
+      11px 50%,
+      100% 50%,
+      100% 100%,
+      0 100%
+    );
+  }
+
+  .ow-toast__arrow[data-side="bottom"] {
+    bottom: calc(100% - 7px);
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% 50%,
+      11px 50%,
+      11px calc(50% + 1px),
+      3px calc(50% + 1px),
+      3px 50%,
+      0 50%
+    );
+  }
+
+  .ow-toast__arrow[data-side="left"] {
+    left: calc(100% - 7px);
+    clip-path: var(--_right-half);
+  }
+
+  .ow-toast__arrow[data-side="right"] {
+    right: calc(100% - 7px);
+    clip-path: var(--_left-half);
+  }
+  /* biome-ignore-end lint/nursery/useLogicalProperties: Base UI's physical sides */
+
+  /* Logical sides: mirrored right to left. */
+  .ow-toast__arrow[data-side="inline-start"] {
+    inset-inline-start: calc(100% - 7px);
+    clip-path: var(--_right-half);
+  }
+
+  .ow-toast__arrow[data-side="inline-end"] {
+    inset-inline-end: calc(100% - 7px);
+    clip-path: var(--_left-half);
+  }
+
+  .ow-toast__positioner[dir="rtl"]
+    .ow-toast__arrow:is([data-side="inline-start"], [data-side="inline-end"]) {
+    transform: scaleX(-1);
+  }
+
+  /* More contrast asked for: a ring around the card and its arrow. */
+  @media (prefers-contrast: more) {
+    .ow-toast {
+      --_shadow: var(--ow-popup-shadow), 0 0 0 1px var(--ow-edge);
+    }
+  }
+
+  /* Forced colors: marks in a system color, over the tone. */
+  @media (forced-colors: active) {
+    .ow-toast__mark {
+      color: CanvasText;
+    }
+  }
+
+  /* No slide, no peek motion, no spin: cards fade, wherever the finger left them. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-toast,
+    .ow-toast:where([data-anchored], [data-anchored][data-ending-style]) {
+      transition: opacity 250ms var(--ow-ease-out);
+    }
+
+    .ow-toast:where(
+        [data-starting-style],
+        [data-ending-style],
+        [data-ending-style][data-swipe-direction]
+      ) {
+      transform: translate(var(--_x), var(--_y)) scale(var(--_scale));
+    }
+
+    .ow-toast:where([data-anchored]:is([data-starting-style], [data-ending-style])) {
+      transform: none;
+    }
+
+    .ow-toast:where([data-type="loading"]) .ow-toast__mark > svg {
+      animation: none;
+    }
+  }
+}

@@ -1,0 +1,229 @@
+---
+title: Toast
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Di registry, itemnya `toast`; Action-nya adalah `button`, jadi item itu
+ikut terpasang.
+
+## Penggunaan [#usage]
+
+Atur sekali saja: Provider di sekitar aplikasi, dan Viewport di dalam Portal.
+
+```tsx
+import { Toast } from "owsem-ui/base";
+
+export function App({ children }: { children: React.ReactNode }) {
+  return (
+    <Toast.Provider>
+      {children}
+      <Toast.Portal>
+        <Toast.Viewport />
+      </Toast.Portal>
+    </Toast.Provider>
+  );
+}
+```
+
+Lalu komponen mana pun di dalam Provider bisa menambah toast:
+
+```tsx
+import { Button, Toast } from "owsem-ui/base";
+
+export function ShowToast() {
+  const toastManager = Toast.useToastManager();
+  return (
+    <Button
+      variant="outline"
+      onClick={() => toastManager.add({ title: "Perubahan disimpan", description: "Suntingan Anda sudah masuk ke draf." })}
+    >
+      Tampilkan toast
+    </Button>
+  );
+}
+```
+
+Viewport tanpa children menggambar setiap toast sendiri: judul dan deskripsinya, Action bila toast
+punya `actionProps`, tanda bila punya `type`, dan tombol tutup. Tulis children untuk menggambarnya
+sesuai keinginan Anda; children menggantikan daftar itu. Toast adalah kartu di atas fill raised
+dengan bayangan popup, selebar paling banyak 22rem dan tak pernah lebih lebar dari jendela dikurangi
+jarak tepi, di ujung bawah jendela: kanan bawah, dan kiri bawah di halaman kanan-ke-kiri. Yang
+terbaru di depan dan yang lama mengintip di belakangnya; hover atau fokus membuka tumpukan menjadi
+daftar, dan geseran menutup satu toast.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Base UI merender bagian-bagiannya, timer, live region, indeks dan offset tumpukan, geseran, dan F6.
+OwsemUI menata viewport, kartu, content, judul, deskripsi, tombol tutup, dan panah, menggambar Action
+dengan Button kecil dan tanda untuk type, serta membawa arah teks ke dalam portal. Provider dan Portal
+tidak menambah tampilan. Provider tidak merender elemen, jadi di Inspect ia adalah jendela yang memuat
+tumpukan. Positioner dan Arrow milik toast berlabuh, yang punya Provider sendiri.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Provider" /> | tidak ada | Hanya state: `limit` (3), `timeout` (5000 ms), dan `toastManager` |
+| Portal | `div` | Memindahkan viewport ke akhir body, atau ke `container` |
+| <Part name="Viewport" /> | `div.ow-toast__viewport` | `role="region"`, `aria-live="polite"`, `aria-label="Notifications"`, dan `data-expanded` selama tumpukan terbuka; tanpa children menggambar setiap toast |
+| <Part name="Root" /> | `div.ow-toast` | Satu toast, `role="dialog"`; `data-type`, `data-expanded`, `data-limited`, `data-swiping`, `data-swipe-direction`, dan `data-anchored` |
+| <Part name="Content" /> | `div.ow-toast__content` | `data-behind` selama toast lain ada di depannya dalam tumpukan tertutup |
+| <Part name="Mark" /> | `span.ow-toast__mark` | Untuk `type` yang dikenalnya; `aria-hidden` |
+| <Part name="Title" /> | `h2.ow-toast__title` | Menamai toast; menampilkan `title` toast bila tanpa children |
+| <Part name="Description" /> | `p.ow-toast__description` | Mendeskripsikan toast, muted |
+| <Part name="Action" /> | `button.ow-toast__action` | Button kecil; hanya bila toast punya `actionProps` |
+| <Part name="Close" /> | `button.ow-toast__close` | Tombol ikon kecil yang tenang di pojok ujung, dengan `aria-label="Close"` |
+| <Part name="Positioner" /> | `div.ow-toast__positioner` | Toast berlabuh: `side`, `align`, `sideOffset` (10), `arrowPadding` (12), dan `dir` |
+| <Part name="Arrow" /> | `div.ow-toast__arrow` | Toast berlabuh: persegi yang diputar, separuhnya terlihat, dengan tepi kartu |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+Toast mengambil semua bagian dan prop Base UI: `limit`, `timeout`, dan `toastManager` pada Provider,
+serta `title`, `description`, `type`, `priority`, `timeout`, `actionProps`, `onClose`, dan `data` pada
+toast, dengan `add`, `update`, `close`, dan `promise` pada manager. Prop di bawah ini adalah yang
+ditambah atau diubah OwsemUI.
+
+### Toast.Viewport
+
+Tanpa children ia menggambar setiap toast milik manager, yang terbaru dulu. Toast yang ditambah dengan
+`positionerProps` digambar berlabuh, lengkap dengan Positioner dan Arrow. `aria-label` viewport
+("Notifications") bisa diganti: terjemahkan.
+
+### Toast.Root
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `swipeDirection` | `string \| string[]` | `["down", "end"]` | Arah geseran yang menutupnya: ke bawah, dan ke ujung baris (kanan, kiri di RTL). Default Base UI adalah `["down", "right"]` |
+
+Tanpa children, Root menggambar tanda, judul, deskripsi, Action, dan Close.
+
+### Toast.Action
+
+Menggambar Button secondary kecil secara default; berikan tombol Anda ke `render` untuk mengubahnya.
+Label dan handler-nya berasal dari `actionProps` toast, dan ia tidak merender apa pun bila toast tidak
+punya.
+
+### Toast.Close
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `aria-label` | `string` | `"Close"` | Nama tombol; atur untuk menerjemahkannya |
+
+Menggambar tanda silang bila tanpa children.
+
+### Toast.Mark
+
+Bukan dari Base UI: tanda kecil untuk `type` toast (`success`, `error`, `warning`, `info`, atau
+`loading`), dibaca dari Root tempatnya berada. Type lain tidak menggambar apa pun. Pakai di children
+yang Anda tulis sendiri.
+
+### Toast.Positioner
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `sideOffset` | `number \| function` | `10` | Jarak ke jangkar, dengan ruang untuk panah. Default Base UI adalah `0` |
+| `arrowPadding` | `number` | `12` | Menjaga panah dari sudut yang membulat. Default Base UI adalah `5` |
+
+Toast berlabuh tampil seperti Popover dan keluar dari tumpukan. Beri toast berlabuh Provider sendiri,
+dan Viewport yang hanya memuat mereka: viewport seperti itu tidak memakai ruang.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-toast__viewport` | Viewport |
+| `ow-toast` | Root |
+| `ow-toast__content` | Content |
+| `ow-toast__mark` | Mark |
+| `ow-toast__text` | Kolom yang memuat judul, deskripsi, dan aksi pada isi bawaan |
+| `ow-toast__title` | Title |
+| `ow-toast__description` | Description |
+| `ow-toast__action` | Action |
+| `ow-toast__close` | Close |
+| `ow-toast__positioner` | Positioner |
+| `ow-toast__arrow` | Arrow |
+
+## Aksesibilitas [#accessibility]
+
+| Tombol | Aksi |
+| --- | --- |
+| F6 | Memindahkan fokus ke viewport, dari mana pun di halaman; timer berhenti dan tumpukan terbuka |
+| Tab, Shift + Tab | Dari viewport, melewati toast dan tombolnya; Shift + Tab di viewport kembali ke tempat fokus tadi |
+| Enter, Spasi | Pada Action atau Close: menjalankannya |
+| Escape | Pada toast: menutupnya |
+
+- Viewport adalah `region` berlabel dengan `aria-live="polite"`, jadi toast baru diumumkan tanpa
+  mengambil fokus; toast dengan `priority: "high"` diumumkan dengan mendesak. Setiap toast adalah
+  `dialog` yang dinamai judulnya dan dideskripsikan deskripsinya, jadi beri ia judul.
+- Toast bukan tempat untuk sesuatu yang wajib terlihat: ia pergi setelah 5 detik, dan orang yang
+  butuh lebih lama tak bisa memunculkannya lagi. Jangan jadikan satu-satunya cara mengetahui hasil;
+  `timeout: 0` menahannya sampai ditutup. Timer berhenti saat hover dan fokus, dan saat jendela tidak
+  fokus.
+- Tanda memakai `aria-hidden`: maknanya ada di judul. Tombol Close punya nama yang bisa Anda
+  terjemahkan dengan `aria-label`.
+- Menggeser hanya gestur pointer: Escape dan tombol Close melakukan hal yang sama.
+- Teks 4,5:1 terhadap kartu, dan tanda serta tombol 3:1. Dengan `prefers-contrast: more`, kartu
+  mendapat cincin 1px dalam `--ow-edge`. Dalam forced colors ia menjaga tepi 1px dalam warna sistem
+  dan tanda digambar dalam warna teks.
+
+## Tema [#theming]
+
+Toast membaca token tema ini. Atur pada satu toast dengan kelas, atau untuk semua toast di `:root`.
+Kelas di sekitar aplikasi tidak menjangkau: viewport dirender di portal, di luar subtree aplikasi.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-raised-bg` | Permukaan, panah juga |
+| `--ow-popup-shadow` | Bayangan, panah juga |
+| `--ow-edge` | Cincin di bawah `prefers-contrast: more` |
+| `--ow-fg` | Teks, dan tombol tutup saat hover |
+| `--ow-muted` | Deskripsi, tombol tutup, dan tanda tanpa nada |
+| `--ow-good` | Tanda `success` |
+| `--ow-critical` | Tanda `error` |
+| `--ow-warning` | Tanda `warning` |
+| `--ow-accent` | Tanda `info` |
+| `--ow-hover` | Tombol tutup saat hover |
+| `--ow-radius` | Sudut |
+| `--ow-focus` | Cincin pada viewport dan tombol tutup |
+| `--ow-ease-drawer` | Gerak tumpukan |
+| `--ow-ease-out` | Memudar |
+
+<ForMode mode="isolated">
+
+Dalam mode terisolasi, nilainya ada pada setiap toast, jadi atur milik Anda pada toast dengan kelas.
+
+</ForMode>
+
+Setiap aturan Toast berbobot satu kelas, jadi kelas Anda, atau utilitas Tailwind, menang tanpa
+`!important`. Toast selebar paling banyak 22rem, dengan padding 12px kali 14px; lebarnya ada pada
+Viewport, jadi atur di sana.
+
+```css
+.wide-toasts {
+  inline-size: 28rem; /* default 22rem */
+}
+```
+
+## Gerak [#motion]
+
+Toast meluncur masuk dari tepi bawah dalam 400 ms pada kurva drawer Core, dan keluar sesuai arah
+geserannya, atau ke bawah, sambil memudar. Toast lama menetap di belakang yang terbaru: masing-masing
+5% lebih sempit dan mengintip 8px, dan membuka tumpukan memindahkannya menjadi daftar dengan jarak
+8px antarkartu, dengan kurva yang sama. Saat digeser, toast mengikuti jari tanpa easing. Hanya
+`transform` dan `opacity` yang bergerak, kecuali perubahan tinggi kartu yang teksnya berubah, dan
+tidak ada yang berjalan saat toast diam selain timer Base UI dan spinner toast `loading`. Dengan
+`prefers-reduced-motion`, toast memudar di tempat tanpa meluncur atau mengintip, dan spinner berhenti.

@@ -71,7 +71,7 @@ const TEXT = {
     docsLink: "dokumentasi",
     docsRead: "Baca",
     docsTitle: "Dokumentasi",
-    docsBody: "Pratinjau dan contoh.",
+    docsBody: "Contoh langsung.",
     edit: "Edit",
     cut: "Potong",
     copy: "Salin",
@@ -132,7 +132,7 @@ const TEXT = {
     docsLink: "the docs",
     docsRead: "Read",
     docsTitle: "Docs",
-    docsBody: "Previews and examples.",
+    docsBody: "Live examples.",
     edit: "Edit",
     cut: "Cut",
     copy: "Copy",
@@ -270,7 +270,7 @@ function PreviewCardPreview({ t }: { t: Text }) {
           <PreviewCard.Trigger href="/">{t.docsLink}</PreviewCard.Trigger>
           <PreviewCard.Portal container={portal.container}>
             <PreviewCard.Positioner side="bottom">
-              <PreviewCard.Popup {...keepFocus}>
+              <PreviewCard.Popup>
                 <PreviewCard.Arrow />
                 <strong>{t.docsTitle}</strong>
                 <p>{t.docsBody}</p>

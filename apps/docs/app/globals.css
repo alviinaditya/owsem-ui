@@ -831,7 +831,13 @@ body {
   max-inline-size: none;
 }
 
-.component-preview :is(.ow-dialog__backdrop, .ow-dialog__popup, .ow-alert-dialog__popup) {
+.component-preview
+  :is(
+    .ow-dialog__backdrop,
+    .ow-dialog__popup,
+    .ow-alert-dialog__backdrop,
+    .ow-alert-dialog__popup
+  ) {
   position: absolute;
 }
 

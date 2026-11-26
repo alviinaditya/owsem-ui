@@ -850,6 +850,15 @@ body {
   margin-block-end: 12px;
 }
 
+/* Drawer's index preview: a bottom sheet in the card's own box, like Dialog's. */
+.component-preview :is(.ow-drawer__backdrop, .ow-drawer__viewport, .ow-drawer__popup) {
+  position: absolute;
+}
+
+.component-preview .ow-drawer__popup {
+  max-inline-size: none;
+}
+
 .component-preview-live[data-preview="tooltip"] {
   margin-block-start: 32px;
 }
@@ -2719,6 +2728,43 @@ body {
 
 .demo-dialog-sheet:is([data-starting-style], [data-ending-style]) {
   transform: translateY(100%);
+}
+
+/* The Drawer page: the same window, with the drawer's layers placed against it. */
+.demo-dialog
+:is(
+  .ow-drawer__backdrop,
+  .ow-drawer__viewport,
+  .ow-drawer__popup,
+  .ow-drawer__swipe-area,
+  .ow-drawer__indent-background
+) {
+  position: absolute;
+}
+
+.demo-drawer-triggers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+/* The page that recedes fills the window, on the window's own surface. */
+.demo-drawer-indent {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-block-size: 0;
+  background-color: var(--docs-surface);
+}
+
+/* Snap points: as tall as the largest stop; the text scrolls only once it is reached. */
+.demo-drawer-snap {
+  block-size: calc(100% - 3rem);
+}
+
+.demo-drawer-snap:not([data-expanded]) .ow-drawer__content {
+  overflow-y: hidden;
 }
 
 /* Token setup panel (components/token-setup.tsx, an owsem-ui Popover): under a component page's toolbar, or

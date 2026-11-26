@@ -64,7 +64,7 @@ export const catalog = [
   { name: "accordion", title: "Accordion", family: "base", category: "disclosure", phase: 2, expressions: ["kinetic"], status: "prototype" },
   { name: "collapsible", title: "Collapsible", family: "base", category: "disclosure", phase: 2, status: "prototype" },
   { name: "otp-field", title: "OTP Field", family: "base", category: "form", phase: 3, status: "prototype" },
-  { name: "drawer", title: "Drawer", family: "base", category: "overlay", phase: 3, status: "planned" },
+  { name: "drawer", title: "Drawer", family: "base", category: "overlay", phase: 3, status: "prototype" },
   { name: "preview-card", title: "Preview Card", family: "base", category: "overlay", phase: 3, status: "prototype" },
   { name: "context-menu", title: "Context Menu", family: "base", category: "navigation", phase: 3, status: "planned" },
   { name: "menubar", title: "Menubar", family: "base", category: "navigation", phase: 3, status: "planned" },

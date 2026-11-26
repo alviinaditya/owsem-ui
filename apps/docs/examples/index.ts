@@ -13,6 +13,7 @@ import ColorPickerPage from "./color-picker";
 import CommandMenuPage from "./command-menu";
 import CopyButtonPage from "./copy-button";
 import DialogPage from "./dialog";
+import DrawerPage from "./drawer";
 import FieldPage from "./field";
 import FieldsetPage from "./fieldset";
 import FormPage from "./form";
@@ -86,6 +87,7 @@ export const examples: Partial<Record<ComponentName, ComponentType<ExamplePagePr
   slider: SliderPage,
   "otp-field": OTPFieldPage,
   "alert-dialog": AlertDialogPage,
+  drawer: DrawerPage,
   "preview-card": PreviewCardPage,
   "icon-morph": IconMorphPage,
   "code-block": CodeBlockPage,

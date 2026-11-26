@@ -34,6 +34,7 @@ export default [
   entry("collapsible", "dist/components/collapsible/index.js", "3 kB"),
   entry("color-picker", "dist/components/color-picker/index.js", "8 kB"),
   entry("dialog", "dist/components/dialog/index.js", "3 kB"),
+  entry("drawer", "dist/components/drawer/index.js", "3 kB"),
   entry("field", "dist/components/field/index.js", "3 kB"),
   entry("fieldset", "dist/components/fieldset/index.js", "3 kB"),
   entry("form", "dist/components/form/index.js", "3 kB"),

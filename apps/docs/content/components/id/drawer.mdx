@@ -1,0 +1,199 @@
+---
+title: Drawer
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Di registry, itemnya `drawer`; tombol pada contoh juga butuh `button`.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Button, Drawer } from "owsem-ui/base";
+
+export function ShareDrawer() {
+  return (
+    <Drawer.Root>
+      <Drawer.Trigger render={<Button variant="outline" />}>Buka drawer</Drawer.Trigger>
+      <Drawer.Portal>
+        <Drawer.Popup>
+          <Drawer.Title>Bagikan draf</Drawer.Title>
+          <Drawer.Description>Siapa pun yang punya tautan bisa membacanya.</Drawer.Description>
+          <div className="actions">
+            <Drawer.Close render={<Button />}>Selesai</Drawer.Close>
+          </div>
+        </Drawer.Popup>
+      </Drawer.Portal>
+    </Drawer.Root>
+  );
+}
+```
+
+Drawer adalah lembar yang meluncur masuk dari tepi layar dan mengikuti jari saat digeser untuk
+menutupnya. Secara default ia lembar bawah; `swipeDirection` pada Root memindahkannya ke tepi lain.
+Ia berada di atas fill raised dengan bayangan popup, dengan sudut membulat hanya pada sisi yang
+menghadap halaman, dan lembar atas atau bawah menampilkan pegangan kecil di tepinya. Tidak ada ikon
+tutup: Close adalah tombol yang Anda taruh sendiri dengan tombol Anda lewat `render`. Pemakaian
+terpendek adalah yang di atas: Portal menggambar scrim dan Popup menggambar Viewport yang dibutuhkan
+Base UI di sekitarnya.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Base UI merender bagian, peran `dialog`, penamaan, fokus, kunci gulir, dan seluruh geseran serta titik
+jepret. OwsemUI menata scrim, lembar, konten, judul, dan deskripsi, menggambar scrim dan viewport
+bila Anda tidak menulisnya, dan membawa arah teks ke dalam portal. Root, Provider, dan Portal tidak
+punya tampilan sendiri, dan Trigger serta Close memakai tombol Anda. Root tidak merender elemen, jadi
+di Inspect ia adalah jendela yang memuat trigger dan drawernya. Provider, IndentBackground, dan Indent ada di contoh Indent, dan SwipeArea berada
+di tepi layar, jadi Inspect tidak menampilkannya.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| Provider | tidak ada | Opsional: membagikan keadaan terbuka semua drawer di dalamnya kepada Indent |
+| IndentBackground | `div.ow-drawer__indent-background` | Opsional, sebelum Indent: lapisan yang terlihat di sekeliling halaman yang mundur |
+| Indent | `div.ow-drawer__indent` | Opsional: membungkus halaman; `data-active` selama ada drawer terbuka |
+| <Part name="Root" /> | tidak ada | Hanya state: `open`, `modal`, `swipeDirection`, `snapPoints`, dan `handle` |
+| <Part name="Trigger" /> | Tombol Anda | Lewat `render`; `aria-haspopup`, `aria-expanded`, dan `data-popup-open` saat terbuka |
+| SwipeArea | `div.ow-drawer__swipe-area` | Opsional: garis tak terlihat di tepi asal drawer, tempat geseran membukanya |
+| Portal | `div` | Memindahkan drawer ke akhir body, atau ke `container`, dan menggambar scrim |
+| <Part name="Backdrop" /> | `div.ow-drawer__backdrop` | Opsional: tulis hanya untuk mengubah scrim, dan ia menggantikan milik Portal |
+| <Part name="Viewport" /> | `div.ow-drawer__viewport` | Lapisan yang menerima geseran; Popup menggambarnya bila Anda tidak menulisnya |
+| <Part name="Popup" /> | `div.ow-drawer__popup` | `role="dialog"`, `dir`, `data-swipe-direction`, `data-swiping`, `--nested-drawers`, dan `data-nested-drawer-open` |
+| <Part name="Title" /> | `h2.ow-drawer__title` | Menamai drawer; satu-satunya bagian yang diwajibkan aksesibilitas |
+| <Part name="Description" /> | `p.ow-drawer__description` | Mendeskripsikan drawer, muted |
+| <Part name="Content" /> | `div.ow-drawer__content` | Opsional: bagian yang menggulir sendiri |
+| <Part name="Close" /> | Tombol Anda | Menutup drawer |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+Drawer memakai semua bagian dan prop Base UI: `swipeDirection` (default `down`) memilih tepi, dan
+`snapPoints`, `snapPoint`, `defaultSnapPoint`, serta `onSnapPointChange` memberi lembar atas atau
+bawah beberapa perhentian. Prop di bawah adalah yang ditambah atau diubah OwsemUI.
+
+### Drawer.Portal
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `backdrop` | `boolean` | `true` | Menggambar scrim di belakang drawer; `false` membiarkan halaman tidak diredupkan. `Drawer.Backdrop` di antara children menggantikannya |
+
+### Drawer.Backdrop
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `forceRender` | `boolean` | `true` | Dirender juga di drawer bertumpuk, tempat ia meredupkan induknya. Default Base UI adalah `false` |
+
+### Drawer.Popup
+
+Popup menggambar `Drawer.Viewport` di sekitar dirinya bila tidak berada di dalam satu, karena Base UI
+menerima geseran di sana dan memberi peringatan tanpanya. Tulis `Drawer.Viewport` hanya untuk
+mengubahnya.
+
+Lembar berada di tepi yang dinamai arah geseran, dengan sudut membulat pada sisi yang menghadap
+halaman: `down` adalah lembar bawah, `up` lembar atas, dan `left` serta `right` berada di tepi layar
+itu, juga di halaman kanan-ke-kiri, karena geserannya fisik. Atas dan bawah selebar layar hingga 32rem,
+di tengah, dan menampilkan pegangan; kiri dan kanan selebar 24rem. Tidak ada yang lebih lebar dari
+layar, dan lembar yang tinggi berhenti 3rem sebelum tepi seberang agar sebagian halaman tetap terlihat.
+Lebar, tinggi, dan padding adalah CSS biasa pada kelas Popup; dengan titik jepret, beri Popup tinggi
+perhentian terbesar. Root di dalam Popup membuat drawer bertumpuk: induk mundur selama yang dalam
+terbuka, dan `backdrop={false}` pada Portal dalam membiarkan induk tidak diredupkan.
+
+Drawer modal yang terbuka menahan gulir halaman lewat kunci milik OwsemUI, jadi teks halaman tidak
+digambar ulang selama ia terbuka.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-drawer__backdrop` | Backdrop |
+| `ow-drawer__viewport` | Viewport |
+| `ow-drawer__popup` | Popup |
+| `ow-drawer__content` | Content |
+| `ow-drawer__title` | Title |
+| `ow-drawer__description` | Description |
+| `ow-drawer__swipe-area` | SwipeArea |
+| `ow-drawer__indent` | Indent |
+| `ow-drawer__indent-background` | IndentBackground |
+
+## Aksesibilitas [#accessibility]
+
+| Tombol | Aksi |
+| --- | --- |
+| Enter, Spasi | Pada trigger: membuka drawer; fokus pindah ke dalamnya |
+| Tab, Shift + Tab | Berpindah di antara kontrol drawer, dan tetap di dalamnya selama modal |
+| Escape | Menutup drawer teratas; fokus kembali ke pembukanya |
+
+- Pembaca layar mengumumkan `dialog` yang dinamai judul dan dideskripsikan deskripsi, jadi selalu beri
+  `Drawer.Title`. Menggeser hanya gestur penunjuk: semua yang dilakukannya juga bisa dilakukan Escape,
+  scrim, dan tombol Close Anda, jadi beri setiap drawer cara untuk menutupnya.
+- Pegangan digambar CSS dan tidak punya elemen: tidak ada yang dibaca pembaca layar, dan tidak ada
+  yang bisa difokuskan.
+- Drawer modal membuat sisa halaman inert dan menahan gulirnya. OwsemUI menahan gulir tanpa mengatur
+  `overflow` pada halaman, jadi teksnya tidak digambar ulang; dibuka lewat sentuhan, kunci Base UI
+  yang berlaku.
+- Dengan `prefers-contrast: more`, lembar mendapat cincin 1px dalam `--ow-edge`. Di forced colors ia
+  menjaga tepi 1px dalam warna sistem dan pegangan digambar dalam warna teks. Drawer tidak membawa
+  teks sendiri, jadi tidak ada yang perlu diterjemahkan selain milik Anda.
+
+## Tema [#theming]
+
+Drawer membaca token tema ini. Atur pada Popup untuk satu lembar, pada Portal agar scrim ikut
+terjangkau, atau untuk semua drawer di `:root`. Kelas di sekitar trigger tidak menjangkau: drawer
+dirender di portal, di luar subtree trigger.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-backdrop` | Scrim |
+| `--ow-raised-bg` | Permukaan |
+| `--ow-popup-shadow` | Bayangan |
+| `--ow-edge` | Cincin di bawah `prefers-contrast: more` |
+| `--ow-fg` | Teks, dan pegangan pada seperempatnya |
+| `--ow-muted` | Deskripsi |
+| `--ow-radius` | Sudut yang menghadap halaman, satu radius untuk semua permukaan |
+| `--ow-focus` | Cincin, saat lembar sendiri mendapat fokus |
+| `--ow-ease-drawer` | Masuk, menetap, dan keluar |
+| `--ow-bg` | Halaman di dalam Indent |
+| `--ow-well-bg` | Lapisan di belakangnya, IndentBackground |
+
+<ForMode mode="isolated">
+
+Dalam mode terisolasi, nilainya ada pada setiap Popup, jadi atur milik Anda pada Popup dengan kelas.
+
+</ForMode>
+
+Setiap aturan Drawer berbobot satu kelas, jadi kelas Anda, atau utilitas Tailwind, menang tanpa
+`!important`. Ukurannya dalam `em`, jadi `font-size` pada Popup menskalakan lembar.
+
+```css
+.wide {
+  max-inline-size: 48rem; /* default 32rem untuk lembar atas atau bawah */
+  padding: 24px;
+}
+```
+
+## Gerak [#motion]
+
+Lembar meluncur masuk dari tepinya dalam 400 ms pada kurva drawer Core dan keluar dalam 300 ms, lebih
+cepat bila dijentik lebih keras. Saat digeser ia mengikuti jari tanpa easing, dan scrim memudar
+bersamanya. Induk mundur 28px dan ke 0,95 untuk setiap drawer yang bertumpuk di dalamnya. Indent
+menskalakan halaman ke 0,96 dan membulatkan sudutnya selama drawer terbuka. Hanya `transform` dan
+`opacity` yang bergerak, dan tidak ada yang berjalan saat drawer diam. Dengan
+`prefers-reduced-motion`, lembar memudar tanpa meluncur, di mana pun jari meninggalkannya, dan baik
+induk maupun halaman tidak mundur.

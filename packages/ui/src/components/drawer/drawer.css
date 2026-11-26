@@ -1,0 +1,330 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * A sheet that slides in from an edge: the raised fill with the popup shadow, over a scrim. The
+ * edge is the one the swipe direction names (Base UI's `data-swipe-direction` on the popup), and
+ * only the corners facing the page are rounded. It follows the finger through Base UI's swipe
+ * variables, then settles or leaves on the Core drawer curve. Each rule weighs one class, so a
+ * class of yours sets the width, the height, or the padding.
+ */
+@layer owsem.components {
+  .ow-drawer__backdrop {
+    --_bg: var(--ow-backdrop);
+    position: fixed;
+    inset: 0;
+    background-color: var(--_bg);
+    /* Fades out as the sheet is swiped away. */
+    opacity: calc(1 - var(--drawer-swipe-progress, 0));
+    transition: opacity 400ms var(--ow-ease-drawer);
+  }
+
+  /* An explicit Drawer.Backdrop replaces the one Portal draws. */
+  .ow-drawer__backdrop:where(:has(+ .ow-drawer__backdrop)) {
+    display: none;
+  }
+
+  .ow-drawer__backdrop:where([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+  }
+
+  /* Leaving is quicker than arriving, and quicker still after a fast swipe. */
+  .ow-drawer__backdrop:where([data-ending-style]) {
+    transition-duration: calc(var(--drawer-swipe-strength, 1) * 300ms);
+  }
+
+  /* The finger sets it: no easing. */
+  .ow-drawer__backdrop:where([data-swiping]) {
+    transition-duration: 0ms;
+  }
+
+  /* The layer that takes the swipe; the sheet is placed against it. */
+  .ow-drawer__viewport {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    overscroll-behavior: contain;
+  }
+
+  /* Base UI hides it with the attribute while keepMounted keeps it. */
+  .ow-drawer__viewport:where([hidden]) {
+    display: none;
+  }
+
+  .ow-drawer__popup {
+    --_bg: var(--ow-raised-bg);
+    --_shadow: var(--ow-popup-shadow);
+    --_fg: var(--ow-fg);
+    --_muted: var(--ow-muted);
+    --_r: var(--ow-radius);
+    --_p: calc(16em / 14);
+    /* The page left showing past the sheet, to press on or see. */
+    --_gap: 3rem;
+    /* Where it rests (the finger and the snap point move it) and where it comes from. */
+    --_rest: translate(
+      var(--drawer-swipe-movement-x, 0px),
+      calc(var(--drawer-snap-point-offset, 0px) + var(--drawer-swipe-movement-y, 0px))
+    );
+    --_out: translateY(calc(100% + 32px));
+    /* How far a drawer nested in it steps it back, in the direction of its own edge. */
+    --_step: translateY(calc(var(--nested-drawers) * -28px));
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    padding: var(--_p);
+    /* Invisible until forced colors draw it as the edge. */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--_bg);
+    box-shadow: var(--_shadow);
+    color: var(--_fg);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement */
+    scrollbar-width: thin;
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement */
+    scrollbar-color: color-mix(in oklab, var(--_fg) 30%, transparent) transparent;
+    transform: var(--_rest);
+    /* Its own layer, so it lands without a pixel jump. */
+    will-change: transform;
+    transition: transform 400ms var(--ow-ease-drawer);
+  }
+
+  /* Base UI hides it with the attribute while keepMounted keeps it. */
+  .ow-drawer__popup:where([hidden]) {
+    display: none;
+  }
+
+  /* Bottom: swiped down to leave. Full width up to 32rem, centered. */
+  .ow-drawer__popup:where([data-swipe-direction="down"]) {
+    inset-block: auto 0;
+    inset-inline: 0;
+    inline-size: 100%;
+    max-inline-size: 32rem;
+    max-block-size: calc(100% - var(--_gap));
+    margin-inline: auto;
+    padding-block: calc(var(--_p) + 12px) calc(var(--_p) + env(safe-area-inset-bottom));
+    border-radius: var(--_r) var(--_r) 0 0;
+    transform-origin: 50% 100%;
+  }
+
+  /* Top: swiped up to leave. */
+  .ow-drawer__popup:where([data-swipe-direction="up"]) {
+    --_out: translateY(calc(-100% - 32px));
+    --_step: translateY(calc(var(--nested-drawers) * 28px));
+    inset-block: 0 auto;
+    inset-inline: 0;
+    inline-size: 100%;
+    max-inline-size: 32rem;
+    max-block-size: calc(100% - var(--_gap));
+    margin-inline: auto;
+    padding-block: calc(var(--_p) + env(safe-area-inset-top)) calc(var(--_p) + 12px);
+    border-radius: 0 0 var(--_r) var(--_r);
+    transform-origin: 50% 0;
+  }
+
+  /* Left and right are the screen's edges, in either text direction, as the swipe is. */
+  .ow-drawer__popup:where([data-swipe-direction="left"]) {
+    --_out: translateX(calc(-100% - 32px));
+    --_step: translateX(calc(var(--nested-drawers) * 28px));
+    inset-block: 0;
+    /* biome-ignore lint/nursery/useLogicalProperties: the edges are the screen's, as the swipe is */
+    left: 0;
+    inline-size: 24rem;
+    max-inline-size: calc(100% - var(--_gap));
+    border-radius: 0 var(--_r) var(--_r) 0;
+    transform-origin: 0 50%;
+  }
+
+  .ow-drawer__popup:where([data-swipe-direction="right"]) {
+    --_out: translateX(calc(100% + 32px));
+    --_step: translateX(calc(var(--nested-drawers) * -28px));
+    inset-block: 0;
+    /* biome-ignore lint/nursery/useLogicalProperties: the edges are the screen's, as the swipe is */
+    right: 0;
+    inline-size: 24rem;
+    max-inline-size: calc(100% - var(--_gap));
+    border-radius: var(--_r) 0 0 var(--_r);
+    transform-origin: 100% 50%;
+  }
+
+  /* The grabber: a short bar at the edge facing the page. Decoration, never read out. */
+  .ow-drawer__popup:where([data-swipe-direction="down"], [data-swipe-direction="up"])::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    margin-inline: auto;
+    inline-size: 36px;
+    block-size: 4px;
+    border-radius: calc(var(--ow-radius) / 8);
+    background-color: color-mix(in oklab, var(--_fg) 25%, transparent);
+  }
+
+  .ow-drawer__popup:where([data-swipe-direction="down"])::before {
+    inset-block-start: 8px;
+  }
+
+  .ow-drawer__popup:where([data-swipe-direction="up"])::before {
+    inset-block-end: 8px;
+  }
+
+  /* Focused itself, as Base UI does on opening, or when `initialFocus` says so. */
+  .ow-drawer__popup:where(:focus-visible) {
+    outline: 2px solid var(--ow-focus);
+    outline-offset: -2px;
+  }
+
+  /* Steps back while a drawer nested in it is open, further for each one. */
+  .ow-drawer__popup:where([data-nested-drawer-open]) {
+    transform: var(--_rest) var(--_step) scale(calc(1 - var(--nested-drawers) * 0.05));
+  }
+
+  .ow-drawer__popup:where([data-starting-style], [data-ending-style]) {
+    transform: var(--_out);
+  }
+
+  /* Leaving is quicker than arriving, and quicker still after a fast swipe. */
+  .ow-drawer__popup:where([data-ending-style]) {
+    transition-duration: calc(var(--drawer-swipe-strength, 1) * 300ms);
+  }
+
+  .ow-drawer__popup:where([data-swiping]) {
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement */
+    user-select: none;
+  }
+
+  /* It scrolls on its own; the popup then stays put and the title and buttons stay in view. */
+  .ow-drawer__content {
+    flex: 1 1 auto;
+    min-block-size: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement */
+    scrollbar-width: thin;
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement */
+    scrollbar-color: color-mix(in oklab, var(--ow-fg) 30%, transparent) transparent;
+  }
+
+  .ow-drawer__title {
+    margin: 0;
+    font-size: calc(16em / 14);
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .ow-drawer__description {
+    margin: 0;
+    color: var(--_muted);
+  }
+
+  /* The heading keeps its distance from what follows; a description stays close to its title. */
+  .ow-drawer__title:where(:not(:last-child)) {
+    margin-block-end: 1em;
+  }
+
+  .ow-drawer__title:where(:has(+ .ow-drawer__description)) {
+    margin-block-end: 0.25em;
+  }
+
+  .ow-drawer__description:where(:not(:last-child)) {
+    margin-block-end: var(--_p);
+  }
+
+  /* A strip along the edge the drawer comes from, where a swipe opens it. */
+  .ow-drawer__swipe-area {
+    position: fixed;
+  }
+
+  .ow-drawer__swipe-area:where([data-swipe-direction="up"]) {
+    inset: auto 0 0;
+    block-size: 24px;
+  }
+
+  .ow-drawer__swipe-area:where([data-swipe-direction="down"]) {
+    inset: 0 0 auto;
+    block-size: 24px;
+  }
+
+  .ow-drawer__swipe-area:where([data-swipe-direction="right"]) {
+    inset: 0 auto 0 0;
+    inline-size: 24px;
+  }
+
+  .ow-drawer__swipe-area:where([data-swipe-direction="left"]) {
+    inset: 0 0 0 auto;
+    inline-size: 24px;
+  }
+
+  /*
+   * The page recedes a little while a drawer is open: opt in by wrapping it. It stays unmoved
+   * and unclipped at rest.
+   */
+  .ow-drawer__indent {
+    --_bg: var(--ow-bg);
+    background-color: var(--_bg);
+    transform-origin: 50% 0;
+    transition:
+      transform 400ms var(--ow-ease-drawer),
+      border-radius 400ms var(--ow-ease-drawer);
+  }
+
+  .ow-drawer__indent:where([data-active]) {
+    border-radius: var(--ow-radius);
+    overflow: clip;
+    transform: scale(0.96);
+    /* Only while receded: a layer at rest would hold the page's fixed children. */
+    will-change: transform;
+  }
+
+  /* What shows around the receded page. */
+  .ow-drawer__indent-background {
+    --_bg: var(--ow-well-bg);
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-color: var(--_bg);
+  }
+
+  /* More contrast asked for: a ring around the sheet. */
+  @media (prefers-contrast: more) {
+    .ow-drawer__popup {
+      --_shadow: var(--ow-popup-shadow), 0 0 0 1px var(--ow-edge);
+    }
+  }
+
+  /* Forced colors draw the grabber in a system color. */
+  @media (forced-colors: active) {
+    .ow-drawer__popup:where([data-swipe-direction="down"], [data-swipe-direction="up"])::before {
+      background-color: CanvasText;
+    }
+  }
+
+  /* No slide, no step back, no recede: it fades, wherever the finger left it. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-drawer__popup,
+    .ow-drawer__popup:where([data-ending-style]) {
+      transition: opacity 250ms var(--ow-ease-out);
+    }
+
+    .ow-drawer__popup:where([data-starting-style], [data-ending-style], [data-nested-drawer-open]) {
+      transform: var(--_rest);
+    }
+
+    .ow-drawer__popup:where([data-starting-style], [data-ending-style]) {
+      opacity: 0;
+    }
+
+    .ow-drawer__indent {
+      transition-property: none;
+    }
+
+    .ow-drawer__indent:where([data-active]) {
+      transform: none;
+      border-radius: 0;
+      overflow: visible;
+      will-change: auto;
+    }
+  }
+}

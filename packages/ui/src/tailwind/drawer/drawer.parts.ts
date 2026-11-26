@@ -1,0 +1,38 @@
+// Generated from components/drawer by scripts/build-tailwind.ts; do not edit.
+// No "use client" here: the namespace object must be readable from Server Components.
+
+export type {
+  DrawerBackdropProps,
+  DrawerCloseProps,
+  DrawerContentProps,
+  DrawerDescriptionProps,
+  DrawerIndentBackgroundProps,
+  DrawerIndentProps,
+  DrawerPopupProps,
+  DrawerPortalProps,
+  DrawerProviderProps,
+  DrawerRootProps,
+  DrawerSwipeAreaProps,
+  DrawerTitleProps,
+  DrawerTriggerProps,
+  DrawerViewportProps,
+  DrawerVirtualKeyboardProviderProps,
+} from "./drawer";
+export {
+  createDrawerHandle as createHandle,
+  DrawerBackdrop as Backdrop,
+  DrawerClose as Close,
+  DrawerContent as Content,
+  DrawerDescription as Description,
+  DrawerIndent as Indent,
+  DrawerIndentBackground as IndentBackground,
+  DrawerPopup as Popup,
+  DrawerPortal as Portal,
+  DrawerProvider as Provider,
+  DrawerRoot as Root,
+  DrawerSwipeArea as SwipeArea,
+  DrawerTitle as Title,
+  DrawerTrigger as Trigger,
+  DrawerViewport as Viewport,
+  DrawerVirtualKeyboardProvider as VirtualKeyboardProvider,
+} from "./drawer";

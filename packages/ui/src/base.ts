@@ -7,6 +7,7 @@ export * from "./components/checkbox";
 export * from "./components/checkbox-group";
 export * from "./components/collapsible";
 export * from "./components/dialog";
+export * from "./components/drawer";
 export * from "./components/field";
 export * from "./components/fieldset";
 export * from "./components/form";

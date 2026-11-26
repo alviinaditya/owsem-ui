@@ -63,7 +63,7 @@ test("the Manual files are not in the page until the tab opens", async ({ page, 
 
 test("every component page's Manual offers the Tailwind choice", async ({ request }) => {
   const names = catalog.filter(isAvailable).map((entry) => entry.name);
-  expect(names.length).toBe(40);
+  expect(names.length).toBe(41);
   for (const name of names) {
     const data = await (await request.get(`/api/manual/${name}`)).json();
     expect(data.css.flavor, name).toBe("css");
@@ -539,6 +539,23 @@ test("Tailwind Alert Dialog: the Core modules it imports, no CSS file", async ({
   }
   await expect(titles.filter({ hasText: "alert-dialog.css" })).toHaveCount(0);
   const classes = await copyVisibleFile(page, "alert-dialog/alert-dialog-variants.ts");
+  expect(classes).not.toMatch(/import .*\.css/);
+});
+
+test("Tailwind Drawer: the Core modules it imports, no CSS file", async ({ page }) => {
+  await openTailwindManual(page, "/en/drawer");
+  const titles = manual(page).locator(".ow-code-block__title:visible");
+  for (const path of [
+    "components/owsem/drawer/drawer.tsx",
+    "components/owsem/drawer/drawer-variants.ts",
+    "lib/owsem/scroll-lock.ts",
+    "lib/owsem/merge-refs.ts",
+    "lib/owsem/cn.ts",
+  ]) {
+    await expect(titles.filter({ hasText: path })).toHaveCount(1);
+  }
+  await expect(titles.filter({ hasText: "drawer.css" })).toHaveCount(0);
+  const classes = await copyVisibleFile(page, "drawer/drawer-variants.ts");
   expect(classes).not.toMatch(/import .*\.css/);
 });
 

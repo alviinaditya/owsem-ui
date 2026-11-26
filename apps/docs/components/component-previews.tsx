@@ -8,6 +8,7 @@ import {
   CheckboxGroup,
   Collapsible,
   Dialog,
+  Drawer,
   Field,
   Fieldset,
   Form,
@@ -231,6 +232,26 @@ function DialogPreview({ t }: { t: Text }) {
           </Dialog.Popup>
         </Dialog.Portal>
       </Dialog.Root>
+      {portal.box}
+    </>
+  );
+}
+
+/** A bottom sheet, pinned open in the card and not modal, so the page stays usable. */
+function DrawerPreview({ t }: { t: Text }) {
+  const portal = usePortal();
+  return (
+    <>
+      <Drawer.Root {...pinned}>
+        <Drawer.Portal container={portal.container}>
+          <Drawer.Popup {...keepFocus}>
+            <Drawer.Title>{t.shareTitle}</Drawer.Title>
+            <div className="component-preview-row">
+              <Drawer.Close render={<Button size="sm" />}>{t.share}</Drawer.Close>
+            </div>
+          </Drawer.Popup>
+        </Drawer.Portal>
+      </Drawer.Root>
       {portal.box}
     </>
   );
@@ -682,6 +703,7 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
   dialog: (t) => <DialogPreview t={t} />,
   popover: (t) => <PopoverPreview t={t} />,
   "alert-dialog": (t) => <AlertDialogPreview t={t} />,
+  drawer: (t) => <DrawerPreview t={t} />,
   "preview-card": (t) => <PreviewCardPreview t={t} />,
   "scroll-area": (t) => (
     <ScrollArea.Root className="component-preview-scroll" fade>
@@ -817,15 +839,6 @@ const SKETCHES: Partial<Record<ComponentName, ReactNode>> = {
       <rect x={40} y={46} width={100} height={32} rx={7} fill="var(--docs-surface)" />
       {F(50, 56, 50)}
       {F(50, 66, 34, 4, 0.35)}
-    </>
-  ),
-  drawer: (
-    <>
-      <rect x={30} y={8} width={100} height={80} rx={8} opacity={0.4} />
-      <path d="M30 48h100v32a8 8 0 0 1-8 8H38a8 8 0 0 1-8-8z" fill="var(--docs-surface)" />
-      {F(70, 54, 20, 4, 0.6)}
-      {F(42, 66, 56, 4, 0.35)}
-      {F(42, 75, 40, 4, 0.35)}
     </>
   ),
   "context-menu": (

@@ -52,6 +52,7 @@ export const components: string[] = [
   "otp-field",
   "alert-dialog",
   "preview-card",
+  "drawer",
 ];
 
 const HEADER = "// Generated from";

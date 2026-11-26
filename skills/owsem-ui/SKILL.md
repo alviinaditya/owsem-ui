@@ -172,7 +172,7 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Accordion**, **Alert Dialog**, **Avatar**, **Button**, **Checkbox**, **Checkbox Group**, **Collapsible**, **Dialog**,
+**Accordion**, **Alert Dialog**, **Avatar**, **Button**, **Checkbox**, **Checkbox Group**, **Collapsible**, **Dialog**, **Drawer**,
 **Field**, **Fieldset**, **Form**, **Input**, **Kbd**, **Menu**, **Meter**, **Number Field**, **OTP Field**, **Popover**, **Preview Card**, **Progress**, **Radio Group**, **Scroll Area**,
 **Select**, **Separator**, **Slider**, **Switch**, **Tabs**, **Toggle**, **Toggle Group**, **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`)
 and **Code Block**, **Color Picker**, **Command Menu**, **Copy Button**, **Icon Morph**,
@@ -529,6 +529,50 @@ import { AlertDialog, Button } from "owsem-ui/base"; // or "@/components/owsem/a
   class to reach the scrim too.
 - Reads `--ow-backdrop`, `--ow-raised-bg`, `--ow-popup-shadow`, `--ow-fg`, `--ow-muted`,
   `--ow-radius`, `--ow-focus`, and `--ow-ease-out`.
+
+### Drawer
+
+A sheet that slides in from an edge and swipes to close. Registry item: `drawer`.
+
+```tsx
+import { Button, Drawer } from "owsem-ui/base"; // or "@/components/owsem/drawer" and ".../button"
+<Drawer.Root>
+  <Drawer.Trigger render={<Button variant="outline" />}>Share</Drawer.Trigger>
+  <Drawer.Portal>
+    <Drawer.Popup>
+      <Drawer.Title>Share the draft</Drawer.Title>
+      <Drawer.Description>Anyone with the link can read it.</Drawer.Description>
+      <Drawer.Close render={<Button />}>Done</Drawer.Close>
+    </Drawer.Popup>
+  </Drawer.Portal>
+</Drawer.Root>
+```
+
+- Focus, the scroll lock, Escape, swiping, and ARIA come from Base UI; give it a `Drawer.Title`.
+  Trigger and Close have no look of their own: pass your button to `render`. There is no corner
+  close icon.
+- The edge is the Root's `swipeDirection`, the way the sheet is swiped to close: `down` (default)
+  is a bottom sheet, `up` a top one, `left` and `right` sit at that physical edge, also in RTL.
+  Top and bottom are full width up to 32rem and show a small grabber (CSS, `aria-hidden`; hide it
+  with a class); left and right are 24rem. Never wider than the screen, and 3rem of the page
+  stays showing past the far edge.
+- `Portal` draws the scrim (`backdrop={false}` for none) and the Popup draws the `Viewport` Base
+  UI needs around it; write `Drawer.Viewport` only to change it. A press on the scrim, Escape, or a
+  swipe shuts it. Do not add a scroll lock of your own.
+- Long content: put it in `Drawer.Content`, which scrolls while the title and buttons stay in
+  view, and where a mouse drag selects text instead of swiping. `snapPoints` (top and bottom only)
+  give the sheet stops: give the Popup the height of the largest one with a class.
+- A nested `Drawer.Root` inside a Popup steps the parent back (`--nested-drawers`,
+  `data-nested-drawer-open`). `Drawer.SwipeArea` is an invisible edge strip that opens the drawer
+  by a swipe. Wrap the app in `Drawer.Provider` with `Drawer.IndentBackground` and `Drawer.Indent`
+  and the page recedes while a drawer is open (opt-in; `Indent` makes a containing block for fixed
+  children while active).
+- Motion is transform only, following the finger and settling on the Core drawer curve; under
+  reduced motion the sheet fades. Width, height, and padding are plain CSS on the Popup's
+  `className`. It renders in a portal: set tokens on `:root`, on the Popup's class, or on the
+  Portal's class to reach the scrim too.
+- Reads `--ow-backdrop`, `--ow-raised-bg`, `--ow-popup-shadow`, `--ow-fg`, `--ow-muted`,
+  `--ow-radius`, `--ow-edge`, `--ow-focus`, `--ow-bg`, `--ow-well-bg`, and `--ow-ease-drawer`.
 
 ### Select
 

@@ -26,6 +26,7 @@ import {
 } from "../src/tailwind/command-menu/command-menu-variants";
 import { copyButtonSlots } from "../src/tailwind/copy-button/copy-button-variants";
 import { dialogSlots } from "../src/tailwind/dialog/dialog-variants";
+import { drawerSlots } from "../src/tailwind/drawer/drawer-variants";
 import { fieldSlots } from "../src/tailwind/field/field-variants";
 import { fieldsetSlots } from "../src/tailwind/fieldset/fieldset-variants";
 import { formSlots } from "../src/tailwind/form/form-variants";
@@ -103,6 +104,7 @@ const all = classNames(
     copyButtonSlots,
     alertDialogSlots,
     dialogSlots,
+    drawerSlots,
     fieldSlots,
     fieldsetSlots,
     formSlots,

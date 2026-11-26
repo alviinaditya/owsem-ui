@@ -1,0 +1,198 @@
+---
+title: Drawer
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. In the registry it is the `drawer` item; the buttons in the examples
+also need `button`.
+
+## Usage [#usage]
+
+```tsx
+import { Button, Drawer } from "owsem-ui/base";
+
+export function ShareDrawer() {
+  return (
+    <Drawer.Root>
+      <Drawer.Trigger render={<Button variant="outline" />}>Open drawer</Drawer.Trigger>
+      <Drawer.Portal>
+        <Drawer.Popup>
+          <Drawer.Title>Share the draft</Drawer.Title>
+          <Drawer.Description>Anyone with the link can read it.</Drawer.Description>
+          <div className="actions">
+            <Drawer.Close render={<Button />}>Done</Drawer.Close>
+          </div>
+        </Drawer.Popup>
+      </Drawer.Portal>
+    </Drawer.Root>
+  );
+}
+```
+
+Drawer is a sheet that slides in from an edge and follows the finger when it is swiped away. It is a
+bottom sheet by default; `swipeDirection` on the Root moves it to another edge. It sits on the raised
+fill with the popup shadow, rounded only on the corners that face the page, and a top or bottom sheet
+shows a small grabber at its edge. There is no close icon: Close is a button you place and pass your
+own button to. The shortest use is the one above: Portal draws the scrim and the Popup draws the
+Viewport Base UI needs around it.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Base UI renders the parts, the `dialog` role, the naming, focus, the scroll lock, and all of the
+swiping and the snap points. OwsemUI styles the scrim, the sheet, the content, the title, and the
+description, draws the scrim and the viewport when you leave them out, and carries the text direction
+into the portal. Root, Provider, and Portal add no look of their own, and Trigger and Close wear your
+button. Root renders no element, so in Inspect it is the window that holds the trigger and its
+drawer. Provider, IndentBackground, and Indent are in the Indent example, and SwipeArea sits
+at the screen's edge, so Inspect leaves them out.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| Provider | none | Optional: shares the open state of every drawer inside it with Indent |
+| IndentBackground | `div.ow-drawer__indent-background` | Optional, before Indent: the layer that shows around the receded page |
+| Indent | `div.ow-drawer__indent` | Optional: wraps the page; `data-active` while a drawer is open |
+| <Part name="Root" /> | none | State only: `open`, `modal`, `swipeDirection`, `snapPoints`, and `handle` |
+| <Part name="Trigger" /> | Your button | Passed to `render`; `aria-haspopup`, `aria-expanded`, and `data-popup-open` while open |
+| SwipeArea | `div.ow-drawer__swipe-area` | Optional: an invisible strip at the edge the drawer comes from, where a swipe opens it |
+| Portal | `div` | Moves the drawer to the end of the body, or into `container`, and draws the scrim |
+| <Part name="Backdrop" /> | `div.ow-drawer__backdrop` | Optional: write it only to change the scrim, and it replaces Portal's |
+| <Part name="Viewport" /> | `div.ow-drawer__viewport` | The layer that takes the swipe; the Popup draws it when you do not write it |
+| <Part name="Popup" /> | `div.ow-drawer__popup` | `role="dialog"`, `dir`, `data-swipe-direction`, `data-swiping`, `--nested-drawers`, and `data-nested-drawer-open` |
+| <Part name="Title" /> | `h2.ow-drawer__title` | Names the drawer; the one part accessibility requires |
+| <Part name="Description" /> | `p.ow-drawer__description` | Describes the drawer, muted |
+| <Part name="Content" /> | `div.ow-drawer__content` | Optional: the part that scrolls on its own |
+| <Part name="Close" /> | Your button | Shuts the drawer |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+Drawer takes all of Base UI's parts and props: `swipeDirection` (`down` by default) picks the edge,
+and `snapPoints`, `snapPoint`, `defaultSnapPoint`, and `onSnapPointChange` give a top or bottom
+sheet several stops. The props below are what OwsemUI adds or changes.
+
+### Drawer.Portal
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `backdrop` | `boolean` | `true` | Draws the scrim behind the drawer; `false` leaves the page undimmed. A `Drawer.Backdrop` among the children replaces it |
+
+### Drawer.Backdrop
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `forceRender` | `boolean` | `true` | Renders in a nested drawer too, where it dims the parent. Base UI's default is `false` |
+
+### Drawer.Popup
+
+The Popup draws a `Drawer.Viewport` around itself when it is not inside one, because Base UI takes the
+swipe there and warns without it. Write `Drawer.Viewport` only to change it.
+
+The sheet sits at the edge the swipe direction names, with the radius on the corners that face the
+page: `down` is a bottom sheet, `up` a top one, and `left` and `right` sit at that edge of the screen,
+also in a right-to-left page, since the swipe is physical. Top and bottom are the screen's width up to
+32rem, centered, and show the grabber; left and right are 24rem. None is wider than the screen, and
+a tall sheet stops 3rem short of the far edge so some of the page stays showing. Width, height, and
+padding are plain CSS on the Popup's class; with snap points, give the Popup the height of the largest
+stop. A Root inside a Popup nests: the parent steps back while the inner one is open, and
+`backdrop={false}` on the inner Portal leaves the parent undimmed.
+
+An open modal drawer holds the page's scroll through OwsemUI's own lock, so the page's text is not
+drawn again while it is open.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-drawer__backdrop` | Backdrop |
+| `ow-drawer__viewport` | Viewport |
+| `ow-drawer__popup` | Popup |
+| `ow-drawer__content` | Content |
+| `ow-drawer__title` | Title |
+| `ow-drawer__description` | Description |
+| `ow-drawer__swipe-area` | SwipeArea |
+| `ow-drawer__indent` | Indent |
+| `ow-drawer__indent-background` | IndentBackground |
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| Enter, Space | On the trigger: open the drawer; focus moves into it |
+| Tab, Shift + Tab | Moves through the drawer's controls, and stays inside while it is modal |
+| Escape | Shuts the top drawer; focus goes back to what opened it |
+
+- Screen readers announce a `dialog` named by the title and described by the description, so always
+  give it a `Drawer.Title`. Swiping is a pointer gesture only: everything it does is also done by
+  Escape, the scrim, and your Close button, so give every drawer a way to close it.
+- The grabber is drawn by CSS and has no element: nothing for a screen reader to read, and nothing to
+  focus.
+- A modal drawer makes the rest of the page inert and holds its scroll. OwsemUI holds the scroll
+  without setting `overflow` on the page, so its text is not drawn again; opened by touch, Base
+  UI's lock stands.
+- With `prefers-contrast: more`, the sheet gains a 1px ring in `--ow-edge`. In forced colors it
+  keeps a 1px edge in the system color and the grabber is drawn in the text color. Drawer ships no
+  text of its own, so there is nothing to translate but yours.
+
+## Theming [#theming]
+
+Drawer reads these theme tokens. Set them on the Popup for one sheet, on the Portal to reach the
+scrim as well, or for every drawer on `:root`. A class around the trigger does not reach: the drawer
+renders in a portal, outside the trigger's subtree.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-backdrop` | The scrim |
+| `--ow-raised-bg` | Surface |
+| `--ow-popup-shadow` | Shadow |
+| `--ow-edge` | The ring under `prefers-contrast: more` |
+| `--ow-fg` | Text, and the grabber at a quarter of it |
+| `--ow-muted` | The description |
+| `--ow-radius` | The corners facing the page, the one radius of every surface |
+| `--ow-focus` | The ring, when the sheet itself takes focus |
+| `--ow-ease-drawer` | Entering, settling, and leaving |
+| `--ow-bg` | The page inside Indent |
+| `--ow-well-bg` | The layer behind it, IndentBackground |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Popup, so set yours on the Popup with a class.
+
+</ForMode>
+
+Each of Drawer's rules weighs one class, so a class of yours, or a Tailwind utility, wins without
+`!important`. Sizes are in `em`, so `font-size` on the Popup scales the sheet.
+
+```css
+.wide {
+  max-inline-size: 48rem; /* 32rem by default for a top or bottom sheet */
+  padding: 24px;
+}
+```
+
+## Motion [#motion]
+
+The sheet slides in from its edge in 400 ms on the Core drawer curve and leaves in 300 ms, faster the
+harder it was flicked. While it is swiped it follows the finger without easing, and the scrim fades
+with it. A parent steps back 28px and to 0.95 for each drawer nested in it. Indent scales the page to
+0.96 and rounds its corners while a drawer is open. Only `transform` and `opacity` move, and nothing
+runs while the drawer rests. With `prefers-reduced-motion`, the sheet fades without sliding, wherever
+the finger left it, and neither a parent nor the page recedes.

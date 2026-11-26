@@ -1,0 +1,175 @@
+---
+title: Alert Dialog
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. In the registry it is the `alert-dialog` item; the buttons in the
+examples also need `button`.
+
+## Usage [#usage]
+
+```tsx
+import { AlertDialog, Button } from "owsem-ui/base";
+
+export function DiscardAlert() {
+  return (
+    <AlertDialog.Root>
+      <AlertDialog.Trigger render={<Button variant="outline" />}>Discard draft</AlertDialog.Trigger>
+      <AlertDialog.Portal>
+        <AlertDialog.Popup>
+          <AlertDialog.Title>Discard this draft?</AlertDialog.Title>
+          <AlertDialog.Description>Changes you have not saved will be lost.</AlertDialog.Description>
+          <div className="actions">
+            <AlertDialog.Close render={<Button variant="outline" />}>Keep editing</AlertDialog.Close>
+            <AlertDialog.Close render={<Button />}>Discard</AlertDialog.Close>
+          </div>
+        </AlertDialog.Popup>
+      </AlertDialog.Portal>
+    </AlertDialog.Root>
+  );
+}
+```
+
+Alert Dialog is a Dialog that asks a question and waits for the answer. It looks and moves exactly as
+Dialog does: the same panel, scrim, sizes, motion, and scroll behavior. It differs in what it asks of
+the person: it is always modal, a press on the scrim does not shut it, and there is no close button in
+the corner, so the person has to choose one of your answers (Escape still shuts it). The two answers
+are plain markup in a row at the end, the safe one first; there is no part for them.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Base UI renders the parts, the `alertdialog` role, the naming, focus, and the scroll lock. OwsemUI
+styles the scrim, the panel, the title, and the description, draws the scrim by default, and carries
+the text direction into the portal. Root and Portal add no look of their own, and Trigger and Close
+wear your button. Root renders no element, so in Inspect it is the window that holds the trigger and
+its alert.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | none | State only: `open` and `handle`; always modal |
+| <Part name="Trigger" /> | Your button | Passed to `render`; `aria-haspopup`, `aria-expanded`, and `data-popup-open` while open |
+| Portal | `div` | Moves the alert to the end of the body, or into `container`, and draws the scrim |
+| <Part name="Backdrop" /> | `div.ow-alert-dialog__backdrop` | Optional: write it only to change the scrim, and it replaces Portal's |
+| Viewport | `div.ow-alert-dialog__viewport` | Optional, around the Popup: it scrolls, and the panel keeps its full height |
+| <Part name="Popup" /> | `div.ow-alert-dialog__popup` | `role="alertdialog"`, `dir`, `--nested-dialogs`, and `data-nested-dialog-open` |
+| <Part name="Title" /> | `h2.ow-alert-dialog__title` | Names the alert; the one part accessibility requires |
+| <Part name="Description" /> | `p.ow-alert-dialog__description` | Describes the alert, muted |
+| <Part name="Close" /> | Your button | Shuts the alert; the first one is the safe answer |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+Alert Dialog takes Dialog's parts, with the props below. Base UI's Root has no `modal` and no
+`disablePointerDismissal`: an alert is always modal and never shuts on an outside press.
+
+### AlertDialog.Portal
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `backdrop` | `boolean` | `true` | Draws the scrim behind the alert; `false` leaves the page undimmed. An `AlertDialog.Backdrop` among the children replaces it |
+
+### AlertDialog.Backdrop
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `forceRender` | `boolean` | `true` | Renders in a nested alert too, where it dims the parent. Base UI's default is `false` |
+
+### AlertDialog.Popup
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `initialFocus` | Same as Base UI | The first `AlertDialog.Close` in the popup | Base UI focuses the first control, which may be the dangerous one. Here the first focus goes to the first Close, wherever it sits in the markup. With no Close, Base UI's default applies. An alert too long to show whole takes focus itself, so it opens at its start |
+
+A Root inside a Popup nests: the parent steps back while the inner one is open, and `backdrop={false}`
+on the inner Portal leaves the parent undimmed. An open alert holds the page's scroll through
+OwsemUI's own lock, so the page's text is not drawn again while it is open.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-alert-dialog__backdrop` | Backdrop |
+| `ow-alert-dialog__viewport` | Viewport |
+| `ow-alert-dialog__popup` | Popup |
+| `ow-alert-dialog__title` | Title |
+| `ow-alert-dialog__description` | Description |
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| Enter, Space | On the trigger: open the alert; focus moves to the safe answer |
+| Tab, Shift + Tab | Moves through the alert's controls, and stays inside |
+| Escape | Shuts the top alert; focus goes back to what opened it |
+
+- Screen readers announce an `alertdialog` named by the title and described by the description, so
+  always give it an `AlertDialog.Title` and an `AlertDialog.Description`.
+- Put the answer that changes nothing in the first `AlertDialog.Close` and it takes the first focus,
+  so a stray Enter cannot confirm the dangerous action. Pass `initialFocus` to choose another.
+- The rest of the page is inert and holds its scroll. OwsemUI holds the scroll without setting
+  `overflow` on the page, so its text is not drawn again; opened by touch, Base UI's lock stands.
+- With `prefers-contrast: more`, the panel gains a 1px ring in `--ow-edge`. In forced colors it keeps a
+  1px edge in the system color. Alert Dialog ships no text of its own, so there is nothing to
+  translate but yours.
+
+## Theming [#theming]
+
+Alert Dialog reads these theme tokens. Set them on the Popup for one panel, on the Portal to reach the
+scrim as well, or for every alert on `:root`. A class around the trigger does not reach: the alert
+renders in a portal, outside the trigger's subtree.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-backdrop` | The scrim |
+| `--ow-raised-bg` | Surface |
+| `--ow-popup-shadow` | Shadow |
+| `--ow-edge` | The ring under `prefers-contrast: more` |
+| `--ow-fg` | Text |
+| `--ow-muted` | The description |
+| `--ow-radius` | Corners, the one radius of every surface |
+| `--ow-focus` | The ring, when the panel itself takes focus |
+| `--ow-ease-out` | Entering and leaving |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Popup, so set yours on the Popup with a class.
+
+</ForMode>
+
+Each of Alert Dialog's rules weighs one class, so a class of yours, or a Tailwind utility, wins
+without `!important`. Sizes are in `em`, so `font-size` on the Popup scales the panel.
+
+```css
+.wide {
+  inline-size: 40em; /* 32em by default; it still stays 16px inside the screen */
+  padding: 24px;
+}
+```
+
+## Motion [#motion]
+
+The panel fades in and grows from 0.96 in 250 ms, from its own middle, with no translate to keep it
+centered; the scrim only fades, and both leave in 200 ms. A parent steps back 16px and to 0.95 for each
+alert nested in it. With `prefers-reduced-motion`, the panel fades without growing, and a parent stays
+in place.

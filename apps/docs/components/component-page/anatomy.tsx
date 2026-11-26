@@ -1462,7 +1462,9 @@ export function Anatomy({
         0000000000
       </span>
       {model ? (
-        <div className="sp-ui">
+        // A modal specimen (Alert Dialog) hides the page from assistive technology, live regions
+        // aside: this keeps the part buttons reachable, and "off" announces nothing.
+        <div className="sp-ui" aria-live="off">
           <div className="sp-sheet" data-hot={target ? "" : undefined}>
             <svg
               className="sp-svg"

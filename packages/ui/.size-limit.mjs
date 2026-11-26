@@ -26,6 +26,7 @@ const entry = (name, path, limit) => ({
 export default [
   entry("core", "dist/core/index.js", "6 kB"),
   entry("accordion", "dist/components/accordion/index.js", "3 kB"),
+  entry("alert-dialog", "dist/components/alert-dialog/index.js", "3 kB"),
   entry("avatar", "dist/components/avatar/index.js", "3 kB"),
   entry("button", "dist/components/button/index.js", "3 kB"),
   entry("checkbox", "dist/components/checkbox/index.js", "3 kB"),
@@ -43,6 +44,7 @@ export default [
   entry("number-field", "dist/components/number-field/index.js", "3 kB"),
   entry("otp-field", "dist/components/otp-field/index.js", "3 kB"),
   entry("popover", "dist/components/popover/index.js", "3 kB"),
+  entry("preview-card", "dist/components/preview-card/index.js", "3 kB"),
   entry("progress", "dist/components/progress/index.js", "3 kB"),
   entry("scroll-area", "dist/components/scroll-area/index.js", "3 kB"),
   entry("radio-group", "dist/components/radio-group/index.js", "3 kB"),

@@ -4,6 +4,7 @@ import {
   accordionSlots,
   accordionTriggerVariants,
 } from "../src/tailwind/accordion/accordion-variants";
+import { alertDialogSlots } from "../src/tailwind/alert-dialog/alert-dialog-variants";
 import { avatarSlots, avatarVariants } from "../src/tailwind/avatar/avatar-variants";
 import { buttonSlots, buttonVariants } from "../src/tailwind/button/button-variants";
 import { checkboxSlots, checkboxVariants } from "../src/tailwind/checkbox/checkbox-variants";
@@ -51,6 +52,7 @@ import {
 } from "../src/tailwind/number-field/number-field-variants";
 import { otpFieldSlots, otpFieldVariants } from "../src/tailwind/otp-field/otp-field-variants";
 import { popoverSlots } from "../src/tailwind/popover/popover-variants";
+import { previewCardSlots } from "../src/tailwind/preview-card/preview-card-variants";
 import { progressSlots, progressVariants } from "../src/tailwind/progress/progress-variants";
 import {
   radioGroupSlots,
@@ -99,6 +101,7 @@ const all = classNames(
     colorPickerSlots,
     commandMenuSlots,
     copyButtonSlots,
+    alertDialogSlots,
     dialogSlots,
     fieldSlots,
     fieldsetSlots,
@@ -112,6 +115,7 @@ const all = classNames(
     numberFieldSlots,
     otpFieldSlots,
     popoverSlots,
+    previewCardSlots,
     progressSlots,
     radioGroupSlots,
     scrollAreaSlots,

@@ -1,0 +1,141 @@
+---
+title: Preview Card
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Di registry, itemnya `preview-card`.
+
+## Penggunaan [#usage]
+
+```tsx
+import { PreviewCard } from "owsem-ui/base";
+
+export function DocsLink() {
+  return (
+    <PreviewCard.Root>
+      <PreviewCard.Trigger href="https://owsem-ui.dev">dokumentasi OwsemUI</PreviewCard.Trigger>
+      <PreviewCard.Portal>
+        <PreviewCard.Positioner>
+          <PreviewCard.Popup>
+            <PreviewCard.Arrow />
+            <strong>Dokumentasi OwsemUI</strong>
+            <p>Setiap komponen punya pratinjau, contoh, dan perintah pasang.</p>
+          </PreviewCard.Popup>
+        </PreviewCard.Positioner>
+      </PreviewCard.Portal>
+    </PreviewCard.Root>
+  );
+}
+```
+
+Preview Card memperlihatkan sekilas ke mana sebuah link menuju: arahkan kursor ke link, atau fokuskan
+dengan keyboard, dan kartu berisi gambar, judul, dan satu baris teks terbuka di sampingnya. Trigger
+adalah link yang memakai warna teks di sekitarnya, dengan garis bawah halus dan cincin fokus, tidak
+lebih; kartunya adalah material raised dengan bayangan popup, selebar paling banyak 20rem, dengan
+panah opsional. Kartu memegang isi biasa dan tidak punya tata letak sendiri.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Base UI merender bagian, jeda, serta penanganan hover dan fokus. OwsemUI menata link, kartu, dan
+panah, mengatur jarak 10px, dan membawa arah teks ke dalam portal. Root, Portal, Backdrop, dan
+Viewport tidak punya tampilan sendiri. Root tidak merender elemen, jadi di Inspect ia adalah kalimat
+yang memuat link dan kartunya.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | tidak ada | Hanya state: `open` dan `handle` |
+| <Part name="Trigger" /> | `a.ow-preview-card__trigger` | `delay` (600 ms) dan `closeDelay` (300 ms); `data-popup-open` saat terbuka |
+| Portal | `div` | Memindahkan kartu ke akhir body, atau ke `container` |
+| <Part name="Positioner" /> | `div.ow-preview-card__positioner` | `side`, `align`, `sideOffset` (10), `arrowPadding` (12), dan `dir` |
+| <Part name="Popup" /> | `div.ow-preview-card__popup` | `data-side` dan `data-instant` saat ia melewati animasi |
+| <Part name="Arrow" /> | `div.ow-preview-card__arrow` | Opsional dan `aria-hidden`, dengan `data-side`; persegi yang diputar, setengahnya terlihat |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### PreviewCard.Positioner
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `sideOffset` | `number \| function` | `10` | Jarak ke trigger, dengan ruang untuk panah. Default Base UI adalah `0` |
+| `arrowPadding` | `number` | `12` | Menjaga panah dari sudut yang membulat. Default Base UI adalah `5` |
+
+`PreviewCard.Trigger` boleh berada di mana saja, di luar Root-nya, dihubungkan oleh handle: setiap
+trigger dengan handle itu membuka kartu yang sama di bawah dirinya, dan handle membuka serta
+menutupnya dari kode. Pasang `PreviewCard.Viewport` di sekitar isi hanya saat satu kartu dibuka oleh
+beberapa trigger dan peralihan di antaranya dianimasikan.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-preview-card__trigger` | Trigger |
+| `ow-preview-card__positioner` | Positioner |
+| `ow-preview-card__popup` | Popup |
+| `ow-preview-card__arrow` | Arrow |
+
+## Aksesibilitas [#accessibility]
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab | Pada link: memfokuskannya, yang membuka kartu setelah jeda |
+| Enter | Mengikuti link, seperti link biasa |
+| Escape | Menutup kartu |
+
+- Pembaca layar tidak mengumumkan kartu: ia pintasan visual ke isi link, dan layar sentuh juga tidak
+  membukanya. Link harus bermakna sendiri, dengan nama yang menyebut tujuannya, dan semua isi kartu
+  harus ada juga di halaman tujuan.
+- Jangan taruh kontrol di kartu: keyboard tidak bisa menjangkaunya, dan kartu menutup saat fokus
+  meninggalkan link.
+- Link memakai warna teksnya dan menjaga 4,5:1 dengannya; garis bawahnya menjaga 3:1 terhadap
+  halaman, dan cincin fokusnya 2px, 2px di luar.
+- Dengan `prefers-contrast: more`, kartu mendapat cincin 1px dalam `--ow-edge`. Di forced colors kartu
+  menjaga tepi 1px dalam warna sistem, begitu juga panahnya, dan cincin fokus berwarna `Highlight`.
+
+## Tema [#theming]
+
+Preview Card membaca token tema ini. Atur pada Popup dengan kelas, atau untuk semua kartu di `:root`.
+Kelas di sekitar link tidak menjangkau: kartu dirender di portal, di luar subtree link.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-raised-bg` | Permukaan, juga milik panah |
+| `--ow-popup-shadow` | Bayangan, juga milik panah |
+| `--ow-edge` | Cincin di bawah `prefers-contrast: more` |
+| `--ow-fg` | Teks |
+| `--ow-radius` | Sudut |
+| `--ow-focus` | Cincin fokus link |
+| `--ow-ease-out` | Masuk dan keluar |
+
+<ForMode mode="isolated">
+
+Dalam mode terisolasi, nilainya ada pada setiap Popup dan Trigger, jadi atur milik Anda pada keduanya
+dengan kelas.
+
+</ForMode>
+
+Kartu berpadding 16px dan selebar paling banyak `20rem`; kelas pada Popup mengubah keduanya.
+
+## Gerak [#motion]
+
+Kartu tumbuh dari link dalam 180 ms, dari 0,96 dan transparan, dari ujung panah, dan keluar dalam
+120 ms. Dibuka dari keyboard, atau ditutup dengan Escape, ia melewati animasi. Garis bawah menggelap
+dalam 150 ms di bawah kursor dan selama kartu terbuka. Dengan `prefers-reduced-motion`, kartu memudar
+tanpa tumbuh.

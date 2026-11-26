@@ -63,7 +63,7 @@ test("the Manual files are not in the page until the tab opens", async ({ page, 
 
 test("every component page's Manual offers the Tailwind choice", async ({ request }) => {
   const names = catalog.filter(isAvailable).map((entry) => entry.name);
-  expect(names.length).toBe(38);
+  expect(names.length).toBe(40);
   for (const name of names) {
     const data = await (await request.get(`/api/manual/${name}`)).json();
     expect(data.css.flavor, name).toBe("css");
@@ -523,6 +523,38 @@ test("Tailwind Popover: the Core modules it imports, no CSS file", async ({ page
   // scroll-lock.ts has a `held:` of its own, which is no class.
   const bridge = await copyVisibleFile(page, "lib/owsem/tailwind.css");
   expect(bridge).not.toContain("@custom-variant");
+});
+
+test("Tailwind Alert Dialog: the Core modules it imports, no CSS file", async ({ page }) => {
+  await openTailwindManual(page, "/en/alert-dialog");
+  const titles = manual(page).locator(".ow-code-block__title:visible");
+  for (const path of [
+    "components/owsem/alert-dialog/alert-dialog.tsx",
+    "components/owsem/alert-dialog/alert-dialog-variants.ts",
+    "lib/owsem/scroll-lock.ts",
+    "lib/owsem/merge-refs.ts",
+    "lib/owsem/cn.ts",
+  ]) {
+    await expect(titles.filter({ hasText: path })).toHaveCount(1);
+  }
+  await expect(titles.filter({ hasText: "alert-dialog.css" })).toHaveCount(0);
+  const classes = await copyVisibleFile(page, "alert-dialog/alert-dialog-variants.ts");
+  expect(classes).not.toMatch(/import .*\.css/);
+});
+
+test("Tailwind Preview Card: the Core modules it imports, no CSS file", async ({ page }) => {
+  await openTailwindManual(page, "/en/preview-card");
+  const titles = manual(page).locator(".ow-code-block__title:visible");
+  for (const path of [
+    "components/owsem/preview-card/preview-card.tsx",
+    "components/owsem/preview-card/preview-card-variants.ts",
+    "lib/owsem/cn.ts",
+  ]) {
+    await expect(titles.filter({ hasText: path })).toHaveCount(1);
+  }
+  await expect(titles.filter({ hasText: "preview-card.css" })).toHaveCount(0);
+  const classes = await copyVisibleFile(page, "preview-card/preview-card-variants.ts");
+  expect(classes).not.toMatch(/import .*\.css/);
 });
 
 test("Tailwind Scroll Area: its one custom variant in the bridge", async ({ page }) => {

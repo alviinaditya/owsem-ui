@@ -50,6 +50,8 @@ export const components: string[] = [
   "number-field",
   "slider",
   "otp-field",
+  "alert-dialog",
+  "preview-card",
 ];
 
 const HEADER = "// Generated from";

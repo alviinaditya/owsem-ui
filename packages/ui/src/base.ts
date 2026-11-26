@@ -1,5 +1,6 @@
 // Base family exports. Components land per phase (PRD, Base scope).
 export * from "./components/accordion";
+export * from "./components/alert-dialog";
 export * from "./components/avatar";
 export * from "./components/button";
 export * from "./components/checkbox";
@@ -16,6 +17,7 @@ export * from "./components/meter";
 export * from "./components/number-field";
 export * from "./components/otp-field";
 export * from "./components/popover";
+export * from "./components/preview-card";
 export * from "./components/progress";
 export * from "./components/radio-group";
 export * from "./components/scroll-area";

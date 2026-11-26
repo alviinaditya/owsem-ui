@@ -1,0 +1,141 @@
+---
+title: Preview Card
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. In the registry it is the `preview-card` item.
+
+## Usage [#usage]
+
+```tsx
+import { PreviewCard } from "owsem-ui/base";
+
+export function DocsLink() {
+  return (
+    <PreviewCard.Root>
+      <PreviewCard.Trigger href="https://owsem-ui.dev">OwsemUI docs</PreviewCard.Trigger>
+      <PreviewCard.Portal>
+        <PreviewCard.Positioner>
+          <PreviewCard.Popup>
+            <PreviewCard.Arrow />
+            <strong>OwsemUI docs</strong>
+            <p>Every component has a preview, examples, and an install command.</p>
+          </PreviewCard.Popup>
+        </PreviewCard.Positioner>
+      </PreviewCard.Portal>
+    </PreviewCard.Root>
+  );
+}
+```
+
+Preview Card shows a glance at where a link goes: hover the link, or focus it with the keyboard, and
+a card with an image, a title, and a line of text opens beside it. The trigger is a link that takes
+the color of the text around it, with a quiet underline and the focus ring, and nothing else; the
+card is the raised material with the popup shadow, up to 20rem wide, with an optional arrow. The card
+holds plain content and has no layout of its own.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Base UI renders the parts, the delays, and the hover and focus handling. OwsemUI styles the link, the
+card, and the arrow, sets the 10px offset, and carries the text direction into the portal. Root,
+Portal, Backdrop, and Viewport add no look of their own. Root renders no element, so in Inspect it is
+the sentence that holds the link and its card.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | none | State only: `open` and `handle` |
+| <Part name="Trigger" /> | `a.ow-preview-card__trigger` | `delay` (600 ms) and `closeDelay` (300 ms); `data-popup-open` while open |
+| Portal | `div` | Moves the card to the end of the body, or into `container` |
+| <Part name="Positioner" /> | `div.ow-preview-card__positioner` | `side`, `align`, `sideOffset` (10), `arrowPadding` (12), and `dir` |
+| <Part name="Popup" /> | `div.ow-preview-card__popup` | `data-side` and `data-instant` when it skips the animation |
+| <Part name="Arrow" /> | `div.ow-preview-card__arrow` | Optional and `aria-hidden`, with `data-side`; a turned square, half of it showing |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### PreviewCard.Positioner
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `sideOffset` | `number \| function` | `10` | Gap to the trigger, with room for the arrow. Base UI's default is `0` |
+| `arrowPadding` | `number` | `12` | Keeps the arrow off the rounded corners. Base UI's default is `5` |
+
+A `PreviewCard.Trigger` can sit anywhere, outside its Root, linked by a handle: every trigger with
+that handle opens the same card under itself, and the handle opens and shuts it from code. Put
+`PreviewCard.Viewport` around the content only when one card is opened by several triggers and the
+switch between them is animated.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-preview-card__trigger` | Trigger |
+| `ow-preview-card__positioner` | Positioner |
+| `ow-preview-card__popup` | Popup |
+| `ow-preview-card__arrow` | Arrow |
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| Tab | On the link: focus it, which opens the card after the delay |
+| Enter | Follows the link, as any link |
+| Escape | Shuts the card |
+
+- Screen readers do not announce the card: it is a sighted shortcut to the link's content, and a
+  touch screen does not open it either. The link must make sense on its own, with a name that says
+  where it goes, and everything in the card must also be on the page it goes to.
+- Do not put controls in the card: it is not reachable by keyboard, and it closes when focus leaves
+  the link.
+- The link takes the color of its text and keeps 4.5:1 with it; the underline keeps 3:1 against the
+  page, and the focus ring is 2px, 2px outside.
+- With `prefers-contrast: more`, the card gains a 1px ring in `--ow-edge`. In forced colors the card
+  keeps a 1px edge in the system color, and so does the arrow, and the focus ring is `Highlight`.
+
+## Theming [#theming]
+
+Preview Card reads these theme tokens. Set them on the Popup with a class, or for every card on
+`:root`. A class around the link does not reach: the card renders in a portal, outside the link's
+subtree.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-raised-bg` | Surface, the arrow's too |
+| `--ow-popup-shadow` | Shadow, the arrow's too |
+| `--ow-edge` | The ring under `prefers-contrast: more` |
+| `--ow-fg` | Text |
+| `--ow-radius` | Corners |
+| `--ow-focus` | The link's focus ring |
+| `--ow-ease-out` | Entering and leaving |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Popup and Trigger, so set yours on them with a class.
+
+</ForMode>
+
+The card has 16px of padding and is at most `20rem` wide; a class on the Popup changes both.
+
+## Motion [#motion]
+
+The card grows out of its link in 180 ms, from 0.96 and transparent, from the arrow's tip, and leaves
+in 120 ms. Opened from the keyboard, or shut with Escape, it skips the animation. The underline
+darkens in 150 ms under the pointer and while the card is open. With `prefers-reduced-motion`, the
+card fades without growing.

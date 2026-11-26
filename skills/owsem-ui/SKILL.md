@@ -172,8 +172,8 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Accordion**, **Avatar**, **Button**, **Checkbox**, **Checkbox Group**, **Collapsible**, **Dialog**,
-**Field**, **Fieldset**, **Form**, **Input**, **Kbd**, **Menu**, **Meter**, **Number Field**, **OTP Field**, **Popover**, **Progress**, **Radio Group**, **Scroll Area**,
+**Accordion**, **Alert Dialog**, **Avatar**, **Button**, **Checkbox**, **Checkbox Group**, **Collapsible**, **Dialog**,
+**Field**, **Fieldset**, **Form**, **Input**, **Kbd**, **Menu**, **Meter**, **Number Field**, **OTP Field**, **Popover**, **Preview Card**, **Progress**, **Radio Group**, **Scroll Area**,
 **Select**, **Separator**, **Slider**, **Switch**, **Tabs**, **Toggle**, **Toggle Group**, **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`)
 and **Code Block**, **Color Picker**, **Command Menu**, **Copy Button**, **Icon Morph**,
 **Sidebar**, **Table**, **Table of Contents**, and **Tree Rail Nav** (Owsem, from
@@ -493,6 +493,43 @@ import { Button, Dialog } from "owsem-ui/base"; // or "@/components/owsem/dialog
 - Reads `--ow-backdrop`, `--ow-raised-bg`, `--ow-popup-shadow`, `--ow-fg`, `--ow-muted`, `--ow-radius`,
   `--ow-focus`, and `--ow-ease-out`.
 
+### Alert Dialog
+
+A modal question that needs an answer: Dialog's twin, with no close icon, where a press on the
+scrim does not shut it. Registry item: `alert-dialog`.
+
+```tsx
+import { AlertDialog, Button } from "owsem-ui/base"; // or "@/components/owsem/alert-dialog" and ".../button"
+<AlertDialog.Root>
+  <AlertDialog.Trigger render={<Button variant="outline" />}>Discard draft</AlertDialog.Trigger>
+  <AlertDialog.Portal>
+    <AlertDialog.Popup>
+      <AlertDialog.Title>Discard this draft?</AlertDialog.Title>
+      <AlertDialog.Description>Changes you have not saved will be lost.</AlertDialog.Description>
+      <AlertDialog.Close render={<Button variant="outline" />}>Keep editing</AlertDialog.Close>
+      <AlertDialog.Close render={<Button variant="destructive" />}>Discard</AlertDialog.Close>
+    </AlertDialog.Popup>
+  </AlertDialog.Portal>
+</AlertDialog.Root>
+```
+
+- Focus, the scroll lock, Escape, and ARIA (`role="alertdialog"`) come from Base UI; always give it
+  an `AlertDialog.Title` and the answers as `AlertDialog.Close`. Trigger and Close have no look of
+  their own: pass your button to `render`.
+- The first focus goes to the first `AlertDialog.Close`, so put the safe answer first (or anywhere
+  in the markup: it is found by its part); `initialFocus` on the Popup overrides it. An alert too
+  long to show whole takes focus itself, so it opens at its start.
+- It is always modal and there is no `modal` prop; a press outside does not shut it, only an answer
+  or Escape. `Portal` draws the scrim (`backdrop={false}` for none, or write an
+  `AlertDialog.Backdrop` to replace it). Do not add a scroll lock of your own.
+- Long content scrolls inside the Popup; inside `AlertDialog.Viewport` the Popup keeps its full
+  height. A nested `AlertDialog.Root` inside a Popup steps the parent back and dims it.
+- Look, sizes, and motion are Dialog's: width and padding are plain CSS on the Popup's `className`.
+  The alert renders in a portal: set tokens on `:root`, on the Popup's class, or on the Portal's
+  class to reach the scrim too.
+- Reads `--ow-backdrop`, `--ow-raised-bg`, `--ow-popup-shadow`, `--ow-fg`, `--ow-muted`,
+  `--ow-radius`, `--ow-focus`, and `--ow-ease-out`.
+
 ### Select
 
 A value, or several, picked from a list in a popup. Registry item: `select`.
@@ -588,6 +625,40 @@ import { Popover } from "owsem-ui/base"; // or "@/components/owsem/popover"
   inside the popup (the popup itself has no overflow, so the arrow shows).
 - Reads `--ow-raised-bg` and `--ow-popup-shadow` (the arrow takes both), `--ow-fg`, `--ow-muted`, and
   `--ow-radius`.
+
+### Preview Card
+
+A card that previews what a link goes to, opened by hover or keyboard focus. Registry item:
+`preview-card`.
+
+```tsx
+import { PreviewCard } from "owsem-ui/base"; // or "@/components/owsem/preview-card"
+<PreviewCard.Root>
+  <PreviewCard.Trigger href="https://owsem-ui.dev">OwsemUI docs</PreviewCard.Trigger>
+  <PreviewCard.Portal>
+    <PreviewCard.Positioner>
+      <PreviewCard.Popup>
+        <PreviewCard.Arrow />
+        <strong>OwsemUI docs</strong>
+        <p>Every component has a preview and an install command.</p>
+      </PreviewCard.Popup>
+    </PreviewCard.Positioner>
+  </PreviewCard.Portal>
+</PreviewCard.Root>
+```
+
+- The Trigger is a link (`a`) in the color of the text around it with a quiet underline. Hover or
+  focus opens the card after `delay` (600 ms) and it shuts `closeDelay` (300 ms) after leaving;
+  touch does not open it. The card is for sighted pointer users, so it must add nothing the link
+  needs: it is not read by assistive technology as a dialog, and it holds no controls.
+- `Positioner`: `side`, `align`, `sideOffset` (10 by default). `Arrow` is optional. The Popup is
+  at most 20rem wide and holds plain content.
+- One card for several links: `const handle = PreviewCard.createHandle()`, then
+  `<PreviewCard.Root handle={handle}>` and `<PreviewCard.Trigger handle={handle} payload={...}>`.
+- The card renders in a portal: set tokens on the Popup's class or on `:root`, and `data-theme` on
+  the Positioner when the link sits in a themed subtree.
+- Reads `--ow-raised-bg` and `--ow-popup-shadow` (the arrow takes both), `--ow-fg`, `--ow-radius`,
+  `--ow-focus`, and `--ow-ease-out`.
 
 ### Scroll Area
 

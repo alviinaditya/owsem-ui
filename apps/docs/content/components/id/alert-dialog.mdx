@@ -1,0 +1,175 @@
+---
+title: Alert Dialog
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Di registry, itemnya `alert-dialog`; tombol pada contoh juga butuh
+`button`.
+
+## Penggunaan [#usage]
+
+```tsx
+import { AlertDialog, Button } from "owsem-ui/base";
+
+export function DiscardAlert() {
+  return (
+    <AlertDialog.Root>
+      <AlertDialog.Trigger render={<Button variant="outline" />}>Buang draf</AlertDialog.Trigger>
+      <AlertDialog.Portal>
+        <AlertDialog.Popup>
+          <AlertDialog.Title>Buang draf ini?</AlertDialog.Title>
+          <AlertDialog.Description>Perubahan yang belum disimpan akan hilang.</AlertDialog.Description>
+          <div className="actions">
+            <AlertDialog.Close render={<Button variant="outline" />}>Lanjut mengedit</AlertDialog.Close>
+            <AlertDialog.Close render={<Button />}>Buang</AlertDialog.Close>
+          </div>
+        </AlertDialog.Popup>
+      </AlertDialog.Portal>
+    </AlertDialog.Root>
+  );
+}
+```
+
+Alert Dialog adalah Dialog yang mengajukan pertanyaan dan menunggu jawaban. Tampilan dan geraknya
+sama persis dengan Dialog: panel, scrim, ukuran, gerak, dan perilaku gulir yang sama. Bedanya ada pada
+apa yang diminta dari pengguna: ia selalu modal, menekan scrim tidak menutupnya, dan tidak ada tombol
+tutup di pojok, jadi pengguna harus memilih salah satu jawaban Anda (Escape tetap menutupnya). Kedua
+jawaban adalah markup biasa dalam satu baris di ujung, yang aman lebih dulu; tidak ada bagian untuknya.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Base UI merender bagian, peran `alertdialog`, penamaan, fokus, dan kunci gulir. OwsemUI menata scrim,
+panel, judul, dan deskripsi, menggambar scrim secara default, dan membawa arah teks ke dalam portal.
+Root dan Portal tidak punya tampilan sendiri, dan Trigger serta Close memakai tombol Anda. Root tidak
+merender elemen, jadi di Inspect ia adalah jendela yang memuat trigger dan alertnya.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | tidak ada | Hanya state: `open` dan `handle`; selalu modal |
+| <Part name="Trigger" /> | Tombol Anda | Lewat `render`; `aria-haspopup`, `aria-expanded`, dan `data-popup-open` saat terbuka |
+| Portal | `div` | Memindahkan alert ke akhir body, atau ke `container`, dan menggambar scrim |
+| <Part name="Backdrop" /> | `div.ow-alert-dialog__backdrop` | Opsional: tulis hanya untuk mengubah scrim, dan ia menggantikan milik Portal |
+| Viewport | `div.ow-alert-dialog__viewport` | Opsional, membungkus Popup: ia yang menggulir, dan panel tetap setinggi isinya |
+| <Part name="Popup" /> | `div.ow-alert-dialog__popup` | `role="alertdialog"`, `dir`, `--nested-dialogs`, dan `data-nested-dialog-open` |
+| <Part name="Title" /> | `h2.ow-alert-dialog__title` | Menamai alert; satu-satunya bagian yang diwajibkan aksesibilitas |
+| <Part name="Description" /> | `p.ow-alert-dialog__description` | Mendeskripsikan alert, muted |
+| <Part name="Close" /> | Tombol Anda | Menutup alert; yang pertama adalah jawaban yang aman |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+Alert Dialog memakai bagian Dialog, dengan prop di bawah. Root Base UI tidak punya `modal` dan
+`disablePointerDismissal`: alert selalu modal dan tidak pernah menutup karena tekanan di luar.
+
+### AlertDialog.Portal
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `backdrop` | `boolean` | `true` | Menggambar scrim di belakang alert; `false` membiarkan halaman tidak diredupkan. `AlertDialog.Backdrop` di antara children menggantikannya |
+
+### AlertDialog.Backdrop
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `forceRender` | `boolean` | `true` | Dirender juga di alert bertumpuk, tempat ia meredupkan induknya. Default Base UI adalah `false` |
+
+### AlertDialog.Popup
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `initialFocus` | Sama seperti Base UI | `AlertDialog.Close` pertama di popup | Base UI memfokuskan kontrol pertama, yang bisa jadi yang berbahaya. Di sini fokus pertama jatuh ke Close pertama, di mana pun ia berada di markup. Tanpa Close, default Base UI berlaku. Alert yang terlalu panjang memfokuskan dirinya sendiri, jadi terbuka di awalnya |
+
+Root di dalam Popup membuat alert bertumpuk: induk mundur selama yang dalam terbuka, dan
+`backdrop={false}` pada Portal dalam membiarkan induk tidak diredupkan. Alert yang terbuka menahan
+gulir halaman lewat kunci milik OwsemUI, jadi teks halaman tidak digambar ulang selama ia terbuka.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-alert-dialog__backdrop` | Backdrop |
+| `ow-alert-dialog__viewport` | Viewport |
+| `ow-alert-dialog__popup` | Popup |
+| `ow-alert-dialog__title` | Title |
+| `ow-alert-dialog__description` | Description |
+
+## Aksesibilitas [#accessibility]
+
+| Tombol | Aksi |
+| --- | --- |
+| Enter, Spasi | Pada trigger: membuka alert; fokus pindah ke jawaban yang aman |
+| Tab, Shift + Tab | Berpindah di antara kontrol alert, dan tetap di dalamnya |
+| Escape | Menutup alert teratas; fokus kembali ke pembukanya |
+
+- Pembaca layar mengumumkan `alertdialog` yang dinamai judul dan dideskripsikan deskripsi, jadi
+  selalu beri `AlertDialog.Title` dan `AlertDialog.Description`.
+- Taruh jawaban yang tidak mengubah apa pun di `AlertDialog.Close` pertama dan ia mendapat fokus
+  pertama, sehingga Enter yang tak sengaja tidak bisa menyetujui aksi berbahaya. Beri `initialFocus`
+  untuk memilih yang lain.
+- Sisa halaman menjadi inert dan menahan gulirnya. OwsemUI menahan gulir tanpa mengatur `overflow`
+  pada halaman, jadi teksnya tidak digambar ulang; dibuka lewat sentuhan, kunci Base UI yang berlaku.
+- Dengan `prefers-contrast: more`, panel mendapat cincin 1px dalam `--ow-edge`. Di forced colors ia
+  menjaga tepi 1px dalam warna sistem. Alert Dialog tidak membawa teks sendiri, jadi tidak ada yang
+  perlu diterjemahkan selain milik Anda.
+
+## Tema [#theming]
+
+Alert Dialog membaca token tema ini. Atur pada Popup untuk satu panel, pada Portal agar scrim ikut
+terjangkau, atau untuk semua alert di `:root`. Kelas di sekitar trigger tidak menjangkau: alert
+dirender di portal, di luar subtree trigger.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-backdrop` | Scrim |
+| `--ow-raised-bg` | Permukaan |
+| `--ow-popup-shadow` | Bayangan |
+| `--ow-edge` | Cincin di bawah `prefers-contrast: more` |
+| `--ow-fg` | Teks |
+| `--ow-muted` | Deskripsi |
+| `--ow-radius` | Sudut, satu radius untuk semua permukaan |
+| `--ow-focus` | Cincin, saat panel sendiri mendapat fokus |
+| `--ow-ease-out` | Masuk dan keluar |
+
+<ForMode mode="isolated">
+
+Dalam mode terisolasi, nilainya ada pada setiap Popup, jadi atur milik Anda pada Popup dengan kelas.
+
+</ForMode>
+
+Setiap aturan Alert Dialog berbobot satu kelas, jadi kelas Anda, atau utilitas Tailwind, menang tanpa
+`!important`. Ukurannya dalam `em`, jadi `font-size` pada Popup menskalakan panel.
+
+```css
+.wide {
+  inline-size: 40em; /* default 32em; tetap 16px di dalam layar */
+  padding: 24px;
+}
+```
+
+## Gerak [#motion]
+
+Panel memudar masuk dan tumbuh dari 0,96 dalam 250 ms, dari tengahnya sendiri, tanpa translate untuk
+menjaganya di tengah; scrim hanya memudar, dan keduanya keluar dalam 200 ms. Induk mundur 16px dan ke
+0,95 untuk setiap alert yang bertumpuk di dalamnya. Dengan `prefers-reduced-motion`, panel memudar tanpa
+tumbuh, dan induk tetap di tempat.

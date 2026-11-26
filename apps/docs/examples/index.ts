@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 import type { ExamplePageProps } from "@/components/component-page/component-page";
 import type { ComponentName } from "@/lib/catalog";
 import AccordionPage from "./accordion";
+import AlertDialogPage from "./alert-dialog";
 import AvatarPage from "./avatar";
 import ButtonPage from "./button";
 import CheckboxPage from "./checkbox";
@@ -23,6 +24,7 @@ import MeterPage from "./meter";
 import NumberFieldPage from "./number-field";
 import OTPFieldPage from "./otp-field";
 import PopoverPage from "./popover";
+import PreviewCardPage from "./preview-card";
 import ProgressPage from "./progress";
 import RadioGroupPage from "./radio-group";
 import ScrollAreaPage from "./scroll-area";
@@ -83,6 +85,8 @@ export const examples: Partial<Record<ComponentName, ComponentType<ExamplePagePr
   "number-field": NumberFieldPage,
   slider: SliderPage,
   "otp-field": OTPFieldPage,
+  "alert-dialog": AlertDialogPage,
+  "preview-card": PreviewCardPage,
   "icon-morph": IconMorphPage,
   "code-block": CodeBlockPage,
 };

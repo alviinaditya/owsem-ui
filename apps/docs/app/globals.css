@@ -709,6 +709,32 @@ body {
   place-items: center;
 }
 
+/* Alert Dialog's index preview: the open alert, drawn by its own classes in the preview's box. */
+.component-preview-alert {
+  position: absolute;
+  inset: 0;
+}
+
+.component-preview-text {
+  margin: 0;
+  text-align: center;
+}
+
+.component-preview-live[data-preview="preview-card"] {
+  margin-block-end: 72px;
+}
+
+.component-preview .ow-preview-card__popup {
+  inline-size: 168px;
+  max-inline-size: none;
+  display: grid;
+  gap: 2px;
+}
+
+.component-preview .ow-preview-card__popup > * {
+  margin: 0;
+}
+
 .component-preview-row {
   display: flex;
   align-items: center;
@@ -805,16 +831,16 @@ body {
   max-inline-size: none;
 }
 
-.component-preview :is(.ow-dialog__backdrop, .ow-dialog__popup) {
+.component-preview :is(.ow-dialog__backdrop, .ow-dialog__popup, .ow-alert-dialog__popup) {
   position: absolute;
 }
 
-.component-preview .ow-dialog__popup {
+.component-preview :is(.ow-dialog__popup, .ow-alert-dialog__popup) {
   inline-size: 224px;
   max-block-size: none;
 }
 
-.component-preview .ow-dialog__description {
+.component-preview :is(.ow-dialog__description, .ow-alert-dialog__description) {
   margin-block-end: 12px;
 }
 
@@ -2610,11 +2636,19 @@ body {
   line-height: 1.45;
 }
 
-.demo-dialog :is(.ow-dialog__backdrop, .ow-dialog__viewport, .ow-dialog__popup) {
+.demo-dialog
+  :is(
+    .ow-dialog__backdrop,
+    .ow-dialog__viewport,
+    .ow-dialog__popup,
+    .ow-alert-dialog__backdrop,
+    .ow-alert-dialog__popup
+  ) {
   position: absolute;
 }
 
-.demo-dialog .ow-dialog__viewport .ow-dialog__popup {
+.demo-dialog .ow-dialog__viewport .ow-dialog__popup,
+.demo-dialog .ow-alert-dialog__viewport .ow-alert-dialog__popup {
   position: relative;
 }
 
@@ -2656,8 +2690,14 @@ body {
   margin-block: 0 12px;
 }
 
+.demo-dialog-status {
+  padding: 24px 16px;
+  color: var(--ow-muted);
+}
+
 .demo-dialog-actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
 }
@@ -4268,4 +4308,51 @@ body {
 /* Token setup's blocks inside the popover. */
 .token-setup-json .ow-code-block {
   border-radius: max(0px, var(--ow-radius) - 4px);
+}
+
+/* Preview Card's demos: a sentence with a link, and the card's plain content. */
+.demo-preview-card-text {
+  max-inline-size: 28em;
+  margin: 0;
+  font-size: var(--docs-text-ui);
+  line-height: 1.6;
+  text-align: center;
+}
+
+.demo-preview-card-specimen {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  inline-size: 24rem;
+  block-size: 18rem;
+}
+
+.demo-preview-card-sides {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 32px;
+  font-size: var(--docs-text-ui);
+}
+
+.demo-preview-card-popup {
+  display: grid;
+  gap: 4px;
+  inline-size: 20rem;
+}
+
+.demo-preview-card-popup > * {
+  margin: 0;
+}
+
+.demo-preview-card-popup > p {
+  color: var(--ow-muted);
+}
+
+.demo-preview-card-image {
+  inline-size: 100%;
+  block-size: auto;
+  margin-block-end: 8px;
+  border-radius: calc(var(--ow-radius) - 6px);
 }

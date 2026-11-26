@@ -1,0 +1,197 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * A link that opens a floating card on the raised fill with the popup shadow, and an optional arrow
+ * with the same surface and shadow. The card grows out of its trigger in 180 ms.
+ */
+@layer owsem.components {
+  /* Takes the color around it, with a quiet underline that darkens under the pointer. */
+  .ow-preview-card__trigger {
+    --_focus: var(--ow-focus);
+    border-radius: calc(var(--ow-radius) / 8);
+    color: inherit;
+    text-decoration-line: underline;
+    text-decoration-color: color-mix(in oklab, currentColor 50%, transparent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+    transition: text-decoration-color 150ms var(--ow-ease-out);
+  }
+
+  .ow-preview-card__trigger:focus-visible {
+    outline: 2px solid var(--_focus);
+    outline-offset: 2px;
+  }
+
+  .ow-preview-card__trigger[data-popup-open] {
+    text-decoration-color: currentColor;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .ow-preview-card__trigger:hover {
+      text-decoration-color: currentColor;
+    }
+  }
+
+  .ow-preview-card__popup {
+    --_bg: var(--ow-raised-bg);
+    --_shadow: var(--ow-popup-shadow);
+    --_fg: var(--ow-fg);
+    box-sizing: border-box;
+    max-inline-size: min(20rem, var(--available-width));
+    padding: 16px;
+    border-radius: var(--ow-radius);
+    /* Invisible until forced colors draw it as the edge. */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--_bg);
+    box-shadow: var(--_shadow);
+    color: var(--_fg);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    transform-origin: var(--transform-origin);
+    /* Its own layer, so it lands without a pixel jump. */
+    will-change: transform;
+    transition:
+      opacity 180ms var(--ow-ease-out),
+      transform 180ms var(--ow-ease-out);
+  }
+
+  .ow-preview-card__popup:is([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  /* Leaving is quicker than arriving. */
+  .ow-preview-card__popup[data-ending-style] {
+    transition-duration: 120ms;
+  }
+
+  /* Opened from the keyboard, or shut with Escape: no animation. */
+  .ow-preview-card__popup[data-instant] {
+    transition: none;
+  }
+
+  /*
+   * A 14px box centered on the popup's edge; its outer half shows a square turned 45 degrees with
+   * the popup's surface and shadow, so its edges are the panel's (in dark, a light line). The
+   * visible half reaches 1px into the popup at the middle, over the panel's inner line, so the
+   * arrow opens into the panel. Base UI centers it on the trigger with top or left.
+   */
+  .ow-preview-card__arrow {
+    /* The half that shows when the arrow points right or left. */
+    --_right-half: polygon(
+      50% 0,
+      100% 0,
+      100% 100%,
+      50% 100%,
+      50% 11px,
+      calc(50% - 1px) 11px,
+      calc(50% - 1px) 3px,
+      50% 3px
+    );
+    --_left-half: polygon(
+      0 0,
+      50% 0,
+      50% 3px,
+      calc(50% + 1px) 3px,
+      calc(50% + 1px) 11px,
+      50% 11px,
+      50% 100%,
+      0 100%
+    );
+    inline-size: 14px;
+    block-size: 14px;
+  }
+
+  /* With the 1px ring outside it, the square's diagonal is the box: (7.9 + 2) × √2 = 14. */
+  .ow-preview-card__arrow::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    inline-size: 7.9px;
+    block-size: 7.9px;
+    margin: auto;
+    /* Invisible until forced colors draw it as the edge. */
+    outline: 1px solid transparent;
+    background-color: var(--_bg);
+    box-shadow: var(--_shadow);
+    transform: rotate(45deg);
+  }
+
+  /* biome-ignore-start lint/nursery/useLogicalProperties: Base UI's physical sides */
+  .ow-preview-card__arrow[data-side="top"] {
+    top: calc(100% - 7px);
+    clip-path: polygon(
+      0 50%,
+      3px 50%,
+      3px calc(50% - 1px),
+      11px calc(50% - 1px),
+      11px 50%,
+      100% 50%,
+      100% 100%,
+      0 100%
+    );
+  }
+
+  .ow-preview-card__arrow[data-side="bottom"] {
+    bottom: calc(100% - 7px);
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% 50%,
+      11px 50%,
+      11px calc(50% + 1px),
+      3px calc(50% + 1px),
+      3px 50%,
+      0 50%
+    );
+  }
+
+  .ow-preview-card__arrow[data-side="left"] {
+    left: calc(100% - 7px);
+    clip-path: var(--_right-half);
+  }
+
+  .ow-preview-card__arrow[data-side="right"] {
+    right: calc(100% - 7px);
+    clip-path: var(--_left-half);
+  }
+  /* biome-ignore-end lint/nursery/useLogicalProperties: Base UI's physical sides */
+
+  /* Logical sides: mirrored right to left. */
+  .ow-preview-card__arrow[data-side="inline-start"] {
+    inset-inline-start: calc(100% - 7px);
+    clip-path: var(--_right-half);
+  }
+
+  .ow-preview-card__arrow[data-side="inline-end"] {
+    inset-inline-end: calc(100% - 7px);
+    clip-path: var(--_left-half);
+  }
+
+  .ow-preview-card__positioner[dir="rtl"]
+    .ow-preview-card__arrow:is([data-side="inline-start"], [data-side="inline-end"]) {
+    transform: scaleX(-1);
+  }
+
+  /* In forced colors the underline and the ring take the system's colors. */
+  @media (forced-colors: active) {
+    .ow-preview-card__trigger:focus-visible {
+      outline-color: Highlight;
+    }
+  }
+
+  /* More contrast asked for: a ring around the popup and its arrow. */
+  @media (prefers-contrast: more) {
+    .ow-preview-card__popup {
+      --_shadow: var(--ow-popup-shadow), 0 0 0 1px var(--ow-edge);
+    }
+  }
+
+  /* It fades, without growing. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-preview-card__popup:is([data-starting-style], [data-ending-style]) {
+      transform: none;
+    }
+  }
+}

@@ -18,6 +18,7 @@ import {
   NumberField,
   OTPField,
   Popover,
+  PreviewCard,
   Progress,
   Radio,
   RadioGroup,
@@ -63,6 +64,14 @@ const TEXT = {
     share: "Bagikan",
     shareTitle: "Bagikan link",
     shareBody: "Siapa pun bisa melihat.",
+    discardTitle: "Buang draf?",
+    discardBody: "Perubahan hilang.",
+    keep: "Lanjut",
+    discard: "Buang",
+    docsLink: "dokumentasi",
+    docsRead: "Baca",
+    docsTitle: "Dokumentasi",
+    docsBody: "Pratinjau dan contoh.",
     edit: "Edit",
     cut: "Potong",
     copy: "Salin",
@@ -116,6 +125,14 @@ const TEXT = {
     share: "Share",
     shareTitle: "Share link",
     shareBody: "Anyone with it can view.",
+    discardTitle: "Discard draft?",
+    discardBody: "Changes are lost.",
+    keep: "Keep",
+    discard: "Discard",
+    docsLink: "the docs",
+    docsRead: "Read",
+    docsTitle: "Docs",
+    docsBody: "Previews and examples.",
     edit: "Edit",
     cut: "Cut",
     copy: "Copy",
@@ -214,6 +231,54 @@ function DialogPreview({ t }: { t: Text }) {
           </Dialog.Popup>
         </Dialog.Portal>
       </Dialog.Root>
+      {portal.box}
+    </>
+  );
+}
+
+/**
+ * Alert Dialog is always modal, so a pinned one would make the page around it inert. This is its
+ * markup drawn by its own classes: the look of the open alert, with nothing to press.
+ */
+function AlertDialogPreview({ t }: { t: Text }) {
+  return (
+    <div className="component-preview-alert" aria-hidden="true">
+      <div className="ow-alert-dialog__backdrop" />
+      <div className="ow-alert-dialog__popup">
+        <h2 className="ow-alert-dialog__title">{t.discardTitle}</h2>
+        <p className="ow-alert-dialog__description">{t.discardBody}</p>
+        <div className="component-preview-row">
+          <Button size="sm" variant="outline" tabIndex={-1}>
+            {t.keep}
+          </Button>
+          <Button size="sm" tabIndex={-1}>
+            {t.discard}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PreviewCardPreview({ t }: { t: Text }) {
+  const portal = usePortal();
+  return (
+    <>
+      <p className="component-preview-text">
+        {t.docsRead}{" "}
+        <PreviewCard.Root open>
+          <PreviewCard.Trigger href="/">{t.docsLink}</PreviewCard.Trigger>
+          <PreviewCard.Portal container={portal.container}>
+            <PreviewCard.Positioner side="bottom">
+              <PreviewCard.Popup {...keepFocus}>
+                <PreviewCard.Arrow />
+                <strong>{t.docsTitle}</strong>
+                <p>{t.docsBody}</p>
+              </PreviewCard.Popup>
+            </PreviewCard.Positioner>
+          </PreviewCard.Portal>
+        </PreviewCard.Root>
+      </p>
       {portal.box}
     </>
   );
@@ -616,6 +681,8 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
   ),
   dialog: (t) => <DialogPreview t={t} />,
   popover: (t) => <PopoverPreview t={t} />,
+  "alert-dialog": (t) => <AlertDialogPreview t={t} />,
+  "preview-card": (t) => <PreviewCardPreview t={t} />,
   "scroll-area": (t) => (
     <ScrollArea.Root className="component-preview-scroll" fade>
       <ul>
@@ -743,17 +810,6 @@ const SKETCHES: Partial<Record<ComponentName, ReactNode>> = {
       {F(40, 62, 38, 5, 0.35)}
     </>
   ),
-  "alert-dialog": (
-    <>
-      {B(30, 12, 100, 72, 8)}
-      <circle cx={46} cy={30} r={8} />
-      <path d="M46 26v4M46 34v0.5" />
-      {F(60, 24, 46, 6, 0.6)}
-      {F(60, 36, 56, 4, 0.35)}
-      {B(66, 62, 26, 13, 4)}
-      <rect x={96} y={62} width={26} height={13} rx={4} fill="currentColor" opacity={0.6} />
-    </>
-  ),
   toast: (
     <>
       <rect x={52} y={26} width={84} height={24} rx={6} opacity={0.4} />
@@ -770,18 +826,6 @@ const SKETCHES: Partial<Record<ComponentName, ReactNode>> = {
       {F(70, 54, 20, 4, 0.6)}
       {F(42, 66, 56, 4, 0.35)}
       {F(42, 75, 40, 4, 0.35)}
-    </>
-  ),
-  "preview-card": (
-    <>
-      {F(40, 12, 40, 5, 0.6)}
-      <path d="M40 21h40" opacity={0.6} />
-      {B(40, 28, 84, 56, 7)}
-      <circle cx={56} cy={44} r={8} />
-      {F(70, 38, 40)}
-      {F(70, 48, 28, 4, 0.35)}
-      {F(50, 62, 64, 4, 0.35)}
-      {F(50, 71, 48, 4, 0.35)}
     </>
   ),
   "context-menu": (

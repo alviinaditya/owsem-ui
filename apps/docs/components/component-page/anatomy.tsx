@@ -296,16 +296,43 @@ function planAt(wrap: HTMLElement, root: HTMLElement, point: { x: number; y: num
   };
 }
 
-/** The first instance of the root part in the demo: where the specimen comes from and returns. */
+/**
+ * The box the specimen leaves and returns to: the demo's first instance of the root part, else
+ * (the demo shows only a trigger, or no wrapper) what the demo shows, so it always lands on
+ * something real.
+ */
 function originOf(demo: HTMLElement, body: HTMLElement, selector: string) {
   const box = body.getBoundingClientRect();
+  const found = (r: DOMRect) => ({
+    x: r.left - box.left + r.width / 2,
+    y: r.top - box.top + r.height / 2,
+    w: r.width,
+    h: r.height,
+  });
   for (const el of demo.querySelectorAll<HTMLElement>(selector)) {
     const r = el.getBoundingClientRect();
-    if (r.width > 0 && r.height > 0) {
-      return { x: r.left - box.left + r.width / 2, y: r.top - box.top + r.height / 2, h: r.height };
-    }
+    if (r.width > 0 && r.height > 0) return found(r);
   }
-  return null;
+  let left = Number.POSITIVE_INFINITY;
+  let top = left;
+  let right = Number.NEGATIVE_INFINITY;
+  let bottom = right;
+  const stack = [...(demo.querySelector(".cp-demo")?.children ?? [])];
+  for (const el of stack) {
+    const r = el.getBoundingClientRect();
+    if (r.width > 0 && r.height > 0) {
+      left = Math.min(left, r.left);
+      top = Math.min(top, r.top);
+      right = Math.max(right, r.right);
+      bottom = Math.max(bottom, r.bottom);
+    } else stack.push(...el.children);
+  }
+  return right > left ? found(new DOMRect(left, top, right - left, bottom - top)) : null;
+}
+
+/** The scale at which the specimen's root fits inside the origin box (never larger than it). */
+function fitScale(origin: { w: number; h: number }, root: DOMRect, k0: number) {
+  return Math.min(origin.w / (root.width / k0), origin.h / (root.height / k0));
 }
 
 interface Env {
@@ -1312,11 +1339,11 @@ export function Anatomy({
       // The mirror of the open: glide and shrink onto the demo's instance, crossing into it.
       const origin = originOf(demo, body, rootPart.selector);
       const k0 = scaleOf(wrap);
-      const h0 = specimenRoot.getBoundingClientRect().height / k0;
+      const root0 = specimenRoot.getBoundingClientRect();
       const bodyBox = body.getBoundingClientRect();
       const here = specimenRoot.getBoundingClientRect();
       const plan = origin
-        ? planAt(wrap, specimenRoot, origin, origin.h / h0)
+        ? planAt(wrap, specimenRoot, origin, fitScale(origin, root0, k0))
         : planAt(
             wrap,
             specimenRoot,
@@ -1356,9 +1383,9 @@ export function Anatomy({
         glide.current = false;
         if (!reduced()) {
           const origin = originOf(demo, body, rootPart.selector);
-          const h0 = (specimenRoot?.getBoundingClientRect().height ?? 0) / scaleOf(wrap);
-          if (origin && specimenRoot && h0) {
-            place(wrap, planAt(wrap, specimenRoot, origin, origin.h / h0));
+          const r0 = specimenRoot?.getBoundingClientRect();
+          if (origin && specimenRoot && r0?.height) {
+            place(wrap, planAt(wrap, specimenRoot, origin, fitScale(origin, r0, scaleOf(wrap))));
           } else if (specimenRoot) {
             place(wrap, planAt(wrap, specimenRoot, goal, plan.k * POP));
           }

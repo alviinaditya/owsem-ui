@@ -2415,6 +2415,11 @@ body {
   inline-size: min(340px, calc(100vw - 64px));
 }
 
+/* Inspect's specimen is only as wide as its slots. */
+.demo-otp-specimen {
+  inline-size: max-content;
+}
+
 .demo-otp-dash {
   color: var(--ow-muted);
 }

@@ -280,10 +280,11 @@ test("Inspect opens as a morph from the demo's instance, with no snap", async ({
   );
   const [first, ...rest] = frames;
   if (!first) throw new Error("no frames");
-  // The first painted frame sits on the origin: same centre, same height.
+  // The first painted frame sits on the origin: same centre, and no taller (it fits inside).
   expect(Math.abs(first[0] - (origin.x + origin.width / 2))).toBeLessThan(4);
   expect(Math.abs(first[1] - (origin.y + origin.height / 2))).toBeLessThan(4);
-  expect(Math.abs(first[2] - origin.height)).toBeLessThan(4);
+  expect(first[2]).toBeLessThan(origin.height + 4);
+  expect(first[2]).toBeGreaterThan(origin.height * 0.7);
   // It grows from there to the middle of the preview, over several frames.
   const last = frames[frames.length - 1] as [number, number, number];
   expect(last[2]).toBeGreaterThan(origin.height * 2);
@@ -292,6 +293,92 @@ test("Inspect opens as a morph from the demo's instance, with no snap", async ({
   if (!body) throw new Error("no body");
   expect(Math.abs(last[1] - (body.y + 60 + (body.height - 124) / 2))).toBeLessThan(40);
 });
+
+// The root part's selector when the demo has an instance of it, else the demo's whole content.
+const EXITS: [string, string | null][] = [
+  ["input", null],
+  ["form", ".ow-form"],
+  ["popover", null],
+  ["select", null],
+  ["tooltip", null],
+  ["otp-field", ".ow-otp-field"],
+];
+
+for (const [slug, root] of EXITS) {
+  test(`${slug}: turning Inspect off lands the specimen on the demo and leaves nothing behind`, async ({
+    page,
+  }, testInfo) => {
+    test.skip(desktopOnly(testInfo), "the full sheet needs a wide preview");
+    await visit(page, `/en/${slug}`);
+    const before = await layoutBoxes(page);
+    await page.keyboard.press("i");
+    await expect(sheet(page).locator(".sp-label").first()).toBeVisible();
+    await page.evaluate(async () => {
+      await Promise.all(document.getAnimations().map((a) => a.finished.catch(() => {})));
+    });
+    // Measure where the glide lands as soon as it starts, before the overlay unmounts (340 ms),
+    // however slow the machine: the glide's end is set at once, so finishing it shows it.
+    await page.evaluate((selector) => {
+      const w = window as unknown as { landed?: unknown };
+      const animate = Element.prototype.animate;
+      Element.prototype.animate = function (this: Element, ...args) {
+        const a = animate.apply(this, args);
+        queueMicrotask(() => {
+          if (a.id !== "sp-glide" || w.landed !== undefined) return;
+          a.finish();
+          const root = selector
+            ? document.querySelector(`.sp-specimen ${selector}`)
+            : document.querySelector(".sp-specimen")?.firstElementChild;
+          const kids = selector
+            ? [...document.querySelectorAll(`.cp-demo ${selector}`)].slice(0, 1)
+            : [...(document.querySelector(".cp-demo")?.children ?? [])];
+          const rects = kids.map((el) => el.getBoundingClientRect()).filter((r) => r.width > 0);
+          if (!root || !rects.length) {
+            w.landed = null;
+            return;
+          }
+          const r = root.getBoundingClientRect();
+          const left = Math.min(...rects.map((x) => x.left));
+          const right = Math.max(...rects.map((x) => x.right));
+          const top = Math.min(...rects.map((x) => x.top));
+          const bottom = Math.max(...rects.map((x) => x.bottom));
+          w.landed = {
+            dx: r.left + r.width / 2 - (left + right) / 2,
+            dy: r.top + r.height / 2 - (top + bottom) / 2,
+            grow: [r.width - (right - left), r.height - (bottom - top)],
+          };
+        });
+        return a;
+      };
+    }, root);
+    await page.keyboard.press("i");
+    await page.waitForFunction(
+      () => (window as unknown as { landed?: unknown }).landed !== undefined,
+    );
+    const landed = (await page.evaluate(
+      () => (window as unknown as { landed?: unknown }).landed,
+    )) as { dx: number; dy: number; grow: number[] } | null;
+    if (!landed) throw new Error("nothing to compare");
+    // On the demo's box: same centre, and never larger than it.
+    expect(Math.abs(landed.dx)).toBeLessThan(2);
+    expect(Math.abs(landed.dy)).toBeLessThan(2);
+    expect(Math.max(...landed.grow)).toBeLessThan(2);
+
+    // Finish everything: the overlay is gone, the demo is where it was, nothing still runs.
+    await page.evaluate(() => {
+      for (const a of document.getAnimations())
+        if (a.effect?.getTiming().iterations !== Infinity) a.finish();
+    });
+    await expect(sheet(page)).toHaveCount(0);
+    await expect(specimen(page)).toHaveCount(0);
+    await expect(demo(page).locator(".cp-demo")).toHaveCSS("opacity", "1");
+    expect(await layoutBoxes(page)).toEqual(before);
+    const left = await page.evaluate(
+      () => document.getAnimations().filter((a) => a.id.startsWith("sp-")).length,
+    );
+    expect(left).toBe(0);
+  });
+}
 
 test("Escape closes a part's popover, then Inspect", async ({ page }, testInfo) => {
   test.skip(desktopOnly(testInfo), "the full sheet needs a wide preview");

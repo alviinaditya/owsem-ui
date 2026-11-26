@@ -218,10 +218,9 @@ export const otpFieldDefinition = defineComponent({
   ],
   anatomy: {
     specimen: (lang) => (
-      <Field.Root className="demo-otp">
-        <Field.Label>{TEXT[lang].code}</Field.Label>
-        <OTPField.Root length={4} size="lg" defaultValue="48" />
-      </Field.Root>
+      <div className="demo-otp-specimen">
+        <OTPField.Root aria-label={TEXT[lang].code} length={4} size="lg" defaultValue="48" />
+      </div>
     ),
   },
   parts: [

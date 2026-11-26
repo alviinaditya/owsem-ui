@@ -154,7 +154,9 @@ come from `font-size` in `em`, so a larger font makes a taller trigger on the sa
 The panel's height moves from Base UI's `--collapsible-panel-height` over 300ms on a curve with no
 overshoot (`--ow-ease-drawer`), clipped, while the content fades over 210ms. Interrupt it and it
 turns around from where it is. Base UI leaves the height at `auto` once the panel is open, so
-content that arrives late is not cut off.
+content that arrives late is not cut off. Base UI measures whole pixels, so where the browser can
+move to `auto` (`interpolate-size`) the panel does, and lands on the content's exact height with no
+last jump at a fractional zoom.
 
 The chevron is two strokes that each turn a quarter about their own centers, so the down chevron
 becomes the up chevron through a flat line, on the settle spring. A held press scales the trigger

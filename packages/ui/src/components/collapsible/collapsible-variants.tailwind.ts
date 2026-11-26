@@ -85,9 +85,16 @@ export function collapsibleContentVariants({ size }: CollapsibleVariantProps = {
 }
 
 // The box that moves: clipped, with the height from Base UI and the content fading with it.
-// Motion is scaled by the motion intensity, so at 0 the panel opens at once.
+// Motion is scaled by the motion intensity, so at 0 the panel opens at once. Base UI measures whole
+// pixels, so at a fractional zoom or content height the box would end up to half a pixel short of
+// the content and jump to it as it lands. Where the browser can move to `auto`, it does, and ends
+// on the exact size.
 const panel = [
   "[--_duration:calc(300ms_*_var(--ow-motion-scale))] h-(--collapsible-panel-height) overflow-hidden",
+  "supports-[interpolate-size:allow-keywords]:[interpolate-size:allow-keywords]",
+  "supports-[interpolate-size:allow-keywords]:h-auto",
+  "supports-[interpolate-size:allow-keywords]:data-starting-style:h-0",
+  "supports-[interpolate-size:allow-keywords]:data-ending-style:h-0",
   "transition-[block-size,opacity] duration-[var(--_duration),calc(var(--_duration)_*_0.7)]",
   "ease-[var(--ow-ease-drawer),var(--ow-ease-out)]",
   "data-starting-style:h-0 data-starting-style:opacity-0",

@@ -156,7 +156,12 @@
     --_turn: 1;
   }
 
-  /* The box that moves: clipped, with its size from Base UI and the content fading with it. */
+  /*
+   * The box that moves: clipped, with its size from Base UI and the content fading with it. Base UI
+   * measures whole pixels, so at a fractional zoom or content height the box would end up to half a
+   * pixel short of the content and jump to it as it lands. Where the browser can move to `auto`,
+   * it does, and ends on the exact size.
+   */
   .ow-accordion__panel {
     --_duration: calc(300ms * var(--ow-motion-scale));
     block-size: var(--accordion-panel-height);
@@ -164,6 +169,13 @@
     transition:
       block-size var(--_duration) var(--ow-ease-drawer),
       opacity calc(var(--_duration) * 0.7) var(--ow-ease-out);
+  }
+
+  @supports (interpolate-size: allow-keywords) {
+    .ow-accordion__panel {
+      interpolate-size: allow-keywords;
+      block-size: auto;
+    }
   }
 
   .ow-accordion__panel:where([data-starting-style], [data-ending-style]) {
@@ -195,6 +207,12 @@
     transition:
       inline-size var(--_duration) var(--ow-ease-drawer),
       opacity calc(var(--_duration) * 0.7) var(--ow-ease-out);
+  }
+
+  @supports (interpolate-size: allow-keywords) {
+    .ow-accordion__panel[data-orientation="horizontal"] {
+      inline-size: auto;
+    }
   }
 
   .ow-accordion__panel[data-orientation="horizontal"]:where(

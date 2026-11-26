@@ -333,15 +333,10 @@ describe("Collapsible", () => {
     const at = heightOf(panel() as HTMLElement);
     expect(at).toBeLessThan(141 - 10);
     await userEvent.click(trigger);
-    await expect
-      .poll(() =>
-        transitions(panel() as HTMLElement)
-          .filter((a) => a.transitionProperty === "block-size" || a.transitionProperty === "height")
-          .map((a) =>
-            Number.parseFloat(String((a.effect as KeyframeEffect).getKeyframes()[0]?.height)),
-          ),
-      )
-      .toSatisfy((starts: number[]) => starts.some((s) => s >= at - 1 && s < 141 - 5));
+    // It turns from the height it had, which the slow motion keeps close, and not from an end.
+    const turned = heightOf(panel() as HTMLElement);
+    expect(turned).toBeGreaterThanOrEqual(at - 1);
+    expect(turned).toBeLessThan(141 - 5);
     // From there it keeps shrinking.
     const first = heightOf(panel() as HTMLElement);
     await expect.poll(() => heightOf(panel() as HTMLElement)).toBeLessThan(first);

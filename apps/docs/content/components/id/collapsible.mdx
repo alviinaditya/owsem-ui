@@ -155,7 +155,9 @@ pada skala yang sama.
 Tinggi panel bergerak dari `--collapsible-panel-height` milik Base UI selama 300ms pada kurva tanpa
 overshoot (`--ow-ease-drawer`), terpotong, sementara isinya memudar selama 210ms. Interupsi dan ia
 berbalik dari tempatnya sekarang. Base UI membiarkan tinggi `auto` setelah panel terbuka, jadi isi
-yang datang belakangan tidak terpotong.
+yang datang belakangan tidak terpotong. Base UI mengukur dalam piksel utuh, jadi bila browser bisa
+bergerak ke `auto` (`interpolate-size`), panel melakukannya dan berhenti tepat di tinggi isi, tanpa
+lompatan terakhir pada zoom pecahan.
 
 Chevron adalah dua goresan yang masing-masing berputar seperempat putaran di sekitar pusatnya
 sendiri, sehingga chevron bawah menjadi chevron atas lewat garis datar, dengan spring settle.

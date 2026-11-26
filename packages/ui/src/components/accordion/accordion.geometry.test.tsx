@@ -134,4 +134,38 @@ describe("Accordion geometry", () => {
     const svg = a.querySelector("svg") as SVGElement;
     expect(getComputedStyle(svg).rotate).toBe("-90deg");
   });
+
+  test("the panel's size is the content's to the last fraction at both ends of its move", async () => {
+    // Base UI measures whole pixels: 77.7px of content would move to 78 and jump to 77.7 on landing.
+    if (!CSS.supports("interpolate-size", "allow-keywords")) return;
+    const group = await mount(
+      <Accordion.Root>
+        <Accordion.Item value="a">
+          <Accordion.Trigger>Item</Accordion.Trigger>
+          <Accordion.Panel>
+            <div style={{ blockSize: 60.2 }}>Content</div>
+          </Accordion.Panel>
+        </Accordion.Item>
+      </Accordion.Root>,
+    );
+    const trigger = group.querySelector(".ow-accordion__trigger") as HTMLElement;
+    const panel = () => group.querySelector<HTMLElement>(".ow-accordion__panel");
+    const moving = () =>
+      panel()
+        ?.getAnimations()
+        .filter(
+          (a) =>
+            a instanceof CSSTransition && ["height", "block-size"].includes(a.transitionProperty),
+        ) ?? [];
+    const content = () => rect(panel()?.firstElementChild as HTMLElement).height;
+    trigger.click();
+    await expect.poll(() => moving().length).toBe(1);
+    for (const animation of moving()) animation.finish();
+    expect(Math.abs(rect(panel() as HTMLElement).height - content())).toBeLessThanOrEqual(0.05);
+    trigger.click();
+    await expect.poll(() => moving().length).toBe(1);
+    // The first frame of the close is the size it rests at, not a rounded one.
+    for (const animation of moving()) animation.currentTime = 0;
+    expect(Math.abs(rect(panel() as HTMLElement).height - content())).toBeLessThanOrEqual(0.05);
+  });
 });

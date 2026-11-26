@@ -166,7 +166,9 @@ from `font-size` in `em`.
 A panel's height (its width, when horizontal) moves from Base UI's `--accordion-panel-height` over
 300ms on a curve with no overshoot (`--ow-ease-drawer`), clipped, while the content fades over
 210ms. Open another item and the first closes as the second opens, each from where it is. Base UI
-leaves the size at `auto` once a panel is open, so content that arrives late is not cut off.
+leaves the size at `auto` once a panel is open, so content that arrives late is not cut off. Base
+UI measures whole pixels, so where the browser can move to `auto` (`interpolate-size`) the panel
+does, and lands on the content's exact size with no last jump at a fractional zoom.
 
 The chevron is two strokes that each turn a quarter about their own centers, so the down chevron
 becomes the up chevron through a flat line, on the settle spring, and its color moves from muted to

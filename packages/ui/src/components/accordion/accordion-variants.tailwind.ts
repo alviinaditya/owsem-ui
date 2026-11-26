@@ -69,20 +69,29 @@ export function accordionTriggerVariants({ size }: AccordionVariantProps = {}): 
 
 // The box that moves: clipped, with its size from Base UI and the content fading with it.
 // Horizontal, the width moves instead. Motion is scaled by the motion intensity, so at 0 the panel
-// opens at once.
+// opens at once. Base UI measures whole pixels, so at a fractional zoom or content height the box
+// would end up to half a pixel short of the content and jump to it as it lands. Where the browser
+// can move to `auto`, it does, and ends on the exact size.
 const panel = [
   "group/ow-accordion-panel [--_duration:calc(300ms_*_var(--ow-motion-scale))] h-(--accordion-panel-height) overflow-hidden",
+  "supports-[interpolate-size:allow-keywords]:[interpolate-size:allow-keywords]",
+  "supports-[interpolate-size:allow-keywords]:h-auto",
   "transition-[block-size,opacity] duration-[var(--_duration),calc(var(--_duration)_*_0.7)]",
   "ease-[var(--ow-ease-drawer),var(--ow-ease-out)]",
   "data-starting-style:h-0 data-starting-style:opacity-0",
   "data-ending-style:h-0 data-ending-style:opacity-0",
+  "supports-[interpolate-size:allow-keywords]:data-starting-style:h-0",
+  "supports-[interpolate-size:allow-keywords]:data-ending-style:h-0",
   "data-[orientation=horizontal]:h-auto",
   "data-[orientation=horizontal]:w-(--accordion-panel-width)",
+  "supports-[interpolate-size:allow-keywords]:data-[orientation=horizontal]:w-auto",
   "data-[orientation=horizontal]:transition-[inline-size,opacity]",
   "data-[orientation=horizontal]:data-starting-style:h-auto",
   "data-[orientation=horizontal]:data-starting-style:w-0",
   "data-[orientation=horizontal]:data-ending-style:h-auto",
   "data-[orientation=horizontal]:data-ending-style:w-0",
+  "supports-[interpolate-size:allow-keywords]:data-[orientation=horizontal]:data-starting-style:w-0",
+  "supports-[interpolate-size:allow-keywords]:data-[orientation=horizontal]:data-ending-style:w-0",
   // No movement: the panel opens at once, with a short fade.
   "motion-reduce:transition-[opacity] motion-reduce:duration-[calc(120ms_*_var(--ow-motion-scale))]",
   "motion-reduce:ease-(--ow-ease-out)",

@@ -391,7 +391,10 @@
     block-size: var(--icon);
   }
 
-  /* Smaller than the items (12px of 14), with their inline padding: the item's --px in its em. */
+  /*
+   * A heading, not a choice: smaller than the items (12px of 14), in capitals with tracking, as
+   * Sidebar's group label. Their inline padding: the item's --px in its em.
+   */
   .ow-select__group-label {
     --_muted: var(--ow-muted);
     padding-block: 0.6em 0.3em;
@@ -399,7 +402,9 @@
     color: var(--_muted);
     font-size: 0.8571em;
     font-weight: 500;
+    letter-spacing: 0.06em;
     line-height: 1.25;
+    text-transform: uppercase;
   }
 
   /* A hairline, as a border for forced colors. */

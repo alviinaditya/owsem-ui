@@ -250,4 +250,27 @@ describe("Select geometry (FR-9, FR-10, FR-10b)", () => {
     expect(el('[data-testid="tall"]').getBoundingClientRect().height).toBeCloseTo(45.5, 1);
     expect(el('[data-testid="tiny"]').getBoundingClientRect().height).toBeCloseTo(24, 1);
   });
+
+  test("a group label reads as a heading: smaller, tracked capitals, shorter than a row", async () => {
+    await render(
+      <Select.Root defaultOpen>
+        <Select.Trigger aria-label="Year" />
+        <Select.Popup>
+          <Select.Group>
+            <Select.GroupLabel>2020s</Select.GroupLabel>
+            <Select.Item value="a">2024</Select.Item>
+          </Select.Group>
+        </Select.Popup>
+      </Select.Root>,
+    );
+    await landed("bottom");
+    const label = getComputedStyle(el(".ow-select__group-label"));
+    const item = getComputedStyle(el(".ow-select__item"));
+    expect(label.textTransform).toBe("uppercase");
+    expect(Number.parseFloat(label.letterSpacing)).toBeGreaterThan(0);
+    expect(Number.parseFloat(label.fontSize)).toBeLessThan(Number.parseFloat(item.fontSize));
+    expect(el(".ow-select__group-label").getBoundingClientRect().height).toBeLessThan(
+      el(".ow-select__item").getBoundingClientRect().height,
+    );
+  });
 });

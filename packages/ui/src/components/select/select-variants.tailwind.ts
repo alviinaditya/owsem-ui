@@ -209,10 +209,12 @@ const itemIndicator = [
   "motion-reduce:not-data-selected:[&>*]:transform-none",
 ];
 
-// Smaller than the items (12px of 14), with their inline padding: the item's --px in its em.
+// A heading, not a choice: smaller than the items (12px of 14), in capitals with tracking, as
+// Sidebar's group label. Their inline padding: the item's --px in its em.
 const groupLabel = [
   "[--_muted:var(--ow-muted)] pt-[0.6em] pb-[0.3em] px-[calc((0.5em_+_(1.25em_-_1cap)_/_2)_/_0.8571)]",
   "text-(color:--_muted) text-[0.8571em] font-medium leading-[1.25]",
+  "tracking-[0.06em] uppercase",
 ];
 
 // A hairline, as a border for forced colors.

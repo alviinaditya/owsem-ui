@@ -176,10 +176,11 @@ const empty = [
 // The first group's name sits closer to the top.
 const group = ["group/ow-command-menu-group"];
 
-// A group's name, in line with its items' icons.
+// A group's name in capitals, as Sidebar's group label, in line with its items' icons.
 const groupLabel = [
   "pt-[0.75em] pb-[0.375em] px-[calc((var(--_n)_+_0.125)_/_0.857_*_1em_-_1px)]",
   "text-(color:--ow-muted) text-[0.857em] font-medium",
+  "tracking-[0.06em] uppercase",
   "group-first/ow-command-menu-group:pt-[0.375em]",
 ];
 

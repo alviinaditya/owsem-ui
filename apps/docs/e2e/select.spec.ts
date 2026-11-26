@@ -67,10 +67,10 @@ test("a long list has groups with labels and separators, and a summary replaces 
   await pick(page, "Groups");
   await demo(page).getByRole("combobox", { name: "Year" }).click();
   await expect(popup(page).locator(".ow-select__group-label")).toHaveText([
-    "2000s",
-    "2010s",
-    "2020s",
-    "2030s",
+    "2000–2009",
+    "2010–2019",
+    "2020–2029",
+    "2030–2039",
   ]);
   await expect(popup(page).locator(".ow-select__separator")).toHaveCount(3);
   await expect(popup(page).getByRole("option", { name: "2026" })).toHaveAttribute(

@@ -310,13 +310,15 @@
     text-align: center;
   }
 
-  /* A group's name, in line with its items' icons. */
+  /* A group's name in capitals, as Sidebar's group label, in line with its items' icons. */
   .ow-command-menu__group-label {
     padding-block: 0.75em 0.375em;
     padding-inline: calc((var(--_n) + 0.125) / 0.857 * 1em - 1px);
     color: var(--ow-muted);
     font-size: 0.857em;
     font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 
   .ow-command-menu__group:first-child > .ow-command-menu__group-label {

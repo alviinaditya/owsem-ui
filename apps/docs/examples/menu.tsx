@@ -465,8 +465,8 @@ export const menuDefinition = defineComponent({
       name: "GroupLabel",
       selector: ".ow-menu__group-label",
       note: {
-        id: "Nama grup, kecil dan muted; juga menamai grup untuk teknologi asistif.",
-        en: "A group's name, small and muted; it names the group for assistive technology too.",
+        id: "Nama grup sebagai judul: huruf kapital kecil, muted, dengan jarak huruf, seperti Select dan Sidebar; juga menamai grup untuk teknologi asistif.",
+        en: "A group's name as a heading: small, muted capitals with tracking, like Select and Sidebar; it names the group for assistive technology too.",
       },
       tokens: { "--ow-muted": "--_muted" },
     },

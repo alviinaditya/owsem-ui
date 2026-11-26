@@ -22,14 +22,19 @@
  * Switch (Base; Tactile and Kinetic). The track is a tint of the text color with no edge while off
  * and the accent while on; the fill changes at once (DP-5). The thumb is a white key with the
  * surface shadow in both. It is gooey: as it travels it stretches along its path, leading edge
- * first (scale from the leading edge, peaking mid-travel), and while held it widens toward the
- * side it will go and squashes a little in height, as on iOS.
+ * first (the leading edge stays put, the tail catches up), and while held it widens toward the
+ * middle of the track and squashes a little in height, as on iOS.
  *
  * The thumb rests where layout puts it, at either end of the track, never on a translate: a resting
  * translate lands between device pixels at a fractional zoom and blurs the key's edges. A change of
  * state moves it there at once, and translate covers the distance while --_switch-travel catches up,
  * so the motion can be interrupted and comes from the track's size. Nothing transitions a transform
  * directly, so nothing needs a layer (NF-8): the thumb's edges snap with the track's.
+ *
+ * It scales about its centre and a translate keeps the anchored edge in place (--_lean), so no
+ * state change moves an origin: a hold that lets go as the state flips would jump by the widening.
+ * The stretch is small and has no slope at either end of the travel, so the tail never moves back
+ * and the thumb reads as one motion.
  */
 @layer owsem.components {
   .ow-switch {
@@ -120,12 +125,33 @@
     --_side: 1;
     --_end: 0;
     /* How far it stretches at most, and how far a hold widens and squashes it. */
-    --_stretch: calc(0.3 * var(--ow-motion-scale));
+    --_stretch: calc(0.15 * var(--ow-motion-scale));
     --_widen: calc(0.18 * var(--ow-motion-scale));
     --_squash: calc(0.06 * var(--ow-motion-scale));
-    /* The edge it grows from: its leading edge, the one toward where it is going, so a stretch
-     * never carries it past its place; the tail catches up. */
-    --_from: calc(50% - var(--_side) * 50%);
+    /* The widening of a hold, and the stretch of the travel: 16t²(1-t)² is 0 with no slope at both
+     * ends and 1 midway; a spring overshoot never shrinks it. */
+    --_wide: calc(var(--_widen) * var(--_switch-held));
+    --_long: calc(
+      var(--_stretch) *
+      max(
+        0,
+        16 *
+        var(--_switch-travel) *
+        var(--_switch-travel) *
+        (1 - var(--_switch-travel)) *
+        (1 - var(--_switch-travel))
+      )
+    );
+    /*
+     * How far the centre moves, as a share of the key's width, to keep an edge fixed. A hold grows
+     * from the edge on its own end and, as the travel passes the middle, from the other one; the
+     * stretch keeps the leading edge.
+     */
+    --_lean: calc(
+      var(--_side) *
+      ((1 - 2 * var(--_switch-travel)) * var(--_wide) - (2 * var(--_end) - 1) * var(--_long)) /
+      2
+    );
     --_switch-travel: 0;
     --_switch-held: 0;
     position: relative;
@@ -141,14 +167,16 @@
     background-clip: padding-box;
     background-color: var(--_key);
     color: var(--_ink);
-    translate: calc(var(--_side) * (var(--_switch-travel) - var(--_end)) * (100cqi - 100%)) 0;
-    /* 4t(1-t) is 0 at both ends of the travel and 1 midway; a spring overshoot never shrinks it. */
-    scale: calc(
-        (1 + var(--_widen) * var(--_switch-held)) *
-        (1 + var(--_stretch) * max(0, 4 * var(--_switch-travel) * (1 - var(--_switch-travel))))
+    translate: calc(
+        var(--_side) *
+        (var(--_switch-travel) - var(--_end)) *
+        (100cqi - 100%) +
+        var(--_lean) *
+        100%
       )
+      0;
+    scale: calc((1 + var(--_wide)) * (1 + var(--_long)))
       calc(1 - var(--_squash) * var(--_switch-held));
-    transform-origin: var(--_from) 50%;
     transition:
       --_switch-travel var(--ow-spring-travel-duration) var(--ow-spring-travel),
       --_switch-held var(--ow-spring-settle-duration) var(--ow-spring-settle);
@@ -161,7 +189,6 @@
   .ow-switch__thumb:where([data-checked]) {
     --_end: 1;
     --_switch-travel: 1;
-    --_from: calc(50% + var(--_side) * 50%);
     margin-inline-start: auto;
   }
 
@@ -178,16 +205,9 @@
   /* Held: in within 90 ms (DP-4), and let go on the settle spring. */
   :where(.ow-switch:active:not([data-disabled], [data-readonly])) > .ow-switch__thumb {
     --_switch-held: 1;
-    --_from: calc(50% - var(--_side) * 50%);
     transition:
       --_switch-travel var(--ow-spring-travel-duration) var(--ow-spring-travel),
       --_switch-held 90ms var(--ow-ease-out);
-  }
-
-  /* Held while on, it will go back: it widens toward the start, from its end edge. */
-  :where(.ow-switch:active:not([data-disabled], [data-readonly]))
-  > .ow-switch__thumb:where([data-checked]) {
-    --_from: calc(50% + var(--_side) * 50%);
   }
 
   /* An icon in the thumb keeps 2px of the key around it. */
@@ -200,6 +220,7 @@
   /* FR-20: the thumb goes to its place with no travel, stretch, or squash. */
   @media (prefers-reduced-motion: reduce) {
     .ow-switch__thumb {
+      --_lean: 0;
       scale: none;
       transition: none;
     }

@@ -68,10 +68,12 @@ const shift = (track: HTMLElement) =>
 /** Where the thumb is from the track's start, without its stretch, which is not the position. */
 const placed = (thumb: HTMLElement) => {
   thumb.style.scale = "none";
+  thumb.style.setProperty("--_lean", "0");
   const left =
     thumb.getBoundingClientRect().left -
     (thumb.closest(".ow-switch") as HTMLElement).getBoundingClientRect().left;
   thumb.style.removeProperty("scale");
+  thumb.style.removeProperty("--_lean");
   return left;
 };
 
@@ -360,12 +362,59 @@ describe("Switch", () => {
     travel.pause();
     travel.currentTime = 200;
     const stretched = thumb.getBoundingClientRect().width / rest.width;
-    expect(stretched).toBeGreaterThan(1.1);
+    expect(stretched).toBeGreaterThan(1.05);
     expect(stretched).toBeLessThanOrEqual(1.3);
-    // Going toward the end, it grows from its end edge: that edge never passes its place.
-    expect(Number.parseFloat(getComputedStyle(thumb).transformOrigin)).toBeCloseTo(rest.width, 0);
+    // Going toward the end, its end edge leads and stays on its place; the tail reaches back.
+    const stretchedBox = thumb.getBoundingClientRect();
+    thumb.style.scale = "none";
+    thumb.style.setProperty("--_lean", "0");
+    const plain = thumb.getBoundingClientRect();
+    thumb.style.removeProperty("scale");
+    thumb.style.removeProperty("--_lean");
+    expect(Math.abs(stretchedBox.right - plain.right)).toBeLessThanOrEqual(0.5);
+    expect(stretchedBox.left).toBeLessThan(plain.left - 1);
     travel.finish();
     expect(thumb.getBoundingClientRect().width).toBe(rest.width);
+  });
+
+  test("the tail never moves back: the thumb's start edge only goes forward along the whole travel", async () => {
+    const track = await one(<Switch.Root aria-label="Wi-Fi" />);
+    const thumb = thumbOf(track);
+    const start = track.getBoundingClientRect().left;
+    track.click();
+    await expect.poll(() => running(thumb)).toContain("--_switch-travel");
+    const [travel] = thumb.getAnimations();
+    if (!travel) throw new Error("no travel");
+    travel.pause();
+    let last = Number.NEGATIVE_INFINITY;
+    for (let ms = 0; ms <= 650; ms += 10) {
+      travel.currentTime = ms;
+      const left = thumb.getBoundingClientRect().left - start;
+      expect(left).toBeGreaterThanOrEqual(last - 0.05);
+      last = left;
+    }
+    travel.finish();
+  });
+
+  test("letting go of a held press carries on from the held shape: nothing jumps as the state flips", async () => {
+    const track = await one(<Switch.Root aria-label="Wi-Fi" />);
+    const thumb = thumbOf(track);
+    const rest = thumb.getBoundingClientRect();
+    await userEvent.hover(track);
+    await commands.mouse("down");
+    onTestFinished(() => commands.mouse("up"));
+    await expect.poll(() => thumb.getBoundingClientRect().width).toBeGreaterThan(rest.width + 1);
+    const held = thumb.getBoundingClientRect();
+    await commands.mouse("up");
+    await expect.poll(() => track.getAttribute("aria-checked")).toBe("true");
+    // The first frame after the flip: both transitions at their start.
+    for (const animation of thumb.getAnimations()) {
+      animation.pause();
+      animation.currentTime = 0;
+    }
+    const first = thumb.getBoundingClientRect();
+    expect(Math.abs(first.left - held.left)).toBeLessThanOrEqual(0.5);
+    expect(Math.abs(first.right - held.right)).toBeLessThanOrEqual(0.5);
   });
 
   test("a held press widens the thumb toward its travel and squashes its height, and lets go on the settle spring", async () => {

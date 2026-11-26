@@ -272,8 +272,8 @@ export const switchDefinition = defineComponent({
       selector: ".ow-switch__thumb",
       size: true,
       note: {
-        id: "Tombol putih dengan bayangan kecil. Saat bergerak ia memanjang dari sisi depannya, dan saat ditahan melebar ke arah tujuannya. Tergambar sendiri bila Root tanpa children, dan bisa memuat ikon.",
-        en: "The white key with a small shadow. It stretches from its leading edge while travelling, and widens toward its destination while held. Root draws it without children, and it can hold an icon.",
+        id: "Tombol putih dengan bayangan kecil. Saat bergerak ia memanjang dari sisi depannya, dan saat ditahan melebar ke arah tengah track. Tergambar sendiri bila Root tanpa children, dan bisa memuat ikon.",
+        en: "The white key with a small shadow. It stretches from its leading edge while travelling, and widens toward the middle of the track while held. Root draws it without children, and it can hold an icon.",
       },
       tokens: {
         "--ow-on-accent": "--_key",

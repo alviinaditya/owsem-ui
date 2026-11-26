@@ -67,29 +67,35 @@ export function switchVariants({ size }: SwitchVariantProps = {}): string {
 
 // The key: as tall as the track, keeping the inset as a clear border, so its edges round to the
 // same pixels as the track's. It is gooey: as it travels it stretches along its path, leading edge
-// first, and while held it widens toward the side it will go and squashes a little in height.
+// first, and while held it widens toward the middle of the track and squashes a little in height.
 // --_end is where layout puts it (0 or 1); translate covers the rest of the way while
 // --_switch-travel catches up, so the motion can be interrupted and comes from the track's size.
+// It scales about its centre and a translate keeps the anchored edge in place (--_lean), so no
+// state change moves an origin. The stretch is small and has no slope at either end of the travel,
+// so the tail never moves back.
 const thumb = [
   // Box.
   "relative isolate grid flex-none place-items-center box-border h-full aspect-square",
   "border-(length:--_inset) border-solid border-transparent rounded-[inherit] bg-clip-padding",
   "bg-(color:--ow-on-accent) text-(color:--ow-fg)",
   // How far it stretches at most, and how far a hold widens and squashes it.
-  "[--_stretch:calc(0.3_*_var(--ow-motion-scale))] [--_widen:calc(0.18_*_var(--ow-motion-scale))]",
+  "[--_stretch:calc(0.15_*_var(--ow-motion-scale))] [--_widen:calc(0.18_*_var(--ow-motion-scale))]",
   "[--_squash:calc(0.06_*_var(--ow-motion-scale))]",
-  // The edge it grows from: its leading edge, the one toward where it is going, so a stretch never
-  // carries it past its place; the tail catches up.
   "[--_side:1] [--_end:0] [--_switch-travel:0] [--_switch-held:0]",
-  "[--_from:calc(50%_-_var(--_side)_*_50%)] origin-[var(--_from)_50%]",
   "[&:dir(rtl)]:[--_side:-1]",
   "data-checked:[--_end:1] data-checked:[--_switch-travel:1] data-checked:ms-auto",
-  "data-checked:[--_from:calc(50%_+_var(--_side)_*_50%)]",
+  // The widening of a hold, and the stretch of the travel: 16t²(1-t)² is 0 with no slope at both
+  // ends and 1 midway; a spring overshoot never shrinks it.
+  "[--_wide:calc(var(--_widen)_*_var(--_switch-held))]",
+  "[--_long:calc(var(--_stretch)_*_max(0,_16_*_var(--_switch-travel)_*_var(--_switch-travel)_*_(1_-_var(--_switch-travel))_*_(1_-_var(--_switch-travel))))]",
+  // How far the centre moves, as a share of the key's width, to keep an edge fixed: a hold grows
+  // from the edge on its own end and, past the middle of the travel, from the other one; the
+  // stretch keeps the leading edge.
+  "[--_lean:calc(var(--_side)_*_((1_-_2_*_var(--_switch-travel))_*_var(--_wide)_-_(2_*_var(--_end)_-_1)_*_var(--_long))_/_2)]",
   // The thumb rests at either end of the track, never on a translate: a resting translate lands
   // between device pixels at a fractional zoom and blurs the key's edges.
-  "[translate:calc(var(--_side)_*_(var(--_switch-travel)_-_var(--_end))_*_(100cqi_-_100%))_0]",
-  // 4t(1-t) is 0 at both ends of the travel and 1 midway; a spring overshoot never shrinks it.
-  "[--_sx:calc((1_+_var(--_widen)_*_var(--_switch-held))_*_(1_+_var(--_stretch)_*_max(0,_4_*_var(--_switch-travel)_*_(1_-_var(--_switch-travel)))))]",
+  "[translate:calc(var(--_side)_*_(var(--_switch-travel)_-_var(--_end))_*_(100cqi_-_100%)_+_var(--_lean)_*_100%)_0]",
+  "[--_sx:calc((1_+_var(--_wide))_*_(1_+_var(--_long)))]",
   "[--_sy:calc(1_-_var(--_squash)_*_var(--_switch-held))] [scale:var(--_sx)_var(--_sy)]",
   // Nothing transitions a transform directly, so nothing needs a layer: the thumb's edges snap with
   // the track's. Held: in within 90 ms, and let go on the settle spring.
@@ -97,18 +103,16 @@ const thumb = [
   String.raw`transition-[--\_switch-travel,--\_switch-held]`,
   "duration-[var(--ow-spring-travel-duration),var(--ow-spring-settle-duration)]",
   "ease-[var(--ow-spring-travel),var(--ow-spring-settle)]",
-  "ow-switch-held:[--_switch-held:1] ow-switch-held:[--_from:calc(50%_-_var(--_side)_*_50%)]",
+  "ow-switch-held:[--_switch-held:1]",
   "ow-switch-held:duration-[var(--ow-spring-travel-duration),90ms]",
   "ow-switch-held:ease-[var(--ow-spring-travel),var(--ow-ease-out)]",
-  // Held while on, it will go back: it widens toward the start, from its end edge.
-  "ow-switch-held:data-checked:[--_from:calc(50%_+_var(--_side)_*_50%)]",
   // The key's shadow, on the key inside the clear border and not on the border.
   "before:absolute before:inset-0 before:z-[-1] before:rounded-[inherit]",
   "before:shadow-(shadow:--ow-surface-shadow) before:content-['']",
   // An icon in the thumb keeps 2px of the key around it.
   "[&>:where(svg,img)]:block [&>:where(svg,img)]:size-[calc(100%_-_4px)]",
   // The thumb goes to its place with no travel, stretch, or squash.
-  "motion-reduce:scale-none motion-reduce:[transition:none]",
+  "motion-reduce:[--_lean:0] motion-reduce:scale-none motion-reduce:[transition:none]",
   // The key is drawn solid.
   "forced-colors:forced-color-adjust-none forced-colors:bg-[CanvasText] forced-colors:text-[Canvas]",
   "forced-colors:before:shadow-none",

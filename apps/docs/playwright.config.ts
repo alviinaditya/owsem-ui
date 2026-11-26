@@ -3,6 +3,8 @@ import { defineConfig, devices } from "@playwright/test";
 const PORT = Number(process.env.PORT ?? 3100);
 // Optional: a system Chrome/Chromium instead of Playwright's download.
 const executablePath = process.env.OWSEM_CHROMIUM_PATH;
+// Optional: extra browser flags, such as --force-device-scale-factor=1.1 to measure at 110%.
+const args = process.env.OWSEM_CHROMIUM_ARGS?.split(" ").filter(Boolean);
 
 export default defineConfig({
   testDir: "./e2e",
@@ -15,7 +17,14 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: "on-first-retry",
-    ...(executablePath ? { launchOptions: { executablePath } } : {}),
+    ...(executablePath || args
+      ? {
+          launchOptions: {
+            ...(executablePath ? { executablePath } : {}),
+            ...(args ? { args } : {}),
+          },
+        }
+      : {}),
   },
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"] } },

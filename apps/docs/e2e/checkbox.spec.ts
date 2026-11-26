@@ -34,7 +34,7 @@ test("a label presses its box, and the parent shows a minus or a check", async (
   await expect(all.locator(".ow-checkbox__indicator")).toHaveCount(0);
 });
 
-test("a Fieldset names a group of boxes that share one name", async ({ page }) => {
+test("a Checkbox Group names a set of boxes and holds their values", async ({ page }) => {
   await visit(page, "/en/checkbox");
   await pick(page, "Group");
   const group = demo(page).getByRole("group", { name: "Notify me by" });

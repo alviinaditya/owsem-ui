@@ -117,7 +117,7 @@ function Project({
 }: ProjectProps) {
   const t = TEXT[lang];
   return (
-    <div className="demo-tabs">
+    <div className={panels ? "demo-tabs" : undefined}>
       <Tabs.Root
         defaultValue="overview"
         orientation={vertical ? "vertical" : "horizontal"}

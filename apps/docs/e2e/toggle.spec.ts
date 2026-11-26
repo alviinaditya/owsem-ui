@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { demo, pageTests, picker, visit } from "./example-page.ts";
+import { demo, pageTests, pick, visit } from "./example-page.ts";
 
 pageTests("toggle", {
   examples: ["Default", "Sizes", "Solid", "Icon only", "Disabled", "Controlled"],
@@ -18,7 +18,7 @@ test("a press turns the toggle on and off", async ({ page }) => {
 
 test("icon-only toggles format the line, and sizes grow", async ({ page }) => {
   await visit(page, "/en/toggle");
-  await picker(page).getByRole("button", { name: "Icon only" }).click();
+  await pick(page, "Icon only");
   const italic = demo(page).getByRole("button", { name: "Italic" });
   const note = demo(page).getByText("Launch moves to Friday");
   await expect(italic).toHaveAttribute("aria-pressed", "false");
@@ -27,7 +27,7 @@ test("icon-only toggles format the line, and sizes grow", async ({ page }) => {
   await expect(italic).toHaveAttribute("aria-pressed", "true");
   await expect(note).toHaveCSS("font-style", "italic");
 
-  await picker(page).getByRole("button", { name: "Sizes" }).click();
+  await pick(page, "Sizes");
   const heights = await demo(page)
     .locator(".ow-toggle")
     .evaluateAll((els) =>
@@ -40,12 +40,12 @@ test("icon-only toggles format the line, and sizes grow", async ({ page }) => {
 
 test("a disabled toggle ignores presses; a controlled one reports its state", async ({ page }) => {
   await visit(page, "/en/toggle");
-  await picker(page).getByRole("button", { name: "Disabled" }).click();
+  await pick(page, "Disabled");
   const off = demo(page).getByRole("button", { name: "Pin" }).first();
   await off.click({ force: true });
   await expect(off).toHaveAttribute("aria-pressed", "false");
 
-  await picker(page).getByRole("button", { name: "Controlled" }).click();
+  await pick(page, "Controlled");
   await expect(demo(page).getByText("Not pinned")).toBeVisible();
   await demo(page).getByRole("button", { name: "Pin" }).click();
   await expect(demo(page).getByText("Pinned", { exact: true })).toBeVisible();

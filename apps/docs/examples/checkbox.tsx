@@ -1,6 +1,6 @@
 "use client";
 
-import { Checkbox, type CheckboxSize, Fieldset } from "owsem-ui/base";
+import { Checkbox, CheckboxGroup, type CheckboxSize } from "owsem-ui/base";
 import { useState } from "react";
 import { ComponentPage, type ExamplePageProps } from "@/components/component-page/component-page";
 import { defineComponent, exampleFile, importPath } from "@/lib/examples";
@@ -108,15 +108,14 @@ function Checklist({ lang }: { lang: Lang }) {
 function Group({ lang }: { lang: Lang }) {
   const t = TEXT[lang];
   return (
-    <Fieldset.Root className="demo-fieldset">
-      <Fieldset.Legend>{t.notify}</Fieldset.Legend>
+    <CheckboxGroup aria-label={t.notify} defaultValue={["email"]}>
       {CHANNELS.map((channel) => (
-        <label key={channel} className="demo-checkbox-label">
-          <Checkbox.Root name="channels" value={channel} defaultChecked={channel === "email"} />
+        <label key={channel}>
+          <Checkbox.Root value={channel} />
           {t[channel]}
         </label>
       ))}
-    </Fieldset.Root>
+    </CheckboxGroup>
   );
 }
 
@@ -239,30 +238,30 @@ export const checkboxDefinition = defineComponent({
       id: "group",
       title: { id: "Grup", en: "Group" },
       description: {
-        id: "Fieldset memberi grup namanya, dan name yang sama mengirim semua yang dicentang. Checkbox Group menambah value bersama dan kotak induk.",
-        en: "A Fieldset names the group, and one shared name submits every checked box. Checkbox Group adds a shared value and a parent box.",
+        id: "Untuk sekumpulan kotak, pakai [Checkbox Group](/id/checkbox-group): ia memegang value yang dicentang bersama dan menamai grupnya. Fieldset dengan satu name juga bisa, tanpa value bersama.",
+        en: "For a set of boxes, use [Checkbox Group](/en/checkbox-group): it holds the checked values together and names the group. A Fieldset with one name also works, without a shared value.",
       },
-      uses: ["Checkbox", "Fieldset"],
+      uses: ["Checkbox", "CheckboxGroup"],
       demo: (lang) => <Group lang={lang} />,
       code: (setup, lang) => {
         const t = TEXT[lang];
         return [
           exampleFile(
             "Channels",
-            imp(setup, `import { Fieldset } from "${importPath(setup, "fieldset")}";`),
+            imp(setup, `import { CheckboxGroup } from "${importPath(setup, "checkbox-group")}";`),
             [
-              "<Fieldset.Root>",
-              `  <Fieldset.Legend>${t.notify}</Fieldset.Legend>`,
+              `<CheckboxGroup aria-label="${t.notify}" defaultValue={["email"]}>`,
               ...CHANNELS.flatMap((channel) =>
-                label(
-                  t[channel],
-                  `<Checkbox.Root name="channels" value="${channel}"${channel === "email" ? " defaultChecked" : ""} />`,
-                ).map((line) => `  ${line}`),
+                [
+                  "<label>",
+                  `  <Checkbox.Root value="${channel}" />`,
+                  `  ${t[channel]}`,
+                  "</label>",
+                ].map((line) => `  ${line}`),
               ),
-              "</Fieldset.Root>",
+              "</CheckboxGroup>",
             ],
           ),
-          TASK_CSS,
         ];
       },
     },

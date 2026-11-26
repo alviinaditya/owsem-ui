@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { demo, pageTests, picker, visit } from "./example-page.ts";
+import { demo, pageTests, pick, visit } from "./example-page.ts";
 
 pageTests("separator", {
   examples: ["Default", "Vertical", "Custom line"],
@@ -15,7 +15,7 @@ test("horizontal by default, vertical in a row, and a custom line colors only it
   await expect(separator).toHaveCount(1);
   await expect(separator).toHaveAttribute("aria-orientation", "horizontal");
 
-  await picker(page).getByRole("button", { name: "Vertical" }).click();
+  await pick(page, "Vertical");
   const lines = demo(page).getByRole("separator");
   await expect(lines).toHaveCount(2);
   await expect(lines.first()).toHaveAttribute("aria-orientation", "vertical");
@@ -24,9 +24,9 @@ test("horizontal by default, vertical in a row, and a custom line colors only it
   expect(box?.height ?? 0).toBeGreaterThan(10);
 
   const color = (el: Element) => getComputedStyle(el).borderBlockStartColor;
-  await picker(page).getByRole("button", { name: "Default" }).click();
+  await pick(page, "Default");
   const plain = await demo(page).getByRole("separator").evaluate(color);
-  await picker(page).getByRole("button", { name: "Custom line" }).click();
+  await pick(page, "Custom line");
   const custom = await demo(page).getByRole("separator").evaluate(color);
   expect(custom).not.toBe(plain);
 });

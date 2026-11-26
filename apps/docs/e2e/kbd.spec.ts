@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { demo, pageTests, picker, visit } from "./example-page.ts";
+import { demo, pageTests, pick, visit } from "./example-page.ts";
 
 pageTests("kbd", {
   examples: ["Default", "Combination", "In controls"],
@@ -19,8 +19,8 @@ test("a keycap takes its size from the text around it", async ({ page }) => {
   ]);
   expect(kbd / text).toBeCloseTo(0.75, 2);
 
-  await picker(page).getByRole("button", { name: "Combination" }).click();
+  await pick(page, "Combination");
   await expect(demo(page).locator(".ow-kbd")).toHaveText(["Ctrl", "Shift", "P", "Esc"]);
-  await picker(page).getByRole("button", { name: "In controls" }).click();
+  await pick(page, "In controls");
   await expect(demo(page).locator(".ow-kbd")).toHaveText(["⌘K", "⌘N"]);
 });

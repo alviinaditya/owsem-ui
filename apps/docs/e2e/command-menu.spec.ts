@@ -90,6 +90,14 @@ test("the examples set the size, the backdrop, and the surface", async ({ page }
   await expect(popup).toHaveCSS("backdrop-filter", "none");
 });
 
+test("the window clips its scrim to its rounded corners", async ({ page }) => {
+  await visit(page, "/en/command-menu");
+  const window = demo(page).locator(".demo-command");
+  await expect(window).toHaveCSS("clip-path", /inset\(.* round /);
+  await pick(page, "Blur backdrop");
+  await expect(window).toHaveCSS("clip-path", /inset\(.* round /);
+});
+
 test("⌘K on the page opens the docs search, not the demo", async ({ page }) => {
   await visit(page, "/en/command-menu");
   await page.keyboard.press("Control+k");

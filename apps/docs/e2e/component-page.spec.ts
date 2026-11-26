@@ -1,5 +1,5 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
-import { demo, docs, preview, sheet, specimen, tools, visit } from "./example-page.ts";
+import { demo, docs, pick, preview, sheet, specimen, tools, visit } from "./example-page.ts";
 
 // The preview-first component pages (examples/): Button and Switch.
 const html = (page: Page) => page.locator("html");
@@ -119,6 +119,22 @@ test("the example picker switches the demo, and the docs' code follows the examp
   await demo(page).getByRole("switch").click();
   await expect(demo(page).getByText("Dark mode is on")).toBeVisible();
   await expect(docs(page).locator("#example-controlled")).toContainText("onCheckedChange={setOn}");
+});
+
+test("a new example scales in, a plain fade under reduced motion, and the stage keeps its size", async ({
+  page,
+}) => {
+  await visit(page, "/en/button");
+  const size = () => preview(page).evaluate((el) => el.getBoundingClientRect().height);
+  const stage = await size();
+  await pick(page, "Sizes");
+  await expect(demo(page).locator(".cp-demo")).toHaveCSS("animation-name", "cp-in");
+  expect(await size()).toBe(stage);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await pick(page, "Icons");
+  await expect(demo(page).locator(".cp-demo")).toHaveCSS("animation-name", "cp-fade");
+  // The old example leaves before the new one is in the page: never both at once.
+  await expect(demo(page).locator(".cp-demo")).toHaveCount(1);
 });
 
 for (const [name, spec] of Object.entries(EXAMPLES)) {

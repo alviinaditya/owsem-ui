@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { demo, pageTests, picker, visit } from "./example-page.ts";
+import { demo, pageTests, pick, visit } from "./example-page.ts";
 
 pageTests("toolbar", {
   examples: ["Default", "Sizes", "Solid", "Vertical", "Link and field"],
@@ -39,7 +39,7 @@ test("the toolbar is one Tab stop; arrow keys move, and a disabled button stays 
 
 test("sizes grow, a vertical toolbar stacks, and the field comes last", async ({ page }) => {
   await visit(page, "/en/toolbar");
-  await picker(page).getByRole("button", { name: "Sizes" }).click();
+  await pick(page, "Sizes");
   const bars = demo(page).getByRole("toolbar");
   await expect(bars).toHaveCount(3);
   const heights = await bars.evaluateAll((els) =>
@@ -48,14 +48,14 @@ test("sizes grow, a vertical toolbar stacks, and the field comes last", async ({
   expect(heights[0]).toBeLessThan(heights[1] ?? 0);
   expect(heights[1]).toBeLessThan(heights[2] ?? 0);
 
-  await picker(page).getByRole("button", { name: "Vertical" }).click();
+  await pick(page, "Vertical");
   const vertical = demo(page).getByRole("toolbar");
   await expect(vertical).toHaveAttribute("aria-orientation", "vertical");
   await vertical.getByRole("button", { name: "Bold" }).focus();
   await page.keyboard.press("ArrowDown");
   await expect(vertical.getByRole("button", { name: "Italic" })).toBeFocused();
 
-  await picker(page).getByRole("button", { name: "Link and field" }).click();
+  await pick(page, "Link and field");
   const bar = demo(page).getByRole("toolbar");
   await expect(bar.getByRole("link", { name: "Help" })).toBeVisible();
   await expect(bar.getByRole("textbox", { name: "Find" })).toBeVisible();

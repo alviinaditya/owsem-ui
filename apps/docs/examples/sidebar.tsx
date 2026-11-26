@@ -145,13 +145,24 @@ function Default({ lang }: { lang: Lang }) {
 
 function Collapsing({ lang }: { lang: Lang }) {
   const t = TEXT[lang];
+  const [open, setOpen] = useState(true);
   return (
     <Sidebar.Provider
       shortcut={false}
       mobileQuery={INLINE}
-      style={{ ...COLUMN, inlineSize: 400, gap: 12, alignItems: "stretch" }}
+      open={open}
+      onOpenChange={setOpen}
+      style={{ ...COLUMN, inlineSize: 400, overflow: "hidden", alignItems: "stretch" }}
     >
-      <Sidebar.Root aria-label={t.nav} style={{ inlineSize: 200 }}>
+      {/* Closed, the Root's box stays: a negative margin gives the room to the page. */}
+      <Sidebar.Root
+        aria-label={t.nav}
+        style={{
+          inlineSize: 200,
+          marginInlineStart: open ? 0 : -200,
+          transition: "margin-inline-start 300ms var(--ow-ease-drawer)",
+        }}
+      >
         <Sidebar.Header>
           <strong>{t.brand}</strong>
         </Sidebar.Header>
@@ -166,18 +177,22 @@ function Collapsing({ lang }: { lang: Lang }) {
   );
 }
 
+/** A phone-sized window: the drawer opens inside it, over its page, not over the docs. */
 function Drawer({ lang }: { lang: Lang }) {
   const t = TEXT[lang];
+  const [frame, setFrame] = useState<HTMLElement | null>(null);
   return (
-    <Sidebar.Provider shortcut={false} mobileQuery="(min-width: 0px)" style={{ padding: 12 }}>
-      <Sidebar.Trigger aria-label={t.open} />
-      <Sidebar.Root aria-label={t.nav}>
-        <Sidebar.Header>
-          <strong>{t.brand}</strong>
-        </Sidebar.Header>
-        <Rows lang={lang} />
-      </Sidebar.Root>
-    </Sidebar.Provider>
+    <div ref={setFrame} className="demo-sidebar-frame">
+      <Sidebar.Provider shortcut={false} mobileQuery="(min-width: 0px)" style={{ padding: 12 }}>
+        <Sidebar.Trigger aria-label={t.open} />
+        <Sidebar.Root aria-label={t.nav} container={frame}>
+          <Sidebar.Header>
+            <strong>{t.brand}</strong>
+          </Sidebar.Header>
+          <Rows lang={lang} />
+        </Sidebar.Root>
+      </Sidebar.Provider>
+    </div>
   );
 }
 
@@ -222,7 +237,8 @@ function Specimen({ lang }: { lang: Lang }) {
   );
 }
 
-const imp = (setup: TokenSetup) => [
+const imp = (setup: TokenSetup, hooks = false) => [
+  ...(hooks ? ['import { useState } from "react";'] : []),
   `import { Sidebar } from "${isDefaultSetup(setup) ? "owsem-ui/owsem" : "@/components/owsem/sidebar"}";`,
 ];
 
@@ -232,6 +248,8 @@ interface Variant {
   footer?: boolean;
   trigger?: boolean;
   drawer?: boolean;
+  /** The page takes the room of a closed sidebar. */
+  collapse?: boolean;
 }
 
 const rows = (lang: Lang, pad: string) => {
@@ -273,10 +291,19 @@ const sidebarFile = (
   v: Variant = {},
 ): ReturnType<typeof exampleFile> => {
   const t = TEXT[lang];
+  const root = v.collapse
+    ? [
+        `  <Sidebar.Root`,
+        `    aria-label="${t.nav}"`,
+        `    style={{ inlineSize: 200, marginInlineStart: open ? 0 : -200 }}`,
+        `  >`,
+      ]
+    : [`  <Sidebar.Root aria-label="${t.nav}"${v.drawer ? " container={frame}" : ""}>`];
   const body = [
+    ...(v.drawer ? ["<div ref={setFrame}>"] : []),
     `<Sidebar.Provider${v.provider ?? ""}>`,
     ...(v.drawer ? ["  <Sidebar.Trigger />"] : []),
-    `  <Sidebar.Root aria-label="${t.nav}">`,
+    ...root,
     ...(v.header ? [`    <Sidebar.Header>${t.brand}</Sidebar.Header>`] : []),
     ...rows(lang, "    "),
     ...(v.footer ? [`    <Sidebar.Footer>${t.version}</Sidebar.Footer>`] : []),
@@ -285,8 +312,17 @@ const sidebarFile = (
       ? ["  <main>", "    <Sidebar.Trigger />", `    <p>${t.pageText}</p>`, "  </main>"]
       : []),
     "</Sidebar.Provider>",
+    ...(v.drawer ? ["</div>"] : []),
   ];
-  const file = exampleFile("AppSidebar", imp(setup), body, ITEM_HELPER);
+  const state = v.collapse
+    ? ["  const [open, setOpen] = useState(true);"]
+    : v.drawer
+      ? ["  const [frame, setFrame] = useState<HTMLElement | null>(null);"]
+      : [];
+  const file = exampleFile("AppSidebar", imp(setup, state.length > 0), body, [
+    ...state,
+    ...ITEM_HELPER,
+  ]);
   return {
     name: "app-sidebar.tsx",
     code: file.code.replace("AppSidebar()", "AppSidebar({ path }: { path: string })"),
@@ -312,21 +348,27 @@ export const sidebarDefinition = defineComponent({
       id: "collapsible",
       title: { id: "Bisa ditutup", en: "Collapsible" },
       description: {
-        id: "Trigger di mana saja di bawah Provider menutup sidebar; halaman di sampingnya mengambil ruangnya.",
-        en: "A Trigger anywhere under the Provider closes the sidebar; the page beside it takes its room.",
+        id: "Trigger di mana saja di bawah Provider menutup sidebar; halaman di sampingnya mengambil ruangnya (margin negatif pada Root, dari status Provider).",
+        en: "A Trigger anywhere under the Provider closes the sidebar; the page beside it takes its room (a negative margin on the Root, from the Provider's state).",
       },
       uses: ["Sidebar"],
       demo: (lang) => <Collapsing lang={lang} />,
       code: (setup, lang) => [
-        sidebarFile(setup, lang, { header: true, footer: true, trigger: true }),
+        sidebarFile(setup, lang, {
+          header: true,
+          footer: true,
+          trigger: true,
+          collapse: true,
+          provider: " open={open} onOpenChange={setOpen}",
+        }),
       ],
     },
     {
       id: "drawer",
       title: { id: "Laci seluler", en: "Mobile drawer" },
       description: {
-        id: "Di bawah mobileQuery sidebar menjadi laci modal dari sisi awal; contoh ini memaksanya selalu aktif.",
-        en: "Under mobileQuery the sidebar becomes a modal drawer from the inline start; this example forces it on.",
+        id: "Di bawah mobileQuery sidebar menjadi laci modal dari sisi awal; contoh ini memaksanya selalu aktif dan memakai container agar laci tetap di jendelanya.",
+        en: "Under mobileQuery the sidebar becomes a modal drawer from the inline start; this example forces it on, and sets container to keep the drawer in its window.",
       },
       uses: ["Sidebar"],
       demo: (lang) => <Drawer lang={lang} />,

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { demo, pageTests, picker, tools, visit } from "./example-page.ts";
+import { demo, pageTests, pick, tools, visit } from "./example-page.ts";
 
 pageTests("table", {
   examples: ["Default", "With caption", "Sizes", "Stacked", "Scrolling"],
@@ -23,7 +23,7 @@ test("the default table is a card with its rows in a table", async ({ page }) =>
 
 test("the caption sits above the card", async ({ page }) => {
   await visit(page, "/en/table");
-  await picker(page).getByRole("button", { name: "With caption" }).click();
+  await pick(page, "With caption");
   const card = await table(page).boundingBox();
   const caption = await demo(page).locator("caption").boundingBox();
   expect(caption && card && caption.y + caption.height <= card.y + 1).toBe(true);
@@ -32,7 +32,7 @@ test("the caption sits above the card", async ({ page }) => {
 
 test("a narrow table stacks its rows, each cell led by its heading", async ({ page }) => {
   await visit(page, "/en/table");
-  await picker(page).getByRole("button", { name: "Stacked" }).click();
+  await pick(page, "Stacked");
   await expect(table(page)).toHaveAttribute("data-layout", "stack");
   const status = demo(page).locator("tbody tr").first().locator("td").nth(1);
   await expect(status).toHaveAttribute("data-label", "Status");
@@ -41,7 +41,7 @@ test("a narrow table stacks its rows, each cell led by its heading", async ({ pa
 
 test("a wide table scrolls inside its card and can be focused", async ({ page }) => {
   await visit(page, "/en/table");
-  await picker(page).getByRole("button", { name: "Scrolling" }).click();
+  await pick(page, "Scrolling");
   const scroller = demo(page).locator(".ow-table__scroll");
   await expect(scroller).toHaveAttribute("tabindex", "0");
   await expect(scroller).toHaveAttribute("data-overflow-end", "");

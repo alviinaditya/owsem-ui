@@ -1,8 +1,10 @@
 "use client";
 
+import type { Route } from "next";
+import Link from "next/link";
 import { Tabs } from "owsem-ui/base";
 import { CodeBlock } from "owsem-ui/owsem";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { importPath } from "@/lib/examples";
 import { Icon } from "../icons/icon";
 import { CodeLine, InstallTabs } from "../install";
@@ -98,6 +100,21 @@ export function Tokens() {
   return <TokenChip lang={usePage().lang} />;
 }
 
+/** A sentence with `[text](/path)` links. */
+function linked(text: string): ReactNode[] {
+  return text.split(/(\[[^\]]+\]\([^)]+\))/).map((part, index) => {
+    const link = /^\[([^\]]+)\]\(([^)]+)\)$/.exec(part);
+    return link ? (
+      // biome-ignore lint/suspicious/noArrayIndexKey: the pieces never reorder
+      <Link key={index} href={(link[2] ?? "") as Route}>
+        {link[1]}
+      </Link>
+    ) : (
+      part
+    );
+  });
+}
+
 /** Every example: its title, a sentence, a button that shows it in the preview, and its code, on one card. */
 export function Examples() {
   const page = usePage();
@@ -130,7 +147,7 @@ export function Examples() {
                 )}
               </button>
             </div>
-            <p>{example.description[lang]}</p>
+            <p>{linked(example.description[lang])}</p>
           </div>
           {example.code(setup, lang).map((file) => (
             <CodeBlock.Root key={file.name} className="docs-code">

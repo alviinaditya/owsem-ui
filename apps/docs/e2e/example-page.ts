@@ -1,4 +1,4 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 
 /** Helpers for the preview-first component pages (examples/). */
 export const preview = (page: Page) => page.getByRole("region", { name: "Preview" });
@@ -9,16 +9,28 @@ export const picker = (page: Page) => page.getByRole("group", { name: "Examples"
 export const specimen = (page: Page) => page.locator(".sp-specimen");
 export const sheet = (page: Page) => page.locator(".sp");
 
-/** Picks an example. A DOM click: on a phone the dev server's overlay badge can sit over the picker. */
-export const pick = (page: Page, title: string) =>
-  picker(page)
-    .getByRole("button", { name: title, exact: true })
-    .evaluate((el) => (el as HTMLElement).click());
+/**
+ * Picks an example and waits until it is on the stage (the old one fades out first). A DOM click:
+ * on a phone the dev server's overlay badge can sit over the picker.
+ */
+export async function pick(page: Page, title: string) {
+  const button = picker(page).getByRole("button", { name: title, exact: true });
+  const id = await button.getAttribute("data-example");
+  await button.evaluate((el) => (el as HTMLElement).click());
+  const shown = demo(page).locator(`.cp-demo[data-example="${id}"]`);
+  await expect(shown).toBeAttached();
+  await settled(shown);
+}
+
+/** Lets the example finish arriving: it scales in, so its box is only final once that ends. */
+export const settled = (shown: Locator) =>
+  shown.evaluate((el) => Promise.all(el.getAnimations().map((animation) => animation.finished)));
 
 /** Goes to a page and waits for it to hydrate: its keys and buttons answer from then on. */
 export async function visit(page: Page, path: string) {
   await page.goto(path);
   await expect(page.locator(".cp")).toHaveAttribute("data-mounted", "");
+  await settled(demo(page).locator(".cp-demo"));
 }
 
 const SECTIONS = [

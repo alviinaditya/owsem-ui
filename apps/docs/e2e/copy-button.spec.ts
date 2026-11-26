@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { demo, pageTests, picker, visit } from "./example-page.ts";
+import { demo, pageTests, pick, visit } from "./example-page.ts";
 
 pageTests("copy-button", {
   examples: ["Default", "With a label", "Variants", "Sizes"],
@@ -44,7 +44,7 @@ test("with a label: both words share one cell, and Copied shows after a press", 
 }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await visit(page, "/en/copy-button");
-  await picker(page).getByRole("button", { name: "With a label" }).click();
+  await pick(page, "With a label");
   const copy = demo(page).locator(".ow-copy-button");
   await expect(copy.locator(".ow-copy-button__label-text")).toHaveCount(2);
   await expect(copy.locator(".ow-copy-button__label-text[data-visible]")).toHaveText("Copy link");
@@ -56,12 +56,12 @@ test("with a label: both words share one cell, and Copied shows after a press", 
 
 test("variants and sizes render one button each", async ({ page }) => {
   await visit(page, "/en/copy-button");
-  await picker(page).getByRole("button", { name: "Variants" }).click();
+  await pick(page, "Variants");
   const variants = await demo(page)
     .locator(".ow-copy-button")
     .evaluateAll((els) => els.map((el) => el.getAttribute("data-variant")));
   expect(variants).toEqual(["ghost", "outline", "secondary"]);
-  await picker(page).getByRole("button", { name: "Sizes" }).click();
+  await pick(page, "Sizes");
   const sizes = await demo(page)
     .locator(".ow-copy-button")
     .evaluateAll((els) => els.map((el) => el.getAttribute("data-size")));

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { demo, pageTests, visit } from "./example-page.ts";
+import { demo, pageTests, pick, visit } from "./example-page.ts";
 
 pageTests("sidebar", {
   examples: ["Default", "Collapsible", "Mobile drawer"],
@@ -64,4 +64,43 @@ test("the dot pulses while the next page loads", async ({ page }, testInfo) => {
   await expect(pill.locator(".ow-sidebar__pulse")).toBeVisible();
   await expect(pill).not.toHaveAttribute("data-waiting", "", { timeout: 15000 });
   await expect(page).toHaveURL(/tooltip/);
+});
+
+test("a closed sidebar gives its room to the page beside it", async ({ page }) => {
+  await visit(page, "/en/sidebar");
+  await pick(page, "Collapsible");
+  const provider = demo(page).locator(".ow-sidebar__provider");
+  const trigger = demo(page).getByRole("button", { name: "Toggle sidebar" });
+  const room = () => trigger.evaluate((el) => el.parentElement?.offsetWidth ?? 0);
+  const whole = await provider.evaluate((el) => (el as HTMLElement).offsetWidth);
+  // Open, the sidebar takes 200px of the window.
+  expect(await room()).toBeLessThan(whole - 150);
+  await trigger.click();
+  await expect(provider).toHaveAttribute("data-sidebar-state", "closed");
+  // The margin glides, so the page grows to the whole window without a wait.
+  await expect.poll(room).toBeGreaterThanOrEqual(whole - 12);
+  await trigger.click();
+  await expect.poll(room).toBeLessThan(whole - 150);
+});
+
+test("the mobile drawer opens inside the demo's window, not over the docs", async ({ page }) => {
+  await visit(page, "/en/sidebar");
+  await pick(page, "Mobile drawer");
+  const frame = demo(page).locator(".demo-sidebar-frame");
+  await frame.getByRole("button", { name: "Open menu" }).click();
+  const drawer = frame.getByRole("dialog", { name: "Documentation" });
+  await expect(drawer).toBeVisible();
+  // The drawer slides in, so wait until it sits inside the window.
+  await expect
+    .poll(async () => {
+      const [inner, outer] = await Promise.all([drawer.boundingBox(), frame.boundingBox()]);
+      if (!inner || !outer) return false;
+      return (
+        inner.x >= outer.x - 1 &&
+        inner.y >= outer.y - 1 &&
+        inner.x + inner.width <= outer.x + outer.width + 1 &&
+        inner.y + inner.height <= outer.y + outer.height + 1
+      );
+    })
+    .toBe(true);
 });

@@ -155,6 +155,9 @@ export function ComponentPage({
   const { examples, parts } = definition;
   const [activeId, setActiveId] = useState(examples[0]?.id ?? "");
   const active = examples.find((example) => example.id === activeId) ?? examples[0];
+  // The example on the stage lags the picked one while it fades out.
+  const [shownId, setShownId] = useState(activeId);
+  const shown = examples.find((example) => example.id === shownId) ?? examples[0];
   const setup = useTokenSetup();
 
   const narrow = useMedia(NARROW);
@@ -347,6 +350,31 @@ export function ComponentPage({
     return () => document.removeEventListener("keydown", onKey, true);
   });
 
+  // Fade the example out, then swap in the picked one (it fades in by CSS on mount).
+  useEffect(() => {
+    if (activeId === shownId) return;
+    const demo = demoRef.current?.querySelector<HTMLElement>(".cp-demo");
+    if (!demo) {
+      setShownId(activeId);
+      return;
+    }
+    demo.inert = true;
+    const style = getComputedStyle(demo);
+    const fade = demo.animate([{ opacity: style.opacity }, { opacity: 0 }], {
+      duration: Number.parseFloat(style.getPropertyValue("--docs-dur-out")) || 120,
+      easing: "ease-out",
+      fill: "forwards",
+    });
+    fade.finished.then(
+      () => setShownId(activeId),
+      () => {},
+    );
+    return () => {
+      fade.cancel();
+      demo.inert = false;
+    };
+  }, [activeId, shownId]);
+
   // Fit the demo into the room the preview has: transform only, never a relayout.
   // biome-ignore lint/correctness/useExhaustiveDependencies: a new example is a new demo to fit
   useLayoutEffect(() => {
@@ -376,7 +404,7 @@ export function ComponentPage({
     observer.observe(body);
     observer.observe(demo);
     return () => observer.disconnect();
-  }, [activeId]);
+  }, [shownId]);
 
   // Single-key shortcuts while focus is not in a field. A shortcut that hides the focused element
   // hands focus to its own button, so the next press still works.
@@ -633,8 +661,10 @@ export function ComponentPage({
           <div ref={bodyRef} className="cp-body" data-inspect={inspecting ? "" : undefined}>
             <div ref={fitRef} className="cp-fit">
               <div ref={demoRef} className="cp-stage">
-                <Fragment key={active?.id}>
-                  <div className="cp-demo">{active?.demo(lang)}</div>
+                <Fragment key={shown?.id}>
+                  <div className="cp-demo" data-example={shown?.id}>
+                    {shown?.demo(lang)}
+                  </div>
                 </Fragment>
               </div>
             </div>
@@ -664,7 +694,7 @@ export function ComponentPage({
                 onValueChange={([next]) => next && setActiveId(next)}
               >
                 {examples.map((example) => (
-                  <ToggleGroup.Item key={example.id} value={example.id}>
+                  <ToggleGroup.Item key={example.id} value={example.id} data-example={example.id}>
                     {example.title[lang]}
                   </ToggleGroup.Item>
                 ))}

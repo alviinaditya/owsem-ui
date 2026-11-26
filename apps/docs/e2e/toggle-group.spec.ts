@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { demo, pageTests, picker, visit } from "./example-page.ts";
+import { demo, pageTests, pick, visit } from "./example-page.ts";
 import { thumbKey } from "./helpers.ts";
 
 pageTests("toggle-group", {
@@ -30,7 +30,7 @@ test("with multiple, each format toggles on its own and there is no thumb moveme
   page,
 }) => {
   await visit(page, "/en/toggle-group");
-  await picker(page).getByRole("button", { name: "Multiple" }).click();
+  await pick(page, "Multiple");
   const group = demo(page).getByRole("group", { name: "Formatting" });
   const bold = group.getByRole("button", { name: "Bold" });
   const italic = group.getByRole("button", { name: "Italic" });
@@ -46,14 +46,14 @@ test("with multiple, each format toggles on its own and there is no thumb moveme
 
 test("equal items share one width, and sizes grow", async ({ page }) => {
   await visit(page, "/en/toggle-group");
-  await picker(page).getByRole("button", { name: "Equal" }).click();
+  await pick(page, "Equal");
   const widths = await demo(page)
     .locator(".ow-toggle-group__item")
     .evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().width)));
   expect(widths).toHaveLength(3);
   expect(new Set(widths).size).toBe(1);
 
-  await picker(page).getByRole("button", { name: "Sizes" }).click();
+  await pick(page, "Sizes");
   const heights = await demo(page)
     .locator(".ow-toggle-group")
     .evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
@@ -64,7 +64,7 @@ test("equal items share one width, and sizes grow", async ({ page }) => {
 
 test("a disabled group ignores presses", async ({ page }) => {
   await visit(page, "/en/toggle-group");
-  await picker(page).getByRole("button", { name: "Disabled" }).click();
+  await pick(page, "Disabled");
   const board = demo(page).getByRole("button", { name: "Board" });
   await board.click({ force: true });
   await expect(board).toHaveAttribute("aria-pressed", "false");

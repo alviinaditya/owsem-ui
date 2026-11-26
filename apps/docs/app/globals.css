@@ -81,6 +81,9 @@
   --docs-radius: var(--ow-radius);
   --docs-radius-box: var(--ow-radius);
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  /* Switching examples: the old one leaves quickly, the new one settles in. */
+  --docs-dur-out: 120ms;
+  --docs-dur-in: 200ms;
   /* Type scale (docs/typography.md), all rem so browser zoom and font preferences work (WCAG
    * 1.4.4). Headings grow fluidly with the width; the rest is fixed. Line heights sit next to each
    * use: 1.1 display, 1.25 title, 1.35 subtitle, 1.55 lead, 1.65 body, 1.6 compact and code,
@@ -2128,7 +2131,7 @@ body {
 
 /* The Tabs page's demos: room for the tabs, and equal tabs by className. */
 .demo-tabs {
-  inline-size: min(380px, 100%);
+  inline-size: min(380px, calc(100cqw - 64px));
 }
 
 .demo-tabs-stack {
@@ -2158,10 +2161,12 @@ body {
 /* Radio Group's demos: one rule that lays the rows out side by side, and groups beside each other. */
 .demo-radio-group-across {
   flex-flow: row wrap;
+  justify-content: center;
 }
 
 .demo-radio-set {
   display: flex;
+  max-inline-size: calc(100cqw - 64px);
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: center;
@@ -2200,6 +2205,8 @@ body {
   box-sizing: border-box;
   overflow: hidden;
   border-radius: var(--ow-radius);
+  /* Clips the blurred scrim too, which overflow and the radius leave square. */
+  clip-path: inset(0 round var(--ow-radius));
   background-color: var(--docs-surface);
   color: var(--ow-fg);
   font-size: var(--docs-text-ui);
@@ -2212,6 +2219,24 @@ body {
 
 .demo-command .ow-command-menu__viewport {
   padding: 58px 32px 24px;
+}
+
+/* Sidebar's drawer demo: a small window; the scrim and the drawer fill it, not the docs page. */
+.demo-sidebar-frame {
+  position: relative;
+  isolation: isolate;
+  inline-size: 320px;
+  max-inline-size: 100%;
+  block-size: 360px;
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: var(--ow-radius);
+  background-color: var(--docs-surface);
+  color: var(--ow-fg);
+}
+
+.demo-sidebar-frame :is(.ow-sidebar__backdrop, .ow-sidebar[data-mobile]) {
+  position: absolute;
 }
 
 /* Inspect's specimen: the Trigger and the open panel in flow, with no scrim over the page. */
@@ -2325,6 +2350,8 @@ body {
 /* Checkbox Group's demos: groups side by side. */
 .demo-checkbox-group-set {
   display: flex;
+  /* Wrap before the stage has to scale the demo down. */
+  max-inline-size: calc(100cqw - 64px);
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: center;
@@ -2340,6 +2367,19 @@ body {
   cursor: pointer;
 }
 
+/*
+ * A row's box sits nearer its edge than its text does (Button's geometry, an icon on one side), so
+ * a group on the stage is moved half that difference to look centred. A transform: the group keeps
+ * its size, so a row of several fits where it did.
+ */
+.cp-demo :is(.ow-checkbox-group, .ow-radio-group) {
+  translate: calc((0.15em + 3px) / 2);
+}
+
+.cp-demo :is(.ow-checkbox-group, .ow-radio-group):dir(rtl) {
+  translate: calc((0.15em + 3px) / -2);
+}
+
 /* A column of demos, one gap apart. */
 .demo-col {
   display: grid;
@@ -2351,6 +2391,7 @@ body {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 16px;
 }
 
@@ -2370,11 +2411,11 @@ body {
 }
 
 .demo-bar {
-  inline-size: min(340px, calc(100vw - 64px));
+  inline-size: min(340px, calc(100cqw - 64px));
 }
 
 .demo-parts {
-  inline-size: min(500px, calc(100vw - 64px));
+  inline-size: min(500px, calc(100cqw - 64px));
 }
 
 /* Collapsible's demos: a plus that turns into a cross while open, and a button beside a state. */
@@ -2401,7 +2442,7 @@ body {
 
 /* Slider's demos: a comfortable width, and upright sliders side by side. */
 .demo-slider {
-  inline-size: min(340px, calc(100vw - 64px));
+  inline-size: min(340px, calc(100cqw - 64px));
 }
 
 .demo-slider-columns {
@@ -2412,7 +2453,8 @@ body {
 
 /* OTP Field's demos: a row that fits a phone, and the dash between two groups. */
 .demo-otp {
-  inline-size: min(340px, calc(100vw - 64px));
+  inline-size: fit-content;
+  max-inline-size: min(340px, calc(100cqw - 64px));
 }
 
 /* Inspect's specimen is only as wide as its slots. */
@@ -2426,22 +2468,23 @@ body {
 
 /* Number Field's demos: a comfortable width, and the labels above the fields. */
 .demo-number-field {
-  inline-size: min(260px, calc(100vw - 64px));
+  inline-size: fit-content;
+  max-inline-size: min(260px, calc(100cqw - 64px));
 }
 
 /* Input's demos. */
 .demo-input {
-  inline-size: min(340px, calc(100vw - 64px));
+  inline-size: min(340px, calc(100cqw - 64px));
 }
 
 /* Field's demos: the field over what its control says, and the ways to restyle it. */
 .demo-field {
-  inline-size: min(340px, calc(100vw - 64px));
+  inline-size: min(340px, calc(100cqw - 64px));
 }
 
 /* Fieldset's demos: unlayered rules, as an app would write them. */
 .demo-fieldset {
-  inline-size: min(340px, calc(100vw - 64px));
+  inline-size: min(340px, calc(100cqw - 64px));
 }
 
 .demo-fieldset > .ow-toggle {
@@ -2460,7 +2503,7 @@ body {
 
 /* Form's demos: a sign-up form, and unlayered rules, as an app would write them. */
 .demo-form {
-  inline-size: min(340px, calc(100vw - 64px));
+  inline-size: min(340px, calc(100cqw - 64px));
 }
 
 /* Keeps its height when empty, so the form doesn't jump when the answer comes. */
@@ -2600,7 +2643,7 @@ body {
 /* The height that makes it scroll, and a panel to scroll over. */
 .demo-scroll-area {
   box-sizing: border-box;
-  inline-size: min(360px, 100%);
+  inline-size: min(360px, calc(100cqw - 64px));
   block-size: 280px;
   background-color: var(--ow-panel);
   color: var(--ow-fg);
@@ -3319,13 +3362,27 @@ body {
   overflow: clip;
 }
 
+/* A new example fades in with a small rise of scale; under reduced motion, a plain fade. */
 .cp-demo {
-  animation: cp-in 0.22s var(--ease);
+  animation: cp-fade var(--docs-dur-in) var(--ease);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cp-demo {
+    animation-name: cp-in;
+  }
+}
+
+@keyframes cp-fade {
+  from {
+    opacity: 0;
+  }
 }
 
 @keyframes cp-in {
   from {
     opacity: 0;
+    scale: 0.98;
   }
 }
 
@@ -3343,6 +3400,7 @@ body {
 }
 
 .cp-body[data-inspect] .cp-stage .cp-demo {
+  animation: none;
   opacity: 0;
   pointer-events: none;
   transition-delay: 0s;
@@ -4085,6 +4143,11 @@ body {
   background-color: color-mix(in oklab, var(--ow-fg) 4%, transparent);
 }
 
+.cp-example__head p a {
+  color: var(--docs-accent);
+  text-underline-offset: 2px;
+}
+
 .cp-example__head[data-active] {
   cursor: default;
 }
@@ -4356,7 +4419,7 @@ body {
 
 /* Icon Morph page: an episode card with its controls. */
 .demo-morph {
-  inline-size: min(320px, 100%);
+  inline-size: min(320px, calc(100cqw - 64px));
 }
 
 .demo-morph-row {
@@ -4395,7 +4458,7 @@ body {
 
 /* Code Block page: snippets in a Code Block. */
 .demo-code {
-  inline-size: min(400px, 100%);
+  inline-size: min(400px, calc(100cqw - 64px));
 }
 
 /* The prompt, drawn by CSS: not part of the text that Copy takes. */

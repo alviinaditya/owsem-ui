@@ -189,6 +189,29 @@ describe("Radio Group geometry", () => {
     close(gap.top, gap.left);
   });
 
+  test("a glyph in the indicator is 75% of the circle, centered, like Checkbox's check", async () => {
+    const { groups, radioOf } = await mount(
+      <RadioGroup aria-label="Glyph" defaultValue="a">
+        <label>
+          <Radio.Root value="a">
+            <Radio.Indicator>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            </Radio.Indicator>
+          </Radio.Root>
+          Standard
+        </label>
+      </RadioGroup>,
+    );
+    const radio = radioOf(groups[0] as Element);
+    const svg = radio.querySelector("svg") as SVGElement;
+    close(rect(svg).width, rect(radio).width * 0.75);
+    const gap = insets(radio, svg);
+    close(gap.left, gap.right);
+    close(gap.top, gap.bottom);
+  });
+
   test("right to left, the radio is at the start, on the right (FR-16)", async () => {
     const { groups, rowsOf, radioOf } = await mount(
       <div dir="rtl">

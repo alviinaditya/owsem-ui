@@ -176,10 +176,11 @@
     background-color: currentcolor;
   }
 
+  /* A glyph takes 75% of the circle, as Checkbox's padded check does in its box. */
   .ow-radio-group__indicator > :where(svg, img) {
     display: block;
-    inline-size: 100%;
-    block-size: 100%;
+    inline-size: 75%;
+    block-size: 75%;
   }
 
   .ow-radio-group__indicator:where([data-starting-style], [data-unchecked]) {

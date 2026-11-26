@@ -119,7 +119,11 @@ describe("Radio Group", () => {
     expect(getComputedStyle(mark).backgroundColor).toBe("rgba(0, 0, 0, 0)");
     expect(getComputedStyle(mark).borderTopWidth).toBe("0px");
     const svg = mark.querySelector("svg") as SVGElement;
-    expect(svg.getBoundingClientRect().width).toBeCloseTo(mark.getBoundingClientRect().width, 0);
+    // 75% of the circle, as Checkbox's padded check is of its box.
+    expect(svg.getBoundingClientRect().width).toBeCloseTo(
+      mark.getBoundingClientRect().width * 0.75,
+      0,
+    );
   });
 
   test("a press on the radio or on the row's text picks it, once", async () => {

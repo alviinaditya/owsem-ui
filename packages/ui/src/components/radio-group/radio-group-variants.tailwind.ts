@@ -121,7 +121,8 @@ const indicator = [
   // sits as far from the circle's edge on every side at a fractional zoom.
   "empty:box-border empty:border-[length:calc(var(--icon)_*_0.29)] empty:border-solid",
   "empty:border-transparent empty:bg-clip-padding empty:bg-current",
-  "[&>:where(svg,img)]:block [&>:where(svg,img)]:size-full",
+  // A glyph takes 75% of the circle, as Checkbox's padded check does in its box.
+  "[&>:where(svg,img)]:block [&>:where(svg,img)]:size-3/4",
   "data-starting-style:opacity-0 data-starting-style:transform-[scale(var(--_from))]",
   "data-unchecked:opacity-0 data-unchecked:transform-[scale(var(--_from))]",
   // Gone with the fill, since a light dot does not belong on the well.

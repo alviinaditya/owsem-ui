@@ -176,7 +176,7 @@ function Box({
             defaultValue={defaultValue as never}
             disabled={disabled}
             readOnly={readOnly}
-            {...(open ? { open: true } : {})}
+            {...(open === undefined ? {} : { open })}
           >
             {bare ? (
               <Combobox.Input aria-label="Fruit" placeholder="Pick a fruit" />
@@ -242,6 +242,8 @@ const make = (name: string, p: Omit<Props, "kit">): Case => ({
 
 const cases: Case[] = [
   ...SIZES.map((size) => make(`closed ${size}`, { size, value: "Cherry" })),
+  // Held shut, so a press on its trigger shows the pressed material and opens no popup.
+  make("shut md", { open: false, value: "Cherry" }),
   ...SIZES.map((size) => make(`chips ${size}`, { size, multiple: true })),
   make("closed, empty", {}),
   make("closed, disabled", { disabled: true, value: "Cherry" }),
@@ -362,7 +364,8 @@ describe("Combobox in Tailwind CSS v4 against combobox.css", () => {
   }, async () => {
     const trigger = { ...group, target: "[data-slot=combobox-trigger]" };
     await tw.states(cases, "closed md", "hover", trigger);
-    await tw.states(cases, "closed md", "held", trigger);
+    // A press opens the popup, which each side would measure part way into its opening.
+    await tw.states(cases, "shut md", "held", trigger);
     await tw.states(cases, "closed sm", "hover", trigger);
     const remove = { ...group, target: "[data-slot=combobox-chip-remove]" };
     await tw.states(cases, "chips md", "hover", remove);

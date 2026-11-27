@@ -37,6 +37,7 @@ const LUCIDE: Record<Value, string> = {
 const TEXT = {
   id: {
     project: "Proyek",
+    months: "Bulan",
     tabs: {
       overview: "Ringkasan",
       activity: "Aktivitas",
@@ -58,6 +59,7 @@ const TEXT = {
   },
   en: {
     project: "Project",
+    months: "Months",
     tabs: {
       overview: "Overview",
       activity: "Activity",
@@ -80,6 +82,54 @@ const TEXT = {
 } satisfies Record<Lang, unknown>;
 
 const SIZES: readonly TabsSize[] = ["sm", "md", "lg"];
+
+const MONTHS = {
+  id: [
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember",
+  ],
+  en: [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ],
+} satisfies Record<Lang, string[]>;
+
+/** Twelve tabs in a list of their own: they scroll, fade, and draw their buttons by themselves. */
+function LongList({ lang }: { lang: Lang }) {
+  return (
+    <div className="demo-tabs">
+      <Tabs.Root defaultValue="5">
+        <Tabs.List aria-label={TEXT[lang].months}>
+          {MONTHS[lang].map((month, i) => (
+            <Tabs.Tab key={month} value={String(i)}>
+              {month}
+            </Tabs.Tab>
+          ))}
+        </Tabs.List>
+      </Tabs.Root>
+    </div>
+  );
+}
 
 /** A tab's content: its text, its icon (named for screen readers), or both. */
 function tabContent(value: Value, content: Content, lang: Lang) {
@@ -307,12 +357,36 @@ export const tabsDefinition = defineComponent({
       id: "overflow",
       title: { id: "Meluap", en: "Overflow" },
       description: {
-        id: "Bila tab tidak muat, list bergulir ke samping; tab yang terpotong tepi masuk saat dipilih.",
-        en: "When the tabs do not fit, the list scrolls sideways; a tab the edge cuts comes in when picked.",
+        id: "Bila tab tidak muat, list bergulir ke samping, dengan chevron dan pemudaran di ujung yang masih punya tab; tab yang terpotong tepi masuk saat dipilih.",
+        en: "When the tabs do not fit, the list scrolls sideways, with chevrons and a fade at the ends that have more; a tab the edge cuts comes in when picked.",
       },
       uses: ["Tabs"],
       demo: (lang) => <Project lang={lang} values={MANY} />,
       code: (setup) => projectCode(setup, "ManyTabs", { values: MANY }),
+    },
+    {
+      id: "long",
+      title: { id: "Daftar panjang", en: "Long list" },
+      description: {
+        id: "Dua belas tab dalam satu baris: tombol chevron menggulir sekitar satu halaman, tepi yang masih ada isinya memudar, dan roda mouse atau trackpad menggulirnya. Tab yang dipilih selalu dibawa ke tampilan.",
+        en: "Twelve tabs in a row: the chevron buttons scroll about a page, the edges with more fade, and a mouse wheel or trackpad scrolls it. The picked tab is always brought into view.",
+      },
+      uses: ["Tabs"],
+      demo: (lang) => <LongList lang={lang} />,
+      code: (setup) => [
+        exampleFile(
+          "MonthTabs",
+          [`import { Tabs } from "${importPath(setup, "tabs")}";`],
+          [
+            "{/* No wiring: when the tabs do not fit, the list scrolls, fades, and draws its buttons. */}",
+            '<Tabs.Root defaultValue="5">',
+            '  <Tabs.List aria-label="Months">',
+            ...MONTHS.en.map((month, i) => `    <Tabs.Tab value="${i}">${month}</Tabs.Tab>`),
+            "  </Tabs.List>",
+            "</Tabs.Root>",
+          ],
+        ),
+      ],
     },
     {
       id: "equal",

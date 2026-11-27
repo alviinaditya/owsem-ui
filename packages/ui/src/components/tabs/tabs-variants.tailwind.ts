@@ -14,30 +14,73 @@ export interface TabsListVariantProps {
 // The list above the panel, or beside it when vertical.
 const root = ["flex flex-col gap-[0.75em] min-w-0", "data-[orientation=vertical]:flex-row"];
 
-// The list is segmented, as in Toggle Group: a tint of the text color with no shadow. It is as big
-// as its tabs, and no bigger than its parent: past that, it scrolls without a scrollbar. It is
-// also Glide's container, so it holds the highlight behind the tabs (relative isolate).
+// The list is segmented, as in Toggle Group: a tint of the text color with no shadow. It is the
+// well, as big as its tabs and no bigger than its parent; the track inside it scrolls past that.
 const list = [
   "group/ow-tabs-list",
   "[--_well:color-mix(in_oklab,var(--ow-fg)_6%,transparent)]",
   // The tabs' and the indicator's radius: the well's, --ow-radius, less its padding.
   "[--_radius:max(0px,var(--ow-radius)_-_var(--_inset))] [--_inset:4px]",
+  "[--_fg:var(--ow-fg)] [--_muted:var(--ow-muted)]",
+  // How far the tabs fade at an edge with more beyond it, and how wide its button is.
+  "[--_fade:2em]",
   // How far a held tab presses in, scaled by the motion intensity.
   "[--_press:calc(1_-_0.03_*_var(--ow-motion-scale))]",
   // Box. A layer like the indicator's, so both snap to device pixels alike and its gaps to the
   // well stay even at a fractional zoom.
-  "relative isolate flex gap-[2px] box-border w-fit max-w-full h-fit max-h-full p-(--_inset)",
+  "relative flex box-border w-fit max-w-full h-fit max-h-full",
   "rounded-[calc(var(--_radius)_+_var(--_inset))] bg-(color:--_well) will-change-transform",
   // The panel's height never squeezes the list out of the root.
   "shrink-0",
-  // Past its parent it scrolls, and a tab brought in by focus keeps the well's gap to the edge.
-  "overflow-x-auto overflow-y-hidden scroll-p-(--_inset) [scrollbar-width:none]",
-  "data-[orientation=vertical]:flex-col data-[orientation=vertical]:overflow-x-hidden",
-  "data-[orientation=vertical]:overflow-y-auto",
-  // Glide's highlight takes the tabs' corners.
-  "[&>[data-slot=glide]]:[--_radius:max(0px,var(--ow-radius)_-_4px)]",
+  "data-[orientation=vertical]:flex-col",
   // The well's edge shows.
   "forced-colors:outline-1 forced-colors:-outline-offset-1 forced-colors:outline-transparent",
+];
+
+// The tabs, as wide as they are, scrolling without a scrollbar, and fading at an edge with more
+// beyond it (data-overflow-start and -end). It is also Glide's container, so it holds the
+// highlight behind the tabs (relative isolate).
+const track = [
+  "group/ow-tabs-track peer/ow-tabs-track",
+  "[--_fade-start:0px] [--_fade-end:0px] [--_fade-dir:to_right]",
+  "relative isolate flex flex-1 gap-[2px] box-border min-w-0 min-h-0 p-(--_inset)",
+  "overflow-x-auto overflow-y-hidden [scrollbar-width:none]",
+  "[&::-webkit-scrollbar]:hidden rounded-[inherit] will-change-transform",
+  // A tab brought in by focus keeps the well's gap to the edge, and clear of the fade.
+  "scroll-p-(--_inset)",
+  "data-[orientation=vertical]:flex-col data-[orientation=vertical]:overflow-x-hidden",
+  "data-[orientation=vertical]:overflow-y-auto",
+  "data-overflow-start:[--_fade-start:var(--_fade)] data-overflow-end:[--_fade-end:var(--_fade)]",
+  "[&:where([data-overflow-start],[data-overflow-end])]:[mask-image:linear-gradient(var(--_fade-dir),transparent,#000_var(--_fade-start),#000_calc(100%_-_var(--_fade-end)),transparent)]",
+  "not-data-[orientation=vertical]:rtl:[--_fade-dir:to_left]",
+  "data-[orientation=vertical]:[--_fade-dir:to_bottom]",
+  "[&:where(:not([data-orientation=vertical]):is([data-overflow-start],[data-overflow-end]))]:scroll-px-(--_fade)",
+  "[&:where([data-orientation=vertical]:is([data-overflow-start],[data-overflow-end]))]:scroll-py-(--_fade)",
+  "[&:where([data-orientation=vertical]:is([data-overflow-start],[data-overflow-end]))]:scroll-px-(--_inset)",
+  // Glide's highlight takes the tabs' corners.
+  "[&>[data-slot=glide]]:[--_radius:max(0px,var(--ow-radius)_-_4px)]",
+];
+
+// A chevron over each faded end, out of the way until that end has more. The right-to-left writing
+// turns it round, and a vertical list moves it to the top and bottom.
+const scrollButton = [
+  "absolute inset-y-0 flex items-center justify-center box-border w-(--_fade) m-0 p-0 border-0",
+  "bg-transparent text-(color:--_muted) hover:text-(color:--_fg) cursor-pointer",
+  "opacity-0 invisible transition-[opacity,visibility,color] duration-150 ease-[ease]",
+  "motion-reduce:transition-none",
+  "data-[edge=start]:start-0 data-[edge=end]:end-0",
+  "[&>svg]:size-[1.125em] rtl:[&>svg]:[scale:-1_1]",
+  "group-data-[orientation=vertical]/ow-tabs-list:inset-y-auto",
+  "group-data-[orientation=vertical]/ow-tabs-list:inset-x-0",
+  "group-data-[orientation=vertical]/ow-tabs-list:w-auto",
+  "group-data-[orientation=vertical]/ow-tabs-list:h-(--_fade)",
+  "group-data-[orientation=vertical]/ow-tabs-list:data-[edge=start]:top-0",
+  "group-data-[orientation=vertical]/ow-tabs-list:data-[edge=end]:bottom-0",
+  "group-data-[orientation=vertical]/ow-tabs-list:[&>svg]:[scale:none]",
+  "peer-data-[overflow-start]/ow-tabs-track:data-[edge=start]:opacity-100",
+  "peer-data-[overflow-start]/ow-tabs-track:data-[edge=start]:visible",
+  "peer-data-[overflow-end]/ow-tabs-track:data-[edge=end]:opacity-100",
+  "peer-data-[overflow-end]/ow-tabs-track:data-[edge=end]:visible",
 ];
 
 const sizeStyles = {
@@ -122,7 +165,7 @@ const tab = [
   // Lit by Glide, or active: the text color; active, the accent leaning toward it.
   "data-glide-active:not-data-active:text-(color:--_fg) data-active:text-(color:--_on)",
   // The active tab as a key of its own before the script places the indicator (server HTML).
-  "group-not-data-thumb/ow-tabs-list:data-active:bg-(color:--_key)",
+  "group-not-data-thumb/ow-tabs-track:data-active:bg-(color:--_key)",
   "data-held:scale-(--_press) data-held:duration-[150ms,90ms] data-held:ease-[ease,var(--ow-ease-out)]",
   // Inside the tab, so the scrolling list never cuts it.
   "focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(color:--_focus)",
@@ -141,8 +184,8 @@ const tab = [
   // The active tab is filled with the system highlight, and a disabled one stays gray.
   "forced-colors:data-active:forced-color-adjust-none",
   "forced-colors:data-active:text-[HighlightText]",
-  "forced-colors:group-not-data-thumb/ow-tabs-list:data-active:forced-color-adjust-none",
-  "forced-colors:group-not-data-thumb/ow-tabs-list:data-active:bg-[Highlight]",
+  "forced-colors:group-not-data-thumb/ow-tabs-track:data-active:forced-color-adjust-none",
+  "forced-colors:group-not-data-thumb/ow-tabs-track:data-active:bg-[Highlight]",
   "forced-colors:focus-visible:outline-[Highlight] forced-colors:data-disabled:text-[GrayText]",
   "forced-colors:data-disabled:data-active:text-[GrayText]",
 ];
@@ -161,8 +204,13 @@ const panel = [
 ];
 
 /** The classes of the other parts. */
-export const tabsSlots: Record<"root" | "indicator" | "tab" | "label" | "panel", string> = {
+export const tabsSlots: Record<
+  "root" | "track" | "scrollButton" | "indicator" | "tab" | "label" | "panel",
+  string
+> = {
   root: root.join(" "),
+  track: track.join(" "),
+  scrollButton: scrollButton.join(" "),
   indicator: indicator.join(" "),
   tab: tab.join(" "),
   label: label.join(" "),

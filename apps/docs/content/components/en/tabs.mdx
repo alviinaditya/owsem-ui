@@ -43,12 +43,14 @@ and the hover highlight draw themselves. Only a change from one tab to another s
 
 <InspectButton />
 
-Four parts are yours to write; the list draws the indicator.
+Four parts are yours to write; the list draws the track, the indicator, and the scroll buttons.
 
 | Part | Element | Notes |
 | --- | --- | --- |
 | <Part name="Root" /> | `div.ow-tabs` | Base UI's `Tabs.Root`: the list and the panels. Tokens set on it reach every part inside |
-| <Part name="List" /> | `div.ow-tabs__list` | `role="tablist"`: the well. It draws the indicator and Glide's highlight, and scrolls sideways when the tabs do not fit |
+| <Part name="List" /> | `div.ow-tabs__list` | `role="tablist"`: the well, as wide as the tabs and no wider than its parent |
+| Track | `div.ow-tabs__track` | Holds the tabs, the indicator, and Glide's highlight. It scrolls along the list's axis when the tabs do not fit, and fades the edge with more beyond it |
+| Scroll button | `button.ow-tabs__scroll-button` | A chevron at each end, shown only while that end has more tabs. Decorative: `aria-hidden`, out of the tab order |
 | <Part name="Tab" /> | `button.ow-tabs__tab` | `role="tab"`, `aria-selected`. Its text is wrapped in `span.ow-tabs__label`, so a tab with only an icon is square |
 | <Part name="Indicator" /> | `span.ow-tabs__indicator` | Decorative (`aria-hidden`); the list draws it |
 | <Part name="Panel" /> | `div.ow-tabs__panel` | `role="tabpanel"`, labelled by its tab. No padding, so your content decides |
@@ -68,6 +70,7 @@ tab, on the same pixels.
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `size` | `"sm" \| "md" \| "lg"` | `"md"` | Font size and padding of the tabs |
+| `scrollButtons` | `boolean` | `true` | Draws the chevron buttons when the tabs overflow. The fade stays without them |
 
 | Size | Font | Tab | Well |
 | --- | --- | --- | --- |
@@ -82,6 +85,9 @@ The well is as tall as a Button of its size, and the tabs sit 4px inside it. An 
 | Data attribute | Present when |
 | --- | --- |
 | `data-size` | Always: `sm`, `md`, or `lg` |
+
+The track has `data-overflow-start` and `data-overflow-end` while tabs are hidden at that side, and
+`data-orientation`. The scroll buttons have `data-edge`, `start` or `end`.
 
 ### Tabs.Tab
 
@@ -99,6 +105,8 @@ A tab's text is wrapped in a label, so a tab with only an icon is square.
 | --- | --- |
 | `ow-tabs` | Root |
 | `ow-tabs__list` | List |
+| `ow-tabs__track` | The track the list draws around its tabs |
+| `ow-tabs__scroll-button` | The scroll buttons the list draws |
 | `ow-tabs__indicator` | The indicator the list draws |
 | `ow-tabs__tab` | Tab |
 | `ow-tabs__label` | The text of a Tab |
@@ -119,6 +127,10 @@ The list is one tab stop.
 
 - By default the arrows only move focus, so a panel that is slow to show is not opened on the way
   past. Set `activateOnFocus` on the list to pick as they move.
+- When the tabs overflow, the track scrolls: the arrow keys and picking a tab bring that tab into view, a
+  mouse wheel or a trackpad scrolls it (a vertical wheel turns a horizontal list until it reaches its
+  end), and so do the chevron buttons. The buttons are for the pointer: they are `aria-hidden` and have
+  no tab stop, so the tabs stay the only thing a keyboard or a screen reader meets.
 - Name the list with `aria-label` or `aria-labelledby`, and a tab with only an icon with `aria-label`.
 - The panel is reachable with Tab, so a keyboard can scroll it. If it starts with something
   focusable, give it `tabIndex={-1}` for one stop less.
@@ -170,5 +182,6 @@ or flex on a child.
 The indicator slides on the Core travel spring and stretches from its leading edge, then settles on
 the settle spring without bouncing; Glide lights the hovered tab. Press and hold a tab and it scales
 to 0.97, the indicator with it if that tab is the active one. A list wider than its parent scrolls
-without a scrollbar, and the indicator travels with its tab. All of it follows `--ow-motion-scale`.
+without a scrollbar, and the indicator travels with its tab. A chevron button scrolls by about a page,
+smoothly, and at once with reduced motion; its fade is no motion at all. All of it follows `--ow-motion-scale`.
 With `prefers-reduced-motion`, the indicator moves at once and a held tab dims instead of scaling.

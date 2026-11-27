@@ -56,9 +56,11 @@ function Long({
 
 async function mount(ui: ReactNode) {
   const screen = await render(ui);
-  const list = screen.container.querySelector<HTMLElement>(".ow-tabs__list");
+  // The track holds the tabs and scrolls; the list around it is the well.
+  const list = screen.container.querySelector<HTMLElement>(".ow-tabs__track");
+  const well = screen.container.querySelector<HTMLElement>(".ow-tabs__list");
   const thumb = screen.container.querySelector<HTMLElement>(".ow-tabs__indicator");
-  if (!list || !thumb) throw new Error("not mounted");
+  if (!list || !well || !thumb) throw new Error("not mounted");
   const tab = (name: string) => {
     const el = [...list.querySelectorAll<HTMLElement>('[role="tab"]')].find(
       (candidate) => candidate.textContent === name,
@@ -70,7 +72,7 @@ async function mount(ui: ReactNode) {
     [...screen.container.querySelectorAll(".ow-tabs__panel")]
       .filter((el) => getComputedStyle(el).display !== "none")
       .map((el) => el.textContent);
-  return { screen, list, thumb, tab, shown };
+  return { screen, list, well, thumb, tab, shown };
 }
 
 /**
@@ -260,11 +262,11 @@ describe("Tabs", () => {
     onTestFinished(() => {
       delete root.dataset.theme;
     });
-    const { screen, list, thumb, tab } = await mount(<Sample />);
+    const { screen, well: wellEl, thumb, tab } = await mount(<Sample />);
     const panel = screen.container.querySelector(".ow-tabs__panel") as Element;
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
-      const well = getComputedStyle(list);
+      const well = getComputedStyle(wellEl);
       expect(well.backgroundColor, theme).toBe(resolve("background-color", TRACK));
       // A list that is a tint of the text color, with no shadow, and a tinted key with no edge.
       expect(well.boxShadow, theme).toBe("none");
@@ -285,7 +287,7 @@ describe("Tabs", () => {
   });
 
   test("a theme token set on the root or a part changes it alone (TK-9)", async () => {
-    const { list, thumb, tab } = await mount(
+    const { well, thumb, tab } = await mount(
       <>
         <Sample
           style={
@@ -299,10 +301,10 @@ describe("Tabs", () => {
         <Sample />
       </>,
     );
-    expect(getComputedStyle(list).backgroundColor).toBe(resolve("background-color", TRACK, list));
-    expect(getComputedStyle(list).backgroundColor).not.toBe(resolve("background-color", TRACK));
+    expect(getComputedStyle(well).backgroundColor).toBe(resolve("background-color", TRACK, well));
+    expect(getComputedStyle(well).backgroundColor).not.toBe(resolve("background-color", TRACK));
     expect(getComputedStyle(thumb, "::before").backgroundColor).toBe(
-      resolve("background-color", TINT, list),
+      resolve("background-color", TINT, well),
     );
     expect(getComputedStyle(tab("Overview")).color).toBe("rgb(7, 8, 9)");
     const lists = document.querySelectorAll(".ow-tabs__list");
@@ -391,9 +393,14 @@ describe("Tabs", () => {
   test("stretched with plain CSS, with equal tabs by className, the indicator follows", async () => {
     sheet(`
       .stretched { inline-size: 100%; }
-      .stretched > .ow-tabs__tab { flex: 1; }
+      .stretched .ow-tabs__tab { flex: 1; }
     `);
-    const { screen, list, thumb, tab } = await mount(
+    const {
+      screen,
+      well: list,
+      thumb,
+      tab,
+    } = await mount(
       <div className="box" style={{ inlineSize: 600 }}>
         <Sample list={{ className: "stretched" }} />
       </div>,
@@ -583,7 +590,7 @@ describe("Tabs", () => {
     await expect.poll(auto.shown).toEqual(["Activity panel"]);
 
     const down = await mount(<Sample defaultValue="overview" orientation="vertical" />);
-    expect(down.list.getAttribute("aria-orientation")).toBe("vertical");
+    expect(down.well.getAttribute("aria-orientation")).toBe("vertical");
     down.tab("Overview").focus();
     await userEvent.keyboard("{ArrowDown}");
     expect(document.activeElement).toBe(down.tab("Activity"));
@@ -643,7 +650,11 @@ describe("Tabs", () => {
     expect(cut.getBoundingClientRect().right).toBeGreaterThan(edge);
     cut.click();
     await expect.poll(() => list.scrollLeft).toBeGreaterThan(0);
-    expect(edge - cut.getBoundingClientRect().right).toBeCloseTo(4, 0);
+    // It clears the fade and the button over it.
+    expect(edge - cut.getBoundingClientRect().right).toBeCloseTo(
+      Number.parseFloat(getComputedStyle(list).scrollPaddingRight),
+      0,
+    );
     // The list's own onClick still runs.
     expect(seen).toEqual(["click"]);
   });
@@ -684,7 +695,7 @@ describe("Tabs", () => {
 
   test("stays legible in forced colors: the active tab on a Highlight key (DP-8)", async () => {
     onTestFinished(() => commands.setForcedColors("none"));
-    const { list, thumb, tab } = await mount(<Sample />);
+    const { well, thumb, tab } = await mount(<Sample />);
     await commands.setForcedColors("active");
     expect(matchMedia("(forced-colors: active)").matches).toBe(true);
     expect(getComputedStyle(thumb, "::before").backgroundColor).toBe(resolve("color", "Highlight"));
@@ -695,8 +706,8 @@ describe("Tabs", () => {
       .poll(() => getComputedStyle(tab("Overview")).color)
       .toBe(resolve("color", "CanvasText"));
     // The well's edge: an outline that forced colors paint.
-    expect(getComputedStyle(list).outlineStyle).toBe("solid");
-    expect(getComputedStyle(list).outlineColor).toBe(resolve("color", "CanvasText"));
+    expect(getComputedStyle(well).outlineStyle).toBe("solid");
+    expect(getComputedStyle(well).outlineColor).toBe(resolve("color", "CanvasText"));
   });
 
   test("has no axe violations in light and dark", async () => {
@@ -761,7 +772,7 @@ describe("Tabs", () => {
   test("Glide's highlight never shows on the active tab, nor slides out from under the indicator", async () => {
     const screen = await render(<Sample />);
     await settle();
-    const list = screen.container.querySelector<HTMLElement>(".ow-tabs__list") as HTMLElement;
+    const list = screen.container.querySelector<HTMLElement>(".ow-tabs__track") as HTMLElement;
     const glide = list.querySelector<HTMLElement>(":scope > .ow-glide") as HTMLElement;
     const tab = (name: string) => screen.getByRole("tab", { name }).element() as HTMLElement;
     // Over the active tab it stays hidden.
@@ -802,10 +813,221 @@ test("every part has its data-slot", async () => {
   expect(slots).toEqual([
     "tabs",
     "tabs-list",
+    "tabs-track",
     "glide",
     "tabs-indicator",
     "tabs-tab",
     "tabs-label",
+    "tabs-scroll-button",
+    "tabs-scroll-button",
     "tabs-panel",
   ]);
+});
+
+describe("Tabs that overflow", () => {
+  const buttons = (well: HTMLElement) => ({
+    start: well.querySelector<HTMLElement>('[data-slot="tabs-scroll-button"][data-edge="start"]'),
+    end: well.querySelector<HTMLElement>('[data-slot="tabs-scroll-button"][data-edge="end"]'),
+  });
+  const shows = (el: HTMLElement | null) =>
+    !!el && getComputedStyle(el).visibility === "visible" && getComputedStyle(el).opacity === "1";
+  const masked = (el: Element) => getComputedStyle(el).maskImage !== "none";
+
+  test("tabs that fit show no buttons and no fade", async () => {
+    const { list, well } = await mount(<Sample />);
+    expect(list.hasAttribute("data-overflow-start")).toBe(false);
+    expect(list.hasAttribute("data-overflow-end")).toBe(false);
+    expect(masked(list)).toBe(false);
+    expect(shows(buttons(well).start)).toBe(false);
+    expect(shows(buttons(well).end)).toBe(false);
+  });
+
+  test("buttons and the fade show only at the ends with more, and follow the scroll", async () => {
+    const { list, well } = await mount(<Long />);
+    const { start, end } = buttons(well);
+    await expect.poll(() => shows(end)).toBe(true);
+    expect(shows(start)).toBe(false);
+    expect(list.hasAttribute("data-overflow-end")).toBe(true);
+    expect(list.hasAttribute("data-overflow-start")).toBe(false);
+    expect(masked(list)).toBe(true);
+    list.scrollLeft = 80;
+    await expect.poll(() => shows(start)).toBe(true);
+    expect(shows(end)).toBe(true);
+    list.scrollLeft = list.scrollWidth;
+    await expect.poll(() => shows(end)).toBe(false);
+    expect(shows(start)).toBe(true);
+    expect(list.hasAttribute("data-overflow-end")).toBe(false);
+  });
+
+  test("the fade covers an end only as far as the button, and the tabs below it stay whole", async () => {
+    const { list, well } = await mount(<Long />);
+    await expect.poll(() => masked(list)).toBe(true);
+    const fade = Number.parseFloat(getComputedStyle(well).getPropertyValue("--_fade")) || 0;
+    // 2em of the list's 14px.
+    expect(fade).toBeGreaterThan(0);
+    const button = buttons(well).end as HTMLElement;
+    expect(button.getBoundingClientRect().width).toBeCloseTo(
+      Number.parseFloat(getComputedStyle(button).width),
+      1,
+    );
+    expect(getComputedStyle(list).maskImage).toContain("linear-gradient");
+  });
+
+  test("a button scrolls by about a page, smoothly, and the indicator stays on its tab", async () => {
+    const { list, well, thumb, tab } = await mount(<Long />);
+    await expect.poll(() => shows(buttons(well).end)).toBe(true);
+    const page = list.clientWidth - tab("component-a.tsx").offsetWidth;
+    buttons(well).end?.click();
+    await expect.poll(() => list.scrollLeft).toBeGreaterThan(page - 2);
+    await expect
+      .poll(() => list.scrollLeft)
+      .toBeLessThanOrEqual(list.scrollWidth - list.clientWidth);
+    expect(over(thumb, tab("component-a.tsx"))).toBe(true);
+    const at = list.scrollLeft;
+    buttons(well).start?.click();
+    await expect.poll(() => list.scrollLeft).toBeLessThan(at);
+    expect(over(thumb, tab("component-a.tsx"))).toBe(true);
+  });
+
+  test("with reduced motion a button scrolls at once", async () => {
+    onTestFinished(() => commands.setReducedMotion("no-preference"));
+    await commands.setReducedMotion("reduce");
+    const { list, well } = await mount(<Long />);
+    await expect.poll(() => shows(buttons(well).end)).toBe(true);
+    buttons(well).end?.click();
+    expect(list.scrollLeft).toBeGreaterThan(0);
+    expect(getComputedStyle(buttons(well).end as Element).transitionDuration).toBe("0s");
+  });
+
+  test("the buttons are decorative: hidden from the tree and out of the tab order", async () => {
+    const { well, tab, screen } = await mount(<Long />);
+    for (const el of Object.values(buttons(well))) {
+      expect(el?.getAttribute("aria-hidden")).toBe("true");
+      expect(el?.tabIndex).toBe(-1);
+    }
+    // The tabs stay the keyboard's; Tab leaves the list without stopping on a button.
+    tab("component-a.tsx").focus();
+    await userEvent.tab();
+    expect(well.contains(document.activeElement)).toBe(false);
+    await expect.element(screen.getByRole("tab", { name: "component-a.tsx" })).toBeVisible();
+    // A press on a button does not take the focus from the tab.
+    tab("component-a.tsx").focus();
+    buttons(well).end?.dispatchEvent(
+      new MouseEvent("mousedown", { bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(tab("component-a.tsx"));
+  });
+
+  test("scrollButtons={false} keeps the fade and draws no buttons", async () => {
+    const { list, well } = await mount(<Long list={{ scrollButtons: false }} />);
+    expect(well.querySelector('[data-slot="tabs-scroll-button"]')).toBeNull();
+    await expect.poll(() => masked(list)).toBe(true);
+  });
+
+  test("a vertical wheel turns a horizontal list until it runs out, then the page gets it", async () => {
+    const { list } = await mount(<Long />);
+    const wheel = (deltaY: number) => {
+      const event = new WheelEvent("wheel", { deltaY, bubbles: true, cancelable: true });
+      list.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    expect(wheel(60)).toBe(true);
+    expect(list.scrollLeft).toBe(60);
+    expect(wheel(-20)).toBe(true);
+    expect(list.scrollLeft).toBe(40);
+    list.scrollLeft = 0;
+    expect(wheel(-20)).toBe(false);
+    list.scrollLeft = list.scrollWidth;
+    expect(wheel(20)).toBe(false);
+    // A sideways wheel is the browser's own.
+    const sideways = new WheelEvent("wheel", {
+      deltaX: 40,
+      deltaY: 2,
+      bubbles: true,
+      cancelable: true,
+    });
+    list.scrollLeft = 10;
+    list.dispatchEvent(sideways);
+    expect(sideways.defaultPrevented).toBe(false);
+  });
+
+  test("a wheel on tabs that fit is left to the page", async () => {
+    const { list } = await mount(<Sample />);
+    const event = new WheelEvent("wheel", { deltaY: 60, bubbles: true, cancelable: true });
+    list.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(false);
+  });
+
+  test("picking another tab brings it into view, clear of the fade", async () => {
+    function Controlled({ value }: { value: string }) {
+      return (
+        <div style={{ inlineSize: 220 }}>
+          <Tabs.Root value={value}>
+            <Tabs.List aria-label="Files">
+              {["a", "b", "c", "d", "e", "f"].map((name) => (
+                <Tabs.Tab key={name} value={name}>{`component-${name}.tsx`}</Tabs.Tab>
+              ))}
+            </Tabs.List>
+          </Tabs.Root>
+        </div>
+      );
+    }
+    const screen = await render(<Controlled value="a" />);
+    const list = screen.container.querySelector(".ow-tabs__track") as HTMLElement;
+    await screen.rerender(<Controlled value="f" />);
+    await expect.poll(() => list.scrollLeft).toBe(list.scrollWidth - list.clientWidth);
+  });
+
+  test("right to left: the start button is on the right and scrolling goes the other way", async () => {
+    const { list, well } = await mount(<Long dir="rtl" />);
+    const { start, end } = buttons(well);
+    await expect.poll(() => shows(end)).toBe(true);
+    expect(start?.getBoundingClientRect().left).toBeGreaterThan(
+      (end as HTMLElement).getBoundingClientRect().left,
+    );
+    expect(getComputedStyle(list).maskImage).toContain("to left");
+    end?.click();
+    await expect.poll(() => list.scrollLeft).toBeLessThan(-100);
+    await expect.poll(() => shows(start)).toBe(true);
+    // The chevron turns round with the writing.
+    expect(getComputedStyle(end?.firstElementChild as Element).scale).toBe("-1 1");
+  });
+
+  test("vertical: the buttons sit at the top and bottom, and the list scrolls down and up", async () => {
+    const screen = await render(
+      <div style={{ blockSize: 120, display: "flex" }}>
+        <Tabs.Root defaultValue="a" orientation="vertical">
+          <Tabs.List aria-label="Files">
+            {["a", "b", "c", "d", "e", "f"].map((name) => (
+              <Tabs.Tab key={name} value={name}>{`component-${name}.tsx`}</Tabs.Tab>
+            ))}
+          </Tabs.List>
+        </Tabs.Root>
+      </div>,
+    );
+    const list = screen.container.querySelector(".ow-tabs__track") as HTMLElement;
+    const well = screen.container.querySelector(".ow-tabs__list") as HTMLElement;
+    const { start, end } = buttons(well);
+    await expect.poll(() => shows(end)).toBe(true);
+    expect(shows(start)).toBe(false);
+    expect(list.scrollHeight).toBeGreaterThan(list.clientHeight);
+    // Down the block axis: the default direction, so no "to right" or "to left".
+    expect(getComputedStyle(list).maskImage).not.toMatch(/to (left|right)|90deg|270deg/);
+    expect(end?.getBoundingClientRect().top).toBeGreaterThan(
+      (start as HTMLElement).getBoundingClientRect().top,
+    );
+    expect(list.offsetWidth - list.clientWidth).toBe(0);
+    end?.click();
+    await expect.poll(() => list.scrollTop).toBeGreaterThan(0);
+    await expect.poll(() => shows(start)).toBe(true);
+    // The chevrons point up and down, not turned with the writing.
+    expect(getComputedStyle(start?.firstElementChild as Element).scale).toBe("none");
+  });
+
+  test("the well keeps its own edge: the fade cuts the tabs, not the well", async () => {
+    const { list, well } = await mount(<Long />);
+    await expect.poll(() => masked(list)).toBe(true);
+    expect(masked(well)).toBe(false);
+    expect(getComputedStyle(well).backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
+  });
 });

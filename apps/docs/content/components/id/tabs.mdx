@@ -44,12 +44,14 @@ perpindahan dari satu tab ke tab lain yang meluncur.
 
 <InspectButton />
 
-Empat part Anda tulis sendiri; indikator digambar oleh list.
+Empat part Anda tulis sendiri; list menggambar track, indikator, dan tombol gulir.
 
 | Part | Elemen | Catatan |
 | --- | --- | --- |
 | <Part name="Root" /> | `div.ow-tabs` | `Tabs.Root` Base UI: list dan panel. Token yang diset di sini sampai ke semua part di dalamnya |
-| <Part name="List" /> | `div.ow-tabs__list` | `role="tablist"`: well-nya. Ia menggambar indikator dan sorotan Glide, dan bergulir ke samping bila tab tidak muat |
+| <Part name="List" /> | `div.ow-tabs__list` | `role="tablist"`: well-nya, selebar tab dan tidak lebih lebar dari induknya |
+| Track | `div.ow-tabs__track` | Memuat tab, indikator, dan sorotan Glide. Ia bergulir searah list bila tab tidak muat, dan memudarkan tepi yang masih ada isinya |
+| Scroll button | `button.ow-tabs__scroll-button` | Chevron di tiap ujung, tampil hanya saat ujung itu masih punya tab. Dekoratif: `aria-hidden`, di luar urutan tab |
 | <Part name="Tab" /> | `button.ow-tabs__tab` | `role="tab"`, `aria-selected`. Teksnya dibungkus `span.ow-tabs__label`, jadi tab yang hanya berisi ikon berbentuk persegi |
 | <Part name="Indicator" /> | `span.ow-tabs__indicator` | Dekoratif (`aria-hidden`); digambar oleh list |
 | <Part name="Panel" /> | `div.ow-tabs__panel` | `role="tabpanel"`, diberi label oleh tab-nya. Tanpa padding, jadi isi Anda yang menentukan |
@@ -69,6 +71,7 @@ menaruh tab, pada piksel yang sama.
 | Prop | Tipe | Default | Deskripsi |
 | --- | --- | --- | --- |
 | `size` | `"sm" \| "md" \| "lg"` | `"md"` | Ukuran font dan padding tab |
+| `scrollButtons` | `boolean` | `true` | Menggambar tombol chevron saat tab meluap. Pemudaran tetap ada tanpa tombol |
 
 | Ukuran | Font | Tab | Alur |
 | --- | --- | --- | --- |
@@ -83,6 +86,9 @@ Wadahnya setinggi Button seukurannya, dan tab berada 4px di dalamnya. Ikon beruk
 | Atribut data | Ada saat |
 | --- | --- |
 | `data-size` | Selalu: `sm`, `md`, atau `lg` |
+
+Track punya `data-overflow-start` dan `data-overflow-end` saat ada tab tersembunyi di sisi itu, dan
+`data-orientation`. Tombol gulir punya `data-edge`, `start` atau `end`.
 
 ### Tabs.Tab
 
@@ -100,6 +106,8 @@ Teks tab dibungkus label, jadi tab yang hanya berisi ikon berbentuk persegi.
 | --- | --- |
 | `ow-tabs` | Root |
 | `ow-tabs__list` | List |
+| `ow-tabs__track` | Track yang digambar list di sekeliling tab-nya |
+| `ow-tabs__scroll-button` | Tombol gulir yang digambar list |
 | `ow-tabs__indicator` | Indikator yang digambar list |
 | `ow-tabs__tab` | Tab |
 | `ow-tabs__label` | Teks sebuah Tab |
@@ -120,6 +128,10 @@ List adalah satu tab stop.
 
 - Secara default panah hanya memindahkan fokus, jadi panel yang lambat tampil tidak terbuka saat
   dilewati. Atur `activateOnFocus` pada list agar memilih sambil bergerak.
+- Saat tab meluap, track bergulir: panah keyboard dan memilih tab membawa tab itu ke tampilan, roda
+  mouse atau trackpad menggulirnya (roda vertikal memutar list horizontal sampai ujungnya), begitu pula
+  tombol chevron. Tombol itu untuk pointer: `aria-hidden` dan tanpa tab stop, jadi tab tetap satu-satunya
+  yang ditemui keyboard atau pembaca layar.
 - Beri nama list dengan `aria-label` atau `aria-labelledby`, dan tab yang hanya berisi ikon dengan
   `aria-label`.
 - Panel bisa dijangkau dengan Tab, agar keyboard bisa menggulirnya. Bila isinya diawali sesuatu yang
@@ -172,6 +184,7 @@ menyembunyikannya, jadi taruh grid atau flex Anda pada anak.
 Indikator meluncur dengan pegas travel Core dan meregang dari tepi depannya, lalu berhenti dengan
 pegas settle tanpa memantul; Glide menyorot tab yang di-hover. Menekan dan menahan sebuah tab
 menskalakannya ke 0,97, begitu pula indikator bila tab itu yang aktif. List yang lebih lebar dari
-induknya bergulir tanpa scrollbar, dan indikator ikut bersama tab-nya. Semuanya mengikuti
+induknya bergulir tanpa scrollbar, dan indikator ikut bersama tab-nya. Tombol chevron menggulir sekitar
+satu halaman, dengan halus, dan seketika pada reduced motion; pemudarannya bukan gerak. Semuanya mengikuti
 `--ow-motion-scale`. Dengan `prefers-reduced-motion`, indikator berpindah seketika dan tab yang
 ditahan meredup, bukan mengecil.

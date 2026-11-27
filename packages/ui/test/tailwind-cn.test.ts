@@ -227,6 +227,7 @@ const BUILT_IN: Record<string, string> = {
   rounded: "rounded-none",
   scale: "scale-50",
   "scroll-p": "scroll-p-1",
+  "scroll-px": "scroll-px-1",
   "scroll-py": "scroll-py-1",
   shadow: "shadow-none",
   size: "size-4",

@@ -163,9 +163,10 @@ describe("Tabs geometry", () => {
     );
     const [across, down] = lists as [HTMLElement, HTMLElement];
     close(rect(across).width, 120);
-    expect(across.scrollWidth).toBeGreaterThan(across.clientWidth);
+    const trackOf = (list: Element) => list.querySelector(".ow-tabs__track") as HTMLElement;
+    expect(trackOf(across).scrollWidth).toBeGreaterThan(trackOf(across).clientWidth);
     close(rect(down).height, 80);
-    expect(down.scrollHeight).toBeGreaterThan(down.clientHeight);
+    expect(trackOf(down).scrollHeight).toBeGreaterThan(trackOf(down).clientHeight);
     for (const side of keyGaps(tabsOf(across)[1] as Element, thumbOf(across))) close(side, 0);
     for (const side of keyGaps(tabsOf(down)[2] as Element, thumbOf(down))) close(side, 0);
   });

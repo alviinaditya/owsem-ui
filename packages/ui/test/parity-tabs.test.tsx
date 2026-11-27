@@ -195,7 +195,7 @@ const cases: Case[] = [
 /** Scrolls the list as the case's name says. */
 const scroll = (side: Element) => {
   const name = side.closest("[data-case]")?.getAttribute("data-case") ?? "";
-  const list = side.querySelector<HTMLElement>("[data-slot=tabs-list]");
+  const list = side.querySelector<HTMLElement>("[data-slot=tabs-track]");
   if (!list) return;
   const toward = getComputedStyle(list).direction === "rtl" ? -1 : 1;
   if (name.includes("middle")) list.scrollLeft = 60 * toward;
@@ -207,7 +207,7 @@ const scroll = (side: Element) => {
 // active tab draws its own key.
 const beforeIndicator = (side: Element) => {
   scroll(side);
-  side.querySelector("[data-slot=tabs-list]")?.removeAttribute("data-thumb");
+  side.querySelector("[data-slot=tabs-track]")?.removeAttribute("data-thumb");
   side.querySelector("[data-slot=tabs-indicator]")?.removeAttribute("data-visible");
 };
 
@@ -411,7 +411,7 @@ describe("Tabs in Tailwind CSS v4 behaves as in CSS", () => {
     const scrolled = [];
     for (const flavor of ["css", "tw"]) {
       const side = row?.querySelector(`[data-side=${flavor}]`) as Element;
-      const list = side.querySelector("[data-slot=tabs-list]") as HTMLElement;
+      const list = side.querySelector("[data-slot=tabs-track]") as HTMLElement;
       const tabs = [...side.querySelectorAll("[role=tab]")];
       expect(list.scrollWidth).toBeGreaterThan(list.clientWidth);
       list.scrollLeft = 0;
@@ -427,18 +427,19 @@ describe("Tabs in Tailwind CSS v4 behaves as in CSS", () => {
   test("the list scrolls without a scrollbar, and keeps the well's gap to the edge", async () => {
     tw.load();
     const screen = await render(<Tabs kit={twind} tabs="many" width={200} />);
-    const list = screen.container.querySelector<HTMLElement>("[data-slot=tabs-list]");
+    const list = screen.container.querySelector<HTMLElement>("[data-slot=tabs-track]");
     if (!list) throw new Error("not rendered");
     expect(list.scrollWidth).toBeGreaterThan(list.clientWidth);
     expect(list.offsetWidth).toBe(200);
     expect(getComputedStyle(list).scrollbarWidth).toBe("none");
-    expect(getComputedStyle(list).scrollPaddingLeft).toBe("4px");
+    // Clear of the fade and its button, which is 2em of the 14px list wide.
+    await expect.poll(() => getComputedStyle(list).scrollPaddingLeft).toBe("28px");
   });
 
   test("Glide lights the hovered tab in the Tailwind flavor", async () => {
     tw.load();
     const screen = await render(<Tabs kit={twind} />);
-    const list = screen.container.querySelector<HTMLElement>("[data-slot=tabs-list]");
+    const list = screen.container.querySelector<HTMLElement>("[data-slot=tabs-track]");
     if (!list) throw new Error("not rendered");
     const tabs = [...list.querySelectorAll("[role=tab]")];
     const highlight = list.querySelector<HTMLElement>("[data-slot=glide]");

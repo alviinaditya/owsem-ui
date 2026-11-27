@@ -52,7 +52,7 @@ export default [
   entry("select", "dist/components/select/index.js", "3 kB"),
   entry("separator", "dist/components/separator/index.js", "3 kB"),
   entry("slider", "dist/components/slider/index.js", "3 kB"),
-  entry("tabs", "dist/components/tabs/index.js", "3 kB"),
+  entry("tabs", "dist/components/tabs/index.js", "4 kB"),
   entry("switch", "dist/components/switch/index.js", "3 kB"),
   entry("toast", "dist/components/toast/index.js", "3 kB"),
   entry("toggle", "dist/components/toggle/index.js", "3 kB"),

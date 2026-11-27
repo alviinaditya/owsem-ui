@@ -22,6 +22,8 @@ export function tabsListVariants({ size = "md" }: TabsListVariantProps = {}): st
 /** The classes of the other parts. */
 export const tabsSlots = {
   root: "ow-tabs",
+  track: "ow-tabs__track",
+  scrollButton: "ow-tabs__scroll-button",
   indicator: "ow-tabs__indicator",
   tab: "ow-tabs__tab",
   label: "ow-tabs__label",

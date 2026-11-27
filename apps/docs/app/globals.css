@@ -2170,12 +2170,6 @@ body {
   flex: 1;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .demo-tabs .ow-tabs__list {
-    scroll-behavior: smooth;
-  }
-}
-
 /* Radio Group's demos: one rule that lays the rows out side by side, and groups beside each other. */
 .demo-radio-group-across {
   flex-flow: row wrap;

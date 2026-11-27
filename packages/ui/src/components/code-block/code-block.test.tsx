@@ -623,6 +623,27 @@ describe("Code Block", () => {
       expect(getComputedStyle(el).overflow).toBe("visible");
     });
 
+    test("while the height grows, the panel keeps its height: no scrollbar flashes", async () => {
+      const screen = await render(<Heights />);
+      await settle();
+      const el = block(screen);
+      await userEvent.click(screen.getByRole("tab", { name: "tall" }));
+      const animation = heightAnimation(el);
+      expect(animation).toBeDefined();
+      // Halfway: the block is shorter than the code, and its panel is clipped, not squeezed.
+      animation?.pause();
+      if (animation) animation.currentTime = Number(animation.effect?.getTiming().duration) / 2;
+      const panel = el.querySelector<HTMLElement>(".ow-code-block__panel:not([hidden])");
+      if (!panel) throw new Error("no panel");
+      const header = el.querySelector<HTMLElement>(".ow-code-block__header") as HTMLElement;
+      expect(el.getBoundingClientRect().height).toBeLessThan(
+        header.getBoundingClientRect().height + panel.scrollHeight - 1,
+      );
+      expect(panel.clientHeight).toBeGreaterThanOrEqual(panel.scrollHeight);
+      expect(panel.offsetWidth - panel.clientWidth).toBe(0);
+      animation?.finish();
+    });
+
     test("rapid switching ends at the height of the last snippet", async () => {
       const screen = await render(<Heights />);
       await settle();

@@ -203,6 +203,9 @@
    * long line. */
   .ow-code-block__panel {
     position: relative;
+    /* While the block's height glides it is shorter than the code: the panel keeps its height and
+     * is clipped by the block, or it would shrink and show a vertical scrollbar. */
+    flex-shrink: 0;
     /* Code reads left to right on any page, and scrolls from its start. */
     direction: ltr;
     overflow-x: auto;

@@ -117,7 +117,9 @@ const copy = ["rounded-(--_nested) flex-none ms-auto"];
 // frame after its tab is left, for an exit animation; it has none, so it goes at once and two
 // panels never stack.
 const panel = [
-  "relative [direction:ltr] overflow-x-auto rounded-b-(--_corner)",
+  // While the block's height glides it is shorter than the code: the panel keeps its height and is
+  // clipped by the block, or it would shrink and show a vertical scrollbar.
+  "relative shrink-0 [direction:ltr] overflow-x-auto rounded-b-(--_corner)",
   "font-[family-name:var(--ow-font-mono,ui-monospace,SFMono-Regular,Menlo,Consolas,monospace)]",
   "text-[0.8125rem] leading-[1.6] data-ending-style:hidden",
   // A thin, quiet scrollbar without arrows: the standard properties here (Firefox)…

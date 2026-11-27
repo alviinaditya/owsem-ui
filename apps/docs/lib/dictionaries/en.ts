@@ -44,6 +44,14 @@ export const en = {
       base: "Base",
       owsem: "Owsem",
     },
+    familyGroups: {
+      base: "Base components",
+      owsem: "Owsem components",
+    },
+    familyNotes: {
+      base: "Base UI's components in OwsemUI's look. Base UI keeps their behavior and accessibility.",
+      owsem: "OwsemUI's own components, beyond Base UI.",
+    },
     categories: {
       action: "Actions",
       form: "Forms",

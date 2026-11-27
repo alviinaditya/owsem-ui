@@ -595,8 +595,21 @@ body {
   margin-block-start: 64px;
 }
 
-.page :where(section > h2) {
+.page :where(section > h2, section > h3) {
   margin-block-end: 24px;
+}
+
+/* The index: Base, then Owsem, each a heading and a line on what the family is, then its categories. */
+.page .index-family + .index-family {
+  margin-block-start: 96px;
+}
+
+.page .index-family > h2 {
+  margin-block-end: 0;
+}
+
+.index-family-note {
+  margin-block: 8px 32px;
 }
 
 /* Grid: a card per component, its preview on top. */

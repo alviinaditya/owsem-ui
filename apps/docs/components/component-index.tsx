@@ -41,7 +41,14 @@ function subscribe(listener: () => void): () => void {
   return () => listeners.delete(listener);
 }
 
-export interface IndexGroup {
+export interface IndexFamily {
+  id: Family;
+  label: string;
+  note: string;
+  groups: IndexGroup[];
+}
+
+interface IndexGroup {
   id: string;
   label: string;
   items: IndexItem[];
@@ -52,7 +59,6 @@ interface IndexItem {
   href: string;
   title: string;
   description: string;
-  family: Family;
   badges: ReactNode;
 }
 
@@ -98,15 +104,15 @@ function Cards({
 }
 
 /**
- * DS-1 for now: components grouped by category, filterable by family (all shown without JS), as a
- * grid of cards with a preview each, or a list that reads straight down.
+ * DS-1 for now: Base components, then Owsem's, each grouped by category and filterable by family
+ * (all shown without JS), as a grid of cards with a preview each, or a list that reads straight down.
  */
 export function ComponentIndex({
-  groups,
+  families,
   labels,
   lang,
 }: {
-  groups: IndexGroup[];
+  families: IndexFamily[];
   labels: Record<Filter | View, string> & { legend: string; view: string; soon: string };
   lang: Lang;
 }) {
@@ -115,7 +121,6 @@ export function ComponentIndex({
   const view = useSyncExternalStore(subscribe, readView, () => null);
   const legend = useId();
   const viewLegend = useId();
-  const shown = (family: Family) => filter === "all" || family === filter;
   return (
     <>
       {/* Each group's name sits before its track. */}
@@ -156,15 +161,20 @@ export function ComponentIndex({
           </ToggleGroup.Root>
         </div>
       </div>
-      {groups.map((group) => {
-        const items = group.items.filter((item) => shown(item.family));
-        return items.length === 0 ? null : (
-          <section key={group.id} aria-labelledby={`group-${group.id}`}>
-            <h2 id={`group-${group.id}`}>{group.label}</h2>
-            <Cards items={items} lang={lang} soon={labels.soon} view={view} />
+      {families.map((family) =>
+        filter === "all" || filter === family.id ? (
+          <section key={family.id} className="index-family" aria-labelledby={`family-${family.id}`}>
+            <h2 id={`family-${family.id}`}>{family.label}</h2>
+            <p className="lead index-family-note">{family.note}</p>
+            {family.groups.map((group) => (
+              <section key={group.id} aria-labelledby={`group-${group.id}`}>
+                <h3 id={`group-${group.id}`}>{group.label}</h3>
+                <Cards items={group.items} lang={lang} soon={labels.soon} view={view} />
+              </section>
+            ))}
           </section>
-        );
-      })}
+        ) : null,
+      )}
     </>
   );
 }

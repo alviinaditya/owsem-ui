@@ -1,11 +1,11 @@
 import { expect, test } from "@playwright/test";
-import { catalog, isAvailable } from "../lib/catalog.ts";
+import { catalog, isAvailable, readingOrder } from "../lib/catalog.ts";
 import { tools, visit } from "./example-page.ts";
 import { showSidebar, sidebar as sidebarOf } from "./helpers.ts";
 
 const robots = (page: import("@playwright/test").Page) => page.locator('meta[name="robots"]');
 
-test("the sidebar lists the available components by category; planned ones stay on the index", async ({
+test("the sidebar lists the available components by family, each by title; planned ones stay on the index", async ({
   page,
 }, testInfo) => {
   await page.goto("/en/docs");
@@ -17,14 +17,17 @@ test("the sidebar lists the available components by category; planned ones stay 
     await expect(link).toHaveCount(isAvailable(entry) ? 1 : 0);
   }
   await expect(sidebar.getByText("Soon")).toHaveCount(0);
-  // A group of available components: an uppercase label, then its links.
-  const forms = sidebar.getByRole("group", { name: "Forms" });
-  await expect(forms.getByRole("link", { name: "Switch", exact: true })).toBeVisible();
-  await expect(forms).toHaveText(/Field/);
-  // Every category has an available component now, so every one has a group.
-  const disclosure = sidebar.getByRole("group", { name: "Disclosure" });
-  await expect(disclosure.getByRole("link", { name: "Accordion", exact: true })).toBeVisible();
-  await expect(disclosure.getByRole("link", { name: "Collapsible", exact: true })).toBeVisible();
+  // Base UI's components, then OwsemUI's own: a group each, its links by title.
+  for (const [family, name] of [
+    ["base", "Base components"],
+    ["owsem", "Owsem components"],
+  ] as const) {
+    const titles = readingOrder
+      .filter((entry) => entry.family === family && isAvailable(entry))
+      .map((entry) => entry.title);
+    expect([...titles].sort((a, b) => a.localeCompare(b, "en"))).toEqual(titles);
+    await expect(sidebar.getByRole("group", { name }).getByRole("link")).toHaveText(titles);
+  }
 });
 
 test("the sidebar's content scrolls on its own, and the page does not", async ({
@@ -61,11 +64,9 @@ test("a component page links the components before and after it, as Buttons", as
   await tools(page).getByRole("button", { name: "Docs", exact: true }).click();
   const nav = page.getByRole("navigation", { name: "Component" });
   await nav.scrollIntoViewIfNeeded();
-  await expect(nav.getByRole("link", { name: "Previous: Menu" })).toHaveAttribute("rel", "prev");
-  await expect(nav.getByRole("link", { name: "Next: Context Menu" })).toHaveAttribute(
-    "rel",
-    "next",
-  );
+  // Base components by title: Switch, Tabs, Toast.
+  await expect(nav.getByRole("link", { name: "Previous: Switch" })).toHaveAttribute("rel", "prev");
+  await expect(nav.getByRole("link", { name: "Next: Toast" })).toHaveAttribute("rel", "next");
   for (const link of await nav.getByRole("link").all()) {
     await expect(link).toHaveClass(/\bow-button\b/);
     await expect(link).toHaveClass(/\bow-button--secondary\b/);
@@ -73,10 +74,17 @@ test("a component page links the components before and after it, as Buttons", as
   }
 });
 
-test("the index filters components by family", async ({ page }) => {
+test("the index shows Base, then Owsem, and filters by family", async ({ page }) => {
   await page.goto("/en");
   const main = page.getByRole("main");
   await expect(main.getByRole("link", { name: "Separator", exact: true })).toBeVisible();
+  await expect(main.getByRole("heading", { level: 2 })).toHaveText([
+    "Base components",
+    "Owsem components",
+  ]);
+  const owsem = main.getByRole("region", { name: "Owsem components" });
+  await expect(owsem.getByRole("link", { name: "Tree Rail Nav", exact: true })).toBeVisible();
+  await expect(owsem.getByRole("link", { name: "Button", exact: true })).toHaveCount(0);
 
   const filter = main.getByRole("group", { name: "Family" });
   await filter.getByRole("button", { name: "Owsem" }).click();
@@ -156,7 +164,11 @@ test("the sidebar marks the page you are on", async ({ page }, testInfo) => {
     "page",
   );
   await expect(sidebar.locator('.ow-sidebar__content [aria-current="page"]')).toHaveCount(1);
-  await sidebar.getByRole("link", { name: "Kbd", exact: true }).click();
+  // A DOM click: the sidebar may still be scrolling Separator into view, which moves the rows
+  // under a pointer.
+  await sidebar
+    .getByRole("link", { name: "Kbd", exact: true })
+    .evaluate((el) => (el as HTMLElement).click());
   await expect(page).toHaveURL(/\/en\/kbd$/);
   // The drawer shuts after a navigation.
   if (testInfo.project.name === "mobile-390") await showSidebar(page);

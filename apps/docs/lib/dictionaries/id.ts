@@ -46,6 +46,14 @@ export const id = {
       base: "Base",
       owsem: "Owsem",
     } satisfies Record<Family, string>,
+    familyGroups: {
+      base: "Komponen Base",
+      owsem: "Komponen Owsem",
+    } satisfies Record<Family, string>,
+    familyNotes: {
+      base: "Komponen Base UI dengan tampilan OwsemUI. Perilaku dan aksesibilitasnya tetap dari Base UI.",
+      owsem: "Komponen milik OwsemUI sendiri, di luar Base UI.",
+    } satisfies Record<Family, string>,
     categories: {
       action: "Aksi",
       form: "Form",

@@ -2,7 +2,7 @@ import type { Node } from "fumadocs-core/page-tree";
 import Link from "next/link";
 import { Sidebar } from "owsem-ui/owsem";
 import ui from "owsem-ui/package.json";
-import { CATEGORIES, type Category, catalog, isAvailable } from "@/lib/catalog";
+import { type Category, FAMILIES, isAvailable, readingOrder } from "@/lib/catalog";
 import { getDictionary } from "@/lib/dictionaries";
 import type { Lang } from "@/lib/i18n";
 import { source } from "@/lib/source";
@@ -29,8 +29,8 @@ export const treePages = (nodes: Node[]): Extract<Node, { type: "page" }>[] =>
 
 /**
  * The site's sidebar (the library's Sidebar), for every page: the brand and the search at the top, a group for
- * the prose pages (content/docs/<lang>/meta.json), then one per catalog category. Components that
- * are not built yet stay on the index. Its state lives in the Provider (site-shell.tsx).
+ * the prose pages (content/docs/<lang>/meta.json), then one per family (Base, then Owsem), each by
+ * title. Components that are not built yet stay on the index. Its state lives in the Provider (site-shell.tsx).
  */
 export function SiteSidebar({ lang }: { lang: Lang }) {
   const dict = getDictionary(lang);
@@ -63,11 +63,11 @@ export function SiteSidebar({ lang }: { lang: Lang }) {
             ))}
           </Sidebar.List>
         </Sidebar.Group>
-        {CATEGORIES.map((category) => {
-          const entries = catalog.filter((e) => e.category === category && isAvailable(e));
+        {FAMILIES.map((family) => {
+          const entries = readingOrder.filter((e) => e.family === family && isAvailable(e));
           return entries.length ? (
-            <Sidebar.Group key={category}>
-              <Sidebar.GroupLabel>{dict.catalog.categories[category]}</Sidebar.GroupLabel>
+            <Sidebar.Group key={family}>
+              <Sidebar.GroupLabel>{dict.catalog.familyGroups[family]}</Sidebar.GroupLabel>
               <Sidebar.List>
                 {entries.map((entry) => (
                   <SidebarLink key={entry.name} href={`/${lang}/${entry.name}`}>

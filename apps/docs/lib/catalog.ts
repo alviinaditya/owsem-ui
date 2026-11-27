@@ -88,9 +88,13 @@ export const catalog = [
 
 export type ComponentName = (typeof catalog)[number]["name"];
 
-/** The order the sidebar lists components in: by category, then PRD order. Previous and next follow it. */
-export const readingOrder = CATEGORIES.flatMap((category) =>
-  catalog.filter((entry) => entry.category === category),
+export const FAMILIES: readonly Family[] = ["base", "owsem"];
+
+/** The order the sidebar lists components in: Base, then Owsem, each by title. Previous and next follow it. */
+export const readingOrder = FAMILIES.flatMap((family) =>
+  catalog
+    .filter((entry) => entry.family === family)
+    .sort((a, b) => a.title.localeCompare(b.title, "en")),
 );
 
 export const isAvailable = (entry: CatalogEntry): boolean => entry.status !== "planned";

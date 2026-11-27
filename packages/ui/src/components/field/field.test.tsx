@@ -139,6 +139,46 @@ describe("Field", () => {
     expect(q("input").getAttribute("aria-invalid")).toBe("true");
   });
 
+  test("an error hides the description, which stays tied to the control; it returns with the error", async () => {
+    function Ui({ invalid }: { invalid: boolean }) {
+      return (
+        <Field.Root invalid={invalid}>
+          <Field.Label>Email</Field.Label>
+          <Field.Control />
+          <Field.Description>Work address.</Field.Description>
+          <Field.Error match={invalid}>Not an address.</Field.Error>
+        </Field.Root>
+      );
+    }
+    const screen = await render(<Ui invalid={false} />);
+    const q = (selector: string) => screen.container.querySelector<HTMLElement>(selector);
+    expect(getComputedStyle(q(".ow-field__description") as Element).display).not.toBe("none");
+    await screen.rerender(<Ui invalid />);
+    expect(getComputedStyle(q(".ow-field__description") as Element).display).toBe("none");
+    // Hidden, not removed: Base UI keeps both in aria-describedby.
+    const described = q("input")?.getAttribute("aria-describedby")?.split(" ");
+    expect(described).toContain(q(".ow-field__description")?.id);
+    expect(described).toContain(q(".ow-field__error")?.id);
+    await screen.rerender(<Ui invalid={false} />);
+    await expect.poll(() => q(".ow-field__error")).toBeNull();
+    expect(getComputedStyle(q(".ow-field__description") as Element).display).not.toBe("none");
+  });
+
+  test("an app shows both by giving the description a display of its own", async () => {
+    const sheet = document.createElement("style");
+    sheet.textContent = ".ow-field__description { display: block; }";
+    document.head.append(sheet);
+    onTestFinished(() => sheet.remove());
+    const { q } = await mount(
+      <Field.Root invalid>
+        <Field.Control />
+        <Field.Description>Work address.</Field.Description>
+        <Field.Error match>Not an address.</Field.Error>
+      </Field.Root>,
+    );
+    expect(getComputedStyle(q(".ow-field__description")).display).toBe("block");
+  });
+
   test("native validation shows the browser's message and the critical tint, with no edge", async () => {
     const { q, screen } = await mount(
       <Field.Root validationMode="onChange">

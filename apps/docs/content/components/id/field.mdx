@@ -34,6 +34,13 @@ deskripsi dan error dibacakan bersamanya, dan validitasnya sampai ke setiap bagi
 sudah cukup untuk field umum. `Field.Control` adalah [Input](/id/input); kontrol Base UI apa pun di
 dalam `Field.Root` tersambung dengan cara yang sama, dengan atau tanpa itu.
 
+Error menempati tempat deskripsi: saat error tampil, deskripsi disembunyikan (`display: none`), jadi
+error satu baris di bawah deskripsi satu baris tidak menggeser apa pun. Pesan dengan tinggi lain
+menggeser isi di bawahnya sebesar selisihnya. Ini satu aturan pada field, jadi Slider, Number Field,
+OTP Field, dan kontrol lain di dalam field mendapatkannya. Untuk menampilkan keduanya, beri deskripsi
+`display` buatan Anda, seperti `.ow-field__description { display: block }` di stylesheet tanpa layer,
+atau kelas Tailwind `[:where(:has(>[data-slot=field-error]))>&]:block` padanya.
+
 ## Contoh [#examples]
 
 <Examples />
@@ -95,7 +102,8 @@ Prop Input, dengan ukuran dan ikonnya. Sisanya masuk ke Field.Control milik Base
 
 - Klik pada label memindahkan fokus ke kontrol, dan teksnya menjadi nama kontrol.
 - Base UI mengisi `aria-describedby` dengan deskripsi, dan dengan error selama tampil; `aria-invalid`
-  menyatakan kegagalannya. Jangan menandai error hanya dengan warna: pesannya ada.
+  menyatakan kegagalannya. Deskripsi yang tersembunyi tetap ada di daftar itu, jadi pembaca layar tetap
+  membacakan apa yang diminta field, lalu mengapa gagal. Jangan menandai error hanya dengan warna: pesannya ada.
 - Disabled meredupkan kontrol dan label menjadi 45%.
 - Dengan `prefers-contrast: more` kontrol mendapat tepi 1px; pada forced colors pesan memakai warna teks
   sistem, dan kontrol invalid mempertahankan tepi 2px. Kanan-ke-kiri, label ada di kanan.

@@ -2153,6 +2153,11 @@ body {
   gap: 16px;
 }
 
+/* The Field specimen shows every part, so its description stays beside the error. */
+.demo-field-all .ow-field__description {
+  display: block;
+}
+
 .demo-tabs-panel {
   min-block-size: 3lh;
 }

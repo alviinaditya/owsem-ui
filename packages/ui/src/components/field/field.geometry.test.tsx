@@ -7,11 +7,11 @@ describe("Field geometry", () => {
   test("one gap between its parts, no outer margins, and it fills its parent", async () => {
     const screen = await render(
       <div data-testid="box" style={{ inlineSize: 300 }}>
-        <Field.Root invalid>
+        <Field.Root>
           <Field.Label>Email</Field.Label>
           <Field.Control />
           <Field.Description>Help</Field.Description>
-          <Field.Error match>Wrong</Field.Error>
+          <Field.Error match={false}>Wrong</Field.Error>
         </Field.Root>
       </div>,
     );
@@ -24,16 +24,11 @@ describe("Field geometry", () => {
     const label = rect(q(".ow-field__label"));
     const control = rect(q(".ow-input"));
     const description = rect(q(".ow-field__description"));
-    const error = rect(q(".ow-field__error"));
     expect(root.width).toBe(300);
     expect(control.width).toBe(300);
     expect(label.top).toBeCloseTo(root.top, 1);
-    expect(error.bottom).toBeCloseTo(root.bottom, 1);
-    const gaps = [
-      control.top - label.bottom,
-      description.top - control.bottom,
-      error.top - description.bottom,
-    ];
+    expect(description.bottom).toBeCloseTo(root.bottom, 1);
+    const gaps = [control.top - label.bottom, description.top - control.bottom];
     for (const gap of gaps) expect(Math.abs(gap - 7)).toBeLessThanOrEqual(TOL);
   });
 
@@ -49,5 +44,43 @@ describe("Field geometry", () => {
     const label = screen.container.querySelector(".ow-field__label") as Element;
     const control = screen.container.querySelector(".ow-input") as Element;
     expect(Math.abs(rect(label).right - rect(control).right)).toBeLessThanOrEqual(TOL);
+  });
+
+  test("an error takes the description's place: a one-line swap moves nothing", async () => {
+    function Swap({ invalid }: { invalid: boolean }) {
+      return (
+        <div data-testid="box" style={{ inlineSize: 300 }}>
+          <Field.Root invalid={invalid}>
+            <Field.Label>Email</Field.Label>
+            <Field.Control />
+            <Field.Description>Help</Field.Description>
+            <Field.Error match={invalid}>Wrong</Field.Error>
+          </Field.Root>
+          <p data-testid="after">After</p>
+        </div>
+      );
+    }
+    const screen = await render(<Swap invalid={false} />);
+    const q = (selector: string) => {
+      const el = screen.container.querySelector(selector);
+      if (!el) throw new Error(`no ${selector}`);
+      return el;
+    };
+    const before = { root: rect(q(".ow-field")), after: rect(q("[data-testid=after]")) };
+    const description = rect(q(".ow-field__description"));
+    await screen.rerender(<Swap invalid />);
+    expect(getComputedStyle(q(".ow-field__description")).display).toBe("none");
+    const error = rect(q(".ow-field__error"));
+    // The error sits where the description was, and nothing under it moved.
+    expect(error.top).toBeCloseTo(description.top, 1);
+    expect(error.height).toBeCloseTo(description.height, 1);
+    expect(rect(q(".ow-field")).height).toBeCloseTo(before.root.height, 1);
+    expect(rect(q("[data-testid=after]")).top).toBeCloseTo(before.after.top, 1);
+    // Valid again: the description comes back, in the same place.
+    await screen.rerender(<Swap invalid={false} />);
+    await expect.poll(() => screen.container.querySelector(".ow-field__error")).toBeNull();
+    expect(getComputedStyle(q(".ow-field__description")).display).not.toBe("none");
+    expect(rect(q(".ow-field__description")).top).toBeCloseTo(description.top, 1);
+    expect(rect(q("[data-testid=after]")).top).toBeCloseTo(before.after.top, 1);
   });
 });

@@ -271,7 +271,7 @@ export const fieldDefinition = defineComponent({
       const t = TEXT[lang];
       return (
         <div className="demo-field">
-          <Field.Root invalid>
+          <Field.Root invalid className="demo-field-all">
             <Field.Label>{t.email}</Field.Label>
             <Field.Control type="email" defaultValue="ana@" />
             <Field.Description>{t.hint}</Field.Description>

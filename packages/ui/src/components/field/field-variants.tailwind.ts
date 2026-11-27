@@ -9,7 +9,11 @@ const label = [
   "data-disabled:cursor-not-allowed data-disabled:opacity-45",
 ];
 
-const description = ["m-0 text-(color:--ow-muted) text-[0.93em] leading-[1.4]"];
+// An error next to it takes its place, so nothing below moves; :where keeps it at one class.
+const description = [
+  "m-0 text-(color:--ow-muted) text-[0.93em] leading-[1.4]",
+  "[:where(:has(>[data-slot=field-error]))>&]:hidden",
+];
 
 // Base UI lists several messages.
 const error = [

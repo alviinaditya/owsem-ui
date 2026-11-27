@@ -40,6 +40,15 @@
     line-height: 1.4;
   }
 
+  /*
+   * An error takes the description's place, so a one-line message swaps for a one-line message and
+   * nothing below moves. It stays in the DOM, so aria-describedby still reads it with the error.
+   * :where keeps this at one class: your own display on the description wins.
+   */
+  :where(.ow-field:has(> .ow-field__error)) > .ow-field__description {
+    display: none;
+  }
+
   /* Base UI lists several messages. */
   .ow-field__error > :where(ul) {
     margin: 0;

@@ -34,6 +34,13 @@ control, the description and the error are read out with it, and the validity re
 A label and a control are all a common field needs. `Field.Control` is [Input](/en/input); any Base UI
 control inside `Field.Root` is wired the same way, with or without it.
 
+An error takes the description's place: while one shows, the description is hidden (`display: none`),
+so a one-line error under a one-line description moves nothing. Messages of other heights shift what
+is below by the difference. This is one rule on the field, so Slider, Number Field, OTP Field, and any
+other control in a field get it. To show both, give the description a `display` of your own, such as
+`.ow-field__description { display: block }` in an unlayered stylesheet, or a Tailwind class
+`[:where(:has(>[data-slot=field-error]))>&]:block` on it.
+
 ## Examples [#examples]
 
 <Examples />
@@ -95,7 +102,8 @@ Input's props, with its sizes and icons. The rest go to Base UI's Field.Control 
 
 - A click on the label moves focus to the control, and its text is the control's name.
 - Base UI sets `aria-describedby` to the description, and to the error while it shows; `aria-invalid`
-  says it failed. Don't signal an error by color alone: the message is there.
+  says it failed. The hidden description stays in that list, so a screen reader still reads what the
+  field asks for, then why it failed. Don't signal an error by color alone: the message is there.
 - Disabled fades the control and the label to 45%.
 - With `prefers-contrast: more` the control gets a 1px edge; in forced colors messages take the system
   text color, and an invalid control keeps a 2px edge. Right to left, the label sits on the right.

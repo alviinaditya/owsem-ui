@@ -60,6 +60,10 @@ for (const path of [
   "/id/alert-dialog",
   "/en/preview-card",
   "/id/drawer",
+  "/en/context-menu",
+  "/id/menubar",
+  "/en/navigation-menu",
+  "/id/navigation-menu",
   "/id/toast",
   "/id/collapsible",
 ]) {

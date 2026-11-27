@@ -888,6 +888,31 @@ body {
   margin-block-start: 32px;
 }
 
+.component-preview-live[data-preview="context-menu"] {
+  margin-block-end: 24px;
+  margin-inline-end: 168px;
+}
+
+.component-preview-live[data-preview="menubar"] {
+  margin-block-end: 72px;
+}
+
+.component-preview-live[data-preview="navigation-menu"] {
+  margin-block-end: 92px;
+}
+
+/* Context Menu's index preview: a small area, beside the pinned menu. */
+.component-preview-area {
+  display: grid;
+  place-items: center;
+  inline-size: 96px;
+  block-size: 56px;
+  border-radius: var(--ow-radius);
+  background-color: color-mix(in oklab, var(--ow-fg) 6%, transparent);
+  color: var(--ow-muted);
+  font-size: 0.8125rem;
+}
+
 .component-preview-live[data-preview="menu"] {
   margin-block-end: 64px;
   margin-inline-end: 168px;
@@ -2642,6 +2667,159 @@ body {
   font: inherit;
   text-decoration: underline;
   text-underline-offset: 0.2em;
+}
+
+/* Context Menu's demos: the page draws the area, the library does not. */
+.demo-context-menu-area {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  /* A max, not min(): the stage sizes to its content, so a percentage width would collapse. */
+  inline-size: 20rem;
+  max-inline-size: 100%;
+  block-size: 9rem;
+  border-radius: var(--ow-radius);
+  background-color: color-mix(in oklab, var(--ow-fg) 6%, transparent);
+  color: var(--ow-muted);
+  font-size: var(--docs-text-small);
+  text-align: center;
+  user-select: none;
+}
+
+.demo-context-menu-area[data-popup-open] {
+  background-color: color-mix(in oklab, var(--ow-fg) 9%, transparent);
+}
+
+.demo-context-menu-area--small {
+  inline-size: 11rem;
+  block-size: 5rem;
+}
+
+/* A mouse right clicks; a touch screen long presses. */
+.demo-context-menu-hint--touch {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .demo-context-menu-hint--mouse {
+    display: none;
+  }
+
+  .demo-context-menu-hint--touch {
+    display: inline;
+  }
+}
+
+.demo-context-menu-specimen {
+  position: relative;
+  display: grid;
+  justify-items: start;
+  align-content: start;
+  inline-size: 16rem;
+  block-size: 14rem;
+}
+
+.demo-context-menu-card {
+  position: relative;
+  inline-size: 16rem;
+  max-inline-size: 100%;
+  border-radius: var(--ow-radius);
+  background-color: var(--ow-panel);
+  box-shadow: var(--ow-surface-shadow);
+  overflow: clip;
+}
+
+.demo-context-menu-photo {
+  display: grid;
+  gap: 2px;
+  padding-block-end: 12px;
+  padding-inline: 14px;
+  color: var(--ow-fg);
+  font-size: var(--docs-text-small);
+  user-select: none;
+}
+
+.demo-context-menu-photo > span:last-child {
+  color: var(--ow-muted);
+  font-size: 0.8125rem;
+}
+
+.demo-context-menu-picture {
+  display: block;
+  block-size: 7rem;
+  margin-inline: -14px;
+  margin-block-end: 10px;
+  background: linear-gradient(
+    135deg,
+    var(--ow-accent),
+    color-mix(in oklab, var(--ow-accent) 30%, var(--ow-panel))
+  );
+}
+
+.demo-context-menu-more {
+  position: absolute;
+  inset-block-start: 8px;
+  inset-inline-end: 8px;
+}
+
+/* Navigation Menu's demos: a panel of cards in two columns that becomes one on a phone. */
+.demo-navigation-menu-grid,
+.demo-navigation-menu-list {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.demo-navigation-menu-grid {
+  grid-template-columns: repeat(2, 13rem);
+}
+
+.demo-navigation-menu-list {
+  inline-size: 15rem;
+}
+
+@media (max-width: 36rem) {
+  .demo-navigation-menu-grid {
+    grid-template-columns: minmax(0, 1fr);
+    inline-size: min(15rem, calc(100cqw - 4rem));
+  }
+
+  .demo-navigation-menu-list {
+    inline-size: min(15rem, calc(100cqw - 4rem));
+  }
+}
+
+.demo-navigation-menu-sizes {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+}
+
+.demo-navigation-menu-specimen {
+  position: relative;
+  display: grid;
+  justify-items: start;
+  align-content: start;
+  inline-size: 28rem;
+  block-size: 15rem;
+}
+
+/* Menubar's sizes, one above the other; the specimen holds the open menu in its own box. */
+.demo-menubar-sizes {
+  display: grid;
+  justify-items: start;
+  gap: 16px;
+}
+
+.demo-menubar-specimen {
+  position: relative;
+  display: grid;
+  justify-items: start;
+  align-content: start;
+  inline-size: 16rem;
+  block-size: 12rem;
 }
 
 /* Menu's sizes, side by side. */

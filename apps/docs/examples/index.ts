@@ -11,6 +11,7 @@ import CodeBlockPage from "./code-block";
 import CollapsiblePage from "./collapsible";
 import ColorPickerPage from "./color-picker";
 import CommandMenuPage from "./command-menu";
+import ContextMenuPage from "./context-menu";
 import CopyButtonPage from "./copy-button";
 import DialogPage from "./dialog";
 import DrawerPage from "./drawer";
@@ -21,7 +22,9 @@ import IconMorphPage from "./icon-morph";
 import InputPage from "./input";
 import KbdPage from "./kbd";
 import MenuPage from "./menu";
+import MenubarPage from "./menubar";
 import MeterPage from "./meter";
+import NavigationMenuPage from "./navigation-menu";
 import NumberFieldPage from "./number-field";
 import OTPFieldPage from "./otp-field";
 import PopoverPage from "./popover";
@@ -65,6 +68,9 @@ export const examples: Partial<Record<ComponentName, ComponentType<ExamplePagePr
   dialog: DialogPage,
   kbd: KbdPage,
   menu: MenuPage,
+  menubar: MenubarPage,
+  "context-menu": ContextMenuPage,
+  "navigation-menu": NavigationMenuPage,
   popover: PopoverPage,
   "radio-group": RadioGroupPage,
   select: SelectPage,

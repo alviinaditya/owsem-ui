@@ -2,7 +2,15 @@
 
 import { useDirection } from "@base-ui/react/direction-provider";
 import { Menu as BaseMenu } from "@base-ui/react/menu";
-import { createContext, type ReactElement, useContext, useEffect, useMemo, useState } from "react";
+import {
+  type Context,
+  createContext,
+  type ReactElement,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { cn } from "../../core/cn";
 import { GlideHighlight, useGlide } from "../../core/glide/use-glide";
 import { useMergedRefs } from "../../core/merge-refs";
@@ -23,8 +31,16 @@ export type MenuRadioGroupProps = BaseMenu.RadioGroup.Props;
 export type MenuSubmenuRootProps = BaseMenu.SubmenuRoot.Props;
 
 /** Whether the open menu is modal: a backdrop takes outside presses, and the page's scroll is locked. */
-const ModalContext = createContext({ modal: false, hover: false, open: false });
-const NOT_MODAL = { modal: false, hover: false, open: false };
+export interface MenuModal {
+  modal: boolean;
+  hover: boolean;
+  open: boolean;
+}
+export const NOT_MODAL: MenuModal = { modal: false, hover: false, open: false };
+export const MenuModalContext: Context<MenuModal> = createContext(NOT_MODAL);
+
+/** Set by Menubar: its menus leave `modal` and the backdrop to Base UI, which cuts the bar out. */
+export const MenubarMenuContext: Context<boolean> = createContext(false);
 
 /**
  * Base UI's Root. `modal` (default true) works as Base UI's: a press outside only shuts the menu,
@@ -37,33 +53,38 @@ export function MenuRoot<Payload = unknown>({
   onOpenChange,
   ...props
 }: MenuRootProps<Payload>): ReactElement {
+  const inBar = useContext(MenubarMenuContext);
   const [hover, setHover] = useState(false);
   // A kept-mounted popup outlives the menu's opening, so the lock follows `open`.
   const [opened, setOpened] = useState(props.defaultOpen ?? false);
   const open = props.open ?? opened;
   useEffect(trackPointerType, []);
-  const value = useMemo(() => ({ modal, hover, open }), [modal, hover, open]);
+  const value = useMemo(
+    () => (inBar ? NOT_MODAL : { modal, hover, open }),
+    [inBar, modal, hover, open],
+  );
   return (
-    <ModalContext.Provider value={value}>
+    <MenuModalContext.Provider value={value}>
       <BaseMenu.Root
         {...props}
-        modal={false}
+        // Base UI ignores `modal` in a menubar and warns about it.
+        {...(inBar ? {} : { modal: false })}
         onOpenChange={(next, details) => {
           setHover(details.reason === "trigger-hover");
           onOpenChange?.(next, details);
           if (!details.isCanceled) setOpened(next);
         }}
       />
-    </ModalContext.Provider>
+    </MenuModalContext.Provider>
   );
 }
 
 /** A submenu: never modal of its own, as in Base UI; the menu it belongs to holds the page. */
 export function MenuSubmenuRoot(props: MenuSubmenuRootProps): ReactElement {
   return (
-    <ModalContext.Provider value={NOT_MODAL}>
+    <MenuModalContext.Provider value={NOT_MODAL}>
       <BaseMenu.SubmenuRoot {...props} />
-    </ModalContext.Provider>
+    </MenuModalContext.Provider>
   );
 }
 
@@ -76,7 +97,7 @@ export interface MenuPortalProps extends Omit<BaseMenu.Portal.Props, "className"
 
 /** Base UI's Portal; for a modal menu it puts a clear backdrop under the popup for outside presses. */
 export function MenuPortal({ children, ...props }: MenuPortalProps): ReactElement {
-  const { modal } = useContext(ModalContext);
+  const { modal } = useContext(MenuModalContext);
   return (
     <BaseMenu.Portal data-slot="menu-portal" {...props}>
       {modal ? (
@@ -150,7 +171,7 @@ export function MenuPopup({
 }: MenuPopupProps): ReactElement {
   const glide = useGlide<HTMLDivElement>({ axis: "y", items: ITEMS });
   const { ref: viewportRef, setActive } = glide;
-  const { modal, hover, open } = useContext(ModalContext);
+  const { modal, hover, open } = useContext(MenuModalContext);
   const [self, setSelf] = useState<HTMLDivElement | null>(null);
   useScrollLock(self, modal && !hover && open);
   const merged = useMergedRefs(setSelf, ref);

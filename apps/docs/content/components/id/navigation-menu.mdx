@@ -1,0 +1,208 @@
+---
+title: Navigation Menu
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Di registry, itemnya `navigation-menu`.
+
+## Penggunaan [#usage]
+
+```tsx
+import { NavigationMenu } from "owsem-ui/base";
+
+export function SiteNavigation() {
+  return (
+    <NavigationMenu.Root aria-label="Utama">
+      <NavigationMenu.List>
+        <NavigationMenu.Item>
+          <NavigationMenu.Trigger>Produk</NavigationMenu.Trigger>
+          <NavigationMenu.Content>
+            <NavigationMenu.Link href="/components">
+              <strong>Komponen</strong>
+              <span>Tiga puluh lebih bagian siap pakai.</span>
+            </NavigationMenu.Link>
+          </NavigationMenu.Content>
+        </NavigationMenu.Item>
+        <NavigationMenu.Item>
+          <NavigationMenu.Link href="/pricing">Harga</NavigationMenu.Link>
+        </NavigationMenu.Item>
+      </NavigationMenu.List>
+      <NavigationMenu.Portal />
+    </NavigationMenu.Root>
+  );
+}
+```
+
+Navigation Menu adalah navigasi situs dengan panel dropdown, sebuah mega menu. List-nya baris tombol
+ghost: trigger membuka konten itemnya, dan link biasa duduk di baris yang sama. Panelnya satu kotak
+bersama: ia berpindah ke trigger yang Anda capai, berubah ukuran mengikuti isinya, dan isinya meluncur
+dari sisi asal Anda, sehingga bergerak di sepanjang baris terasa sebagai satu gerakan. Link di dalam
+konten berupa kartu, judul dan satu baris teks, dan Glide menyalakan yang ada di bawah pointer atau
+tombol.
+
+`NavigationMenu.Portal` kosong menggambar Positioner, Popup, dan Viewport untuk Anda; tulis sendiri bila
+ingin menambah Arrow atau mengubah salah satunya.
+
+Di ponsel, list membungkus alih-alih menggulir, ketukan membuka panel di bawahnya, dan mengetuk trigger
+lain menukar panelnya. Panel tidak pernah lebih lebar dari jendela dikurangi 16px di tiap sisi, dan
+konten yang lebih tinggi dari jendela menggulir. Susun isinya satu kolom di sana, seperti pada contoh.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Base UI merender bagian-bagiannya, jeda buka dan tutup, arah gerak konten, ukuran panel, dan keyboard.
+OwsemUI menata list, trigger, panel, dan link, menggambar chevron dan sorotan Glide, mengatur offset,
+dan membawa arah teks ke dalam portal. Item dan Portal tidak menambah tampilan.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `nav.ow-navigation-menu` | `value`, `delay` (50 ms), `closeDelay` (50 ms), `orientation`; `data-size` |
+| <Part name="List" /> | `ul.ow-navigation-menu__list` | Baris yang membungkus; `data-orientation` |
+| Item | `li` | Memuat trigger dan kontennya, atau sebuah link; `value` menamainya |
+| <Part name="Trigger" /> | `button.ow-navigation-menu__trigger` | `data-popup-open` selama panelnya terbuka; menggambar Icon setelah labelnya |
+| Icon | `span.ow-navigation-menu__icon` | Chevron yang berputar selama panel terbuka |
+| <Part name="Content" /> | `div.ow-navigation-menu__content` | Pindah ke Viewport selama terbuka; `data-activation-direction`; memegang Glide |
+| <Part name="Link" /> | `a.ow-navigation-menu__link` atau `a.ow-navigation-menu__trigger` | Kartu di dalam konten, tombol ghost di list; `data-active` dan `aria-current="page"` untuk halaman saat ini |
+| Backdrop | `div.ow-navigation-menu__backdrop` | Opsional: bening, di bawah panel |
+| Portal | `div` | Memindahkan panel ke akhir body, atau ke `container`; kosong, ia menggambar Positioner |
+| Positioner | `div.ow-navigation-menu__positioner` | 8px di bawah list, 16px di dalam jendela, tidak dibalik; berpindah antar trigger |
+| <Part name="Popup" /> | `div.ow-navigation-menu__popup` | Panel bersama; `data-size`, `data-instant`; kosong, ia menggambar Viewport |
+| <Part name="Arrow" /> | `div.ow-navigation-menu__arrow` | Opsional, di Popup sebelum Viewport; mengikuti trigger yang terbuka |
+| <Part name="Viewport" /> | `div.ow-navigation-menu__viewport` | Memotong konten saat meluncur |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### NavigationMenu.Root
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Tinggi trigger dan tipe panel |
+
+| Ukuran | Trigger | Font |
+| --- | --- | --- |
+| `sm` | 32px | 13px |
+| `md` | 40px | 14px |
+| `lg` | 48px | 16px |
+
+Panel dirender di portal, di luar elemen Root, dan membaca `size` dari konteks Root. Trigger mengikuti
+aturan `--py` milik Button.
+
+### NavigationMenu.Trigger
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `icon` | `ReactNode` | Chevron | Mengganti chevron; `null` menghilangkan Icon, untuk trigger yang menggambar `NavigationMenu.Icon` sendiri |
+
+### NavigationMenu.Positioner
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `sideOffset` | `number \| function` | `8` | Jarak ke list. Default Base UI `0` |
+| `collisionPadding` | `number \| object` | `16` | Menjaga panel dari tepi jendela. Default Base UI `5` |
+| `collisionAvoidance` | `object` | `{ side: "none" }` | Panel tidak dibalik ke atas list; ia bergeser di sepanjangnya |
+
+Positioner menyimpan jembatan 12px di atas celah, agar pointer bisa berpindah dari trigger ke panel;
+jika `sideOffset` lebih dari 12, lebarkan dengan kelas.
+
+### NavigationMenu.Icon, Portal, Popup
+
+Tanpa children, Portal menggambar Positioner, Positioner menggambar Popup, dan Popup menggambar
+Viewport. Icon menggambar chevron; beri children untuk menggambar sendiri.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-navigation-menu` | Root |
+| `ow-navigation-menu--sm`, `ow-navigation-menu--md`, `ow-navigation-menu--lg` | Root, menurut `size` |
+| `ow-navigation-menu__list` | List |
+| `ow-navigation-menu__trigger` | Trigger, dan Link di list |
+| `ow-navigation-menu__trigger--sm`, `ow-navigation-menu__trigger--md`, `ow-navigation-menu__trigger--lg` | Trigger, menurut `size` |
+| `ow-navigation-menu__icon` | Icon |
+| `ow-navigation-menu__backdrop` | Backdrop |
+| `ow-navigation-menu__positioner` | Positioner |
+| `ow-navigation-menu__popup` | Popup |
+| `ow-navigation-menu__popup--sm`, `ow-navigation-menu__popup--md`, `ow-navigation-menu__popup--lg` | Popup, menurut `size` |
+| `ow-navigation-menu__viewport` | Viewport |
+| `ow-navigation-menu__content` | Content |
+| `ow-navigation-menu__link` | Link di dalam konten |
+| `ow-navigation-menu__arrow` | Arrow |
+
+## Aksesibilitas [#accessibility]
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab | Melewati trigger dan link, lalu ke link di panel yang terbuka |
+| Enter, Spasi | Pada trigger: membuka panelnya; pada link: mengikutinya |
+| Panah Bawah | Pada trigger yang terbuka: masuk ke panelnya |
+| Panah Kanan, Panah Kiri | Antar trigger (Bawah dan Atas untuk `orientation="vertical"`) |
+| Escape | Menutup panel; fokus kembali ke triggernya |
+
+- Root-nya `nav`: beri `aria-label` yang menyebut apa yang dinavigasi. Tiap trigger mengumumkan bahwa ia
+  dapat diperluas dan apakah terbuka; link halaman saat ini memiliki `aria-current="page"`.
+- Hover membuka panel setelah 50 ms, dan klik membukanya seketika; layar sentuh mengetuk. Panel yang
+  hanya bisa dibuka hover akan tak terjangkau, dan panel ini tidak begitu. Klik pada trigger yang
+  terbuka menutup panelnya, kecuali dalam 500 ms pertama setelah hover membukanya, sehingga hover lalu
+  klik membiarkannya terbuka.
+- Trigger nonaktif diredupkan 45% dan dilewati.
+- Trigger yang terbuka tetap bertint, sehingga panel mana yang terbuka tidak hanya diberitahukan lewat gerak.
+- Chevron dan sorotan Glide hanya hiasan dan disembunyikan dari teknologi asistif.
+- Dengan `prefers-contrast: more`, panel mendapat cincin 1px `--ow-edge`. Pada forced colors panel
+  tetap bertepi 1px warna sistem, dan cincin fokus, trigger yang terbuka, serta link saat ini
+  di-outline dengan `Highlight`.
+
+## Tema [#theming]
+
+Navigation Menu membaca token tema ini. Setel pada Root dengan kelas untuk trigger, atau pada Popup untuk
+panel, yang dirender di portal di luar subtree Root; atau setel untuk semua menu di `:root`.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-raised-bg` | Permukaan panel, panahnya juga |
+| `--ow-popup-shadow` | Bayangan panel, panahnya juga |
+| `--ow-edge` | Cincin pada `prefers-contrast: more` |
+| `--ow-fg` | Teks |
+| `--ow-muted` | Baris teks di bawah judul link |
+| `--ow-hover` | Trigger di bawah pointer, dan sorotan Glide |
+| `--ow-pressed-bg` | Trigger yang terbuka, dan halaman saat ini |
+| `--ow-radius` | Sudut; link dan Glide memakainya dikurangi padding panel 8px |
+| `--ow-focus` | Cincin fokus |
+| `--ow-ease-out` | Setiap gerakan |
+
+<ForMode mode="isolated">
+
+Pada mode terisolasi nilainya ada di tiap bagian, jadi atur nilai Anda di Root dan Popup lewat kelas.
+
+</ForMode>
+
+## Gerak [#motion]
+
+Panel tumbuh dari trigger yang terbuka dalam 180 ms, dari 0,96 dan transparan, dan menutup dalam 120
+ms. Berpindah ke trigger lain memakan 320 ms: Positioner meluncur ke trigger baru, panel berubah
+ukuran mengikuti konten baru (Base UI yang mengukurnya; ini satu-satunya bagian yang menganimasikan
+ukuran, karena kotak harus mengikuti isinya), dan konten lama meluncur keluar ke sisi asalnya sementara
+yang baru meluncur masuk, hanya dengan transform dan opacity. Dibuka dari keyboard, atau ditutup dengan
+Escape, panel melewati animasi. Chevron berputar dalam 200 ms. Dengan `prefers-reduced-motion`, panel
+dan konten memudar tanpa tumbuh atau meluncur, panel langsung mengambil posisi dan ukuran trigger
+baru, dan chevron berputar seketika.

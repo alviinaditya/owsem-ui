@@ -1,0 +1,153 @@
+---
+title: Context Menu
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Di registry, itemnya `context-menu`; popup dan itemnya milik item `menu`,
+jadi itu ikut terpasang.
+
+## Penggunaan [#usage]
+
+```tsx
+import { ContextMenu } from "owsem-ui/base";
+
+export function Canvas() {
+  return (
+    <ContextMenu.Root>
+      <ContextMenu.Trigger className="canvas">Klik kanan di sini</ContextMenu.Trigger>
+      <ContextMenu.Portal>
+        <ContextMenu.Positioner>
+          <ContextMenu.Popup>
+            <ContextMenu.Item onClick={cut}>Potong</ContextMenu.Item>
+            <ContextMenu.Item onClick={copy}>Salin</ContextMenu.Item>
+          </ContextMenu.Popup>
+        </ContextMenu.Positioner>
+      </ContextMenu.Portal>
+    </ContextMenu.Root>
+  );
+}
+```
+
+Context Menu adalah Menu yang dibuka dengan klik kanan atau tekan lama pada sebuah area, di posisi
+pointer. Popup, item, highlight Glide, centang dan pilihan, submenu, label grup, pemisah, dan shortcut
+semuanya milik Menu: kelasnya sama, dan token tema yang diatur untuk Menu berlaku untuk keduanya. Areanya
+milik Anda: kartu, kanvas, atau baris. Pustaka tidak memberinya tampilan, hanya yang dibutuhkan tekan
+lama di iOS: callout sistem tidak muncul di atas menu.
+
+Menu konteks sebaiknya melengkapi cara yang terlihat, bukan menggantikannya: layar sentuh dan teknologi
+asistif bisa saja tidak menemukannya. Contoh terakhir memasangkannya dengan tombol Menu.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Base UI merender bagian-bagiannya, penanganan pointer dan tekan lama, serta keyboard. OwsemUI memberi
+tiap bagian tampilan Menu dan `data-slot`-nya sendiri (`context-menu-item`, dan seterusnya), serta
+membawa arah teks ke dalam portal. Root, Group, dan RadioGroup tidak menambah tampilan. Root tidak
+merender elemen, jadi di Inspect ia adalah kotak yang memuat area dan menunya. Backdrop dan Arrow Base UI
+bukan bagian komponen ini: menu selalu modal dan Base UI menggambar lapisan yang menerima tekanan di
+luar, dan menu di pointer tidak punya apa-apa untuk ditunjuk.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | tidak ada | Hanya state: `open` dan `onOpenChange` |
+| <Part name="Trigger" /> | `div.ow-context-menu__trigger` | Areanya; `data-popup-open` selama menu terbuka |
+| Positioner | `div.ow-menu__positioner` | Di pointer; submenu di samping itemnya, baris pertama sejajar |
+| <Part name="Popup" /> | `div.ow-menu__popup` | `role="menu"`, `data-size`, `data-instant` saat melewati animasi |
+| <Part name="Item" /> | `div.ow-menu__item` | `role="menuitem"` dan `data-disabled`; `svg` di depan berukuran ikon |
+| <Part name="GroupLabel" /> | `div.ow-menu__group-label` | Menamai `ContextMenu.Group` atau `ContextMenu.RadioGroup` |
+| <Part name="CheckboxItem" /> | `div.ow-menu__item` | `role="menuitemcheckbox"`, `aria-checked` |
+| <Part name="Separator" /> | `div.ow-menu__separator` | `role="separator"`, garis tipis |
+| <Part name="SubmenuTrigger" /> | `div.ow-menu__item` | `aria-haspopup`, `data-popup-open`, dan chevron |
+
+`ContextMenu.LinkItem` adalah item yang berupa link; `RadioItem` dan indikatornya milik Menu.
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### ContextMenu.Positioner
+
+Positioner mempertahankan jangkar pointer Base UI dan offsetnya. Di dalam `ContextMenu.SubmenuRoot` ia
+menempatkan submenu seperti Positioner Menu: 6px di samping itemnya, baris pertama sejajar.
+
+### ContextMenu.Popup
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Skala tipe item, seperti Menu |
+
+Menu konteks selalu modal, seperti di Base UI: lapisan milik Base UI menerima tekanan di luar, sehingga
+tekanan itu hanya menutup menu, dan halaman menahan gulirnya.
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-context-menu__trigger` | Trigger |
+| `ow-menu__*` | Semua bagian lain: lihat kelas Menu |
+
+## Aksesibilitas [#accessibility]
+
+| Tombol | Aksi |
+| --- | --- |
+| Klik kanan, tekan lama | Pada area: membuka menu di pointer |
+| Panah Bawah, Panah Atas | Item berikut atau sebelumnya, berputar |
+| Home, End | Item pertama atau terakhir |
+| Enter, Spasi | Memilih item |
+| Panah Kanan, Panah Kiri | Membuka submenu, atau kembali darinya (dibalik untuk teks kanan ke kiri) |
+| Escape | Menutup menu; fokus kembali ke area |
+| Sebuah huruf | Item berikutnya yang diawali huruf itu |
+
+- Banyak keyboard tidak punya klik kanan (tombol Menu dan Shift+F10 mengirim event menu konteks di banyak
+  platform, dan itu membuka menu ini). Jangan jadikan ini satu-satunya jalan ke sebuah aksi: sediakan aksi
+  yang sama di balik kontrol yang terlihat.
+- Pembaca layar membacakan menu, peran dan state tiap item, dan grup menurut labelnya.
+- Area memakai peran dan nama yang Anda berikan; menu tidak menambahkannya.
+- Item nonaktif diredupkan 45%; keyboard tetap menjangkaunya, dan Glide melewatinya.
+- Dengan `prefers-contrast: more`, popup mendapat cincin 1px `--ow-edge`. Di forced colors popup tetap
+  punya tepi 1px warna sistem, highlight berupa outline `Highlight`, dan centang mengikuti warna teks.
+
+## Tema [#theming]
+
+Context Menu membaca token tema Menu. Atur pada Popup lewat kelas, atau untuk semua menu di `:root`.
+Kelas di sekitar area tidak sampai: menu dirender di portal, di luar subtree area.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-raised-bg` | Permukaan |
+| `--ow-popup-shadow` | Bayangan |
+| `--ow-edge` | Cincin pada `prefers-contrast: more` |
+| `--ow-fg` | Teks item |
+| `--ow-muted` | Label grup, shortcut, dan chevron |
+| `--ow-hover` | Highlight (Glide) |
+| `--ow-line` | Pemisah |
+| `--ow-radius` | Sudut popup; item dan Glide memakainya dikurangi padding 4px |
+| `--ow-focus` | Cincin fokus |
+
+<ForMode mode="isolated">
+
+Pada mode terisolasi nilainya ada di tiap Popup, jadi atur nilai Anda di Popup lewat kelas.
+
+</ForMode>
+
+## Gerak [#motion]
+
+Menu tumbuh dari pointer dalam 180 ms, dari 0,96 dan transparan, dan menutup dalam 120 ms; dibuka dari
+keyboard, ia langsung muncul. Glide menggeser satu highlight antar item. Dengan
+`prefers-reduced-motion`, menu memudar tanpa tumbuh, dan Glide memudar alih-alih bergeser. Areanya tidak
+punya gerak sendiri.

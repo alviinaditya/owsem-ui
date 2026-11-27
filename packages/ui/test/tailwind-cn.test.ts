@@ -24,6 +24,7 @@ import {
   commandMenuSlots,
   commandMenuTriggerVariants,
 } from "../src/tailwind/command-menu/command-menu-variants";
+import { contextMenuSlots } from "../src/tailwind/context-menu/context-menu-variants";
 import { copyButtonSlots } from "../src/tailwind/copy-button/copy-button-variants";
 import { dialogSlots } from "../src/tailwind/dialog/dialog-variants";
 import { drawerSlots } from "../src/tailwind/drawer/drawer-variants";
@@ -40,6 +41,7 @@ import { kbdSlots } from "../src/tailwind/kbd/kbd-variants";
 import { cn } from "../src/tailwind/lib/cn";
 import { glideSlots } from "../src/tailwind/lib/glide/glide-variants";
 import { menuPopupVariants, menuSlots } from "../src/tailwind/menu/menu-variants";
+import { menubarTriggerVariants, menubarVariants } from "../src/tailwind/menubar/menubar-variants";
 import {
   meterLegendItemVariants,
   meterLegendVariants,
@@ -47,6 +49,12 @@ import {
   meterSlots,
   meterVariants,
 } from "../src/tailwind/meter/meter-variants";
+import {
+  navigationMenuPopupVariants,
+  navigationMenuSlots,
+  navigationMenuTriggerVariants,
+  navigationMenuVariants,
+} from "../src/tailwind/navigation-menu/navigation-menu-variants";
 import {
   numberFieldSlots,
   numberFieldVariants,
@@ -102,6 +110,7 @@ const all = classNames(
     collapsibleSlots,
     colorPickerSlots,
     commandMenuSlots,
+    contextMenuSlots,
     copyButtonSlots,
     alertDialogSlots,
     dialogSlots,
@@ -115,6 +124,7 @@ const all = classNames(
     kbdSlots,
     menuSlots,
     meterSlots,
+    navigationMenuSlots,
     numberFieldSlots,
     otpFieldSlots,
     popoverSlots,
@@ -177,6 +187,11 @@ const all = classNames(
     toolbarInputVariants({ size }),
     toolbarLinkVariants({ size }),
     toolbarVariants({ size }),
+    menubarVariants({ size }),
+    menubarTriggerVariants({ size }),
+    navigationMenuVariants({ size }),
+    navigationMenuTriggerVariants({ size }),
+    navigationMenuPopupVariants({ size }),
     ...(["primary", "secondary", "outline", "ghost", "link", "destructive"] as const).flatMap(
       (variant) => [false, true].map((soft) => buttonVariants({ variant, size, soft })),
     ),

@@ -1,0 +1,122 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * A row of menus as in a desktop app, on the quiet panel of Toolbar. The bar is 32, 40, or 48px
+ * tall (sm, md, lg); its triggers are ghost buttons 24, 32, or 40px tall in the 4px padding, so
+ * their radius follows the bar's curve (FR-9 to FR-11). The open menu's trigger stays tinted. The
+ * menus themselves are Menu's.
+ */
+@layer owsem.components {
+  .ow-menubar {
+    --_bg: var(--ow-panel);
+    --_shadow: var(--ow-surface-shadow);
+    --_pad: 4px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    box-sizing: border-box;
+    inline-size: fit-content;
+    max-inline-size: 100%;
+    padding: var(--_pad);
+    /* One radius outside (TK-8); the triggers follow its curve, less the padding. */
+    --_inner: max(0px, var(--ow-radius) - var(--_pad));
+    border-radius: var(--ow-radius);
+    /* Invisible until forced colors draw it as the edge (DP-8). */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--_bg);
+    box-shadow: var(--_shadow);
+    color: var(--ow-fg);
+    font-size: 0.875rem;
+    line-height: 1.25;
+  }
+
+  .ow-menubar--sm {
+    font-size: 0.8125rem;
+  }
+
+  .ow-menubar--lg {
+    font-size: 1rem;
+  }
+
+  .ow-menubar[data-orientation="vertical"] {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* Triggers: Button's geometry, --py the only input; 8px shorter than the bar (FR-9). */
+  .ow-menubar__trigger {
+    --py: 0.5179em;
+    --_py: max(var(--py), (24px - 1lh) / 2);
+    --px: calc(var(--_py) + (1lh - 1cap) / 2);
+    --_hover: var(--ow-hover);
+    --_open: var(--ow-pressed-bg);
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    box-sizing: border-box;
+    margin: 0;
+    padding: var(--_py) var(--px);
+    border: 0;
+    border-radius: var(--_inner);
+    /* Invisible until forced colors draw it as the edge (DP-8). */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: transparent;
+    color: var(--ow-fg);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25;
+    white-space: nowrap;
+    cursor: default;
+    touch-action: manipulation;
+  }
+
+  .ow-menubar__trigger--sm {
+    --py: 0.3em;
+    font-size: 0.8125rem;
+  }
+
+  .ow-menubar__trigger--lg {
+    --py: 0.625em;
+    font-size: 1rem;
+  }
+
+  @media (hover: hover) {
+    .ow-menubar__trigger:hover:not([data-disabled]) {
+      background-color: var(--_hover);
+    }
+  }
+
+  /* The open menu's trigger stays lit while the pointer is in the menu. */
+  .ow-menubar__trigger:is([data-popup-open], [data-pressed]):not([data-disabled]) {
+    background-color: var(--_open);
+  }
+
+  .ow-menubar__trigger:focus-visible {
+    outline: 2px solid var(--ow-focus);
+    outline-offset: 2px;
+  }
+
+  .ow-menubar__trigger[data-disabled] {
+    opacity: 0.45;
+  }
+
+  @media (forced-colors: active) {
+    .ow-menubar__trigger:focus-visible {
+      outline-color: Highlight;
+    }
+
+    .ow-menubar__trigger:is([data-popup-open], [data-pressed]) {
+      outline-color: Highlight;
+    }
+
+    .ow-menubar__trigger[data-disabled] {
+      color: GrayText;
+      opacity: 1;
+    }
+  }
+}

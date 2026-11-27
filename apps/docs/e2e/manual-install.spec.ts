@@ -63,7 +63,7 @@ test("the Manual files are not in the page until the tab opens", async ({ page, 
 
 test("every component page's Manual offers the Tailwind choice", async ({ request }) => {
   const names = catalog.filter(isAvailable).map((entry) => entry.name);
-  expect(names.length).toBe(42);
+  expect(names.length).toBe(45);
   for (const name of names) {
     const data = await (await request.get(`/api/manual/${name}`)).json();
     expect(data.css.flavor, name).toBe("css");

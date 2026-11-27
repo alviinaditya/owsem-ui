@@ -1,0 +1,12 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * The area that opens the menu has no look of its own: it is a card, a canvas, or a row, and the
+ * page draws it. The popup and its items are Menu's (menu.css). The one rule keeps a long press
+ * on iOS from raising the system's callout over the menu.
+ */
+@layer owsem.components {
+  .ow-context-menu__trigger {
+    -webkit-touch-callout: none;
+  }
+}

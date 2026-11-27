@@ -172,8 +172,8 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Accordion**, **Alert Dialog**, **Avatar**, **Button**, **Checkbox**, **Checkbox Group**, **Collapsible**, **Dialog**, **Drawer**,
-**Field**, **Fieldset**, **Form**, **Input**, **Kbd**, **Menu**, **Meter**, **Number Field**, **OTP Field**, **Popover**, **Preview Card**, **Progress**, **Radio Group**, **Scroll Area**,
+**Accordion**, **Alert Dialog**, **Avatar**, **Button**, **Checkbox**, **Checkbox Group**, **Collapsible**, **Context Menu**, **Dialog**, **Drawer**,
+**Field**, **Fieldset**, **Form**, **Input**, **Kbd**, **Menu**, **Menubar**, **Meter**, **Navigation Menu**, **Number Field**, **OTP Field**, **Popover**, **Preview Card**, **Progress**, **Radio Group**, **Scroll Area**,
 **Select**, **Separator**, **Slider**, **Switch**, **Tabs**, **Toast**, **Toggle**, **Toggle Group**, **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`)
 and **Code Block**, **Color Picker**, **Command Menu**, **Copy Button**, **Icon Morph**,
 **Sidebar**, **Table**, **Table of Contents**, and **Tree Rail Nav** (Owsem, from
@@ -451,6 +451,113 @@ import { Menu } from "owsem-ui/base"; // or "@/components/owsem/menu"
   themed subtree.
 - Reads `--ow-raised-bg`, `--ow-popup-shadow`, `--ow-fg`, `--ow-muted`, `--ow-hover` (Glide),
   `--ow-line` (separators), `--ow-radius`, and `--ow-focus`.
+
+### Context Menu
+
+Menu opened by a right click or a long press on an area, at the pointer. Registry item:
+`context-menu` (it needs `menu`).
+
+```tsx
+import { ContextMenu } from "owsem-ui/base"; // or "@/components/owsem/context-menu"
+<ContextMenu.Root>
+  <ContextMenu.Trigger className="canvas">Right click here</ContextMenu.Trigger>
+  <ContextMenu.Portal>
+    <ContextMenu.Positioner>
+      <ContextMenu.Popup>
+        <ContextMenu.Item onClick={copy}>Copy</ContextMenu.Item>
+        <ContextMenu.Separator />
+        <ContextMenu.SubmenuRoot>
+          <ContextMenu.SubmenuTrigger>Share</ContextMenu.SubmenuTrigger>
+          <ContextMenu.Portal>
+            <ContextMenu.Positioner>
+              <ContextMenu.Popup>{/* items */}</ContextMenu.Popup>
+            </ContextMenu.Positioner>
+          </ContextMenu.Portal>
+        </ContextMenu.SubmenuRoot>
+      </ContextMenu.Popup>
+    </ContextMenu.Positioner>
+  </ContextMenu.Portal>
+</ContextMenu.Root>
+```
+
+- The parts are Menu's (`Item`, `LinkItem`, `CheckboxItem`, `RadioGroup`, `RadioItem`, the
+  indicators, `Group`, `GroupLabel`, `Separator`, `SubmenuRoot`, `SubmenuTrigger`), with the same
+  classes, so Menu's tokens and `size` on the Popup apply. The Trigger is an area you draw (a card, a
+  canvas): the library gives it no look. Base UI's `Backdrop` and `Arrow` are not parts here.
+- Never the only way to an action: touch and assistive technology may not find it. Put the same
+  actions behind a visible Menu button.
+- Always modal, as in Base UI: its own layer takes a press outside, and the page holds still.
+
+### Menubar
+
+A row of menus as in a desktop app. Registry item: `menubar` (it needs `menu`).
+
+```tsx
+import { Menu, Menubar } from "owsem-ui/base"; // or "@/components/owsem/menu", ".../menubar"
+<Menubar.Root aria-label="Application">
+  <Menu.Root>
+    <Menubar.Trigger>File</Menubar.Trigger>
+    <Menu.Portal>
+      <Menu.Positioner align="start">
+        <Menu.Popup>
+          <Menu.Item>New</Menu.Item>
+        </Menu.Popup>
+      </Menu.Positioner>
+    </Menu.Portal>
+  </Menu.Root>
+  {/* one Menu.Root per menu */}
+</Menubar.Root>
+```
+
+- Parts: `Menubar.Root` (the bar) and `Menubar.Trigger` (a ghost button, tinted while its menu is
+  open). The menus are Menu's: `Menu.Root`, `Portal`, `Positioner`, `Popup`, and the items.
+- `size` (`sm|md|lg`, 32/40/48px bar) on the Root, overridable per Trigger; a Popup's own `size`
+  is separate. Arrow keys move between the triggers and between open menus; hover swaps the open one.
+- `modal` (default true) and `orientation`, `loopFocus`, `disabled` are Base UI's, on the Root. A
+  Menu.Root inside the bar leaves `modal` to the bar.
+- Reads `--ow-panel`, `--ow-surface-shadow`, `--ow-hover`, `--ow-pressed-bg`, `--ow-fg`,
+  `--ow-radius`, and `--ow-focus`.
+
+### Navigation Menu
+
+Site navigation with dropdown panels (a mega menu). Registry item: `navigation-menu`.
+
+```tsx
+import { NavigationMenu } from "owsem-ui/base"; // or "@/components/owsem/navigation-menu"
+<NavigationMenu.Root aria-label="Main">
+  <NavigationMenu.List>
+    <NavigationMenu.Item>
+      <NavigationMenu.Trigger>Products</NavigationMenu.Trigger>
+      <NavigationMenu.Content>
+        <NavigationMenu.Link href="/components">
+          <strong>Components</strong>
+          <span>Thirty-some parts.</span>
+        </NavigationMenu.Link>
+      </NavigationMenu.Content>
+    </NavigationMenu.Item>
+    <NavigationMenu.Item>
+      <NavigationMenu.Link href="/pricing">Pricing</NavigationMenu.Link>
+    </NavigationMenu.Item>
+  </NavigationMenu.List>
+  <NavigationMenu.Portal />
+</NavigationMenu.Root>
+```
+
+- Parts: `Root` (a `nav`), `List`, `Item`, `Trigger`, `Icon`, `Content`, `Link`, `Portal`,
+  `Positioner`, `Popup`, `Viewport`, `Arrow`, `Backdrop`. An empty `Portal` draws a `Positioner`,
+  an empty `Positioner` a `Popup`, an empty `Popup` a `Viewport`; write them out to add an `Arrow`
+  (in the Popup, before the Viewport).
+- The Trigger draws its chevron `Icon` after its label; `icon` replaces the glyph, `icon={null}`
+  leaves it out. A Link in the list is a ghost button; in a Content it is a card (a title, then
+  lines of text) lit by Glide. `active` marks the current page.
+- All panels share one box that moves to the trigger you reach, resizes to the content (Base
+  UI's own), and slides the content in from the side you came from. The panel is under the list,
+  8px away, never flipped, 16px inside the window; on a phone the list wraps and the panel
+  is at most the window's width, scrolling when taller: lay content out in one column there.
+- `size` (`sm|md|lg`: 32/40/48px triggers) is set on the Root; the panel reads it by context.
+- Reads `--ow-raised-bg`, `--ow-popup-shadow`, `--ow-hover`, `--ow-pressed-bg`, `--ow-fg`,
+  `--ow-muted`, `--ow-radius`, `--ow-focus`, and `--ow-ease-out`. Set tokens on the Popup for the
+  panel: it renders in a portal.
 
 ### Dialog
 

@@ -1,0 +1,208 @@
+---
+title: Navigation Menu
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. In the registry it is the `navigation-menu` item.
+
+## Usage [#usage]
+
+```tsx
+import { NavigationMenu } from "owsem-ui/base";
+
+export function SiteNavigation() {
+  return (
+    <NavigationMenu.Root aria-label="Main">
+      <NavigationMenu.List>
+        <NavigationMenu.Item>
+          <NavigationMenu.Trigger>Products</NavigationMenu.Trigger>
+          <NavigationMenu.Content>
+            <NavigationMenu.Link href="/components">
+              <strong>Components</strong>
+              <span>Thirty-some parts, ready to use.</span>
+            </NavigationMenu.Link>
+          </NavigationMenu.Content>
+        </NavigationMenu.Item>
+        <NavigationMenu.Item>
+          <NavigationMenu.Link href="/pricing">Pricing</NavigationMenu.Link>
+        </NavigationMenu.Item>
+      </NavigationMenu.List>
+      <NavigationMenu.Portal />
+    </NavigationMenu.Root>
+  );
+}
+```
+
+Navigation Menu is site navigation with dropdown panels, a mega menu. The list is a row of ghost
+buttons: a trigger opens its item's content, and a plain link sits in the same row. The panels share
+one box: it moves to the trigger you reach, resizes to the content it holds, and the content slides in
+from the side you came from, so moving across the row reads as one motion. Links in a content are
+cards, a title and a line of text, and Glide lights the one under the pointer or the key.
+
+An empty `NavigationMenu.Portal` draws the Positioner, the Popup, and the Viewport for you; write them
+out when you want to add an Arrow or change one.
+
+On a phone the list wraps instead of scrolling, a tap opens a panel under it, and tapping another
+trigger swaps the panel. The panel is never wider than the window less 16px on each side, and a content
+taller than the window scrolls. Lay the content out in one column there, as the examples do.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Base UI renders the parts, the open and close delays, the direction the contents travel, the sizes of
+the panel, and the keyboard. OwsemUI styles the list, the triggers, the panel, and the links, draws the
+chevron and the Glide highlight, sets the offsets, and carries the text direction into the portal.
+Item and Portal add no look of their own.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `nav.ow-navigation-menu` | `value`, `delay` (50 ms), `closeDelay` (50 ms), `orientation`; `data-size` |
+| <Part name="List" /> | `ul.ow-navigation-menu__list` | A row that wraps; `data-orientation` |
+| Item | `li` | Holds a trigger and its content, or a link; `value` names it |
+| <Part name="Trigger" /> | `button.ow-navigation-menu__trigger` | `data-popup-open` while its panel is open; draws an Icon after its label |
+| Icon | `span.ow-navigation-menu__icon` | A chevron that turns over while the panel is open |
+| <Part name="Content" /> | `div.ow-navigation-menu__content` | Moves into the Viewport while open; `data-activation-direction`; holds Glide |
+| <Part name="Link" /> | `a.ow-navigation-menu__link` or `a.ow-navigation-menu__trigger` | A card in a content, a ghost button in the list; `data-active` and `aria-current="page"` for the current page |
+| Backdrop | `div.ow-navigation-menu__backdrop` | Optional: clear, under the panel |
+| Portal | `div` | Moves the panel to the end of the body, or into `container`; empty, it draws the Positioner |
+| Positioner | `div.ow-navigation-menu__positioner` | 8px under the list, 16px inside the window, never flipped; moves between triggers |
+| <Part name="Popup" /> | `div.ow-navigation-menu__popup` | The shared panel; `data-size`, `data-instant`; empty, it draws the Viewport |
+| <Part name="Arrow" /> | `div.ow-navigation-menu__arrow` | Optional, in the Popup before the Viewport; follows the open trigger |
+| <Part name="Viewport" /> | `div.ow-navigation-menu__viewport` | Clips the contents as they slide |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### NavigationMenu.Root
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | The triggers' height and the panel's type |
+
+| Size | Trigger | Font |
+| --- | --- | --- |
+| `sm` | 32px | 13px |
+| `md` | 40px | 14px |
+| `lg` | 48px | 16px |
+
+The panel renders in a portal, outside the Root's element, and reads `size` from the Root's context.
+Triggers follow Button's `--py` rule.
+
+### NavigationMenu.Trigger
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `icon` | `ReactNode` | A chevron | Replaces the chevron; `null` leaves the Icon out, for a trigger that draws its own `NavigationMenu.Icon` |
+
+### NavigationMenu.Positioner
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `sideOffset` | `number \| function` | `8` | Gap to the list. Base UI's default is `0` |
+| `collisionPadding` | `number \| object` | `16` | Keeps the panel off the window's edge. Base UI's default is `5` |
+| `collisionAvoidance` | `object` | `{ side: "none" }` | The panel does not flip above the list; it shifts along it |
+
+The Positioner keeps a 12px bridge over the gap, so the pointer can travel from the trigger into the
+panel; if you raise `sideOffset` beyond 12, widen it with a class.
+
+### NavigationMenu.Icon, Portal, Popup
+
+Without children, the Portal draws a Positioner, the Positioner a Popup, and the Popup a Viewport. The
+Icon draws a chevron; pass children to draw your own.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-navigation-menu` | Root |
+| `ow-navigation-menu--sm`, `ow-navigation-menu--md`, `ow-navigation-menu--lg` | Root, by `size` |
+| `ow-navigation-menu__list` | List |
+| `ow-navigation-menu__trigger` | Trigger, and a Link in the list |
+| `ow-navigation-menu__trigger--sm`, `ow-navigation-menu__trigger--md`, `ow-navigation-menu__trigger--lg` | Trigger, by `size` |
+| `ow-navigation-menu__icon` | Icon |
+| `ow-navigation-menu__backdrop` | Backdrop |
+| `ow-navigation-menu__positioner` | Positioner |
+| `ow-navigation-menu__popup` | Popup |
+| `ow-navigation-menu__popup--sm`, `ow-navigation-menu__popup--md`, `ow-navigation-menu__popup--lg` | Popup, by `size` |
+| `ow-navigation-menu__viewport` | Viewport |
+| `ow-navigation-menu__content` | Content |
+| `ow-navigation-menu__link` | A Link in a content |
+| `ow-navigation-menu__arrow` | Arrow |
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| Tab | Through the triggers and links, then into an open panel's links |
+| Enter, Space | On a trigger: open its panel; on a link: follow it |
+| Arrow Down | On an open trigger: into its panel |
+| Arrow Right, Arrow Left | Between the triggers (Down and Up for `orientation="vertical"`) |
+| Escape | Shut the panel; focus goes back to its trigger |
+
+- The Root is a `nav`: give it an `aria-label` that says what it navigates. Each trigger announces
+  that it expands, and whether it is open; a link for the current page has `aria-current="page"`.
+- Hover opens a panel after 50 ms, and a click opens it at once; a touch screen taps. A panel that only
+  hover could open would be out of reach, and this one is not. A click on an open trigger shuts its
+  panel, except in the first 500 ms after hover opened it, so a hover then a click leaves it open.
+- A disabled trigger is dimmed to 45% and skipped.
+- The open trigger keeps its tint, so which panel is open is not told by motion alone.
+- The chevron and the Glide highlight are decorative and hidden from assistive technology.
+- With `prefers-contrast: more`, the panel gains a 1px ring in `--ow-edge`. In forced colors the panel
+  keeps a 1px edge in the system color, and the focus ring, the open trigger, and the current link are
+  outlined in `Highlight`.
+
+## Theming [#theming]
+
+Navigation Menu reads these theme tokens. Set them on the Root with a class for the triggers, or on the
+Popup for the panel, which renders in a portal outside the Root's subtree; or set them for every menu
+on `:root`.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-raised-bg` | The panel's surface, the arrow's too |
+| `--ow-popup-shadow` | The panel's shadow, the arrow's too |
+| `--ow-edge` | The ring under `prefers-contrast: more` |
+| `--ow-fg` | Text |
+| `--ow-muted` | The lines of text under a link's title |
+| `--ow-hover` | A trigger under the pointer, and Glide's highlight |
+| `--ow-pressed-bg` | The open trigger, and the current page |
+| `--ow-radius` | Corners; links and Glide take it less the panel's 8px padding |
+| `--ow-focus` | Focus ring |
+| `--ow-ease-out` | Every move |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each part, so set yours on the Root and the Popup with a class.
+
+</ForMode>
+
+## Motion [#motion]
+
+The panel grows out of the open trigger in 180 ms, from 0.96 and transparent, and leaves in 120 ms.
+Moving to another trigger takes 320 ms: the Positioner slides to the new trigger, the panel resizes to
+the new content (Base UI measures it; this is the one part that animates size, because the box has to
+follow its content), and the old content slides out toward the side it came from while the new one slides
+in, on transform and opacity only. Opened from the keyboard, or shut with Escape, the panel skips the
+animation. The chevron turns over in 200 ms. With `prefers-reduced-motion`, the panel and the contents
+fade without growing or sliding, the panel takes a new trigger's place and size at once, and the
+chevron turns at once.

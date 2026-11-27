@@ -1,0 +1,470 @@
+@layer owsem.tokens, owsem.components;
+
+/*
+ * Site navigation: a row of triggers and links, and one panel that holds the open item's content.
+ * The triggers are ghost buttons on Button's geometry (32, 40, or 48px); the panel is the raised
+ * fill with the popup shadow. The panel is shared: it moves to the next trigger and resizes to
+ * the next content (Base UI sets the size and the position; this animates them), and each content
+ * slides in from the side the pointer came from. Links in a content take Glide's highlight.
+ */
+@layer owsem.components {
+  .ow-navigation-menu {
+    display: block;
+    min-inline-size: 0;
+    max-inline-size: 100%;
+    color: var(--ow-fg);
+    font-size: 0.875rem;
+    line-height: 1.25;
+  }
+
+  .ow-navigation-menu--sm {
+    font-size: 0.8125rem;
+  }
+
+  .ow-navigation-menu--lg {
+    font-size: 1rem;
+  }
+
+  /* It wraps on a narrow screen, so every trigger stays reachable without a side scroll. */
+  .ow-navigation-menu__list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ow-navigation-menu__list[data-orientation="vertical"] {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* Triggers, and links in the list: Button's geometry, --py the only input. */
+  .ow-navigation-menu__trigger {
+    --py: 0.8036em;
+    --_py: max(var(--py), (24px - 1lh) / 2);
+    --px: calc(var(--_py) + (1lh - 1cap) / 2);
+    --_hover: var(--ow-hover);
+    --_open: var(--ow-pressed-bg);
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25em;
+    box-sizing: border-box;
+    margin: 0;
+    padding: var(--_py) var(--px);
+    border: 0;
+    border-radius: var(--ow-radius);
+    /* Invisible until forced colors draw it as the edge (DP-8). */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: transparent;
+    color: var(--ow-fg);
+    font: inherit;
+    font-weight: 500;
+    line-height: 1.25;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .ow-navigation-menu__trigger--sm {
+    --py: 0.6058em;
+  }
+
+  .ow-navigation-menu__trigger--lg {
+    --py: 0.875em;
+  }
+
+  @media (hover: hover) {
+    .ow-navigation-menu__trigger:hover:not([data-disabled]) {
+      background-color: var(--_hover);
+    }
+  }
+
+  /* The open item's trigger, and the page the link is for, stay tinted. */
+  .ow-navigation-menu__trigger:is([data-popup-open], [data-pressed], [data-active]):not(
+    [data-disabled]
+  ) {
+    background-color: var(--_open);
+  }
+
+  .ow-navigation-menu__trigger:focus-visible {
+    outline: 2px solid var(--ow-focus);
+    outline-offset: 2px;
+  }
+
+  .ow-navigation-menu__trigger[data-disabled] {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
+  /* The chevron: the font size plus 2px, turned over while its panel is open. */
+  .ow-navigation-menu__icon {
+    display: inline-flex;
+    flex: none;
+    inline-size: calc(1em + 2px);
+    block-size: calc(1em + 2px);
+    transition: transform 200ms var(--ow-ease-out);
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: transform;
+  }
+
+  .ow-navigation-menu__icon > svg {
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  .ow-navigation-menu__icon[data-popup-open] {
+    transform: rotate(180deg);
+  }
+
+  /* An optional backdrop under the panel: clear, it only takes presses. */
+  .ow-navigation-menu__backdrop {
+    position: fixed;
+    inset: 0;
+  }
+
+  /*
+   * Base UI sizes the positioner and the popup to the open content and moves the positioner to
+   * the open trigger; these transitions let that glide. The pseudo element bridges the gap to the
+   * trigger, so the pointer can travel into the panel.
+   */
+  .ow-navigation-menu__positioner {
+    inline-size: var(--positioner-width);
+    block-size: var(--positioner-height);
+    max-inline-size: var(--available-width);
+    /* biome-ignore-start lint/nursery/useLogicalProperties: Base UI's physical sides */
+    transition-duration: 320ms;
+    transition-property: top, left, right, bottom;
+    transition-timing-function: var(--ow-ease-out);
+    /* biome-ignore-end lint/nursery/useLogicalProperties: Base UI's physical sides */
+  }
+
+  .ow-navigation-menu__positioner::before {
+    content: "";
+    position: absolute;
+    /* biome-ignore-start lint/nursery/useLogicalProperties: Base UI's physical sides */
+    right: 0;
+    left: 0;
+    block-size: 12px;
+  }
+
+  .ow-navigation-menu__positioner[data-side="bottom"]::before {
+    top: -12px;
+  }
+
+  .ow-navigation-menu__positioner[data-side="top"]::before {
+    bottom: -12px;
+  }
+  /* biome-ignore-end lint/nursery/useLogicalProperties: Base UI's physical sides */
+
+  .ow-navigation-menu__positioner[data-instant] {
+    transition: none;
+  }
+
+  .ow-navigation-menu__popup {
+    --_bg: var(--ow-raised-bg);
+    --_shadow: var(--ow-popup-shadow);
+    --_fg: var(--ow-fg);
+    --_muted: var(--ow-muted);
+    --_pad: 8px;
+    /* One radius outside (TK-8); the links inside follow its curve, less the padding. */
+    --_inner: max(0px, var(--ow-radius) - var(--_pad));
+    position: relative;
+    box-sizing: border-box;
+    inline-size: var(--popup-width);
+    block-size: var(--popup-height);
+    max-block-size: var(--available-height);
+    border-radius: var(--ow-radius);
+    /* Invisible until forced colors draw it as the edge (DP-8). */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--_bg);
+    box-shadow: var(--_shadow);
+    color: var(--_fg);
+    font-size: 0.875rem;
+    line-height: 1.25;
+    transform-origin: var(--transform-origin);
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: transform;
+    /* The size is Base UI's own to animate; the rest is transform and opacity. */
+    transition:
+      opacity 180ms var(--ow-ease-out),
+      transform 180ms var(--ow-ease-out),
+      inline-size 320ms var(--ow-ease-out),
+      block-size 320ms var(--ow-ease-out);
+  }
+
+  .ow-navigation-menu__popup--sm {
+    font-size: 0.8125rem;
+  }
+
+  .ow-navigation-menu__popup--lg {
+    font-size: 1rem;
+  }
+
+  .ow-navigation-menu__popup:is([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  /* Leaving is quicker than arriving. */
+  .ow-navigation-menu__popup[data-ending-style] {
+    transition-duration: 120ms;
+  }
+
+  /* Opened from the keyboard, or shut with Escape: no animation. */
+  .ow-navigation-menu__popup[data-instant] {
+    transition: none;
+  }
+
+  /* The shared viewport clips the contents as they slide. */
+  .ow-navigation-menu__viewport {
+    position: relative;
+    inline-size: 100%;
+    block-size: 100%;
+    overflow: hidden;
+    border-radius: inherit;
+  }
+
+  /*
+   * A content takes the size of what it holds, up to the window's width. It slides in from the side
+   * of the trigger it came from and out toward the other, on transform and opacity; the one that
+   * leaves is the one that was open. Where it is too tall for the window, it scrolls.
+   */
+  .ow-navigation-menu__content {
+    box-sizing: border-box;
+    inline-size: max-content;
+    max-inline-size: var(--available-width);
+    max-block-size: var(--available-height);
+    padding: var(--_pad);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    transition:
+      opacity 240ms var(--ow-ease-out),
+      translate 320ms var(--ow-ease-out);
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: translate;
+  }
+
+  .ow-navigation-menu__content:is([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+  }
+
+  .ow-navigation-menu__content[data-starting-style][data-activation-direction="left"],
+  .ow-navigation-menu__content[data-ending-style][data-activation-direction="right"] {
+    translate: -50% 0;
+  }
+
+  .ow-navigation-menu__content[data-starting-style][data-activation-direction="right"],
+  .ow-navigation-menu__content[data-ending-style][data-activation-direction="left"] {
+    translate: 50% 0;
+  }
+
+  .ow-navigation-menu__content[data-starting-style][data-activation-direction="up"],
+  .ow-navigation-menu__content[data-ending-style][data-activation-direction="down"] {
+    translate: 0 -50%;
+  }
+
+  .ow-navigation-menu__content[data-starting-style][data-activation-direction="down"],
+  .ow-navigation-menu__content[data-ending-style][data-activation-direction="up"] {
+    translate: 0 50%;
+  }
+
+  /* Glide's highlight takes the links' corners. */
+  .ow-navigation-menu__content > .ow-glide {
+    --_radius: var(--_inner);
+  }
+
+  /* A link in a content: a title, then lines of text, flat; Glide lights the one under the pointer. */
+  .ow-navigation-menu__link {
+    display: grid;
+    gap: 2px;
+    box-sizing: border-box;
+    padding: 0.625em 0.75em;
+    border-radius: var(--_inner);
+    outline: 0;
+    color: var(--_fg);
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .ow-navigation-menu__link > :first-child {
+    font-weight: 500;
+  }
+
+  .ow-navigation-menu__link > :not(:first-child) {
+    color: var(--_muted);
+    font-size: 0.9286em;
+  }
+
+  .ow-navigation-menu__link[data-active] {
+    background-color: var(--ow-pressed-bg);
+  }
+
+  /* A 2px ring, inside the link so the panel does not clip it. */
+  .ow-navigation-menu__link:focus-visible {
+    outline: 2px solid var(--ow-focus);
+    outline-offset: -2px;
+  }
+
+  /*
+   * A 14px box centered on the popup's edge; its outer half shows a square turned 45 degrees with
+   * the popup's surface and shadow, so its edges are the panel's (in dark, a light line). The visible half reaches 1px into the popup at the middle, over the panel's inner
+   * line, so the arrow opens into the panel. Base UI centers it on the trigger with top or left.
+   */
+  .ow-navigation-menu__arrow {
+    /* The half that shows when the arrow points right or left. */
+    --_right-half: polygon(
+      50% 0,
+      100% 0,
+      100% 100%,
+      50% 100%,
+      50% 11px,
+      calc(50% - 1px) 11px,
+      calc(50% - 1px) 3px,
+      50% 3px
+    );
+    --_left-half: polygon(
+      0 0,
+      50% 0,
+      50% 3px,
+      calc(50% + 1px) 3px,
+      calc(50% + 1px) 11px,
+      50% 11px,
+      50% 100%,
+      0 100%
+    );
+    inline-size: 14px;
+    block-size: 14px;
+  }
+
+  /* With the 1px ring outside it, the square's diagonal is the box: (7.9 + 2) × √2 = 14. */
+  .ow-navigation-menu__arrow::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    inline-size: 7.9px;
+    block-size: 7.9px;
+    margin: auto;
+    /* Invisible until forced colors draw it as the edge (DP-8). */
+    outline: 1px solid transparent;
+    background-color: var(--_bg);
+    box-shadow: var(--_shadow);
+    transform: rotate(45deg);
+  }
+
+  /* biome-ignore-start lint/nursery/useLogicalProperties: Base UI's physical sides */
+  .ow-navigation-menu__arrow[data-side="top"] {
+    top: calc(100% - 7px);
+    clip-path: polygon(
+      0 50%,
+      3px 50%,
+      3px calc(50% - 1px),
+      11px calc(50% - 1px),
+      11px 50%,
+      100% 50%,
+      100% 100%,
+      0 100%
+    );
+  }
+
+  .ow-navigation-menu__arrow[data-side="bottom"] {
+    bottom: calc(100% - 7px);
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% 50%,
+      11px 50%,
+      11px calc(50% + 1px),
+      3px calc(50% + 1px),
+      3px 50%,
+      0 50%
+    );
+  }
+
+  .ow-navigation-menu__arrow[data-side="left"] {
+    left: calc(100% - 7px);
+    clip-path: var(--_right-half);
+  }
+
+  .ow-navigation-menu__arrow[data-side="right"] {
+    right: calc(100% - 7px);
+    clip-path: var(--_left-half);
+  }
+  /* biome-ignore-end lint/nursery/useLogicalProperties: Base UI's physical sides */
+
+  /* Logical sides: mirrored right to left. */
+  .ow-navigation-menu__arrow[data-side="inline-start"] {
+    inset-inline-start: calc(100% - 7px);
+    clip-path: var(--_right-half);
+  }
+
+  .ow-navigation-menu__arrow[data-side="inline-end"] {
+    inset-inline-end: calc(100% - 7px);
+    clip-path: var(--_left-half);
+  }
+
+  .ow-navigation-menu__positioner[dir="rtl"]
+    .ow-navigation-menu__arrow:is([data-side="inline-start"], [data-side="inline-end"]) {
+    transform: scaleX(-1);
+  }
+
+  /* More contrast asked for: a ring around the panel and its arrow. */
+  @media (prefers-contrast: more) {
+    .ow-navigation-menu__popup {
+      --_shadow: var(--ow-popup-shadow), 0 0 0 1px var(--ow-edge);
+    }
+  }
+
+  /*
+   * FR-20: the panel fades without growing, and the contents without sliding. Moving to another
+   * trigger, the panel takes its new place and size at once.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-navigation-menu__positioner {
+      transition: none;
+    }
+
+    .ow-navigation-menu__popup {
+      transition: opacity 180ms var(--ow-ease-out);
+    }
+
+    .ow-navigation-menu__popup:is([data-starting-style], [data-ending-style]) {
+      transform: none;
+    }
+
+    .ow-navigation-menu__content:is(
+        [data-starting-style],
+        [data-ending-style]
+      )[data-activation-direction] {
+      translate: none;
+    }
+
+    .ow-navigation-menu__icon {
+      transition: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .ow-navigation-menu__trigger:focus-visible,
+    .ow-navigation-menu__trigger:is([data-popup-open], [data-pressed], [data-active]) {
+      outline-color: Highlight;
+    }
+
+    .ow-navigation-menu__link:focus-visible,
+    .ow-navigation-menu__link[data-active] {
+      outline-color: Highlight;
+    }
+
+    .ow-navigation-menu__trigger[data-disabled] {
+      color: GrayText;
+      opacity: 1;
+    }
+  }
+}

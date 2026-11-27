@@ -1,0 +1,156 @@
+---
+title: Context Menu
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. In the registry it is the `context-menu` item; it uses the `menu` item's
+popup and items, so that comes with it.
+
+## Usage [#usage]
+
+```tsx
+import { ContextMenu } from "owsem-ui/base";
+
+export function Canvas() {
+  return (
+    <ContextMenu.Root>
+      <ContextMenu.Trigger className="canvas">Right click here</ContextMenu.Trigger>
+      <ContextMenu.Portal>
+        <ContextMenu.Positioner>
+          <ContextMenu.Popup>
+            <ContextMenu.Item onClick={cut}>Cut</ContextMenu.Item>
+            <ContextMenu.Item onClick={copy}>Copy</ContextMenu.Item>
+          </ContextMenu.Popup>
+        </ContextMenu.Positioner>
+      </ContextMenu.Portal>
+    </ContextMenu.Root>
+  );
+}
+```
+
+Context Menu is Menu opened by a right click or a long press on an area, at the pointer. The popup, the
+items, the Glide highlight, the checks and choices, the submenus, the group labels, the separators, and
+the shortcuts are Menu's: the classes are the same, and a theme token set for Menu reaches both. The
+area is yours: a card, a canvas, a row. The library gives it no look, only what a long press needs on
+iOS: the system's callout does not appear over the menu.
+
+A context menu should supplement a visible way to do the same thing, not replace it: a touch screen and
+assistive technology may never find it. The last example pairs it with a Menu button.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Base UI renders the parts, the pointer and long-press handling, and the keyboard. OwsemUI gives each
+part the Menu look and its own `data-slot` (`context-menu-item`, and so on), and carries the text
+direction into the portal. Root, Group, and RadioGroup add no look of their own. Root renders no
+element, so in Inspect it is the box that holds the area and its menu. Base UI's Backdrop and Arrow are
+not parts of this component: the menu is always modal and Base UI draws the layer that takes a press
+outside, and a menu at the pointer has nothing to point at.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | none | State only: `open` and `onOpenChange` |
+| <Part name="Trigger" /> | `div.ow-context-menu__trigger` | The area; `data-popup-open` while the menu is open |
+| Positioner | `div.ow-menu__positioner` | At the pointer; a submenu beside its item, first rows in line |
+| <Part name="Popup" /> | `div.ow-menu__popup` | `role="menu"`, `data-size`, `data-instant` when it skips the animation |
+| <Part name="Item" /> | `div.ow-menu__item` | `role="menuitem"` and `data-disabled`; an `svg` first is sized as its icon |
+| <Part name="GroupLabel" /> | `div.ow-menu__group-label` | Names its `ContextMenu.Group` or `ContextMenu.RadioGroup` |
+| <Part name="CheckboxItem" /> | `div.ow-menu__item` | `role="menuitemcheckbox"`, `aria-checked` |
+| <Part name="Separator" /> | `div.ow-menu__separator` | `role="separator"`, a hairline |
+| <Part name="SubmenuTrigger" /> | `div.ow-menu__item` | `aria-haspopup`, `data-popup-open`, and a chevron |
+
+`ContextMenu.LinkItem` is an item that is a link; `RadioItem` and the indicators are Menu's.
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### ContextMenu.Positioner
+
+The Positioner keeps Base UI's pointer anchor and its offsets. Inside a `ContextMenu.SubmenuRoot` it
+places the submenu as Menu's Positioner does: 6px beside its item, first rows in line. The same
+`size` prop as Menu's sets the type scale on the Popup.
+
+### ContextMenu.Popup
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | The items' type scale, as Menu's |
+
+A context menu is always modal, as in Base UI: Base UI's own layer takes a press outside, so that press
+only shuts the menu, and the page holds its scroll.
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-context-menu__trigger` | Trigger |
+| `ow-menu__*` | Every other part: see Menu's classes |
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| Right click, long press | On the area: open the menu at the pointer |
+| Arrow Down, Arrow Up | The next or previous item, wrapping around |
+| Home, End | The first or last item |
+| Enter, Space | Pick the item |
+| Arrow Right, Arrow Left | Open a submenu, or go back from one (mirrored right to left) |
+| Escape | Shut the menu; focus goes back to the area |
+| A letter | The next item that starts with it |
+
+- Keyboard users have no right click on most keyboards (the Menu key and Shift+F10 raise the system's
+  context menu event on many platforms, which opens this one). Never make this the only way to reach an
+  action: put the same actions behind a visible control.
+- Screen readers announce the menu, each item's role and state, and the groups by their labels.
+- The area keeps whatever role and name you give it; the menu does not add one.
+- A disabled item is dimmed to 45%; the keyboard still reaches it, and Glide passes it.
+- With `prefers-contrast: more`, the popup gains a 1px ring in `--ow-edge`. In forced colors it keeps a
+  1px edge in the system color, the highlight is an outline in `Highlight`, and the checks follow the
+  text color.
+
+## Theming [#theming]
+
+Context Menu reads Menu's theme tokens. Set them on the Popup with a class, or for every menu on
+`:root`. A class around the area does not reach: the menu renders in a portal, outside the area's
+subtree.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-raised-bg` | Surface |
+| `--ow-popup-shadow` | Shadow |
+| `--ow-edge` | The ring under `prefers-contrast: more` |
+| `--ow-fg` | Item text |
+| `--ow-muted` | Group labels, shortcuts, and chevrons |
+| `--ow-hover` | The highlight (Glide) |
+| `--ow-line` | Separators |
+| `--ow-radius` | The popup's corners; items and Glide take it less the 4px padding |
+| `--ow-focus` | Focus ring |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each Popup, so set yours on the Popup with a class.
+
+</ForMode>
+
+## Motion [#motion]
+
+The menu grows out of the pointer in 180 ms, from 0.96 and transparent, and leaves in 120 ms; opened
+from the keyboard, it appears at once. Glide slides one highlight between items. With
+`prefers-reduced-motion`, the menu fades without growing, and Glide fades instead of sliding. The area
+has no motion of its own.

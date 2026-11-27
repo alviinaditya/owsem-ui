@@ -1,0 +1,161 @@
+---
+title: Menubar
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Di registry, itemnya `menubar`; menu di dalamnya milik item `menu`, jadi itu
+ikut terpasang.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Menu, Menubar } from "owsem-ui/base";
+
+export function AppMenubar() {
+  return (
+    <Menubar.Root aria-label="Aplikasi">
+      <Menu.Root>
+        <Menubar.Trigger>Berkas</Menubar.Trigger>
+        <Menu.Portal>
+          <Menu.Positioner align="start">
+            <Menu.Popup>
+              <Menu.Item onClick={newFile}>Baru</Menu.Item>
+              <Menu.Item onClick={save}>Simpan</Menu.Item>
+            </Menu.Popup>
+          </Menu.Positioner>
+        </Menu.Portal>
+      </Menu.Root>
+      <Menu.Root>
+        <Menubar.Trigger>Edit</Menubar.Trigger>
+        {/* Portal, Positioner, dan Popup seperti di atas */}
+      </Menu.Root>
+    </Menubar.Root>
+  );
+}
+```
+
+Menubar adalah deretan menu seperti di aplikasi desktop: Berkas, Edit, Tampilan. Bar-nya panel tenang
+seperti milik Toolbar, dan pemicunya tombol ghost yang tetap diberi tint selama menunya terbuka. Satu
+perhentian Tab masuk ke bar; tombol panah berpindah antar menu, dan setelah satu terbuka, hover juga
+memindahkannya. Setiap menu adalah Menu: satu `Menu.Root` per menu, dengan `Menubar.Trigger` dan Portal,
+Positioner, serta Popup biasa, sehingga item, highlight Glide, centang, submenu, dan shortcut-nya sama
+dengan milik Menu.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Base UI merender bar, rolenya, serta keyboard dan hover antar menu. OwsemUI menata bar dan pemicu serta
+mengatur ukurannya; menu di dalamnya membawa bagian dan kelas Menu. Menu.Root tahu bahwa ia ada di
+dalam bar dan menyerahkan `modal` dan backdrop ke Base UI, yang melubangi backdrop di bagian bar
+sehingga pemicu lain tetap terjangkau.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-menubar` | `role="menubar"`, `data-orientation`, `data-modal`, `data-has-submenu-open`, dan `data-size` |
+| <Part name="Trigger" /> | `button.ow-menubar__trigger` | `aria-haspopup="menu"`; `data-popup-open` selama menunya terbuka; `data-size` |
+| Bagian Menu | Milik Menu | `Menu.Root`, `Portal`, `Positioner`, `Popup`, `Item`, dan lainnya: lihat Menu |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+Menubar punya satu bagian Base UI, Root; pemicu dan menunya milik Menu, jadi dokumentasi Menubar Base UI
+menulis `Menu.Trigger` di tempat komponen ini memakai `Menubar.Trigger`.
+
+### Menubar.Root
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Tinggi bar dan skala tipe pemicu |
+
+| Ukuran | Bar | Pemicu | Font |
+| --- | --- | --- | --- |
+| `sm` | 32px | 24px | 13px |
+| `md` | 40px | 32px | 14px |
+| `lg` | 48px | 40px | 16px |
+
+Pemicu mengikuti aturan `--py` milik Button di dalam padding 4px bar, sehingga sudutnya konsentris dengan
+sudut bar. `size` pada Popup sebuah Menu terpisah: atur juga bila menu harus serasi.
+
+### Menubar.Trigger
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | Ukuran bar | Menimpa ukuran bar untuk satu pemicu |
+
+### Kelas CSS
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-menubar` | Root |
+| `ow-menubar--sm`, `ow-menubar--md`, `ow-menubar--lg` | Root, menurut `size` |
+| `ow-menubar__trigger` | Trigger |
+| `ow-menubar__trigger--sm`, `ow-menubar__trigger--md`, `ow-menubar__trigger--lg` | Trigger, menurut `size` |
+
+Kelas menu di dalamnya milik Menu (`ow-menu__*`).
+
+## Aksesibilitas [#accessibility]
+
+| Tombol | Aksi |
+| --- | --- |
+| Tab | Masuk ke bar, pada satu pemicu, dan keluar darinya |
+| Panah Kanan, Panah Kiri | Pada pemicu: pemicu berikut atau sebelumnya (Panah Bawah dan Atas untuk `orientation="vertical"`); di dalam menu terbuka, menu berikut atau sebelumnya |
+| Home, End | Pemicu pertama atau terakhir |
+| Enter, Spasi, Panah Bawah | Membuka menu di item pertamanya |
+| Escape | Menutup menu; fokus kembali ke pemicunya |
+
+- Bar berperan `role="menubar"` dan tiap pemicu mengumumkan bahwa ia membuka menu dan apakah terbuka;
+  beri bar sebuah `aria-label`.
+- `modal` (true secara default) milik bar, seperti di Base UI: selama menu terbuka halaman tak
+  terjangkau dan tidak menggulir, kecuali bar itu sendiri. Setel `modal={false}` untuk bar yang
+  membiarkan halaman.
+- Pemicu nonaktif diredupkan 45% dan dilewati tombol panah; `disabled` pada Root menonaktifkan seluruh bar.
+- Pemicu setinggi 24px atau lebih; yang terbuka tetap bertint, sehingga menu yang terbuka tidak hanya
+  diberitahukan lewat gerak atau warna: `aria-expanded` juga mengatakannya.
+- Dengan `prefers-contrast: more`, menu mendapat cincin 1px. Pada forced colors cincin fokus dan outline
+  pemicu yang terbuka berupa `Highlight`, dan pemicu nonaktif `GrayText`.
+
+## Tema [#theming]
+
+Menubar membaca token tema ini. Setel pada bar dengan sebuah kelas, atau pada `:root` untuk semua bar.
+Menunya dirender di portal dan membaca token Menu: setel itu pada Popup-nya.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-panel` | Permukaan bar |
+| `--ow-surface-shadow` | Bayangan bar |
+| `--ow-fg` | Teks pemicu |
+| `--ow-hover` | Pemicu di bawah pointer |
+| `--ow-pressed-bg` | Pemicu yang menunya terbuka |
+| `--ow-radius` | Sudut bar; pemicu memakainya dikurangi padding 4px |
+| `--ow-focus` | Cincin fokus |
+
+<ForMode mode="isolated">
+
+Pada mode terisolasi nilainya ada di bar dan tiap pemicu, jadi atur nilai Anda di sana lewat kelas.
+
+</ForMode>
+
+## Gerak [#motion]
+
+Bar tidak punya gerak sendiri: pemicu hanya berganti tint di bawah pointer dan selama menunya terbuka,
+tanpa perpindahan. Tiap menu tumbuh dari pemicunya dalam 180 ms dan menutup dalam 120 ms, seperti
+Menu, dan dengan `prefers-reduced-motion` ia memudar tanpa tumbuh. Berpindah dari satu menu terbuka ke
+menu berikutnya menukar keduanya tanpa animasi.

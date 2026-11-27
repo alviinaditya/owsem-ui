@@ -54,6 +54,9 @@ export const components: string[] = [
   "preview-card",
   "drawer",
   "toast",
+  "context-menu",
+  "menubar",
+  "navigation-menu",
 ];
 
 const HEADER = "// Generated from";

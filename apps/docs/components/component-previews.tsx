@@ -16,6 +16,7 @@ import {
   Kbd,
   Menu,
   Meter,
+  NavigationMenu,
   NumberField,
   OTPField,
   Popover,
@@ -78,6 +79,13 @@ const TEXT = {
     cut: "Potong",
     copy: "Salin",
     paste: "Tempel",
+    file: "Berkas",
+    view: "Tampilan",
+    rightClick: "Klik kanan",
+    products: "Produk",
+    pricing: "Harga",
+    tokens: "Token",
+    glide: "Glide",
     guides: "Panduan",
     start: "Mulai",
     theming: "Tema",
@@ -143,6 +151,13 @@ const TEXT = {
     cut: "Cut",
     copy: "Copy",
     paste: "Paste",
+    file: "File",
+    view: "View",
+    rightClick: "Right click",
+    products: "Products",
+    pricing: "Pricing",
+    tokens: "Tokens",
+    glide: "Glide",
     guides: "Guides",
     start: "Getting started",
     theming: "Theming",
@@ -398,6 +413,117 @@ function MenuPreview({ t }: { t: Text }) {
           </Menu.Positioner>
         </Menu.Portal>
       </Menu.Root>
+      {portal.box}
+    </>
+  );
+}
+
+/**
+ * Context Menu's popup is Menu's, so a pinned Menu draws it beside an area: a context menu itself
+ * opens at the pointer, which a preview has none of.
+ */
+function ContextMenuPreview({ t }: { t: Text }) {
+  const portal = usePortal();
+  return (
+    <>
+      <Menu.Root {...pinned}>
+        <Menu.Trigger nativeButton={false} render={<div className="component-preview-area" />}>
+          {t.rightClick}
+        </Menu.Trigger>
+        <Menu.Portal container={portal.container}>
+          <Menu.Positioner side="inline-end" align="start" alignOffset={0}>
+            <Menu.Popup size="sm" {...keepFocus}>
+              <Menu.Item>
+                <Icon name="copy" />
+                {t.copy}
+                <kbd>⌘C</kbd>
+              </Menu.Item>
+              <Menu.Item>
+                <Icon name="clipboard" />
+                {t.paste}
+                <kbd>⌘V</kbd>
+              </Menu.Item>
+              <Menu.Separator />
+              <Menu.Item>{t.edit}</Menu.Item>
+            </Menu.Popup>
+          </Menu.Positioner>
+        </Menu.Portal>
+      </Menu.Root>
+      {portal.box}
+    </>
+  );
+}
+
+function MenubarPreview({ t }: { t: Text }) {
+  const portal = usePortal();
+  // Held open inside a Menubar, Base UI shuts a menu when nothing in the bar has focus: this is the
+  // bar's look made of its classes, with a plain Menu open under one trigger.
+  return (
+    <>
+      <div className="ow-menubar ow-menubar--sm">
+        <span className="ow-menubar__trigger ow-menubar__trigger--sm">{t.file}</span>
+        <Menu.Root {...pinned}>
+          <Menu.Trigger
+            nativeButton={false}
+            render={<span />}
+            className="ow-menubar__trigger ow-menubar__trigger--sm"
+          >
+            {t.edit}
+          </Menu.Trigger>
+          <Menu.Portal container={portal.container}>
+            <Menu.Positioner align="start" positionMethod="absolute">
+              <Menu.Popup size="sm" {...keepFocus}>
+                <Menu.Item>
+                  <Icon name="scissors" />
+                  {t.cut}
+                  <kbd>⌘X</kbd>
+                </Menu.Item>
+                <Menu.Item>
+                  <Icon name="copy" />
+                  {t.copy}
+                  <kbd>⌘C</kbd>
+                </Menu.Item>
+              </Menu.Popup>
+            </Menu.Positioner>
+          </Menu.Portal>
+        </Menu.Root>
+        <span className="ow-menubar__trigger ow-menubar__trigger--sm">{t.view}</span>
+      </div>
+      {portal.box}
+    </>
+  );
+}
+
+function NavigationMenuPreview({ t }: { t: Text }) {
+  const portal = usePortal();
+  return (
+    <>
+      {/* Small, with title-only links, so the open panel fits the card. */}
+      <NavigationMenu.Root value="products" aria-label={t.products} size="sm">
+        <NavigationMenu.List>
+          <NavigationMenu.Item value="products">
+            <NavigationMenu.Trigger>{t.products}</NavigationMenu.Trigger>
+            <NavigationMenu.Content>
+              <NavigationMenu.Link href="#" tabIndex={-1}>
+                <strong>{t.tokens}</strong>
+              </NavigationMenu.Link>
+              <NavigationMenu.Link href="#" tabIndex={-1}>
+                <strong>{t.glide}</strong>
+              </NavigationMenu.Link>
+            </NavigationMenu.Content>
+          </NavigationMenu.Item>
+          <NavigationMenu.Item>
+            <NavigationMenu.Link href="#" tabIndex={-1}>
+              {t.pricing}
+            </NavigationMenu.Link>
+          </NavigationMenu.Item>
+        </NavigationMenu.List>
+        <NavigationMenu.Portal container={portal.container}>
+          <NavigationMenu.Positioner positionMethod="absolute">
+            <NavigationMenu.Popup inert />
+          </NavigationMenu.Positioner>
+        </NavigationMenu.Portal>
+      </NavigationMenu.Root>
       {portal.box}
     </>
   );
@@ -758,6 +884,9 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
     </ScrollArea.Root>
   ),
   tooltip: (t) => <TooltipPreview t={t} />,
+  "context-menu": (t) => <ContextMenuPreview t={t} />,
+  menubar: (t) => <MenubarPreview t={t} />,
+  "navigation-menu": (t) => <NavigationMenuPreview t={t} />,
   menu: (t) => <MenuPreview t={t} />,
   select: (t) => <SelectPreview t={t} />,
   "tree-rail-nav": (t) => (
@@ -873,42 +1002,6 @@ const SKETCHES: Partial<Record<ComponentName, ReactNode>> = {
       <rect x={34} y={44} width={92} height={12} rx={4} fill="currentColor" opacity={0.18} />
       {F(40, 47, 50)}
       {F(40, 62, 38, 5, 0.35)}
-    </>
-  ),
-  "context-menu": (
-    <>
-      <path d="M44 16v18l5-5 4 8 3-1.5-4-8h7z" fill="currentColor" opacity={0.6} />
-      {B(56, 32, 70, 54, 6)}
-      <rect x={60} y={36} width={62} height={13} rx={4} fill="currentColor" opacity={0.18} />
-      {F(66, 40, 36)}
-      {F(66, 55, 44, 5, 0.35)}
-      {F(66, 70, 30, 5, 0.35)}
-    </>
-  ),
-  menubar: (
-    <>
-      {B(20, 12, 120, 20, 5)}
-      <rect x={24} y={15} width={28} height={14} rx={4} fill="currentColor" opacity={0.18} />
-      {F(29, 20, 18)}
-      {F(60, 20, 20, 5, 0.35)}
-      {F(88, 20, 22, 5, 0.35)}
-      {B(24, 36, 64, 48, 6)}
-      {F(32, 46, 40, 5, 0.35)}
-      {F(32, 58, 30, 5, 0.35)}
-      {F(32, 70, 44, 5, 0.35)}
-    </>
-  ),
-  "navigation-menu": (
-    <>
-      {F(30, 14, 26)}
-      {F(66, 14, 26, 5, 0.35)}
-      {F(102, 14, 26, 5, 0.35)}
-      {B(24, 28, 112, 56, 7)}
-      {B(32, 36, 44, 40, 5)}
-      {F(86, 40, 40, 5, 0.6)}
-      {F(86, 51, 32, 4, 0.35)}
-      {F(86, 62, 40, 5, 0.6)}
-      {F(86, 73, 28, 4, 0.35)}
     </>
   ),
   "lumen-rail-nav": (

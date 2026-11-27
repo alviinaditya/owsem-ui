@@ -1,0 +1,160 @@
+---
+title: Menubar
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. In the registry it is the `menubar` item; the menus inside it are the
+`menu` item's, so that comes with it.
+
+## Usage [#usage]
+
+```tsx
+import { Menu, Menubar } from "owsem-ui/base";
+
+export function AppMenubar() {
+  return (
+    <Menubar.Root aria-label="Application">
+      <Menu.Root>
+        <Menubar.Trigger>File</Menubar.Trigger>
+        <Menu.Portal>
+          <Menu.Positioner align="start">
+            <Menu.Popup>
+              <Menu.Item onClick={newFile}>New</Menu.Item>
+              <Menu.Item onClick={save}>Save</Menu.Item>
+            </Menu.Popup>
+          </Menu.Positioner>
+        </Menu.Portal>
+      </Menu.Root>
+      <Menu.Root>
+        <Menubar.Trigger>Edit</Menubar.Trigger>
+        {/* Portal, Positioner, and Popup as above */}
+      </Menu.Root>
+    </Menubar.Root>
+  );
+}
+```
+
+Menubar is a row of menus as in a desktop app: File, Edit, View. The bar is a quiet panel, as Toolbar's,
+and its triggers are ghost buttons that stay tinted while their menu is open. One Tab stop enters the
+bar; the arrow keys move between the menus, and once one is open, hover moves it too. Each menu is
+Menu: one `Menu.Root` per menu, with a `Menubar.Trigger` and the usual Portal, Positioner, and Popup,
+so the items, the Glide highlight, the checks, the submenus, and the shortcuts are the ones Menu has.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Base UI renders the bar, its roles, and the keyboard and hover handling between menus. OwsemUI styles
+the bar and the trigger and sets the sizes; the menus inside carry Menu's parts and classes. Menu.Root
+knows it sits in a bar and leaves `modal` and the backdrop to Base UI, which cuts the bar out of its
+backdrop so the other triggers stay reachable.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | `div.ow-menubar` | `role="menubar"`, `data-orientation`, `data-modal`, `data-has-submenu-open`, and `data-size` |
+| <Part name="Trigger" /> | `button.ow-menubar__trigger` | `aria-haspopup="menu"`; `data-popup-open` while its menu is open; `data-size` |
+| Menu parts | Menu's | `Menu.Root`, `Portal`, `Positioner`, `Popup`, `Item`, and the rest: see Menu |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+Menubar has one Base UI part, Root; the triggers and menus are Menu's, so Base UI's Menubar docs list
+`Menu.Trigger` where this one has `Menubar.Trigger`.
+
+### Menubar.Root
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | The bar's height and the triggers' type scale |
+
+| Size | Bar | Trigger | Font |
+| --- | --- | --- | --- |
+| `sm` | 32px | 24px | 13px |
+| `md` | 40px | 32px | 14px |
+| `lg` | 48px | 40px | 16px |
+
+The triggers follow Button's `--py` rule inside the bar's 4px padding, so their corners are concentric
+with the bar's. `size` on a Menu's Popup is separate: set it too when the menus should match.
+
+### Menubar.Trigger
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | The bar's size | Overrides the bar's size for one trigger |
+
+### CSS classes
+
+| CSS class | Part |
+| --- | --- |
+| `ow-menubar` | Root |
+| `ow-menubar--sm`, `ow-menubar--md`, `ow-menubar--lg` | Root, by `size` |
+| `ow-menubar__trigger` | Trigger |
+| `ow-menubar__trigger--sm`, `ow-menubar__trigger--md`, `ow-menubar__trigger--lg` | Trigger, by `size` |
+
+The menus' own classes are Menu's (`ow-menu__*`).
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| Tab | Into the bar, on one trigger, and out of it |
+| Arrow Right, Arrow Left | On a trigger: the next or previous trigger (Arrow Down and Up for `orientation="vertical"`); inside an open menu, the next or previous menu |
+| Home, End | The first or last trigger |
+| Enter, Space, Arrow Down | Open the menu at its first item |
+| Escape | Shut the menu; focus goes back to its trigger |
+
+- The bar is `role="menubar"` and each trigger announces that it opens a menu and whether it is open;
+  give the bar an `aria-label`.
+- `modal` (true by default) is the bar's, as in Base UI: while a menu is open the page is out of reach
+  and does not scroll, except the bar itself. Set `modal={false}` for a bar that leaves the page alone.
+- A disabled trigger is dimmed to 45% and skipped by the arrow keys; `disabled` on the Root disables the
+  whole bar.
+- Triggers are 24px or more tall; the open one keeps its tint, so which menu is open is not told by
+  motion or color alone: `aria-expanded` says it too.
+- With `prefers-contrast: more`, the menus gain their 1px ring. In forced colors the focus ring and the
+  open trigger's outline are `Highlight`, and a disabled trigger is `GrayText`.
+
+## Theming [#theming]
+
+Menubar reads these theme tokens. Set them on the bar with a class, or for every bar on `:root`. Its
+menus render in a portal and read Menu's tokens: set those on their Popup.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-panel` | The bar's surface |
+| `--ow-surface-shadow` | The bar's shadow |
+| `--ow-fg` | Trigger text |
+| `--ow-hover` | A trigger under the pointer |
+| `--ow-pressed-bg` | The trigger whose menu is open |
+| `--ow-radius` | The bar's corners; triggers take it less the 4px padding |
+| `--ow-focus` | Focus ring |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on the bar and each trigger, so set yours on them with a class.
+
+</ForMode>
+
+## Motion [#motion]
+
+The bar has none of its own: a trigger changes its tint under the pointer and while its menu is open,
+with no movement. Each menu grows out of its trigger in 180 ms and leaves in 120 ms, as Menu's does,
+and with `prefers-reduced-motion` it fades without growing. Moving from one open menu to the next
+swaps them with no animation.

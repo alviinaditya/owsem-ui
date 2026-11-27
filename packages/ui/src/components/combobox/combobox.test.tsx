@@ -18,8 +18,12 @@ const q = <T extends HTMLElement>(selector: string) => document.querySelector(se
 const all = (selector: string) => [...document.querySelectorAll<HTMLElement>(selector)];
 const options = () => all('[role="option"]').map((el) => el.textContent);
 
-/** Finishes every running transition, so a popup is at rest. */
-const land = () => {
+/**
+ * Finishes every running transition, so a popup is at rest. Base UI drops data-starting-style a
+ * frame after a part mounts, and its transition starts only then.
+ */
+const land = async () => {
+  await expect.poll(() => document.querySelector("[data-starting-style]")).toBeNull();
   for (const animation of document.getAnimations()) animation.finish();
 };
 
@@ -114,7 +118,7 @@ const popup = () => q('[data-slot="combobox-popup"]');
 async function open() {
   await userEvent.click(trigger());
   await expect.poll(() => popup()).not.toBeNull();
-  land();
+  await land();
 }
 
 describe("Combobox", () => {
@@ -157,7 +161,7 @@ describe("Combobox", () => {
     await userEvent.click(input());
     await userEvent.keyboard("{ArrowDown}");
     await expect.poll(popup).not.toBeNull();
-    land();
+    await land();
     const lit = () => q('[role="option"][data-highlighted]')?.textContent;
     // Opening with the arrow lights the first item.
     await expect.poll(lit).toBe("Apple");
@@ -189,7 +193,7 @@ describe("Combobox", () => {
     await userEvent.keyboard("{ArrowDown}{ArrowDown}");
     const item = q('[role="option"][data-highlighted]');
     await expect.poll(() => q(".ow-glide")?.hasAttribute("data-visible")).toBe(true);
-    land();
+    await land();
     const glide = q(".ow-glide").getBoundingClientRect();
     const lit = item.getBoundingClientRect();
     expect(glide.top).toBeCloseTo(lit.top, 0);
@@ -290,7 +294,7 @@ describe("Combobox", () => {
     await userEvent.click(input());
     await userEvent.keyboard("{ArrowDown}");
     await expect.poll(popup).not.toBeNull();
-    land();
+    await land();
     await userEvent.click(all('[role="option"]')[2] as HTMLElement);
     await expect
       .poll(() => all('[data-slot="combobox-chip"]').map((el) => el.textContent))
@@ -372,7 +376,7 @@ describe("Combobox", () => {
     expect(read?.value).toBe("Banana");
     await userEvent.click(all('[data-slot="combobox-trigger"]')[1] as HTMLElement);
     await expect.poll(popup).not.toBeNull();
-    land();
+    await land();
     await userEvent.click(all('[role="option"]')[0] as HTMLElement);
     expect(read?.value).toBe("Banana");
   });
@@ -728,7 +732,7 @@ describe("Combobox, around it", () => {
     }
     await userEvent.click(trigger());
     await expect.poll(popup).not.toBeNull();
-    land();
+    await land();
     // Open, Base UI hides the page behind the popup from assistive technology, so only the popup.
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
@@ -742,7 +746,7 @@ describe("Combobox, around it", () => {
     expect(await measureIdle()).toEqual({ rafCalls: 0, runningAnimations: [] });
     await open();
     await userEvent.keyboard("{ArrowDown}{ArrowDown}");
-    land();
+    await land();
     await settle();
     expect(await measureIdle()).toEqual({ rafCalls: 0, runningAnimations: [] });
   });

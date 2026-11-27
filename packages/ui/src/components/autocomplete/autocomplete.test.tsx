@@ -14,7 +14,12 @@ const TAGS = ["feature", "fix", "bug", "docs", "internal", "mobile"];
 const q = <T extends HTMLElement>(selector: string) => document.querySelector(selector) as T;
 const all = (selector: string) => [...document.querySelectorAll<HTMLElement>(selector)];
 const options = () => all('[role="option"]').map((el) => el.textContent);
-const land = () => {
+/**
+ * Finishes every running transition, so a popup is at rest. Base UI drops data-starting-style a
+ * frame after a part mounts, and its transition starts only then.
+ */
+const land = async () => {
+  await expect.poll(() => document.querySelector("[data-starting-style]")).toBeNull();
   for (const animation of document.getAnimations()) animation.finish();
 };
 
@@ -89,7 +94,7 @@ describe("Autocomplete", () => {
     await userEvent.click(input());
     await userEvent.keyboard("{ArrowDown}");
     await expect.poll(popup).not.toBeNull();
-    land();
+    await land();
     await userEvent.keyboard("{ArrowDown}");
     // The input now says "feature", which is all the list filters to.
     await expect.poll(() => input().value).toBe("feature");
@@ -101,7 +106,7 @@ describe("Autocomplete", () => {
     await userEvent.click(input());
     await userEvent.keyboard("{ArrowDown}");
     await expect.poll(popup).not.toBeNull();
-    land();
+    await land();
     await userEvent.keyboard("{ArrowDown}");
     await expect.poll(() => input().value).toBe("feature");
     await userEvent.keyboard("{ArrowDown}");
@@ -115,7 +120,7 @@ describe("Autocomplete", () => {
     await userEvent.click(input());
     await userEvent.keyboard("{ArrowDown}");
     await expect.poll(popup).not.toBeNull();
-    land();
+    await land();
     const lit = () => q('[role="option"][data-highlighted]')?.textContent;
     await userEvent.keyboard("{ArrowDown}");
     await expect.poll(lit).toBe("feature");
@@ -307,7 +312,7 @@ describe("Autocomplete", () => {
     }
     await userEvent.type(input(), "f");
     await expect.poll(popup).not.toBeNull();
-    land();
+    await land();
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
       expect(await axeReport(popup())).toEqual({ violations: [], contrastUnknown: [] });
@@ -320,7 +325,7 @@ describe("Autocomplete", () => {
     expect(await measureIdle()).toEqual({ rafCalls: 0, runningAnimations: [] });
     await userEvent.type(input(), "f");
     await expect.poll(popup).not.toBeNull();
-    land();
+    await land();
     await settle();
     expect(await measureIdle()).toEqual({ rafCalls: 0, runningAnimations: [] });
   });

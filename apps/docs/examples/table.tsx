@@ -92,6 +92,7 @@ function Grid({
   caption?: ReactNode;
   size?: "default" | "sm";
   layout?: "table" | "stack" | "auto";
+  nowrap?: boolean;
   label?: string;
   style?: CSSProperties;
 }) {
@@ -293,14 +294,15 @@ export const tableDefinition = defineComponent({
       id: "scrolling",
       title: { id: "Menggulir", en: "Scrolling" },
       description: {
-        id: 'Dengan layout="table", tabel lebar menggulir di dalam kartu; tepinya memudar di sisi yang masih ada isinya.',
-        en: 'With layout="table", a wide table scrolls inside the card; its edges fade on the sides with more.',
+        id: 'Dengan layout="table", tabel lebar menggulir di dalam kartu, dan nowrap menjaga tiap sel dalam satu baris. Scrollbar tipis muncul saat hover, fokus, atau menggulir; tepinya memudar di sisi yang masih ada isinya.',
+        en: 'With layout="table", a wide table scrolls inside the card, and nowrap keeps each cell on one line. A thin scrollbar shows on hover, focus, or scroll; the edges fade on the sides with more.',
       },
       uses: ["Table"],
       demo: (lang) => (
         <Grid
           style={NARROW}
           layout="table"
+          nowrap
           head={TEXT[lang].wide}
           body={wideRows(lang)}
           label={TEXT[lang].caption}
@@ -311,7 +313,7 @@ export const tableDefinition = defineComponent({
           "Invoices",
           [importLine(setup)],
           [
-            `<Table.Root layout="table" aria-label="${TEXT[lang].caption}">`,
+            `<Table.Root layout="table" nowrap aria-label="${TEXT[lang].caption}">`,
             ...indent(headerLines(TEXT[lang].wide)),
             ...indent(bodyLines(wideRows(lang))),
             "</Table.Root>",

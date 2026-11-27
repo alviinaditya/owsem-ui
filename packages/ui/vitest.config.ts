@@ -9,6 +9,7 @@ import {
   setPrint,
   setReducedMotion,
   setReducedTransparency,
+  wheel,
 } from "./test/commands.ts";
 
 type BrowserName = "chromium" | "firefox" | "webkit";
@@ -44,6 +45,7 @@ export default defineConfig({
         setReducedMotion,
         setReducedTransparency,
         mouse,
+        wheel,
         compileTailwind,
       },
       // Traces are off: Vitest 5.0.5 names them by test name, so parallel files overwrite each

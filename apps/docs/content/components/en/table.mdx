@@ -41,7 +41,7 @@ export function Plans() {
 Table is a plain HTML table drawn as a quiet card: muted headings on a faint tint, hairlines between
 rows, no vertical lines. Write the table inside `Table.Root`, with a `Caption`, a `Header` of
 `Head` cells, a `Body` of `Row`s and `Cell`s, and a `Footer` if you need one. The Root holds a
-scroller and the `<table>`, so `tableProps` is how you reach the `<table>` itself.
+scroller (a [Scroll Area](/en/scroll-area)) and the `<table>`, so `tableProps` is how you reach the `<table>` itself.
 
 Put a `Caption` or a heading before each table. The Caption sits above the card, so two tables in a
 row read as two.
@@ -78,6 +78,7 @@ drawn above the card.
 | --- | --- | --- | --- |
 | `layout` | `"auto" \| "table" \| "stack"` | `"auto"` | `"table"` always draws a table, `"stack"` always stacks its rows, `"auto"` stacks under `stackBelow` |
 | `stackBelow` | `number` | `480` | The Root width in pixels under which `"auto"` stacks |
+| `nowrap` | `boolean` | `false` | Keeps every cell on one line, so a wide table scrolls instead of squeezing its columns. Stacked rows still wrap |
 | `size` | `"default" \| "sm"` | `"default"` | `"sm"` tightens the cell padding |
 | `tableProps` | `ComponentProps<"table">` | | Props, `ref` included, for the inner `<table>` |
 | `aria-label`, `aria-labelledby` | `string` | | Name the scroller while it scrolls; else the Caption does |
@@ -90,7 +91,8 @@ drawn above the card.
 | --- | --- |
 | `data-layout` | Always; `"table"` or `"stack"`, the layout in use |
 | `data-size` | `size` is set |
-| `data-overflow-start`, `data-overflow-end` | On `div.ow-table__scroll`: more content toward that side |
+| `data-nowrap` | `nowrap` is set |
+| `data-overflow-x-start`, `data-overflow-x-end` | On `div.ow-table__scroll`, Scroll Area's viewport: more content toward that side |
 
 ### The other parts
 
@@ -111,7 +113,7 @@ through as they are.
 | --- | --- |
 | `ow-table` | Root |
 | `ow-table--sm` | Root, with `size="sm"` |
-| `ow-table__scroll`, `ow-table__table` | The scroller and the table inside the Root |
+| `ow-table__scroller`, `ow-table__scroll`, `ow-table__table` | The Scroll Area, its viewport that scrolls, and the table inside the Root |
 | `ow-table__caption` | Caption |
 | `ow-table__header`, `ow-table__body`, `ow-table__footer` | The row groups |
 | `ow-table__row` | Row |
@@ -130,6 +132,9 @@ It is a real table, so assistive technology gets its rows, columns, and headings
 - Wider than the card, the card scrolls and takes the Tab key (`role="region"`, named by the
   Caption, `aria-label`, or `aria-labelledby`), and the arrow keys scroll it. When nothing
   overflows it is not in the tab order.
+- The scrollbar is Scroll Area's: a thin overlay that shows on hover, on keyboard focus, and while
+  it scrolls, with no arrow buttons. A mouse wheel scrolls it sideways with Shift or a sideways
+  wheel, or you drag the scrollbar.
 - In forced colors, the hairlines and the card's edge take the system text color.
 
 ## Theming [#theming]
@@ -159,5 +164,5 @@ Table does not style `code` or other content in cells; do that in your own CSS. 
 
 ## Motion [#motion]
 
-Table does not move: its fades are static gradients and nothing animates, so
-`prefers-reduced-motion` changes nothing.
+Table's own parts do not move: its fades are static gradients. The scrollbar fades in and out as in
+[Scroll Area](/en/scroll-area), and only its opacity moves, so `prefers-reduced-motion` changes nothing.

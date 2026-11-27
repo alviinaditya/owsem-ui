@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 import { Table as CssTable } from "../src/components/table/index";
 import { cn } from "../src/tailwind/lib/cn";
+import { scrollAreaSlots } from "../src/tailwind/scroll-area/scroll-area-variants";
 import { Table as TwTable } from "../src/tailwind/table/index";
 import { tableSlots, tableVariants } from "../src/tailwind/table/table-variants";
 import {
@@ -27,6 +28,8 @@ const OVERRIDES =
 const tw = tailwindParity(
   classNames(
     ...Object.values(tableSlots),
+    // The scroller is a Scroll Area, with its scrollbar.
+    ...Object.values(scrollAreaSlots),
     tableVariants({ size: "default" }),
     tableVariants({ size: "sm" }),
     OVERRIDES,
@@ -38,6 +41,7 @@ const tw = tailwindParity(
 const props = [
   ...PROPS,
   "maskImage",
+  "maskComposite",
   "scrollbarWidth",
   "overflowX",
   "overscrollBehaviorX",
@@ -169,7 +173,7 @@ const cases: Case[] = [
 /** Scrolls the table sideways as the case's name says. */
 const scroll = async (side: Element) => {
   const name = side.closest("[data-case]")?.getAttribute("data-case") ?? "";
-  const scroller = side.querySelector<HTMLElement>("[data-slot=table-scroll]");
+  const scroller = side.querySelector<HTMLElement>("[data-slot=scroll-area-viewport]");
   if (!scroller) return;
   // The start is at the right in right-to-left writing, and scrollLeft counts from there.
   const toward = getComputedStyle(scroller).direction === "rtl" ? -1 : 1;
@@ -214,7 +218,8 @@ describe("Table in Tailwind CSS v4 against table.css", () => {
 });
 
 describe("Table states, with real input, in Tailwind CSS v4", () => {
-  const scroller = { target: "[data-slot=table-scroll]", props, pseudo };
+  // The viewport takes the focus; Scroll Area draws the ring on its Root, which is compared too.
+  const scroller = { target: "[data-slot=scroll-area-viewport]", props, pseudo };
 
   test("keyboard focus on a scrolling table draws a ring inside it", async () => {
     await tw.states(cases, "wide", "focus", scroller);

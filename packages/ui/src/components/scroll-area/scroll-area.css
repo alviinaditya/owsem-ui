@@ -1,8 +1,9 @@
 @layer owsem.tokens, owsem.components;
 
 /*
- * No surface of its own: a scroller and a thin scrollbar over whatever it sits on. The height that
- * makes it scroll comes from your CSS, a max-height too (the flex column passes it on).
+ * No surface of its own: a scroller and a thin scrollbar over whatever it sits on, shown on hover,
+ * on keyboard focus, and while it scrolls. The height that makes it scroll comes from your CSS, a
+ * max-height too (the flex column passes it on).
  */
 @layer owsem.components {
   .ow-scroll-area {
@@ -84,6 +85,12 @@
   }
 
   .ow-scroll-area__scrollbar:where([data-hovering], [data-scrolling], :active) {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* A keyboard user who focuses the viewport sees where they are (the scrollbar follows it). */
+  .ow-scroll-area__viewport:where(:focus-visible) ~ .ow-scroll-area__scrollbar {
     opacity: 1;
     pointer-events: auto;
   }

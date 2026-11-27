@@ -44,6 +44,13 @@ export const mouse: BrowserCommand<[action: "down" | "up"]> = async (ctx, action
   await ctx.page.mouse[action]();
 };
 
+// A real wheel turn at the pointer, which a dispatched WheelEvent is not: it scrolls. Move the
+// pointer onto the element first, e.g. with userEvent.hover().
+export const wheel: BrowserCommand<[deltaX: number, deltaY: number]> = async (ctx, dx, dy) => {
+  if (ctx.provider.name !== "playwright") throw new Error("requires the playwright provider");
+  await ctx.page.mouse.wheel(dx, dy);
+};
+
 // Surface's opaque version. Playwright has no option for it, so Chromium emulates it over CDP;
 // "no-preference" lets Playwright send its own media state again, which leaves it out.
 let transparency: CDPSession | undefined;
@@ -82,6 +89,7 @@ declare module "vitest/browser" {
     setReducedMotion: (mode: "reduce" | "no-preference") => Promise<void>;
     setPrint: (mode: "print" | "screen") => Promise<void>;
     mouse: (action: "down" | "up") => Promise<void>;
+    wheel: (deltaX: number, deltaY: number) => Promise<void>;
     setReducedTransparency: (mode: "reduce" | "no-preference") => Promise<void>;
     compileTailwind: (css: string, candidates: string[]) => Promise<string>;
   }

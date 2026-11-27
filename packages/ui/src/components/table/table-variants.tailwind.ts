@@ -49,20 +49,11 @@ export function tableVariants({ size }: TableVariantProps = {}): string {
   return cn(variants({ size }));
 }
 
-// Wider than the card, the table scrolls inside it with a fade on the sides that have more. The
-// scrollbar is hidden.
-const scroll = [
-  "rounded-[inherit] overflow-x-auto overscroll-x-contain",
-  "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-  "focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(color:--_focus)",
-  "data-overflow-start:[mask-image:linear-gradient(to_right,transparent,#000_28px)]",
-  "data-overflow-end:[mask-image:linear-gradient(to_left,transparent,#000_28px)]",
-  "data-overflow-start:data-overflow-end:[mask-image:linear-gradient(to_right,transparent,#000_28px,#000_calc(100%_-_28px),transparent)]",
-  // Right to left: the sides swap.
-  "[&:dir(rtl)]:data-overflow-start:[mask-image:linear-gradient(to_left,transparent,#000_28px)]",
-  "[&:dir(rtl)]:data-overflow-end:[mask-image:linear-gradient(to_right,transparent,#000_28px)]",
-  "[&:dir(rtl)]:data-overflow-start:data-overflow-end:[mask-image:linear-gradient(to_left,transparent,#000_28px,#000_calc(100%_-_28px),transparent)]",
-];
+// Wider than the card, the table scrolls inside it as a Scroll Area does: a thin scrollbar over it,
+// and the edges fading by --fade-size.
+const scroller = ["[--fade-size:28px] rounded-[inherit]"];
+
+const scroll = ["overscroll-x-contain"];
 
 const table = [
   "w-full border-separate border-spacing-0 tabular-nums",
@@ -112,6 +103,8 @@ const row = [
 
 // A heading and a data cell share the box: a hairline below, the first cell the row's title.
 const cell = [
+  // One line to a cell, so a table wider than the card scrolls instead of squeezing.
+  "group-data-nowrap/ow-table:group-not-data-[layout=stack]/ow-table:whitespace-nowrap",
   "py-(--_py) px-(--_px) border-b border-b-(color:--_line) text-start align-top",
   // No hairline after the last row of the body.
   "[[data-slot=table-body]>[data-slot=table-row]:last-child>&]:border-b-0",
@@ -163,9 +156,20 @@ const value = [
 
 /** The classes of the other parts. */
 export const tableSlots: Record<
-  "scroll" | "table" | "caption" | "header" | "body" | "footer" | "row" | "head" | "cell" | "value",
+  | "scroller"
+  | "scroll"
+  | "table"
+  | "caption"
+  | "header"
+  | "body"
+  | "footer"
+  | "row"
+  | "head"
+  | "cell"
+  | "value",
   string
 > = {
+  scroller: scroller.join(" "),
   scroll: scroll.join(" "),
   table: table.join(" "),
   caption: caption.join(" "),

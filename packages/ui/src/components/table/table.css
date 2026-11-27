@@ -3,7 +3,7 @@
 /*
  * Table, an Owsem component: a card with a quiet header row, hairlines between rows, and no
  * vertical lines. The caption is a title above the card. Wider than the card, the table scrolls
- * inside it with a fade on the sides that have more; narrow, the rows stack: the first cell is the
+ * inside it as a Scroll Area does, with a fade on the sides that have more; narrow, the rows stack: the first cell is the
  * title and the others carry their column's heading. Nothing moves, so nothing animates.
  */
 @layer owsem.components {
@@ -44,58 +44,14 @@
     margin-block-start: 28px;
   }
 
-  .ow-table__scroll {
+  /* A Scroll Area: its thin scrollbar over the card, and the edges fading by --fade-size. */
+  .ow-table__scroller {
+    --fade-size: 28px;
     border-radius: inherit;
-    overflow-x: auto;
+  }
+
+  .ow-table__scroll {
     overscroll-behavior-x: contain;
-    /* The scrollbar is hidden; the edges fade where there is more to scroll. */
-    /* biome-ignore lint/nursery/useBaseline: progressive enhancement (NF-1) */
-    scrollbar-width: none;
-  }
-
-  .ow-table__scroll::-webkit-scrollbar {
-    display: none;
-  }
-
-  .ow-table__scroll:focus-visible {
-    outline: 2px solid var(--_focus);
-    outline-offset: -2px;
-  }
-
-  .ow-table__scroll:where([data-overflow-start]) {
-    mask-image: linear-gradient(to right, transparent, #000 28px);
-  }
-
-  .ow-table__scroll:where([data-overflow-end]) {
-    mask-image: linear-gradient(to left, transparent, #000 28px);
-  }
-
-  .ow-table__scroll:where([data-overflow-start][data-overflow-end]) {
-    mask-image: linear-gradient(
-      to right,
-      transparent,
-      #000 28px,
-      #000 calc(100% - 28px),
-      transparent
-    );
-  }
-
-  .ow-table__scroll:where(:dir(rtl)[data-overflow-start]) {
-    mask-image: linear-gradient(to left, transparent, #000 28px);
-  }
-
-  .ow-table__scroll:where(:dir(rtl)[data-overflow-end]) {
-    mask-image: linear-gradient(to right, transparent, #000 28px);
-  }
-
-  .ow-table__scroll:where(:dir(rtl)[data-overflow-start][data-overflow-end]) {
-    mask-image: linear-gradient(
-      to left,
-      transparent,
-      #000 28px,
-      #000 calc(100% - 28px),
-      transparent
-    );
   }
 
   .ow-table__table {
@@ -136,6 +92,11 @@
     border-block-end: 1px solid var(--_line);
     text-align: start;
     vertical-align: top;
+  }
+
+  /* One line to a cell, so a table wider than the card scrolls instead of squeezing. */
+  .ow-table:where([data-nowrap]:not([data-layout="stack"])) :is(.ow-table__head, .ow-table__cell) {
+    white-space: nowrap;
   }
 
   .ow-table__head {

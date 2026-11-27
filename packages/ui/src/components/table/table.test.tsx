@@ -92,8 +92,8 @@ const q = <T extends HTMLElement = HTMLElement>(selector: string, scope: ParentN
 };
 const scroller = () => q(".ow-table__scroll");
 const flags = () => [
-  scroller().hasAttribute("data-overflow-start"),
-  scroller().hasAttribute("data-overflow-end"),
+  scroller().hasAttribute("data-overflow-x-start"),
+  scroller().hasAttribute("data-overflow-x-end"),
 ];
 
 /** Resolves a value of `property` (e.g. a token) to its computed form inside `scope`. */
@@ -443,11 +443,11 @@ describe("Table overflow", () => {
   test("no fade and not focusable when nothing overflows", async () => {
     await render(<Plain width={700} />);
     expect(flags()).toEqual([false, false]);
-    expect(getComputedStyle(scroller()).maskImage).toBe("none");
-    expect(scroller().hasAttribute("tabindex")).toBe(false);
+    // Scroll Area keeps a viewport with nothing to scroll out of the tab order.
+    expect(scroller().tabIndex).toBe(-1);
   });
 
-  test("fades only the sides with more, and the scrollbar is hidden", async () => {
+  test("fades only the sides with more, and the native scrollbar is hidden", async () => {
     await render(<Wide />);
     const el = scroller();
     expect(flags()).toEqual([false, true]);
@@ -462,17 +462,70 @@ describe("Table overflow", () => {
 
   test("is focusable and named by its caption only while it overflows", async () => {
     const screen = await render(<Wide />);
-    await expect.poll(() => scroller().getAttribute("tabindex")).toBe("0");
+    await expect.poll(() => scroller().tabIndex).toBe(0);
     expect(scroller().getAttribute("role")).toBe("region");
     await expect.element(screen.getByRole("region", { name: "Wide table" })).toBeVisible();
     await userEvent.tab();
     expect(document.activeElement).toBe(scroller());
-    expect(getComputedStyle(scroller()).outlineStyle).toBe("solid");
+    // Scroll Area draws the ring on its Root, over the content.
+    expect(getComputedStyle(q(".ow-table__scroller"), "::after").outlineStyle).toBe("solid");
     await userEvent.keyboard("{ArrowRight}");
     await expect.poll(() => scroller().scrollLeft).toBeGreaterThan(0);
     await screen.rerender(<Wide columns={1} />);
-    await expect.poll(() => scroller().hasAttribute("tabindex")).toBe(false);
+    await expect.poll(() => scroller().tabIndex).toBe(-1);
     expect(scroller().getAttribute("role")).toBeNull();
+  });
+
+  test("scrolls like a Scroll Area: the scrollbar shows on hover, focus, and scroll, with no arrows", async () => {
+    await render(<Wide />);
+    const bar = q(".ow-table__scroller .ow-scroll-area__scrollbar");
+    const shown = () => getComputedStyle(bar).opacity;
+    expect(bar.getAttribute("data-orientation")).toBe("horizontal");
+    expect(bar.querySelectorAll("button")).toHaveLength(0);
+    await expect.poll(shown).toBe("0");
+    await userEvent.hover(scroller());
+    await expect.poll(shown).toBe("1");
+    await userEvent.unhover(scroller());
+    await expect.poll(shown).toBe("0");
+    // Keyboard focus: it shows, and stays while the table has it.
+    await userEvent.tab();
+    expect(document.activeElement).toBe(scroller());
+    await expect.poll(shown).toBe("1");
+  });
+
+  test("a sideways wheel scrolls it; a vertical one has no room here and passes through", async () => {
+    await render(<Wide />);
+    const el = scroller();
+    await userEvent.hover(el);
+    await commands.wheel(120, 0);
+    await expect.poll(() => el.scrollLeft).toBeGreaterThan(0);
+    const at = el.scrollLeft;
+    await commands.wheel(0, 120);
+    expect(el.scrollTop).toBe(0);
+    expect(el.scrollLeft).toBe(at);
+  });
+
+  test("nowrap keeps each cell on one line, so a narrow card scrolls instead of squeezing", async () => {
+    function Words({ nowrap }: { nowrap?: boolean }) {
+      return (
+        <Table.Root layout="table" nowrap={nowrap} style={{ inlineSize: 240 }} aria-label="Words">
+          <Table.Body>
+            <Table.Row>
+              <Table.Cell>some words that would wrap</Table.Cell>
+              <Table.Cell>and more words that would wrap</Table.Cell>
+            </Table.Row>
+          </Table.Body>
+        </Table.Root>
+      );
+    }
+    const screen = await render(<Words />);
+    const cell = () => q<HTMLElement>(".ow-table__cell");
+    const wrapped = cell().getBoundingClientRect().height;
+    expect(getComputedStyle(cell()).whiteSpace).toBe("normal");
+    await screen.rerender(<Words nowrap />);
+    expect(getComputedStyle(cell()).whiteSpace).toBe("nowrap");
+    expect(cell().getBoundingClientRect().height).toBeLessThan(wrapped);
+    await expect.poll(() => scroller().scrollWidth).toBeGreaterThan(scroller().clientWidth);
   });
 
   test("aria-label on the Root names the scroller", async () => {
@@ -575,7 +628,9 @@ test("every part has its data-slot, and an outer part's data-slot wins", async (
   ];
   expect(slots).toEqual([
     "table",
-    "table-scroll",
+    "table-scroller",
+    "scroll-area-viewport",
+    "scroll-area-content",
     "table-table",
     "table-caption",
     "table-header",

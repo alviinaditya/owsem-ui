@@ -1,15 +1,16 @@
 // The Tailwind CSS v4 twin of scroll-area-variants.ts: the same exports, with the styles as utility classes.
 // Needs tokens.css, and from the bridge (tailwind.css) the ow-scroll-area-fade variant.
 
-// No surface of its own: a scroller and a thin scrollbar over whatever it sits on. The height that
-// makes it scroll comes from your CSS, a max-height too (the flex column passes it on).
+// No surface of its own: a scroller and a thin scrollbar over whatever it sits on, shown on hover,
+// on keyboard focus, and while it scrolls. The height that makes it scroll comes from your CSS, a
+// max-height too (the flex column passes it on).
 const root = [
   "group/ow-scroll-area [--_radius:var(--ow-radius)] [--_focus:var(--ow-focus)]",
   "flex flex-col min-w-0 min-h-0 rounded-(--_radius)",
 ];
 
 const viewport = [
-  "flex-auto rounded-[inherit]",
+  "peer/ow-scroll-viewport flex-auto rounded-[inherit]",
   // Native scrollbars are hidden here, so Base UI's <style> for it can be turned off.
   "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
   // The ring is drawn on the Root, over the content: the fade's mask would cut one here.
@@ -32,6 +33,9 @@ const scrollbar = [
   "opacity-0 pointer-events-none transition-opacity duration-150 ease-(--_ease)",
   "[&:where([data-hovering],[data-scrolling],:active)]:opacity-100",
   "[&:where([data-hovering],[data-scrolling],:active)]:pointer-events-auto",
+  // A keyboard user who focuses the viewport sees where they are.
+  "peer-focus-visible/ow-scroll-viewport:opacity-100",
+  "peer-focus-visible/ow-scroll-viewport:pointer-events-auto",
   "data-[orientation=vertical]:w-(--_size) data-[orientation=vertical]:my-(--_clear)",
   "data-[orientation=vertical]:me-(--_gap)",
   "data-[orientation=horizontal]:h-(--_size) data-[orientation=horizontal]:mx-(--_clear)",

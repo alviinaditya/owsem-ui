@@ -17,6 +17,11 @@ import {
 } from "react";
 import { cn } from "../lib/cn";
 import { useMergedRefs } from "../lib/merge-refs";
+import {
+  ScrollAreaRoot,
+  ScrollAreaScrollbar,
+  ScrollAreaViewport,
+} from "../scroll-area/scroll-area";
 import { type TableSize, tableSlots, tableVariants } from "./table-variants";
 
 export type TableLayout = "table" | "stack" | "auto";
@@ -51,21 +56,25 @@ export interface TableRootProps extends Omit<useRender.ComponentProps<"div">, "c
   size?: TableSize | undefined;
   /** The Root width in pixels under which `layout="auto"` stacks. */
   stackBelow?: number | undefined;
+  /** Keeps every cell on one line, so a wide table scrolls instead of squeezing its columns. */
+  nowrap?: boolean | undefined;
   /** Props for the `<table>` inside the Root. */
   tableProps?: ComponentPropsWithRef<"table"> | undefined;
 }
 
 /**
- * The table as a card: a `div` that holds a scroller and the `<table>`. `ref`, `className`,
- * `style`, and `render` are the card's. Wider than the card, the table scrolls inside it, with
- * its edges fading on the sides that have more; it is focusable then, so the keyboard can scroll
- * it, and `aria-label` or `aria-labelledby` (else the Caption) name it. Narrow, rows can stack.
+ * The table as a card: a `div` that holds a Scroll Area and the `<table>`. `ref`, `className`,
+ * `style`, and `render` are the card's. Wider than the card, the table scrolls inside it as a
+ * Scroll Area does: a thin scrollbar over it on hover, focus, and scroll, and its edges fading on
+ * the sides that have more. It is focusable then, so the keyboard can scroll it, and `aria-label`
+ * or `aria-labelledby` (else the Caption) name it. Narrow, rows can stack.
  */
 export function TableRoot({
   className,
   render,
   layout = "auto",
   stackBelow = 480,
+  nowrap,
   size,
   tableProps,
   children,
@@ -106,29 +115,20 @@ export function TableRoot({
     return () => observer.disconnect();
   }, [layout, stackBelow]);
 
-  // Edge fades: data-overflow-start/-end say which side has more to scroll. Passive, idle-free.
+  // Whether it scrolls, for the keyboard stop's name; and the Caption's id.
   const [captionId, setCaptionId] = useState<string>();
   useEffect(() => {
     const el = scroller.current;
     if (!el) return;
     const update = () => {
-      const max = el.scrollWidth - el.clientWidth;
-      // scrollLeft is negative in right-to-left writing.
-      const at = Math.abs(el.scrollLeft);
-      el.toggleAttribute("data-overflow-start", at > 1);
-      el.toggleAttribute("data-overflow-end", max - at > 1);
-      setOverflowing(max > 1);
+      setOverflowing(el.scrollWidth - el.clientWidth > 1);
       setCaptionId(el.querySelector("caption")?.id || undefined);
     };
     update();
-    el.addEventListener("scroll", update, { passive: true });
     const observer = new ResizeObserver(update);
     observer.observe(el);
-    for (const child of Array.from(el.children)) observer.observe(child);
-    return () => {
-      el.removeEventListener("scroll", update);
-      observer.disconnect();
-    };
+    for (const child of Array.from(el.querySelectorAll("table"))) observer.observe(child);
+    return () => observer.disconnect();
   }, []);
 
   const merged = useMergedRefs(own, ref);
@@ -153,24 +153,26 @@ export function TableRoot({
           className: cn(tableVariants({ size }), className),
           "data-layout": stacked ? "stack" : "table",
           "data-size": size,
+          "data-nowrap": nowrap ? "" : undefined,
           children: (
-            <div
-              data-slot="table-scroll"
-              ref={scroller}
-              className={tableSlots.scroll}
-              // Focusable only while it scrolls, so a keyboard can reach what is off to the side.
-              tabIndex={overflowing ? 0 : undefined}
-              {...(overflowing ? region : null)}
-            >
-              <table
-                data-slot="table-table"
-                {...table}
-                className={cn(tableSlots.table, tableClass)}
-                role={role ?? (stacked ? "table" : undefined)}
+            <ScrollAreaRoot data-slot="table-scroller" className={tableSlots.scroller} fade>
+              {/* Scroll Area's Viewport takes the keyboard stop only while it scrolls. */}
+              <ScrollAreaViewport
+                ref={scroller}
+                className={tableSlots.scroll}
+                {...(overflowing ? region : null)}
               >
-                {children}
-              </table>
-            </div>
+                <table
+                  data-slot="table-table"
+                  {...table}
+                  className={cn(tableSlots.table, tableClass)}
+                  role={role ?? (stacked ? "table" : undefined)}
+                >
+                  {children}
+                </table>
+              </ScrollAreaViewport>
+              <ScrollAreaScrollbar orientation="horizontal" />
+            </ScrollAreaRoot>
           ),
         },
       })}

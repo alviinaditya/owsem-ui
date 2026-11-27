@@ -15,6 +15,7 @@ export function tableVariants({ size = "default" }: TableVariantProps = {}): str
 
 /** The classes of the other parts. */
 export const tableSlots = {
+  scroller: "ow-table__scroller",
   scroll: "ow-table__scroll",
   table: "ow-table__table",
   caption: "ow-table__caption",

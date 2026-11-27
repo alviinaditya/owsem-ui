@@ -44,11 +44,29 @@ test("a wide table scrolls inside its card and can be focused", async ({ page })
   await pick(page, "Scrolling");
   const scroller = demo(page).locator(".ow-table__scroll");
   await expect(scroller).toHaveAttribute("tabindex", "0");
-  await expect(scroller).toHaveAttribute("data-overflow-end", "");
+  await expect(scroller).toHaveAttribute("data-overflow-x-end", "");
   await scroller.focus();
   await page.keyboard.press("ArrowRight");
   await expect.poll(() => scroller.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
-  await expect(scroller).toHaveAttribute("data-overflow-start", "");
+  await expect(scroller).toHaveAttribute("data-overflow-x-start", "");
+});
+
+test("a mouse on desktop scrolls it: the scrollbar shows on hover and a sideways wheel moves it", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "desktop", "a mouse wheel is a desktop input");
+  await visit(page, "/en/table");
+  await pick(page, "Scrolling");
+  const scroller = demo(page).locator(".ow-table__scroll");
+  const bar = demo(page).locator(".ow-table__scroller .ow-scroll-area__scrollbar");
+  await expect(bar).toHaveCSS("opacity", "0");
+  await scroller.hover();
+  await expect(bar).toHaveCSS("opacity", "1");
+  // Cells keep to one line, so it scrolls instead of squeezing.
+  const cell = demo(page).locator(".ow-table__cell").first();
+  await expect(cell).toHaveCSS("white-space", "nowrap");
+  await page.mouse.wheel(200, 0);
+  await expect.poll(() => scroller.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
 });
 
 test("the docs' own tables are Tables, and two in a row stay apart", async ({ page }) => {

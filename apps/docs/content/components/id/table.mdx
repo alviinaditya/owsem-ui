@@ -41,7 +41,7 @@ export function Plans() {
 Table adalah tabel HTML biasa yang digambar sebagai kartu yang tenang: judul muted di atas tint
 tipis, garis tipis antarbaris, tanpa garis vertikal. Tulis tabelnya di dalam `Table.Root`, dengan
 `Caption`, `Header` berisi sel `Head`, `Body` berisi `Row` dan `Cell`, serta `Footer` bila perlu.
-Root memuat scroller dan `<table>`, jadi `tableProps` adalah jalan ke `<table>` itu sendiri.
+Root memuat scroller (sebuah [Scroll Area](/id/scroll-area)) dan `<table>`, jadi `tableProps` adalah jalan ke `<table>` itu sendiri.
 
 Beri `Caption` atau judul sebelum tiap tabel. Caption berada di atas kartu, jadi dua tabel berurutan
 terbaca sebagai dua.
@@ -78,6 +78,7 @@ di atas kartu.
 | --- | --- | --- | --- |
 | `layout` | `"auto" \| "table" \| "stack"` | `"auto"` | `"table"` selalu tabel, `"stack"` selalu menumpuk baris, `"auto"` menumpuk di bawah `stackBelow` |
 | `stackBelow` | `number` | `480` | Lebar Root dalam piksel di bawah mana `"auto"` menumpuk |
+| `nowrap` | `boolean` | `false` | Menjaga setiap sel dalam satu baris, jadi tabel lebar menggulir, bukan memeras kolomnya. Baris bertumpuk tetap membungkus |
 | `size` | `"default" \| "sm"` | `"default"` | `"sm"` merapatkan padding sel |
 | `tableProps` | `ComponentProps<"table">` | | Props, termasuk `ref`, untuk `<table>` di dalam |
 | `aria-label`, `aria-labelledby` | `string` | | Menamai scroller saat menggulir; kalau tidak, Caption yang menamai |
@@ -90,7 +91,8 @@ di atas kartu.
 | --- | --- |
 | `data-layout` | Selalu; `"table"` atau `"stack"`, tata letak yang dipakai |
 | `data-size` | `size` diatur |
-| `data-overflow-start`, `data-overflow-end` | Pada `div.ow-table__scroll`: masih ada isi ke sisi itu |
+| `data-nowrap` | `nowrap` diatur |
+| `data-overflow-x-start`, `data-overflow-x-end` | Pada `div.ow-table__scroll`, viewport Scroll Area: masih ada isi ke sisi itu |
 
 ### Bagian lainnya
 
@@ -111,7 +113,7 @@ apa adanya.
 | --- | --- |
 | `ow-table` | Root |
 | `ow-table--sm` | Root, dengan `size="sm"` |
-| `ow-table__scroll`, `ow-table__table` | Scroller dan tabel di dalam Root |
+| `ow-table__scroller`, `ow-table__scroll`, `ow-table__table` | Scroll Area, viewport-nya yang menggulir, dan tabel di dalam Root |
 | `ow-table__caption` | Caption |
 | `ow-table__header`, `ow-table__body`, `ow-table__footer` | Kelompok baris |
 | `ow-table__row` | Row |
@@ -130,6 +132,9 @@ Ini tabel sungguhan, jadi teknologi bantu mendapat baris, kolom, dan judulnya.
 - Lebih lebar dari kartu, kartu menggulir dan menerima tombol Tab (`role="region"`, dinamai Caption,
   `aria-label`, atau `aria-labelledby`), dan tombol panah menggulirnya. Bila tidak ada yang meluap,
   ia tidak masuk urutan tab.
+- Scrollbar-nya milik Scroll Area: overlay tipis yang tampil saat hover, saat fokus keyboard, dan
+  selama menggulir, tanpa tombol panah. Roda mouse menggulirnya ke samping dengan Shift atau roda
+  menyamping, atau seret scrollbar-nya.
 - Pada forced colors, garis tipis dan tepi kartu memakai warna teks sistem.
 
 ## Tema [#theming]
@@ -159,5 +164,6 @@ Table tidak menata `code` atau isi lain di sel; lakukan di CSS Anda sendiri. Jar
 
 ## Gerak [#motion]
 
-Table tidak bergerak: pudarnya adalah gradien statis dan tidak ada yang beranimasi, jadi
+Part Table sendiri tidak bergerak: pudarnya adalah gradien statis. Scrollbar memudar masuk dan keluar
+seperti di [Scroll Area](/id/scroll-area), dan hanya opasitasnya yang bergerak, jadi
 `prefers-reduced-motion` tidak mengubah apa-apa.

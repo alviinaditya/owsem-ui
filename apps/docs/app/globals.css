@@ -918,8 +918,23 @@ body {
   margin-inline-end: 168px;
 }
 
-.component-preview-live[data-preview="select"] {
+.component-preview-live[data-preview="select"],
+.component-preview-live[data-preview="combobox"],
+.component-preview-live[data-preview="autocomplete"] {
   margin-block-end: 104px;
+}
+
+/* Combobox's and Autocomplete's list as a picture: under the field, 6px down, as the popup sits. */
+.component-preview-field {
+  position: relative;
+  inline-size: 176px;
+}
+
+.component-preview-list {
+  position: absolute;
+  inset-block-start: calc(100% + 6px);
+  inset-inline-start: 0;
+  min-inline-size: 100%;
 }
 
 /* The area and the hue slider, smaller. */
@@ -2599,6 +2614,25 @@ body {
 
 .demo-select-specimen .ow-select__popup {
   max-block-size: 10rem;
+}
+
+/* Combobox's and Autocomplete's demos: a field 18rem wide, and the specimen with room for its list. */
+.demo-combobox-field {
+  display: grid;
+  inline-size: 18rem;
+  max-inline-size: 100%;
+}
+
+.demo-combobox-specimen {
+  position: relative;
+  display: grid;
+  inline-size: 20rem;
+  block-size: 19rem;
+  align-content: start;
+}
+
+.demo-combobox-specimen .ow-combobox__popup {
+  max-block-size: 12rem;
 }
 
 /*

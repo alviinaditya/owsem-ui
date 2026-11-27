@@ -6,12 +6,14 @@
 @import "./core/glide/glide.css";
 @import "./components/accordion/accordion.css";
 @import "./components/alert-dialog/alert-dialog.css";
+@import "./components/autocomplete/autocomplete.css";
 @import "./components/avatar/avatar.css";
 @import "./components/button/button.css";
 @import "./components/checkbox/checkbox.css";
 @import "./components/checkbox-group/checkbox-group.css";
 @import "./components/collapsible/collapsible.css";
 @import "./components/color-picker/color-picker.css";
+@import "./components/combobox/combobox.css";
 @import "./components/context-menu/context-menu.css";
 @import "./components/dialog/dialog.css";
 @import "./components/drawer/drawer.css";

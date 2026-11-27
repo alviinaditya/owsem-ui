@@ -45,14 +45,12 @@ test("the sidebar's content scrolls on its own, and the page does not", async ({
 });
 
 test("planned components show Coming soon and stay out of search", async ({ page }) => {
-  await page.goto("/en/combobox");
+  // Every Base UI component is built; the planned ones are Owsem's, with no Base UI page.
+  await page.goto("/en/lumen-rail-nav");
   const main = page.getByRole("main");
-  await expect(main.getByRole("heading", { level: 1, name: "Combobox" })).toBeVisible();
+  await expect(main.getByRole("heading", { level: 1, name: "Lumen Rail Nav" })).toBeVisible();
   await expect(main.getByText("Coming soon", { exact: true })).toBeVisible();
-  await expect(main.getByRole("link", { name: "Combobox", exact: true })).toHaveAttribute(
-    "href",
-    "https://base-ui.com/react/components/combobox",
-  );
+  await expect(main.getByText("with no Base UI counterpart", { exact: false })).toBeVisible();
   await expect(robots(page)).toHaveAttribute("content", /noindex/);
 
   await page.goto("/en/separator");

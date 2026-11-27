@@ -1,11 +1,13 @@
 // Base family exports. Components land per phase (PRD, Base scope).
 export * from "./components/accordion";
 export * from "./components/alert-dialog";
+export * from "./components/autocomplete";
 export * from "./components/avatar";
 export * from "./components/button";
 export * from "./components/checkbox";
 export * from "./components/checkbox-group";
 export * from "./components/collapsible";
+export * from "./components/combobox";
 export * from "./components/context-menu";
 export * from "./components/dialog";
 export * from "./components/drawer";

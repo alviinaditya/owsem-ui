@@ -1,0 +1,163 @@
+---
+title: Autocomplete
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. In the registry it is the `autocomplete` item, which also installs
+[Combobox](/en/combobox), whose field, popup, and list it shares.
+
+## Usage [#usage]
+
+```tsx
+import { Autocomplete } from "owsem-ui/base";
+
+const tags = ["feature", "fix", "bug", "docs", "internal", "mobile"];
+
+export function TagSearch() {
+  return (
+    <Autocomplete.Root items={tags}>
+      <Autocomplete.Input aria-label="Tag" placeholder="e.g. feature" />
+      <Autocomplete.Popup>
+        <Autocomplete.Empty>No suggestions.</Autocomplete.Empty>
+        <Autocomplete.List>
+          {(tag: string) => (
+            <Autocomplete.Item key={tag} value={tag}>
+              {tag}
+            </Autocomplete.Item>
+          )}
+        </Autocomplete.List>
+      </Autocomplete.Popup>
+    </Autocomplete.Root>
+  );
+}
+```
+
+Autocomplete is a text input with suggestions under it. Its value is the text, free: picking a suggestion
+fills the input, and text that is in no suggestion is just as valid. Use [Combobox](/en/combobox) when
+the value must be one of the items, and the selection should be remembered. The input is drawn as
+[Input](/en/input) is; the popup, items, group labels, and separators are the same as Combobox's and
+[Select](/en/select)'s.
+
+Name the input with a [Field](/en/field) label, a `<label htmlFor>`, or `aria-label`. Without an
+`InputGroup`, the Input is the field. Inside one it is bare, with the Clear and Trigger as flat squares.
+A Popup draws its own Portal and Positioner. `mode` is Base UI's: `list` filters the list, `both` also
+fills the input with the highlighted suggestion as the arrows move, `inline` only fills it, and `none`
+does neither.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Base UI renders the parts, the filtering, the inline filling, and the announcements. OwsemUI draws them as
+Combobox does, with the `data-slot` of Autocomplete. Root, Value, and Collection render no element.
+There is no ItemIndicator, Chips, or Label: nothing is selected.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | none | State, and `size` for the field and the popup |
+| <Part name="InputGroup" /> | `div.ow-combobox__input-group` | The field, when there are buttons. Takes the invalid, disabled, and read-only states |
+| <Part name="Input" /> | `input.ow-input` or `input.ow-combobox__input` | Alone it is an Input; in a group it is bare |
+| <Part name="Clear" /> | `button.ow-combobox__clear` | A flat square. Draws an × without children; shows only while there is text |
+| <Part name="Trigger" /> | `button.ow-combobox__trigger` | A flat square, not a tab stop. Draws an Icon without children |
+| <Part name="Icon" /> | `span.ow-combobox__icon` | A chevron, `1em + 2px`. Draws one without children |
+| Portal | `div` | Moves the popup to the end of the body, or into `container` |
+| Positioner | `div.ow-select__positioner` | `side`, `align`, `sideOffset` (6), and `dir` |
+| <Part name="Popup" /> | `div.ow-select__popup.ow-combobox__popup` | Combobox's panel; hidden when there is nothing to show |
+| Status | `div.ow-combobox__status` | A polite live region over the list, shown only with text |
+| Empty | `div.ow-combobox__empty` | Shown when no suggestion matches, and only with text |
+| List | `div.ow-select__list` | `role="listbox"`, holds the Glide highlight |
+| <Part name="GroupLabel" /> | `div.ow-select__group-label` | Names its `Autocomplete.Group` |
+| <Part name="Item" /> | `div.ow-select__item.ow-combobox__item` | `role="option"`; pressing it fills the input |
+| <Part name="Separator" /> | `div.ow-select__separator` | A hairline |
+
+| Size | Font | Field | Buttons |
+| --- | --- | --- | --- |
+| `sm` | 13px | 32px | 24px |
+| `md` (default) | 14px | 40px | 32px |
+| `lg` | 16px | 48px | 40px |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### Autocomplete.Root
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Type scale of the field and the items; every part reads it |
+
+Everything else, `mode` included, is Base UI's. `value` and `onValueChange` are the input's text.
+
+### Autocomplete parts
+
+The parts are Combobox's, drawn by the same code, so Combobox's API notes apply: the Trigger and Clear
+take `children` and an `aria-label` (`"Open"` and `"Clear"`), the Positioner's `align` is `"start"` and
+`sideOffset` is `6`, and a Popup hides itself when there is nothing to show. See
+[Combobox](/en/combobox) for the tables.
+
+### CSS classes
+
+Autocomplete has no classes of its own: its parts take Combobox's and Select's. See
+[Combobox](/en/combobox) and [Select](/en/select).
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| Arrow Down, Arrow Up | Open the list and highlight; then the next or previous suggestion |
+| Home, End | Move the caret to the start or end of the text, as in any input |
+| Enter | Fill the input with the highlighted suggestion |
+| Escape | Shut the list; a second press clears the text |
+
+- The input has `role="combobox"` with `aria-autocomplete` (`list`, `both`, `inline`, or `none`, by
+  `mode`), `aria-expanded`, `aria-controls`, and the highlighted suggestion as `aria-activedescendant`, so
+  focus stays in the input. Name it with a Field label or `aria-label`. Status and Empty are polite live
+  regions.
+- Targets are at least 24px. Invalid is a tint, a message, and a motion, never color alone.
+- Text keeps 4.5:1 on the field and the popup in both themes. With `prefers-contrast: more` the field
+  gets a 1px edge in `--ow-edge`; in forced colors the transparent outline is the edge and focus is
+  `Highlight`.
+
+## Theming [#theming]
+
+Autocomplete reads Combobox's theme tokens. Set them on a part with a class, or for every one on
+`:root`. A class around the field does not reach the popup, which renders in a portal.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-fg` | Text, and the field's tint: 6% at rest, 9% on hover |
+| `--ow-critical` | Invalid tint |
+| `--ow-muted` | Placeholder, buttons, group labels |
+| `--ow-hover`, `--ow-pressed-bg` | The buttons under the pointer and held; the Glide highlight |
+| `--ow-raised-bg`, `--ow-popup-shadow` | Popup surface and shadow |
+| `--ow-line` | Separators |
+| `--ow-radius` | Field and popup corners |
+| `--ow-focus` | Focus ring |
+| `--ow-edge` | The edge under `prefers-contrast: more` |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each part, so set yours on that part with a class.
+
+</ForMode>
+
+## Motion [#motion]
+
+The popup grows from the field in 180 ms and leaves in 140 ms; Glide moves one highlight between
+suggestions, following the pointer and the arrow keys. An invalid field shakes once. With
+`prefers-reduced-motion`, the popup only fades, Glide fades instead of sliding, and an invalid field
+blinks. Nothing runs at rest.

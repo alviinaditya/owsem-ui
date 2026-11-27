@@ -63,7 +63,7 @@ test("the Manual files are not in the page until the tab opens", async ({ page, 
 
 test("every component page's Manual offers the Tailwind choice", async ({ request }) => {
   const names = catalog.filter(isAvailable).map((entry) => entry.name);
-  expect(names.length).toBe(45);
+  expect(names.length).toBe(47);
   for (const name of names) {
     const data = await (await request.get(`/api/manual/${name}`)).json();
     expect(data.css.flavor, name).toBe("css");
@@ -592,6 +592,42 @@ test("Tailwind Preview Card: the Core modules it imports, no CSS file", async ({
   await expect(titles.filter({ hasText: "preview-card.css" })).toHaveCount(0);
   const classes = await copyVisibleFile(page, "preview-card/preview-card-variants.ts");
   expect(classes).not.toMatch(/import .*\.css/);
+});
+
+test("Tailwind Combobox: the Input and Select class maps it shares, the shake in the bridge", async ({
+  page,
+}) => {
+  await openTailwindManual(page, "/en/combobox");
+  const titles = manual(page).locator(".ow-code-block__title:visible");
+  for (const path of [
+    "components/owsem/combobox/combobox.tsx",
+    "components/owsem/combobox/combobox-variants.ts",
+    "components/owsem/input/input-variants.ts",
+    "components/owsem/select/select-variants.ts",
+    "lib/owsem/glide/use-glide.tsx",
+    "lib/owsem/cn.ts",
+  ]) {
+    await expect(titles.filter({ hasText: path })).toHaveCount(1);
+  }
+  await expect(titles.filter({ hasText: "combobox.css" })).toHaveCount(0);
+  const classes = await copyVisibleFile(page, "combobox/combobox-variants.ts");
+  expect(classes).not.toMatch(/import .*\.css/);
+  const bridge = await copyVisibleFile(page, "lib/owsem/tailwind.css");
+  expect(bridge).toContain("@keyframes ow-input-shake");
+});
+
+test("Tailwind Autocomplete: Combobox's files and class maps, no CSS file", async ({ page }) => {
+  await openTailwindManual(page, "/en/autocomplete");
+  const titles = manual(page).locator(".ow-code-block__title:visible");
+  for (const path of [
+    "components/owsem/autocomplete/autocomplete.tsx",
+    "components/owsem/autocomplete/autocomplete-variants.ts",
+    "components/owsem/combobox/combobox.tsx",
+    "components/owsem/combobox/combobox-variants.ts",
+  ]) {
+    await expect(titles.filter({ hasText: path })).toHaveCount(1);
+  }
+  await expect(titles.filter({ hasText: "autocomplete.css" })).toHaveCount(0);
 });
 
 test("Tailwind Scroll Area: its one custom variant in the bridge", async ({ page }) => {

@@ -1,0 +1,163 @@
+---
+title: Autocomplete
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Di registry, itemnya `autocomplete`, yang ikut memasang
+[Combobox](/id/combobox), yang bidang, popup, dan daftarnya ia pakai bersama.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Autocomplete } from "owsem-ui/base";
+
+const label = ["fitur", "perbaikan", "bug", "dokumentasi", "internal", "seluler"];
+
+export function CariLabel() {
+  return (
+    <Autocomplete.Root items={label}>
+      <Autocomplete.Input aria-label="Label" placeholder="mis. fitur" />
+      <Autocomplete.Popup>
+        <Autocomplete.Empty>Tidak ada saran.</Autocomplete.Empty>
+        <Autocomplete.List>
+          {(nama: string) => (
+            <Autocomplete.Item key={nama} value={nama}>
+              {nama}
+            </Autocomplete.Item>
+          )}
+        </Autocomplete.List>
+      </Autocomplete.Popup>
+    </Autocomplete.Root>
+  );
+}
+```
+
+Autocomplete adalah input teks dengan saran di bawahnya. Nilainya teks bebas: memilih saran mengisi
+input, dan teks yang tidak ada di saran mana pun sama sahnya. Pakai [Combobox](/id/combobox) bila nilainya
+harus salah satu item dan pilihannya perlu diingat. Input digambar seperti [Input](/id/input); popup, item,
+label grup, dan pemisahnya sama dengan milik Combobox dan [Select](/id/select).
+
+Beri nama input dengan label [Field](/id/field), `<label htmlFor>`, atau `aria-label`. Tanpa `InputGroup`,
+Input sendiri yang menjadi bidang. Di dalamnya ia polos, dengan Clear dan Trigger berupa persegi datar.
+Popup menggambar Portal dan Positioner sendiri. `mode` milik Base UI: `list` menyaring daftar, `both`
+juga mengisi input dengan saran yang disorot saat panah bergerak, `inline` hanya mengisinya, dan `none`
+tidak melakukan keduanya.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Base UI merender bagian, penyaringan, pengisian sebaris, dan pengumuman. OwsemUI menggambarnya seperti
+Combobox, dengan `data-slot` milik Autocomplete. Root, Value, dan Collection tidak merender elemen. Tidak
+ada ItemIndicator, Chips, atau Label: tidak ada yang dipilih.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | tidak ada | State, dan `size` untuk bidang dan popup |
+| <Part name="InputGroup" /> | `div.ow-combobox__input-group` | Bidangnya, bila ada tombol. Menerima state invalid, nonaktif, dan hanya baca |
+| <Part name="Input" /> | `input.ow-input` atau `input.ow-combobox__input` | Sendirian ia Input; di dalam grup ia polos |
+| <Part name="Clear" /> | `button.ow-combobox__clear` | Persegi datar. Menggambar × tanpa children; tampil hanya selama ada teks |
+| <Part name="Trigger" /> | `button.ow-combobox__trigger` | Persegi datar, bukan perhentian Tab. Menggambar Icon tanpa children |
+| <Part name="Icon" /> | `span.ow-combobox__icon` | Chevron, `1em + 2px`. Menggambarnya tanpa children |
+| Portal | `div` | Memindahkan popup ke akhir body, atau ke `container` |
+| Positioner | `div.ow-select__positioner` | `side`, `align`, `sideOffset` (6), dan `dir` |
+| <Part name="Popup" /> | `div.ow-select__popup.ow-combobox__popup` | Panel Combobox; tersembunyi bila tidak ada yang ditampilkan |
+| Status | `div.ow-combobox__status` | Live region sopan di atas daftar, tampil hanya dengan teks |
+| Empty | `div.ow-combobox__empty` | Tampil saat tidak ada saran yang cocok, dan hanya dengan teks |
+| List | `div.ow-select__list` | `role="listbox"`, memegang sorotan Glide |
+| <Part name="GroupLabel" /> | `div.ow-select__group-label` | Menamai `Autocomplete.Group`-nya |
+| <Part name="Item" /> | `div.ow-select__item.ow-combobox__item` | `role="option"`; menekannya mengisi input |
+| <Part name="Separator" /> | `div.ow-select__separator` | Garis tipis |
+
+| Ukuran | Font | Bidang | Tombol |
+| --- | --- | --- | --- |
+| `sm` | 13px | 32px | 24px |
+| `md` (default) | 14px | 40px | 32px |
+| `lg` | 16px | 48px | 40px |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### Autocomplete.Root
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Skala huruf bidang dan item; setiap bagian membacanya |
+
+Selebihnya, termasuk `mode`, milik Base UI. `value` dan `onValueChange` adalah teks input.
+
+### Bagian Autocomplete
+
+Bagiannya milik Combobox, digambar oleh kode yang sama, jadi catatan API Combobox berlaku: Trigger dan
+Clear menerima `children` dan `aria-label` (`"Open"` dan `"Clear"`), `align` pada Positioner adalah
+`"start"` dan `sideOffset` `6`, dan Popup menyembunyikan dirinya bila tidak ada yang ditampilkan. Lihat
+[Combobox](/id/combobox) untuk tabelnya.
+
+### Kelas CSS
+
+Autocomplete tidak punya kelas sendiri: bagiannya memakai kelas Combobox dan Select. Lihat
+[Combobox](/id/combobox) dan [Select](/id/select).
+
+## Aksesibilitas [#accessibility]
+
+| Tombol | Aksi |
+| --- | --- |
+| Panah Bawah, Panah Atas | Membuka daftar dan menyorot; lalu saran berikut atau sebelumnya |
+| Home, End | Memindahkan kursor teks ke awal atau akhir teks, seperti pada input mana pun |
+| Enter | Mengisi input dengan saran yang disorot |
+| Escape | Menutup daftar; tekanan kedua mengosongkan teks |
+
+- Input punya `role="combobox"` dengan `aria-autocomplete` (`list`, `both`, `inline`, atau `none`,
+  menurut `mode`), `aria-expanded`, `aria-controls`, dan saran yang disorot sebagai
+  `aria-activedescendant`, jadi fokus tetap di input. Beri nama dengan label Field atau `aria-label`.
+  Status dan Empty adalah live region sopan.
+- Target paling sedikit 24px. Invalid berupa warna, pesan, dan gerak, tidak pernah warna saja.
+- Teks menjaga 4,5:1 pada bidang dan popup di kedua tema. Dengan `prefers-contrast: more` bidang mendapat
+  tepi 1px dalam `--ow-edge`; di forced colors outline transparan adalah tepinya dan fokus berwarna
+  `Highlight`.
+
+## Tema [#theming]
+
+Autocomplete membaca token tema milik Combobox. Atur pada sebuah bagian dengan kelas, atau untuk semuanya
+di `:root`. Kelas di sekitar bidang tidak menjangkau popup, yang dirender di portal.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-fg` | Teks, dan isian bidang: 6% saat diam, 9% saat hover |
+| `--ow-critical` | Isian invalid |
+| `--ow-muted` | Placeholder, tombol, label grup |
+| `--ow-hover`, `--ow-pressed-bg` | Tombol di bawah kursor dan saat ditahan; sorotan Glide |
+| `--ow-raised-bg`, `--ow-popup-shadow` | Permukaan dan bayangan popup |
+| `--ow-line` | Pemisah |
+| `--ow-radius` | Sudut bidang dan popup |
+| `--ow-focus` | Cincin fokus |
+| `--ow-edge` | Tepi di bawah `prefers-contrast: more` |
+
+<ForMode mode="isolated">
+
+Dalam mode terisolasi, nilainya ada pada setiap bagian, jadi atur milik Anda pada bagian itu dengan
+kelas.
+
+</ForMode>
+
+## Gerak [#motion]
+
+Popup tumbuh dari bidang dalam 180 ms dan keluar dalam 140 ms; Glide menggerakkan satu sorotan di antara
+saran, mengikuti kursor dan tombol panah. Bidang invalid bergetar sekali. Dengan `prefers-reduced-motion`,
+popup hanya memudar, Glide memudar alih-alih meluncur, dan bidang invalid berkedip. Tidak ada yang
+berjalan saat diam.

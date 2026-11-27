@@ -1,0 +1,226 @@
+---
+title: Combobox
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Instalasi [#installation]
+
+<Install />
+
+Impor dari `owsem-ui/base`. Di registry, itemnya `combobox`, yang ikut memasang [Input](/id/input) dan
+[Select](/id/select), yang tampilannya ia pakai bersama.
+
+## Penggunaan [#usage]
+
+```tsx
+import { Combobox } from "owsem-ui/base";
+
+const buah = ["Apel", "Pisang", "Ceri", "Mangga", "Pepaya"];
+
+export function BuahCombobox() {
+  return (
+    <Combobox.Root items={buah}>
+      <Combobox.InputGroup>
+        <Combobox.Input aria-label="Buah" placeholder="Pilih buah" />
+        <Combobox.Clear />
+        <Combobox.Trigger />
+      </Combobox.InputGroup>
+      <Combobox.Popup>
+        <Combobox.Empty>Tidak ada buah yang cocok.</Combobox.Empty>
+        <Combobox.List>
+          {(nama: string) => (
+            <Combobox.Item key={nama} value={nama}>
+              {nama}
+              <Combobox.ItemIndicator />
+            </Combobox.Item>
+          )}
+        </Combobox.List>
+      </Combobox.Popup>
+    </Combobox.Root>
+  );
+}
+```
+
+Combobox adalah input yang menyaring daftar dan memilih darinya: satu nilai, atau beberapa yang tampil
+sebagai chip. Pakai [Autocomplete](/id/autocomplete) bila nilainya teks bebas, dan [Select](/id/select)
+bila tidak ada input untuk mengetik. Bidangnya digambar seperti [Input](/id/input), setinggi Input pada
+ukurannya, dengan Clear dan Trigger berupa persegi datar yang terpasang 4px dari ujungnya. Popup, item,
+label grup, dan pemisahnya milik Select, dan sorotan Glide mengikuti keyboard.
+
+Beri nama input dengan label [Field](/id/field), `<label htmlFor>`, atau `aria-label`. Bagian yang
+hampir selalu sama menggambar dirinya sendiri bila dibiarkan kosong: Trigger chevron, Clear dan
+ChipRemove ×, ItemIndicator centang. Popup menggambar Portal dan Positioner sendiri. `Input` tanpa
+`InputGroup` adalah bidangnya sendiri dan tampil seperti Input.
+
+## Contoh [#examples]
+
+<Examples />
+
+## Anatomi [#anatomy]
+
+<InspectButton />
+
+Base UI merender bagian, penyaringan, keyboard, tombol chip, dan pengumuman. OwsemUI menggambar bidang,
+chip, tombol, dan tampilan Select pada popup, dan membawa arah teks ke dalam portal. Root, Value, dan
+Collection tidak merender elemen.
+
+| Bagian | Elemen | Catatan |
+| --- | --- | --- |
+| <Part name="Root" /> | tidak ada | State, dan `size` untuk bidang dan popup |
+| Label | `div.ow-select__label` | Menamai Trigger, untuk input di dalam popup |
+| <Part name="InputGroup" /> | `div.ow-combobox__input-group` | Bidangnya. Menerima state invalid, nonaktif, dan hanya baca |
+| Chips | `div.ow-combobox__chips` | Memuat chip dan Input pada combobox `multiple` |
+| Chip | `div.ow-combobox__chip` | Pil 24px; `data-highlighted` saat tombol panah ada di atasnya |
+| ChipRemove | `button.ow-combobox__chip-remove` | Target 24px. Menggambar × tanpa children |
+| <Part name="Input" /> | `input.ow-combobox__input` | Polos di dalam grup; sendirian ia `ow-input` |
+| <Part name="Clear" /> | `button.ow-combobox__clear` | Persegi datar. Menggambar × tanpa children; tampil hanya selama ada yang bisa dihapus |
+| <Part name="Trigger" /> | `button.ow-combobox__trigger` | Persegi datar, bukan perhentian Tab. Menggambar Icon tanpa children |
+| <Part name="Icon" /> | `span.ow-combobox__icon` | Chevron, `1em + 2px`. Menggambarnya tanpa children |
+| Portal | `div` | Memindahkan popup ke akhir body, atau ke `container` |
+| Positioner | `div.ow-select__positioner` | `side`, `align`, `sideOffset` (6), dan `dir` |
+| <Part name="Popup" /> | `div.ow-select__popup.ow-combobox__popup` | Panel Select; tersembunyi bila tidak ada yang ditampilkan |
+| Status | `div.ow-combobox__status` | Live region sopan di atas daftar, tampil hanya dengan teks |
+| Empty | `div.ow-combobox__empty` | Tampil saat tidak ada item yang cocok, dan hanya dengan teks |
+| List | `div.ow-select__list` | `role="listbox"`, memegang sorotan Glide |
+| <Part name="GroupLabel" /> | `div.ow-select__group-label` | Menamai `Combobox.Group`-nya |
+| <Part name="Item" /> | `div.ow-select__item.ow-combobox__item` | `role="option"` |
+| ItemIndicator | `span.ow-select__item-indicator` | Centang di ujung baris; menyimpan tempatnya saat tidak terpilih |
+| <Part name="Separator" /> | `div.ow-select__separator` | Garis tipis |
+
+| Ukuran | Font | Bidang | Tombol | Chip |
+| --- | --- | --- | --- | --- |
+| `sm` | 13px | 32px | 24px | 24px |
+| `md` (default) | 14px | 40px | 32px | 24px |
+| `lg` | 16px | 48px | 40px | 24px |
+
+## Referensi API [#api]
+
+<BaseUiReference />
+
+### Combobox.Root
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Skala huruf bidang dan item; setiap bagian membacanya |
+
+### Combobox.InputGroup dan Combobox.Input
+
+Input di dalam InputGroup polos, dan grupnyalah bidangnya. Input di luar grup mendapat kelas milik Input.
+Keduanya membawa `data-size`.
+
+### Combobox.Trigger, Combobox.Clear, Combobox.ChipRemove, Combobox.Icon
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | Chevron; ×; × | Glif sebesar ikon yang diganti oleh children Anda |
+| `aria-label` | `string` | `"Open"`; `"Clear"`; `"Remove"` | Nama mereka, dalam bahasa Inggris: atur milik Anda untuk bahasa lain, dan namai tiap ChipRemove sesuai chip-nya |
+
+### Combobox.ItemIndicator
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `keepMounted` | `boolean` | `true` | Menyimpan tempatnya saat tidak terpilih, agar label tetap sejajar. Default Base UI adalah `false` |
+| `children` | `ReactNode` | Centang | Glif sebesar ikon |
+
+### Combobox.Positioner
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `align` | `"start" \| "center" \| "end"` | `"start"` | Default Base UI adalah `"center"` |
+| `sideOffset` | `number \| function` | `6` | Default Base UI adalah `0` |
+
+### Combobox.Popup dan Combobox.Empty
+
+Popup tanpa Positioner di sekitarnya menggambar Portal dan Positioner. Saat daftar kosong, dan Empty serta
+Status tidak punya teks, Popup disembunyikan: Empty yang berteks menampilkannya. `useFilter`,
+`useFilteredItems`, dan `createItems` milik Base UI, tanpa perubahan.
+
+### Kelas CSS
+
+Item, label grup, pemisah, Positioner, panel Popup, dan List memakai kelas Select (lihat
+[Select](/id/select)); kelas di bawah milik Combobox sendiri.
+
+| Kelas CSS | Bagian |
+| --- | --- |
+| `ow-combobox__input-group` | InputGroup |
+| `ow-combobox__input-group--sm`, `ow-combobox__input-group--md`, `ow-combobox__input-group--lg` | InputGroup, menurut `size` |
+| `ow-combobox__input` | Input, di dalam grup |
+| `ow-combobox__chips` | Chips |
+| `ow-combobox__chip` | Chip |
+| `ow-combobox__chip-remove` | ChipRemove |
+| `ow-combobox__clear` | Clear |
+| `ow-combobox__trigger` | Trigger |
+| `ow-combobox__icon` | Icon |
+| `ow-combobox__popup` | Popup, bersama `ow-select__popup` dan ukurannya |
+| `ow-combobox__list` | List, bersama `ow-select__list` |
+| `ow-combobox__item` | Item, bersama `ow-select__item` |
+| `ow-combobox__status`, `ow-combobox__empty` | Status, Empty |
+
+## Aksesibilitas [#accessibility]
+
+| Tombol | Aksi |
+| --- | --- |
+| Panah Bawah, Panah Atas | Pada input: membuka daftar dan menyorot; lalu item berikut atau sebelumnya |
+| Home, End | Memindahkan kursor teks ke awal atau akhir teks, seperti pada input mana pun |
+| Enter | Memilih item yang disorot |
+| Escape | Menutup daftar; tekanan kedua mengosongkan teks |
+| Backspace | `multiple`, di input kosong: menghapus chip terakhir |
+| Panah Kiri | `multiple`, dari awal input: pindah ke chip; Delete atau Backspace menghapus satu |
+
+- Input punya `role="combobox"` dengan `aria-expanded`, `aria-controls`, dan opsi yang disorot sebagai
+  `aria-activedescendant`, jadi fokus tetap di input. Beri nama dengan label Field atau `aria-label`.
+  Status dan Empty adalah live region sopan.
+- Target paling sedikit 24px: Clear dan Trigger berupa persegi 24 sampai 40px, tombol hapus chip 24px.
+- Invalid berupa warna, pesan, dan gerak, tidak pernah warna saja. Ia datang dari `Field` Base UI
+  (`data-invalid`) pada grup.
+- Teks menjaga 4,5:1 pada bidang, chip, dan popup, di kedua tema. Dengan `prefers-contrast: more`
+  bidang dan chip mendapat tepi 1px dalam `--ow-edge`, dan popup cincin tambahan. Di forced colors outline
+  transparan adalah tepinya, fokus berwarna `Highlight`, dan bagian nonaktif `GrayText`.
+
+## Tema [#theming]
+
+Combobox membaca token tema ini. Atur pada sebuah bagian dengan kelas, atau untuk semua combobox di
+`:root`. Kelas di sekitar bidang tidak menjangkau popup, yang dirender di portal.
+
+<Tokens />
+
+| Token tema | Fungsi |
+| --- | --- |
+| `--ow-fg` | Teks, dan isian bidang: 6% saat diam, 9% saat hover |
+| `--ow-critical` | Isian invalid |
+| `--ow-muted` | Placeholder, tombol, label grup |
+| `--ow-hover`, `--ow-pressed-bg` | Tombol di bawah kursor dan saat ditahan; sorotan Glide |
+| `--ow-raised-bg` | Permukaan popup, dan chip |
+| `--ow-popup-shadow`, `--ow-surface-shadow` | Bayangan popup, dan chip |
+| `--ow-line` | Pemisah |
+| `--ow-radius` | Sudut bidang dan popup; tombol dan item memakainya dikurangi inset 4px |
+| `--ow-focus` | Cincin fokus, dan milik chip yang disorot |
+| `--ow-edge` | Tepi di bawah `prefers-contrast: more` |
+
+<ForMode mode="isolated">
+
+Dalam mode terisolasi, nilainya ada pada setiap bagian, jadi atur milik Anda pada bagian itu dengan
+kelas.
+
+</ForMode>
+
+Setiap bagian menerima `className`, dan aturan Anda menang atas milik komponen tanpa `!important`.
+`--py` menerima nilai lewat `style` pada grup.
+
+## Gerak [#motion]
+
+Popup tumbuh dari bidang dalam 180 ms dan keluar dalam 140 ms; Glide menggerakkan satu sorotan di antara
+item, mengikuti kursor dan tombol panah. Centang pilihan memudar dan membesar masuk dengan spring settle.
+Clear memudar masuk dan keluar bersama pilihan. Bidang invalid bergetar sekali. Dengan
+`prefers-reduced-motion`, popup hanya memudar, Glide memudar alih-alih meluncur, dan bidang invalid
+berkedip. Tidak ada yang berjalan saat diam.

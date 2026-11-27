@@ -1,0 +1,224 @@
+---
+title: Combobox
+---
+
+import { Examples, Install, InspectButton, Part, Tokens } from "@/components/component-page/docs";
+import { ForMode } from "@/components/token-setup";
+
+## Installation [#installation]
+
+<Install />
+
+Import it from `owsem-ui/base`. In the registry it is the `combobox` item, which also installs
+[Input](/en/input) and [Select](/en/select), whose look it shares.
+
+## Usage [#usage]
+
+```tsx
+import { Combobox } from "owsem-ui/base";
+
+const fruits = ["Apple", "Banana", "Cherry", "Mango", "Papaya"];
+
+export function FruitCombobox() {
+  return (
+    <Combobox.Root items={fruits}>
+      <Combobox.InputGroup>
+        <Combobox.Input aria-label="Fruit" placeholder="Pick a fruit" />
+        <Combobox.Clear />
+        <Combobox.Trigger />
+      </Combobox.InputGroup>
+      <Combobox.Popup>
+        <Combobox.Empty>No fruit matches.</Combobox.Empty>
+        <Combobox.List>
+          {(fruit: string) => (
+            <Combobox.Item key={fruit} value={fruit}>
+              {fruit}
+              <Combobox.ItemIndicator />
+            </Combobox.Item>
+          )}
+        </Combobox.List>
+      </Combobox.Popup>
+    </Combobox.Root>
+  );
+}
+```
+
+Combobox is an input that filters a list and selects from it: one value, or several shown as chips.
+Use [Autocomplete](/en/autocomplete) when the value is free text, and [Select](/en/select) when there
+is no input to type in. The field is drawn as [Input](/en/input) is, as tall as an Input of its size,
+with the Clear and Trigger as flat squares inset 4px from its end. The popup, items, group labels,
+and separators are Select's, and Glide's highlight follows the keyboard.
+
+Name the input with a [Field](/en/field) label, a `<label htmlFor>`, or `aria-label`. Parts that are
+nearly always the same draw themselves when left empty: the Trigger a chevron, the Clear and ChipRemove
+an ×, the ItemIndicator a check. A Popup draws its own Portal and Positioner. An `Input` without an
+`InputGroup` is the field itself and looks like an Input.
+
+## Examples [#examples]
+
+<Examples />
+
+## Anatomy [#anatomy]
+
+<InspectButton />
+
+Base UI renders the parts, the filtering, the keyboard, the chips' keys, and the announcements.
+OwsemUI draws the field, the chips, the buttons, and the Select look of the popup, and carries the text
+direction into the portal. Root, Value, and Collection render no element.
+
+| Part | Element | Notes |
+| --- | --- | --- |
+| <Part name="Root" /> | none | State, and `size` for the field and the popup |
+| Label | `div.ow-select__label` | Names the Trigger, for an input inside the popup |
+| <Part name="InputGroup" /> | `div.ow-combobox__input-group` | The field. Takes the invalid, disabled, and read-only states |
+| Chips | `div.ow-combobox__chips` | Holds the chips and the Input of a `multiple` combobox |
+| Chip | `div.ow-combobox__chip` | A 24px pill; `data-highlighted` while the arrow keys are on it |
+| ChipRemove | `button.ow-combobox__chip-remove` | A 24px target. Draws an × without children |
+| <Part name="Input" /> | `input.ow-combobox__input` | Bare in a group; alone it is an `ow-input` |
+| <Part name="Clear" /> | `button.ow-combobox__clear` | A flat square. Draws an × without children; shows only while there is something to clear |
+| <Part name="Trigger" /> | `button.ow-combobox__trigger` | A flat square, not a tab stop. Draws an Icon without children |
+| <Part name="Icon" /> | `span.ow-combobox__icon` | A chevron, `1em + 2px`. Draws one without children |
+| Portal | `div` | Moves the popup to the end of the body, or into `container` |
+| Positioner | `div.ow-select__positioner` | `side`, `align`, `sideOffset` (6), and `dir` |
+| <Part name="Popup" /> | `div.ow-select__popup.ow-combobox__popup` | Select's panel; hidden when there is nothing to show |
+| Status | `div.ow-combobox__status` | A polite live region over the list, shown only with text |
+| Empty | `div.ow-combobox__empty` | Shown when no item matches, and only with text |
+| List | `div.ow-select__list` | `role="listbox"`, holds the Glide highlight |
+| <Part name="GroupLabel" /> | `div.ow-select__group-label` | Names its `Combobox.Group` |
+| <Part name="Item" /> | `div.ow-select__item.ow-combobox__item` | `role="option"` |
+| ItemIndicator | `span.ow-select__item-indicator` | A check at the row's end; keeps its room while unselected |
+| <Part name="Separator" /> | `div.ow-select__separator` | A hairline |
+
+| Size | Font | Field | Buttons | Chip |
+| --- | --- | --- | --- | --- |
+| `sm` | 13px | 32px | 24px | 24px |
+| `md` (default) | 14px | 40px | 32px | 24px |
+| `lg` | 16px | 48px | 40px | 24px |
+
+## API reference [#api]
+
+<BaseUiReference />
+
+### Combobox.Root
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Type scale of the field and the items; every part reads it |
+
+### Combobox.InputGroup and Combobox.Input
+
+An Input inside an InputGroup is bare, and the group is the field. An Input outside one gets Input's own
+classes. Both carry `data-size`.
+
+### Combobox.Trigger, Combobox.Clear, Combobox.ChipRemove, Combobox.Icon
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | A chevron; an ×; an × | Icon-sized glyphs that your children replace |
+| `aria-label` | `string` | `"Open"`; `"Clear"`; `"Remove"` | Their names, in English: set your own for another language, and name each ChipRemove after its chip |
+
+### Combobox.ItemIndicator
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `keepMounted` | `boolean` | `true` | Keeps its room while unselected, so labels stay in line. Base UI's default is `false` |
+| `children` | `ReactNode` | A check | An icon-sized glyph |
+
+### Combobox.Positioner
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `align` | `"start" \| "center" \| "end"` | `"start"` | Base UI's default is `"center"` |
+| `sideOffset` | `number \| function` | `6` | Base UI's default is `0` |
+
+### Combobox.Popup and Combobox.Empty
+
+A Popup without a Positioner around it draws a Portal and a Positioner. When the list is empty, and the
+Empty and the Status have no text, the Popup is hidden: an Empty with text shows it. `useFilter`,
+`useFilteredItems`, and `createItems` are Base UI's, unchanged.
+
+### CSS classes
+
+Items, group labels, separators, the Positioner, the Popup's panel, and the List take Select's classes
+(see [Select](/en/select)); the classes below are Combobox's own.
+
+| CSS class | Part |
+| --- | --- |
+| `ow-combobox__input-group` | InputGroup |
+| `ow-combobox__input-group--sm`, `ow-combobox__input-group--md`, `ow-combobox__input-group--lg` | InputGroup, by `size` |
+| `ow-combobox__input` | Input, in a group |
+| `ow-combobox__chips` | Chips |
+| `ow-combobox__chip` | Chip |
+| `ow-combobox__chip-remove` | ChipRemove |
+| `ow-combobox__clear` | Clear |
+| `ow-combobox__trigger` | Trigger |
+| `ow-combobox__icon` | Icon |
+| `ow-combobox__popup` | Popup, with `ow-select__popup` and its size |
+| `ow-combobox__list` | List, with `ow-select__list` |
+| `ow-combobox__item` | Item, with `ow-select__item` |
+| `ow-combobox__status`, `ow-combobox__empty` | Status, Empty |
+
+## Accessibility [#accessibility]
+
+| Key | Action |
+| --- | --- |
+| Arrow Down, Arrow Up | On the input: open the list and highlight; then the next or previous item |
+| Home, End | Move the caret to the start or end of the text, as in any input |
+| Enter | Pick the highlighted item |
+| Escape | Shut the list; a second press clears the text |
+| Backspace | `multiple`, in the empty input: remove the last chip |
+| Arrow Left | `multiple`, from the start of the input: move onto the chips; Delete or Backspace removes one |
+
+- The input has `role="combobox"` with `aria-expanded`, `aria-controls`, and the highlighted option as
+  `aria-activedescendant`, so focus stays in the input. Name it with a Field label or `aria-label`.
+  The Status and Empty are polite live regions.
+- Targets are at least 24px: the Clear and Trigger are 24 to 40px squares, a chip's remove button 24px.
+- Invalid is a tint, a message, and a motion, never color alone. It comes from Base UI's `Field`
+  (`data-invalid`) on the group.
+- Text keeps 4.5:1 on the field, the chips, and the popup, in both themes. With `prefers-contrast: more`
+  the field and the chips get a 1px edge in `--ow-edge`, and the popup an extra ring. In forced colors
+  the transparent outline is the edge, focus is `Highlight`, and disabled parts are `GrayText`.
+
+## Theming [#theming]
+
+Combobox reads these theme tokens. Set them on a part with a class, or for every combobox on `:root`.
+A class around the field does not reach the popup, which renders in a portal.
+
+<Tokens />
+
+| Theme token | Purpose |
+| --- | --- |
+| `--ow-fg` | Text, and the field's tint: 6% at rest, 9% on hover |
+| `--ow-critical` | Invalid tint |
+| `--ow-muted` | Placeholder, buttons, group labels |
+| `--ow-hover`, `--ow-pressed-bg` | The buttons under the pointer and held; the Glide highlight |
+| `--ow-raised-bg` | Popup surface, and the chips |
+| `--ow-popup-shadow`, `--ow-surface-shadow` | The popup's shadow, and the chips' |
+| `--ow-line` | Separators |
+| `--ow-radius` | Field and popup corners; buttons and items take it less their 4px inset |
+| `--ow-focus` | Focus ring, and the highlighted chip's |
+| `--ow-edge` | The edge under `prefers-contrast: more` |
+
+<ForMode mode="isolated">
+
+In isolated mode the values sit on each part, so set yours on that part with a class.
+
+</ForMode>
+
+Every part takes a `className`, and your rule wins over the component's without `!important`. `--py`
+takes a value through `style` on the group.
+
+## Motion [#motion]
+
+The popup grows from the field in 180 ms and leaves in 140 ms; Glide moves one highlight between items,
+following the pointer and the arrow keys. A pick's check fades and scales in on the settle spring. The
+Clear fades in and out with the selection. An invalid field shakes once. With `prefers-reduced-motion`,
+the popup only fades, Glide fades instead of sliding, and an invalid field blinks. Nothing runs at rest.

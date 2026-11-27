@@ -2,11 +2,13 @@
 
 import {
   Accordion,
+  Autocomplete,
   Avatar,
   Button,
   Checkbox,
   CheckboxGroup,
   Collapsible,
+  Combobox,
   Dialog,
   Drawer,
   Field,
@@ -122,6 +124,8 @@ const TEXT = {
     toastWarning: "Penyimpanan hampir penuh",
     toastSaved: "Perubahan disimpan",
     toastSavedBody: "Draf sudah diperbarui.",
+    fruit: "Buah",
+    fruitNames: ["Apel", "Pisang", "Ceri"],
   },
   en: {
     create: "New",
@@ -194,6 +198,8 @@ const TEXT = {
     toastWarning: "Storage almost full",
     toastSaved: "Changes saved",
     toastSavedBody: "The draft is up to date.",
+    fruit: "Fruit",
+    fruitNames: ["Apple", "Banana", "Cherry"],
   },
 };
 
@@ -557,6 +563,63 @@ function SelectPreview({ t }: { t: Text }) {
   );
 }
 
+/**
+ * Floating UI hides the page around an open combobox from assistive technology, and a pinned one
+ * would hide the whole index. So the field is live and closed, and its list is a picture: the
+ * classes the open popup and its items wear, under the field.
+ */
+function ListPicture({ names, picked }: { names: readonly string[]; picked?: string | undefined }) {
+  return (
+    <div className="component-preview-list ow-select__popup ow-select__popup--sm ow-combobox__popup">
+      <div className="ow-select__list ow-combobox__list">
+        {names.map((name) => (
+          <div
+            key={name}
+            className="ow-select__item ow-combobox__item"
+            data-selected={name === picked ? "" : undefined}
+          >
+            {name}
+            {picked === undefined ? null : (
+              <span
+                className="ow-select__item-indicator"
+                data-selected={name === picked ? "" : undefined}
+              >
+                <Icon name="check" />
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ComboboxPreview({ t }: { t: Text }) {
+  return (
+    <div className="component-preview-field">
+      <Combobox.Root items={t.fruitNames} defaultValue={t.fruitNames[1]} size="sm">
+        <Combobox.InputGroup>
+          <Combobox.Input aria-label={t.fruit} />
+          <Combobox.Clear />
+          <Combobox.Trigger />
+        </Combobox.InputGroup>
+      </Combobox.Root>
+      <ListPicture names={t.fruitNames} picked={t.fruitNames[1]} />
+    </div>
+  );
+}
+
+function AutocompletePreview({ t }: { t: Text }) {
+  return (
+    <div className="component-preview-field">
+      <Autocomplete.Root items={t.fruitNames} defaultValue={t.fruitNames[0]} size="sm">
+        <Autocomplete.Input aria-label={t.fruit} />
+      </Autocomplete.Root>
+      <ListPicture names={t.fruitNames} />
+    </div>
+  );
+}
+
 function CommandMenuPreview({ t }: { t: Text }) {
   const [frame, setFrame] = useState<HTMLDivElement | null>(null);
   const items = [
@@ -889,6 +952,8 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
   "navigation-menu": (t) => <NavigationMenuPreview t={t} />,
   menu: (t) => <MenuPreview t={t} />,
   select: (t) => <SelectPreview t={t} />,
+  combobox: (t) => <ComboboxPreview t={t} />,
+  autocomplete: (t) => <AutocompletePreview t={t} />,
   "tree-rail-nav": (t) => (
     <TreeRailNav.Root aria-label={t.guides} className="component-preview-tree">
       <TreeRailNav.List>

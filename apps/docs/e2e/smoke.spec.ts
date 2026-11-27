@@ -44,6 +44,8 @@ for (const path of [
   "/en/radio-group",
   "/en/dialog",
   "/en/select",
+  "/id/combobox",
+  "/en/autocomplete",
   "/en/input",
   "/id/field",
   "/en/fieldset",

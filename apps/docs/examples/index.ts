@@ -3,6 +3,7 @@ import type { ExamplePageProps } from "@/components/component-page/component-pag
 import type { ComponentName } from "@/lib/catalog";
 import AccordionPage from "./accordion";
 import AlertDialogPage from "./alert-dialog";
+import AutocompletePage from "./autocomplete";
 import AvatarPage from "./avatar";
 import ButtonPage from "./button";
 import CheckboxPage from "./checkbox";
@@ -10,6 +11,7 @@ import CheckboxGroupPage from "./checkbox-group";
 import CodeBlockPage from "./code-block";
 import CollapsiblePage from "./collapsible";
 import ColorPickerPage from "./color-picker";
+import ComboboxPage from "./combobox";
 import CommandMenuPage from "./command-menu";
 import ContextMenuPage from "./context-menu";
 import CopyButtonPage from "./copy-button";
@@ -97,6 +99,8 @@ export const examples: Partial<Record<ComponentName, ComponentType<ExamplePagePr
   drawer: DrawerPage,
   toast: ToastPage,
   "preview-card": PreviewCardPage,
+  combobox: ComboboxPage,
+  autocomplete: AutocompletePage,
   "icon-morph": IconMorphPage,
   "code-block": CodeBlockPage,
 };

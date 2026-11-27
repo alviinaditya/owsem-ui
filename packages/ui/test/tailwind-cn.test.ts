@@ -5,6 +5,7 @@ import {
   accordionTriggerVariants,
 } from "../src/tailwind/accordion/accordion-variants";
 import { alertDialogSlots } from "../src/tailwind/alert-dialog/alert-dialog-variants";
+import { autocompleteSlots } from "../src/tailwind/autocomplete/autocomplete-variants";
 import { avatarSlots, avatarVariants } from "../src/tailwind/avatar/avatar-variants";
 import { buttonSlots, buttonVariants } from "../src/tailwind/button/button-variants";
 import { checkboxSlots, checkboxVariants } from "../src/tailwind/checkbox/checkbox-variants";
@@ -19,6 +20,12 @@ import {
   colorPickerSlots,
   colorPickerTriggerVariants,
 } from "../src/tailwind/color-picker/color-picker-variants";
+import {
+  comboboxInputGroupVariants,
+  comboboxInputVariants,
+  comboboxPopupVariants,
+  comboboxSlots,
+} from "../src/tailwind/combobox/combobox-variants";
 import {
   commandMenuPopupVariants,
   commandMenuSlots,
@@ -103,12 +110,14 @@ const SIZES = ["sm", "md", "lg"] as const;
 const all = classNames(
   ...[
     accordionSlots,
+    autocompleteSlots,
     avatarSlots,
     buttonSlots,
     checkboxSlots,
     codeBlockSlots,
     collapsibleSlots,
     colorPickerSlots,
+    comboboxSlots,
     commandMenuSlots,
     contextMenuSlots,
     copyButtonSlots,
@@ -176,6 +185,9 @@ const all = classNames(
     tabsListVariants({ size }),
     inputVariants({ size }),
     inputWrapperVariants({ size }),
+    comboboxInputGroupVariants({ size }),
+    comboboxInputVariants({ size }),
+    comboboxPopupVariants({ size }),
     commandMenuPopupVariants({ size }),
     commandMenuTriggerVariants({ size }),
     colorPickerTriggerVariants({ size }),
@@ -556,6 +568,36 @@ describe("a user's className wins over Tree Rail Nav and Sidebar", () => {
     gone(cn(treeRailNavSlots.panel, "duration-700 h-8"), [
       "duration-340",
       "h-(--collapsible-panel-height)",
+    ]);
+  });
+});
+
+describe("a user's className wins over Combobox", () => {
+  const tokens = (value: string) => value.split(" ");
+  const gone = (value: string, names: string[]) => {
+    for (const name of names) expect(tokens(value), name).not.toContain(name);
+  };
+
+  test("on the field, the popup, the chip, and the buttons", () => {
+    gone(cn(comboboxInputGroupVariants({ size: "sm" }), "p-0 rounded-none text-lg bg-red-500"), [
+      "p-(--_inset)",
+      "rounded-(--ow-radius)",
+      "text-[0.8125rem]",
+      "bg-(color:--_bg)",
+    ]);
+    gone(cn(comboboxPopupVariants({ size: "md" }), "rounded-none max-h-4 bg-red-500"), [
+      "rounded-(--ow-radius)",
+      "max-h-(--available-height)",
+      "bg-(color:--_bg)",
+    ]);
+    gone(cn(comboboxSlots.chip, "px-8 rounded-none bg-red-500"), [
+      "ps-[0.75em]",
+      "rounded-[calc(var(--_chip)_/_2)]",
+      "bg-(color:--_bg)",
+    ]);
+    gone(cn(comboboxSlots.trigger, "rounded-none size-4 bg-red-500"), [
+      "rounded-(--_radius)",
+      "size-(--_stepper)",
     ]);
   });
 });

@@ -57,6 +57,8 @@ export const components: string[] = [
   "context-menu",
   "menubar",
   "navigation-menu",
+  "combobox",
+  "autocomplete",
 ];
 
 const HEADER = "// Generated from";

@@ -1,0 +1,26 @@
+// Generated from components/autocomplete by scripts/build-tailwind.ts; do not edit.
+export type {
+  AutocompleteArrowProps,
+  AutocompleteBackdropProps,
+  AutocompleteClearProps,
+  AutocompleteCollectionProps,
+  AutocompleteEmptyProps,
+  AutocompleteGroupLabelProps,
+  AutocompleteGroupProps,
+  AutocompleteIconProps,
+  AutocompleteInputGroupProps,
+  AutocompleteInputProps,
+  AutocompleteItemProps,
+  AutocompleteListProps,
+  AutocompletePopupProps,
+  AutocompletePortalProps,
+  AutocompletePositionerProps,
+  AutocompleteRootProps,
+  AutocompleteRowProps,
+  AutocompleteSeparatorProps,
+  AutocompleteStatusProps,
+  AutocompleteTriggerProps,
+  AutocompleteValueProps,
+} from "./autocomplete";
+export * as Autocomplete from "./autocomplete.parts";
+export type { AutocompleteSize } from "./autocomplete-variants";

@@ -172,7 +172,7 @@ Glide never moves focus; for a keyboard highlight, call `glide.setActive(item)`.
 ## Components available now
 
 Read the registry index or the docs, not a hard-coded list. As of this version of the skill,
-**Accordion**, **Alert Dialog**, **Avatar**, **Button**, **Checkbox**, **Checkbox Group**, **Collapsible**, **Context Menu**, **Dialog**, **Drawer**,
+**Accordion**, **Alert Dialog**, **Autocomplete**, **Avatar**, **Button**, **Checkbox**, **Checkbox Group**, **Collapsible**, **Combobox**, **Context Menu**, **Dialog**, **Drawer**,
 **Field**, **Fieldset**, **Form**, **Input**, **Kbd**, **Menu**, **Menubar**, **Meter**, **Navigation Menu**, **Number Field**, **OTP Field**, **Popover**, **Preview Card**, **Progress**, **Radio Group**, **Scroll Area**,
 **Select**, **Separator**, **Slider**, **Switch**, **Tabs**, **Toast**, **Toggle**, **Toggle Group**, **Toolbar**, and **Tooltip** (Base, from `owsem-ui/base`)
 and **Code Block**, **Color Picker**, **Command Menu**, **Copy Button**, **Icon Morph**,
@@ -782,6 +782,104 @@ Details:
 - Reads `--ow-fg` (the trigger's text and tint), `--ow-critical`, `--ow-raised-bg`,
   `--ow-popup-shadow`, `--ow-muted`, `--ow-hover` (Glide), `--ow-line` (separators),
   `--ow-radius`, and `--ow-focus`.
+
+### Combobox
+
+An input that filters a list and selects one value, or several as chips. Registry item: `combobox`.
+For free text with suggestions use Autocomplete instead.
+
+```tsx
+import { Combobox } from "owsem-ui/base"; // or "@/components/owsem/combobox"
+<Combobox.Root items={fruits}>
+  <Combobox.InputGroup>
+    <Combobox.Input aria-label="Fruit" placeholder="Pick a fruit" />
+    <Combobox.Clear />
+    <Combobox.Trigger />
+  </Combobox.InputGroup>
+  <Combobox.Popup>
+    <Combobox.Empty>No fruit matches.</Combobox.Empty>
+    <Combobox.List>
+      {(fruit: string) => (
+        <Combobox.Item key={fruit} value={fruit}>
+          {fruit}
+          <Combobox.ItemIndicator />
+        </Combobox.Item>
+      )}
+    </Combobox.List>
+  </Combobox.Popup>
+</Combobox.Root>
+```
+
+- Name the input with a `Field.Label`, a `<label htmlFor>`, or `aria-label`. `Root` takes
+  `size="sm|md|lg"` for the field and the items (13, 14, 16px; the field is as tall as an Input).
+- Parts draw themselves when left empty: `Trigger` a chevron `Icon`, `Clear` an ×, `ChipRemove` an ×,
+  `ItemIndicator` a check (at the row's end, keeping its room unselected). `Clear` shows only while
+  there is something to clear. `Empty` and `Status` show only when they have text; a popup with
+  no match, no Empty text, and no Status is hidden.
+- `InputGroup` is the field (a tint like Input, buttons as flat squares inset 4px). `Input` alone,
+  without a group, looks like an Input. `Popup` draws its own Portal and Positioner (6px under the
+  field, starting where it starts); the panel, items, group labels, and separators are Select's.
+- `multiple`: put `Chips` inside the group, around the chips and the `Input`. Chips are 24px pills;
+  Backspace in the empty input removes the last. Give each `ChipRemove` its own name: the default is
+  "Remove".
+
+  ```tsx
+  <Combobox.Root items={fruits} multiple>
+    <Combobox.InputGroup>
+      <Combobox.Chips>
+        <Combobox.Value>
+          {(value: string[]) =>
+            value.map((fruit) => (
+              <Combobox.Chip key={fruit}>
+                {fruit}
+                <Combobox.ChipRemove aria-label={`Remove ${fruit}`} />
+              </Combobox.Chip>
+            ))
+          }
+        </Combobox.Value>
+        <Combobox.Input aria-label="Fruits" />
+      </Combobox.Chips>
+    </Combobox.InputGroup>
+    {/* Popup as above */}
+  </Combobox.Root>
+  ```
+- Grouped items: `items={[{ value: "Group", items: [...] }]}`, then `Group` (with `items`),
+  `GroupLabel`, and `Collection` inside the List. Async: `filter={null}`, set `items` yourself, and
+  put the loading line in `Status`.
+- Glide's highlight follows the keyboard's highlight (focus stays in the input). Under a Field, an
+  invalid state turns the group critical and shakes it once.
+- Reads `--ow-fg`, `--ow-muted`, `--ow-hover`, `--ow-pressed-bg`, `--ow-raised-bg`,
+  `--ow-popup-shadow`, `--ow-surface-shadow`, `--ow-critical`, `--ow-focus`, `--ow-edge`, `--ow-line`,
+  and `--ow-radius`. Set them on the Popup's class or on `:root`: the popup renders in a portal.
+
+### Autocomplete
+
+A text input with suggestions; the value is the text, free. It is Combobox with the selection taken
+out, so the field, the popup, and the list are the same. Registry item: `autocomplete`.
+
+```tsx
+import { Autocomplete } from "owsem-ui/base"; // or "@/components/owsem/autocomplete"
+<Autocomplete.Root items={tags}>
+  <Autocomplete.Input aria-label="Tag" placeholder="e.g. feature" />
+  <Autocomplete.Popup>
+    <Autocomplete.Empty>No suggestions.</Autocomplete.Empty>
+    <Autocomplete.List>
+      {(tag: string) => (
+        <Autocomplete.Item key={tag} value={tag}>{tag}</Autocomplete.Item>
+      )}
+    </Autocomplete.List>
+  </Autocomplete.Popup>
+</Autocomplete.Root>
+```
+
+- `Input` alone is the field, looking like an Input; add `InputGroup` with `Clear` and `Trigger` for
+  buttons. `size="sm|md|lg"` on `Root`.
+- `mode` is Base UI's: `"list"` (default) filters, `"both"` filters and fills the input with the
+  highlighted suggestion while the arrows move, `"inline"` only fills it, `"none"` does neither.
+  `value` and `onValueChange` are the input's text.
+- Parts are as Combobox's, with `data-slot="autocomplete-…"`: `Popup` draws its own Portal and
+  Positioner, `Empty` and `Status` show only with text, groups use `Group`, `GroupLabel`, and
+  `Collection`. There is no `ItemIndicator` or `Chips`: nothing is selected.
 
 ### Popover
 

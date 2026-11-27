@@ -27,6 +27,7 @@ export default [
   entry("core", "dist/core/index.js", "6 kB"),
   entry("accordion", "dist/components/accordion/index.js", "3 kB"),
   entry("alert-dialog", "dist/components/alert-dialog/index.js", "3 kB"),
+  entry("autocomplete", "dist/components/autocomplete/index.js", "3 kB"),
   entry("avatar", "dist/components/avatar/index.js", "3 kB"),
   entry("button", "dist/components/button/index.js", "3 kB"),
   entry("checkbox", "dist/components/checkbox/index.js", "3 kB"),
@@ -64,6 +65,7 @@ export default [
   entry("tooltip", "dist/components/tooltip/index.js", "3 kB"),
   // Code Block builds on Copy Button, Button, and Icon Morph, which count here too.
   entry("code-block", "dist/components/code-block/index.js", "8 kB"),
+  entry("combobox", "dist/components/combobox/index.js", "3 kB"),
   entry("command-menu", "dist/components/command-menu/index.js", "8 kB"),
   // Copy Button builds on Button and Icon Morph, which count here too.
   entry("copy-button", "dist/components/copy-button/index.js", "8 kB"),

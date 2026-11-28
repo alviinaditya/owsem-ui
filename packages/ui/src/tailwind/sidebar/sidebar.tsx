@@ -17,7 +17,6 @@ import {
   useContext,
   useEffect,
   useId,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -28,6 +27,7 @@ import { GlideHighlight, useGlide } from "../lib/glide/use-glide";
 import { useMergedRefs } from "../lib/merge-refs";
 import { prefersReducedMotion } from "../lib/reduced-motion";
 import { trackPointerType, useScrollLock } from "../lib/scroll-lock";
+import { useBeforePaint } from "../lib/use-before-paint";
 import { createIndicator } from "./sidebar.indicator";
 import { sidebarSlots } from "./sidebar-variants";
 
@@ -253,7 +253,7 @@ export function SidebarRoot({
  */
 function useRoomVar(release: boolean): (node: HTMLElement | null) => void {
   const [node, setNode] = useState<HTMLElement | null>(null);
-  useLayoutEffect(() => {
+  useBeforePaint(() => {
     if (!node || !release) return;
     const measure = () => node.style.setProperty("--_w", `${node.offsetWidth}px`);
     // Measured before the first paint, and only then may the margin transition, so it never runs on load.

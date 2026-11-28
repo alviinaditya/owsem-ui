@@ -3,8 +3,8 @@
 /*
  * Sidebar, an Owsem component: the site navigation. Quiet rows, a liquid background and dot for the
  * current page, and Glide's highlight between the rest. Desktop: closed, it slides out and fades
- * (translate and opacity only), and with space="release" the page takes its room. Mobile: a drawer (Base UI Dialog) from the inline start. Its width is its
- * inline-size, which a class of yours sets.
+ * (translate and opacity only), and with space="release" the page takes its room. Mobile: a drawer
+ * (Base UI Dialog) from the inline start. Its width is its inline-size, which a class of yours sets.
  */
 @layer owsem.components {
   .ow-sidebar__provider {

@@ -34,6 +34,11 @@ const TEXT = {
     move: "Pindah",
     run: "Jalankan",
     dismiss: "Tutup",
+    sizes: [
+      ["sm", "Kecil"],
+      ["md", "Sedang"],
+      ["lg", "Besar"],
+    ],
     stats: [
       ["Pendapatan", "Rp 84 jt"],
       ["Pengguna", "2.418"],
@@ -80,6 +85,11 @@ const TEXT = {
     move: "Move",
     run: "Run",
     dismiss: "Close",
+    sizes: [
+      ["sm", "Small"],
+      ["md", "Medium"],
+      ["lg", "Large"],
+    ],
     stats: [
       ["Revenue", "$5.2k"],
       ["Users", "2,418"],
@@ -285,6 +295,28 @@ function Demo({
   );
 }
 
+/**
+ * The three sizes side by side: a button for each opens its own menu inside the window. The buttons
+ * wrap on a narrow preview; the short list keeps the largest panel inside the window.
+ */
+function Sizes({ lang }: { lang: Lang }) {
+  const t = TEXT[lang];
+  const [frame, setFrame] = useState<HTMLDivElement | null>(null);
+  const groups = t.groups.map((group) => ({ ...group, items: group.items.slice(0, 2) }));
+  return (
+    <div ref={setFrame} className="demo-command">
+      <div className="demo-command-sizes">
+        {t.sizes.map(([size, label]) => (
+          <CommandMenu.Root key={size} items={groups} shortcut={false} modal={false}>
+            <CommandMenu.Trigger size={size as CommandMenuSize}>{label}</CommandMenu.Trigger>
+            <Palette t={t} size={size as CommandMenuSize} container={frame} focus={() => true} />
+          </CommandMenu.Root>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /** One complete instance: the Trigger, and the open panel in a box of its own, inert. */
 function Specimen({ lang }: { lang: Lang }) {
   const t = TEXT[lang];
@@ -318,7 +350,13 @@ const file = (
     rootProps = [],
     popupProps = [],
     triggerProps = "",
-  }: { rootProps?: string[]; popupProps?: string[]; triggerProps?: string } = {},
+    triggerText,
+  }: {
+    rootProps?: string[];
+    popupProps?: string[];
+    triggerProps?: string;
+    triggerText?: string;
+  } = {},
 ) => {
   const t = TEXT[lang];
   const [pages, actions] = t.groups;
@@ -331,8 +369,8 @@ const file = (
     [
       `<CommandMenu.Root items={groups}${rootProps.map((p) => ` ${p}`).join("")}>`,
       `  <CommandMenu.Trigger${triggerProps}>`,
-      `    ${t.trigger}`,
-      "    <CommandMenu.Shortcut aria-hidden>⌘K</CommandMenu.Shortcut>",
+      `    ${triggerText ?? t.trigger}`,
+      ...(triggerText ? [] : ["    <CommandMenu.Shortcut aria-hidden>⌘K</CommandMenu.Shortcut>"]),
       "  </CommandMenu.Trigger>",
       `  <CommandMenu.Popup ${popup}>`,
       `    <CommandMenu.Input aria-label="${t.input}" placeholder="${t.placeholder}" />`,
@@ -390,14 +428,36 @@ export const commandMenuDefinition = defineComponent({
       id: "sizes",
       title: { id: "Ukuran", en: "Sizes" },
       description: {
-        id: 'size="lg" di Popup dan Trigger: teks 16px dan baris yang lebih tinggi.',
-        en: 'size="lg" on the Popup and the Trigger: 16px text and taller rows.',
+        id: 'size di Popup dan Trigger: "sm", "md" (bawaan), dan "lg" memakai teks 13, 14, dan 16px, dengan baris yang makin tinggi.',
+        en: 'size on the Popup and the Trigger: "sm", "md" (the default), and "lg" set 13, 14, and 16px text, with taller rows.',
       },
       uses: ["CommandMenu"],
-      demo: (lang) => <Demo lang={lang} size="lg" />,
-      code: (setup, lang) => [
-        file(setup, lang, { popupProps: ['size="lg"'], triggerProps: ' size="lg"' }),
-      ],
+      demo: (lang) => <Sizes lang={lang} />,
+      code: (setup, lang) => {
+        const t = TEXT[lang];
+        const one = file(setup, lang, {
+          popupProps: ["size={size}"],
+          triggerProps: " size={size}",
+          triggerText: "{label}",
+        });
+        const usage = [
+          "",
+          "export function Sizes() {",
+          "  return (",
+          '    <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>',
+          ...t.sizes.map(([size, label]) => `      <Commands size="${size}" label="${label}" />`),
+          "    </div>",
+          "  );",
+          "}",
+        ];
+        const signature = 'Commands({ size, label }: { size: "sm" | "md" | "lg"; label: string })';
+        return [
+          {
+            name: one.name,
+            code: [one.code.replace("Commands()", signature), ...usage].join("\n"),
+          },
+        ];
+      },
     },
     {
       id: "blur",

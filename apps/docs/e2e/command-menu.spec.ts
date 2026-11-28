@@ -83,7 +83,17 @@ test("the examples set the size, the backdrop, and the surface", async ({ page }
   await expect(popup).toHaveAttribute("data-size", "md");
   await expect(demo(page).locator(".ow-command-menu__backdrop")).not.toHaveAttribute("data-blur");
   await pick(page, "Sizes");
-  await expect(popup).toHaveAttribute("data-size", "lg");
+  // Three buttons, each opens a menu of its size.
+  for (const [name, size] of [
+    ["Small", "sm"],
+    ["Medium", "md"],
+    ["Large", "lg"],
+  ]) {
+    await demo(page).getByRole("button", { name }).click();
+    await expect(popup).toHaveAttribute("data-size", size as string);
+    await page.keyboard.press("Escape");
+    await expect(popup).toHaveCount(0);
+  }
   await pick(page, "Blur backdrop");
   await expect(demo(page).locator(".ow-command-menu__backdrop")).toHaveAttribute("data-blur", "");
   await pick(page, "Solid");

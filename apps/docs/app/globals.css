@@ -2361,6 +2361,15 @@ body {
   inline-size: 220px;
 }
 
+/* The Sizes example: a row of buttons that wraps on a narrow window. */
+.demo-command-sizes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+}
+
 .demo-command-body {
   display: grid;
   flex: 1;

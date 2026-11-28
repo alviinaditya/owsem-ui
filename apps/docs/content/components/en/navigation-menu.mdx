@@ -202,7 +202,8 @@ The panel grows out of the open trigger in 180 ms, from 0.96 and transparent, an
 Moving to another trigger takes 320 ms: the Positioner slides to the new trigger, the panel resizes to
 the new content (Base UI measures it; this is the one part that animates size, because the box has to
 follow its content), and the old content slides out toward the side it came from while the new one slides
-in, on transform and opacity only. Opened from the keyboard, or shut with Escape, the panel skips the
+in, each over the whole 320 ms and 40% of its width, on transform and opacity only: the old one fades
+out first (140 ms) and the new one fades in after 60 ms, so the slide reads. Opened from the keyboard, or shut with Escape, the panel skips the
 animation. The chevron turns over in 200 ms. With `prefers-reduced-motion`, the panel and the contents
 fade without growing or sliding, the panel takes a new trigger's place and size at once, and the
 chevron turns at once.

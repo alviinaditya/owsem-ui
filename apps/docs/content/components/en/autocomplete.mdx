@@ -48,7 +48,8 @@ Name the input with a [Field](/en/field) label, a `<label htmlFor>`, or `aria-la
 `InputGroup`, the Input is the field. Inside one it is bare, with the Clear and Trigger as flat squares.
 A Popup draws its own Portal and Positioner. `mode` is Base UI's: `list` filters the list, `both` also
 fills the input with the highlighted suggestion as the arrows move, `inline` only fills it, and `none`
-does neither.
+does neither. Picking a suggestion fills the input, but the list keeps what it showed until the popup
+has closed, so it does not shrink to the one match as it leaves.
 
 ## Examples [#examples]
 

@@ -202,7 +202,9 @@ Panel tumbuh dari trigger yang terbuka dalam 180 ms, dari 0,96 dan transparan, d
 ms. Berpindah ke trigger lain memakan 320 ms: Positioner meluncur ke trigger baru, panel berubah
 ukuran mengikuti konten baru (Base UI yang mengukurnya; ini satu-satunya bagian yang menganimasikan
 ukuran, karena kotak harus mengikuti isinya), dan konten lama meluncur keluar ke sisi asalnya sementara
-yang baru meluncur masuk, hanya dengan transform dan opacity. Dibuka dari keyboard, atau ditutup dengan
+yang baru meluncur masuk, masing-masing sepanjang 320 ms penuh dan 40% lebarnya, hanya dengan transform
+dan opacity: yang lama memudar lebih dulu (140 ms) dan yang baru memudar masuk setelah 60 ms, sehingga
+luncurannya terbaca. Dibuka dari keyboard, atau ditutup dengan
 Escape, panel melewati animasi. Chevron berputar dalam 200 ms. Dengan `prefers-reduced-motion`, panel
 dan konten memudar tanpa tumbuh atau meluncur, panel langsung mengambil posisi dan ukuran trigger
 baru, dan chevron berputar seketika.

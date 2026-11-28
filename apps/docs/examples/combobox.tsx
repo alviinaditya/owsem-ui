@@ -1,7 +1,7 @@
 "use client";
 
 import { Combobox, type ComboboxSize, Field } from "owsem-ui/base";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { ComponentPage, type ExamplePageProps } from "@/components/component-page/component-page";
 import { defineComponent, exampleFile, importPath } from "@/lib/examples";
 import type { Lang } from "@/lib/i18n";
@@ -170,10 +170,10 @@ function Multiple({ lang }: { lang: Lang }) {
   );
 }
 
-function Grouped({ lang }: { lang: Lang }) {
+function Groups({ lang }: { lang: Lang }) {
   const t = TEXT[lang];
   return (
-    <Field.Root name="grouped" className="demo-combobox-field">
+    <Field.Root name="groups" className="demo-combobox-field">
       <Field.Label>{t.fruit}</Field.Label>
       <Combobox.Root items={groups(lang)}>
         <Combobox.InputGroup>
@@ -183,18 +183,21 @@ function Grouped({ lang }: { lang: Lang }) {
         <Combobox.Popup>
           <Combobox.Empty>{t.none}</Combobox.Empty>
           <Combobox.List>
-            {(group: ReturnType<typeof groups>[number]) => (
-              <Combobox.Group key={group.value} items={group.items}>
-                <Combobox.GroupLabel>{group.value}</Combobox.GroupLabel>
-                <Combobox.Collection>
-                  {(name: string) => (
-                    <Combobox.Item key={name} value={name}>
-                      {name}
-                      <Combobox.ItemIndicator />
-                    </Combobox.Item>
-                  )}
-                </Combobox.Collection>
-              </Combobox.Group>
+            {(group: ReturnType<typeof groups>[number], index: number) => (
+              <Fragment key={group.value}>
+                {index > 0 ? <Combobox.Separator /> : null}
+                <Combobox.Group items={group.items}>
+                  <Combobox.GroupLabel>{group.value}</Combobox.GroupLabel>
+                  <Combobox.Collection>
+                    {(name: string) => (
+                      <Combobox.Item key={name} value={name}>
+                        {name}
+                        <Combobox.ItemIndicator />
+                      </Combobox.Item>
+                    )}
+                  </Combobox.Collection>
+                </Combobox.Group>
+              </Fragment>
             )}
           </Combobox.List>
         </Combobox.Popup>
@@ -441,22 +444,22 @@ export const comboboxDefinition = defineComponent({
       ],
     },
     {
-      id: "grouped",
-      title: { id: "Grup", en: "Grouped" },
+      id: "groups",
+      title: { id: "Grup", en: "Groups" },
       description: {
-        id: "Item dikelompokkan dengan Group dan GroupLabel; menyaring membuang grup yang tidak punya yang cocok.",
-        en: "Items grouped with Group and GroupLabel; filtering drops a group with no match.",
+        id: "Item dikelompokkan dengan Group dan GroupLabel, dengan Separator di antara grup; menyaring membuang grup yang tidak punya yang cocok.",
+        en: "Items grouped with Group and GroupLabel and a Separator between the groups; filtering drops a group with no match.",
       },
       uses: ["Combobox", "Field"],
-      demo: (lang) => <Grouped lang={lang} />,
+      demo: (lang) => <Groups lang={lang} />,
       code: (setup, lang) => {
         const g = groups(lang);
         return [
           exampleFile(
             "GroupedCombobox",
-            imp(setup, ["Field"]),
+            [...imp(setup, ["Field"]), 'import { Fragment } from "react";'],
             [
-              '<Field.Root name="grouped" className="field">',
+              '<Field.Root name="groups" className="field">',
               `  <Field.Label>${TEXT[lang].fruit}</Field.Label>`,
               "  <Combobox.Root items={groups}>",
               "    <Combobox.InputGroup>",
@@ -466,18 +469,21 @@ export const comboboxDefinition = defineComponent({
               "    <Combobox.Popup>",
               `      <Combobox.Empty>${TEXT[lang].none}</Combobox.Empty>`,
               "      <Combobox.List>",
-              "        {(group: Group) => (",
-              "          <Combobox.Group key={group.value} items={group.items}>",
-              "            <Combobox.GroupLabel>{group.value}</Combobox.GroupLabel>",
-              "            <Combobox.Collection>",
-              "              {(name: string) => (",
-              "                <Combobox.Item key={name} value={name}>",
-              "                  {name}",
-              "                  <Combobox.ItemIndicator />",
-              "                </Combobox.Item>",
-              "              )}",
-              "            </Combobox.Collection>",
-              "          </Combobox.Group>",
+              "        {(group: Group, index: number) => (",
+              "          <Fragment key={group.value}>",
+              "            {index > 0 ? <Combobox.Separator /> : null}",
+              "            <Combobox.Group items={group.items}>",
+              "              <Combobox.GroupLabel>{group.value}</Combobox.GroupLabel>",
+              "              <Combobox.Collection>",
+              "                {(name: string) => (",
+              "                  <Combobox.Item key={name} value={name}>",
+              "                    {name}",
+              "                    <Combobox.ItemIndicator />",
+              "                  </Combobox.Item>",
+              "                )}",
+              "              </Combobox.Collection>",
+              "            </Combobox.Group>",
+              "          </Fragment>",
               "        )}",
               "      </Combobox.List>",
               "    </Combobox.Popup>",

@@ -142,7 +142,10 @@ digambar ulang selama ia terbuka.
   `Drawer.Title`. Menggeser hanya gestur penunjuk: semua yang dilakukannya juga bisa dilakukan Escape,
   scrim, dan tombol Close Anda, jadi beri setiap drawer cara untuk menutupnya.
 - Pegangan digambar CSS dan tidak punya elemen: tidak ada yang dibaca pembaca layar, dan tidak ada
-  yang bisa difokuskan.
+  yang bisa difokuskan. Di sekitarnya ada target penunjuk yang lega dengan kursor grab, dan seluruh lembar
+  menampilkan kursor grabbing selama geseran berjalan; bagian lain dari lembar tetap bisa diseleksi teksnya.
+- Isian lembar berlanjut melewati tepi tempatnya menempel, jadi menyeretnya ke arah yang salah (lembar
+  bawah ke atas) tidak menampakkan celah antara lembar dan tepi jendela.
 - Drawer modal membuat sisa halaman inert dan menahan gulirnya. OwsemUI menahan gulir tanpa mengatur
   `overflow` pada halaman, jadi teksnya tidak digambar ulang; dibuka lewat sentuhan, kunci Base UI
   yang berlaku.

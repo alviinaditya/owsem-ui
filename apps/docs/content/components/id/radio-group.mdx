@@ -50,7 +50,7 @@ tiap radio mengambil namanya dari barisnya.
 | <Part name="Group" /> | `div.ow-radio-group` | `RadioGroup`, dengan role radiogroup. Memuat baris dan highlight Glide |
 | <Part name="Row" /> | `label` | Milik Anda, tanpa class sendiri: `label` apa pun yang memuat radio, di kedalaman mana pun |
 | <Part name="Radio" /> | `span.ow-radio-group__radio` | `Radio.Root`, dengan role radio dan `input` tersembunyi di sampingnya. Tanpa children, ia menggambar Indicator |
-| <Part name="Indicator" /> | `span.ow-radio-group__indicator` | Terpasang hanya saat dicentang kecuali `keepMounted`. Kosong, ia berupa titik; children menggantikannya |
+| <Part name="Indicator" /> | `span.ow-radio-group__indicator` | Terpasang hanya saat dicentang kecuali `keepMounted`. Kosong, ia berupa titik; children menggantikannya, dan `svg` di dalamnya 80% lingkaran dengan stroke 2, seperti centang Select |
 
 Satu baris punya geometri Button: padding-nya dari `--py`, dan lingkaran berada di tempat ikon Button.
 Lingkaran seukuran font ditambah 6 px, dan pseudo-element memperluas target tekan menjadi 24 px tanpa
@@ -161,8 +161,8 @@ seperti `.delivery.ow-radio-group`.
 
 ## Gerak [#motion]
 
-Isiannya berubah seketika, bersama state. Hanya titik yang bergerak, dengan spring settle
-(`--ow-spring-settle`), membesar dari setengah ukurannya, dan ia pergi bersama isiannya. Menahan baris
+Isiannya berubah seketika, bersama state. Hanya tanda yang bergerak, dengan spring settle
+(`--ow-spring-settle`), membesar dari 0,6 ukurannya sambil memudar masuk dalam 120 ms, seperti centang Select, dan ia pergi bersama isiannya. Menahan baris
 menekan lingkarannya ke 0,97 dalam 90 ms, lalu melepasnya dengan spring. `--ow-motion-scale` mengatur
 seberapa jauh tekanan (0 mematikannya). Dengan `prefers-reduced-motion`, tidak ada yang bergerak:
-lingkaran yang ditahan hanya berganti isian, dan titik memudar masuk.
+lingkaran yang ditahan hanya berganti isian, dan tanda memudar masuk.

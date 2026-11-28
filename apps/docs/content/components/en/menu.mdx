@@ -114,7 +114,7 @@ Items follow Button's `--py` rule with `--py: 0.5em`.
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `keepMounted` | `boolean` | `true` | Keeps its room while unchecked, so labels stay in line. Base UI's default is `false` |
-| `children` | `ReactNode` | A check, or a dot for the radio | An icon-sized glyph |
+| `children` | `ReactNode` | A check, or a dot for the radio | An icon-sized glyph; the default check is Select's, a 24-unit icon with stroke 2 |
 
 A modal menu (the default) holds the page's scroll through OwsemUI's own lock, which leaves the page's `overflow` alone; a menu opened by hover is never modal.
 
@@ -184,6 +184,7 @@ In isolated mode the values sit on each Popup, so set yours on the Popup with a 
 ## Motion [#motion]
 
 The menu grows out of its trigger in 180 ms, from 0.96 and transparent, and leaves in 120 ms; opened
-from the keyboard, it appears at once. Glide slides one highlight between items, and in the gaps the lit
+from the keyboard, it appears at once. A check or dot pops in as Select's check does: it fades in over
+120 ms and scales up from 0.6 on the settle spring, and it fades and shrinks as it goes. Glide slides one highlight between items, and in the gaps the lit
 one holds. With `prefers-reduced-motion`, the menu fades without growing, and Glide fades instead of
 sliding.

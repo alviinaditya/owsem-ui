@@ -49,7 +49,7 @@ Name the group with `aria-label` or `aria-labelledby`; each radio takes its name
 | <Part name="Group" /> | `div.ow-radio-group` | `RadioGroup`, with the radiogroup role. Holds the rows and Glide's highlight |
 | <Part name="Row" /> | `label` | Yours, with no class of its own: any `label` holding a radio, at any depth |
 | <Part name="Radio" /> | `span.ow-radio-group__radio` | `Radio.Root`, with the radio role and a hidden `input` beside it. Without children it draws its Indicator |
-| <Part name="Indicator" /> | `span.ow-radio-group__indicator` | Mounted only while checked unless `keepMounted`. Empty, it is the dot; children replace it |
+| <Part name="Indicator" /> | `span.ow-radio-group__indicator` | Mounted only while checked unless `keepMounted`. Empty, it is the dot; children replace it, and an `svg` child is 80% of the circle with stroke 2, as Select's check |
 
 A row has Button's geometry: its padding comes from `--py`, and the circle sits where Button has its
 icon. The circle is the font size plus 6 px, and a pseudo-element extends the press target to 24 px
@@ -160,7 +160,7 @@ A `className` wins over the component's own values with no `!important`. Every s
 
 ## Motion [#motion]
 
-The fill changes at once, with the state. Only the dot moves, on the settle spring (`--ow-spring-settle`),
-scaling in from half its size, and it leaves with the fill. Holding a row presses its circle in to 0.97
+The fill changes at once, with the state. Only the mark moves, on the settle spring (`--ow-spring-settle`),
+scaling in from 0.6 of its size while it fades in over 120 ms, as Select's check does, and it leaves with the fill. Holding a row presses its circle in to 0.97
 within 90 ms, and it lets go on the spring. `--ow-motion-scale` sets how far a press goes (0 turns it off).
-With `prefers-reduced-motion`, nothing moves: a held circle only changes its fill, and the dot fades in.
+With `prefers-reduced-motion`, nothing moves: a held circle only changes its fill, and the mark fades in.

@@ -1,7 +1,7 @@
 "use client";
 
 import { Autocomplete, type AutocompleteSize, Field } from "owsem-ui/base";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { ComponentPage, type ExamplePageProps } from "@/components/component-page/component-page";
 import { defineComponent, exampleFile, importPath } from "@/lib/examples";
 import type { Lang } from "@/lib/i18n";
@@ -112,27 +112,30 @@ function Inline({ lang }: { lang: Lang }) {
   );
 }
 
-function Grouped({ lang }: { lang: Lang }) {
+function Groups({ lang }: { lang: Lang }) {
   const t = TEXT[lang];
   return (
-    <Field.Root name="grouped" className="demo-combobox-field">
+    <Field.Root name="groups" className="demo-combobox-field">
       <Field.Label>{t.search}</Field.Label>
       <Autocomplete.Root items={groups(lang)}>
         <Autocomplete.Input placeholder={t.placeholder} />
         <Autocomplete.Popup>
           <Autocomplete.Empty>{t.none}</Autocomplete.Empty>
           <Autocomplete.List>
-            {(group: Group) => (
-              <Autocomplete.Group key={group.value} items={group.items}>
-                <Autocomplete.GroupLabel>{group.value}</Autocomplete.GroupLabel>
-                <Autocomplete.Collection>
-                  {(tag: string) => (
-                    <Autocomplete.Item key={tag} value={tag}>
-                      {tag}
-                    </Autocomplete.Item>
-                  )}
-                </Autocomplete.Collection>
-              </Autocomplete.Group>
+            {(group: Group, index: number) => (
+              <Fragment key={group.value}>
+                {index > 0 ? <Autocomplete.Separator /> : null}
+                <Autocomplete.Group items={group.items}>
+                  <Autocomplete.GroupLabel>{group.value}</Autocomplete.GroupLabel>
+                  <Autocomplete.Collection>
+                    {(tag: string) => (
+                      <Autocomplete.Item key={tag} value={tag}>
+                        {tag}
+                      </Autocomplete.Item>
+                    )}
+                  </Autocomplete.Collection>
+                </Autocomplete.Group>
+              </Fragment>
             )}
           </Autocomplete.List>
         </Autocomplete.Popup>
@@ -224,17 +227,20 @@ const popup = (lang: Lang, group = false) => [
   "  <Autocomplete.List>",
   ...(group
     ? [
-        "    {(group: Group) => (",
-        "      <Autocomplete.Group key={group.value} items={group.items}>",
-        "        <Autocomplete.GroupLabel>{group.value}</Autocomplete.GroupLabel>",
-        "        <Autocomplete.Collection>",
-        "          {(tag: string) => (",
-        "            <Autocomplete.Item key={tag} value={tag}>",
-        "              {tag}",
-        "            </Autocomplete.Item>",
-        "          )}",
-        "        </Autocomplete.Collection>",
-        "      </Autocomplete.Group>",
+        "    {(group: Group, index: number) => (",
+        "      <Fragment key={group.value}>",
+        "        {index > 0 ? <Autocomplete.Separator /> : null}",
+        "        <Autocomplete.Group items={group.items}>",
+        "          <Autocomplete.GroupLabel>{group.value}</Autocomplete.GroupLabel>",
+        "          <Autocomplete.Collection>",
+        "            {(tag: string) => (",
+        "              <Autocomplete.Item key={tag} value={tag}>",
+        "                {tag}",
+        "              </Autocomplete.Item>",
+        "            )}",
+        "          </Autocomplete.Collection>",
+        "        </Autocomplete.Group>",
+        "      </Fragment>",
         "    )}",
       ]
     : [
@@ -321,19 +327,19 @@ export const autocompleteDefinition = defineComponent({
       ],
     },
     {
-      id: "grouped",
-      title: { id: "Grup", en: "Grouped" },
+      id: "groups",
+      title: { id: "Grup", en: "Groups" },
       description: {
-        id: "Saran dikelompokkan dengan Group dan GroupLabel; menyaring membuang grup yang tidak punya yang cocok.",
-        en: "Suggestions grouped with Group and GroupLabel; filtering drops a group with no match.",
+        id: "Saran dikelompokkan dengan Group dan GroupLabel, dengan Separator di antara grup; menyaring membuang grup yang tidak punya yang cocok.",
+        en: "Suggestions grouped with Group and GroupLabel and a Separator between the groups; filtering drops a group with no match.",
       },
       uses: ["Autocomplete", "Field"],
-      demo: (lang) => <Grouped lang={lang} />,
+      demo: (lang) => <Groups lang={lang} />,
       code: (setup, lang) => [
         exampleFile(
           "GroupedTagSearch",
-          imp(setup, ["Field"]),
-          field(lang, "grouped", [
+          [...imp(setup, ["Field"]), 'import { Fragment } from "react";'],
+          field(lang, "groups", [
             "<Autocomplete.Root items={groups}>",
             `  <Autocomplete.Input placeholder="${TEXT[lang].placeholder}" />`,
             ...indent(popup(lang, true)),

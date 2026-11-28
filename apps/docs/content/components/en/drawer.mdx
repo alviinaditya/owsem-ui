@@ -142,7 +142,10 @@ drawn again while it is open.
   give it a `Drawer.Title`. Swiping is a pointer gesture only: everything it does is also done by
   Escape, the scrim, and your Close button, so give every drawer a way to close it.
 - The grabber is drawn by CSS and has no element: nothing for a screen reader to read, and nothing to
-  focus.
+  focus. It has a comfortable pointer target around it that shows a grab cursor, and the whole sheet
+  shows a grabbing cursor while a swipe runs; the rest of the sheet keeps its text selectable.
+- The sheet's fill runs on past the edge it is attached to, so dragging it the wrong way (a bottom sheet
+  upward) shows no gap between it and the edge of the window.
 - A modal drawer makes the rest of the page inert and holds its scroll. OwsemUI holds the scroll
   without setting `overflow` on the page, so its text is not drawn again; opened by touch, Base
   UI's lock stands.

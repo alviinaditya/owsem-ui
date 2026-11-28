@@ -47,13 +47,16 @@ test("inline: the arrows fill the input with the highlighted suggestion", async 
   await expect(field).toHaveAttribute("aria-autocomplete", "both");
 });
 
-test("grouped: labels head the groups", async ({ page }) => {
+test("groups: labels head the groups with a separator between, also while filtering", async ({
+  page,
+}) => {
   await visit(page, "/en/autocomplete");
-  await pick(page, "Grouped");
+  await pick(page, "Groups");
   const field = input(page, "Search tags");
   await field.click();
   await field.press("ArrowDown");
   await expect(popup(page).locator(".ow-select__group-label")).toHaveText(["Type", "Area"]);
+  await expect(popup(page).locator(".ow-select__separator")).toHaveCount(1);
 });
 
 test("buttons: Clear empties the text and the Trigger opens the list", async ({ page }) => {

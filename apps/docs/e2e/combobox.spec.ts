@@ -89,15 +89,19 @@ test("multiple: picks become chips, Backspace removes the last, and a chip's but
   expect(box?.height).toBeGreaterThanOrEqual(23.5);
 });
 
-test("grouped: labels head the groups, and filtering drops one with no match", async ({ page }) => {
+test("groups: labels head the groups with a separator between, also while filtering", async ({
+  page,
+}) => {
   await visit(page, "/en/combobox");
-  await pick(page, "Grouped");
+  await pick(page, "Groups");
   const field = input(page, "Fruit");
   await field.click();
   await field.press("ArrowDown");
   await expect(popup(page).locator(".ow-select__group-label")).toHaveText(["Orchard", "Tropical"]);
+  await expect(popup(page).locator(".ow-select__separator")).toHaveCount(1);
   await field.fill("lych");
   await expect(popup(page).locator(".ow-select__group-label")).toHaveText(["Tropical"]);
+  await expect(popup(page).locator(".ow-select__separator")).toHaveCount(0);
 });
 
 test("async: the Status says a search runs, then the results or an Empty come", async ({

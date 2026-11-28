@@ -9,6 +9,7 @@ import { PACKAGE_MANAGER_STORAGE_KEY } from "@/lib/theme";
 import { isDefaultSetup, type TokenSetup } from "@/lib/token-setup";
 import { HighlightedLine } from "./component-page/highlighted";
 import { Icon } from "./icons/icon";
+import { useStoredFlavor } from "./install-flavor";
 import { TokenChip, useTokenSetup } from "./token-setup";
 
 const PACKAGE_MANAGERS = ["pnpm", "npm", "yarn", "bun"] as const;
@@ -314,8 +315,22 @@ export function CodeLine({
  * The code drawer's install tab: the npm package, or the source through the shadcn CLI. Another
  * token setup needs the owsem CLI (TK-6).
  */
-export function InstallPane({ item, labels, lang }: { item: string; labels: Labels; lang: Lang }) {
+export function InstallPane({
+  item,
+  labels,
+  lang,
+  tailwind = false,
+}: {
+  item: string;
+  labels: Labels;
+  lang: Lang;
+  /** Whether the component has a Tailwind flavor. */
+  tailwind?: boolean;
+}) {
   const pm = usePackageManager();
+  // The registry item follows the flavor chosen on the Manual tab: `<name>-tailwind` for Tailwind.
+  const flavor = useStoredFlavor();
+  const registryItem = tailwind && flavor === "tailwind" ? `${item}-tailwind` : item;
   const setup = useTokenSetup();
   if (!isDefaultSetup(setup)) {
     return (
@@ -350,7 +365,7 @@ export function InstallPane({ item, labels, lang }: { item: string; labels: Labe
         <h3>{labels.installSource}</h3>
         <p>{labels.installSourceNote}</p>
         <Command text={`${DLX[pm]} shadcn registry add ${REGISTRY}`} labels={labels} />
-        <Command text={`${DLX[pm]} shadcn add @owsem/${item}`} labels={labels} />
+        <Command text={`${DLX[pm]} shadcn add @owsem/${registryItem}`} labels={labels} />
       </section>
     </div>
   );

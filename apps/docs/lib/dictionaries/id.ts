@@ -119,7 +119,7 @@ export const id = {
     manualFlavorTailwind: "Tailwind v4",
     manualFlavorCssNote: "React dengan CSS biasa: file-nya sama dengan registry.",
     manualFlavorTailwindNote:
-      "React dengan class utility langsung di kode. Perlu Tailwind CSS v4.1 atau lebih baru di project.",
+      "React dengan class utility langsung di kode, file-nya sama dengan item -tailwind di registry. Perlu Tailwind CSS v4.1 atau lebih baru di project.",
     manualTailwindSoon:
       "Versi Tailwind v4 komponen ini segera hadir. Langkah di bawah memakai CSS biasa.",
     manualLoading: "Memuat file…",

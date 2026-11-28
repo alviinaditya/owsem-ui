@@ -2,17 +2,29 @@
  * Stages the shadcn registry in apps/docs/.registry from packages/ui sources (DS-7).
  * `registry:build` then runs `shadcn registry validate` and `shadcn build` into public/r.
  * Run directly by Node (type stripping), so only erasable TypeScript here and in its imports.
+ *
+ * What an item installs is what the Manual install shows (componentFiles), split so that nothing
+ * comes along unasked:
+ * - `<name>`: a component in the CSS flavor; `<name>-tailwind`: the same in the Tailwind flavor.
+ * - `core-<module>`: one Core helper (cn, glide, scroll-lock, ...). A module whose Tailwind copy
+ *   differs from the CSS one has a `core-<module>-tailwind` twin.
+ * - `tokens`: tokens.css. `tailwind-setup`: tailwind.css, for the Tailwind flavor only.
+ * - `core`, `core-tailwind`: meta items that list every module, for people who want all of Core.
+ * A component lists only the modules, siblings, and setup its own files import.
  */
 import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, posix } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Registry, RegistryItem } from "shadcn/schema";
 import { catalog, isAvailable } from "../lib/catalog.ts";
 import {
+  componentFiles,
+  type Flavor,
+  hasTailwind,
   isSource,
   npmDependencies,
   coreModules as readCoreModules,
-  rewriteImports,
+  stripRepoHeader,
 } from "../lib/component-files.ts";
 import { en } from "../lib/dictionaries/en.ts";
 import { RESERVED_SLUGS } from "../lib/reserved-slugs.ts";
@@ -23,18 +35,23 @@ const uiSrc = join(docsDir, "../../packages/ui/src");
 const stageDir = join(docsDir, ".registry");
 const outDir = join(docsDir, "public/r");
 
-/** Writes a registry copy of a packages/ui file; shadcn only accepts paths inside stageDir. */
-function stage(item: string, from: string, to: string, transform = (code: string) => code) {
+/** Writes a registry copy of a file; shadcn only accepts paths inside stageDir. */
+function stage(item: string, to: string, code: string): string {
   const dest = join(stageDir, "src", item, to);
   mkdirSync(dirname(dest), { recursive: true });
-  writeFileSync(dest, transform(readFileSync(join(uiSrc, from), "utf8")));
+  writeFileSync(dest, code);
   return `src/${item}/${to}`;
 }
 
+const read = (path: string) => readFileSync(path, "utf8");
+
+const itemNames = new Set<string>();
 function assertValidItem(item: RegistryItem): void {
   if (item.name.includes("/") || RESERVED_SLUGS.has(item.name)) {
     throw new Error(`Registry item "${item.name}" must be a flat, non-reserved name.`);
   }
+  if (itemNames.has(item.name)) throw new Error(`Registry item "${item.name}" is defined twice.`);
+  itemNames.add(item.name);
   // Unnamespaced names resolve to shadcn's own registry.
   for (const dependency of item.registryDependencies ?? []) {
     if (!dependency.startsWith("@owsem/")) {
@@ -49,48 +66,149 @@ function assertValidItem(item: RegistryItem): void {
 rmSync(stageDir, { recursive: true, force: true });
 rmSync(outDir, { recursive: true, force: true });
 
-// Core modules and their CSS keep their path under @lib/owsem/. index.ts only re-exports (Base UI
-// providers for npm users); tokens.css and tailwind.css are listed on their own.
-const coreModules = readCoreModules(uiSrc);
+const items: RegistryItem[] = [];
+const owsem = (name: string) => `@owsem/${name}`;
 
-const items: RegistryItem[] = [
+// Core modules: a top-level file (cn.ts) or folder (glide/) of core/, or its Tailwind copy in
+// tailwind/lib/. Files keep their path under lib/owsem/. index.ts only re-exports (Base UI
+// providers for npm users); tokens.css and tailwind.css have items of their own.
+interface ModuleFile {
+  /** Path under lib/owsem/. */
+  path: string;
+  code: string;
+}
+const moduleOf = (path: string) => (path.split("/")[0] ?? "").replace(/\.[a-z]+$/, "");
+
+function moduleFiles(flavor: Flavor): Map<string, ModuleFile[]> {
+  const modules = new Map<string, ModuleFile[]>();
+  const add = (root: string, only: (module: string) => boolean) => {
+    const list =
+      root === "core"
+        ? readCoreModules(uiSrc)
+        : readdirSync(join(uiSrc, "tailwind/lib"), { recursive: true, encoding: "utf8" })
+            .filter(isSource)
+            .map((file) => file.split("\\").join("/"));
+    for (const path of list) {
+      const module = moduleOf(path);
+      if (!only(module)) continue;
+      const code = stripRepoHeader(
+        read(join(uiSrc, root === "core" ? "core" : "tailwind/lib", path)),
+      );
+      modules.set(module, [...(modules.get(module) ?? []), { path, code }]);
+    }
+  };
+  if (flavor === "tailwind") add("tailwind", () => true);
+  add("core", (module) => flavor === "css" || !modules.has(module));
+  return modules;
+}
+
+const cssModules = moduleFiles("css");
+const twModules = moduleFiles("tailwind");
+const sameFiles = (a: ModuleFile[], b: ModuleFile[]) =>
+  a.length === b.length &&
+  a.every((file, i) => file.path === b[i]?.path && file.code === b[i]?.code);
+
+/** The item that holds a module in a flavor: shared when both flavors have the same files. */
+function moduleItem(flavor: Flavor, module: string): string {
+  const css = cssModules.get(module);
+  const tw = twModules.get(module);
+  return flavor === "tailwind" && tw && !(css && sameFiles(css, tw))
+    ? `core-${module}-tailwind`
+    : `core-${module}`;
+}
+
+/** Modules a module's own files import, from their relative imports. */
+function moduleImports(module: string, files: ModuleFile[]): Set<string> {
+  const found = new Set<string>();
+  for (const file of files) {
+    for (const [, spec = ""] of file.code.matchAll(/(?:from |import )["'](\.{1,2}\/[^"']+)["']/g)) {
+      const target = moduleOf(posix.join(posix.dirname(file.path), spec));
+      if (target && target !== module && !target.startsWith("..")) found.add(target);
+    }
+  }
+  return found;
+}
+
+const setupItem = (flavor: Flavor) => (flavor === "tailwind" ? "tailwind-setup" : "tokens");
+
+items.push(
   {
-    name: "core",
+    name: "tokens",
     type: "registry:lib",
-    title: "Owsem Core",
-    description:
-      "Theme tokens with the --ow- prefix, the OwsemUI @layer order, Glide, helpers, and a Tailwind CSS v4 theme.",
-    dependencies: [
-      ...new Set(
-        coreModules
-          .filter((file) => file.endsWith(".ts"))
-          .flatMap((file) =>
-            npmDependencies(readFileSync(join(uiSrc, "core", file), "utf8"), uiSrc),
-          ),
-      ),
-    ],
+    title: "Owsem Tokens",
+    description: "Theme tokens with the --ow- prefix and the OwsemUI @layer order.",
     files: [
       {
-        path: stage("core", "core/tokens/tokens.css", "tokens.css"),
+        path: stage("tokens", "tokens.css", read(join(uiSrc, "core/tokens/tokens.css"))),
         type: "registry:file",
         target: "@lib/owsem/tokens.css",
       },
-      // CLI-7: a plain file, not the item's cssVars or tailwind fields.
+    ],
+    meta: { family: "core" },
+    docs: "Import @/lib/owsem/tokens.css once in your app's CSS entry.",
+  },
+  {
+    name: "tailwind-setup",
+    type: "registry:lib",
+    title: "Owsem Tailwind CSS Setup",
+    description: "The Tailwind CSS v4 theme the Tailwind flavor of OwsemUI components needs.",
+    registryDependencies: [owsem("tokens")],
+    // CLI-7: a plain file, not the item's cssVars or tailwind fields.
+    files: [
       {
-        path: stage("core", "tailwind.css", "tailwind.css"),
+        path: stage("tailwind-setup", "tailwind.css", read(join(uiSrc, "tailwind.css"))),
         type: "registry:file",
         target: "@lib/owsem/tailwind.css",
       },
-      ...coreModules.map((file) => ({
-        path: stage("core", `core/${file}`, file),
-        type: file.endsWith(".css") ? ("registry:file" as const) : ("registry:lib" as const),
-        target: `@lib/owsem/${file}`,
-      })),
     ],
     meta: { family: "core" },
-    docs: "Import @/lib/owsem/tokens.css once in your app's CSS entry. With Tailwind CSS v4, import @/lib/owsem/tailwind.css there first, before tailwindcss.",
+    docs: "Import @/lib/owsem/tailwind.css in your app's CSS entry before tailwindcss, then @/lib/owsem/tokens.css after it.",
   },
-];
+);
+
+const coreMeta: Record<Flavor, string[]> = {
+  css: [owsem("tokens")],
+  tailwind: [owsem("tailwind-setup")],
+};
+for (const flavor of ["css", "tailwind"] as const) {
+  for (const [module, files] of flavor === "css" ? cssModules : twModules) {
+    const name = moduleItem(flavor, module);
+    // The shared item is made once, from the CSS flavor.
+    if (flavor === "tailwind" && !name.endsWith("-tailwind")) {
+      coreMeta.tailwind.push(owsem(name));
+      continue;
+    }
+    coreMeta[flavor].push(owsem(name));
+    const code = files.map((file) => file.code).join("\n");
+    items.push({
+      name,
+      type: "registry:lib",
+      title: `Owsem Core: ${module}`,
+      description: `The ${module} helper from OwsemUI Core${flavor === "tailwind" ? " (Tailwind flavor)" : ""}.`,
+      dependencies: npmDependencies(code, uiSrc),
+      registryDependencies: [...moduleImports(module, files)].map((m) =>
+        owsem(moduleItem(flavor, m)),
+      ),
+      files: files.map((file) => ({
+        path: stage(name, file.path, file.code),
+        type: file.path.endsWith(".css") ? ("registry:file" as const) : ("registry:lib" as const),
+        target: `@lib/owsem/${file.path}`,
+      })),
+      meta: { family: "core" },
+    });
+  }
+}
+for (const flavor of ["css", "tailwind"] as const) {
+  items.push({
+    name: flavor === "css" ? "core" : "core-tailwind",
+    type: "registry:lib",
+    title: flavor === "css" ? "Owsem Core" : "Owsem Core (Tailwind)",
+    description:
+      "Everything in OwsemUI Core at once: the theme setup and every helper. A component installs only what it uses.",
+    registryDependencies: [...new Set(coreMeta[flavor])],
+    meta: { family: "core" },
+  });
+}
 
 const componentNames = readdirSync(join(uiSrc, "components"), { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
@@ -103,6 +221,10 @@ for (const entry of catalog.filter(isAvailable)) {
   }
 }
 
+/** The item a component is installed as in a flavor. */
+const componentItem = (name: string, flavor: Flavor) =>
+  flavor === "tailwind" && hasTailwind(name, uiSrc) ? `${name}-tailwind` : name;
+
 for (const name of componentNames) {
   const entry = catalog.find((e) => e.name === name);
   if (!entry || !isAvailable(entry)) {
@@ -110,29 +232,40 @@ for (const name of componentNames) {
       `packages/ui/src/components/${name} needs an available entry in lib/catalog.ts.`,
     );
   }
-  const dependencies = new Set<string>();
-  const uses = new Set(["@owsem/core"]);
-  const files = readdirSync(join(uiSrc, "components", name))
-    .filter(isSource)
-    .map((file) => ({
-      path: stage(name, `components/${name}/${file}`, file, (code) => {
-        for (const dependency of npmDependencies(code, uiSrc)) dependencies.add(dependency);
-        return file.endsWith(".css") ? code : rewriteImports(name, code, uses);
-      }),
-      type: file.endsWith(".css") ? ("registry:file" as const) : ("registry:ui" as const),
-      target: `@components/owsem/${name}/${file}`,
-    }));
+  for (const requested of ["css", "tailwind"] as const) {
+    if (requested === "tailwind" && !hasTailwind(name, uiSrc)) continue;
+    const { files: all } = componentFiles(name, requested, uiSrc);
+    const own = all.filter((file) => file.path.startsWith(`components/owsem/${name}/`));
+    const itemName = componentItem(name, requested);
+    const code = own.map((file) => file.code).join("\n");
+    // What the item's own files import: sibling components, Core modules, and the setup.
+    const uses = new Set<string>();
+    for (const [, sibling = ""] of code.matchAll(/@\/components\/owsem\/([a-z0-9-]+)\//g)) {
+      if (sibling !== name) uses.add(owsem(componentItem(sibling, requested)));
+    }
+    for (const [, sibling = ""] of code.matchAll(/@import\s+"\.\.\/([a-z0-9-]+)\//g)) {
+      if (sibling !== name) uses.add(owsem(componentItem(sibling, requested)));
+    }
+    for (const [, path = ""] of code.matchAll(/@\/lib\/owsem\/([a-z0-9/-]+)/g)) {
+      uses.add(owsem(moduleItem(requested, moduleOf(path))));
+    }
+    uses.add(owsem(setupItem(requested)));
 
-  items.push({
-    name,
-    type: "registry:ui",
-    title: entry.title,
-    description: en.components[entry.name],
-    dependencies: [...dependencies],
-    registryDependencies: [...uses],
-    files,
-    meta: { family: entry.family, status: entry.status },
-  });
+    items.push({
+      name: itemName,
+      type: "registry:ui",
+      title: requested === "tailwind" ? `${entry.title} (Tailwind)` : entry.title,
+      description: en.components[entry.name],
+      dependencies: npmDependencies(code, uiSrc),
+      registryDependencies: [...uses],
+      files: own.map((file) => ({
+        path: stage(itemName, file.path.slice(`components/owsem/${name}/`.length), file.code),
+        type: file.path.endsWith(".css") ? ("registry:file" as const) : ("registry:ui" as const),
+        target: `@components/${file.path.slice("components/".length)}`,
+      })),
+      meta: { family: entry.family, status: entry.status, flavor: requested },
+    });
+  }
 }
 
 for (const item of items) assertValidItem(item);

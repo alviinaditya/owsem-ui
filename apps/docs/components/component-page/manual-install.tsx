@@ -11,14 +11,13 @@ import {
   useLayoutEffect,
   useRef,
   useState,
-  useSyncExternalStore,
 } from "react";
 import type { Flavor, InstallFile } from "@/lib/component-files";
 import type { Token } from "@/lib/highlight";
-import { INSTALL_FLAVOR_STORAGE_KEY } from "@/lib/theme";
 import { isDefaultSetup } from "@/lib/token-setup";
 import { Icon } from "../icons/icon";
 import { ADD, InstallBlock } from "../install";
+import { chooseFlavor, useStoredFlavor } from "../install-flavor";
 import { useTokenSetup } from "../token-setup";
 import { usePage } from "./component-page";
 import { Highlighted, HighlightedLines } from "./highlighted";
@@ -71,42 +70,6 @@ function useManualData(name: string, active: boolean): Loaded {
   }, [name, active]);
   return loaded;
 }
-
-const FLAVORS: readonly Flavor[] = ["css", "tailwind"];
-
-// The visitor's flavor, kept across visits like the package manager.
-const listeners = new Set<() => void>();
-
-function readFlavor(): Flavor {
-  try {
-    const stored = localStorage.getItem(INSTALL_FLAVOR_STORAGE_KEY);
-    return FLAVORS.find((flavor) => flavor === stored) ?? "css";
-  } catch {
-    return "css";
-  }
-}
-
-function chooseFlavor(flavor: Flavor): void {
-  try {
-    localStorage.setItem(INSTALL_FLAVOR_STORAGE_KEY, flavor);
-  } catch {}
-  for (const listener of listeners) listener();
-}
-
-function subscribe(listener: () => void): () => void {
-  listeners.add(listener);
-  const onStorage = (event: StorageEvent) => {
-    if (event.key === INSTALL_FLAVOR_STORAGE_KEY) listener();
-  };
-  addEventListener("storage", onStorage);
-  return () => {
-    listeners.delete(listener);
-    removeEventListener("storage", onStorage);
-  };
-}
-
-// The server cannot know the stored choice: null there, and CSS in the steps.
-const useStoredFlavor = () => useSyncExternalStore(subscribe, readFlavor, () => null);
 
 /** The folder of a path, with its slash: `components/owsem/button/`. */
 const folderOf = (path: string) => path.slice(0, path.lastIndexOf("/") + 1);

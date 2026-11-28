@@ -22,7 +22,7 @@ export const isSource = (file: string): boolean =>
  * Comments for this repo, not for a copied file: the generator's "do not edit" header, and the
  * first paragraph of a Tailwind class map, which says whose twin it is.
  */
-const stripRepoHeader = (code: string): string =>
+export const stripRepoHeader = (code: string): string =>
   code
     .replace(/^\/\/ Generated from [^\n]*\n/, "")
     .replace(/^\/\/ The Tailwind CSS v4 twin of (?:[^\n]+\n)(?:\/\/ [^\n]+\n)*(?:\/\/)?\n/, "");
@@ -37,6 +37,7 @@ const PEERS = new Set(["react", "react-dom"]);
 export const npmDependencies = (code: string, uiSrc = defaultUiSrc): string[] => {
   const names = new Set<string>();
   for (const [, spec = ""] of code.matchAll(/(?:from |import )["']([^"'./][^"']*)["']/g)) {
+    if (spec.startsWith("@/")) continue; // an install alias, not a package
     const parts = spec.split("/");
     const name = spec.startsWith("@") ? parts.slice(0, 2).join("/") : (parts[0] ?? "");
     if (!PEERS.has(name) && !name.startsWith("node:")) names.add(name);

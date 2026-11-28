@@ -117,7 +117,7 @@ export const en = {
     manualFlavorTailwind: "Tailwind v4",
     manualFlavorCssNote: "React with plain CSS: the files are the same as the registry's.",
     manualFlavorTailwindNote:
-      "React with utility classes inline. Needs Tailwind CSS v4.1 or newer in the project.",
+      "React with utility classes inline, the same files as the registry's -tailwind item. Needs Tailwind CSS v4.1 or newer in the project.",
     manualTailwindSoon:
       "A Tailwind v4 version of this component is coming. These steps use plain CSS.",
     manualLoading: "Loading the files…",

@@ -132,8 +132,20 @@ npx shadcn registry add @owsem=https://owsem.dev/r/{name}.json
 npx shadcn add @owsem/separator
 ```
 
-File komponen masuk ke `components/owsem/`, dan token ke `lib/owsem/tokens.css`. Import
-`@/lib/owsem/tokens.css` sekali di CSS entry app. CLI `owsem`, dengan prefix token sendiri dan mode
+File komponen masuk ke `components/owsem/`, helper Core yang dipakai komponen ke `lib/owsem/`, dan
+token ke `lib/owsem/tokens.css`. Import `@/lib/owsem/tokens.css` sekali di CSS entry app. Sebuah
+item hanya memasang yang ia import: `@owsem/separator` hanya beberapa file, dan `@owsem/core`
+tersedia untuk seluruh Core sekaligus.
+
+Dengan Tailwind CSS v4, tambahkan flavor Tailwind, kode yang sama dengan opsi Tailwind di tab
+Manual. Nama itemnya berakhiran `-tailwind`:
+
+```sh
+npx shadcn add @owsem/separator-tailwind
+```
+
+Ia juga memasang `lib/owsem/tailwind.css`, yang di-import sebelum `tailwindcss` (lihat di atas),
+serta package `class-variance-authority` dan `cn`. CLI `owsem`, dengan prefix token sendiri dan mode
 isolated, menyusul.
 
 ## Base dan Owsem

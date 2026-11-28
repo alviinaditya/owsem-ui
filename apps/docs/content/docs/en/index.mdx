@@ -128,9 +128,21 @@ npx shadcn registry add @owsem=https://owsem.dev/r/{name}.json
 npx shadcn add @owsem/separator
 ```
 
-Component files go to `components/owsem/`, and tokens to `lib/owsem/tokens.css`. Import
-`@/lib/owsem/tokens.css` once in your app's CSS entry. The `owsem` CLI, with your own token prefix
-and isolated mode, comes later.
+Component files go to `components/owsem/`, the Core helpers a component uses to `lib/owsem/`, and
+tokens to `lib/owsem/tokens.css`. Import `@/lib/owsem/tokens.css` once in your app's CSS entry. An
+item installs only what it imports: `@owsem/separator` is a handful of files, and `@owsem/core` is
+there for everything in Core at once.
+
+With Tailwind CSS v4, add the Tailwind flavor instead, the same code as the Manual tab's Tailwind
+option. Its items end in `-tailwind`:
+
+```sh
+npx shadcn add @owsem/separator-tailwind
+```
+
+It also installs `lib/owsem/tailwind.css`, which you import before `tailwindcss` (see above), and
+the `class-variance-authority` and `cn` packages. The `owsem` CLI, with your own token prefix and
+isolated mode, comes later.
 
 ## Base and Owsem
 

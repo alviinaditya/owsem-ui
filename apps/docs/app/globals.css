@@ -2749,6 +2749,8 @@ body {
 .demo-context-menu-sizes {
   display: flex;
   flex-wrap: wrap;
+  /* Centered, so a row that wraps stays in the middle of the stage. */
+  justify-content: center;
   gap: 0.75rem;
 }
 

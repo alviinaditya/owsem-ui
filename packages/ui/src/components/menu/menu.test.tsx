@@ -747,3 +747,37 @@ test("every part has its data-slot", async () => {
     "menu-chevron",
   ]);
 });
+
+test("the Root's size sizes the popup and its submenus, and a Popup's own size beats it", async () => {
+  await render(
+    <Menu.Root size="lg" defaultOpen>
+      <Menu.Trigger>Edit</Menu.Trigger>
+      <Menu.Popup>
+        <Menu.SubmenuRoot defaultOpen>
+          <Menu.SubmenuTrigger>More</Menu.SubmenuTrigger>
+          <Menu.Popup data-testid="sub">
+            <Menu.Item>One</Menu.Item>
+          </Menu.Popup>
+        </Menu.SubmenuRoot>
+      </Menu.Popup>
+    </Menu.Root>,
+  );
+  await expect.poll(() => document.querySelectorAll(".ow-menu__popup").length).toBe(2);
+  for (const popup of document.querySelectorAll<HTMLElement>(".ow-menu__popup")) {
+    expect(popup.dataset.size).toBe("lg");
+    expect(popup.className).toContain("ow-menu__popup--lg");
+  }
+});
+
+test("a Popup's own size beats the Root's", async () => {
+  await render(
+    <Menu.Root size="lg" defaultOpen>
+      <Menu.Trigger>Edit</Menu.Trigger>
+      <Menu.Popup size="sm">
+        <Menu.Item>One</Menu.Item>
+      </Menu.Popup>
+    </Menu.Root>,
+  );
+  await expect.poll(() => document.querySelector(".ow-menu__popup")).not.toBeNull();
+  expect(document.querySelector<HTMLElement>(".ow-menu__popup")?.dataset.size).toBe("sm");
+});

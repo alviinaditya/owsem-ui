@@ -303,6 +303,26 @@ describe("ContextMenu", () => {
     expect(getComputedStyle(popup() as HTMLElement).fontSize).toBe("16px");
   });
 
+  test("the Root's size sizes the popup and its submenus", async () => {
+    await render(
+      <ContextMenu.Root size="lg" defaultOpen>
+        <ContextMenu.Trigger>Area</ContextMenu.Trigger>
+        <ContextMenu.Popup>
+          <ContextMenu.SubmenuRoot defaultOpen>
+            <ContextMenu.SubmenuTrigger>More</ContextMenu.SubmenuTrigger>
+            <ContextMenu.Popup>
+              <ContextMenu.Item>One</ContextMenu.Item>
+            </ContextMenu.Popup>
+          </ContextMenu.SubmenuRoot>
+        </ContextMenu.Popup>
+      </ContextMenu.Root>,
+    );
+    await expect.poll(() => document.querySelectorAll(".ow-menu__popup").length).toBe(2);
+    for (const el of document.querySelectorAll<HTMLElement>(".ow-menu__popup")) {
+      expect(el.dataset.size).toBe("lg");
+    }
+  });
+
   test("follows the text direction: the positioner carries it, submenus open to the left", async () => {
     await render(
       <DirectionProvider direction="rtl">

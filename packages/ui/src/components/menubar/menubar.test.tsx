@@ -209,6 +209,23 @@ describe("Menubar", () => {
     }
   });
 
+  test("the bar's size reaches its menus' popups and their submenus", async () => {
+    await render(<Bar size="lg" open="file" />);
+    await expect.poll(() => document.querySelector(".ow-menu__popup")).not.toBeNull();
+    for (const popup of document.querySelectorAll<HTMLElement>(".ow-menu__popup")) {
+      expect(popup.dataset.size).toBe("lg");
+    }
+    await userEvent.click(
+      [...document.querySelectorAll<HTMLElement>('[role="menuitem"]')].find(
+        (item) => item.textContent === "Export",
+      ) as HTMLElement,
+    );
+    await expect.poll(() => document.querySelectorAll(".ow-menu__popup").length).toBe(2);
+    for (const popup of document.querySelectorAll<HTMLElement>(".ow-menu__popup")) {
+      expect(popup.dataset.size).toBe("lg");
+    }
+  });
+
   test("a trigger's own size beats the bar's", async () => {
     await render(<Bar size="sm" triggerSize="lg" />);
     expect(trigger("File").dataset.size).toBe("lg");

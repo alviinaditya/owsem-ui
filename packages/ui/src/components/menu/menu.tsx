@@ -14,9 +14,15 @@ import {
 import { cn } from "../../core/cn";
 import { GlideHighlight, useGlide } from "../../core/glide/use-glide";
 import { useMergedRefs } from "../../core/merge-refs";
+import { Placed, Placement, Unplaced } from "../../core/placed";
 import { useRestingAnchor } from "../../core/resting-anchor";
 import { trackPointerType, useScrollLock } from "../../core/scroll-lock";
-import { type MenuVariantProps, menuPopupVariants, menuSlots } from "./menu-variants";
+import {
+  type MenuSize,
+  type MenuVariantProps,
+  menuPopupVariants,
+  menuSlots,
+} from "./menu-variants";
 import "./menu.css";
 
 /** Every kind of item Glide lights: plain, link, checkbox, radio, and submenu triggers. */
@@ -24,44 +30,56 @@ const ITEMS = '[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradi
 
 // Parts without a look of their own come straight from Base UI.
 
-export type MenuRootProps<Payload = unknown> = BaseMenu.Root.Props<Payload>;
 export type MenuTriggerProps<Payload = unknown> = BaseMenu.Trigger.Props<Payload>;
 export type MenuGroupProps = BaseMenu.Group.Props;
 export type MenuRadioGroupProps = BaseMenu.RadioGroup.Props;
 export type MenuSubmenuRootProps = BaseMenu.SubmenuRoot.Props;
 
-/** Whether the open menu is modal: a backdrop takes outside presses, and the page's scroll is locked. */
+/**
+ * What a menu's parts share: whether it is modal (a backdrop takes outside presses and the page's
+ * scroll is locked), and the popup's size.
+ */
 export interface MenuModal {
   modal: boolean;
   hover: boolean;
   open: boolean;
+  size: MenuSize;
 }
-export const NOT_MODAL: MenuModal = { modal: false, hover: false, open: false };
+export const NOT_MODAL: MenuModal = { modal: false, hover: false, open: false, size: "md" };
 export const MenuModalContext: Context<MenuModal> = createContext(NOT_MODAL);
 
-/** Set by Menubar: its menus leave `modal` and the backdrop to Base UI, which cuts the bar out. */
-export const MenubarMenuContext: Context<boolean> = createContext(false);
+/**
+ * Set by Menubar to its size: its menus leave `modal` and the backdrop to Base UI, which cuts the
+ * bar out, and their popups take the bar's size.
+ */
+export const MenubarMenuContext: Context<MenuSize | false> = createContext<MenuSize | false>(false);
+
+export type MenuRootProps<Payload = unknown> = BaseMenu.Root.Props<Payload> & MenuVariantProps;
 
 /**
- * Base UI's Root. `modal` (default true) works as Base UI's: a press outside only shuts the menu,
- * and the page does not scroll. The lock is OwsemUI's (core/scroll-lock), which leaves the page's
- * overflow alone, so its text is not drawn again while the menu is open. A menu opened by hover is
- * never modal.
+ * Base UI's Root, with one `size` for the popup and its submenus' (in a Menubar, the bar's).
+ * `modal` (default true) works as Base UI's: a press outside only shuts the menu, and the page
+ * does not scroll. The lock is OwsemUI's (core/scroll-lock), which leaves the page's overflow
+ * alone, so its text is not drawn again while the menu is open. A menu opened by hover is never
+ * modal.
  */
 export function MenuRoot<Payload = unknown>({
+  size,
   modal = true,
   onOpenChange,
   ...props
 }: MenuRootProps<Payload>): ReactElement {
-  const inBar = useContext(MenubarMenuContext);
+  const bar = useContext(MenubarMenuContext);
+  const inBar = bar !== false;
+  const sized = size ?? (bar || "md");
   const [hover, setHover] = useState(false);
   // A kept-mounted popup outlives the menu's opening, so the lock follows `open`.
   const [opened, setOpened] = useState(props.defaultOpen ?? false);
   const open = props.open ?? opened;
   useEffect(trackPointerType, []);
   const value = useMemo(
-    () => (inBar ? NOT_MODAL : { modal, hover, open }),
-    [inBar, modal, hover, open],
+    () => (inBar ? { ...NOT_MODAL, size: sized } : { modal, hover, open, size: sized }),
+    [inBar, modal, hover, open, sized],
   );
   return (
     <MenuModalContext.Provider value={value}>
@@ -81,8 +99,10 @@ export function MenuRoot<Payload = unknown>({
 
 /** A submenu: never modal of its own, as in Base UI; the menu it belongs to holds the page. */
 export function MenuSubmenuRoot(props: MenuSubmenuRootProps): ReactElement {
+  const { size } = useContext(MenuModalContext);
+  const value = useMemo(() => ({ ...NOT_MODAL, size }), [size]);
   return (
-    <MenuModalContext.Provider value={NOT_MODAL}>
+    <MenuModalContext.Provider value={value}>
       <BaseMenu.SubmenuRoot {...props} />
     </MenuModalContext.Provider>
   );
@@ -140,16 +160,18 @@ export function MenuPositioner({
   const direction = useDirection();
   const resting = useRestingAnchor(ref);
   return (
-    <BaseMenu.Positioner
-      data-slot="menu-positioner"
-      dir={direction}
-      anchor={resting.anchor}
-      {...props}
-      ref={resting.ref}
-      className={cn(menuSlots.positioner, className)}
-      sideOffset={sideOffset}
-      alignOffset={alignOffset}
-    />
+    <Placed>
+      <BaseMenu.Positioner
+        data-slot="menu-positioner"
+        dir={direction}
+        anchor={resting.anchor}
+        {...props}
+        ref={resting.ref}
+        className={cn(menuSlots.positioner, className)}
+        sideOffset={sideOffset}
+        alignOffset={alignOffset}
+      />
+    </Placed>
   );
 }
 
@@ -159,11 +181,12 @@ export interface MenuPopupProps extends Omit<BaseMenu.Popup.Props, "className">,
 
 /**
  * The panel with the popup shadow. It clips; its items scroll in an inner viewport. Glide lights
- * the item nearest the pointer; the keyboard's highlight (focus) moves it too.
+ * the item nearest the pointer; the keyboard's highlight (focus) moves it too. It takes the
+ * Root's `size`. Without a Positioner around it, it draws a Portal and a Positioner.
  */
 export function MenuPopup({
   className,
-  size = "md",
+  size,
   onFocus,
   children,
   ref,
@@ -171,7 +194,8 @@ export function MenuPopup({
 }: MenuPopupProps): ReactElement {
   const glide = useGlide<HTMLDivElement>({ axis: "y", items: ITEMS });
   const { ref: viewportRef, setActive } = glide;
-  const { modal, hover, open } = useContext(MenuModalContext);
+  const { modal, hover, open, size: rootSize } = useContext(MenuModalContext);
+  const sized = size ?? rootSize;
   const [self, setSelf] = useState<HTMLDivElement | null>(null);
   useScrollLock(self, modal && !hover && open);
   const merged = useMergedRefs(setSelf, ref);
@@ -182,20 +206,22 @@ export function MenuPopup({
     if (item.matches(ITEMS) && event.currentTarget.contains(item)) setActive(item);
   };
   return (
-    <BaseMenu.Popup
-      data-slot="menu-popup"
-      data-size={size}
-      onFocus={follow}
-      {...props}
-      ref={merged}
-      className={cn(menuPopupVariants({ size }), className)}
-    >
-      {/* The popup only clips, so its rounded corners cut the scrollbar; this scrolls. */}
-      <div data-slot="menu-viewport" ref={viewportRef} className={menuSlots.viewport}>
-        <GlideHighlight glide={glide} />
-        {children}
-      </div>
-    </BaseMenu.Popup>
+    <Placement portal={MenuPortal} positioner={MenuPositioner}>
+      <BaseMenu.Popup
+        data-slot="menu-popup"
+        data-size={sized}
+        onFocus={follow}
+        {...props}
+        ref={merged}
+        className={cn(menuPopupVariants({ size: sized }), className)}
+      >
+        {/* The popup only clips, so its rounded corners cut the scrollbar; this scrolls. */}
+        <div data-slot="menu-viewport" ref={viewportRef} className={menuSlots.viewport}>
+          <GlideHighlight glide={glide} />
+          <Unplaced>{children}</Unplaced>
+        </div>
+      </BaseMenu.Popup>
+    </Placement>
   );
 }
 

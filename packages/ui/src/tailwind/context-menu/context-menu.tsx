@@ -3,8 +3,9 @@
 
 import { ContextMenu as BaseContextMenu } from "@base-ui/react/context-menu";
 import { useDirection } from "@base-ui/react/direction-provider";
-import { createContext, type ReactElement, useContext } from "react";
+import { createContext, type ReactElement, useContext, useMemo } from "react";
 import { cn } from "../lib/cn";
+import { Placed, Placement } from "../lib/placed";
 import {
   MenuCheckboxItem,
   MenuCheckboxItemIndicator,
@@ -16,6 +17,7 @@ import {
   type MenuItemProps,
   MenuLinkItem,
   type MenuLinkItemProps,
+  MenuModalContext,
   MenuPopup,
   type MenuPopupProps,
   MenuPositioner,
@@ -28,8 +30,9 @@ import {
   MenuSubmenuRoot,
   MenuSubmenuTrigger,
   type MenuSubmenuTriggerProps,
+  NOT_MODAL,
 } from "../menu/menu";
-import { menuSlots } from "../menu/menu-variants";
+import { type MenuVariantProps, menuSlots } from "../menu/menu-variants";
 import { contextMenuSlots } from "./context-menu-variants";
 
 // The popup, the items, and their look are Menu's; each part here only names itself.
@@ -48,13 +51,21 @@ export type ContextMenuSubmenuTriggerProps = MenuSubmenuTriggerProps;
 export type ContextMenuGroupLabelProps = MenuGroupLabelProps;
 export type ContextMenuSeparatorProps = MenuSeparatorProps;
 
-export type ContextMenuRootProps = BaseContextMenu.Root.Props;
+export type ContextMenuRootProps = BaseContextMenu.Root.Props & MenuVariantProps;
 
 /**
- * Base UI's Root. A context menu is always modal, as in Base UI: its own backdrop takes a press
- * outside, so that press only shuts the menu, and the page does not scroll.
+ * Base UI's Root, with one `size` for the popup and its submenus'. A context menu is always modal,
+ * as in Base UI: its own backdrop takes a press outside, so that press only shuts the menu, and
+ * the page does not scroll.
  */
-export const ContextMenuRoot: typeof BaseContextMenu.Root = BaseContextMenu.Root;
+export function ContextMenuRoot({ size = "md", ...props }: ContextMenuRootProps): ReactElement {
+  const value = useMemo(() => ({ ...NOT_MODAL, size }), [size]);
+  return (
+    <MenuModalContext.Provider value={value}>
+      <BaseContextMenu.Root {...props} />
+    </MenuModalContext.Provider>
+  );
+}
 
 export interface ContextMenuTriggerProps extends Omit<BaseContextMenu.Trigger.Props, "className"> {
   className?: string | undefined;
@@ -102,12 +113,14 @@ export function ContextMenuPositioner({
     return <MenuPositioner data-slot="context-menu-positioner" {...props} className={className} />;
   }
   return (
-    <BaseContextMenu.Positioner
-      data-slot="context-menu-positioner"
-      dir={direction}
-      {...props}
-      className={cn(menuSlots.positioner, className)}
-    />
+    <Placed>
+      <BaseContextMenu.Positioner
+        data-slot="context-menu-positioner"
+        dir={direction}
+        {...props}
+        className={cn(menuSlots.positioner, className)}
+      />
+    </Placed>
   );
 }
 
@@ -123,9 +136,16 @@ export function ContextMenuSubmenuRoot(props: ContextMenuSubmenuRootProps): Reac
 export const ContextMenuGroup: typeof BaseContextMenu.Group = BaseContextMenu.Group;
 export const ContextMenuRadioGroup: typeof BaseContextMenu.RadioGroup = BaseContextMenu.RadioGroup;
 
-/** Menu's popup: the panel with the popup shadow, its items scrolling inside. */
+/**
+ * Menu's popup: the panel with the popup shadow, its items scrolling inside. Without a Positioner
+ * around it, it draws a Portal and a Positioner.
+ */
 export function ContextMenuPopup(props: ContextMenuPopupProps): ReactElement {
-  return <MenuPopup data-slot="context-menu-popup" {...props} />;
+  return (
+    <Placement portal={ContextMenuPortal} positioner={ContextMenuPositioner}>
+      <MenuPopup data-slot="context-menu-popup" {...props} />
+    </Placement>
+  );
 }
 
 /** An action; put an icon (`svg`) first and a shortcut (`kbd`) last. */

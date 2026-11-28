@@ -30,7 +30,7 @@ export interface MenubarRootProps
 export function MenubarRoot({ size = "md", className, ...props }: MenubarRootProps): ReactElement {
   return (
     <SizeContext.Provider value={size}>
-      <MenubarMenuContext.Provider value>
+      <MenubarMenuContext.Provider value={size}>
         <BaseMenubar
           data-slot="menubar"
           {...props}

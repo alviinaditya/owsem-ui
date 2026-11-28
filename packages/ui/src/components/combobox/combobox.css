@@ -52,11 +52,11 @@
   /* Reached with the arrow keys from the input. */
   .ow-combobox__chip:where([data-highlighted], :focus-visible) {
     outline: 2px solid var(--_focus);
-    outline-offset: 0;
+    outline-offset: 2px;
   }
 
   .ow-combobox__chip:where([data-disabled]) {
-    opacity: 0.45;
+    opacity: 0.5;
   }
 
   .ow-combobox__chip-remove {
@@ -102,12 +102,14 @@
 
   .ow-combobox__chip-remove:where([data-disabled], :disabled) {
     cursor: not-allowed;
-    opacity: 0.45;
+    opacity: 0.5;
   }
 
   .ow-combobox__chip-remove > :where(svg) {
     inline-size: 0.875em;
     block-size: 0.875em;
+    /* A heavier stroke for the small ×, so it weighs as the others (about 1.5px). */
+    stroke-width: 3;
   }
 
   /* More contrast asked for: a chip gets an edge too. */

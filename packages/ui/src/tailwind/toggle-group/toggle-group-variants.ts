@@ -100,7 +100,7 @@ const thumb = [
   // on the settle spring.
   "will-change-[translate,transform,scale] transition-[translate,transform,scale,opacity]",
   "duration-[var(--ow-spring-travel-duration),var(--ow-spring-travel-duration),var(--ow-spring-settle-duration),150ms]",
-  "ease-[var(--ow-spring-travel),var(--ow-spring-travel),var(--ow-spring-settle),ease]",
+  "ease-[var(--ow-spring-travel),var(--ow-spring-travel),var(--ow-spring-settle),var(--ow-ease-out)]",
   // The key, inside the clear border.
   "before:absolute before:content-[''] before:inset-0 before:rounded-(--_radius)",
   "before:bg-(color:--_thumb) before:[box-shadow:var(--_key-shadow)] before:will-change-transform",
@@ -108,17 +108,17 @@ const thumb = [
   // Pressed in quickly, released with the settle spring.
   "data-held:scale-(--_press)",
   "data-held:duration-[var(--ow-spring-travel-duration),var(--ow-spring-travel-duration),90ms,150ms]",
-  "data-held:ease-[var(--ow-spring-travel),var(--ow-spring-travel),var(--ow-ease-out),ease]",
+  "data-held:ease-[var(--ow-spring-travel),var(--ow-spring-travel),var(--ow-ease-out),var(--ow-ease-out)]",
   // The thumb does not slide or press; it only fades. A held item dims instead.
   "motion-reduce:scale-none motion-reduce:data-held:scale-none",
-  "motion-reduce:transition-[opacity] motion-reduce:duration-150 motion-reduce:ease-[ease]",
-  "motion-reduce:data-held:duration-150 motion-reduce:data-held:ease-[ease]",
+  "motion-reduce:transition-[opacity] motion-reduce:duration-150 motion-reduce:ease-(--ow-ease-out)",
+  "motion-reduce:data-held:duration-150 motion-reduce:data-held:ease-(--ow-ease-out)",
   "motion-reduce:data-held:data-visible:opacity-80",
   // The label turns as the fill arrives, so the fill does not travel.
   "forced-colors:before:forced-color-adjust-none forced-colors:before:bg-[Highlight]",
   "forced-colors:before:[box-shadow:none]",
   "forced-colors:not-data-held:transition-[opacity] forced-colors:not-data-held:duration-150",
-  "forced-colors:not-data-held:ease-[ease]",
+  "forced-colors:not-data-held:ease-(--ow-ease-out)",
   // The first placement and every jump: nothing transitions.
   "data-instant:[transition:none] forced-colors:data-instant:[transition:none]",
 ];
@@ -138,7 +138,7 @@ const item = [
   "text-(color:--_muted) leading-[1.25] whitespace-nowrap",
   "cursor-pointer touch-manipulation will-change-[scale]",
   "transition-[color,scale] duration-[var(--_color-time),var(--ow-spring-settle-duration)]",
-  "ease-[ease,var(--ow-spring-settle)]",
+  "ease-[var(--ow-ease-out),var(--ow-spring-settle)]",
   // Lit by Glide, or pressed: the text color; pressed, the accent leaning toward it.
   "data-glide-active:not-data-pressed:text-(color:--_fg) data-pressed:text-(color:--_on)",
   // A pressed item as a key of its own: with multiple selection, and before the script places the
@@ -157,15 +157,11 @@ const item = [
   "group-data-thumb/ow-toggle-group:group-not-data-multiple/ow-toggle-group:group-data-[variant=solid]/ow-toggle-group:data-pressed:delay-[var(--_color-delay),0s]",
   "group-data-thumb/ow-toggle-group:group-not-data-multiple/ow-toggle-group:group-data-[variant=solid]/ow-toggle-group:not-data-pressed:not-data-glide-active:delay-[var(--_leave-delay),0s]",
   "group-data-thumb/ow-toggle-group:group-not-data-multiple/ow-toggle-group:group-data-[variant=solid]/ow-toggle-group:data-glide-active:not-data-pressed:[--_color-time:150ms]",
-  "data-held:scale-(--_press) data-held:duration-[var(--_color-time),90ms] data-held:ease-[ease,var(--ow-ease-out)]",
+  "data-held:scale-(--_press) data-held:duration-[var(--_color-time),90ms] data-held:ease-[var(--ow-ease-out),var(--ow-ease-out)]",
   // Above its neighbors, so a raised one beside it never covers the ring.
   "focus-visible:z-1 focus-visible:outline-2 focus-visible:outline-offset-2",
   "focus-visible:outline-(color:--_focus)",
-  // Disabled is the last word on the text, also when pressed.
-  "[--_dim:color-mix(in_oklab,var(--_muted)_50%,transparent)] disabled:cursor-not-allowed",
-  "disabled:text-(color:--_dim) disabled:data-pressed:text-(color:--_dim)",
-  // A disabled solid key keeps its fill, so its text dims toward it.
-  "group-data-[variant=solid]/ow-toggle-group:disabled:data-pressed:text-[color-mix(in_oklab,var(--_on)_60%,transparent)]",
+  "disabled:cursor-not-allowed disabled:opacity-50",
   // The icon is the font size plus 2px, as far from the edge as from the top. With both margins,
   // an item with only an icon is square.
   "[&>svg]:flex-none [&>svg]:size-(--icon)",
@@ -173,8 +169,8 @@ const item = [
   "[&>svg:last-child]:me-[calc((1cap_-_var(--icon))_/_2)]",
   // No pressing in; the material still changes.
   "motion-reduce:scale-none motion-reduce:data-held:scale-none",
-  "motion-reduce:transition-[color] motion-reduce:duration-150 motion-reduce:ease-[ease]",
-  "motion-reduce:data-held:duration-150 motion-reduce:data-held:ease-[ease]",
+  "motion-reduce:transition-[color] motion-reduce:duration-150 motion-reduce:ease-(--ow-ease-out)",
+  "motion-reduce:data-held:duration-150 motion-reduce:data-held:ease-(--ow-ease-out)",
   // The pressed items are filled with the system highlight, and a disabled one stays gray.
   "forced-colors:data-pressed:forced-color-adjust-none",
   "forced-colors:data-pressed:text-[HighlightText]",
@@ -183,7 +179,7 @@ const item = [
   "forced-colors:group-data-multiple/ow-toggle-group:data-pressed:forced-color-adjust-none",
   "forced-colors:group-data-multiple/ow-toggle-group:data-pressed:bg-[Highlight]",
   "forced-colors:focus-visible:outline-[Highlight] forced-colors:disabled:text-[GrayText]",
-  "forced-colors:disabled:data-pressed:text-[GrayText]",
+  "forced-colors:disabled:opacity-100 forced-colors:disabled:data-pressed:text-[GrayText]",
   "forced-colors:group-data-[variant=solid]/ow-toggle-group:disabled:data-pressed:text-[GrayText]",
   "forced-colors:data-pressed:bg-none forced-colors:data-pressed:[box-shadow:none]",
   "forced-colors:group-not-data-thumb/ow-toggle-group:data-pressed:[box-shadow:none]",

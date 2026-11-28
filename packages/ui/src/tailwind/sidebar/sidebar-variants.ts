@@ -134,7 +134,7 @@ const trigger = [
 const indicator = [
   "group/ow-sidebar-indicator absolute top-0 start-0 w-0 h-0 -z-1 opacity-0 pointer-events-none",
   // Its own layer, so it lands without a pixel jump.
-  "will-change-[opacity] transition-[opacity] duration-150 ease-[ease]",
+  "will-change-[opacity] transition-[opacity] duration-150 ease-(--ow-ease-out)",
   "data-visible:opacity-100",
 ];
 

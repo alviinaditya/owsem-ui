@@ -76,7 +76,7 @@ interface GroupProps {
   disabled?: boolean;
   readOnly?: boolean;
   /** One option that is disabled or read only. */
-  one?: "disabled" | "readonly";
+  one?: "disabled" | "readonly" | "invalid";
   mark?: "svg" | "kept";
   className?: string;
   long?: boolean;
@@ -119,6 +119,7 @@ function Options({
           "aria-label": bare ? name : undefined,
           disabled: one === "disabled" && name === "Pickup" ? true : undefined,
           readOnly: one === "readonly" && name === "Pickup" ? true : undefined,
+          "aria-invalid": one === "invalid" && name === "Pickup" ? true : undefined,
         };
         return bare ? (
           <Radio.Root key={name} {...rest}>
@@ -151,6 +152,8 @@ const cases: Case[] = [
   make("one disabled, off", { one: "disabled", value: "standard" }),
   make("read only group", { readOnly: true }),
   make("one read only", { one: "readonly", value: "pickup" }),
+  make("one invalid", { one: "invalid", value: "standard" }),
+  make("one invalid, on", { one: "invalid", value: "pickup" }),
   make("an icon as the mark", { mark: "svg" }),
   make("a mark kept mounted", { mark: "kept" }),
   make("a label that wraps", { long: true }),

@@ -234,7 +234,7 @@ describe("OTP Field", () => {
     const off = await mount(<OTPField.Root length={3} aria-label="Code" disabled />);
     const slot = off.slots()[0] as HTMLInputElement;
     expect(slot.disabled).toBe(true);
-    expect(getComputedStyle(slot).opacity).toBe("0.45");
+    expect(getComputedStyle(slot).opacity).toBe("0.5");
     expect(getComputedStyle(slot).cursor).toBe("not-allowed");
   });
 

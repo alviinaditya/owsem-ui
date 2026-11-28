@@ -306,7 +306,7 @@ describe("className on Navigation Menu in Tailwind CSS v4", () => {
   test("a Tailwind page does not see the CSS flavor's classes", async () => {
     const root = await rendered({ open: false });
     const classes = [...root.querySelectorAll("[class]")].flatMap((el) =>
-      el.className.split(/\s+/),
+      (el.getAttribute("class") ?? "").split(/\s+/),
     );
     expect(classes.filter((name) => /^ow-[\w-]+$/.test(name))).toEqual([]);
     expect(classes.length).toBeGreaterThan(10);

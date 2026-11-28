@@ -91,9 +91,11 @@
     text-align: center;
   }
 
-  /* The tint deepens on hover. */
+  /* The tint deepens on hover, unless the field only shows its value. */
   @media (hover: hover) and (pointer: fine) {
-    .ow-otp-field__input:where(:hover):where(:not([data-disabled], :disabled)) {
+    .ow-otp-field__input:where(:hover):where(
+        :not([data-disabled], :disabled, [readonly], [data-readonly])
+      ) {
       --_bg: color-mix(in oklab, var(--ow-fg) 9%, transparent);
     }
   }
@@ -109,7 +111,7 @@
 
   .ow-otp-field__input:where([data-disabled], :disabled) {
     cursor: not-allowed;
-    opacity: 0.45;
+    opacity: 0.5;
   }
 
   /* More contrast asked for: the edge comes back at 3:1. */

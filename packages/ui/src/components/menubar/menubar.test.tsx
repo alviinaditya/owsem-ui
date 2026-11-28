@@ -182,7 +182,7 @@ describe("Menubar", () => {
     expect(getComputedStyle(root).overflow).not.toBe("hidden");
   });
 
-  test("the bar is a quiet panel; the triggers are ghost buttons, tinted under the pointer", async () => {
+  test("the bar is a quiet panel; the triggers are ghost buttons, lit by Glide under the pointer", async () => {
     await render(<Bar />);
     const style = getComputedStyle(bar());
     expect(style.backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
@@ -191,7 +191,11 @@ describe("Menubar", () => {
     expect(getComputedStyle(edit).backgroundColor).toBe("rgba(0, 0, 0, 0)");
     expect(getComputedStyle(edit).borderTopWidth).toBe("0px");
     await userEvent.hover(edit);
-    await expect.poll(() => getComputedStyle(edit).backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
+    // The trigger itself stays clear; the highlight behind it lights.
+    await expect.poll(() => edit.hasAttribute("data-glide-active")).toBe(true);
+    const glide = bar().querySelector<HTMLElement>('[data-slot="glide"]');
+    await expect.poll(() => glide?.hasAttribute("data-visible")).toBe(true);
+    expect(getComputedStyle(edit).backgroundColor).toBe("rgba(0, 0, 0, 0)");
   });
 
   test("the bar is 32, 40, or 48px tall, and the triggers 24, 32, or 40", async () => {
@@ -244,7 +248,7 @@ describe("Menubar", () => {
   test("a disabled trigger is dimmed and skipped by the arrows", async () => {
     await render(<Bar disabled />);
     expect(trigger("View").hasAttribute("data-disabled")).toBe(true);
-    expect(getComputedStyle(trigger("View")).opacity).toBe("0.45");
+    expect(getComputedStyle(trigger("View")).opacity).toBe("0.5");
     trigger("Edit").focus();
     await userEvent.keyboard("{ArrowRight}");
     expect(document.activeElement).not.toBe(trigger("View"));

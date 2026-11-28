@@ -49,12 +49,12 @@ const marker = [
   // Motion.
   "transition-[stroke-dasharray,stroke-dashoffset,opacity]",
   "duration-[var(--ow-spring-travel-duration),var(--ow-spring-travel-duration),150ms]",
-  "ease-[var(--ow-spring-travel),var(--ow-spring-travel),ease]",
+  "ease-[var(--ow-spring-travel),var(--ow-spring-travel),var(--ow-ease-out)]",
   // The first placement and a redraw: no transition.
   "data-instant:[transition:none]",
   // Media. The marker jumps to the next link, and only fades in and out; in forced colors the rail
   // is the text color and the marker the system highlight.
-  "motion-reduce:transition-[opacity] motion-reduce:duration-150 motion-reduce:ease-[ease]",
+  "motion-reduce:transition-[opacity] motion-reduce:duration-150 motion-reduce:ease-(--ow-ease-out)",
   "forced-colors:forced-color-adjust-none forced-colors:stroke-[Highlight]",
 ];
 

@@ -5,8 +5,8 @@
 /*
  * A row of menus as in a desktop app, on the quiet panel of Toolbar. The bar is 32, 40, or 48px
  * tall (sm, md, lg); its triggers are ghost buttons 24, 32, or 40px tall in the 4px padding, so
- * their radius follows the bar's curve (FR-9 to FR-11). The open menu's trigger stays tinted. The
- * menus themselves are Menu's.
+ * their radius follows the bar's curve (FR-9 to FR-11). Glide lights the trigger under the pointer;
+ * the open menu's trigger stays tinted. The menus themselves are Menu's.
  */
 @layer owsem.components {
   .ow-menubar {
@@ -46,13 +46,18 @@
     align-items: stretch;
   }
 
+  /* Glide's highlight takes the triggers' corners. */
+  .ow-menubar > .ow-glide {
+    --_radius: var(--_inner);
+  }
+
   /* Triggers: Button's geometry, --py the only input; 8px shorter than the bar (FR-9). */
   .ow-menubar__trigger {
     --py: 0.5179em;
     --_py: max(var(--py), (24px - 1lh) / 2);
     --px: calc(var(--_py) + (1lh - 1cap) / 2);
-    --_hover: var(--ow-hover);
     --_open: var(--ow-pressed-bg);
+    --_press: calc(1 - 0.03 * var(--ow-motion-scale));
     display: inline-flex;
     flex: none;
     align-items: center;
@@ -75,6 +80,10 @@
     white-space: nowrap;
     cursor: default;
     touch-action: manipulation;
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: transform;
+    /* A press lets go on the settle spring (FR-21). */
+    transition: transform var(--ow-spring-settle-duration) var(--ow-spring-settle);
   }
 
   .ow-menubar__trigger--sm {
@@ -87,15 +96,17 @@
     font-size: 1rem;
   }
 
-  @media (hover: hover) {
-    .ow-menubar__trigger:hover:not([data-disabled]) {
-      background-color: var(--_hover);
-    }
-  }
-
   /* The open menu's trigger stays lit while the pointer is in the menu. */
   .ow-menubar__trigger:is([data-popup-open], [data-pressed]):not([data-disabled]) {
     background-color: var(--_open);
+  }
+
+  /* Held down: in to 0.97 and the pressed material within 90 ms, as Toolbar's buttons (DP-4). */
+  .ow-menubar__trigger:active:not([data-disabled]) {
+    background-color: var(--_open);
+    transform: scale(var(--_press));
+    transition-duration: 90ms;
+    transition-timing-function: var(--ow-ease-out);
   }
 
   .ow-menubar__trigger:focus-visible {
@@ -104,7 +115,14 @@
   }
 
   .ow-menubar__trigger[data-disabled] {
-    opacity: 0.45;
+    opacity: 0.5;
+  }
+
+  /* FR-20: the material still changes, nothing moves. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-menubar__trigger:active:not([data-disabled]) {
+      transform: none;
+    }
   }
 
   @media (forced-colors: active) {

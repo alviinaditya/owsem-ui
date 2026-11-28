@@ -101,7 +101,7 @@
 
   .ow-tree-rail-nav__rail .ow-tree-rail-nav__rail-active {
     opacity: 0;
-    transition: opacity 0.25s ease;
+    transition: opacity 0.25s var(--ow-ease-out);
   }
 
   .ow-tree-rail-nav__rail .ow-tree-rail-nav__rail-active[data-on] {
@@ -131,8 +131,8 @@
     stroke: var(--_surface);
     stroke-width: 1.5;
     transition:
-      fill 0.22s ease,
-      opacity 0.2s ease,
+      fill 0.22s var(--ow-ease-out),
+      opacity 0.2s var(--ow-ease-out),
       transform 0.34s var(--_ease);
   }
 
@@ -146,7 +146,7 @@
   }
 
   .ow-tree-rail-nav__rail .ow-tree-rail-nav__rail-node[data-disabled] circle {
-    opacity: 0.45;
+    opacity: 0.5;
   }
 
   .ow-tree-rail-nav__rail .ow-tree-rail-nav__rail-node[data-hidden] circle {
@@ -219,7 +219,7 @@
     text-align: start;
     text-decoration: none;
     cursor: pointer;
-    transition: color 0.18s ease;
+    transition: color 0.18s var(--ow-ease-out);
   }
 
   /* First-level rows stand out by color and icon; every level shares one size and weight. */
@@ -261,7 +261,7 @@
     will-change: transform;
     transition:
       transform 0.5s var(--_ease),
-      opacity 0.22s ease;
+      opacity 0.22s var(--ow-ease-out);
   }
 
   .ow-tree-rail-nav__item:is([data-current], [data-arrived], [data-leaving]):dir(rtl)::before {
@@ -277,7 +277,7 @@
   .ow-tree-rail-nav__item[data-leaving]::before {
     transition:
       transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-      opacity 0.16s ease 0.14s;
+      opacity 0.16s var(--ow-ease-out) 0.14s;
   }
 
   .ow-tree-rail-nav__item:focus-visible {
@@ -355,7 +355,7 @@
     mask-position:
       0 0,
       0 0;
-    transition: mask-position 0.25s ease 0.4s;
+    transition: mask-position 0.25s var(--ow-ease-out) 0.4s;
   }
 
   .ow-tree-rail-nav__item:is([data-glide-active], :focus-visible)
@@ -389,27 +389,39 @@
     }
   }
 
+  /* The chevron is Accordion's: the font size plus 2px, its strokes turning while the group is open. */
   .ow-tree-rail-nav__chevron {
+    --_flip: 0;
     flex: none;
-    inline-size: 14px;
-    block-size: 14px;
+    inline-size: calc(1em + 2px);
+    block-size: calc(1em + 2px);
     margin-inline-start: auto;
     fill: none;
     stroke: currentColor;
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
+  }
+
+  .ow-tree-rail-nav__item[aria-expanded="true"] .ow-tree-rail-nav__chevron {
+    --_flip: 1;
+  }
+
+  /* Each stroke turns a quarter about its own center: down, flat halfway, then up. */
+  .ow-tree-rail-nav__chevron-stroke {
+    --_turn: -1;
+    /* biome-ignore lint/nursery/useBaseline: the strokes turn about their own centers */
+    transform-box: fill-box;
+    transform-origin: center;
+    rotate: calc(var(--_flip) * var(--_turn) * 90deg);
     /* Its own layer, so it lands without a pixel jump (NF-8). */
     will-change: rotate;
-    transition: rotate 0.34s var(--_ease);
+    transition: rotate calc(var(--ow-spring-settle-duration) * var(--ow-motion-scale))
+      var(--ow-spring-settle);
   }
 
-  .ow-tree-rail-nav__item[aria-expanded="false"] .ow-tree-rail-nav__chevron {
-    rotate: -90deg;
-  }
-
-  .ow-tree-rail-nav__item[aria-expanded="false"]:dir(rtl) .ow-tree-rail-nav__chevron {
-    rotate: 90deg;
+  .ow-tree-rail-nav__chevron-stroke[data-side="end"] {
+    --_turn: 1;
   }
 
   /*
@@ -503,7 +515,7 @@
 
   .ow-tree-rail-nav__tree:not([data-rail])
     .ow-tree-rail-nav__item:is(:disabled, [aria-disabled="true"], [data-disabled])::after {
-    opacity: 0.45;
+    opacity: 0.5;
   }
 
   /* The current row's tint, at rest; the deepest current row only, as the script picks. */
@@ -529,19 +541,19 @@
   /* FR-20: no sliding, no sweeping; opacity and color only. */
   @media (prefers-reduced-motion: reduce) {
     .ow-tree-rail-nav__panel,
-    .ow-tree-rail-nav__chevron {
+    .ow-tree-rail-nav__chevron-stroke {
       transition: none;
     }
 
     .ow-tree-rail-nav__item:is([data-current], [data-arrived], [data-leaving])::before {
       transform: none;
-      transition: opacity 0.2s ease;
+      transition: opacity 0.2s var(--ow-ease-out);
     }
 
     .ow-tree-rail-nav__rail .ow-tree-rail-nav__rail-node circle {
       transition:
-        fill 0.2s ease,
-        opacity 0.2s ease;
+        fill 0.2s var(--ow-ease-out),
+        opacity 0.2s var(--ow-ease-out);
     }
 
     /* The label keeps still, start fade included; its full text is in a tooltip instead. The

@@ -119,7 +119,7 @@
       translate var(--_travel),
       transform var(--_travel),
       scale var(--_settle),
-      opacity 150ms ease;
+      opacity 150ms var(--ow-ease-out);
   }
 
   /* The key, inside the clear border. thumb.ts stretches it with an animation. */
@@ -144,7 +144,7 @@
       translate var(--_travel),
       transform var(--_travel),
       scale var(--_press-in),
-      opacity 150ms ease;
+      opacity 150ms var(--ow-ease-out);
   }
 
   .ow-toggle-group__item {
@@ -179,7 +179,7 @@
     touch-action: manipulation;
     will-change: scale;
     transition:
-      color var(--_color-time) ease,
+      color var(--_color-time) var(--ow-ease-out),
       scale var(--_settle);
   }
 
@@ -240,7 +240,7 @@
   .ow-toggle-group__item[data-held] {
     scale: var(--_press);
     transition:
-      color var(--_color-time) ease,
+      color var(--_color-time) var(--ow-ease-out),
       scale var(--_press-in);
   }
 
@@ -252,13 +252,8 @@
   }
 
   .ow-toggle-group__item:disabled {
-    color: color-mix(in oklab, var(--_muted) 50%, transparent);
+    opacity: 0.5;
     cursor: not-allowed;
-  }
-
-  /* A disabled solid key keeps its fill, so its text dims toward it. */
-  .ow-toggle-group--solid .ow-toggle-group__item[data-pressed]:disabled {
-    color: color-mix(in oklab, var(--_on) 60%, transparent);
   }
 
   /* FR-10: the icon is the font size plus 2px, as far from the edge as from the top. */
@@ -291,13 +286,13 @@
     .ow-toggle-group__thumb,
     .ow-toggle-group__thumb[data-held] {
       scale: none;
-      transition: opacity 150ms ease;
+      transition: opacity 150ms var(--ow-ease-out);
     }
 
     .ow-toggle-group__item,
     .ow-toggle-group__item[data-held] {
       scale: none;
-      transition: color 150ms ease;
+      transition: color 150ms var(--ow-ease-out);
     }
 
     .ow-toggle-group__thumb[data-held][data-visible] {
@@ -330,6 +325,7 @@
     .ow-toggle-group__item:disabled,
     .ow-toggle-group--solid .ow-toggle-group__item[data-pressed]:disabled {
       color: GrayText;
+      opacity: 1;
     }
 
     /* The fill does not travel, so the text turns at once. */
@@ -350,7 +346,7 @@
     }
 
     .ow-toggle-group__thumb {
-      transition: opacity 150ms ease;
+      transition: opacity 150ms var(--ow-ease-out);
     }
   }
 

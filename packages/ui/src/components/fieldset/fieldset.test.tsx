@@ -75,7 +75,7 @@ describe("Fieldset", () => {
     const inputs = [...screen.container.querySelectorAll("input")];
     expect(inputs.map((input) => input.disabled)).toEqual([true, true]);
     expect(inputs.every((input) => "disabled" in input.dataset)).toBe(true);
-    expect(getComputedStyle(q(".ow-fieldset__legend")).opacity).toBe("0.45");
+    expect(getComputedStyle(q(".ow-fieldset__legend")).opacity).toBe("0.5");
   });
 
   test("works with plain controls and in a plain form", async () => {

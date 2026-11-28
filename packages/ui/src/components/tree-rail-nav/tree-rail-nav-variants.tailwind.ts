@@ -63,7 +63,9 @@ const rail = [
 const railBase = ["[&_path]:stroke-(color:--_rail) [&_path]:[stroke-width:1.25]"];
 
 // The trail, and the marker's layer, appear with data-on.
-const railActive = ["opacity-0 transition-[opacity] duration-250 ease-[ease] data-on:opacity-100"];
+const railActive = [
+  "opacity-0 transition-[opacity] duration-250 ease-(--ow-ease-out) data-on:opacity-100",
+];
 
 const railTrail = ["stroke-(color:--_trail) [stroke-width:1.75]"];
 
@@ -85,12 +87,12 @@ const railDot = [
 const railNode = [
   "[&_circle]:fill-(--_node) [&_circle]:stroke-(color:--_surface) [&_circle]:[stroke-width:1.5]",
   "[&_circle]:transition-[fill,opacity,transform] [&_circle]:duration-[220ms,200ms,340ms]",
-  "[&_circle]:ease-[ease,ease,var(--_ease)]",
+  "[&_circle]:ease-[var(--ow-ease-out),var(--ow-ease-out),var(--_ease)]",
   "data-hot:[&_circle]:fill-(--_muted)",
   "data-lit:[&_circle]:fill-(--_trail) data-lit:[&_circle]:transform-[scale(1.2)]",
-  "data-disabled:[&_circle]:opacity-45 data-hidden:[&_circle]:opacity-0",
+  "data-disabled:[&_circle]:opacity-50 data-hidden:[&_circle]:opacity-0",
   "motion-reduce:[&_circle]:transition-[fill,opacity] motion-reduce:[&_circle]:duration-200",
-  "motion-reduce:[&_circle]:ease-[ease]",
+  "motion-reduce:[&_circle]:ease-(--ow-ease-out)",
 ];
 
 // Each list's rail and the gap between its rows; the resting rail draws from both. Inside a panel
@@ -155,7 +157,7 @@ const item = [
   "ms-(--_x) py-[6px] px-[10px] border-0 rounded-(--_radius) bg-transparent",
   // Type.
   "text-(color:--_muted) font-[family-name:inherit] font-[weight:inherit] text-start no-underline",
-  "cursor-pointer transition-[color] duration-180 ease-[ease]",
+  "cursor-pointer transition-[color] duration-180 ease-(--ow-ease-out)",
   "ow-tree-rail-nav-bright:text-(color:--_fg)",
   // Inside, so a panel's overflow never cuts it.
   "focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(color:--_focus)",
@@ -173,12 +175,12 @@ const item = [
   // Its own layer, so it lands without a pixel jump.
   "ow-tree-rail-nav-tinted:before:will-change-transform",
   "ow-tree-rail-nav-tinted:before:transition-[transform,opacity]",
-  "ow-tree-rail-nav-tinted:before:duration-[500ms,220ms] ow-tree-rail-nav-tinted:before:ease-[var(--_ease),ease]",
+  "ow-tree-rail-nav-tinted:before:duration-[500ms,220ms] ow-tree-rail-nav-tinted:before:ease-[var(--_ease),var(--ow-ease-out)]",
   "ow-tree-rail-nav-tinted:data-arrived:before:opacity-100",
   "ow-tree-rail-nav-tinted:data-arrived:before:transform-none",
   // Closing is quicker than the sweep, and fades once it has mostly folded.
   "ow-tree-rail-nav-tinted:data-leaving:before:duration-[300ms,160ms]",
-  "ow-tree-rail-nav-tinted:data-leaving:before:ease-[cubic-bezier(0.4,0,0.2,1),ease]",
+  "ow-tree-rail-nav-tinted:data-leaving:before:ease-[cubic-bezier(0.4,0,0.2,1),var(--ow-ease-out)]",
   "ow-tree-rail-nav-tinted:data-leaving:before:delay-[0s,140ms]",
   // The deepest current row's tint, at rest.
   "ow-tree-rail-nav-resting-current:before:opacity-100",
@@ -188,10 +190,10 @@ const item = [
   "motion-reduce:ow-tree-rail-nav-tinted:before:transform-none",
   "motion-reduce:ow-tree-rail-nav-tinted:before:transition-[opacity]",
   "motion-reduce:ow-tree-rail-nav-tinted:before:duration-200",
-  "motion-reduce:ow-tree-rail-nav-tinted:before:ease-[ease]",
+  "motion-reduce:ow-tree-rail-nav-tinted:before:ease-(--ow-ease-out)",
   "motion-reduce:ow-tree-rail-nav-tinted:before:delay-0",
   "motion-reduce:ow-tree-rail-nav-tinted:data-leaving:before:duration-200",
-  "motion-reduce:ow-tree-rail-nav-tinted:data-leaving:before:ease-[ease]",
+  "motion-reduce:ow-tree-rail-nav-tinted:data-leaving:before:ease-(--ow-ease-out)",
   "motion-reduce:ow-tree-rail-nav-tinted:data-leaving:before:delay-0",
   // The resting dot on its rail, cut out of the rail with the page color, as the script draws it.
   "ow-tree-rail-nav-resting:after:content-[''] ow-tree-rail-nav-resting:after:absolute",
@@ -200,9 +202,9 @@ const item = [
   "ow-tree-rail-nav-resting:after:size-[5px] ow-tree-rail-nav-resting:after:rounded-[50%]",
   "ow-tree-rail-nav-resting:after:bg-(color:--_node)",
   "ow-tree-rail-nav-resting:after:shadow-[0_0_0_1.5px_var(--_surface)]",
-  "ow-tree-rail-nav-resting:disabled:after:opacity-45",
-  "ow-tree-rail-nav-resting:aria-disabled:after:opacity-45",
-  "ow-tree-rail-nav-resting:data-disabled:after:opacity-45",
+  "ow-tree-rail-nav-resting:disabled:after:opacity-50",
+  "ow-tree-rail-nav-resting:aria-disabled:after:opacity-50",
+  "ow-tree-rail-nav-resting:data-disabled:after:opacity-50",
   "forced-colors:ow-tree-rail-nav-resting:after:forced-color-adjust-none",
   // The system colors; the current row is underlined.
   "forced-colors:outline-1 forced-colors:-outline-offset-1 forced-colors:outline-transparent",
@@ -229,7 +231,7 @@ const label = [
   "data-overflow:[&:dir(rtl)]:[mask-position:0_0,0_0]",
   "ow-tree-rail-nav-running:data-overflow:[mask-position:0_0,0_0]",
   "ow-tree-rail-nav-running:data-overflow:transition-[mask-position]",
-  "ow-tree-rail-nav-running:data-overflow:duration-250 ow-tree-rail-nav-running:data-overflow:ease-[ease]",
+  "ow-tree-rail-nav-running:data-overflow:duration-250 ow-tree-rail-nav-running:data-overflow:ease-(--ow-ease-out)",
   "ow-tree-rail-nav-running:data-overflow:delay-400",
   "ow-tree-rail-nav-running:data-overflow:[&:dir(rtl)]:[mask-position:-16px_0,0_0]",
   // The label keeps still, start fade included; its full text is in a tooltip instead.
@@ -244,14 +246,20 @@ const labelText = [
   "motion-reduce:ow-tree-rail-nav-running:group-data-overflow/ow-tree-rail-nav-label:animate-none",
 ];
 
+// Accordion's chevron: the font size plus 2px, its strokes turning while the group is open.
 const chevron = [
-  "flex-none size-[14px] ms-auto fill-none stroke-current stroke-2",
+  "flex-none size-[calc(1em_+_2px)] ms-auto fill-none stroke-current stroke-2",
   "[stroke-linecap:round] [stroke-linejoin:round]",
+  "[--_flip:0] group-aria-[expanded=true]/ow-tree-rail-nav-item:[--_flip:1]",
+];
+
+// Each stroke turns a quarter about its own center: down, flat halfway, then up.
+const chevronStroke = [
+  "[--_turn:-1] data-[side=end]:[--_turn:1] [transform-box:fill-box] origin-center",
   // Its own layer, so it lands without a pixel jump.
-  "will-change-[rotate] transition-[rotate] duration-340 ease-(--_ease)",
-  "group-aria-[expanded=false]/ow-tree-rail-nav-item:-rotate-90",
-  "group-aria-[expanded=false]/ow-tree-rail-nav-item:[&:dir(rtl)]:rotate-90",
-  "motion-reduce:[transition:none]",
+  "rotate-[calc(var(--_flip)_*_var(--_turn)_*_90deg)] will-change-[rotate] transition-[rotate]",
+  "duration-[calc(var(--ow-spring-settle-duration)_*_var(--ow-motion-scale))]",
+  "ease-(--ow-spring-settle) motion-reduce:[transition:none]",
 ];
 
 /** The classes of every part, the React parts' and the rail's own drawing. */
@@ -262,6 +270,7 @@ export const treeRailNavSlots: Record<
   | "node"
   | "item"
   | "chevron"
+  | "chevronStroke"
   | "panel"
   | "icon"
   | "origin"
@@ -284,6 +293,7 @@ export const treeRailNavSlots: Record<
   node: node.join(" "),
   item: item.join(" "),
   chevron: chevron.join(" "),
+  chevronStroke: chevronStroke.join(" "),
   panel: panel.join(" "),
   icon: icon.join(" "),
   origin: origin.join(" "),

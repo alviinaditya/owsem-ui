@@ -284,7 +284,7 @@ describe("Autocomplete", () => {
   test("disabled dims the input", async () => {
     await render(<Tags disabled />);
     expect(input().disabled).toBe(true);
-    expect(getComputedStyle(input()).opacity).toBe("0.45");
+    expect(getComputedStyle(input()).opacity).toBe("0.5");
   });
 
   test("passes className and ref through, and every part has its data-slot", async () => {

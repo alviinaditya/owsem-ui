@@ -204,8 +204,7 @@ export interface CommandMenuPopupProps extends Omit<Dialog.Popup.Props, "classNa
 
 /**
  * The glass panel over a dimmed page (Surface): Base UI Dialog's portal, backdrop, viewport, and
- * popup, holding the Autocomplete that filters the list. It opens and closes at once: a palette
- * opened from the keyboard many times a day does not animate.
+ * popup, holding the Autocomplete that filters the list. It opens and closes as a Dialog does.
  */
 export function CommandMenuPopup({
   className,

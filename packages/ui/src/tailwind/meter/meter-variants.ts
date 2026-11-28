@@ -150,7 +150,7 @@ export function meterLegendVariants({ size }: { size?: MeterSize | undefined } =
 const legendItem = [
   "group/ow-meter-item",
   ...position,
-  "[--_on-fg:color-mix(in_oklab,var(--ow-accent)_70%,var(--ow-fg))]",
+  "[--_on-fg:color-mix(in_oklab,var(--ow-accent)_70%,var(--ow-fg))] [--_press:calc(1_-_0.03_*_var(--ow-motion-scale))]",
   // Box.
   "m-0 box-border inline-flex items-center gap-[0.6em] min-h-[24px]",
   "border-0 rounded-[999px] bg-transparent py-[0.55em] ps-[0.75em] pe-[0.9em]",
@@ -165,7 +165,7 @@ const legendItem = [
   "cursor-pointer touch-manipulation will-change-transform",
   // A press lets go on the settle spring; held, it is in within 90 ms.
   "transition-[transform] duration-(--ow-spring-settle-duration) ease-(--ow-spring-settle)",
-  "active:not-data-disabled:transform-[scale(0.97)] active:not-data-disabled:duration-90",
+  "active:not-data-disabled:transform-[scale(var(--_press))] active:not-data-disabled:duration-90",
   "active:not-data-disabled:ease-(--ow-ease-out)",
   // Pressed: a tint of the accent with accent text leaning toward the text color.
   "aria-pressed:bg-[color-mix(in_oklab,var(--ow-accent)_14%,transparent)]",
@@ -178,7 +178,7 @@ const legendItem = [
   "active:not-data-disabled:bg-[color-mix(in_oklab,var(--ow-accent)_22%,transparent)]",
   "active:not-data-disabled:text-(color:--_on-fg)",
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(color:--ow-focus)",
-  "data-disabled:cursor-not-allowed data-disabled:opacity-45",
+  "data-disabled:cursor-not-allowed data-disabled:opacity-50",
   // No movement; the material still changes.
   "motion-reduce:active:not-data-disabled:transform-none",
   // The tint is gone, so pressed is the system's highlight; a disabled one stays gray.

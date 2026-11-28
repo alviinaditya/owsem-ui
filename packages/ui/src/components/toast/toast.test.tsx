@@ -209,7 +209,7 @@ describe("Toast", () => {
       expect(close.querySelector("svg")).toBeNull();
     });
 
-    test("is a 24px target in the end corner, with a 14px cross", async () => {
+    test("is a 24px target in the end corner, with a cross of the font size plus 2px", async () => {
       await shown(1);
       const close = one(".ow-toast__close") as HTMLElement;
       const box = close.getBoundingClientRect();
@@ -218,7 +218,7 @@ describe("Toast", () => {
       expect(box.height).toBe(24);
       expect(card.right - box.right).toBe(8);
       expect(box.top - card.top).toBe(8);
-      expect(one("svg", close)?.getBoundingClientRect().width).toBe(14);
+      expect(one("svg", close)?.getBoundingClientRect().width).toBe(16);
     });
 
     test("Escape on a focused toast dismisses it", async () => {

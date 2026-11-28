@@ -52,9 +52,9 @@
     font-size: 1rem;
   }
 
-  /* The tint deepens on hover. */
+  /* The tint deepens on hover, unless the field only shows its value. */
   @media (hover: hover) and (pointer: fine) {
-    .ow-combobox__input-group:where(:hover):where(:not([data-disabled])) {
+    .ow-combobox__input-group:where(:hover):where(:not([data-disabled], [data-readonly])) {
       --_bg: color-mix(in oklab, var(--ow-fg) 9%, transparent);
     }
   }
@@ -82,7 +82,7 @@
 
   .ow-combobox__input-group:where([data-disabled]) {
     cursor: not-allowed;
-    opacity: 0.45;
+    opacity: 0.5;
   }
 
   /* The group draws the field, so the input is bare; it measures in the group's font. */
@@ -167,10 +167,15 @@
     outline-offset: 2px;
   }
 
+  .ow-combobox__trigger:where([data-readonly]),
+  .ow-combobox__clear:where([data-readonly]) {
+    cursor: default;
+  }
+
   .ow-combobox__trigger:where([data-disabled], :disabled),
   .ow-combobox__clear:where([data-disabled], :disabled) {
     cursor: not-allowed;
-    opacity: 0.45;
+    opacity: 0.5;
   }
 
   /* It fades in and out as the selection comes and goes. */
@@ -228,6 +233,11 @@
     padding: 1em;
     color: var(--_muted);
     text-align: center;
+  }
+
+  /* No match is as roomy as Command Menu's. */
+  .ow-combobox__empty {
+    padding: 2.25em 1em;
   }
 
   .ow-combobox__status:where(:empty),

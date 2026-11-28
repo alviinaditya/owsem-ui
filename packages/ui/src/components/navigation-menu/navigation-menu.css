@@ -48,6 +48,7 @@
     --px: calc(var(--_py) + (1lh - 1cap) / 2);
     --_hover: var(--ow-hover);
     --_open: var(--ow-pressed-bg);
+    --_press: calc(1 - 0.03 * var(--ow-motion-scale));
     display: inline-flex;
     flex: none;
     align-items: center;
@@ -70,6 +71,10 @@
     white-space: nowrap;
     cursor: pointer;
     touch-action: manipulation;
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: transform;
+    /* A press lets go on the settle spring (FR-21). */
+    transition: transform var(--ow-spring-settle-duration) var(--ow-spring-settle);
   }
 
   .ow-navigation-menu__trigger--sm {
@@ -93,6 +98,14 @@
     background-color: var(--_open);
   }
 
+  /* Held down: in to 0.97 and the pressed material within 90 ms, as Toolbar's buttons (DP-4). */
+  .ow-navigation-menu__trigger:active:not([data-disabled]) {
+    background-color: var(--_open);
+    transform: scale(var(--_press));
+    transition-duration: 90ms;
+    transition-timing-function: var(--ow-ease-out);
+  }
+
   .ow-navigation-menu__trigger:focus-visible {
     outline: 2px solid var(--ow-focus);
     outline-offset: 2px;
@@ -100,18 +113,16 @@
 
   .ow-navigation-menu__trigger[data-disabled] {
     cursor: not-allowed;
-    opacity: 0.45;
+    opacity: 0.5;
   }
 
-  /* The chevron: the font size plus 2px, turned over while its panel is open. */
+  /* The chevron: the font size plus 2px; its strokes turn while its panel is open, as Accordion's. */
   .ow-navigation-menu__icon {
+    --_flip: 0;
     display: inline-flex;
     flex: none;
     inline-size: calc(1em + 2px);
     block-size: calc(1em + 2px);
-    transition: transform 200ms var(--ow-ease-out);
-    /* Its own layer, so it lands without a pixel jump (NF-8). */
-    will-change: transform;
   }
 
   .ow-navigation-menu__icon > svg {
@@ -120,7 +131,23 @@
   }
 
   .ow-navigation-menu__icon[data-popup-open] {
-    transform: rotate(180deg);
+    --_flip: 1;
+  }
+
+  /* Each stroke turns a quarter about its own center: down, flat halfway, then up. */
+  .ow-navigation-menu__stroke {
+    --_turn: -1;
+    /* biome-ignore lint/nursery/useBaseline: the strokes turn about their own centers */
+    transform-box: fill-box;
+    transform-origin: center;
+    rotate: calc(var(--_flip) * var(--_turn) * 90deg);
+    will-change: rotate;
+    transition: rotate calc(var(--ow-spring-settle-duration) * var(--ow-motion-scale))
+      var(--ow-spring-settle);
+  }
+
+  .ow-navigation-menu__stroke[data-side="end"] {
+    --_turn: 1;
   }
 
   /* An optional backdrop under the panel: clear, it only takes presses. */
@@ -210,7 +237,7 @@
 
   .ow-navigation-menu__popup:is([data-starting-style], [data-ending-style]) {
     opacity: 0;
-    transform: scale(0.96);
+    transform: scale(calc(1 - 0.04 * var(--ow-motion-scale)));
   }
 
   /* Leaving is quicker than arriving. */
@@ -458,7 +485,11 @@
       translate: none;
     }
 
-    .ow-navigation-menu__icon {
+    .ow-navigation-menu__trigger:active:not([data-disabled]) {
+      transform: none;
+    }
+
+    .ow-navigation-menu__stroke {
       transition: none;
     }
   }

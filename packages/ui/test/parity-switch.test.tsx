@@ -61,6 +61,8 @@ const cases: Case[] = [
   make("default", (Switch) => <Switch.Root aria-label="Wi-Fi" />),
   make("disabled", (Switch) => <Switch.Root disabled aria-label="Wi-Fi" />),
   make("disabled on", (Switch) => <Switch.Root disabled defaultChecked aria-label="Wi-Fi" />),
+  make("invalid", (Switch) => <Switch.Root aria-invalid aria-label="Wi-Fi" />),
+  make("invalid on", (Switch) => <Switch.Root aria-invalid defaultChecked aria-label="Wi-Fi" />),
   make("read only", (Switch) => <Switch.Root readOnly aria-label="Wi-Fi" />),
   make("read only on", (Switch) => <Switch.Root readOnly defaultChecked aria-label="Wi-Fi" />),
   make("disabled and read only", (Switch) => (

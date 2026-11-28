@@ -55,6 +55,38 @@
     overscroll-behavior: contain;
   }
 
+  /* A thin, quiet scrollbar without arrows, as Command Menu's: the standard properties (Firefox)… */
+  .ow-menu__viewport {
+    --_thumb: color-mix(in oklab, var(--ow-muted) 40%, transparent);
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement (NF-1) */
+    scrollbar-width: thin;
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement (NF-1) */
+    scrollbar-color: var(--_thumb) transparent;
+  }
+
+  /* …and WebKit's pseudo-elements where the browser has them, which the standard ones would turn off. */
+  @supports selector(::-webkit-scrollbar) {
+    .ow-menu__viewport {
+      scrollbar-width: auto;
+      scrollbar-color: auto;
+    }
+
+    .ow-menu__viewport::-webkit-scrollbar {
+      inline-size: 10px;
+    }
+
+    .ow-menu__viewport::-webkit-scrollbar-track {
+      background: none;
+    }
+
+    .ow-menu__viewport::-webkit-scrollbar-thumb {
+      border: 3px solid transparent;
+      /* literal: a pill, whatever the theme's radius */
+      border-radius: 999px;
+      background: var(--_thumb) padding-box;
+    }
+  }
+
   .ow-menu__popup--sm {
     font-size: 0.8125rem;
   }
@@ -65,7 +97,7 @@
 
   .ow-menu__popup:is([data-starting-style], [data-ending-style]) {
     opacity: 0;
-    transform: scale(0.96);
+    transform: scale(calc(1 - 0.04 * var(--ow-motion-scale)));
   }
 
   /* Leaving is quicker than arriving. */
@@ -180,7 +212,7 @@
   }
 
   .ow-menu__item[data-disabled] {
-    opacity: 0.45;
+    opacity: 0.5;
   }
 
   /*

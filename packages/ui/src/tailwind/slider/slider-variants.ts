@@ -66,7 +66,7 @@ const control = [
   "data-[orientation=vertical]:h-auto data-[orientation=vertical]:min-h-0",
   "data-[orientation=vertical]:w-[max(var(--_thumb),24px)] data-[orientation=vertical]:px-0",
   "data-[orientation=vertical]:py-[calc(var(--_thumb)_/_2)] data-[orientation=vertical]:[touch-action:pan-x]",
-  "data-disabled:cursor-not-allowed data-disabled:opacity-45 forced-colors:data-disabled:opacity-100",
+  "data-disabled:cursor-not-allowed data-disabled:opacity-50 forced-colors:data-disabled:opacity-100",
 ];
 
 // Base UI positions it, and the thumb and fill inside it. It is drawn half a thumb past each end,

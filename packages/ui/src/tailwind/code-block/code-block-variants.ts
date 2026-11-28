@@ -57,7 +57,7 @@ const thumb = [
   // the settle spring.
   "will-change-[translate,transform,scale] transition-[translate,transform,scale,opacity]",
   "duration-[var(--ow-spring-travel-duration),var(--ow-spring-travel-duration),var(--ow-spring-settle-duration),150ms]",
-  "ease-[var(--ow-spring-travel),var(--ow-spring-travel),var(--ow-spring-settle),ease]",
+  "ease-[var(--ow-spring-travel),var(--ow-spring-travel),var(--ow-spring-settle),var(--ow-ease-out)]",
   // The key, inside the box.
   "before:absolute before:content-[''] before:inset-0 before:rounded-(--_radius)",
   "before:bg-(color:--_key) before:will-change-transform",
@@ -65,16 +65,16 @@ const thumb = [
   // Pressed in quickly, released with the settle spring.
   "data-held:scale-(--_press)",
   "data-held:duration-[var(--ow-spring-travel-duration),var(--ow-spring-travel-duration),90ms,150ms]",
-  "data-held:ease-[var(--ow-spring-travel),var(--ow-spring-travel),var(--ow-ease-out),ease]",
+  "data-held:ease-[var(--ow-spring-travel),var(--ow-spring-travel),var(--ow-ease-out),var(--ow-ease-out)]",
   // The thumb does not slide or press; it only fades. A held tab dims instead.
   "motion-reduce:scale-none motion-reduce:data-held:scale-none",
-  "motion-reduce:transition-[opacity] motion-reduce:duration-150 motion-reduce:ease-[ease]",
-  "motion-reduce:data-held:duration-150 motion-reduce:data-held:ease-[ease]",
+  "motion-reduce:transition-[opacity] motion-reduce:duration-150 motion-reduce:ease-(--ow-ease-out)",
+  "motion-reduce:data-held:duration-150 motion-reduce:data-held:ease-(--ow-ease-out)",
   "motion-reduce:data-held:data-visible:opacity-80",
   // The label turns as the fill arrives, so the fill does not travel.
   "forced-colors:before:forced-color-adjust-none forced-colors:before:bg-[Highlight]",
   "forced-colors:not-data-held:transition-[opacity] forced-colors:not-data-held:duration-150",
-  "forced-colors:not-data-held:ease-[ease]",
+  "forced-colors:not-data-held:ease-(--ow-ease-out)",
   // The first placement and every jump: nothing transitions.
   "data-instant:[transition:none] forced-colors:data-instant:[transition:none]",
 ];
@@ -88,12 +88,12 @@ const tab = [
   "text-inherit font-[family-name:inherit] font-[weight:inherit] whitespace-nowrap cursor-pointer",
   "touch-manipulation",
   "will-change-[scale] transition-[color,scale] duration-[150ms,var(--ow-spring-settle-duration)]",
-  "ease-[ease,var(--ow-spring-settle)]",
+  "ease-[var(--ow-ease-out),var(--ow-spring-settle)]",
   // Lit by Glide, or active: the text color; active, the accent leaning toward it.
   "data-glide-active:not-data-active:text-(color:--_fg) data-active:text-(color:--_on)",
   // The active tab as a key of its own before the script places the thumb (server HTML).
   "group-not-data-thumb/ow-code-block-list:data-active:bg-(color:--_key)",
-  "data-held:scale-(--_press) data-held:duration-[150ms,90ms] data-held:ease-[ease,var(--ow-ease-out)]",
+  "data-held:scale-(--_press) data-held:duration-[150ms,90ms] data-held:ease-[var(--ow-ease-out),var(--ow-ease-out)]",
   // Inside, so the scrolling list never cuts it.
   "focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(color:--_focus)",
   "disabled:text-[color-mix(in_oklab,var(--_muted)_50%,transparent)] disabled:cursor-not-allowed",
@@ -101,8 +101,8 @@ const tab = [
   "disabled:data-active:text-[color-mix(in_oklab,var(--_muted)_50%,transparent)]",
   // No pressing in; the material still changes.
   "motion-reduce:scale-none motion-reduce:data-held:scale-none",
-  "motion-reduce:transition-[color] motion-reduce:duration-150 motion-reduce:ease-[ease]",
-  "motion-reduce:data-held:duration-150 motion-reduce:data-held:ease-[ease]",
+  "motion-reduce:transition-[color] motion-reduce:duration-150 motion-reduce:ease-(--ow-ease-out)",
+  "motion-reduce:data-held:duration-150 motion-reduce:data-held:ease-(--ow-ease-out)",
   // The active tab is filled with the system highlight.
   "forced-colors:data-active:forced-color-adjust-none forced-colors:data-active:text-[HighlightText]",
   "forced-colors:group-not-data-thumb/ow-code-block-list:data-active:forced-color-adjust-none",

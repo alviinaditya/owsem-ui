@@ -304,6 +304,8 @@ const popup = [
   "data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-100",
   // Opened from the keyboard, or dismissed: no motion (Base UI's data-instant).
   "data-instant:[transition:none]",
+  // Raised, like every popup, not the quieter panel of a picker on the page.
+  "[&>[data-slot=color-picker]]:[--_bg:var(--ow-raised-bg)]",
   "[&>[data-slot=color-picker]]:[--_panel-shadow:var(--ow-popup-shadow)]",
   // More contrast asked for: the popup gets a ring.
   "contrast-more:[&>[data-slot=color-picker]]:[--_panel-shadow:var(--ow-popup-shadow),0_0_0_1px_var(--ow-edge)]",

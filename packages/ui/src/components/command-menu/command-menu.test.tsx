@@ -418,20 +418,22 @@ describe("Command Menu", () => {
     await expect.poll(() => document.activeElement).toBe(elsewhere);
   });
 
-  test("opens and closes at once, with no transition (keyboard-first)", async () => {
+  test("opens and closes as a Dialog does: 250 ms in, then a fade out", async () => {
     await render(<Menu />);
     await userEvent.keyboard("{Meta>}k{/Meta}");
     await expect.poll(popup).not.toBeNull();
     const backdrop = document.querySelector(".ow-command-menu__backdrop");
     for (const el of [popup(), backdrop]) {
-      expect(el && getComputedStyle(el).transitionDuration).toBe("0s");
-      expect(el?.getAnimations()).toEqual([]);
+      if (!el) throw new Error("not rendered");
+      expect(getComputedStyle(el).transitionDuration).toContain("0.25s");
     }
-    expect(popup()?.hasAttribute("data-starting-style")).toBe(false);
+    await expect.poll(() => popup()?.hasAttribute("data-starting-style")).toBe(false);
+    for (const a of document.getAnimations()) a.finish();
     expect(getComputedStyle(popup() as Element).opacity).toBe("1");
     await userEvent.keyboard("{Escape}");
-    // Base UI waits only for running animations; there are none.
-    await expect.poll(popup, { timeout: 100 }).toBeNull();
+    await expect.poll(() => popup()?.hasAttribute("data-ending-style") ?? true).toBe(true);
+    for (const a of document.getAnimations()) a.finish();
+    await expect.poll(popup).toBeNull();
   });
 
   test("a hidden close button shows when focused, with a label to translate (FR-17)", async () => {

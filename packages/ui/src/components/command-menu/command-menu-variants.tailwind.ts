@@ -24,7 +24,7 @@ const trigger = [
   // Type.
   "text-(color:--ow-muted) font-[family-name:inherit] font-[weight:inherit] text-start",
   "whitespace-nowrap",
-  "cursor-pointer transition-[color] duration-150 ease-[ease]",
+  "cursor-pointer transition-[color] duration-150 ease-(--ow-ease-out)",
   // Hover deepens the tint.
   "pointer-fine:hover:[--_bg:color-mix(in_oklab,var(--ow-fg)_9%,transparent)]",
   "pointer-fine:hover:text-(color:--ow-fg)",
@@ -63,6 +63,13 @@ const popup = [
   "relative flex flex-col w-[min(100%,560px)] max-h-[min(100%,32rem)] box-border",
   "rounded-(--ow-radius) outline-1 -outline-offset-1 outline-transparent bg-(color:--_bg)",
   "shadow-(shadow:--_shadow) text-(color:--ow-fg)",
+  // Opens and closes as a Dialog does: a fade and a small grow from its middle, 250 ms in and
+  // 200 ms out. Its own layer, so it lands without a pixel jump.
+  "will-change-transform transition-[opacity,transform] duration-250 ease-(--ow-ease-out)",
+  "data-starting-style:opacity-0 data-starting-style:transform-[scale(calc(1_-_0.04_*_var(--ow-motion-scale)))]",
+  "data-ending-style:opacity-0 data-ending-style:transform-[scale(calc(1_-_0.04_*_var(--ow-motion-scale)))]",
+  "data-ending-style:duration-200 motion-reduce:data-starting-style:transform-none",
+  "motion-reduce:data-ending-style:transform-none",
   // Glass where the browser can blur; opaque for those who ask for less transparency.
   "supports-[backdrop-filter:blur(1px)]:[--_bg:var(--_glass)]",
   "supports-[backdrop-filter:blur(1px)]:backdrop-blur-(--_blur)",
@@ -98,6 +105,8 @@ const icon = [
 // The scrim; with backdrop="blur" the page also blurs under it.
 const backdrop = [
   "fixed inset-0 bg-(color:--ow-backdrop)",
+  "transition-opacity duration-250 ease-(--ow-ease-out)",
+  "data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-200",
   "supports-[backdrop-filter:blur(1px)]:data-blur:backdrop-blur-[8px]",
   "supports-[backdrop-filter:blur(1px)]:data-blur:ow-reduced-transparency:backdrop-filter-none",
 ];
@@ -177,10 +186,10 @@ const group = ["group/ow-command-menu-group"];
 
 // A group's name in capitals, as Sidebar's group label, in line with its items' icons.
 const groupLabel = [
-  "pt-[0.75em] pb-[0.375em] px-[calc((var(--_n)_+_0.125)_/_0.857_*_1em_-_1px)]",
+  "pt-[0.6em] pb-[0.3em] px-[calc((var(--_n)_+_0.125)_/_0.857_*_1em_-_1px)]",
   "text-(color:--ow-muted) text-[0.857em] font-medium",
   "tracking-[0.06em] uppercase",
-  "group-first/ow-command-menu-group:pt-[0.375em]",
+  "group-first/ow-command-menu-group:pt-[0.3em]",
 ];
 
 const item = [
@@ -189,7 +198,7 @@ const item = [
   "[--px:calc(var(--_py)_+_(1lh_-_1cap)_/_2)] [--icon:calc(1em_+_2px)]",
   "flex items-center gap-[0.5em] box-border py-(--_py) px-(--px) rounded-(--_radius)",
   "text-(color:--ow-fg) cursor-default outline-none",
-  "data-disabled:text-(color:--ow-muted) forced-colors:data-disabled:text-[GrayText]",
+  "data-disabled:opacity-50 forced-colors:data-disabled:text-[GrayText] forced-colors:data-disabled:opacity-100",
   "[&>[data-slot=command-menu-shortcut]]:ms-auto",
 ];
 

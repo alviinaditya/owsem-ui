@@ -25,7 +25,16 @@ const root = [
   "[--_minus-out:calc(1_-_var(--ow-motion-scale))]",
   // Invisible until forced colors draw it as the edge.
   "outline-1 -outline-offset-1 outline-transparent",
-  "bg-[color-mix(in_oklab,var(--ow-fg)_10%,transparent)] [--_held:color-mix(in_oklab,var(--ow-fg)_16%,transparent)]",
+  "[--_surface:color-mix(in_oklab,var(--ow-fg)_10%,transparent)] [--_tint-hover:color-mix(in_oklab,var(--ow-fg)_13%,transparent)]",
+  "[--_accent:var(--ow-accent)] [--_held:color-mix(in_oklab,var(--ow-fg)_16%,transparent)] bg-(color:--_surface)",
+  // Invalid: the well and the fill turn critical, as the fields' tint does.
+  "ow-input-invalid:[--_surface:color-mix(in_oklab,var(--ow-critical)_14%,transparent)]",
+  "ow-input-invalid:[--_tint-hover:color-mix(in_oklab,var(--ow-critical)_20%,transparent)]",
+  "ow-input-invalid:[--_accent:var(--ow-critical-solid)]",
+  "ow-input-invalid:not-ow-checkbox-on:[--_held:color-mix(in_oklab,var(--ow-critical)_26%,transparent)]",
+  // Rejects once when it becomes invalid; data-armed is set while it is valid (core/shake.ts), so one
+  // invalid from the start stays still. A Form re-plays it with data-shake="off".
+  "ow-input-invalid:data-armed:not-data-[shake=off]:will-change-transform",
   // Type. A glyph on its way out shows on the well; the middle of the text, in any state, since a
   // baseline would follow the glyphs.
   "text-(color:--ow-fg) align-middle",
@@ -36,13 +45,15 @@ const root = [
   // A 24px target around a smaller box, adding no layout.
   "after:absolute after:inset-[min(0px,(100%_-_24px)_/_2)] after:content-['']",
   // Checked or mixed: the primary material, and a deeper fill when held. Black darkens any fill.
-  "ow-checkbox-on:bg-(color:--ow-accent) ow-checkbox-on:shadow-(shadow:--ow-primary-shadow)",
+  "ow-checkbox-on:bg-(color:--_accent) ow-checkbox-on:shadow-(shadow:--ow-primary-shadow)",
   "ow-checkbox-on:text-(color:--ow-on-accent)",
-  "ow-checkbox-on:[--_held:color-mix(in_oklab,var(--ow-accent),black_10%)]",
+  "ow-checkbox-on:[--_held:color-mix(in_oklab,var(--_accent),black_10%)]",
   // A label and its box are one control, so pointing at the text counts.
-  "ow-label-hover:not-data-disabled:not-data-readonly:not-ow-checkbox-on:bg-[color-mix(in_oklab,var(--ow-fg)_13%,transparent)]",
+  "ow-label-hover:not-data-disabled:not-data-readonly:not-ow-checkbox-on:bg-(color:--_tint-hover)",
   // literal: black darkens any fill
   "ow-label-hover:ow-checkbox-on:not-data-disabled:not-data-readonly:bg-[linear-gradient(color-mix(in_oklab,black_5%,transparent)_0_0)]",
+  "ow-input-invalid:data-armed:not-data-[shake=off]:animate-[ow-checkbox-shake_320ms_var(--ow-ease-out)]",
+  "motion-reduce:ow-input-invalid:data-armed:not-data-[shake=off]:animate-[ow-checkbox-blink_160ms_var(--ow-ease-out)]",
   // In to 0.97 within 90 ms, on a deeper fill.
   "ow-checkbox-held:bg-(color:--_held) ow-checkbox-held:bg-none",
   "ow-checkbox-held:transform-[scale(var(--_press))] ow-checkbox-held:duration-90",

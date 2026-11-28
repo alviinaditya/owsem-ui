@@ -5,6 +5,7 @@ import { Checkbox as BaseCheckbox } from "@base-ui/react/checkbox";
 import type { ReactElement } from "react";
 import { useCheckboxGroupSize } from "../lib/checkbox-group-size";
 import { cn } from "../lib/cn";
+import { useShakeGate } from "../lib/shake";
 import {
   type CheckboxSize,
   type CheckboxVariantProps,
@@ -79,14 +80,17 @@ export function CheckboxRoot({
   size: ownSize,
   className,
   children = <CheckboxIndicator />,
+  ref,
   ...props
 }: CheckboxRootProps): ReactElement {
+  const gate = useShakeGate(ref);
   const grouped = useCheckboxGroupSize();
   const size = ownSize ?? outerSize ?? grouped ?? "md";
   return (
     <BaseCheckbox.Root
       data-slot="checkbox"
       {...props}
+      ref={gate}
       className={cn(checkboxVariants({ size }), className)}
       data-size={size}
     >

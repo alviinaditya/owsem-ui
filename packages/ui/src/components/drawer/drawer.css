@@ -343,7 +343,7 @@
   .ow-drawer__indent:where([data-active]) {
     border-radius: var(--ow-radius);
     overflow: clip;
-    transform: scale(0.96);
+    transform: scale(calc(1 - 0.04 * var(--ow-motion-scale)));
     /* Only while receded: a layer at rest would hold the page's fixed children. */
     will-change: transform;
   }

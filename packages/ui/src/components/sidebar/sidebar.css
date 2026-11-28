@@ -209,7 +209,7 @@
     pointer-events: none;
     /* Its own layer, so it lands without a pixel jump (NF-8). */
     will-change: opacity;
-    transition: opacity 150ms ease;
+    transition: opacity 150ms var(--ow-ease-out);
   }
 
   .ow-sidebar__indicator[data-visible] {

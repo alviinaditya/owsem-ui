@@ -377,7 +377,7 @@ describe("Toolbar", () => {
     );
     const redo = q<HTMLButtonElement>(".ow-toolbar__button");
     expect(redo.getAttribute("aria-disabled")).toBe("true");
-    expect(getComputedStyle(redo).opacity).toBe("0.45");
+    expect(getComputedStyle(redo).opacity).toBe("0.5");
     await userEvent.click(redo, { force: true });
     expect(clicks).toBe(0);
   });

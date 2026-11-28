@@ -40,8 +40,8 @@ const popup = [
   // Grows out of its trigger, and has its own layer so it lands without a pixel jump.
   "origin-(--transform-origin) will-change-transform",
   "transition-[opacity,transform] duration-180 ease-(--ow-ease-out)",
-  "data-starting-style:opacity-0 data-starting-style:transform-[scale(0.96)]",
-  "data-ending-style:opacity-0 data-ending-style:transform-[scale(0.96)]",
+  "data-starting-style:opacity-0 data-starting-style:transform-[scale(calc(1_-_0.04_*_var(--ow-motion-scale)))]",
+  "data-ending-style:opacity-0 data-ending-style:transform-[scale(calc(1_-_0.04_*_var(--ow-motion-scale)))]",
   // Leaving is quicker than arriving.
   "data-ending-style:duration-120",
   // Opened from the keyboard, or shut with Escape: no animation.
@@ -73,6 +73,22 @@ export function menuPopupVariants({ size }: MenuVariantProps = {}): string {
 const viewport = [
   "relative isolate flex-auto box-border min-h-0 p-(--_pad) overflow-y-auto overscroll-contain",
   "[&>[data-slot=glide]]:[--_radius:var(--_inner)]",
+  // A thin, quiet scrollbar without arrows, as Command Menu's: the standard properties (Firefox)…
+  "[--_thumb:color-mix(in_oklab,var(--ow-muted)_40%,transparent)]",
+  "[scrollbar-width:thin] [scrollbar-color:var(--_thumb)_transparent]",
+  // …and WebKit's pseudo-elements where the browser has them, which the standard ones would turn
+  // off.
+  "supports-[selector(::-webkit-scrollbar)]:[scrollbar-width:auto]",
+  "supports-[selector(::-webkit-scrollbar)]:[scrollbar-color:auto]",
+  "supports-[selector(::-webkit-scrollbar)]:[&::-webkit-scrollbar]:w-[10px]",
+  "supports-[selector(::-webkit-scrollbar)]:[&::-webkit-scrollbar-track]:bg-none",
+  "supports-[selector(::-webkit-scrollbar)]:[&::-webkit-scrollbar-thumb]:border-[3px]",
+  "supports-[selector(::-webkit-scrollbar)]:[&::-webkit-scrollbar-thumb]:border-solid",
+  "supports-[selector(::-webkit-scrollbar)]:[&::-webkit-scrollbar-thumb]:border-transparent",
+  // A pill, whatever the theme's radius.
+  "supports-[selector(::-webkit-scrollbar)]:[&::-webkit-scrollbar-thumb]:rounded-[999px]",
+  "supports-[selector(::-webkit-scrollbar)]:[&::-webkit-scrollbar-thumb]:bg-(--_thumb)",
+  "supports-[selector(::-webkit-scrollbar)]:[&::-webkit-scrollbar-thumb]:bg-clip-padding",
 ];
 
 // Items: Button's geometry rule, --py the only input; an icon or indicator first.
@@ -88,7 +104,7 @@ const item = [
   // A 2px ring, inside the item so the popup does not clip it.
   "outline-none focus-visible:outline-solid focus-visible:outline-2 focus-visible:-outline-offset-2",
   "focus-visible:outline-(color:--ow-focus)",
-  "data-disabled:opacity-45",
+  "data-disabled:opacity-50",
   // Icons sit as far from the edge as from the top and bottom.
   "[&>svg]:inline-flex [&>svg]:flex-none [&>svg]:size-(--icon)",
   "[&>svg:first-child]:ms-[calc((1cap_-_var(--icon))_/_2)]",

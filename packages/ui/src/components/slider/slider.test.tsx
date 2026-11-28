@@ -323,7 +323,7 @@ describe("Slider", () => {
     expect(input.disabled).toBe(true);
     await userEvent.click(control, { position: { x: 200, y: 12 } });
     expect(input.value).toBe("40");
-    expect(getComputedStyle(control).opacity).toBe("0.45");
+    expect(getComputedStyle(control).opacity).toBe("0.5");
     expect(getComputedStyle(control).cursor).toBe("not-allowed");
     expect(thumb.hasAttribute("data-disabled")).toBe(true);
   });

@@ -163,7 +163,7 @@ const swipeArea = [
 const indent = [
   "[--_bg:var(--ow-bg)] bg-(color:--_bg) origin-[50%_0]",
   "transition-[transform,border-radius] duration-400 ease-(--ow-ease-drawer)",
-  "data-active:rounded-(--ow-radius) data-active:overflow-clip data-active:[transform:scale(0.96)]",
+  "data-active:rounded-(--ow-radius) data-active:overflow-clip data-active:[transform:scale(calc(1_-_0.04_*_var(--ow-motion-scale)))]",
   // Only while receded: a layer at rest would hold the page's fixed children.
   "data-active:will-change-transform",
   // No recede.

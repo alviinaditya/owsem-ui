@@ -16,6 +16,7 @@
     --_on-bg: color-mix(in oklab, var(--ow-accent) 14%, transparent);
     --_on-hover-bg: color-mix(in oklab, var(--ow-accent) 18%, transparent);
     --_held-bg: color-mix(in oklab, var(--ow-accent) 22%, transparent);
+    --_press: calc(1 - 0.03 * var(--ow-motion-scale));
     --py: 0.8036em;
     --_py: max(var(--py), (24px - 1lh) / 2);
     --px: calc(var(--_py) + (1lh - 1cap) / 2);
@@ -111,7 +112,7 @@
   .ow-toggle:active:not([data-disabled]) {
     background-color: var(--_held-bg);
     color: var(--_on-fg);
-    transform: scale(0.97);
+    transform: scale(var(--_press));
     transition-duration: 90ms;
     transition-timing-function: var(--ow-ease-out);
   }
@@ -147,7 +148,7 @@
 
   .ow-toggle[data-disabled] {
     cursor: not-allowed;
-    opacity: 0.45;
+    opacity: 0.5;
   }
 
   /* FR-20: the material still changes, nothing moves. */

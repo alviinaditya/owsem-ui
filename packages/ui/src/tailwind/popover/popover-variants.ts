@@ -21,8 +21,8 @@ const popup = [
   // Grows out of the trigger, and has its own layer so it lands without a pixel jump.
   "origin-(--transform-origin) will-change-transform",
   "transition-[opacity,transform] duration-180 ease-(--ow-ease-out)",
-  "data-starting-style:opacity-0 data-starting-style:transform-[scale(0.96)]",
-  "data-ending-style:opacity-0 data-ending-style:transform-[scale(0.96)]",
+  "data-starting-style:opacity-0 data-starting-style:transform-[scale(calc(1_-_0.04_*_var(--ow-motion-scale)))]",
+  "data-ending-style:opacity-0 data-ending-style:transform-[scale(calc(1_-_0.04_*_var(--ow-motion-scale)))]",
   // Leaving is quicker than arriving.
   "data-ending-style:duration-120",
   // Opened from the keyboard, or shut with Escape: no animation.

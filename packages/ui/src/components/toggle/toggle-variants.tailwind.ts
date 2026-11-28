@@ -31,7 +31,8 @@ const root = [
   "cursor-pointer touch-manipulation will-change-transform",
   // A press lets go on the settle spring; held, it is in within 90 ms.
   "transition-[transform] duration-(--ow-spring-settle-duration) ease-(--ow-spring-settle)",
-  "active:not-data-disabled:transform-[scale(0.97)] active:not-data-disabled:duration-90",
+  "[--_press:calc(1_-_0.03_*_var(--ow-motion-scale))]",
+  "active:not-data-disabled:transform-[scale(var(--_press))] active:not-data-disabled:duration-90",
   "active:not-data-disabled:ease-(--ow-ease-out)",
   // Icon only: a square as tall as a labelled toggle.
   "data-icon-only:p-[calc(var(--_py)_+_(1lh_-_var(--icon))_/_2)] data-icon-only:[--_icon-margin:0]",
@@ -44,7 +45,7 @@ const root = [
   "active:not-data-pressed:not-data-disabled:bg-[color-mix(in_oklab,var(--ow-accent)_22%,transparent)]",
   "active:not-data-pressed:not-data-disabled:text-(color:--_on-fg)",
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(color:--ow-focus)",
-  "data-disabled:cursor-not-allowed data-disabled:opacity-45",
+  "data-disabled:cursor-not-allowed data-disabled:opacity-50",
   // No movement; the material still changes.
   "motion-reduce:active:not-data-disabled:transform-none",
   // The tint is gone, so on is the system's highlight; a disabled one stays gray.

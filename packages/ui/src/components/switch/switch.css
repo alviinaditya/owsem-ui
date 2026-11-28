@@ -77,6 +77,12 @@
     font-size: 1rem;
   }
 
+  /* Invalid: the track turns critical, as the fields' tint does; on, it is the solid critical. */
+  .ow-switch:where([data-invalid], [aria-invalid="true"]) {
+    --_track: color-mix(in oklab, var(--ow-critical) 14%, transparent);
+    --_accent: var(--ow-critical-solid);
+  }
+
   .ow-switch:where([data-checked]) {
     background-color: var(--_accent);
     box-shadow: var(--_accent-shadow);
@@ -92,9 +98,40 @@
   /* Off, the track steps up on hover; the label counts too. */
   @media (hover: hover) and (pointer: fine) {
     .ow-switch:where(:hover, label:hover *):where(
-        :not([data-disabled], :disabled, [data-checked])
+        :not([data-disabled], :disabled, [data-checked], [data-invalid], [aria-invalid="true"])
       ) {
       --_track: color-mix(in oklab, var(--ow-fg) 13%, transparent);
+    }
+  }
+
+  /*
+   * Rejects once when it becomes invalid, as the fields do. data-armed is set while it is valid
+   * (core/shake.ts), so one invalid from the start stays still; a Form re-plays it with
+   * data-shake="off" (a reflow).
+   */
+  .ow-switch:where([data-invalid], [aria-invalid="true"])[data-armed]:not([data-shake="off"]) {
+    will-change: transform;
+    animation: ow-switch-shake 320ms var(--ow-ease-out);
+  }
+
+  @keyframes ow-switch-shake {
+    20% {
+      transform: translateX(calc(-4px * var(--ow-motion-scale)));
+    }
+    40% {
+      transform: translateX(calc(4px * var(--ow-motion-scale)));
+    }
+    60% {
+      transform: translateX(calc(-2px * var(--ow-motion-scale)));
+    }
+    80% {
+      transform: translateX(calc(2px * var(--ow-motion-scale)));
+    }
+  }
+
+  @keyframes ow-switch-blink {
+    from {
+      opacity: 0.6;
     }
   }
 
@@ -221,6 +258,10 @@
 
   /* FR-20: the thumb goes to its place with no travel, stretch, or squash. */
   @media (prefers-reduced-motion: reduce) {
+    .ow-switch:where([data-invalid], [aria-invalid="true"])[data-armed]:not([data-shake="off"]) {
+      animation: ow-switch-blink 160ms var(--ow-ease-out);
+    }
+
     .ow-switch__thumb {
       --_lean: 0;
       scale: none;

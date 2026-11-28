@@ -53,6 +53,7 @@ export function navigationMenuPopupVariants({
 export const navigationMenuSlots = {
   list: "ow-navigation-menu__list",
   icon: "ow-navigation-menu__icon",
+  stroke: "ow-navigation-menu__stroke",
   backdrop: "ow-navigation-menu__backdrop",
   positioner: "ow-navigation-menu__positioner",
   viewport: "ow-navigation-menu__viewport",

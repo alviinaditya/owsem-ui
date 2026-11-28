@@ -646,15 +646,14 @@ describe("Toggle Group, solid", () => {
     }
   });
 
-  test("a disabled pressed key keeps its fill and dims its text toward it", async () => {
+  test("a disabled pressed key keeps its fill and dims with the whole key", async () => {
     const { item } = await mount(
       <Views variant="solid" multiple defaultValue={["day"]} disabled />,
     );
     const style = getComputedStyle(item("Day"));
     expect(style.backgroundColor).toBe(resolveColor("var(--ow-accent)"));
-    expect(style.color).toBe(
-      resolveColor("color-mix(in oklab, var(--ow-on-accent) 60%, transparent)"),
-    );
+    expect(style.color).toBe(resolveColor("var(--ow-on-accent)"));
+    expect(style.opacity).toBe("0.5");
   });
 
   test("the pressed item is the accent key until the thumb is placed", async () => {

@@ -222,6 +222,7 @@
   /* A flat button that stays tinted while pressed, as a Toggle that is on. */
   .ow-meter__legend-item {
     --_on-fg: color-mix(in oklab, var(--ow-accent) 70%, var(--ow-fg));
+    --_press: calc(1 - 0.03 * var(--ow-motion-scale));
     display: inline-flex;
     align-items: center;
     gap: 0.6em;
@@ -278,7 +279,7 @@
   .ow-meter__legend-item:active:not([data-disabled]) {
     background-color: color-mix(in oklab, var(--ow-accent) 22%, transparent);
     color: var(--_on-fg);
-    transform: scale(0.97);
+    transform: scale(var(--_press));
     transition-duration: 90ms;
     transition-timing-function: var(--ow-ease-out);
   }
@@ -290,7 +291,7 @@
 
   .ow-meter__legend-item[data-disabled] {
     cursor: not-allowed;
-    opacity: 0.45;
+    opacity: 0.5;
   }
 
   .ow-meter__legend-value {

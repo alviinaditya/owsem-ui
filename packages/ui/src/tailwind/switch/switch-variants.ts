@@ -27,7 +27,15 @@ const root = [
   // Invisible until forced colors draw it as the edge.
   "outline-1 -outline-offset-1 outline-transparent",
   "[--_track:color-mix(in_oklab,var(--ow-fg)_10%,transparent)] bg-(color:--_track)",
-  "data-checked:bg-(color:--ow-accent) data-checked:shadow-(shadow:--ow-primary-shadow)",
+  "[--_accent:var(--ow-accent)] data-checked:bg-(color:--_accent) data-checked:shadow-(shadow:--ow-primary-shadow)",
+  // Invalid: the track turns critical, as the fields' tint does; on, it is the solid critical.
+  "ow-input-invalid:[--_track:color-mix(in_oklab,var(--ow-critical)_14%,transparent)]",
+  "ow-input-invalid:[--_accent:var(--ow-critical-solid)]",
+  // Rejects once when it becomes invalid; data-armed is set while it is valid (core/shake.ts), so one
+  // invalid from the start stays still. A Form re-plays it with data-shake="off".
+  "ow-input-invalid:data-armed:not-data-[shake=off]:will-change-transform",
+  "ow-input-invalid:data-armed:not-data-[shake=off]:animate-[ow-switch-shake_320ms_var(--ow-ease-out)]",
+  "motion-reduce:ow-input-invalid:data-armed:not-data-[shake=off]:animate-[ow-switch-blink_160ms_var(--ow-ease-out)]",
   // Type.
   "align-middle",
   // Touch.
@@ -35,7 +43,7 @@ const root = [
   // A 24px target around a smaller track, adding no layout.
   "before:absolute before:inset-[min(0px,(100%_-_24px)_/_2)] before:content-['']",
   // Off, the track steps up on hover; the label counts too.
-  "ow-label-hover:not-data-disabled:not-disabled:not-data-checked:[--_track:color-mix(in_oklab,var(--ow-fg)_13%,transparent)]",
+  "ow-label-hover:not-data-disabled:not-disabled:not-data-checked:not-ow-input-invalid:[--_track:color-mix(in_oklab,var(--ow-fg)_13%,transparent)]",
   // 2px outside the track.
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(color:--ow-focus)",
   "data-readonly:not-data-disabled:cursor-default",
@@ -78,7 +86,7 @@ const thumb = [
   "relative isolate grid flex-none place-items-center box-border h-full aspect-square",
   "border-(length:--_inset) border-solid border-transparent rounded-[inherit] bg-clip-padding",
   // The key is white in both themes, so the ink is a 3:1 edge tone off and the accent on.
-  "bg-(color:--ow-on-accent) text-(color:--ow-edge) data-checked:text-(color:--ow-accent)",
+  "bg-(color:--ow-on-accent) text-(color:--ow-edge) data-checked:text-(color:--_accent)",
   // How far it stretches at most, and how far a hold widens and squashes it.
   "[--_stretch:calc(0.15_*_var(--ow-motion-scale))] [--_widen:calc(0.18_*_var(--ow-motion-scale))]",
   "[--_squash:calc(0.06_*_var(--ow-motion-scale))]",

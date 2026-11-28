@@ -138,11 +138,15 @@ describe("NavigationMenu", () => {
     expect(icon?.querySelector("svg")).not.toBeNull();
     // Base UI hides it from assistive technology: it is decoration.
     expect(icon?.getAttribute("aria-hidden")).toBe("true");
-    expect(getComputedStyle(icon as HTMLElement).transform).toBe("none");
+    const strokes = [...(icon?.querySelectorAll<SVGElement>(".ow-navigation-menu__stroke") ?? [])];
+    expect(strokes).toHaveLength(2);
+    expect(strokes.map((s) => getComputedStyle(s).rotate)).toEqual(["0deg", "0deg"]);
     await userEvent.click(trigger("Products"));
     await expect.poll(popup).not.toBeNull();
+    // Each stroke turns a quarter about its own center: down, then up, as Accordion's.
+    for (const a of icon?.getAnimations({ subtree: true }) ?? []) a.finish();
     await settle();
-    expect(getComputedStyle(icon as HTMLElement).transform).toBe("matrix(-1, 0, 0, -1, 0, 0)");
+    expect(strokes.map((s) => getComputedStyle(s).rotate)).toEqual(["-90deg", "90deg"]);
   });
 
   test("icon replaces the chevron, and icon={null} leaves it out", async () => {
@@ -329,7 +333,7 @@ describe("NavigationMenu", () => {
         </NavigationMenu.List>
       </NavigationMenu.Root>,
     );
-    expect(getComputedStyle(trigger("Off")).opacity).toBe("0.45");
+    expect(getComputedStyle(trigger("Off")).opacity).toBe("0.5");
   });
 
   test("the list wraps on a narrow screen instead of scrolling", async () => {

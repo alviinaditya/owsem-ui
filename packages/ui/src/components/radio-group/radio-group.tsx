@@ -7,6 +7,7 @@ import { cn } from "../../core/cn";
 import type { GlideOptions } from "../../core/glide/glide";
 import { GlideHighlight, useGlide } from "../../core/glide/use-glide";
 import { useMergedRefs } from "../../core/merge-refs";
+import { useShakeGate } from "../../core/shake";
 import {
   type RadioGroupVariantProps,
   radioGroupSlots,
@@ -80,12 +81,15 @@ export interface RadioRootProps<Value = unknown>
 export function RadioRoot<Value = unknown>({
   className,
   children = <RadioIndicator />,
+  ref,
   ...props
 }: RadioRootProps<Value>): ReactElement {
+  const gate = useShakeGate(ref);
   return (
     <BaseRadio.Root
       data-slot="radio-group-radio"
       {...props}
+      ref={gate}
       className={cn(radioGroupSlots.radio, className)}
     >
       {children}

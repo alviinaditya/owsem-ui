@@ -62,7 +62,7 @@ const box = [
   "ow-toolbar-quiet:font-[family-name:inherit]",
   "focus-visible:ow-toolbar-quiet:outline-2 focus-visible:ow-toolbar-quiet:outline-offset-2",
   "focus-visible:ow-toolbar-quiet:outline-(color:--ow-focus)",
-  "data-disabled:ow-toolbar-quiet:cursor-not-allowed data-disabled:ow-toolbar-quiet:opacity-45",
+  "data-disabled:ow-toolbar-quiet:cursor-not-allowed data-disabled:ow-toolbar-quiet:opacity-50",
   "forced-colors:focus-visible:ow-toolbar-quiet:outline-[Highlight]",
   "forced-colors:data-disabled:ow-toolbar-quiet:text-[GrayText]",
   "forced-colors:data-disabled:ow-toolbar-quiet:opacity-100",
@@ -72,6 +72,7 @@ const box = [
 const quiet = [
   "ow-toolbar-quiet:[--_muted:var(--ow-muted)] ow-toolbar-quiet:[--_fg:var(--ow-fg)]",
   "ow-toolbar-quiet:[--_hover:var(--ow-hover)] ow-toolbar-quiet:[--_pressed-bg:var(--ow-pressed-bg)]",
+  "ow-toolbar-quiet:[--_press:calc(1_-_0.03_*_var(--ow-motion-scale))]",
   "ow-toolbar-quiet:inline-flex ow-toolbar-quiet:flex-none ow-toolbar-quiet:items-center",
   "ow-toolbar-quiet:justify-center ow-toolbar-quiet:gap-[0.5em] ow-toolbar-quiet:bg-transparent",
   "ow-toolbar-quiet:text-(color:--_muted) ow-toolbar-quiet:font-medium ow-toolbar-quiet:no-underline",
@@ -87,7 +88,7 @@ const quiet = [
   // reduced. A Toggle presses in by its own rule.
   "active:not-data-disabled:ow-toolbar-quiet:bg-(color:--_pressed-bg)",
   "active:not-data-disabled:ow-toolbar-quiet:text-(color:--_fg)",
-  "active:not-data-disabled:not-[[aria-pressed]]:ow-toolbar-quiet:scale-[0.97]",
+  "active:not-data-disabled:not-[[aria-pressed]]:ow-toolbar-quiet:scale-(--_press)",
   "active:not-data-disabled:ow-toolbar-quiet:duration-90",
   "active:not-data-disabled:ow-toolbar-quiet:ease-(--ow-ease-out)",
   "motion-reduce:active:not-data-disabled:not-[[aria-pressed]]:ow-toolbar-quiet:scale-none",

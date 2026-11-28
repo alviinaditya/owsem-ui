@@ -83,6 +83,9 @@
 /* An input that is disabled, natively or by Base UI. */
 @custom-variant ow-input-disabled (&:where([data-disabled], :disabled));
 
+/* An input that only shows its value. */
+@custom-variant ow-input-readonly (&:where([data-readonly], [readonly]));
+
 /* Input rejects with a shake, and with a blink when motion is reduced. */
 @keyframes ow-input-shake {
   20% {
@@ -168,6 +171,72 @@
 @custom-variant ow-radio-group-held (
   &:where(:active, label:active *):where(:not([data-disabled], [data-readonly]))
 );
+
+/* Checkbox rejects with a shake, and with a blink when motion is reduced. */
+@keyframes ow-checkbox-shake {
+  20% {
+    transform: translateX(calc(-4px * var(--ow-motion-scale)));
+  }
+  40% {
+    transform: translateX(calc(4px * var(--ow-motion-scale)));
+  }
+  60% {
+    transform: translateX(calc(-2px * var(--ow-motion-scale)));
+  }
+  80% {
+    transform: translateX(calc(2px * var(--ow-motion-scale)));
+  }
+}
+
+@keyframes ow-checkbox-blink {
+  from {
+    opacity: 0.6;
+  }
+}
+
+/* Radio rejects with a shake, and with a blink when motion is reduced. */
+@keyframes ow-radio-group-shake {
+  20% {
+    transform: translateX(calc(-4px * var(--ow-motion-scale)));
+  }
+  40% {
+    transform: translateX(calc(4px * var(--ow-motion-scale)));
+  }
+  60% {
+    transform: translateX(calc(-2px * var(--ow-motion-scale)));
+  }
+  80% {
+    transform: translateX(calc(2px * var(--ow-motion-scale)));
+  }
+}
+
+@keyframes ow-radio-group-blink {
+  from {
+    opacity: 0.6;
+  }
+}
+
+/* Switch rejects with a shake, and with a blink when motion is reduced. */
+@keyframes ow-switch-shake {
+  20% {
+    transform: translateX(calc(-4px * var(--ow-motion-scale)));
+  }
+  40% {
+    transform: translateX(calc(4px * var(--ow-motion-scale)));
+  }
+  60% {
+    transform: translateX(calc(-2px * var(--ow-motion-scale)));
+  }
+  80% {
+    transform: translateX(calc(2px * var(--ow-motion-scale)));
+  }
+}
+
+@keyframes ow-switch-blink {
+  from {
+    opacity: 0.6;
+  }
+}
 
 /* Select rejects with a shake, and with a blink when motion is reduced. */
 @keyframes ow-select-shake {

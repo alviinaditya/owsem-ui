@@ -31,7 +31,7 @@ const trigger = [
   "text-(color:--_fg) font-[family-name:inherit] font-[weight:inherit] text-start",
   "cursor-pointer touch-manipulation [-webkit-tap-highlight-color:transparent]",
   // The tint deepens on hover and while open, and turns critical when invalid.
-  "pointer-fine:hover:not-data-disabled:not-disabled:not-ow-input-invalid:[--_bg:color-mix(in_oklab,var(--ow-fg)_9%,transparent)]",
+  "pointer-fine:hover:not-data-disabled:not-disabled:not-data-readonly:not-ow-input-invalid:[--_bg:color-mix(in_oklab,var(--ow-fg)_9%,transparent)]",
   "data-popup-open:not-ow-input-invalid:[--_bg:color-mix(in_oklab,var(--ow-fg)_9%,transparent)]",
   "ow-input-invalid:[--_bg:color-mix(in_oklab,var(--_critical)_14%,transparent)]",
   // Rejects once when it becomes invalid. data-armed is set while it is valid (core/shake.ts), so a
@@ -40,7 +40,7 @@ const trigger = [
   "ow-input-invalid:data-armed:not-data-[shake=off]:animate-[ow-select-shake_320ms_var(--ow-ease-out)]",
   "motion-reduce:ow-input-invalid:data-armed:not-data-[shake=off]:animate-[ow-select-blink_160ms_var(--ow-ease-out)]",
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(color:--_focus)",
-  "data-disabled:cursor-not-allowed data-disabled:opacity-45",
+  "data-readonly:cursor-default data-disabled:cursor-not-allowed data-disabled:opacity-50",
   // More contrast asked for: the edge comes back.
   "contrast-more:shadow-[inset_0_0_0_1px_var(--ow-edge)]",
   // Forced colors: the ring takes the system color, and a disabled field stays gray.
@@ -94,8 +94,8 @@ const popup = [
   "not-data-[side=none]:origin-(--transform-origin) not-data-[side=none]:will-change-transform",
   "not-data-[side=none]:transition-[opacity,transform]",
   "data-starting-style:opacity-0 data-ending-style:opacity-0",
-  "motion-safe:not-data-[side=none]:data-starting-style:transform-[scale(0.96)]",
-  "motion-safe:not-data-[side=none]:data-ending-style:transform-[scale(0.96)]",
+  "motion-safe:not-data-[side=none]:data-starting-style:transform-[scale(calc(1_-_0.04_*_var(--ow-motion-scale)))]",
+  "motion-safe:not-data-[side=none]:data-ending-style:transform-[scale(calc(1_-_0.04_*_var(--ow-motion-scale)))]",
   // Leaving is quicker than arriving, after a beat that lets a pick's check land.
   "data-ending-style:duration-140 data-ending-style:delay-60",
   // Used from the keyboard, or shut with Escape: no animation.
@@ -160,6 +160,23 @@ const list = [
   "relative isolate flex-auto box-border min-h-0 max-h-(--available-height) p-(--_pad)",
   "overflow-y-auto overscroll-contain scroll-py-[24px]",
   "[&>[data-slot=glide]]:[--_radius:var(--_inner)]",
+  // Combobox and Autocomplete lists scroll with a thin, quiet scrollbar, as Command Menu's; Select's
+  // own has arrows and Base UI hides its bar. The standard properties (Firefox)…
+  "[&:not(.base-ui-disable-scrollbar)]:[--_thumb:color-mix(in_oklab,var(--ow-muted)_40%,transparent)]",
+  "[&:not(.base-ui-disable-scrollbar)]:[scrollbar-width:thin] [&:not(.base-ui-disable-scrollbar)]:[scrollbar-color:var(--_thumb)_transparent]",
+  // …and WebKit's pseudo-elements where the browser has them, which the standard ones would turn
+  // off.
+  "[&:not(.base-ui-disable-scrollbar)]:supports-[selector(::-webkit-scrollbar)]:[scrollbar-width:auto]",
+  "[&:not(.base-ui-disable-scrollbar)]:supports-[selector(::-webkit-scrollbar)]:[scrollbar-color:auto]",
+  "[&:not(.base-ui-disable-scrollbar)]:supports-[selector(::-webkit-scrollbar)]:[&::-webkit-scrollbar]:w-[10px]",
+  "[&:not(.base-ui-disable-scrollbar)]:supports-[selector(::-webkit-scrollbar)]:[&::-webkit-scrollbar-track]:bg-none",
+  "[&:not(.base-ui-disable-scrollbar)]:supports-[selector(::-webkit-scrollbar)]:[&::-webkit-scrollbar-thumb]:border-[3px]",
+  "[&:not(.base-ui-disable-scrollbar)]:supports-[selector(::-webkit-scrollbar)]:[&::-webkit-scrollbar-thumb]:border-solid",
+  "[&:not(.base-ui-disable-scrollbar)]:supports-[selector(::-webkit-scrollbar)]:[&::-webkit-scrollbar-thumb]:border-transparent",
+  // A pill, whatever the theme's radius.
+  "[&:not(.base-ui-disable-scrollbar)]:supports-[selector(::-webkit-scrollbar)]:[&::-webkit-scrollbar-thumb]:rounded-[999px]",
+  "[&:not(.base-ui-disable-scrollbar)]:supports-[selector(::-webkit-scrollbar)]:[&::-webkit-scrollbar-thumb]:bg-(--_thumb)",
+  "[&:not(.base-ui-disable-scrollbar)]:supports-[selector(::-webkit-scrollbar)]:[&::-webkit-scrollbar-thumb]:bg-clip-padding",
   "[&.base-ui-disable-scrollbar]:[scrollbar-width:none]",
   "[&.base-ui-disable-scrollbar::-webkit-scrollbar]:hidden",
 ];
@@ -179,7 +196,7 @@ const item = [
   // A 2px ring, inside the item so the popup does not clip it.
   "outline-none focus-visible:outline-solid focus-visible:outline-2 focus-visible:-outline-offset-2",
   "focus-visible:outline-(color:--_focus)",
-  "data-disabled:opacity-45",
+  "data-disabled:opacity-50",
   // Icons sit as far from the edge as from the top and bottom.
   "[&>:where(svg)]:inline-flex [&>:where(svg)]:flex-none [&>:where(svg)]:size-(--icon)",
   "[&>:where(svg:first-child)]:ms-[calc((1cap_-_var(--icon))_/_2)]",

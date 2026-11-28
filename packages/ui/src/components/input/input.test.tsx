@@ -292,9 +292,9 @@ describe("Input", () => {
     const input = await mount(<Input aria-label="Name" disabled startIcon={<Star />} />);
     expect(input.disabled).toBe(true);
     expect("disabled" in input.dataset).toBe(true);
-    expect(getComputedStyle(input).opacity).toBe("0.45");
+    expect(getComputedStyle(input).opacity).toBe("0.5");
     const icon = input.parentElement?.querySelector(".ow-input__icon") as Element;
-    expect(getComputedStyle(icon).opacity).toBe("0.45");
+    expect(getComputedStyle(icon).opacity).toBe("0.5");
     input.focus();
     expect(document.activeElement).not.toBe(input);
   });

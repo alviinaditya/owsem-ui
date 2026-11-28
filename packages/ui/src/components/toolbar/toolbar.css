@@ -105,6 +105,7 @@
     --_fg: var(--ow-fg);
     --_hover: var(--ow-hover);
     --_pressed-bg: var(--ow-pressed-bg);
+    --_press: calc(1 - 0.03 * var(--ow-motion-scale));
     display: inline-flex;
     flex: none;
     align-items: center;
@@ -165,7 +166,7 @@
   :where(.ow-toolbar__button, .ow-toolbar__link):where(:active:not([data-disabled])) {
     background-color: var(--_pressed-bg);
     color: var(--_fg);
-    transform: scale(0.97);
+    transform: scale(var(--_press));
     transition-duration: 90ms;
     transition-timing-function: var(--ow-ease-out);
   }
@@ -177,7 +178,7 @@
 
   :where(.ow-toolbar__button, .ow-toolbar__link, .ow-toolbar__input):where([data-disabled]) {
     cursor: not-allowed;
-    opacity: 0.45;
+    opacity: 0.5;
   }
 
   /* The field: a tint of the text color, as Input's, with no shadow. */

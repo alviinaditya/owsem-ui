@@ -96,7 +96,7 @@
     [data-starting-style],
     [data-ending-style]
   ) {
-    transform: scale(0.96);
+    transform: scale(calc(1 - 0.04 * var(--ow-motion-scale)));
   }
 
   /* Leaving is quicker than arriving, after a beat that lets a pick's check land. */
@@ -124,6 +124,41 @@
     overscroll-behavior: contain;
     /* The keyboard's item stays clear of the scroll arrows. */
     scroll-padding-block: 24px;
+  }
+
+  /*
+   * Combobox and Autocomplete lists scroll with a thin, quiet scrollbar, as Command Menu's; Select's
+   * own list has scroll arrows and Base UI hides its bar. The standard properties (Firefox)…
+   */
+  .ow-select__list:not(.base-ui-disable-scrollbar) {
+    --_thumb: color-mix(in oklab, var(--ow-muted) 40%, transparent);
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement (NF-1) */
+    scrollbar-width: thin;
+    /* biome-ignore lint/nursery/useBaseline: progressive enhancement (NF-1) */
+    scrollbar-color: var(--_thumb) transparent;
+  }
+
+  /* …and WebKit's pseudo-elements where the browser has them, which the standard ones would turn off. */
+  @supports selector(::-webkit-scrollbar) {
+    .ow-select__list:not(.base-ui-disable-scrollbar) {
+      scrollbar-width: auto;
+      scrollbar-color: auto;
+    }
+
+    .ow-select__list:not(.base-ui-disable-scrollbar)::-webkit-scrollbar {
+      inline-size: 10px;
+    }
+
+    .ow-select__list:not(.base-ui-disable-scrollbar)::-webkit-scrollbar-track {
+      background: none;
+    }
+
+    .ow-select__list:not(.base-ui-disable-scrollbar)::-webkit-scrollbar-thumb {
+      border: 3px solid transparent;
+      /* literal: a pill, whatever the theme's radius */
+      border-radius: 999px;
+      background: var(--_thumb) padding-box;
+    }
   }
 
   /* Items: Button's geometry rule (FR-9), --py the only input; the indicator first. */
@@ -163,7 +198,7 @@
   }
 
   .ow-select__item:where([data-disabled]) {
-    opacity: 0.45;
+    opacity: 0.5;
   }
 
   /* Icons and the indicator sit as far from the edge as from the top and bottom (FR-10). */

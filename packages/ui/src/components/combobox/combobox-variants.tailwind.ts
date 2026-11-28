@@ -31,7 +31,7 @@ const inputGroup = [
   // Invisible until forced colors draw it as the edge.
   "outline-1 -outline-offset-1 outline-transparent",
   // The tint deepens on hover, and turns critical when invalid.
-  "pointer-fine:hover:not-data-disabled:not-ow-input-invalid:[--_bg:color-mix(in_oklab,var(--ow-fg)_9%,transparent)]",
+  "pointer-fine:hover:not-data-disabled:not-data-readonly:not-ow-input-invalid:[--_bg:color-mix(in_oklab,var(--ow-fg)_9%,transparent)]",
   "ow-input-invalid:[--_bg:color-mix(in_oklab,var(--ow-critical)_14%,transparent)]",
   // Rejects once when it becomes invalid, as Input does (its keyframes). data-armed is set while it
   // is valid (core/shake.ts), so a field invalid from the start stays still.
@@ -41,7 +41,7 @@ const inputGroup = [
   // The ring is the group's, while the input has focus.
   "has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2",
   "has-[input:focus-visible]:outline-(color:--_focus)",
-  "data-disabled:cursor-not-allowed data-disabled:opacity-45",
+  "data-disabled:cursor-not-allowed data-disabled:opacity-50",
   // More contrast asked for: the edge comes back at 3:1.
   "contrast-more:shadow-[inset_0_0_0_1px_var(--ow-edge)]",
   // The transparent outline is the edge; invalid thickens it, since its color is gone.
@@ -108,9 +108,9 @@ const chip = [
   "outline-1 -outline-offset-1 outline-transparent",
   "text-(color:--_fg) leading-none whitespace-nowrap cursor-default",
   // Reached with the arrow keys from the input.
-  "data-highlighted:outline-2 data-highlighted:outline-offset-0 data-highlighted:outline-(color:--_focus)",
-  "focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-(color:--_focus)",
-  "data-disabled:opacity-45",
+  "data-highlighted:outline-2 data-highlighted:outline-offset-2 data-highlighted:outline-(color:--_focus)",
+  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(color:--_focus)",
+  "data-disabled:opacity-50",
   "contrast-more:shadow-[inset_0_0_0_1px_var(--ow-edge)]",
   "forced-colors:data-highlighted:outline-[Highlight] forced-colors:focus-visible:outline-[Highlight]",
   "forced-colors:data-disabled:text-[GrayText] forced-colors:data-disabled:opacity-100",
@@ -129,7 +129,7 @@ const button = [
   "active:not-data-disabled:not-disabled:not-data-readonly:bg-(color:--ow-pressed-bg)",
   "active:not-data-disabled:not-disabled:not-data-readonly:text-(color:--ow-fg)",
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(color:--_focus)",
-  "data-disabled:cursor-not-allowed data-disabled:opacity-45",
+  "data-readonly:cursor-default data-disabled:cursor-not-allowed data-disabled:opacity-50",
   "forced-colors:focus-visible:outline-[Highlight]",
   "forced-colors:data-disabled:text-[GrayText] forced-colors:data-disabled:opacity-100",
 ];
@@ -150,14 +150,23 @@ const clear = [
   "data-starting-style:opacity-0 data-ending-style:opacity-0",
 ];
 
-const chipRemove = [...button, "size-(--_chip) rounded-[50%]", "[&>:where(svg)]:size-[0.875em]"];
+const chipRemove = [
+  ...button,
+  "size-(--_chip) rounded-[50%]",
+  // A heavier stroke for the small ×, so it weighs as the others (about 1.5px).
+  "[&>:where(svg)]:size-[0.875em] [&>:where(svg)]:[stroke-width:3]",
+];
 
 const icon = ["inline-flex flex-none size-(--icon) [&>:where(svg)]:size-(--icon)"];
 
 // A line of text over the list: loading, or no match. It shows only when it has text.
 const notice = [
-  "[--_muted:var(--ow-muted)] box-border p-[1em] text-(color:--_muted) text-center empty:hidden",
+  "[--_muted:var(--ow-muted)] box-border text-(color:--_muted) text-center empty:hidden",
 ];
+
+// Loading is a line; no match is as roomy as Command Menu's.
+const status = [...notice, "p-[1em]"];
+const empty = [...notice, "py-[2.25em] px-[1em]"];
 
 // Positioned, so axe reads its text over Glide's highlight.
 const item = [selectSlots.item, "relative"];
@@ -196,8 +205,8 @@ export const comboboxSlots: Record<
   icon: icon.join(" "),
   backdrop: selectSlots.backdrop,
   positioner: selectSlots.positioner,
-  status: notice.join(" "),
-  empty: notice.join(" "),
+  status: status.join(" "),
+  empty: empty.join(" "),
   list: cn(selectSlots.list, "data-empty:hidden"),
   item: item.join(" "),
   itemIndicator,

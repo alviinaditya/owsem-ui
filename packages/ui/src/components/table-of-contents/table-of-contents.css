@@ -101,7 +101,7 @@
     transition:
       stroke-dasharray var(--_travel),
       stroke-dashoffset var(--_travel),
-      opacity 150ms ease;
+      opacity 150ms var(--ow-ease-out);
   }
 
   .ow-table-of-contents__marker[data-visible] {
@@ -116,7 +116,7 @@
   /* FR-20: the marker jumps to the next link, and only fades in and out. */
   @media (prefers-reduced-motion: reduce) {
     .ow-table-of-contents__marker {
-      transition: opacity 150ms ease;
+      transition: opacity 150ms var(--ow-ease-out);
     }
   }
 

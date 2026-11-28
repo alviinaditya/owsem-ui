@@ -45,6 +45,7 @@ const list = [
 const trigger = [
   "[--_py:max(var(--py),(24px_-_1lh)_/_2)] [--px:calc(var(--_py)_+_(1lh_-_1cap)_/_2)]",
   "[--_hover:var(--ow-hover)] [--_open:var(--ow-pressed-bg)]",
+  "[--_press:calc(1_-_0.03_*_var(--ow-motion-scale))]",
   // Box.
   "inline-flex flex-none items-center justify-center gap-[0.25em] box-border m-0 py-(--_py) px-(--px)",
   "border-0 rounded-(--ow-radius)",
@@ -52,12 +53,17 @@ const trigger = [
   "outline-1 -outline-offset-1 outline-transparent",
   // Type.
   "bg-transparent text-(color:--ow-fg) font-[family-name:inherit] font-medium leading-[1.25] no-underline",
-  "whitespace-nowrap cursor-pointer touch-manipulation",
+  "whitespace-nowrap cursor-pointer touch-manipulation will-change-transform",
+  // A press lets go on the settle spring; held, it is in within 90 ms, on the pressed material.
+  "transition-[transform] duration-(--ow-spring-settle-duration) ease-(--ow-spring-settle)",
+  "active:not-data-disabled:bg-(color:--_open) active:not-data-disabled:transform-[scale(var(--_press))]",
+  "active:not-data-disabled:duration-90 active:not-data-disabled:ease-(--ow-ease-out)",
+  "motion-reduce:active:transform-none",
   "hover:not-data-disabled:bg-(color:--_hover)",
   "data-popup-open:not-data-disabled:bg-(color:--_open) data-pressed:not-data-disabled:bg-(color:--_open)",
   "data-active:not-data-disabled:bg-(color:--_open)",
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(color:--ow-focus)",
-  "data-disabled:cursor-not-allowed data-disabled:opacity-45",
+  "data-disabled:cursor-not-allowed data-disabled:opacity-50",
   // Forced colors: the ring, the open trigger, and a disabled one take system colors.
   "forced-colors:focus-visible:outline-[Highlight] forced-colors:data-popup-open:outline-[Highlight]",
   "forced-colors:data-pressed:outline-[Highlight] forced-colors:data-active:outline-[Highlight]",
@@ -98,8 +104,8 @@ const popup = [
   // Grows out of the open trigger, and has its own layer so it lands without a pixel jump.
   "origin-(--transform-origin) will-change-transform",
   "[transition:opacity_180ms_var(--ow-ease-out),transform_180ms_var(--ow-ease-out),inline-size_320ms_var(--ow-ease-out),block-size_320ms_var(--ow-ease-out)]",
-  "data-starting-style:opacity-0 data-starting-style:transform-[scale(0.96)]",
-  "data-ending-style:opacity-0 data-ending-style:transform-[scale(0.96)]",
+  "data-starting-style:opacity-0 data-starting-style:transform-[scale(calc(1_-_0.04_*_var(--ow-motion-scale)))]",
+  "data-ending-style:opacity-0 data-ending-style:transform-[scale(calc(1_-_0.04_*_var(--ow-motion-scale)))]",
   // Leaving is quicker than arriving.
   "data-ending-style:[transition-duration:120ms]",
   // Opened from the keyboard, or shut with Escape: no animation.
@@ -127,11 +133,18 @@ export function navigationMenuPopupVariants({ size }: NavigationMenuVariantProps
   return cn(popupVariants({ size }));
 }
 
-// The chevron: the font size plus 2px, turned over while its panel is open.
+// The chevron: the font size plus 2px; its strokes turn while its panel is open, as Accordion's.
 const icon = [
-  "inline-flex flex-none size-[calc(1em_+_2px)] [transition:transform_200ms_var(--ow-ease-out)]",
-  "will-change-transform",
-  "[&>svg]:size-full data-popup-open:transform-[rotate(180deg)] motion-reduce:transition-none",
+  "inline-flex flex-none size-[calc(1em_+_2px)] [--_flip:0] data-popup-open:[--_flip:1]",
+  "[&>svg]:size-full",
+];
+
+// Each stroke turns a quarter about its own center: down, flat halfway, then up.
+const stroke = [
+  "[--_turn:-1] data-[side=end]:[--_turn:1] [transform-box:fill-box] origin-center",
+  "rotate-[calc(var(--_flip)_*_var(--_turn)_*_90deg)] will-change-[rotate] transition-[rotate]",
+  "duration-[calc(var(--ow-spring-settle-duration)_*_var(--ow-motion-scale))]",
+  "ease-(--ow-spring-settle) motion-reduce:[transition:none]",
 ];
 
 // An optional backdrop under the panel: clear, it only takes presses.
@@ -221,11 +234,20 @@ const arrow = [
 
 /** The classes of the other parts. */
 export const navigationMenuSlots: Record<
-  "list" | "icon" | "backdrop" | "positioner" | "viewport" | "content" | "link" | "arrow",
+  | "list"
+  | "icon"
+  | "stroke"
+  | "backdrop"
+  | "positioner"
+  | "viewport"
+  | "content"
+  | "link"
+  | "arrow",
   string
 > = {
   list: list.join(" "),
   icon: icon.join(" "),
+  stroke: stroke.join(" "),
   backdrop: backdrop.join(" "),
   positioner: positioner.join(" "),
   viewport: viewport.join(" "),

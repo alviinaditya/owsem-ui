@@ -204,7 +204,7 @@ describe("Number Field", () => {
     await userEvent.click(plus);
     expect(plus.hasAttribute("data-disabled")).toBe(true);
     expect(plus.disabled).toBe(true);
-    expect(getComputedStyle(plus).opacity).toBe("0.45");
+    expect(getComputedStyle(plus).opacity).toBe("0.5");
     expect(getComputedStyle(plus).cursor).toBe("not-allowed");
     expect(getComputedStyle(minus).opacity).toBe("1");
     await userEvent.click(plus, { force: true });
@@ -212,7 +212,7 @@ describe("Number Field", () => {
     await userEvent.click(minus);
     await userEvent.click(minus);
     expect(minus.disabled).toBe(true);
-    expect(getComputedStyle(minus).opacity).toBe("0.45");
+    expect(getComputedStyle(minus).opacity).toBe("0.5");
   });
 
   test("the keyboard steps by step, shift by largeStep, alt by smallStep, Home and End to the ends", async () => {
@@ -366,7 +366,7 @@ describe("Number Field, drawn", () => {
     expect(getComputedStyle(invalid.group).backgroundColor).toBe(resolve(CRITICAL));
     const off = await mount(<Num defaultValue={1} disabled label="Qty" />);
     expect(off.group.hasAttribute("data-disabled")).toBe(true);
-    expect(getComputedStyle(off.group).opacity).toBe("0.45");
+    expect(getComputedStyle(off.group).opacity).toBe("0.5");
     expect(getComputedStyle(off.group).cursor).toBe("not-allowed");
     expect(getComputedStyle(off.minus).opacity).toBe("1");
     expect(off.minus.disabled).toBe(true);

@@ -369,7 +369,7 @@ describe("Combobox", () => {
     const [off, read] = all('[data-slot="combobox-input"]') as HTMLInputElement[];
     const [offGroup, readGroup] = all('[data-slot="combobox-input-group"]');
     expect(off?.disabled).toBe(true);
-    expect(getComputedStyle(offGroup as HTMLElement).opacity).toBe("0.45");
+    expect(getComputedStyle(offGroup as HTMLElement).opacity).toBe("0.5");
     expect(getComputedStyle(offGroup as HTMLElement).cursor).toBe("not-allowed");
     expect(read?.readOnly).toBe(true);
     expect(getComputedStyle(readGroup as HTMLElement).opacity).toBe("1");

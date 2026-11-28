@@ -743,9 +743,9 @@ describe("ColorPickerPopover", () => {
     const positioner = popup()?.parentElement;
     expect(positioner?.getAttribute("data-theme")).toBe("dark");
     expect(positioner?.getAttribute("dir")).toBe("rtl");
-    // A popup is a panel, with the popup shadow.
+    // A popup is a raised panel, as every popup, with the popup shadow.
     expect(getComputedStyle(q('[role="dialog"] .ow-color-picker')).backgroundColor).toBe(
-      resolveColor("var(--ow-panel)", q('[data-theme="dark"]')),
+      resolveColor("var(--ow-raised-bg)", q('[data-theme="dark"]')),
     );
     expect(getComputedStyle(q('[role="dialog"] .ow-color-picker')).boxShadow).toBe(
       resolve("var(--ow-popup-shadow)", q('[data-theme="dark"]'), "box-shadow"),

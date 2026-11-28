@@ -52,12 +52,12 @@ const input = [
   // Type.
   "text-(color:--ow-fg) font-[family-name:inherit] font-[weight:inherit] tabular-nums text-center",
   "bg-(color:--_bg) [--_bg:color-mix(in_oklab,var(--ow-fg)_6%,transparent)]",
-  "pointer-fine:hover:not-data-disabled:not-disabled:not-data-invalid:not-aria-invalid:[--_bg:color-mix(in_oklab,var(--ow-fg)_9%,transparent)]",
+  "pointer-fine:hover:not-data-disabled:not-disabled:not-ow-input-readonly:not-data-invalid:not-aria-invalid:[--_bg:color-mix(in_oklab,var(--ow-fg)_9%,transparent)]",
   "data-invalid:[--_bg:color-mix(in_oklab,var(--ow-critical)_14%,transparent)]",
   "aria-invalid:[--_bg:color-mix(in_oklab,var(--ow-critical)_14%,transparent)]",
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(color:--ow-focus)",
-  "data-disabled:cursor-not-allowed data-disabled:opacity-45",
-  "disabled:cursor-not-allowed disabled:opacity-45",
+  "data-disabled:cursor-not-allowed data-disabled:opacity-50",
+  "disabled:cursor-not-allowed disabled:opacity-50",
   // More contrast asked for: the edge comes back at 3:1.
   "contrast-more:shadow-[inset_0_0_0_1px_var(--ow-edge)]",
   // The transparent outline is the edge; invalid thickens it, since its color is gone.

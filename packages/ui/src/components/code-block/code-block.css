@@ -115,7 +115,7 @@
       translate var(--_travel),
       transform var(--_travel),
       scale var(--_settle),
-      opacity 150ms ease;
+      opacity 150ms var(--ow-ease-out);
   }
 
   /* The key, which thumb.ts stretches along the travel with an animation. */
@@ -139,7 +139,7 @@
       translate var(--_travel),
       transform var(--_travel),
       scale var(--_press-in),
-      opacity 150ms ease;
+      opacity 150ms var(--ow-ease-out);
   }
 
   .ow-code-block__tab {
@@ -160,7 +160,7 @@
     touch-action: manipulation;
     will-change: scale;
     transition:
-      color 150ms ease,
+      color 150ms var(--ow-ease-out),
       scale var(--_settle);
   }
 
@@ -180,7 +180,7 @@
   .ow-code-block__tab[data-held] {
     scale: var(--_press);
     transition:
-      color 150ms ease,
+      color 150ms var(--ow-ease-out),
       scale var(--_press-in);
   }
 
@@ -275,13 +275,13 @@
     .ow-code-block__thumb,
     .ow-code-block__thumb[data-held] {
       scale: none;
-      transition: opacity 150ms ease;
+      transition: opacity 150ms var(--ow-ease-out);
     }
 
     .ow-code-block__tab,
     .ow-code-block__tab[data-held] {
       scale: none;
-      transition: color 150ms ease;
+      transition: color 150ms var(--ow-ease-out);
     }
 
     .ow-code-block__thumb[data-held][data-visible] {
@@ -310,7 +310,7 @@
     }
 
     .ow-code-block__thumb {
-      transition: opacity 150ms ease;
+      transition: opacity 150ms var(--ow-ease-out);
     }
 
     .ow-code-block__tab:focus-visible,

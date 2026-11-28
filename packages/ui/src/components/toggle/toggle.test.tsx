@@ -501,7 +501,7 @@ describe("Toggle, solid", () => {
     expect(document.activeElement).toBe(on);
     expect(getComputedStyle(on).outlineColor).toBe(resolve("color", "var(--ow-focus)"));
     expect(getComputedStyle(on).outlineWidth).toBe("2px");
-    expect(getComputedStyle(disabled).opacity).toBe("0.45");
+    expect(getComputedStyle(disabled).opacity).toBe("0.5");
     expect(getComputedStyle(disabled).backgroundColor).toBe(resolve("color", "var(--ow-accent)"));
   });
 

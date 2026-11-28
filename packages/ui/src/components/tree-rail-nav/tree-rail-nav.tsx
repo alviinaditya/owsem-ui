@@ -205,7 +205,8 @@ export function TreeRailNavToggle({
         aria-hidden="true"
         focusable="false"
       >
-        <path d="m6 9 6 6 6-6" />
+        <path className={treeRailNavSlots.chevronStroke} data-side="start" d="m6 9 6 6" />
+        <path className={treeRailNavSlots.chevronStroke} data-side="end" d="m12 15 6-6" />
       </svg>
     </Collapsible.Trigger>
   );

@@ -772,7 +772,7 @@ export function ColorPickerPopover({
   onOpenChange,
   side = "bottom",
   align = "start",
-  sideOffset = 8,
+  sideOffset = 10,
   size = outerSize ?? "md",
   variant = "field",
   className,

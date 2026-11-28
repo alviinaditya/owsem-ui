@@ -223,7 +223,7 @@ describe("Field", () => {
       </Field.Root>,
     );
     expect(q<HTMLInputElement>("input").disabled).toBe(true);
-    expect(getComputedStyle(q(".ow-field__label")).opacity).toBe("0.45");
+    expect(getComputedStyle(q(".ow-field__label")).opacity).toBe("0.5");
   });
 
   test("works controlled and uncontrolled, and in a plain form (FR-4)", async () => {

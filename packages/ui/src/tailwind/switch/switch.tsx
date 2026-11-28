@@ -4,6 +4,7 @@
 import { Switch as BaseSwitch } from "@base-ui/react/switch";
 import type { ReactElement } from "react";
 import { cn } from "../lib/cn";
+import { useShakeGate } from "../lib/shake";
 import {
   type SwitchSize,
   type SwitchVariantProps,
@@ -40,12 +41,15 @@ export function SwitchRoot({
   size = outerSize ?? "md",
   className,
   children,
+  ref,
   ...props
 }: SwitchRootProps): ReactElement {
+  const gate = useShakeGate(ref);
   return (
     <BaseSwitch.Root
       data-slot="switch"
       {...props}
+      ref={gate}
       className={cn(switchVariants({ size }), className)}
       data-size={size}
     >

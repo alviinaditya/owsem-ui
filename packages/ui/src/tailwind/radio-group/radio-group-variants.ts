@@ -29,16 +29,17 @@ const row = [
   "[&_:where(label:has([data-slot=radio-group-radio]))]:touch-manipulation",
   "[&_:where(label:has([data-slot=radio-group-radio]))]:[-webkit-tap-highlight-color:transparent]",
   "[&_:where(label:has([data-slot=radio-group-radio][data-readonly]))]:cursor-default",
-  "[&_:where(label:has([data-slot=radio-group-radio][data-disabled]))]:text-[color-mix(in_oklab,var(--_muted)_50%,transparent)]",
+  "[&_:where(label:has([data-slot=radio-group-radio][data-disabled]))]:opacity-50",
   "[&_:where(label:has([data-slot=radio-group-radio][data-disabled]))]:cursor-not-allowed",
   // The label turns gray with the system's disabled color.
   "forced-colors:[&_:where(label:has([data-slot=radio-group-radio][data-disabled]))]:text-[GrayText]",
+  "forced-colors:[&_:where(label:has([data-slot=radio-group-radio][data-disabled]))]:opacity-100",
 ];
 
 // The group sets no width: it fits its rows, and a rule on className lays them out in a row or a
 // grid. Glide's container, so it holds the highlight behind the rows.
 const root = [
-  "[--_fg:var(--ow-fg)] [--_muted:var(--ow-muted)]",
+  "[--_fg:var(--ow-fg)]",
   "relative isolate inline-flex flex-col align-top",
   "text-(color:--_fg)",
   ...row,
@@ -87,13 +88,22 @@ const radio = [
   "data-checked:[--_bg:var(--_accent)] data-checked:[--_shadow:var(--_accent-shadow)]",
   "data-checked:[--_bg-held:color-mix(in_oklab,var(--_accent),black_10%)]",
   // Off, the fill steps up on hover; the row counts too.
-  "ow-label-hover:not-data-disabled:not-disabled:not-data-checked:[--_bg:color-mix(in_oklab,var(--ow-fg)_13%,transparent)]",
+  "ow-label-hover:not-data-disabled:not-disabled:not-data-checked:not-ow-input-invalid:[--_bg:color-mix(in_oklab,var(--ow-fg)_13%,transparent)]",
+  // Invalid: the circle's tint and fill turn critical, as the fields' tint does; held, it deepens.
+  "ow-input-invalid:[--_accent:var(--ow-critical-solid)]",
+  "ow-input-invalid:not-data-checked:[--_bg:color-mix(in_oklab,var(--ow-critical)_14%,transparent)]",
+  "ow-input-invalid:not-data-checked:[--_bg-held:color-mix(in_oklab,var(--ow-critical)_26%,transparent)]",
+  // Rejects once when it becomes invalid; data-armed is set while it is valid (core/shake.ts), so one
+  // invalid from the start stays still. A Form re-plays it with data-shake="off".
+  "ow-input-invalid:data-armed:not-data-[shake=off]:animate-[ow-radio-group-shake_320ms_var(--ow-ease-out)]",
+  "motion-reduce:ow-input-invalid:data-armed:not-data-[shake=off]:animate-[ow-radio-group-blink_160ms_var(--ow-ease-out)]",
   // Held, or with its row held: in to 0.97 within 90 ms, with the pressed fill.
   "ow-radio-group-held:bg-(color:--_bg-held) ow-radio-group-held:transform-[scale(var(--_press))]",
   "ow-radio-group-held:duration-90 ow-radio-group-held:ease-(--ow-ease-out)",
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(color:--_focus)",
   "data-readonly:cursor-default",
-  "data-disabled:opacity-50 data-disabled:cursor-not-allowed",
+  // A radio in a row is dimmed with its label; only a bare one dims itself.
+  "data-disabled:cursor-not-allowed [&:where([data-disabled]):not(label_*)]:opacity-50",
   // The fill still changes and the dot fades in; nothing moves.
   "motion-reduce:[--_press:1]",
   // More contrast asked for: the edge comes back at 3:1.

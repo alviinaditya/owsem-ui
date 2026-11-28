@@ -66,8 +66,8 @@ const root = [
   "data-anchored:h-auto data-anchored:transform-none data-anchored:origin-(--transform-origin)",
   "data-anchored:transition-[opacity,transform] data-anchored:duration-180",
   "data-anchored:ease-(--ow-ease-out) data-anchored:after:content-none",
-  "data-anchored:data-starting-style:opacity-0 data-anchored:data-starting-style:transform-[scale(0.96)]",
-  "data-anchored:data-ending-style:opacity-0 data-anchored:data-ending-style:transform-[scale(0.96)]",
+  "data-anchored:data-starting-style:opacity-0 data-anchored:data-starting-style:transform-[scale(calc(1_-_0.04_*_var(--ow-motion-scale)))]",
+  "data-anchored:data-ending-style:opacity-0 data-anchored:data-ending-style:transform-[scale(calc(1_-_0.04_*_var(--ow-motion-scale)))]",
   // Leaving is quicker than arriving.
   "data-anchored:data-ending-style:duration-120",
   // More contrast asked for: a ring around the card and its arrow.
@@ -123,15 +123,15 @@ const description = ["m-0 text-(color:--_muted) wrap-anywhere"];
 
 const action = ["mt-[8px]"];
 
-// The corner button: quiet until pointed at, a 24px target with a 14px cross.
+// The corner button: quiet until pointed at, a 24px target with a cross of the font size plus 2px.
 const close = [
   "absolute top-[8px] end-[8px] grid place-items-center box-border size-[24px] m-0 p-0 border-0",
-  "rounded-[calc(var(--_r)_/_2)] bg-transparent text-(color:--_muted) cursor-pointer",
+  "rounded-[calc(var(--_r)_/_2)] bg-transparent text-(color:--_muted) [font-size:inherit] cursor-pointer",
   "touch-manipulation [-webkit-tap-highlight-color:transparent]",
   "transition-[background-color,color] duration-150 ease-(--ow-ease-out)",
-  "[&>svg]:block [&>svg]:size-[14px]",
+  "[&>svg]:block [&>svg]:size-[calc(1em_+_2px)]",
   "[@media(hover:hover)]:hover:bg-(--ow-hover) [@media(hover:hover)]:hover:text-(color:--_fg)",
-  "focus-visible:outline-2 focus-visible:outline-(--ow-focus) focus-visible:outline-offset-1",
+  "focus-visible:outline-2 focus-visible:outline-(--ow-focus) focus-visible:outline-offset-2",
 ];
 
 // A 14px box centered on the card's edge; its outer half shows a square turned 45 degrees with

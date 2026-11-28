@@ -44,7 +44,7 @@ const group = [
   "outline-1 -outline-offset-1 outline-transparent",
   // The face: the tint deepens on hover, and turns critical when invalid.
   "bg-(color:--_bg) [--_bg:color-mix(in_oklab,var(--ow-fg)_6%,transparent)]",
-  "pointer-fine:hover:not-data-disabled:not-data-invalid:[--_bg:color-mix(in_oklab,var(--ow-fg)_9%,transparent)]",
+  "pointer-fine:hover:not-data-disabled:not-data-readonly:not-data-invalid:[--_bg:color-mix(in_oklab,var(--ow-fg)_9%,transparent)]",
   "data-invalid:[--_bg:color-mix(in_oklab,var(--ow-critical)_14%,transparent)]",
   // Rejects once when it becomes invalid; data-armed is set while it is valid (core/shake.ts), so a
   // field invalid from the start stays still. A Form re-plays it with data-shake="off".
@@ -55,7 +55,7 @@ const group = [
   "has-[[data-slot=number-field-input]:focus-visible]:outline-2",
   "has-[[data-slot=number-field-input]:focus-visible]:outline-offset-2",
   "has-[[data-slot=number-field-input]:focus-visible]:outline-(color:--ow-focus)",
-  "data-disabled:cursor-not-allowed data-disabled:opacity-45",
+  "data-disabled:cursor-not-allowed data-disabled:opacity-50",
   // The steppers of a disabled field are as dim as the field is; no more.
   "data-disabled:[&>[data-slot=number-field-decrement]]:opacity-100",
   "data-disabled:[&>[data-slot=number-field-increment]]:opacity-100",
@@ -98,8 +98,8 @@ const stepper = [
   "active:not-data-disabled:not-disabled:not-data-readonly:transform-[scale(var(--_press))]",
   "active:not-data-disabled:not-disabled:not-data-readonly:duration-90 active:not-data-disabled:not-disabled:not-data-readonly:ease-(--ow-ease-out)",
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(color:--ow-focus)",
-  "data-disabled:cursor-not-allowed data-disabled:opacity-45",
-  "disabled:cursor-not-allowed disabled:opacity-45",
+  "data-disabled:cursor-not-allowed data-disabled:opacity-50",
+  "disabled:cursor-not-allowed disabled:opacity-50",
   // Read only: the same as Input, so the steppers only do nothing.
   "data-readonly:cursor-default",
   // The press only changes the material.

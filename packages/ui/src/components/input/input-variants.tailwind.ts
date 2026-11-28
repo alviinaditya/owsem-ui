@@ -42,7 +42,7 @@ const root = [
   "has-[+[data-slot=input-icon][data-side=end]]:[--_pe:calc(var(--_inset)_+_var(--icon)_+_0.5em)]",
   // The face: the tint deepens on hover, and turns critical when invalid.
   "bg-(color:--_bg) [--_bg:color-mix(in_oklab,var(--ow-fg)_6%,transparent)]",
-  "pointer-fine:hover:not-data-disabled:not-disabled:not-ow-input-invalid:[--_bg:color-mix(in_oklab,var(--ow-fg)_9%,transparent)]",
+  "pointer-fine:hover:not-data-disabled:not-disabled:not-ow-input-readonly:not-ow-input-invalid:[--_bg:color-mix(in_oklab,var(--ow-fg)_9%,transparent)]",
   "ow-input-invalid:[--_bg:color-mix(in_oklab,var(--ow-critical)_14%,transparent)]",
   // Invisible until forced colors draw it as the edge.
   "outline-1 -outline-offset-1 outline-transparent",
@@ -55,7 +55,7 @@ const root = [
   "ow-input-invalid:data-armed:not-data-[shake=off]:animate-[ow-input-shake_320ms_var(--ow-ease-out)]",
   "motion-reduce:ow-input-invalid:data-armed:not-data-[shake=off]:animate-[ow-input-blink_160ms_var(--ow-ease-out)]",
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(color:--ow-focus)",
-  "ow-input-disabled:cursor-not-allowed ow-input-disabled:opacity-45",
+  "ow-input-disabled:cursor-not-allowed ow-input-disabled:opacity-50",
   // More contrast asked for: the edge comes back at 3:1.
   "contrast-more:shadow-[inset_0_0_0_1px_var(--ow-edge)]",
   // The transparent outline is the edge; invalid thickens it, since its color is gone.
@@ -95,7 +95,7 @@ const icon = [
   "data-[side=end]:ms-[calc(-1_*_(var(--_inset)_+_var(--icon)))] data-[side=end]:me-(--_inset)",
   "[&>:where(svg,img)]:block [&>:where(svg,img)]:size-full",
   // Disabled with its input.
-  "group-has-[>:is([data-disabled],:disabled)]/ow-input:opacity-45",
+  "group-has-[>:is([data-disabled],:disabled)]/ow-input:opacity-50",
   "forced-colors:group-has-[>:is([data-disabled],:disabled)]/ow-input:text-[GrayText]",
   "forced-colors:group-has-[>:is([data-disabled],:disabled)]/ow-input:opacity-100",
 ];

@@ -146,9 +146,9 @@
     opacity: 0;
     visibility: hidden;
     transition:
-      opacity 150ms ease,
-      visibility 150ms,
-      color 150ms ease;
+      opacity 150ms var(--ow-ease-out),
+      visibility 150ms var(--ow-ease-out),
+      color 150ms var(--ow-ease-out);
   }
 
   .ow-tabs__scroll-button:where(:hover) {
@@ -244,7 +244,7 @@
       translate var(--_travel),
       transform var(--_travel),
       scale var(--_settle),
-      opacity 150ms ease;
+      opacity 150ms var(--ow-ease-out);
   }
 
   /* The key, inside the clear border. thumb.ts stretches it with an animation. */
@@ -268,7 +268,7 @@
       translate var(--_travel),
       transform var(--_travel),
       scale var(--_press-in),
-      opacity 150ms ease;
+      opacity 150ms var(--ow-ease-out);
   }
 
   .ow-tabs__tab {
@@ -309,7 +309,7 @@
     touch-action: manipulation;
     will-change: scale;
     transition:
-      color 150ms ease,
+      color 150ms var(--ow-ease-out),
       scale var(--_settle);
   }
 
@@ -341,7 +341,7 @@
   .ow-tabs__tab:where([data-held]) {
     scale: var(--_press);
     transition:
-      color 150ms ease,
+      color 150ms var(--ow-ease-out),
       scale var(--_press-in);
   }
 
@@ -352,7 +352,7 @@
   }
 
   .ow-tabs__tab:where([data-disabled]) {
-    color: color-mix(in oklab, var(--_muted) 50%, transparent);
+    opacity: 0.5;
     cursor: not-allowed;
   }
 
@@ -411,13 +411,13 @@
     .ow-tabs__indicator,
     .ow-tabs__indicator:where([data-held]) {
       scale: none;
-      transition: opacity 150ms ease;
+      transition: opacity 150ms var(--ow-ease-out);
     }
 
     .ow-tabs__tab,
     .ow-tabs__tab:where([data-held]) {
       scale: none;
-      transition: color 150ms ease;
+      transition: color 150ms var(--ow-ease-out);
     }
 
     .ow-tabs__indicator:where([data-held][data-visible]) {
@@ -444,6 +444,7 @@
 
     .ow-tabs__tab:where([data-disabled]) {
       color: GrayText;
+      opacity: 1;
     }
 
     /* The label turns as the fill arrives, so the fill does not travel. */
@@ -454,7 +455,7 @@
     }
 
     .ow-tabs__indicator {
-      transition: opacity 150ms ease;
+      transition: opacity 150ms var(--ow-ease-out);
     }
   }
 

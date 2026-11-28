@@ -67,7 +67,7 @@ const track = [
 const scrollButton = [
   "absolute inset-y-0 flex items-center justify-center box-border w-(--_fade) m-0 p-0 border-0",
   "bg-transparent text-(color:--_muted) hover:text-(color:--_fg) cursor-pointer",
-  "opacity-0 invisible transition-[opacity,visibility,color] duration-150 ease-[ease]",
+  "opacity-0 invisible transition-[opacity,visibility,color] duration-150 ease-(--ow-ease-out)",
   "motion-reduce:transition-none",
   "data-[edge=start]:start-0 data-[edge=end]:end-0",
   "[&>svg]:size-[1.125em] rtl:[&>svg]:[scale:-1_1]",
@@ -119,7 +119,7 @@ const indicator = [
   // on the settle spring.
   "will-change-[translate,transform,scale] transition-[translate,transform,scale,opacity]",
   "duration-[var(--ow-spring-travel-duration),var(--ow-spring-travel-duration),var(--ow-spring-settle-duration),150ms]",
-  "ease-[var(--ow-spring-travel),var(--ow-spring-travel),var(--ow-spring-settle),ease]",
+  "ease-[var(--ow-spring-travel),var(--ow-spring-travel),var(--ow-spring-settle),var(--ow-ease-out)]",
   // The key, inside the clear border.
   "before:absolute before:content-[''] before:inset-0 before:rounded-(--_radius)",
   "before:bg-(color:--_key) before:will-change-transform",
@@ -127,16 +127,16 @@ const indicator = [
   // Pressed in quickly, released with the settle spring.
   "data-held:scale-(--_press)",
   "data-held:duration-[var(--ow-spring-travel-duration),var(--ow-spring-travel-duration),90ms,150ms]",
-  "data-held:ease-[var(--ow-spring-travel),var(--ow-spring-travel),var(--ow-ease-out),ease]",
+  "data-held:ease-[var(--ow-spring-travel),var(--ow-spring-travel),var(--ow-ease-out),var(--ow-ease-out)]",
   // The indicator does not slide or press; it only fades. A held tab dims instead.
   "motion-reduce:scale-none motion-reduce:data-held:scale-none",
-  "motion-reduce:transition-[opacity] motion-reduce:duration-150 motion-reduce:ease-[ease]",
-  "motion-reduce:data-held:duration-150 motion-reduce:data-held:ease-[ease]",
+  "motion-reduce:transition-[opacity] motion-reduce:duration-150 motion-reduce:ease-(--ow-ease-out)",
+  "motion-reduce:data-held:duration-150 motion-reduce:data-held:ease-(--ow-ease-out)",
   "motion-reduce:data-held:data-visible:opacity-80",
   // The label turns as the fill arrives, so the fill does not travel.
   "forced-colors:before:forced-color-adjust-none forced-colors:before:bg-[Highlight]",
   "forced-colors:not-data-held:transition-[opacity] forced-colors:not-data-held:duration-150",
-  "forced-colors:not-data-held:ease-[ease]",
+  "forced-colors:not-data-held:ease-(--ow-ease-out)",
   // The first placement and every jump: nothing transitions.
   "data-instant:[transition:none] forced-colors:data-instant:[transition:none]",
 ];
@@ -162,17 +162,16 @@ const tab = [
   "text-(color:--_muted) leading-[1.25] whitespace-nowrap",
   "cursor-pointer touch-manipulation will-change-[scale]",
   "transition-[color,scale] duration-[150ms,var(--ow-spring-settle-duration)]",
-  "ease-[ease,var(--ow-spring-settle)]",
+  "ease-[var(--ow-ease-out),var(--ow-spring-settle)]",
   // Lit by Glide, or active: the text color; active, the accent leaning toward it.
   "data-glide-active:not-data-active:text-(color:--_fg) data-active:text-(color:--_on)",
   // The active tab as a key of its own before the script places the indicator (server HTML).
   "group-not-data-thumb/ow-tabs-track:data-active:bg-(color:--_key)",
-  "data-held:scale-(--_press) data-held:duration-[150ms,90ms] data-held:ease-[ease,var(--ow-ease-out)]",
+  "data-held:scale-(--_press) data-held:duration-[150ms,90ms] data-held:ease-[var(--ow-ease-out),var(--ow-ease-out)]",
   // Inside the tab, so the scrolling list never cuts it.
   "focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(color:--_focus)",
   // Disabled is the last word on the text, also when active.
-  "[--_dim:color-mix(in_oklab,var(--_muted)_50%,transparent)] data-disabled:cursor-not-allowed",
-  "data-disabled:text-(color:--_dim) data-disabled:data-active:text-(color:--_dim)",
+  "data-disabled:cursor-not-allowed data-disabled:opacity-50",
   // The icon is the font size plus 2px, as far from the edge as from the top. With both margins,
   // a tab with only an icon is square.
   "[&>:where(svg)]:flex-none [&>:where(svg)]:size-(--icon)",
@@ -180,15 +179,15 @@ const tab = [
   "[&>:where(svg:last-child)]:me-[calc((1cap_-_var(--icon))_/_2)]",
   // No pressing in; the material still changes.
   "motion-reduce:scale-none motion-reduce:data-held:scale-none",
-  "motion-reduce:transition-[color] motion-reduce:duration-150 motion-reduce:ease-[ease]",
-  "motion-reduce:data-held:duration-150 motion-reduce:data-held:ease-[ease]",
+  "motion-reduce:transition-[color] motion-reduce:duration-150 motion-reduce:ease-(--ow-ease-out)",
+  "motion-reduce:data-held:duration-150 motion-reduce:data-held:ease-(--ow-ease-out)",
   // The active tab is filled with the system highlight, and a disabled one stays gray.
   "forced-colors:data-active:forced-color-adjust-none",
   "forced-colors:data-active:text-[HighlightText]",
   "forced-colors:group-not-data-thumb/ow-tabs-track:data-active:forced-color-adjust-none",
   "forced-colors:group-not-data-thumb/ow-tabs-track:data-active:bg-[Highlight]",
   "forced-colors:focus-visible:outline-[Highlight] forced-colors:data-disabled:text-[GrayText]",
-  "forced-colors:data-disabled:data-active:text-[GrayText]",
+  "forced-colors:data-disabled:data-active:text-[GrayText] forced-colors:data-disabled:opacity-100",
 ];
 
 // Room for glyphs whose ink passes their advance (a monospace "m"), without changing the width.

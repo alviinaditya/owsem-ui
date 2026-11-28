@@ -168,7 +168,7 @@
 
   .ow-toast:where([data-anchored]:is([data-starting-style], [data-ending-style])) {
     opacity: 0;
-    transform: scale(0.96);
+    transform: scale(calc(1 - 0.04 * var(--ow-motion-scale)));
   }
 
   /* Leaving is quicker than arriving. */
@@ -253,7 +253,7 @@
     margin-block-start: 8px;
   }
 
-  /* The corner button: quiet until pointed at, a 24px target with a 14px cross. */
+  /* The corner button: quiet until pointed at, a 24px target with a cross of the font size plus 2px. */
   .ow-toast__close {
     position: absolute;
     inset-block-start: 8px;
@@ -269,6 +269,7 @@
     border-radius: calc(var(--_r) / 2);
     background: none;
     color: var(--_muted);
+    font-size: inherit;
     cursor: pointer;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
@@ -279,8 +280,8 @@
 
   .ow-toast__close > svg {
     display: block;
-    inline-size: 14px;
-    block-size: 14px;
+    inline-size: calc(1em + 2px);
+    block-size: calc(1em + 2px);
   }
 
   /* The spinner turns only while the toast is loading. */
@@ -303,7 +304,7 @@
 
   .ow-toast__close:where(:focus-visible) {
     outline: 2px solid var(--ow-focus);
-    outline-offset: 1px;
+    outline-offset: 2px;
   }
 
   /*

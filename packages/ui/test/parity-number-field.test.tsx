@@ -249,7 +249,7 @@ describe("a number field in Tailwind CSS v4 behaves as in CSS", () => {
     await userEvent.click(q("increment"));
     expect((q("input") as HTMLInputElement).value).toBe("10");
     expect(q("increment").hasAttribute("data-disabled")).toBe(true);
-    expect(getComputedStyle(q("increment")).opacity).toBe("0.45");
+    expect(getComputedStyle(q("increment")).opacity).toBe("0.5");
     expect(getComputedStyle(q("decrement")).opacity).toBe("1");
   });
 

@@ -376,7 +376,7 @@ describe("Select", () => {
       </>,
     );
     expect(trigger().hasAttribute("data-disabled")).toBe(true);
-    expect(getComputedStyle(trigger()).opacity).toBe("0.45");
+    expect(getComputedStyle(trigger()).opacity).toBe("0.5");
     expect(getComputedStyle(trigger()).cursor).toBe("not-allowed");
     await userEvent.click(trigger(), { force: true });
     await settle();

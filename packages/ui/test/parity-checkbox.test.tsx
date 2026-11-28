@@ -76,6 +76,13 @@ const cases: Case[] = [
   make("disabled and read only", (Checkbox) => (
     <Checkbox.Root disabled readOnly defaultChecked aria-label="Agree" />
   )),
+  make("invalid", (Checkbox) => <Checkbox.Root aria-invalid aria-label="Agree" />),
+  make("invalid checked", (Checkbox) => (
+    <Checkbox.Root aria-invalid defaultChecked aria-label="Agree" />
+  )),
+  make("invalid mixed", (Checkbox) => (
+    <Checkbox.Root aria-invalid indeterminate aria-label="Agree" />
+  )),
   make("indicator kept while off", (Checkbox) => (
     <Checkbox.Root aria-label="Agree">
       <Checkbox.Indicator keepMounted />

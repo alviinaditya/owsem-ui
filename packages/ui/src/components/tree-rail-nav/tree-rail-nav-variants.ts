@@ -8,6 +8,7 @@ export const treeRailNavSlots = {
   node: "ow-tree-rail-nav__node",
   item: "ow-tree-rail-nav__item",
   chevron: "ow-tree-rail-nav__chevron",
+  chevronStroke: "ow-tree-rail-nav__chevron-stroke",
   panel: "ow-tree-rail-nav__panel",
   icon: "ow-tree-rail-nav__icon",
   origin: "ow-tree-rail-nav__origin",

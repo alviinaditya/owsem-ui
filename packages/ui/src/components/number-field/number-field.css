@@ -54,7 +54,7 @@
 
   /* The tint deepens on hover. */
   @media (hover: hover) and (pointer: fine) {
-    .ow-number-field__group:where(:hover):where(:not([data-disabled])) {
+    .ow-number-field__group:where(:hover):where(:not([data-disabled], [data-readonly])) {
       --_bg: color-mix(in oklab, var(--ow-fg) 9%, transparent);
     }
   }
@@ -107,7 +107,7 @@
 
   .ow-number-field__group:where([data-disabled]) {
     cursor: not-allowed;
-    opacity: 0.45;
+    opacity: 0.5;
   }
 
   .ow-number-field__input {
@@ -195,7 +195,7 @@
   /* At the min or the max, or read only: dim. A disabled field is dim as a whole already. */
   .ow-number-field__stepper:where([data-disabled], :disabled) {
     cursor: not-allowed;
-    opacity: 0.45;
+    opacity: 0.5;
   }
 
   /* Read only: the same as Input, so the steppers only do nothing. */

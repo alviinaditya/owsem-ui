@@ -75,7 +75,8 @@ export function NavigationMenuList({ className, ...props }: NavigationMenuListPr
   );
 }
 
-// Drawn for OwsemUI; it follows the text color, forced colors included.
+// Drawn for OwsemUI, as Accordion's: two strokes that turn about their own centers. It follows the
+// text color, forced colors included.
 const chevron = (
   <svg
     viewBox="0 0 24 24"
@@ -86,7 +87,8 @@ const chevron = (
     strokeLinejoin="round"
     aria-hidden="true"
   >
-    <path d="m6 9.5 6 6 6-6" />
+    <path className={navigationMenuSlots.stroke} data-side="start" d="m6 9 6 6" />
+    <path className={navigationMenuSlots.stroke} data-side="end" d="m12 15 6-6" />
   </svg>
 );
 
@@ -94,7 +96,7 @@ export interface NavigationMenuIconProps extends Omit<BaseNavigationMenu.Icon.Pr
   className?: string | undefined;
 }
 
-/** A chevron that turns over while the item's panel is open. Pass children to draw your own. */
+/** A chevron whose strokes turn while the item's panel is open. Pass children to draw your own. */
 export function NavigationMenuIcon({
   className,
   children = chevron,

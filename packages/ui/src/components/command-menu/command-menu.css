@@ -4,8 +4,8 @@
 
 /*
  * Command Menu, an Owsem component (Kinetic, Surface): a glass panel over a dimmed page, with one
- * highlight gliding through the results. No glow, and no open or close animation: a palette opened
- * from the keyboard many times a day appears and goes at once. Only Glide moves.
+ * highlight gliding through the results. No glow. It opens and closes as a Dialog does: a fade and
+ * a small grow from its middle, 250 ms in and 200 ms out.
  *
  * It reads the theme tokens only (TK-9). The popup renders in the body, so set them on :root, or
  * on the Popup itself through className or style.
@@ -38,7 +38,7 @@
     text-align: start;
     white-space: nowrap;
     cursor: pointer;
-    transition: color 0.15s ease;
+    transition: color 0.15s var(--ow-ease-out);
   }
 
   .ow-command-menu__trigger--sm {
@@ -85,6 +85,11 @@
     position: fixed;
     inset: 0;
     background-color: var(--ow-backdrop);
+    transition: opacity 250ms var(--ow-ease-out);
+  }
+
+  .ow-command-menu__backdrop:where([data-starting-style], [data-ending-style]) {
+    opacity: 0;
   }
 
   /* The popup hangs from the upper part of the screen, so its top stays put as results change. */
@@ -126,6 +131,22 @@
     color: var(--ow-fg);
     font-size: 14px;
     line-height: 1.25;
+    /* Its own layer, so it lands without a pixel jump (NF-8). */
+    will-change: transform;
+    transition:
+      opacity 250ms var(--ow-ease-out),
+      transform 250ms var(--ow-ease-out);
+  }
+
+  .ow-command-menu__popup:where([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+    transform: scale(calc(1 - 0.04 * var(--ow-motion-scale)));
+  }
+
+  /* Leaving is quicker than arriving. */
+  .ow-command-menu__popup:where([data-ending-style]),
+  .ow-command-menu__backdrop:where([data-ending-style]) {
+    transition-duration: 200ms;
   }
 
   .ow-command-menu__popup--sm {
@@ -314,7 +335,7 @@
 
   /* A group's name in capitals, as Sidebar's group label, in line with its items' icons. */
   .ow-command-menu__group-label {
-    padding-block: 0.75em 0.375em;
+    padding-block: 0.6em 0.3em;
     padding-inline: calc((var(--_n) + 0.125) / 0.857 * 1em - 1px);
     color: var(--ow-muted);
     font-size: 0.857em;
@@ -324,7 +345,7 @@
   }
 
   .ow-command-menu__group:first-child > .ow-command-menu__group-label {
-    padding-block-start: 0.375em;
+    padding-block-start: 0.3em;
   }
 
   .ow-command-menu__item {
@@ -344,7 +365,7 @@
   }
 
   .ow-command-menu__item[data-disabled] {
-    color: var(--ow-muted);
+    opacity: 0.5;
   }
 
   .ow-command-menu__item-icon {
@@ -404,6 +425,13 @@
     font-size: 0.857em;
   }
 
+  /* FR-20: it fades, without growing. */
+  @media (prefers-reduced-motion: reduce) {
+    .ow-command-menu__popup:where([data-starting-style], [data-ending-style]) {
+      transform: none;
+    }
+  }
+
   /* DP-8: backgrounds and shadows drop out; outlines and system colors carry the shapes. */
   @media (forced-colors: active) {
     .ow-command-menu__field,
@@ -413,6 +441,7 @@
 
     .ow-command-menu__item[data-disabled] {
       color: GrayText;
+      opacity: 1;
     }
 
     .ow-command-menu__trigger:focus-visible,

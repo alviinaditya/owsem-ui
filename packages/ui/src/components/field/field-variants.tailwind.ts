@@ -6,7 +6,7 @@ const root = ["flex flex-col gap-[0.5em] min-w-0 text-[0.875rem] leading-[1.25]"
 
 const label = [
   "text-(color:--ow-fg) font-medium",
-  "data-disabled:cursor-not-allowed data-disabled:opacity-45",
+  "data-disabled:cursor-not-allowed data-disabled:opacity-50",
 ];
 
 // An error next to it takes its place, so nothing below moves; :where keeps it at one class.

@@ -58,11 +58,15 @@
     outline-offset: 2px;
   }
 
-  /* The tint deepens on hover and while open. */
+  /* The tint deepens on hover and while open, unless the field only shows its value. */
   @media (hover: hover) and (pointer: fine) {
-    .ow-select__trigger:where(:hover):where(:not([data-disabled], :disabled)) {
+    .ow-select__trigger:where(:hover):where(:not([data-disabled], :disabled, [data-readonly])) {
       --_bg: color-mix(in oklab, var(--ow-fg) 9%, transparent);
     }
+  }
+
+  .ow-select__trigger:where([data-readonly]) {
+    cursor: default;
   }
 
   .ow-select__trigger:where([data-popup-open]) {
@@ -107,7 +111,7 @@
 
   .ow-select__trigger:where([data-disabled]) {
     cursor: not-allowed;
-    opacity: 0.45;
+    opacity: 0.5;
   }
 
   /* It takes the room there is, so the icon stays at the end; empty, it still holds a line. */

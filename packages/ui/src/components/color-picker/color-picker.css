@@ -513,6 +513,8 @@
   }
 
   .ow-color-picker__popup > .ow-color-picker {
+    /* Raised, like every popup, not the quieter panel of a picker on the page. */
+    --_bg: var(--ow-raised-bg);
     --_panel-shadow: var(--ow-popup-shadow);
   }
 

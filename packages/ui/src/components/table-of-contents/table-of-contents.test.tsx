@@ -5,6 +5,7 @@ import { commands, userEvent } from "vitest/browser";
 import { render } from "vitest-browser-react";
 import { axeReport } from "../../../test/a11y.ts";
 import { measureIdle, settle } from "../../../test/raf-counter.ts";
+import { run } from "../../../test/toc-run.ts";
 import { TableOfContents } from "./index";
 
 const root = document.documentElement;
@@ -80,7 +81,7 @@ function Page(props: Parameters<typeof Toc>[0] & { children?: ReactNode }) {
 async function mount(ui: ReactNode = <Page />) {
   const screen = await render(ui);
   const nav = screen.container.querySelector<HTMLElement>(".ow-table-of-contents");
-  const marker = screen.container.querySelector<HTMLElement>(".ow-table-of-contents__marker");
+  const marker = screen.container.querySelector<SVGPathElement>(".ow-table-of-contents__marker");
   const article = screen.container.querySelector<HTMLElement>(".article");
   if (!nav || !marker || !article) throw new Error("not mounted");
   const link = (name: string) => {
@@ -98,11 +99,14 @@ async function mount(ui: ReactNode = <Page />) {
   return { screen, nav, marker, article, link, current, scroll };
 }
 
-/** Whether the marker sits beside the link: as tall as it, at the same height (within 0.5px). */
-function beside(marker: Element, link: Element): boolean {
-  const a = marker.getBoundingClientRect();
-  const b = link.getBoundingClientRect();
-  return Math.abs(a.top - b.top) <= 0.5 && Math.abs(a.bottom - b.bottom) <= 0.5;
+/**
+ * Whether the marker's run is beside the link: from its top to its bottom, less a bend's half at
+ * an end where the rail bends to the next level (7px at most).
+ */
+function beside(marker: SVGPathElement, link: Element, slack = 7.5): boolean {
+  const { start, end } = run(marker);
+  const rect = link.getBoundingClientRect();
+  return Math.abs(start.y - rect.top) <= slack && Math.abs(end.y - rect.bottom) <= slack;
 }
 
 const transitions = (el: Element) =>
@@ -111,6 +115,8 @@ const transitions = (el: Element) =>
     .filter((a): a is CSSTransition => a instanceof CSSTransition)
     .map((a) => a.transitionProperty)
     .sort();
+
+const TRAVEL = ["stroke-dasharray", "stroke-dashoffset"];
 
 /** Resolves a color (e.g. `var(--ow-accent)`) to its computed rgb() inside `scope`. */
 function resolveColor(value: string, scope: Element = document.body): string {
@@ -123,7 +129,7 @@ function resolveColor(value: string, scope: Element = document.body): string {
 }
 
 describe("Table of Contents", () => {
-  test("renders a labelled nav of nested lists, with a decorative marker", async () => {
+  test("renders a labelled nav of nested lists, with a decorative rail and marker", async () => {
     const { nav, marker, link } = await mount();
     expect(nav.tagName).toBe("NAV");
     expect(nav.getAttribute("aria-label")).toBe("On this page");
@@ -132,7 +138,11 @@ describe("Table of Contents", () => {
     expect(link("Installation").dataset.depth).toBe("1");
     expect(link("npm").dataset.depth).toBe("2");
     expect(link("npm").closest("li")?.className).toBe("ow-table-of-contents__item");
-    expect(marker.getAttribute("aria-hidden")).toBe("true");
+    const rail = nav.querySelector("svg");
+    expect(rail?.getAttribute("aria-hidden")).toBe("true");
+    expect(rail?.getAttribute("focusable")).toBe("false");
+    expect(rail?.contains(marker)).toBe(true);
+    expect(marker.getAttribute("data-slot")).toBe("table-of-contents-marker");
   });
 
   test("passes className, style, render, and ref through (FR-2, FR-5)", async () => {
@@ -256,34 +266,83 @@ describe("Table of Contents", () => {
     expect(page.current()).toEqual(["API:location:true"]);
   });
 
-  test("places the marker beside the current link, on the rail, without sliding in", async () => {
+  test("places the marker beside the current link, on the rail, without travelling in", async () => {
     const { nav, marker, link, scroll } = await mount();
     scroll(120);
     await expect.poll(() => marker.hasAttribute("data-visible")).toBe(true);
     expect(beside(marker, link("Installation"))).toBe(true);
     expect(transitions(marker)).toEqual([]);
     expect(getComputedStyle(marker).opacity).toBe("1");
-    // On the rail: the top list's inline start, nested links included.
-    const rail = nav.querySelector("ul")?.getBoundingClientRect();
-    expect(marker.getBoundingClientRect().left).toBeCloseTo(rail?.left ?? Number.NaN, 1);
-    expect(marker.getBoundingClientRect().width).toBeCloseTo(2, 1);
+    // On the rail: the top list's inline start, the marker's 2px just inside it.
+    const edge = nav.querySelector("ul")?.getBoundingClientRect().left ?? Number.NaN;
+    expect(run(marker).start.x).toBeCloseTo(edge + 1, 1);
+    expect(getComputedStyle(marker).strokeWidth).toBe("2px");
   });
 
-  test("slides to the next current link by translate and scale, and rests on it", async () => {
+  test("travels to the next current link along the path, and rests on it", async () => {
     const { nav, marker, link, scroll } = await mount();
     scroll(120);
     await expect.poll(() => beside(marker, link("Installation"))).toBe(true);
+    const before = run(marker).from;
     scroll(450);
-    // Both links are one line tall: it only moves.
-    await expect.poll(() => transitions(marker)).toEqual(["translate"]);
+    await expect.poll(() => transitions(marker)).toEqual(TRAVEL);
     expect(beside(marker, link("npm"))).toBe(false);
     await expect.poll(() => beside(marker, link("npm")), { timeout: 2000 }).toBe(true);
     await settle();
-    // At rest it is laid out on the link's box, untransformed.
-    const style = getComputedStyle(marker);
-    expect([style.translate, style.scale]).toEqual(["0px", "1"]);
-    const rail = nav.querySelector("ul")?.getBoundingClientRect();
-    expect(marker.getBoundingClientRect().left).toBeCloseTo(rail?.left ?? Number.NaN, 1);
+    expect(run(marker).from).toBeGreaterThan(before);
+    // The sub-section is one level in: its run is 12px in from the section's.
+    const edge = nav.querySelector("ul")?.getBoundingClientRect().left ?? Number.NaN;
+    expect(run(marker).start.x).toBeCloseTo(edge + 13, 1);
+    expect(run(marker).end.x).toBeCloseTo(edge + 13, 1);
+  });
+
+  test("the rail bends where the level changes, and the marker travels through the bend", async () => {
+    const { nav, marker, link, scroll } = await mount();
+    const rail = nav.querySelector<SVGPathElement>(".ow-table-of-contents__line");
+    if (!rail) throw new Error("no rail");
+    // Installation, npm, Usage, API are on levels 1, 2, 1, 1: two bends.
+    await expect.poll(() => rail.getAttribute("d")?.match(/C/g)?.length).toBe(2);
+    expect(marker.getAttribute("d")).toBe(rail.getAttribute("d"));
+    // The rail is a continuous run beside each link, so its x only changes inside a bend.
+    const x = (n: number) => rail.getPointAtLength(n).x;
+    const total = rail.getTotalLength();
+    const xs = Array.from({ length: 41 }, (_, i) => x((total * i) / 40));
+    expect(new Set(xs.map((n) => Math.round(n * 10) / 10)).size).toBeGreaterThan(2);
+    expect(Math.max(...xs) - Math.min(...xs)).toBeCloseTo(12, 0);
+    // The bend lies between the two links' runs.
+    scroll(120);
+    await expect.poll(() => beside(marker, link("Installation"))).toBe(true);
+    const first = run(marker);
+    scroll(450);
+    await expect.poll(() => beside(marker, link("npm")), { timeout: 2000 }).toBe(true);
+    await settle();
+    const second = run(marker);
+    expect(first.from + first.len).toBeLessThan(second.from);
+    // Midway between them, the rail is neither on the first run's x nor on the second's.
+    const mid = x((first.from + first.len + second.from) / 2);
+    expect(mid).toBeGreaterThan(Math.min(x(first.from), x(second.from)) + 1);
+    expect(mid).toBeLessThan(Math.max(x(first.from), x(second.from)) - 1);
+  });
+
+  test("the marker travels by steps along the path, not by a jump", async () => {
+    const { marker, link, scroll } = await mount();
+    scroll(120);
+    await expect.poll(() => beside(marker, link("Installation"))).toBe(true);
+    scroll(450);
+    await expect.poll(() => transitions(marker)).toEqual(TRAVEL);
+    // Mid-travel the run is where the spring has it, between the two links' runs.
+    const seen = new Set<number>();
+    await expect
+      .poll(
+        () => {
+          const { from } = run(marker);
+          seen.add(Math.round(from));
+          return seen.size;
+        },
+        { timeout: 2000 },
+      )
+      .toBeGreaterThan(3);
+    await expect.poll(() => beside(marker, link("npm")), { timeout: 2000 }).toBe(true);
   });
 
   test("is as tall as a link whose title wraps onto two lines", async () => {
@@ -295,12 +354,69 @@ describe("Table of Contents", () => {
     expect(lines).toBeGreaterThan(2);
     scroll(120);
     await expect.poll(() => beside(marker, install)).toBe(true);
+    // The run is its whole height, less the bend at its foot.
+    expect(run(marker).len).toBeGreaterThan(
+      2 * Number.parseFloat(getComputedStyle(install).lineHeight),
+    );
     scroll(450);
-    // A shorter link: it shrinks on the way.
-    await expect.poll(() => transitions(marker)).toEqual(["scale", "translate"]);
+    // A shorter run: its length changes on the way.
+    await expect.poll(() => transitions(marker)).toEqual(TRAVEL);
     await expect.poll(() => beside(marker, link("npm")), { timeout: 2000 }).toBe(true);
     scroll(120);
     await expect.poll(() => beside(marker, install), { timeout: 2000 }).toBe(true);
+  });
+
+  test("a list with no nesting is a straight rail", async () => {
+    const flat = await render(
+      <div style={{ display: "flex", gap: 24, alignItems: "start" }}>
+        <Article style={{ blockSize: 300 }} />
+        <TableOfContents.Root aria-label="Flat" style={{ inlineSize: 200 }}>
+          <TableOfContents.List>
+            <TableOfContents.Item>
+              <TableOfContents.Link href="#install">Installation</TableOfContents.Link>
+            </TableOfContents.Item>
+            <TableOfContents.Item>
+              <TableOfContents.Link href="#usage">Usage</TableOfContents.Link>
+            </TableOfContents.Item>
+          </TableOfContents.List>
+        </TableOfContents.Root>
+      </div>,
+    );
+    const rail = flat.container.querySelector<SVGPathElement>(".ow-table-of-contents__line");
+    await expect.poll(() => rail?.getAttribute("d")).toMatch(/^M[\d.]+ [\d.]+V[\d.]+V[\d.]+$/);
+  });
+
+  test("three levels bend down twice, and back up in one bend", async () => {
+    const deep = await render(
+      <div style={{ display: "flex", gap: 24, alignItems: "start" }}>
+        <Article style={{ blockSize: 300 }} />
+        <TableOfContents.Root aria-label="Deep" style={{ inlineSize: 200 }}>
+          <TableOfContents.List>
+            <TableOfContents.Item>
+              <TableOfContents.Link href="#install">Installation</TableOfContents.Link>
+              <TableOfContents.List>
+                <TableOfContents.Item>
+                  <TableOfContents.Link href="#npm">npm</TableOfContents.Link>
+                  <TableOfContents.List>
+                    <TableOfContents.Item>
+                      <TableOfContents.Link href="#usage">Usage</TableOfContents.Link>
+                    </TableOfContents.Item>
+                  </TableOfContents.List>
+                </TableOfContents.Item>
+              </TableOfContents.List>
+            </TableOfContents.Item>
+            <TableOfContents.Item>
+              <TableOfContents.Link href="#api">API</TableOfContents.Link>
+            </TableOfContents.Item>
+          </TableOfContents.List>
+        </TableOfContents.Root>
+      </div>,
+    );
+    const path = deep.container.querySelector<SVGPathElement>(".ow-table-of-contents__line");
+    // Down two levels, and back up in one bend.
+    await expect.poll(() => path?.getAttribute("d")?.match(/C/g)?.length).toBe(3);
+    const xs = (path?.getAttribute("d") ?? "").match(/V[\d.]+/g)?.length;
+    expect(xs).toBe(4);
   });
 
   test("fades out when no link is current, and fades in again where it lands", async () => {
@@ -376,13 +492,9 @@ describe("Table of Contents", () => {
         resolveColor("var(--ow-fg)"),
       );
       expect(getComputedStyle(link("Usage")).color, theme).toBe(resolveColor("var(--ow-muted)"));
-      expect(getComputedStyle(marker).backgroundColor, theme).toBe(
-        resolveColor("var(--ow-accent)"),
-      );
-      const list = nav.querySelector("ul");
-      expect(list && getComputedStyle(list).borderInlineStartColor, theme).toBe(
-        resolveColor("var(--ow-line)"),
-      );
+      expect(getComputedStyle(marker).stroke, theme).toBe(resolveColor("var(--ow-accent)"));
+      const line = nav.querySelector(".ow-table-of-contents__line");
+      expect(line && getComputedStyle(line).stroke, theme).toBe(resolveColor("var(--ow-line)"));
     }
   });
 
@@ -392,7 +504,7 @@ describe("Table of Contents", () => {
     );
     scroll(120);
     await expect.poll(() => marker.hasAttribute("data-visible")).toBe(true);
-    expect(getComputedStyle(marker).backgroundColor).toBe("rgb(255, 0, 0)");
+    expect(getComputedStyle(marker).stroke).toBe("rgb(255, 0, 0)");
     expect(nav.parentElement && resolveColor("var(--ow-accent)", nav.parentElement)).not.toBe(
       "rgb(255, 0, 0)",
     );
@@ -420,8 +532,8 @@ describe("Table of Contents", () => {
     await expect.poll(() => marker.hasAttribute("data-visible")).toBe(true);
     const list = nav.querySelector("ul");
     if (!list) throw new Error("no list");
-    expect(getComputedStyle(list).borderRightWidth).toBe("1px");
-    expect(marker.getBoundingClientRect().right).toBeCloseTo(list.getBoundingClientRect().right, 1);
+    // The marker's 2px are just inside the list's right edge.
+    expect(run(marker).start.x).toBeCloseTo(list.getBoundingClientRect().right - 1, 1);
   });
 
   test("with reduced motion, the marker jumps to the next link (FR-20)", async () => {
@@ -445,7 +557,7 @@ describe("Table of Contents", () => {
     probe.style.color = "Highlight";
     document.body.append(probe);
     onTestFinished(() => probe.remove());
-    expect(getComputedStyle(marker).backgroundColor).toBe(getComputedStyle(probe).color);
+    expect(getComputedStyle(marker).stroke).toBe(getComputedStyle(probe).color);
     expect(getComputedStyle(link("Installation")).textDecorationLine).toBe("underline");
   });
 
@@ -456,6 +568,10 @@ describe("Table of Contents", () => {
     const { nav, marker, scroll } = await mount();
     scroll(450);
     await expect.poll(() => marker.hasAttribute("data-visible")).toBe(true);
+    // As in Tree Rail Nav's test: axe cannot read text contrast under an SVG, so the drawing is out
+    // of it; the marker's and the rail's colors are checked above.
+    const svg = nav.querySelector<SVGElement>("svg");
+    if (svg) svg.style.display = "none";
     for (const theme of ["light", "dark"]) {
       root.dataset.theme = theme;
       await settle();
@@ -485,6 +601,7 @@ test("every part has its data-slot", async () => {
     "table-of-contents-list",
     "table-of-contents-item",
     "table-of-contents-link",
+    "table-of-contents-rail",
     "table-of-contents-marker",
   ]);
 });
@@ -511,5 +628,5 @@ test("tracking survives another data-slot on a link and a list", async () => {
   expect(link("Installation").getAttribute("aria-current")).toBe("location");
   // The marker rests on the list's rail: the list's start edge, not the link's.
   const rail = (nav.querySelector("ul") as HTMLElement).getBoundingClientRect();
-  expect(Math.abs(marker.getBoundingClientRect().left - rail.left)).toBeLessThan(1.5);
+  expect(run(marker).start.x).toBeCloseTo(rail.left + 1, 1);
 });

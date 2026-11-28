@@ -3,7 +3,7 @@ import { demo, pageTests, pick, visit } from "./example-page.ts";
 
 pageTests("table-of-contents", {
   examples: ["Default", "Flat", "Recolor"],
-  parts: ["Root", "List", "Item", "Link", "Marker"],
+  parts: ["Root", "List", "Item", "Link", "Rail", "Marker"],
   specimen: ".ow-table-of-contents__marker[data-visible]",
 });
 
@@ -67,7 +67,7 @@ test("the Flat example has one level, and Recolor sets the marker's token on the
   const marker = demo(page).locator(".ow-table-of-contents__marker");
   await expect(marker).toHaveAttribute("data-visible", "");
   const [recolored, plain] = await Promise.all([
-    marker.evaluate((el) => getComputedStyle(el).backgroundColor),
+    marker.evaluate((el) => getComputedStyle(el).stroke),
     (async () => {
       await pick(page, "Default");
       await demo(page)
@@ -77,7 +77,7 @@ test("the Flat example has one level, and Recolor sets the marker's token on the
         });
       return demo(page)
         .locator(".ow-table-of-contents__marker")
-        .evaluate((el) => getComputedStyle(el).backgroundColor);
+        .evaluate((el) => getComputedStyle(el).stroke);
     })(),
   ]);
   expect(recolored).not.toBe(plain);

@@ -2,8 +2,8 @@
 // The Tailwind CSS v4 twin of table-of-contents-variants.ts: the same exports, with the styles as
 // utility classes. Needs tokens.css.
 
-// A rail along the list, and a marker that slides along it to the current link. The rail and the
-// marker read Tree Rail Nav's tokens for its rail and trail, so both navs read as one.
+// A rail that bends with the levels, and a marker that travels along it to the current link. The
+// rail and the marker read Tree Rail Nav's tokens for its rail and trail, so both navs read as one.
 const root = [
   "[--_fg:var(--ow-fg)] [--_muted:var(--ow-muted)] [--_rail:var(--ow-line)]",
   "[--_marker:var(--ow-accent)] [--_focus:var(--ow-focus)] [--_radius:var(--ow-radius)]",
@@ -12,10 +12,9 @@ const root = [
 
 const list = [
   "m-0 p-0 list-none",
-  // The rail, a 1px line at the top list's inline start. The 2px marker covers it, and the 1px
-  // padding keeps a link's focus ring clear of the marker.
-  "data-[depth=1]:ps-[1px] data-[depth=1]:border-s data-[depth=1]:border-s-(color:--_rail)",
-  // Sub-sections indent; the marker stays on the one rail.
+  // The 2px marker covers the rail, and the 2px of padding keeps a link's focus ring clear of it.
+  "data-[depth=1]:ps-[2px]",
+  // Sub-sections indent, and the rail bends in with them.
   "[[data-slot=table-of-contents-list]_&]:ps-[12px]",
 ];
 
@@ -31,30 +30,44 @@ const link = [
   "forced-colors:data-current:underline forced-colors:focus-visible:outline-[Highlight]",
 ];
 
-// Beside the current link: the tracker lays it out on that link's box (--_x, --_y, --_h), and slides
-// it there from where it was by --_dx, --_dy, and --_sy, which end at none.
+// The rail and the marker: one SVG over the nav, drawn by the tracker. It is mirrored for right to
+// left, as the tracker measures x from the inline start.
+const rail = [
+  "absolute inset-0 w-full h-full overflow-visible pointer-events-none",
+  "rtl:[scale:-1_1] [&_path]:fill-none",
+];
+
+const line = ["stroke-(color:--_rail) stroke-1"];
+
+// The marker is the same path, dashed to show only the current link's run: the tracker sets where
+// the dash starts (--_from) and how long it is (--_len), and it travels along the path as those
+// transition.
 const marker = [
-  // Box.
-  "absolute top-[var(--_y,0px)] left-[var(--_x,0px)] w-[2px] h-[var(--_h,0px)]",
-  "bg-(color:--_marker) opacity-0 pointer-events-none data-visible:opacity-100",
-  "[translate:var(--_dx,0)_var(--_dy,0)] [scale:1_var(--_sy,1)]",
-  // Motion. Its own layer, so it lands without a pixel jump.
-  "will-change-[translate,scale] transition-[translate,scale,opacity]",
+  "stroke-(color:--_marker) stroke-2",
+  "[stroke-dasharray:var(--_len,0px)_100000px] [stroke-dashoffset:calc(var(--_from,0px)*-1)]",
+  "opacity-0 data-visible:opacity-100",
+  // Motion.
+  "transition-[stroke-dasharray,stroke-dashoffset,opacity]",
   "duration-[var(--ow-spring-travel-duration),var(--ow-spring-travel-duration),150ms]",
   "ease-[var(--ow-spring-travel),var(--ow-spring-travel),ease]",
-  // The first placement and a resize: no transition.
+  // The first placement and a redraw: no transition.
   "data-instant:[transition:none]",
-  // Media. The marker jumps to the next link, and only fades in and out; in forced colors it is the
-  // system highlight.
+  // Media. The marker jumps to the next link, and only fades in and out; in forced colors the rail
+  // is the text color and the marker the system highlight.
   "motion-reduce:transition-[opacity] motion-reduce:duration-150 motion-reduce:ease-[ease]",
-  "forced-colors:forced-color-adjust-none forced-colors:bg-[Highlight]",
+  "forced-colors:forced-color-adjust-none forced-colors:stroke-[Highlight]",
 ];
 
 /** The classes of the parts. Item has no look of its own. */
-export const tableOfContentsSlots: Record<"root" | "list" | "item" | "link" | "marker", string> = {
+export const tableOfContentsSlots: Record<
+  "root" | "list" | "item" | "link" | "rail" | "line" | "marker",
+  string
+> = {
   root: root.join(" "),
   list: list.join(" "),
   item: "",
   link: link.join(" "),
+  rail: rail.join(" "),
+  line: [...line, "forced-colors:stroke-[CanvasText]"].join(" "),
   marker: marker.join(" "),
 };

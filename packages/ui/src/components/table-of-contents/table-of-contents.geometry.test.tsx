@@ -3,6 +3,7 @@ import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { commands } from "vitest/browser";
 import { render } from "vitest-browser-react";
 import { TOL } from "../../../test/geometry.ts";
+import { run } from "../../../test/toc-run.ts";
 import { TableOfContents } from "./index";
 
 const block = (height: number) => ({ blockSize: height, margin: 0 }) satisfies CSSProperties;
@@ -51,7 +52,7 @@ describe.each(["ltr", "rtl"] as const)("Table of Contents geometry, %s", (dir) =
   beforeAll(() => commands.setReducedMotion("reduce"));
   afterAll(() => commands.setReducedMotion("no-preference"));
 
-  test("the marker covers the rail and is as tall as the current link, wrapped or not", async () => {
+  test("the marker's run is beside the current link, on the rail, wrapped or not", async () => {
     const { get, links } = await mount(dir);
     const [install, recolor] = links;
     const article = get(".article");
@@ -61,23 +62,25 @@ describe.each(["ltr", "rtl"] as const)("Table of Contents geometry, %s", (dir) =
     // The nested title wraps onto two lines.
     const line = Number.parseFloat(getComputedStyle(recolor).lineHeight);
     expect(recolor.getBoundingClientRect().height).toBeGreaterThan(2 * line);
-    for (const [top, link] of [
-      [120, install],
-      [450, recolor],
+    for (const [top, link, indent] of [
+      [120, install, 0],
+      [450, recolor, 12],
     ] as const) {
       article.scrollTop = top;
       // WebKit can hold back the scroll event of a test frame it throttles; this test is about
       // where the marker lands, so the event is sent here.
       article.dispatchEvent(new Event("scroll"));
       await expect.poll(() => link.hasAttribute("data-current")).toBe(true);
-      const m = marker.getBoundingClientRect();
+      // The run ends where the rail bends to the other level, up to 7px short of the link's edge.
       const l = link.getBoundingClientRect();
-      expect(Math.abs(m.top - l.top)).toBeLessThanOrEqual(TOL);
-      expect(Math.abs(m.bottom - l.bottom)).toBeLessThanOrEqual(TOL);
-      expect(m.width).toBeCloseTo(2, 1);
-      // Its outer edge is the rail's: the top list's inline start.
-      const edge = dir === "ltr" ? m.left - rail.left : rail.right - m.right;
-      expect(Math.abs(edge)).toBeLessThanOrEqual(TOL);
+      const { start, end } = run(marker);
+      expect(Math.abs(start.y - l.top)).toBeLessThanOrEqual(TOL + (link === recolor ? 7 : 0));
+      expect(Math.abs(end.y - l.bottom)).toBeLessThanOrEqual(TOL + (link === install ? 7 : 0));
+      expect(getComputedStyle(marker).strokeWidth).toBe("2px");
+      // Its outer edge is the rail's, the top list's inline start, moved in with the level.
+      const edge = dir === "ltr" ? start.x - 1 - rail.left : rail.right - (start.x + 1);
+      expect(Math.abs(edge - indent)).toBeLessThanOrEqual(TOL);
+      expect(Math.abs(end.x - start.x)).toBeLessThanOrEqual(TOL);
     }
   });
 

@@ -16,6 +16,7 @@ import {
   setMedia,
   tailwindParity,
 } from "./parity";
+import { run as markerRun } from "./toc-run";
 
 // Table of Contents in Tailwind CSS v4 (src/tailwind/table-of-contents) against
 // table-of-contents.css.
@@ -36,8 +37,11 @@ const props = [
   "overflowWrap",
   "forcedColorAdjust",
   "paddingInlineStart",
-  "borderInlineStartWidth",
-  "borderInlineStartColor",
+  "fill",
+  "stroke",
+  "strokeWidth",
+  "strokeDasharray",
+  "strokeDashoffset",
 ];
 
 type Kit = typeof CssToc;
@@ -229,7 +233,7 @@ describe("a marker in Tailwind CSS v4 moves", () => {
     return el;
   };
 
-  test("it lands on the current link with the same box, and slides to the next", async () => {
+  test("it lands on the current link's run with the same points, and travels to the next", async () => {
     const screen = await tw.mount(cases, { names: ["before the marker is placed"] });
     const boxes: Record<string, number[]> = {};
     for (const side of ["css", "tw"] as const) {
@@ -250,25 +254,30 @@ describe("a marker in Tailwind CSS v4 moves", () => {
           const el = root.querySelector("[data-current]");
           expect(el?.textContent).toBe(name === "first" ? "Installation" : "Recoloring");
         });
-        // The slide ends on the link's box.
+        // The travel ends on the link's run: from its top to its bottom, less a bend's half.
         await vi.waitFor(
           () => {
-            const m = marker(root).getBoundingClientRect();
+            const { start, end } = markerRun(marker(root));
             const l = (root.querySelector("[data-current]") as Element).getBoundingClientRect();
-            expect(Math.abs(m.top - l.top)).toBeLessThan(0.5);
-            expect(Math.abs(m.bottom - l.bottom)).toBeLessThan(0.5);
+            expect(Math.abs(start.y - l.top)).toBeLessThan(7.5);
+            expect(Math.abs(end.y - l.bottom)).toBeLessThan(7.5);
           },
           { timeout: 3000 },
         );
-        const m = marker(root).getBoundingClientRect();
-        boxes[`${side} ${name}`] = [m.x - origin.x, m.y - origin.y, m.width, m.height].map(
-          (n) => Math.round(n * 100) / 100,
-        );
+        await vi.waitFor(() => expect(marker(root).getAnimations()).toEqual([]), { timeout: 3000 });
+        const { start, end } = markerRun(marker(root));
+        boxes[`${side} ${name}`] = [
+          start.x - origin.x,
+          start.y - origin.y,
+          end.x - origin.x,
+          end.y - origin.y,
+        ].map((n) => Math.round(n * 100) / 100);
       }
     }
     expect(boxes["tw first"]).toEqual(boxes["css first"]);
     expect(boxes["tw second"]).toEqual(boxes["css second"]);
-    expect(boxes["tw second"]?.[2]).toBe(2);
+    // The sub-section's run is one level in from the section's.
+    expect((boxes["tw second"]?.[0] ?? 0) - (boxes["tw first"]?.[0] ?? 0)).toBe(12);
   });
 
   test("the rendered tree has no ow- class", async () => {

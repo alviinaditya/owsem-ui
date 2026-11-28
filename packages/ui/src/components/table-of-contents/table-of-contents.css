@@ -1,9 +1,10 @@
 @layer owsem.tokens, owsem.components;
 
 /*
- * Table of Contents (tracker.ts finds the section being read), an Owsem component (Kinetic): a
- * rail along the list, and a marker that slides along it to the current link. The rail and the
- * marker read Tree Rail Nav's tokens for its rail and trail, so both navs read as one.
+ * Table of Contents (tracker.ts finds the section being read and draws the rail), an Owsem
+ * component (Kinetic): a rail that bends with the levels, and a marker that travels along it to
+ * the current link. The rail and the marker read Tree Rail Nav's tokens for its rail and trail, so
+ * both navs read as one.
  */
 @layer owsem.components {
   .ow-table-of-contents {
@@ -25,14 +26,12 @@
     list-style: none;
   }
 
-  /* The rail, a 1px line at the top list's inline start. The 2px marker covers it, and the 1px
-   * padding keeps a link's focus ring clear of the marker. */
+  /* The 2px marker covers the rail, and the 2px of padding keeps a link's focus ring clear of it. */
   .ow-table-of-contents__list[data-depth="1"] {
-    padding-inline-start: 1px;
-    border-inline-start: 1px solid var(--_rail);
+    padding-inline-start: 2px;
   }
 
-  /* Sub-sections indent; the marker stays on the one rail. */
+  /* Sub-sections indent, and the rail bends in with them. */
   .ow-table-of-contents__list .ow-table-of-contents__list {
     padding-inline-start: 12px;
   }
@@ -63,28 +62,45 @@
     outline-offset: -2px;
   }
 
+  /* The rail and the marker: one SVG over the nav, drawn by tracker.ts. */
+  .ow-table-of-contents__rail {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  /* The script measures x from the inline start; right to left, the whole SVG is mirrored. */
+  [dir="rtl"] .ow-table-of-contents__rail,
+  .ow-table-of-contents__rail:dir(rtl) {
+    scale: -1 1;
+  }
+
+  .ow-table-of-contents__rail path {
+    fill: none;
+  }
+
+  .ow-table-of-contents__line {
+    stroke: var(--_rail);
+    stroke-width: 1;
+  }
+
   /*
-   * The marker, beside the current link: tracker.ts lays it out on that link's box (--_x, --_y,
-   * --_h), and slides it there from where it was by --_dx, --_dy, and --_sy, which end at none.
+   * The marker is the same path, dashed to show only the current link's run: tracker.ts sets where
+   * the dash starts (--_from) and how long it is (--_len), and it travels along the path, bends
+   * included, as those transition.
    */
   .ow-table-of-contents__marker {
-    position: absolute;
-    /* biome-ignore-start lint/nursery/useLogicalProperties: the script measures physical edges */
-    top: var(--_y, 0px);
-    left: var(--_x, 0px);
-    width: 2px;
-    height: var(--_h, 0px);
-    /* biome-ignore-end lint/nursery/useLogicalProperties: the script measures physical edges */
-    background-color: var(--_marker);
+    stroke: var(--_marker);
+    stroke-width: 2;
+    stroke-dasharray: var(--_len, 0px) 100000px;
+    stroke-dashoffset: calc(var(--_from, 0px) * -1);
     opacity: 0;
-    pointer-events: none;
-    translate: var(--_dx, 0) var(--_dy, 0);
-    scale: 1 var(--_sy, 1);
-    /* Its own layer, so it lands without a pixel jump (NF-8). */
-    will-change: translate, scale;
     transition:
-      translate var(--_travel),
-      scale var(--_travel),
+      stroke-dasharray var(--_travel),
+      stroke-dashoffset var(--_travel),
       opacity 150ms ease;
   }
 
@@ -92,7 +108,7 @@
     opacity: 1;
   }
 
-  /* The first placement and a resize: no transition. */
+  /* The first placement and a redraw: no transition. */
   .ow-table-of-contents__marker[data-instant] {
     transition: none;
   }
@@ -114,9 +130,13 @@
       outline-color: Highlight;
     }
 
+    .ow-table-of-contents__line {
+      stroke: CanvasText;
+    }
+
     .ow-table-of-contents__marker {
       forced-color-adjust: none;
-      background-color: Highlight;
+      stroke: Highlight;
     }
   }
 }

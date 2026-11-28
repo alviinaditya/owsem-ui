@@ -213,8 +213,8 @@ export const tableOfContentsDefinition = defineComponent({
       id: "default",
       title: { id: "Dasar", en: "Default" },
       description: {
-        id: "Daftar bagian dengan sub-bagian bersarang; penanda meluncur ke bagian yang sedang dibaca.",
-        en: "A list of sections with nested sub-sections; a marker slides to the section being read.",
+        id: "Daftar bagian dengan sub-bagian bersarang; rail menikung mengikuti tingkatnya, dan penanda meluncur di atasnya ke bagian yang sedang dibaca.",
+        en: "A list of sections with nested sub-sections; the rail bends with the levels, and a marker travels along it to the section being read.",
       },
       uses: ["TableOfContents"],
       demo: (lang) => <Demo lang={lang} />,
@@ -290,8 +290,8 @@ export const tableOfContentsDefinition = defineComponent({
       name: "Root",
       selector: ".ow-table-of-contents",
       note: {
-        id: "nav yang melacak bagian yang sedang dibaca dan memuat penandanya. Token tema yang dipasang di sini hanya berlaku untuknya.",
-        en: "The nav: it tracks the section being read and holds the marker. Theme tokens set here apply to it alone.",
+        id: "nav yang melacak bagian yang sedang dibaca dan menggambar rail serta penandanya. Token tema yang dipasang di sini hanya berlaku untuknya.",
+        en: "The nav: it tracks the section being read and draws the rail and the marker. Theme tokens set here apply to it alone.",
       },
       tokens: {
         "--ow-accent": "--_marker",
@@ -306,8 +306,8 @@ export const tableOfContentsDefinition = defineComponent({
       name: "List",
       selector: ".ow-table-of-contents__list",
       note: {
-        id: "Daftar bagian. List teratas menggambar rail; list bersarang menjorok ke dalam.",
-        en: "A list of sections. The top List draws the rail; a nested one indents.",
+        id: "Daftar bagian. List bersarang, di dalam Item, menjorok ke dalam, dan rail menikung masuk bersamanya.",
+        en: "A list of sections. A nested List, inside an Item, indents, and the rail bends in with it.",
       },
     },
     {
@@ -327,11 +327,19 @@ export const tableOfContentsDefinition = defineComponent({
       },
     },
     {
+      name: "Rail",
+      selector: ".ow-table-of-contents__rail",
+      note: {
+        id: "Satu SVG di atas nav, digambar Root: satu path melewati semua link, dengan tikungan di tempat tingkatnya berubah.",
+        en: "One SVG over the nav, drawn by Root: a single path through the links, with a bend where the level changes.",
+      },
+    },
+    {
       name: "Marker",
       selector: ".ow-table-of-contents__marker",
       note: {
-        id: "Digambar oleh Root di atas rail, setinggi link yang aktif, dan meluncur ke link berikutnya.",
-        en: "Drawn by Root on the rail, as tall as the current link, and slides to the next one.",
+        id: "Garis aksen 2px di atas rail, sepanjang bagian rail di samping link yang aktif; berjalan di sepanjang rail, melewati tikungannya, ke link berikutnya.",
+        en: "The 2px accent stroke on the rail, along the current link's part of it; it travels along the rail, bends included, to the next link.",
       },
     },
   ],

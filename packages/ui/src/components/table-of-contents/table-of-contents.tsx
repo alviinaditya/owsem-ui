@@ -29,8 +29,8 @@ export interface TableOfContentsRootProps extends Omit<ComponentProps<"nav">, "c
 }
 
 /**
- * The table of contents: a `<nav>` that tracks the section being read and holds the marker. Its
- * links' targets are found by id; the current link gets `aria-current="location"`.
+ * The table of contents: a `<nav>` that tracks the section being read and draws the rail and the
+ * marker. Its links' targets are found by id; the current link gets `aria-current="location"`.
  */
 export function TableOfContentsRoot({
   className,
@@ -39,12 +39,12 @@ export function TableOfContentsRoot({
   ...props
 }: TableOfContentsRootProps): ReactElement {
   const root = useRef<HTMLElement | null>(null);
-  const marker = useRef<HTMLSpanElement>(null);
+  const rail = useRef<SVGSVGElement>(null);
   const merged = useMergedRefs(root, ref);
 
   useBeforePaint(() => {
-    if (!root.current || !marker.current) return;
-    const tracker = createTracker(root.current, marker.current);
+    if (!root.current || !rail.current) return;
+    const tracker = createTracker(root.current, rail.current);
     return () => tracker.destroy();
   }, []);
 
@@ -56,11 +56,12 @@ export function TableOfContentsRoot({
       className={cn(tableOfContentsSlots.root, className)}
     >
       {children}
-      <span
-        ref={marker}
-        data-slot="table-of-contents-marker"
-        className={tableOfContentsSlots.marker}
+      <svg
+        ref={rail}
+        data-slot="table-of-contents-rail"
+        className={tableOfContentsSlots.rail}
         aria-hidden="true"
+        focusable="false"
       />
     </nav>
   );
@@ -70,7 +71,7 @@ export interface TableOfContentsListProps extends Omit<ComponentProps<"ul">, "cl
   className?: string | undefined;
 }
 
-/** A list of sections. The top one draws the rail; a nested one, inside an Item, indents. */
+/** A list of sections. A nested one, inside an Item, indents, and the rail bends in with it. */
 export function TableOfContentsList({
   className,
   children,

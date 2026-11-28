@@ -8,20 +8,34 @@
  *   since a short last section never reaches the line. Until a target crosses it, none is.
  * - A clicked link stays current until the visitor scrolls by themselves: a wheel, a touch, or a
  *   scroll key.
- * - The marker rests where layout puts the current link's box on the rail, untransformed, and
- *   slides there from where it was by `translate` and `scale` through CSS transitions that end at
- *   none (FLIP, as Toggle Group's thumb). Its first placement is instant.
+ * - The rail is one SVG path through the links: a vertical run beside each link, at its level's x,
+ *   and where two links change level a bend from one x to the other, the same S-curve as Tree Rail
+ *   Nav's branches, spanning the end of one link and the start of the next. It is redrawn when the
+ *   nav or its content changes size. Right to left, x is measured from the right and the SVG is
+ *   mirrored in CSS.
+ * - The marker is a second path, the same one, dashed so that only the current link's run shows. It
+ *   moves by the dash's start and length through CSS transitions, so it travels along the path,
+ *   bends included. Its first placement, and a redraw, are instant.
  * - Everything runs from scroll, resize, and mutation events: no frames while idle.
  */
+
+import { tableOfContentsSlots } from "./table-of-contents-variants";
 
 export interface Tracker {
   destroy(): void;
 }
 
-interface Box {
+/** Where a link's run lies along the path: its arc length from the start, and its length. */
+interface Run {
+  from: number;
+  len: number;
+}
+
+interface Link {
+  el: HTMLElement;
   x: number;
-  y: number;
-  h: number;
+  top: number;
+  bottom: number;
 }
 
 /** The reading line, as a share of the scroll area's height from its top. */
@@ -30,13 +44,47 @@ const SCROLL_KEYS = new Set(["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home
 // The parts are found by their data-slot, never by class.
 const LINK = '[data-slot="table-of-contents-link"]';
 const RAIL = '[data-slot="table-of-contents-list"][data-depth="1"]';
+const NS = "http://www.w3.org/2000/svg";
+/** The tallest a bend is: it spans the end of one link and the start of the next, half in each. */
+const BEND = 14;
 
 const px = (n: number) => `${n}px`;
-const same = (a: Box, b: Box) =>
-  Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y), Math.abs(a.h - b.h)) < 0.01;
+const round = (n: number) => Math.round(n * 100) / 100;
+const same = (a: Run, b: Run) => Math.abs(a.from - b.from) < 0.01 && Math.abs(a.len - b.len) < 0.01;
 
-/** Wires tracking and the marker to `root`, the nav that holds the links. */
-export function createTracker(root: HTMLElement, marker: HTMLElement): Tracker {
+// The S-curve of Tree Rail Nav's branches (curve() in tree-rail.ts).
+const curve = (x0: number, y0: number, x1: number, y1: number) => {
+  const k = (y1 - y0) / 2;
+  return `C${x0} ${round(y0 + k)} ${x1} ${round(y1 - k)} ${x1} ${y1}`;
+};
+
+/** The length of that curve, by 32 chords. */
+function curveLength(x0: number, y0: number, x1: number, y1: number): number {
+  const k = (y1 - y0) / 2;
+  let length = 0;
+  let lx = x0;
+  let ly = y0;
+  for (let i = 1; i <= 32; i++) {
+    const t = i / 32;
+    const u = 1 - t;
+    const [a, b, c, d] = [u * u * u, 3 * u * u * t, 3 * u * t * t, t * t * t];
+    const x = (a + b) * x0 + (c + d) * x1;
+    const y = a * y0 + b * (y0 + k) + c * (y1 - k) + d * y1;
+    length += Math.hypot(x - lx, y - ly);
+    lx = x;
+    ly = y;
+  }
+  return length;
+}
+
+function svgPath(svg: SVGSVGElement, attrs: Record<string, string>): SVGPathElement {
+  const path = document.createElementNS(NS, "path");
+  for (const [name, value] of Object.entries(attrs)) path.setAttribute(name, value);
+  return svg.appendChild(path);
+}
+
+/** Wires tracking and the rail to `root`, the nav that holds the links, and its `svg`. */
+export function createTracker(root: HTMLElement, svg: SVGSVGElement): Tracker {
   const doc = root.ownerDocument;
   const win = doc.defaultView ?? window;
   let links: HTMLElement[] = [];
@@ -45,9 +93,19 @@ export function createTracker(root: HTMLElement, marker: HTMLElement): Tracker {
   let bound: HTMLElement | Window | null = null;
   let current: HTMLElement | null = null;
   let pinned: HTMLElement | null = null;
-  // The link the marker is beside, and its box; null while hidden.
+  // The marker's paths; the markup stays out of React so redraws never re-render.
+  svg.replaceChildren();
+  const line = svgPath(svg, { class: tableOfContentsSlots.line });
+  const marker = svgPath(svg, {
+    class: tableOfContentsSlots.marker,
+    "data-slot": "table-of-contents-marker",
+  });
+  // The path of the rail, and each link's run on it.
+  let runs = new Map<HTMLElement, Run>();
+  let drawn = "";
+  // The link the marker is on, and its run; null while hidden.
   let on: HTMLElement | null = null;
-  let last: Box | null = null;
+  let last: Run | null = null;
   let placed = false;
 
   const targetOf = (link: Element): HTMLElement | null => {
@@ -107,62 +165,117 @@ export function createTracker(root: HTMLElement, marker: HTMLElement): Tracker {
     };
   }
 
-  /** Where the marker rests beside `link`: on the rail at its list's inline start, as tall as it. */
-  function boxOf(link: HTMLElement): Box | null {
-    const rect = link.getBoundingClientRect();
-    if (!rect.height) return null;
-    const list = link.closest<HTMLElement>(RAIL) ?? link;
-    const rail = local(list.getBoundingClientRect());
-    const own = local(rect);
-    const rtl = getComputedStyle(list).direction === "rtl";
-    return {
-      x: rtl ? rail.right - marker.offsetWidth : rail.left,
-      y: own.top,
-      h: own.height,
-    };
+  /**
+   * Draws the rail through the links and finds each link's run on it. A link's x is its list's
+   * inline start edge, moved in by the link's indent; where two links differ in x, a bend takes
+   * the end of the first and the start of the second. Returns whether the path changed.
+   */
+  function measure(): boolean {
+    const rtl = getComputedStyle(root).direction === "rtl";
+    const width = root.clientWidth;
+    // The path's x grows from the inline start, so that right to left the SVG only mirrors.
+    const inline = (r: { left: number; right: number }) => (rtl ? width - r.right : r.left);
+    // The path is the 1px rail's centre; the marker is wider, and moved over so that the rail is
+    // its outer edge.
+    const railHalf = (Number.parseFloat(getComputedStyle(line).strokeWidth) || 1) / 2;
+    const markHalf = (Number.parseFloat(getComputedStyle(marker).strokeWidth) || 2) / 2;
+    const starts = new Map<Element, number>();
+    const boxes: {
+      el: HTMLElement;
+      rail: Element | null;
+      start: number;
+      top: number;
+      h: number;
+    }[] = [];
+    for (const el of links) {
+      const rect = el.getBoundingClientRect();
+      if (!rect.height) continue;
+      const own = local(rect);
+      const rail = el.closest(RAIL);
+      const start = inline(own);
+      boxes.push({ el, rail, start, top: own.top, h: own.height });
+      if (rail) starts.set(rail, Math.min(starts.get(rail) ?? start, start));
+    }
+    const items: Link[] = boxes.map(({ el, rail, start, top, h }) => {
+      const edge = rail ? inline(local(rail.getBoundingClientRect())) : start;
+      const indent = rail ? start - (starts.get(rail) ?? start) : 0;
+      return { el, x: round(edge + indent + railHalf), top: round(top), bottom: round(top + h) };
+    });
+
+    const next = new Map<HTMLElement, Run>();
+    let d = "";
+    let length = 0;
+    let y = 0;
+    for (const [i, item] of items.entries()) {
+      const after = items[i + 1];
+      if (i === 0) {
+        d = `M${item.x} ${item.top}`;
+        y = item.top;
+      } else if (y < item.top) {
+        // The way down to a link on the same level as the one above it.
+        d += `V${item.top}`;
+        length += item.top - y;
+        y = item.top;
+      }
+      const from = length;
+      const bend = after && after.x !== item.x;
+      const span = bend
+        ? Math.min(BEND, (item.bottom - item.top) / 2, (after.bottom - after.top) / 2)
+        : 0;
+      // The run ends where its bend begins: half of it above the two links' shared edge.
+      const end = bend
+        ? Math.max(y, (item.bottom + after.top) / 2 - span / 2)
+        : Math.max(y, item.bottom);
+      d += `V${round(end)}`;
+      length += end - y;
+      y = end;
+      next.set(item.el, { from, len: length - from });
+      if (bend) {
+        const to = round(end + span);
+        d += curve(item.x, round(end), after.x, to);
+        length += curveLength(item.x, round(end), after.x, to);
+        y = to;
+      }
+    }
+    const changed = d !== drawn;
+    drawn = d;
+    runs = next;
+    line.setAttribute("d", d);
+    marker.setAttribute("d", d);
+    marker.setAttribute("transform", `translate(${markHalf - railHalf} 0)`);
+    return changed;
   }
 
-  /** Transforms the marker, laid out at `box`, about its centre to look like `look`. */
-  function draw(box: Box, look: Box): void {
-    const style = marker.style;
-    style.setProperty("--_dx", px(look.x - box.x));
-    style.setProperty("--_dy", px(look.y + look.h / 2 - (box.y + box.h / 2)));
-    style.setProperty("--_sy", String(look.h / box.h));
-  }
-
-  function place(): void {
-    const to = current && boxOf(current);
-    if (!current || !to) {
+  /** Puts the marker on the current link's run; `snap` skips the travel. */
+  function place(snap = false): void {
+    const run = current ? runs.get(current) : undefined;
+    if (!current || !run) {
       on = null;
       last = null;
       marker.removeAttribute("data-visible");
       return;
     }
-    if (current === on && last && same(to, last)) return;
-    // From one link to the next, it slides from wherever it is now, mid-flight included.
-    let from: Box | null = null;
-    if (current !== on && on !== null) {
-      const now = local(marker.getBoundingClientRect());
-      from = { x: now.left, y: now.top, h: now.height };
-    }
-    marker.setAttribute("data-instant", "");
-    marker.style.setProperty("--_x", px(to.x));
-    marker.style.setProperty("--_y", px(to.y));
-    marker.style.setProperty("--_h", px(to.h));
-    draw(to, from ?? to);
+    if (current === on && last && same(run, last)) return;
+    // From one link to the next it travels along the path from wherever it is now, mid-flight
+    // included: a transition that starts mid-way continues from the value it has.
+    const instant = snap || on === null || !placed;
+    if (instant) marker.setAttribute("data-instant", "");
     if (!placed) marker.setAttribute("data-visible", "");
-    // Commit the start before transitions come back.
-    void marker.offsetWidth;
-    marker.removeAttribute("data-instant");
-    if (from) draw(to, to);
+    marker.style.setProperty("--_from", px(run.from));
+    marker.style.setProperty("--_len", px(run.len));
+    if (instant) {
+      // Commit the start before transitions come back.
+      void getComputedStyle(marker).strokeDashoffset;
+      marker.removeAttribute("data-instant");
+    }
     // Shown again after no link was current: it fades in where it is.
     marker.setAttribute("data-visible", "");
     placed = true;
     on = current;
-    last = to;
+    last = run;
   }
 
-  function update(): void {
+  function update(snap = false): void {
     if (pinned && !links.includes(pinned)) pinned = null;
     const next = pinned ?? reading();
     if (next === current) return;
@@ -171,7 +284,7 @@ export function createTracker(root: HTMLElement, marker: HTMLElement): Tracker {
     current = next;
     current?.setAttribute("aria-current", "location");
     current?.setAttribute("data-current", "");
-    place();
+    place(snap);
   }
 
   const onScroll = () => update();
@@ -191,10 +304,14 @@ export function createTracker(root: HTMLElement, marker: HTMLElement): Tracker {
     update();
   };
 
-  const sizes = new ResizeObserver(() => {
-    update();
-    place();
-  });
+  /** Redraws the rail, and puts the marker where its link now is. */
+  function redraw(): void {
+    const snap = measure();
+    update(snap);
+    place(snap);
+  }
+
+  const sizes = new ResizeObserver(redraw);
 
   function unbind(): void {
     bound?.removeEventListener("scroll", onScroll);
@@ -227,8 +344,7 @@ export function createTracker(root: HTMLElement, marker: HTMLElement): Tracker {
 
   const mutations = new MutationObserver(() => {
     collect();
-    update();
-    place();
+    redraw();
   });
   mutations.observe(root, {
     subtree: true,
@@ -241,6 +357,7 @@ export function createTracker(root: HTMLElement, marker: HTMLElement): Tracker {
   win.addEventListener("keydown", release);
   win.addEventListener("resize", onScroll);
   collect();
+  measure();
   update();
 
   return {
@@ -254,7 +371,7 @@ export function createTracker(root: HTMLElement, marker: HTMLElement): Tracker {
       current?.removeAttribute("aria-current");
       current?.removeAttribute("data-current");
       marker.removeAttribute("data-visible");
-      marker.removeAttribute("style");
+      svg.replaceChildren();
     },
   };
 }

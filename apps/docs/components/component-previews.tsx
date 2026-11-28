@@ -676,11 +676,23 @@ function TableOfContentsPreview({ t }: { t: Text }) {
       </div>
       <TableOfContents.Root aria-label={t.contents}>
         <TableOfContents.List>
-          {t.sections.map((section, i) => (
-            <TableOfContents.Item key={section}>
-              <TableOfContents.Link href={`#${id}-${i}`}>{section}</TableOfContents.Link>
-            </TableOfContents.Item>
-          ))}
+          {t.sections.map((section, i) => {
+            // The third section sits under the second, so the rail bends.
+            if (i === 2) return null;
+            const sub = i === 1 ? t.sections[2] : undefined;
+            return (
+              <TableOfContents.Item key={section}>
+                <TableOfContents.Link href={`#${id}-${i}`}>{section}</TableOfContents.Link>
+                {sub ? (
+                  <TableOfContents.List>
+                    <TableOfContents.Item>
+                      <TableOfContents.Link href={`#${id}-2`}>{sub}</TableOfContents.Link>
+                    </TableOfContents.Item>
+                  </TableOfContents.List>
+                ) : null}
+              </TableOfContents.Item>
+            );
+          })}
         </TableOfContents.List>
       </TableOfContents.Root>
     </div>

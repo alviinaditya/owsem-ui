@@ -39,8 +39,8 @@ export function OnThisPage() {
 ```
 
 Table of Contents mendaftar bagian-bagian sebuah halaman, dengan sub-bagian bersarang, dan menandai
-yang sedang dibaca. Rail membentang di sepanjang daftar, dan penanda meluncur di atasnya ke bagian
-yang aktif. Setiap link menamai bagiannya lewat hash: `href="#install"` menunjuk elemen dengan id itu,
+yang sedang dibaca. Rail membentang di sepanjang daftar dan menikung masuk di setiap tingkat bersarang, dan penanda
+berjalan di atasnya ke bagian yang aktif. Setiap link menamai bagiannya lewat hash: `href="#install"` menunjuk elemen dengan id itu,
 jadi beri setiap bagian sebuah id, seperti yang dilakukan pipeline Markdown dengan slug judul.
 
 Bagian yang aktif adalah yang terakhir yang tepi atasnya sudah melewati garis baca, 30% dari atas area
@@ -63,16 +63,17 @@ sticky menutupi bagian yang dituju browser: atur `scroll-padding-top` di area gu
 
 <InspectButton />
 
-Empat bagian, dan penanda yang digambar Root. Root menemukan bagian setiap link lewat id dan melacak
+Empat bagian, dan rail serta penanda yang digambar Root. Root menemukan bagian setiap link lewat id dan melacak
 gulir dengan event: tidak ada yang berjalan selagi halaman diam.
 
 | Bagian | Elemen | Catatan |
 | --- | --- | --- |
-| <Part name="Root" /> | `nav.ow-table-of-contents` | Melacak bagian yang sedang dibaca dan memuat penanda. Beri nama dengan `aria-label` |
-| <Part name="List" /> | `ul.ow-table-of-contents__list` | `data-depth` mulai dari 1. List teratas menggambar rail; yang bersarang, di dalam Item, menjorok |
+| <Part name="Root" /> | `nav.ow-table-of-contents` | Melacak bagian yang sedang dibaca dan menggambar rail serta penanda. Beri nama dengan `aria-label` |
+| <Part name="List" /> | `ul.ow-table-of-contents__list` | `data-depth` mulai dari 1. List bersarang, di dalam Item, menjorok, dan rail menikung masuk bersamanya |
 | <Part name="Item" /> | `li.ow-table-of-contents__item` | Satu bagian: Link-nya, dan List untuk sub-bagiannya |
 | <Part name="Link" /> | `a.ow-table-of-contents__link` | `href="#id"`; yang aktif punya `aria-current="location"` dan `data-current` |
-| <Part name="Marker" /> | `span.ow-table-of-contents__marker` | Digambar Root di atas rail (`aria-hidden`), setinggi link yang aktif; `data-visible` selama ada link aktif |
+| <Part name="Rail" /> | `svg.ow-table-of-contents__rail` | Digambar Root di atas nav (`aria-hidden`): satu path melewati semua link, dengan tikungan di tempat tingkatnya berubah |
+| <Part name="Marker" /> | `path.ow-table-of-contents__marker` | Garis aksen 2px di path itu, di bagian milik link yang aktif; `data-visible` selama ada link aktif |
 
 ## Referensi API [#api]
 
@@ -117,7 +118,9 @@ apa adanya, begitu juga ref.
 | Kelas CSS | Bagian |
 | --- | --- |
 | `ow-table-of-contents` | Root |
-| `ow-table-of-contents__marker` | Penanda |
+| `ow-table-of-contents__rail` | SVG rail |
+| `ow-table-of-contents__line` | Path rail |
+| `ow-table-of-contents__marker` | Path penanda |
 | `ow-table-of-contents__list` | List |
 | `ow-table-of-contents__item` | Item |
 | `ow-table-of-contents__link` | Link |
@@ -131,7 +134,7 @@ apa adanya, begitu juga ref.
 
 - Link yang aktif punya `aria-current="location"`, jadi screen reader menyebutnya sebagai lokasi saat
   ini. Server tidak merender satu pun, jadi tidak ada yang salah diumumkan sebelum pelacakan mulai.
-- Penanda `aria-hidden`; strukturnya datang dari daftar.
+- Rail dan penanda `aria-hidden` dan tidak bisa difokus; strukturnya datang dari daftar.
 - Fokus keyboard menampilkan cincin di dalam link, jadi container yang bergulir tidak pernah
   memotongnya.
 - Di mode forced colors, penanda memakai `Highlight` dan link aktif digarisbawahi. Dari kanan ke kiri,
@@ -162,6 +165,8 @@ Di mode isolated, nilainya ada di root setiap nav, jadi atur di nav-nya sendiri,
 
 ## Gerak [#motion]
 
-Penanda meluncur ke link berikutnya dengan spring travel. Saat diam, ia diletakkan di kotak link itu
-sendiri, tanpa transform, jadi sejajar dengan link di zoom berapa pun. Dengan
-`prefers-reduced-motion`, penanda melompat ke link berikutnya dan hanya memudar masuk dan keluar.
+Penanda berjalan ke link berikutnya dengan spring travel, di sepanjang rail dan melewati
+tikungannya, jadi dari sebuah bagian ke sub-bagiannya ia mengikuti lengkungan. Ia adalah garis putus
+pada path rail itu sendiri, jadi sejajar dengan link di zoom berapa pun, dan rail digambar ulang
+setiap kali nav atau isinya berubah ukuran, tanpa gerak. Dengan `prefers-reduced-motion`, penanda
+melompat ke link berikutnya dan hanya memudar masuk dan keluar.

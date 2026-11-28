@@ -39,7 +39,8 @@ export function OnThisPage() {
 ```
 
 Table of Contents lists a page's sections, with their sub-sections nested, and marks the one being
-read. A rail runs along the list, and a marker slides along it to the current section. Each link
+read. A rail runs along the list and bends in with each nested level, and a marker travels along it
+to the current section. Each link
 names its section by hash: `href="#install"` points at the element with that id, so give every
 section an id, as Markdown pipelines with heading slugs do.
 
@@ -62,16 +63,17 @@ section the browser scrolls to: set `scroll-padding-top` on the scroll area, as 
 
 <InspectButton />
 
-Four parts, and the marker that Root draws. Root finds each link's section by id and tracks scrolling
+Four parts, and the rail and the marker that Root draws. Root finds each link's section by id and tracks scrolling
 with events: nothing runs while the page is still.
 
 | Part | Element | Notes |
 | --- | --- | --- |
-| <Part name="Root" /> | `nav.ow-table-of-contents` | Tracks the section being read and holds the marker. Name it with `aria-label` |
-| <Part name="List" /> | `ul.ow-table-of-contents__list` | `data-depth` from 1. The top List draws the rail; a nested one, inside an Item, indents |
+| <Part name="Root" /> | `nav.ow-table-of-contents` | Tracks the section being read and draws the rail and the marker. Name it with `aria-label` |
+| <Part name="List" /> | `ul.ow-table-of-contents__list` | `data-depth` from 1. A nested List, inside an Item, indents, and the rail bends in with it |
 | <Part name="Item" /> | `li.ow-table-of-contents__item` | One section: its Link, and a List for its sub-sections |
 | <Part name="Link" /> | `a.ow-table-of-contents__link` | `href="#id"`; the current one has `aria-current="location"` and `data-current` |
-| <Part name="Marker" /> | `span.ow-table-of-contents__marker` | Drawn by Root on the rail (`aria-hidden`), as tall as the current link; `data-visible` while a link is current |
+| <Part name="Rail" /> | `svg.ow-table-of-contents__rail` | Drawn by Root over the nav (`aria-hidden`): one path through the links, with a bend where the level changes |
+| <Part name="Marker" /> | `path.ow-table-of-contents__marker` | The 2px accent stroke on that path, along the current link's part of it; `data-visible` while a link is current |
 
 ## API reference [#api]
 
@@ -116,7 +118,9 @@ are, and so do refs.
 | CSS class | Part |
 | --- | --- |
 | `ow-table-of-contents` | Root |
-| `ow-table-of-contents__marker` | The marker |
+| `ow-table-of-contents__rail` | The rail's SVG |
+| `ow-table-of-contents__line` | The rail's path |
+| `ow-table-of-contents__marker` | The marker's path |
 | `ow-table-of-contents__list` | List |
 | `ow-table-of-contents__item` | Item |
 | `ow-table-of-contents__link` | Link |
@@ -130,7 +134,7 @@ are, and so do refs.
 
 - The current link has `aria-current="location"`, so a screen reader names it as the current location.
   The server renders none, so nothing wrong is announced before tracking starts.
-- The marker is `aria-hidden`; the structure comes from the lists.
+- The rail and the marker are `aria-hidden` and not focusable; the structure comes from the lists.
 - Keyboard focus shows a ring inside the link, so a scrolling container never cuts it.
 - In forced colors, the marker uses `Highlight` and the current link is underlined. Right to left,
   the rail and the marker are on the right.
@@ -160,6 +164,8 @@ In isolated mode the values sit on each nav's root, so set yours on the nav itse
 
 ## Motion [#motion]
 
-The marker slides to the next link on the travel spring. At rest it is laid out on the link's own box,
-untransformed, so it lines up with the link at any zoom. With `prefers-reduced-motion`, the marker
-jumps to the next link and only fades in and out.
+The marker travels to the next link on the travel spring, along the rail and through its bends, so
+moving from a section to a sub-section follows the curve. It is a dash on the rail's own path, so it
+lines up with the links at any zoom, and the rail is redrawn whenever the nav or its content changes
+size, with no travel. With `prefers-reduced-motion`, the marker jumps to the next link and only
+fades in and out.

@@ -1814,8 +1814,8 @@ import { Table } from "owsem-ui/owsem"; // or "@/components/owsem/table"
 
 ### Table of Contents
 
-An "On this page" list that marks the section being read: a rail along the list, and a marker that
-slides along it to the current link. Registry item: `table-of-contents`.
+An "On this page" list that marks the section being read: a rail that bends in with each nested
+level, and a marker that travels along it to the current link. Registry item: `table-of-contents`.
 
 ```tsx
 import { TableOfContents } from "owsem-ui/owsem"; // or "@/components/owsem/table-of-contents"

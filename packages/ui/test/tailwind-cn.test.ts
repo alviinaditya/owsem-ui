@@ -520,10 +520,10 @@ describe("a user's className wins over Color Picker and Table of Contents", () =
       "text-(color:--_muted)",
     ]);
     gone(cn(tableOfContentsSlots.list, "p-2 m-2"), ["m-0", "p-0"]);
-    gone(cn(tableOfContentsSlots.marker, "w-1 opacity-100 bg-red-500"), [
-      "w-[2px]",
+    gone(cn(tableOfContentsSlots.marker, "stroke-1 opacity-100 stroke-red-500"), [
+      "stroke-2",
       "opacity-0",
-      "bg-(color:--_marker)",
+      "stroke-(color:--_marker)",
     ]);
   });
 });

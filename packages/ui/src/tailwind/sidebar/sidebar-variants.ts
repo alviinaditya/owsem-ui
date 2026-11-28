@@ -28,6 +28,14 @@ const root = [
   "data-[state=closed]:[translate:calc(var(--_dir)_*_100%_*_var(--ow-motion-scale))_0]",
   "data-[state=closed]:opacity-0 data-[state=closed]:invisible",
   "data-[state=open]:delay-0",
+  // space="release": closed, a negative end margin as wide as the box (--_w, measured by sidebar.tsx)
+  // gives the room to the page over the same 300ms. data-ready comes after the first measure.
+  "data-[space=release]:data-[state=closed]:me-[calc(var(--_w,0px)*-1)]",
+  "data-[space=release]:data-ready:transition-[translate,opacity,visibility,margin-inline-end]",
+  "data-[space=release]:data-ready:duration-[300ms,200ms,0s,300ms]",
+  "data-[space=release]:data-ready:ease-[var(--ow-ease-drawer),var(--ow-ease-out),linear,var(--ow-ease-drawer)]",
+  "data-[space=release]:data-ready:delay-[0s,0s,300ms,0s]",
+  "data-[space=release]:data-ready:data-[state=open]:delay-0",
   // The drawer: over the page, from the inline start.
   "data-mobile:fixed data-mobile:inset-y-0 data-mobile:start-0",
   "data-mobile:max-w-[calc(100%_-_48px)] data-mobile:rounded-se-(--ow-radius)",
@@ -46,6 +54,12 @@ const root = [
   "motion-reduce:transition-[opacity,visibility] motion-reduce:duration-[200ms,0s]",
   "motion-reduce:ease-[var(--ow-ease-out),linear] motion-reduce:delay-[0s,200ms]",
   "motion-reduce:data-[state=open]:delay-0",
+  // The room changes at once: no margin in the list.
+  "motion-reduce:data-[space=release]:data-ready:transition-[opacity,visibility]",
+  "motion-reduce:data-[space=release]:data-ready:duration-[200ms,0s]",
+  "motion-reduce:data-[space=release]:data-ready:ease-[var(--ow-ease-out),linear]",
+  "motion-reduce:data-[space=release]:data-ready:delay-[0s,200ms]",
+  "motion-reduce:data-[space=release]:data-ready:data-[state=open]:delay-0",
   "motion-reduce:data-mobile:transition-[opacity] motion-reduce:data-mobile:duration-200",
   "motion-reduce:data-mobile:ease-(--ow-ease-out) motion-reduce:data-mobile:delay-0",
   "motion-reduce:data-mobile:data-ending-style:duration-200",

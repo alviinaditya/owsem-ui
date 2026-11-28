@@ -256,6 +256,90 @@ describe("Sidebar", () => {
     expect(getComputedStyle(nav).visibility).toBe("visible");
   });
 
+  describe.each(["ltr", "rtl"] as const)('space="release", %s', (dir) => {
+    function Page({ space }: { space?: "keep" | "release" }) {
+      return (
+        <div dir={dir} style={{ inlineSize: 600 }}>
+          <Sidebar.Provider shortcut={false} style={{ inlineSize: 600 }}>
+            <Sidebar.Root space={space} style={{ inlineSize: 200 }}>
+              <Sidebar.Content>
+                <Sidebar.List>
+                  <Sidebar.Item href="/a">A long label that would rewrap if squashed</Sidebar.Item>
+                </Sidebar.List>
+              </Sidebar.Content>
+            </Sidebar.Root>
+            <main data-testid="page" style={{ flex: "1 1 0", minInlineSize: 0 }}>
+              <Sidebar.Trigger />
+            </main>
+          </Sidebar.Provider>
+        </div>
+      );
+    }
+    const page = () => (q('[data-testid="page"]') as HTMLElement).getBoundingClientRect().width;
+    const settle = async () => {
+      await expect
+        .poll(() => (q(".ow-sidebar") as HTMLElement).hasAttribute("data-ready"))
+        .toBe(true);
+      await expect.poll(() => document.getAnimations().length).toBe(0);
+    };
+
+    test("closed, the page takes the sidebar's width back; open, it gives it up", async () => {
+      await render(<Page space="release" />);
+      await settle();
+      const nav = q(".ow-sidebar") as HTMLElement;
+      expect(Math.round(page())).toBe(400);
+      const label = q(".ow-sidebar__label") as HTMLElement;
+      const before = label.getBoundingClientRect().height;
+      (q(".ow-sidebar__trigger") as HTMLElement).click();
+      await expect.poll(() => nav.dataset.state).toBe("closed");
+      await settle();
+      expect(Math.round(page())).toBe(600);
+      // It keeps its width and does not rewrap while it slides.
+      expect(nav.offsetWidth).toBe(200);
+      expect(label.getBoundingClientRect().height).toBe(before);
+      const trigger = q(".ow-sidebar__trigger") as HTMLElement;
+      trigger.click();
+      await expect.poll(() => nav.dataset.state).toBe("open");
+      await settle();
+      expect(Math.round(page())).toBe(400);
+    });
+
+    test("the room glides with the slide, over the same 300ms", async () => {
+      await render(<Page space="release" />);
+      await settle();
+      const nav = q(".ow-sidebar") as HTMLElement;
+      (q(".ow-sidebar__trigger") as HTMLElement).click();
+      await expect.poll(() => nav.dataset.state).toBe("closed");
+      const style = getComputedStyle(nav);
+      const names = style.transitionProperty.split(", ");
+      const at = names.indexOf("margin-inline-end");
+      expect(at).toBeGreaterThan(-1);
+      expect(style.transitionDuration.split(", ")[at]).toBe("0.3s");
+      expect(style.transitionDuration.split(", ")[names.indexOf("translate")]).toBe("0.3s");
+    });
+
+    test('"keep" leaves the box where it was', async () => {
+      await render(<Page space="keep" />);
+      (q(".ow-sidebar__trigger") as HTMLElement).click();
+      const nav = q(".ow-sidebar") as HTMLElement;
+      await expect.poll(() => nav.dataset.state).toBe("closed");
+      expect(nav.hasAttribute("data-space")).toBe(false);
+      expect(getComputedStyle(nav).marginInlineEnd).toBe("0px");
+      expect(Math.round(page())).toBe(400);
+    });
+
+    test("reduced motion: the room changes at once", async () => {
+      await commands.setReducedMotion("reduce");
+      await render(<Page space="release" />);
+      await settle();
+      const nav = q(".ow-sidebar") as HTMLElement;
+      expect(getComputedStyle(nav).transitionProperty).not.toContain("margin");
+      (q(".ow-sidebar__trigger") as HTMLElement).click();
+      await expect.poll(() => nav.dataset.state).toBe("closed");
+      expect(Math.round(page())).toBe(600);
+    });
+  });
+
   test("tokens theme the parts (TK-9)", async () => {
     root.style.setProperty("--ow-fg", "rgb(10, 20, 30)");
     root.style.setProperty("--ow-radius", "40px");

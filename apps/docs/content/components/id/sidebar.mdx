@@ -46,9 +46,9 @@ export function AppSidebar({ path }: { path: string }) {
 Sidebar adalah navigasi situs: grup baris yang tenang, latar cair dan titik untuk halaman yang dibuka,
 dan highlight tipis yang meluncur di antara baris lain saat di-hover (Glide, dari `owsem-ui/core`).
 Provider memegang status buka kedua mode, jadi `Sidebar.Trigger` bisa di mana saja di bawahnya. Saat
-ditutup di desktop, sidebar bergeser keluar dan memudar, dan kotaknya tetap sampai Anda mengambil
-ruangnya kembali: `data-sidebar-state` milik Provider memberi tahu halaman di sampingnya (lihat
-Bisa ditutup di bawah). Di bawah `mobileQuery`, ia menjadi laci modal dari sisi awal, dengan
+ditutup di desktop, sidebar bergeser keluar dan memudar, dan kotaknya tetap, kecuali Anda mengatur `space="release"` pada Root: lalu halaman di sampingnya
+mengambil ruangnya kembali (lihat Bisa ditutup di bawah). `data-sidebar-state` milik Provider juga memberi
+tahu halaman, jika Anda menatanya sendiri. Di bawah `mobileQuery`, ia menjadi laci modal dari sisi awal, dengan
 jebakan fokus, Esc, dan scrim; memilih item menutupnya.
 
 Lebarnya adalah `inline-size` milik Root (bawaan 248px): atur dengan class atau `style`. Kontennya
@@ -120,6 +120,7 @@ toggle, mobile, mobileOpen, setMobileOpen }` untuk kontrol Anda sendiri di bawah
 | --- | --- | --- | --- |
 | `aria-label` | `string` | `"Sidebar"` | Nama nav atau laci |
 | `container` | `HTMLElement \| null` | `document.body` | Tempat laci dirender di seluler |
+| `space` | `"keep" \| "release"` | `"keep"` | Yang dilakukan sidebar desktop yang tertutup pada ruangnya. `"release"` mengembalikan inline-size-nya ke halaman di sampingnya, dan mengambilnya lagi saat dibuka, seirama dengan gesernya (seketika saat gerak dikurangi). Sidebar mempertahankan lebarnya, jadi isinya tidak berubah baris. Tidak dipakai laci |
 | `render` | `ReactElement \| (props, state) => ReactElement` | | Mengganti elemen |
 
 #### Data attributes
@@ -127,6 +128,7 @@ toggle, mobile, mobileOpen, setMobileOpen }` untuk kontrol Anda sendiri di bawah
 | Data attribute | Pada | Ada saat |
 | --- | --- | --- |
 | `data-state` | Root (desktop) | Selalu; `open` atau `closed` |
+| `data-space` | Root (desktop) | `space="release"` |
 | `data-mobile` | Root | Sidebar adalah laci |
 | `data-starting-style`, `data-ending-style` | Root (laci), backdrop | Laci sedang terbuka atau tertutup |
 

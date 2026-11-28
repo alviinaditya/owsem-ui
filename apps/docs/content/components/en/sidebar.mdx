@@ -46,8 +46,8 @@ export function AppSidebar({ path }: { path: string }) {
 Sidebar is the site navigation: groups of quiet rows, a liquid background and dot for the current page, and
 a faint highlight that glides between the other rows on hover (Glide, from `owsem-ui/core`). The
 Provider holds the open state of both modes, so a `Sidebar.Trigger` can sit anywhere under it. Closed
-on desktop, the sidebar slides out and fades, and its box stays until you take the room back: the Provider's
-`data-sidebar-state` tells the page beside it (see Collapsible below).
+on desktop, the sidebar slides out and fades, and its box stays, unless you set `space="release"` on the Root: then the page beside it takes the room
+back (see Collapsible below). The Provider's `data-sidebar-state` also tells the page, if you lay it out yourself.
 Under `mobileQuery`, it becomes a modal drawer from the inline start, with a focus trap, Esc, and a
 scrim; choosing an item closes it.
 
@@ -121,6 +121,7 @@ your own under the Provider.
 | --- | --- | --- | --- |
 | `aria-label` | `string` | `"Sidebar"` | The name of the nav or drawer |
 | `container` | `HTMLElement \| null` | `document.body` | Where the drawer is rendered on mobile |
+| `space` | `"keep" \| "release"` | `"keep"` | What a closed desktop sidebar does with its room. `"release"` gives its inline size back to the page beside it, and takes it again on open, in step with the slide (at once under reduced motion). The sidebar keeps its width, so its content does not rewrap. Not used by the drawer |
 | `render` | `ReactElement \| (props, state) => ReactElement` | | Swaps the element |
 
 #### Data attributes
@@ -128,6 +129,7 @@ your own under the Provider.
 | Data attribute | On | Present when |
 | --- | --- | --- |
 | `data-state` | Root (desktop) | Always; `open` or `closed` |
+| `data-space` | Root (desktop) | `space="release"` |
 | `data-mobile` | Root | The sidebar is a drawer |
 | `data-starting-style`, `data-ending-style` | Root (drawer), backdrop | The drawer is opening or closing |
 

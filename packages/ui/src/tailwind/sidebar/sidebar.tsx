@@ -17,6 +17,7 @@ import {
   useContext,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -187,6 +188,12 @@ export interface SidebarRootProps extends Omit<useRender.ComponentProps<"nav">, 
   className?: string | undefined;
   /** Where the drawer is rendered on mobile. Default: `document.body`. */
   container?: BaseDialog.Portal.Props["container"];
+  /**
+   * What a closed desktop sidebar does with its room. `"keep"`: its box stays and the page beside it
+   * does not move. `"release"`: the page takes the inline size back while the sidebar slides out, and
+   * gives it up again on open. The mobile drawer is not affected. @default "keep"
+   */
+  space?: "keep" | "release" | undefined;
 }
 
 /**
@@ -199,6 +206,7 @@ export interface SidebarRootProps extends Omit<useRender.ComponentProps<"nav">, 
 export function SidebarRoot({
   className,
   container,
+  space = "keep",
   render,
   children,
   "aria-label": label = "Sidebar",
@@ -226,6 +234,7 @@ export function SidebarRoot({
   return (
     <DesktopRoot
       open={sidebar.open}
+      release={space === "release"}
       id={sidebar.rootId}
       className={className}
       render={render}
@@ -238,8 +247,33 @@ export function SidebarRoot({
   );
 }
 
+/**
+ * Measures the box for `release`: a percentage margin would be of the parent, not of the sidebar,
+ * and CSS cannot read its own width. The observer only fires when the width changes, never at rest.
+ */
+function useRoomVar(release: boolean): (node: HTMLElement | null) => void {
+  const [node, setNode] = useState<HTMLElement | null>(null);
+  useLayoutEffect(() => {
+    if (!node || !release) return;
+    const measure = () => node.style.setProperty("--_w", `${node.offsetWidth}px`);
+    // Measured before the first paint, and only then may the margin transition, so it never runs on load.
+    measure();
+    void node.offsetWidth;
+    node.setAttribute("data-ready", "");
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+    return () => {
+      observer.disconnect();
+      node.removeAttribute("data-ready");
+      node.style.removeProperty("--_w");
+    };
+  }, [node, release]);
+  return setNode;
+}
+
 function DesktopRoot({
   open,
+  release,
   id,
   className,
   render,
@@ -249,6 +283,7 @@ function DesktopRoot({
   children,
 }: {
   open: boolean;
+  release: boolean;
   id: string;
   className: string | undefined;
   render: SidebarRootProps["render"];
@@ -257,10 +292,11 @@ function DesktopRoot({
   rest: Record<string, unknown>;
   children: ReactNode;
 }): ReactElement {
+  const ref = useMergedRefs(useRoomVar(release), forwardedRef);
   return useRender({
     defaultTagName: "nav",
     render,
-    ref: forwardedRef,
+    ref,
     props: {
       "data-slot": "sidebar",
       id,
@@ -269,6 +305,7 @@ function DesktopRoot({
       ...(open ? undefined : { inert: true }),
       className: cn(sidebarSlots.root, className),
       "data-state": open ? "open" : "closed",
+      "data-space": release ? "release" : undefined,
       children,
     },
   });

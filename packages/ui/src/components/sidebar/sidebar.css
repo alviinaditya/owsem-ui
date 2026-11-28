@@ -3,7 +3,7 @@
 /*
  * Sidebar, an Owsem component: the site navigation. Quiet rows, a liquid background and dot for the
  * current page, and Glide's highlight between the rest. Desktop: closed, it slides out and fades
- * (translate and opacity only). Mobile: a drawer (Base UI Dialog) from the inline start. Its width is its
+ * (translate and opacity only), and with space="release" the page takes its room. Mobile: a drawer (Base UI Dialog) from the inline start. Its width is its
  * inline-size, which a class of yours sets.
  */
 @layer owsem.components {
@@ -54,6 +54,29 @@
   }
 
   .ow-sidebar:where([data-state="open"]) {
+    transition-delay: 0s;
+  }
+
+  /*
+   * space="release": closed, the box gives its inline size back to the page by a negative end margin
+   * as wide as itself, over the same 300ms as the slide. The box keeps its width, so the content does
+   * not rewrap. The width is measured into --_w (sidebar.tsx): CSS cannot read its own width, and a
+   * percentage margin is of the parent. data-ready comes after the first measure, so it never animates
+   * on load.
+   */
+  .ow-sidebar[data-space="release"]:where([data-state="closed"]) {
+    margin-inline-end: calc(-1 * var(--_w, 0px));
+  }
+
+  .ow-sidebar[data-space="release"][data-ready] {
+    transition:
+      translate 300ms var(--ow-ease-drawer),
+      opacity 200ms var(--ow-ease-out),
+      visibility 0s linear 300ms,
+      margin-inline-end 300ms var(--ow-ease-drawer);
+  }
+
+  .ow-sidebar[data-space="release"][data-ready][data-state="open"] {
     transition-delay: 0s;
   }
 
@@ -366,14 +389,17 @@
       translate: 0;
     }
 
-    .ow-sidebar {
+    /* The room changes at once: no margin in the list. */
+    .ow-sidebar,
+    .ow-sidebar[data-space="release"][data-ready] {
       transition:
         opacity 200ms var(--ow-ease-out),
         visibility 0s linear 200ms;
     }
 
     /* Only leaving waits for the fade; opening shows it at once. */
-    .ow-sidebar:where([data-state="open"]) {
+    .ow-sidebar:where([data-state="open"]),
+    .ow-sidebar[data-space="release"][data-ready][data-state="open"] {
       transition-delay: 0s;
     }
 

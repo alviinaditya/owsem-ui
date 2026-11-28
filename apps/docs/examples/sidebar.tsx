@@ -154,15 +154,7 @@ function Collapsing({ lang }: { lang: Lang }) {
       onOpenChange={setOpen}
       style={{ ...COLUMN, inlineSize: 400, overflow: "hidden", alignItems: "stretch" }}
     >
-      {/* Closed, the Root's box stays: a negative margin gives the room to the page. */}
-      <Sidebar.Root
-        aria-label={t.nav}
-        style={{
-          inlineSize: 200,
-          marginInlineStart: open ? 0 : -200,
-          transition: "margin-inline-start 300ms var(--ow-ease-drawer)",
-        }}
-      >
+      <Sidebar.Root aria-label={t.nav} space="release" style={{ inlineSize: 200 }}>
         <Sidebar.Header>
           <strong>{t.brand}</strong>
         </Sidebar.Header>
@@ -292,12 +284,7 @@ const sidebarFile = (
 ): ReturnType<typeof exampleFile> => {
   const t = TEXT[lang];
   const root = v.collapse
-    ? [
-        `  <Sidebar.Root`,
-        `    aria-label="${t.nav}"`,
-        `    style={{ inlineSize: 200, marginInlineStart: open ? 0 : -200 }}`,
-        `  >`,
-      ]
+    ? [`  <Sidebar.Root aria-label="${t.nav}" space="release">`]
     : [`  <Sidebar.Root aria-label="${t.nav}"${v.drawer ? " container={frame}" : ""}>`];
   const body = [
     ...(v.drawer ? ["<div ref={setFrame}>"] : []),
@@ -348,8 +335,8 @@ export const sidebarDefinition = defineComponent({
       id: "collapsible",
       title: { id: "Bisa ditutup", en: "Collapsible" },
       description: {
-        id: "Trigger di mana saja di bawah Provider menutup sidebar; halaman di sampingnya mengambil ruangnya (margin negatif pada Root, dari status Provider).",
-        en: "A Trigger anywhere under the Provider closes the sidebar; the page beside it takes its room (a negative margin on the Root, from the Provider's state).",
+        id: 'Trigger di mana saja di bawah Provider menutup sidebar; halaman di sampingnya mengambil ruangnya (space="release" pada Root).',
+        en: 'A Trigger anywhere under the Provider closes the sidebar; the page beside it takes its room (space="release" on the Root).',
       },
       uses: ["Sidebar"],
       demo: (lang) => <Collapsing lang={lang} />,

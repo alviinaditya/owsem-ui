@@ -65,6 +65,7 @@ const props = [
   "forcedColorAdjust",
   "insetInlineStart",
   "marginInlineStart",
+  "marginInlineEnd",
   "paddingInlineStart",
   "paddingInlineEnd",
   "maxWidth",
@@ -106,6 +107,8 @@ interface NavProps {
   many?: boolean;
   height?: number;
   closed?: boolean;
+  /** `space="release"`: the closed box gives its room back. */
+  release?: boolean;
   noIndicator?: boolean;
   rootClassName?: string;
   linkClassName?: string;
@@ -130,6 +133,7 @@ function Nav({
   many,
   height = 360,
   closed,
+  release,
   noIndicator,
   rootClassName,
   linkClassName,
@@ -146,7 +150,11 @@ function Nav({
       shortcut={false}
       {...(mobile ? { mobileQuery: "all", defaultMobileOpen: true } : {})}
     >
-      <Root className={rootClassName} style={{ blockSize: height }}>
+      <Root
+        className={rootClassName}
+        style={{ blockSize: height }}
+        {...(release ? { space: "release" as const } : {})}
+      >
         {bare ? null : (
           <Header className={headerClassName}>
             <kit.Trigger className={triggerClassName} aria-label="Toggle">
@@ -212,6 +220,8 @@ const cases: Case[] = [
   make("active and disabled", { active: "/off" }),
   make("active with a long label", { active: "/long" }),
   make("closed", { closed: true, active: "/input" }),
+  make("closed, room released", { closed: true, release: true, active: "/input" }),
+  make("open, room released", { release: true, active: "/input" }),
   make("scrolls, at the start", { many: true, height: 240, active: "/button" }),
   make("scrolls, in the middle", { many: true, height: 240, active: "/input" }),
   make("scrolls, at the end", { many: true, height: 240, active: "/more-7" }),
@@ -360,7 +370,14 @@ async function motion(names: string[], prepare = stage): Promise<void> {
 }
 
 describe("Sidebar's motion in Tailwind CSS v4", () => {
-  const names = ["active", "closed", "waiting", "plain", "scrolls, in the middle"];
+  const names = [
+    "active",
+    "closed",
+    "closed, room released",
+    "waiting",
+    "plain",
+    "scrolls, in the middle",
+  ];
 
   test("transitions and animations are the same, durations, easings, and names", {
     timeout: 60_000,

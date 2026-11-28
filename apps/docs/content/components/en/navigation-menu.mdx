@@ -33,7 +33,7 @@ export function SiteNavigation() {
           <NavigationMenu.Link href="/pricing">Pricing</NavigationMenu.Link>
         </NavigationMenu.Item>
       </NavigationMenu.List>
-      <NavigationMenu.Portal />
+      <NavigationMenu.Popup />
     </NavigationMenu.Root>
   );
 }
@@ -45,8 +45,9 @@ one box: it moves to the trigger you reach, resizes to the content it holds, and
 from the side you came from, so moving across the row reads as one motion. Links in a content are
 cards, a title and a line of text, and Glide lights the one under the pointer or the key.
 
-An empty `NavigationMenu.Portal` draws the Positioner, the Popup, and the Viewport for you; write them
-out when you want to add an Arrow or change one.
+A bare `NavigationMenu.Popup`, as above, draws its own Portal and Positioner, and the Viewport inside it,
+as Select's Popup does; an empty `NavigationMenu.Portal` does the same from the top. Write them out when
+you want to add an Arrow or change one; the written-out form works as it always did.
 
 On a phone the list wraps instead of scrolling, a tap opens a panel under it, and tapping another
 trigger swaps the panel. The panel is never wider than the window less 16px on each side, and a content
@@ -77,7 +78,7 @@ Item and Portal add no look of their own.
 | Backdrop | `div.ow-navigation-menu__backdrop` | Optional: clear, under the panel |
 | Portal | `div` | Moves the panel to the end of the body, or into `container`; empty, it draws the Positioner |
 | Positioner | `div.ow-navigation-menu__positioner` | 8px under the list, 16px inside the window, never flipped; moves between triggers |
-| <Part name="Popup" /> | `div.ow-navigation-menu__popup` | The shared panel; `data-size`, `data-instant`; empty, it draws the Viewport |
+| <Part name="Popup" /> | `div.ow-navigation-menu__popup` | The shared panel; `data-size`, `data-instant`; empty, it draws the Viewport; without a Positioner around it, a Portal and a Positioner |
 | <Part name="Arrow" /> | `div.ow-navigation-menu__arrow` | Optional, in the Popup before the Viewport; follows the open trigger |
 | <Part name="Viewport" /> | `div.ow-navigation-menu__viewport` | Clips the contents as they slide |
 

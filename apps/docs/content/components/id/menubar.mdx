@@ -33,7 +33,7 @@ export function AppMenubar() {
       </Menu.Root>
       <Menu.Root>
         <Menubar.Trigger>Edit</Menubar.Trigger>
-        {/* Portal, Positioner, dan Popup seperti di atas */}
+        {/* Popup seperti di atas */}
       </Menu.Root>
     </Menubar.Root>
   );
@@ -43,9 +43,11 @@ export function AppMenubar() {
 Menubar adalah deretan menu seperti di aplikasi desktop: Berkas, Edit, Tampilan. Bar-nya panel tenang
 seperti milik Toolbar, dan pemicunya tombol ghost yang tetap diberi tint selama menunya terbuka. Satu
 perhentian Tab masuk ke bar; tombol panah berpindah antar menu, dan setelah satu terbuka, hover juga
-memindahkannya. Setiap menu adalah Menu: satu `Menu.Root` per menu, dengan `Menubar.Trigger` dan Portal,
-Positioner, serta Popup biasa, sehingga item, highlight Glide, centang, submenu, dan shortcut-nya sama
-dengan milik Menu.
+memindahkannya. Setiap menu adalah Menu: satu `Menu.Root` per menu, dengan `Menubar.Trigger` dan sebuah Popup,
+sehingga item, highlight Glide, centang, submenu, dan shortcut-nya sama dengan milik Menu. Popup
+menggambar Portal dan Positioner sendiri, seperti milik Menu; contoh di atas menulisnya lengkap agar
+tiap menu dimulai di bawah triggernya dengan `align="start"`. `size` bar sampai ke popup menunya,
+jadi Anda tidak perlu mengulangnya di setiap Popup.
 
 ## Contoh [#examples]
 
@@ -88,7 +90,8 @@ menulis `Menu.Trigger` di tempat komponen ini memakai `Menubar.Trigger`.
 | `lg` | 48px | 40px | 16px |
 
 Pemicu mengikuti aturan `--py` milik Button di dalam padding 4px bar, sehingga sudutnya konsentris dengan
-sudut bar. `size` pada Popup sebuah Menu terpisah: atur juga bila menu harus serasi.
+sudut bar. Popup menunya, dan submenunya, ikut ukuran bar; `size` milik Menu sendiri, di Root atau
+Popup, menimpanya.
 
 ### Menubar.Trigger
 

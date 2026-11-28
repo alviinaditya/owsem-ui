@@ -21,18 +21,18 @@ export function EditMenu() {
   return (
     <Menu.Root>
       <Menu.Trigger render={<Button variant="outline" />}>Edit</Menu.Trigger>
-      <Menu.Portal>
-        <Menu.Positioner>
-          <Menu.Popup>
-            <Menu.Item onClick={cut}>Cut</Menu.Item>
-            <Menu.Item onClick={copy}>Copy</Menu.Item>
-          </Menu.Popup>
-        </Menu.Positioner>
-      </Menu.Portal>
+      <Menu.Popup>
+        <Menu.Item onClick={cut}>Cut</Menu.Item>
+        <Menu.Item onClick={copy}>Copy</Menu.Item>
+      </Menu.Popup>
     </Menu.Root>
   );
 }
 ```
+
+`Menu.Popup` draws its own Portal and Positioner, as Select's does. Write `Menu.Portal` and
+`Menu.Positioner` out to set `side`, `align`, or `sideOffset`; the written-out form works as it always
+did.
 
 Menu opens a list of actions from a button: items with icons and shortcuts, checks and choices, and
 submenus, on the raised material with the popup shadow and no edge, since it floats. Items have no
@@ -76,6 +76,14 @@ element, so in Inspect it is the box that holds the trigger and its menu.
 
 <BaseUiReference />
 
+### Menu.Root
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | The items' type scale, for the popup and its submenus' popups. In a Menubar, the bar's size |
+
 ### Menu.Positioner
 
 #### Props
@@ -91,7 +99,7 @@ element, so in Inspect it is the box that holds the trigger and its menu.
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `size` | `"sm" \| "md" \| "lg"` | `"md"` | The items' type scale |
+| `size` | `"sm" \| "md" \| "lg"` | The Root's | Overrides the Root's size for this popup |
 
 | Size | Font | Item height | Icon |
 | --- | --- | --- | --- |

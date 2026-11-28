@@ -21,19 +21,19 @@ export function SharePopover() {
   return (
     <Popover.Root>
       <Popover.Trigger render={<Button variant="outline" />}>Bagikan</Popover.Trigger>
-      <Popover.Portal>
-        <Popover.Positioner>
-          <Popover.Popup>
-            <Popover.Arrow />
-            <Popover.Title>Bagikan draf</Popover.Title>
-            <Popover.Description>Siapa pun yang punya link bisa membacanya.</Popover.Description>
-          </Popover.Popup>
-        </Popover.Positioner>
-      </Popover.Portal>
+      <Popover.Popup>
+        <Popover.Arrow />
+        <Popover.Title>Bagikan draf</Popover.Title>
+        <Popover.Description>Siapa pun yang punya link bisa membacanya.</Popover.Description>
+      </Popover.Popup>
     </Popover.Root>
   );
 }
 ```
+
+`Popover.Popup` menggambar Portal dan Positioner sendiri, seperti Select. Tulis `Popover.Portal` dan
+`Popover.Positioner` bila ingin mengatur `side`, `align`, atau `sideOffset`; bentuk yang ditulis lengkap
+tetap bekerja seperti biasa.
 
 Popover membuka panel kecil dari sebuah tombol: judul, satu-dua baris, dan kontrol, pada material
 raised dengan bayangan popup, dengan panah opsional ke arah tombol. Berbeda dari tooltip, ia memuat isi

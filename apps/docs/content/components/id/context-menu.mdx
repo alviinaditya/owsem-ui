@@ -21,18 +21,18 @@ export function Canvas() {
   return (
     <ContextMenu.Root>
       <ContextMenu.Trigger className="canvas">Klik kanan di sini</ContextMenu.Trigger>
-      <ContextMenu.Portal>
-        <ContextMenu.Positioner>
-          <ContextMenu.Popup>
-            <ContextMenu.Item onClick={cut}>Potong</ContextMenu.Item>
-            <ContextMenu.Item onClick={copy}>Salin</ContextMenu.Item>
-          </ContextMenu.Popup>
-        </ContextMenu.Positioner>
-      </ContextMenu.Portal>
+      <ContextMenu.Popup>
+        <ContextMenu.Item onClick={cut}>Potong</ContextMenu.Item>
+        <ContextMenu.Item onClick={copy}>Salin</ContextMenu.Item>
+      </ContextMenu.Popup>
     </ContextMenu.Root>
   );
 }
 ```
+
+`ContextMenu.Popup` menggambar Portal dan Positioner sendiri, seperti Select. Tulis `ContextMenu.Portal`
+dan `ContextMenu.Positioner` bila ingin mengubahnya; bentuk yang ditulis lengkap tetap bekerja seperti
+biasa.
 
 Context Menu adalah Menu yang dibuka dengan klik kanan atau tekan lama pada sebuah area, di posisi
 pointer. Popup, item, highlight Glide, centang dan pilihan, submenu, label grup, pemisah, dan shortcut
@@ -81,13 +81,21 @@ luar, dan menu di pointer tidak punya apa-apa untuk ditunjuk.
 Positioner mempertahankan jangkar pointer Base UI dan offsetnya. Di dalam `ContextMenu.SubmenuRoot` ia
 menempatkan submenu seperti Positioner Menu: 6px di samping itemnya, baris pertama sejajar.
 
+### ContextMenu.Root
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Skala tipe item, untuk popup dan popup submenunya, seperti Menu |
+
 ### ContextMenu.Popup
 
 #### Props
 
 | Prop | Tipe | Default | Deskripsi |
 | --- | --- | --- | --- |
-| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Skala tipe item, seperti Menu |
+| `size` | `"sm" \| "md" \| "lg"` | Milik Root | Menimpa size Root untuk popup ini |
 
 Menu konteks selalu modal, seperti di Base UI: lapisan milik Base UI menerima tekanan di luar, sehingga
 tekanan itu hanya menutup menu, dan halaman menahan gulirnya.

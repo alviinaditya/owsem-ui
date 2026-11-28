@@ -33,7 +33,7 @@ export function AppMenubar() {
       </Menu.Root>
       <Menu.Root>
         <Menubar.Trigger>Edit</Menubar.Trigger>
-        {/* Portal, Positioner, and Popup as above */}
+        {/* a Popup, as above */}
       </Menu.Root>
     </Menubar.Root>
   );
@@ -43,8 +43,10 @@ export function AppMenubar() {
 Menubar is a row of menus as in a desktop app: File, Edit, View. The bar is a quiet panel, as Toolbar's,
 and its triggers are ghost buttons that stay tinted while their menu is open. One Tab stop enters the
 bar; the arrow keys move between the menus, and once one is open, hover moves it too. Each menu is
-Menu: one `Menu.Root` per menu, with a `Menubar.Trigger` and the usual Portal, Positioner, and Popup,
-so the items, the Glide highlight, the checks, the submenus, and the shortcuts are the ones Menu has.
+Menu: one `Menu.Root` per menu, with a `Menubar.Trigger` and a Popup, so the items, the Glide
+highlight, the checks, the submenus, and the shortcuts are the ones Menu has. A Popup draws its own
+Portal and Positioner, as Menu's does; the example above writes them out to start each menu under its
+trigger with `align="start"`. The bar's `size` reaches its menus' popups, so you do not repeat it on each.
 
 ## Examples [#examples]
 
@@ -87,7 +89,8 @@ Menubar has one Base UI part, Root; the triggers and menus are Menu's, so Base U
 | `lg` | 48px | 40px | 16px |
 
 The triggers follow Button's `--py` rule inside the bar's 4px padding, so their corners are concentric
-with the bar's. `size` on a Menu's Popup is separate: set it too when the menus should match.
+with the bar's. The menus' popups, and their submenus', take the bar's size too; a Menu's own `size`
+on its Root or Popup overrides it.
 
 ### Menubar.Trigger
 

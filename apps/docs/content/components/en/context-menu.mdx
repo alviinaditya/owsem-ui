@@ -21,18 +21,17 @@ export function Canvas() {
   return (
     <ContextMenu.Root>
       <ContextMenu.Trigger className="canvas">Right click here</ContextMenu.Trigger>
-      <ContextMenu.Portal>
-        <ContextMenu.Positioner>
-          <ContextMenu.Popup>
-            <ContextMenu.Item onClick={cut}>Cut</ContextMenu.Item>
-            <ContextMenu.Item onClick={copy}>Copy</ContextMenu.Item>
-          </ContextMenu.Popup>
-        </ContextMenu.Positioner>
-      </ContextMenu.Portal>
+      <ContextMenu.Popup>
+        <ContextMenu.Item onClick={cut}>Cut</ContextMenu.Item>
+        <ContextMenu.Item onClick={copy}>Copy</ContextMenu.Item>
+      </ContextMenu.Popup>
     </ContextMenu.Root>
   );
 }
 ```
+
+`ContextMenu.Popup` draws its own Portal and Positioner, as Select's does. Write `ContextMenu.Portal`
+and `ContextMenu.Positioner` out to change them; the written-out form works as it always did.
 
 Context Menu is Menu opened by a right click or a long press on an area, at the pointer. The popup, the
 items, the Glide highlight, the checks and choices, the submenus, the group labels, the separators, and
@@ -79,8 +78,15 @@ outside, and a menu at the pointer has nothing to point at.
 ### ContextMenu.Positioner
 
 The Positioner keeps Base UI's pointer anchor and its offsets. Inside a `ContextMenu.SubmenuRoot` it
-places the submenu as Menu's Positioner does: 6px beside its item, first rows in line. The same
-`size` prop as Menu's sets the type scale on the Popup.
+places the submenu as Menu's Positioner does: 6px beside its item, first rows in line.
+
+### ContextMenu.Root
+
+#### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | The items' type scale, for the popup and its submenus' popups, as Menu's |
 
 ### ContextMenu.Popup
 
@@ -88,7 +94,7 @@ places the submenu as Menu's Positioner does: 6px beside its item, first rows in
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `size` | `"sm" \| "md" \| "lg"` | `"md"` | The items' type scale, as Menu's |
+| `size` | `"sm" \| "md" \| "lg"` | The Root's | Overrides the Root's size for this popup |
 
 A context menu is always modal, as in Base UI: Base UI's own layer takes a press outside, so that press
 only shuts the menu, and the page holds its scroll.

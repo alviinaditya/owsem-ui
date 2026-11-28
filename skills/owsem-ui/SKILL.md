@@ -181,6 +181,13 @@ and **Code Block**, **Color Picker**, **Command Menu**, **Copy Button**, **Icon 
 components are Base UI components with OwsemUI's styling, and small primitives without a Base UI
 part, such as Kbd; Owsem components are OwsemUI's own. No component has a `flavor` prop.
 
+**Popups place themselves.** A `Popup` without a `Positioner` around it draws its own `Portal` and
+`Positioner` (Select, Combobox, Autocomplete, Menu, Context Menu, Popover, Tooltip, Preview Card,
+Navigation Menu); a Dialog, Alert Dialog, or Drawer `Popup` without a `Portal` draws its own, with
+the scrim. Write `Portal > Positioner > Popup` out only to set `side`, `align`, `sideOffset`,
+`container`, or the scrim, or to add an `Arrow` or `Viewport`; the written-out form always works.
+The examples below write it out.
+
 ### Button
 
 ```tsx
@@ -444,7 +451,8 @@ import { Menu } from "owsem-ui/base"; // or "@/components/owsem/menu"
   press only shuts the menu, and the page's scroll is held without an `overflow` style, so its text
   is not drawn again. Wheel and scroll keys work inside the menu. Touch opens, hover opens, and
   submenus never lock. Do not add a backdrop or a scroll lock of your own; `modal={false}` for none.
-- `Popup` takes `size` (`"sm"`, `"md"` default, `"lg"`), also on a submenu's Popup. `Positioner`
+- `size` (`"sm"`, `"md"` default, `"lg"`) goes on the Root and reaches the Popup and every
+  submenu's Popup (a Popup's own `size` overrides it). `Positioner`
   sits 6px from the trigger's resting box (`side`, `align`, `sideOffset`), so a press does not shift
   it; a submenu lines its first item up with its trigger. The menu renders in a portal: set tokens
   on the Popup's class or on `:root`, and `data-theme` on the Positioner when the trigger sits in a
@@ -482,7 +490,7 @@ import { ContextMenu } from "owsem-ui/base"; // or "@/components/owsem/context-m
 
 - The parts are Menu's (`Item`, `LinkItem`, `CheckboxItem`, `RadioGroup`, `RadioItem`, the
   indicators, `Group`, `GroupLabel`, `Separator`, `SubmenuRoot`, `SubmenuTrigger`), with the same
-  classes, so Menu's tokens and `size` on the Popup apply. The Trigger is an area you draw (a card, a
+  classes, so Menu's tokens apply, and `size` on the Root (or a Popup) as Menu's. The Trigger is an area you draw (a card, a
   canvas): the library gives it no look. Base UI's `Backdrop` and `Arrow` are not parts here.
 - Never the only way to an action: touch and assistive technology may not find it. Put the same
   actions behind a visible Menu button.
@@ -511,8 +519,8 @@ import { Menu, Menubar } from "owsem-ui/base"; // or "@/components/owsem/menu", 
 
 - Parts: `Menubar.Root` (the bar) and `Menubar.Trigger` (a ghost button, tinted while its menu is
   open). The menus are Menu's: `Menu.Root`, `Portal`, `Positioner`, `Popup`, and the items.
-- `size` (`sm|md|lg`, 32/40/48px bar) on the Root, overridable per Trigger; a Popup's own `size`
-  is separate. Arrow keys move between the triggers and between open menus; hover swaps the open one.
+- `size` (`sm|md|lg`, 32/40/48px bar) on the Root, overridable per Trigger; the menus' popups and
+  submenus take the bar's size too (a Menu's own `size` overrides it). Arrow keys move between the triggers and between open menus; hover swaps the open one.
 - `modal` (default true) and `orientation`, `loopFocus`, `disabled` are Base UI's, on the Root. A
   Menu.Root inside the bar leaves `modal` to the bar.
 - Reads `--ow-panel`, `--ow-surface-shadow`, `--ow-hover`, `--ow-pressed-bg`, `--ow-fg`,

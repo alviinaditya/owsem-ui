@@ -21,19 +21,19 @@ export function SharePopover() {
   return (
     <Popover.Root>
       <Popover.Trigger render={<Button variant="outline" />}>Share</Popover.Trigger>
-      <Popover.Portal>
-        <Popover.Positioner>
-          <Popover.Popup>
-            <Popover.Arrow />
-            <Popover.Title>Share the draft</Popover.Title>
-            <Popover.Description>Anyone with the link can read it.</Popover.Description>
-          </Popover.Popup>
-        </Popover.Positioner>
-      </Popover.Portal>
+      <Popover.Popup>
+        <Popover.Arrow />
+        <Popover.Title>Share the draft</Popover.Title>
+        <Popover.Description>Anyone with the link can read it.</Popover.Description>
+      </Popover.Popup>
     </Popover.Root>
   );
 }
 ```
+
+`Popover.Popup` draws its own Portal and Positioner, as Select's does. Write `Popover.Portal` and
+`Popover.Positioner` out to set `side`, `align`, or `sideOffset`; the written-out form works as it
+always did.
 
 Popover opens a small panel from a button: a title, a line or two, and controls, on the raised
 material with the popup shadow, with an optional arrow toward the button. Unlike a tooltip, it holds

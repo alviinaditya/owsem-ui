@@ -2,7 +2,7 @@ import { expect, type Page, test } from "@playwright/test";
 import { demo, pageTests, pick, specimen, visit } from "./example-page.ts";
 
 pageTests("context-menu", {
-  examples: ["Default", "Submenu", "Choices", "With a menu button"],
+  examples: ["Default", "Submenu", "Choices", "Sizes", "With a menu button"],
   parts: [
     "Root",
     "Trigger",

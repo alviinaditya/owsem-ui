@@ -21,20 +21,22 @@ export function DiscardAlert() {
   return (
     <AlertDialog.Root>
       <AlertDialog.Trigger render={<Button variant="outline" />}>Buang draf</AlertDialog.Trigger>
-      <AlertDialog.Portal>
-        <AlertDialog.Popup>
-          <AlertDialog.Title>Buang draf ini?</AlertDialog.Title>
-          <AlertDialog.Description>Perubahan yang belum disimpan akan hilang.</AlertDialog.Description>
-          <div className="actions">
-            <AlertDialog.Close render={<Button variant="outline" />}>Lanjut mengedit</AlertDialog.Close>
-            <AlertDialog.Close render={<Button />}>Buang</AlertDialog.Close>
-          </div>
-        </AlertDialog.Popup>
-      </AlertDialog.Portal>
+      <AlertDialog.Popup>
+        <AlertDialog.Title>Buang draf ini?</AlertDialog.Title>
+        <AlertDialog.Description>Perubahan yang belum disimpan akan hilang.</AlertDialog.Description>
+        <div className="actions">
+          <AlertDialog.Close render={<Button variant="outline" />}>Lanjut mengedit</AlertDialog.Close>
+          <AlertDialog.Close render={<Button />}>Buang</AlertDialog.Close>
+        </div>
+      </AlertDialog.Popup>
     </AlertDialog.Root>
   );
 }
 ```
+
+`AlertDialog.Popup` menggambar Portal sendiri, lengkap dengan scrim. Tulis `AlertDialog.Portal` bila
+ingin mengatur `container`, mematikan scrim, atau membungkus Popup dengan `AlertDialog.Viewport`; bentuk
+yang ditulis lengkap tetap bekerja seperti biasa.
 
 Alert Dialog adalah Dialog yang mengajukan pertanyaan dan menunggu jawaban. Tampilan dan geraknya
 sama persis dengan Dialog: panel, scrim, ukuran, gerak, dan perilaku gulir yang sama. Bedanya ada pada

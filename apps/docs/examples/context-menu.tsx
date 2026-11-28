@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, ContextMenu, Menu } from "owsem-ui/base";
+import { Button, ContextMenu, Menu, type MenuSize } from "owsem-ui/base";
 import { type ReactNode, useState } from "react";
 import { ComponentPage, type ExamplePageProps } from "@/components/component-page/component-page";
 import { Icon } from "@/components/icons/icon";
@@ -62,6 +62,7 @@ const TEXT = {
 } satisfies Record<Lang, Record<string, string>>;
 
 const THEMES = ["light", "dark", "system"] as const;
+const SIZES: readonly MenuSize[] = ["sm", "md", "lg"];
 
 /** The area every menu opens from: the page draws it, the library does not. */
 function Area({ lang, demo = "area" }: { lang: Lang; demo?: string }) {
@@ -192,6 +193,27 @@ function Choices({ lang }: { lang: Lang }) {
         </ContextMenu.Group>
       </Panel>
     </ContextMenu.Root>
+  );
+}
+
+/** One area per size: `size` on the Root reaches the popup and its submenus. */
+function Sizes({ lang }: { lang: Lang }) {
+  return (
+    <div className="demo-context-menu-sizes">
+      {SIZES.map((size) => (
+        <ContextMenu.Root key={size} size={size}>
+          <ContextMenu.Trigger
+            className="demo-context-menu-area demo-context-menu-area--small"
+            data-demo={`area-${size}`}
+          >
+            {size}
+          </ContextMenu.Trigger>
+          <Panel>
+            <Actions lang={lang} />
+          </Panel>
+        </ContextMenu.Root>
+      ))}
+    </div>
   );
 }
 
@@ -446,6 +468,30 @@ export const contextMenuDefinition = defineComponent({
           ),
         ];
       },
+    },
+    {
+      id: "sizes",
+      title: { id: "Ukuran", en: "Sizes" },
+      description: {
+        id: "size di Root mengatur font dan tinggi item popup dan submenunya: 13, 14, atau 16px, seperti Menu.",
+        en: "size on the Root sets the type scale and height of the items in the popup and its submenus: 13, 14, or 16px, as Menu's.",
+      },
+      uses: ["ContextMenu"],
+      demo: (lang) => <Sizes lang={lang} />,
+      code: (setup, lang) => [
+        exampleFile(
+          "SizedAreas",
+          imports(setup, ["Clipboard", "Copy", "Scissors"]),
+          SIZES.flatMap((size) => [
+            `<ContextMenu.Root size="${size}">`,
+            `  <ContextMenu.Trigger className="area">${size}</ContextMenu.Trigger>`,
+            "  <ContextMenu.Popup>",
+            ...actions(lang).map((l) => `    ${l}`),
+            "  </ContextMenu.Popup>",
+            "</ContextMenu.Root>",
+          ]),
+        ),
+      ],
     },
     {
       id: "card",

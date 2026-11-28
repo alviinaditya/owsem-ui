@@ -20,19 +20,21 @@ export function ShareDrawer() {
   return (
     <Drawer.Root>
       <Drawer.Trigger render={<Button variant="outline" />}>Buka drawer</Drawer.Trigger>
-      <Drawer.Portal>
-        <Drawer.Popup>
-          <Drawer.Title>Bagikan draf</Drawer.Title>
-          <Drawer.Description>Siapa pun yang punya tautan bisa membacanya.</Drawer.Description>
-          <div className="actions">
-            <Drawer.Close render={<Button />}>Selesai</Drawer.Close>
-          </div>
-        </Drawer.Popup>
-      </Drawer.Portal>
+      <Drawer.Popup>
+        <Drawer.Title>Bagikan draf</Drawer.Title>
+        <Drawer.Description>Siapa pun yang punya tautan bisa membacanya.</Drawer.Description>
+        <div className="actions">
+          <Drawer.Close render={<Button />}>Selesai</Drawer.Close>
+        </div>
+      </Drawer.Popup>
     </Drawer.Root>
   );
 }
 ```
+
+`Drawer.Popup` menggambar Portal sendiri, lengkap dengan scrim dan Viewport. Tulis `Drawer.Portal` bila
+ingin mengatur `container` atau mematikan scrim; bentuk yang ditulis lengkap tetap bekerja seperti
+biasa.
 
 Drawer adalah lembar yang meluncur masuk dari tepi layar dan mengikuti jari saat digeser untuk
 menutupnya. Secara default ia lembar bawah; `swipeDirection` pada Root memindahkannya ke tepi lain.

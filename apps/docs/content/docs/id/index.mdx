@@ -160,3 +160,21 @@ import { TreeRailNav } from "owsem-ui/owsem";
 ```
 
 [Halaman komponen](/id) menampilkan tipe setiap komponen, dan bisa difilter menurut tipenya.
+
+## Popup menempatkan dirinya
+
+Setiap popup menggambar sendiri yang dibutuhkannya bila Anda tidak menulisnya. `Popup` tanpa
+`Positioner` di sekitarnya menggambar `Portal` dan `Positioner` sendiri (Select, Combobox,
+Autocomplete, Menu, Context Menu, Popover, Tooltip, Preview Card, dan Navigation Menu); `Popup` pada
+Dialog, Alert Dialog, atau Drawer tanpa `Portal` menggambar sendiri, lengkap dengan scrim:
+
+```tsx
+<Popover.Root>
+  <Popover.Trigger>Bagikan</Popover.Trigger>
+  <Popover.Popup>Siapa pun dengan link bisa membacanya.</Popover.Popup>
+</Popover.Root>
+```
+
+Bentuk yang ditulis lengkap, `Portal` lalu `Positioner` lalu `Popup`, bekerja persis seperti biasa.
+Tulis bila Anda ingin mengatur `side`, `align`, `sideOffset`, `container`, atau scrim, atau menambah
+bagian seperti `Arrow` atau `Viewport` di sekitar popup.

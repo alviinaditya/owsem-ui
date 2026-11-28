@@ -20,18 +20,18 @@ export function EditMenu() {
   return (
     <Menu.Root>
       <Menu.Trigger render={<Button variant="outline" />}>Edit</Menu.Trigger>
-      <Menu.Portal>
-        <Menu.Positioner>
-          <Menu.Popup>
-            <Menu.Item onClick={cut}>Potong</Menu.Item>
-            <Menu.Item onClick={copy}>Salin</Menu.Item>
-          </Menu.Popup>
-        </Menu.Positioner>
-      </Menu.Portal>
+      <Menu.Popup>
+        <Menu.Item onClick={cut}>Potong</Menu.Item>
+        <Menu.Item onClick={copy}>Salin</Menu.Item>
+      </Menu.Popup>
     </Menu.Root>
   );
 }
 ```
+
+`Menu.Popup` menggambar Portal dan Positioner sendiri, seperti Select. Tulis `Menu.Portal` dan
+`Menu.Positioner` bila ingin mengatur `side`, `align`, atau `sideOffset`; bentuk yang ditulis lengkap
+tetap bekerja seperti biasa.
 
 Menu membuka daftar aksi dari sebuah tombol: item dengan ikon dan shortcut, centang dan pilihan, serta
 submenu, pada material raised dengan bayangan popup dan tanpa tepi, karena ia melayang. Item tidak
@@ -75,6 +75,14 @@ kotak yang memuat trigger dan menunya.
 
 <BaseUiReference />
 
+### Menu.Root
+
+#### Props
+
+| Prop | Tipe | Default | Deskripsi |
+| --- | --- | --- | --- |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Skala huruf item, untuk popup dan popup submenunya. Di Menubar, ukuran bar |
+
 ### Menu.Positioner
 
 #### Props
@@ -90,7 +98,7 @@ kotak yang memuat trigger dan menunya.
 
 | Prop | Tipe | Default | Deskripsi |
 | --- | --- | --- | --- |
-| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Skala huruf item |
+| `size` | `"sm" \| "md" \| "lg"` | Milik Root | Menimpa size Root untuk popup ini |
 
 | Ukuran | Font | Tinggi item | Ikon |
 | --- | --- | --- | --- |

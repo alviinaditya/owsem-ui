@@ -156,3 +156,21 @@ import { TreeRailNav } from "owsem-ui/owsem";
 ```
 
 The [component page](/en) shows the type of every component, and filters by it.
+
+## Popups place themselves
+
+Every popup draws what it needs around itself when you leave it out. A `Popup` with no `Positioner`
+around it draws its own `Portal` and `Positioner` (Select, Combobox, Autocomplete, Menu, Context
+Menu, Popover, Tooltip, Preview Card, and Navigation Menu); a Dialog, Alert Dialog, or Drawer `Popup`
+with no `Portal` draws its own, with the scrim:
+
+```tsx
+<Popover.Root>
+  <Popover.Trigger>Share</Popover.Trigger>
+  <Popover.Popup>Anyone with the link can read it.</Popover.Popup>
+</Popover.Root>
+```
+
+The written-out form, `Portal` then `Positioner` then `Popup`, works exactly as it always did. Write
+it when you want to set `side`, `align`, `sideOffset`, `container`, or the scrim, or to add a part
+such as an `Arrow` or a `Viewport` around the popup.

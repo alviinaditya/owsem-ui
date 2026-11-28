@@ -22,18 +22,18 @@ export function PinButton() {
   return (
     <Tooltip.Root>
       <Tooltip.Trigger render={<IconButton aria-label="Pin" icon={<Pin />} />} />
-      <Tooltip.Portal>
-        <Tooltip.Positioner>
-          <Tooltip.Popup>
-            <Tooltip.Arrow />
-            Pin
-          </Tooltip.Popup>
-        </Tooltip.Positioner>
-      </Tooltip.Portal>
+      <Tooltip.Popup>
+        <Tooltip.Arrow />
+        Pin
+      </Tooltip.Popup>
     </Tooltip.Root>
   );
 }
 ```
+
+`Tooltip.Popup` draws its own Portal and Positioner, as Select's does. Write `Tooltip.Portal` and
+`Tooltip.Positioner` out to set `side`, `align`, or `sideOffset`; the written-out form works as it
+always did.
 
 Tooltip names a button for people with a pointer or a keyboard: a short label, and its shortcut, on a
 solid dark surface. A tooltip that opened at every pass of the pointer would flicker across a toolbar,

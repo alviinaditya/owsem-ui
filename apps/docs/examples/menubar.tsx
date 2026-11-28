@@ -59,33 +59,23 @@ const SIZES: readonly MenubarSize[] = ["sm", "md", "lg"];
 const THEMES = ["light", "dark", "system"] as const;
 
 /** One menu of the bar: its trigger, then Portal, Positioner, and Popup around the items. */
-function Dropdown({
-  label,
-  demo,
-  size,
-  children,
-}: {
-  label: string;
-  demo: string;
-  size?: MenubarSize;
-  children: ReactNode;
-}) {
+function Dropdown({ label, demo, children }: { label: string; demo: string; children: ReactNode }) {
   return (
     <Menu.Root>
       <Menubar.Trigger data-demo={demo}>{label}</Menubar.Trigger>
       <Menu.Portal>
         <Menu.Positioner align="start">
-          <Menu.Popup {...(size ? { size } : {})}>{children}</Menu.Popup>
+          <Menu.Popup>{children}</Menu.Popup>
         </Menu.Positioner>
       </Menu.Portal>
     </Menu.Root>
   );
 }
 
-function FileMenu({ lang, size }: { lang: Lang; size?: MenubarSize }) {
+function FileMenu({ lang }: { lang: Lang }) {
   const t = TEXT[lang];
   return (
-    <Dropdown label={t.file} demo="file" {...(size ? { size } : {})}>
+    <Dropdown label={t.file} demo="file">
       <Menu.Item data-demo="new">
         {t.new}
         <kbd>⌘N</kbd>
@@ -103,7 +93,7 @@ function FileMenu({ lang, size }: { lang: Lang; size?: MenubarSize }) {
         <Menu.SubmenuTrigger data-demo="export">{t.export}</Menu.SubmenuTrigger>
         <Menu.Portal>
           <Menu.Positioner>
-            <Menu.Popup {...(size ? { size } : {})}>
+            <Menu.Popup>
               <Menu.Item>{t.pdf}</Menu.Item>
               <Menu.Item>{t.png}</Menu.Item>
             </Menu.Popup>
@@ -119,10 +109,10 @@ function FileMenu({ lang, size }: { lang: Lang; size?: MenubarSize }) {
   );
 }
 
-function EditMenu({ lang, size }: { lang: Lang; size?: MenubarSize }) {
+function EditMenu({ lang }: { lang: Lang }) {
   const t = TEXT[lang];
   return (
-    <Dropdown label={t.edit} demo="edit" {...(size ? { size } : {})}>
+    <Dropdown label={t.edit} demo="edit">
       <Menu.Item>
         <Icon name="scissors" />
         {t.cut}
@@ -143,13 +133,13 @@ function EditMenu({ lang, size }: { lang: Lang; size?: MenubarSize }) {
 }
 
 /** Two checkbox items, and a theme picked in a radio group under its label. */
-function ViewMenu({ lang, size }: { lang: Lang; size?: MenubarSize }) {
+function ViewMenu({ lang }: { lang: Lang }) {
   const t = TEXT[lang];
   const [wrap, setWrap] = useState(true);
   const [numbers, setNumbers] = useState(false);
   const [theme, setTheme] = useState("system");
   return (
-    <Dropdown label={t.view} demo="view" {...(size ? { size } : {})}>
+    <Dropdown label={t.view} demo="view">
       <Menu.CheckboxItem checked={wrap} onCheckedChange={setWrap} data-demo="wrap">
         <Menu.CheckboxItemIndicator />
         {t.wrap}
@@ -184,14 +174,22 @@ function Default({ lang }: { lang: Lang }) {
   );
 }
 
+function Choices({ lang }: { lang: Lang }) {
+  return (
+    <Menubar.Root aria-label={TEXT[lang].bar}>
+      <ViewMenu lang={lang} />
+    </Menubar.Root>
+  );
+}
+
 function Sizes({ lang }: { lang: Lang }) {
   return (
     <div className="demo-menubar-sizes">
       {SIZES.map((size) => (
         <Menubar.Root key={size} size={size} aria-label={`${TEXT[lang].bar} ${size}`}>
-          <FileMenu lang={lang} size={size} />
-          <EditMenu lang={lang} size={size} />
-          <ViewMenu lang={lang} size={size} />
+          <FileMenu lang={lang} />
+          <EditMenu lang={lang} />
+          <ViewMenu lang={lang} />
         </Menubar.Root>
       ))}
     </div>
@@ -258,14 +256,13 @@ const imports = (setup: TokenSetup, icons: string[] = []) => [
 ];
 
 /** One menu: its trigger, then Portal, Positioner, and Popup around some lines. */
-const dropdown = (label: string, items: string[], size?: MenubarSize) => {
-  const prop = size ? ` size="${size}"` : "";
+const dropdown = (label: string, items: string[]) => {
   return [
     "<Menu.Root>",
     `  <Menubar.Trigger>${label}</Menubar.Trigger>`,
     "  <Menu.Portal>",
     '    <Menu.Positioner align="start">',
-    `      <Menu.Popup${prop}>`,
+    "      <Menu.Popup>",
     ...items.map((l) => `        ${l}`),
     "      </Menu.Popup>",
     "    </Menu.Positioner>",
@@ -390,8 +387,8 @@ export const menubarDefinition = defineComponent({
       id: "sizes",
       title: { id: "Ukuran", en: "Sizes" },
       description: {
-        id: "size di Menubar.Root mengatur tinggi bar dan tipe pemicu: 32, 40, atau 48px. Popup menu memakai size-nya sendiri.",
-        en: "size on Menubar.Root sets the bar's height and the triggers' type: 32, 40, or 48px. Each menu's Popup takes its own size.",
+        id: "size di Menubar.Root mengatur tinggi bar dan tipe pemicu: 32, 40, atau 48px. Popup menunya, dan submenunya, ikut ukuran itu.",
+        en: "size on Menubar.Root sets the bar's height and the triggers' type: 32, 40, or 48px. Each menu's Popup, and its submenus, follow it.",
       },
       uses: ["Menubar", "Menu"],
       demo: (lang) => <Sizes lang={lang} />,
@@ -402,8 +399,29 @@ export const menubarDefinition = defineComponent({
             "MenubarSizes",
             [...imports(setup, ["Clipboard", "Copy", "Scissors"])],
             SIZES.flatMap((size) =>
-              bar(lang, dropdown(t.edit, editItems(lang), size), ` size="${size}"`),
+              bar(lang, dropdown(t.edit, editItems(lang)), ` size="${size}"`),
             ),
+          ),
+        ];
+      },
+    },
+    {
+      id: "choices",
+      title: { id: "Pilihan", en: "Choices" },
+      description: {
+        id: "CheckboxItem dan RadioItem di menu bar: centang menyalakan dan mematikan, radio memilih satu, dan menu tetap terbuka selama dipilih.",
+        en: "CheckboxItem and RadioItem in a bar menu: a check turns a setting on and off, a radio picks one, and the menu stays open while you choose.",
+      },
+      uses: ["Menubar", "Menu"],
+      demo: (lang) => <Choices lang={lang} />,
+      code: (setup, lang) => {
+        const t = TEXT[lang];
+        return [
+          exampleFile(
+            "ViewMenubar",
+            imports(setup).concat('import { useState } from "react";'),
+            bar(lang, dropdown(t.view, viewItems(lang))),
+            viewHooks,
           ),
         ];
       },

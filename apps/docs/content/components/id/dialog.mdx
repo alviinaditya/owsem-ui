@@ -20,17 +20,19 @@ export function ShareDialog() {
   return (
     <Dialog.Root>
       <Dialog.Trigger render={<Button />}>Bagikan</Dialog.Trigger>
-      <Dialog.Portal>
-        <Dialog.Popup>
-          <Dialog.Title>Bagikan draf</Dialog.Title>
-          <Dialog.Description>Siapa pun yang punya link bisa membacanya.</Dialog.Description>
-          <Dialog.Close render={<Button />}>Selesai</Dialog.Close>
-        </Dialog.Popup>
-      </Dialog.Portal>
+      <Dialog.Popup>
+        <Dialog.Title>Bagikan draf</Dialog.Title>
+        <Dialog.Description>Siapa pun yang punya link bisa membacanya.</Dialog.Description>
+        <Dialog.Close render={<Button />}>Selesai</Dialog.Close>
+      </Dialog.Popup>
     </Dialog.Root>
   );
 }
 ```
+
+`Dialog.Popup` menggambar Portal sendiri, lengkap dengan scrim. Tulis `Dialog.Portal` bila ingin
+mengatur `container`, mematikan scrim, atau membungkus Popup dengan `Dialog.Viewport`; bentuk yang
+ditulis lengkap tetap bekerja seperti biasa.
 
 Dialog membuka jendela di atas halaman: judul, satu-dua baris, dan apa pun yang dibutuhkan tugasnya,
 di tengah pada material raised di atas scrim. Base UI menjaga fokus tetap di dalam, menahan gulir

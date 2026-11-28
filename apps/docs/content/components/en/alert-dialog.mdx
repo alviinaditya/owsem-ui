@@ -21,20 +21,22 @@ export function DiscardAlert() {
   return (
     <AlertDialog.Root>
       <AlertDialog.Trigger render={<Button variant="outline" />}>Discard draft</AlertDialog.Trigger>
-      <AlertDialog.Portal>
-        <AlertDialog.Popup>
-          <AlertDialog.Title>Discard this draft?</AlertDialog.Title>
-          <AlertDialog.Description>Changes you have not saved will be lost.</AlertDialog.Description>
-          <div className="actions">
-            <AlertDialog.Close render={<Button variant="outline" />}>Keep editing</AlertDialog.Close>
-            <AlertDialog.Close render={<Button />}>Discard</AlertDialog.Close>
-          </div>
-        </AlertDialog.Popup>
-      </AlertDialog.Portal>
+      <AlertDialog.Popup>
+        <AlertDialog.Title>Discard this draft?</AlertDialog.Title>
+        <AlertDialog.Description>Changes you have not saved will be lost.</AlertDialog.Description>
+        <div className="actions">
+          <AlertDialog.Close render={<Button variant="outline" />}>Keep editing</AlertDialog.Close>
+          <AlertDialog.Close render={<Button />}>Discard</AlertDialog.Close>
+        </div>
+      </AlertDialog.Popup>
     </AlertDialog.Root>
   );
 }
 ```
+
+`AlertDialog.Popup` draws its own Portal, with the scrim. Write `AlertDialog.Portal` out to set
+`container`, to turn the scrim off, or to put an `AlertDialog.Viewport` around the Popup; the
+written-out form works as it always did.
 
 Alert Dialog is a Dialog that asks a question and waits for the answer. It looks and moves exactly as
 Dialog does: the same panel, scrim, sizes, motion, and scroll behavior. It differs in what it asks of

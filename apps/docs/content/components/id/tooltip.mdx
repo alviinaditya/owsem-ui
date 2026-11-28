@@ -21,18 +21,18 @@ export function PinButton() {
   return (
     <Tooltip.Root>
       <Tooltip.Trigger render={<IconButton aria-label="Sematkan" icon={<Pin />} />} />
-      <Tooltip.Portal>
-        <Tooltip.Positioner>
-          <Tooltip.Popup>
-            <Tooltip.Arrow />
-            Sematkan
-          </Tooltip.Popup>
-        </Tooltip.Positioner>
-      </Tooltip.Portal>
+      <Tooltip.Popup>
+        <Tooltip.Arrow />
+        Sematkan
+      </Tooltip.Popup>
     </Tooltip.Root>
   );
 }
 ```
+
+`Tooltip.Popup` menggambar Portal dan Positioner sendiri, seperti Select. Tulis `Tooltip.Portal` dan
+`Tooltip.Positioner` bila ingin mengatur `side`, `align`, atau `sideOffset`; bentuk yang ditulis lengkap
+tetap bekerja seperti biasa.
 
 Tooltip menamai tombol bagi pengguna pointer atau keyboard: label singkat, dan shortcut-nya, pada
 permukaan gelap solid. Tooltip yang terbuka di setiap lewatnya pointer akan berkedip di sepanjang

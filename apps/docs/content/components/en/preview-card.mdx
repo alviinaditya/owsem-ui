@@ -20,19 +20,19 @@ export function DocsLink() {
   return (
     <PreviewCard.Root>
       <PreviewCard.Trigger href="https://owsem-ui.dev">OwsemUI docs</PreviewCard.Trigger>
-      <PreviewCard.Portal>
-        <PreviewCard.Positioner>
-          <PreviewCard.Popup>
-            <PreviewCard.Arrow />
-            <strong>OwsemUI docs</strong>
-            <p>Every component has a preview, examples, and an install command.</p>
-          </PreviewCard.Popup>
-        </PreviewCard.Positioner>
-      </PreviewCard.Portal>
+      <PreviewCard.Popup>
+        <PreviewCard.Arrow />
+        <strong>OwsemUI docs</strong>
+        <p>Every component has a preview, examples, and an install command.</p>
+      </PreviewCard.Popup>
     </PreviewCard.Root>
   );
 }
 ```
+
+`PreviewCard.Popup` draws its own Portal and Positioner, as Select's does. Write `PreviewCard.Portal`
+and `PreviewCard.Positioner` out to set `side`, `align`, or `sideOffset`; the written-out form works as
+it always did.
 
 Preview Card shows a glance at where a link goes: hover the link, or focus it with the keyboard, and
 a card with an image, a title, and a line of text opens beside it. The trigger is a link that takes

@@ -20,19 +20,19 @@ export function DocsLink() {
   return (
     <PreviewCard.Root>
       <PreviewCard.Trigger href="https://owsem-ui.dev">dokumentasi OwsemUI</PreviewCard.Trigger>
-      <PreviewCard.Portal>
-        <PreviewCard.Positioner>
-          <PreviewCard.Popup>
-            <PreviewCard.Arrow />
-            <strong>Dokumentasi OwsemUI</strong>
-            <p>Setiap komponen punya pratinjau, contoh, dan perintah pasang.</p>
-          </PreviewCard.Popup>
-        </PreviewCard.Positioner>
-      </PreviewCard.Portal>
+      <PreviewCard.Popup>
+        <PreviewCard.Arrow />
+        <strong>Dokumentasi OwsemUI</strong>
+        <p>Setiap komponen punya pratinjau, contoh, dan perintah pasang.</p>
+      </PreviewCard.Popup>
     </PreviewCard.Root>
   );
 }
 ```
+
+`PreviewCard.Popup` menggambar Portal dan Positioner sendiri, seperti Select. Tulis `PreviewCard.Portal`
+dan `PreviewCard.Positioner` bila ingin mengatur `side`, `align`, atau `sideOffset`; bentuk yang ditulis
+lengkap tetap bekerja seperti biasa.
 
 Preview Card memperlihatkan sekilas ke mana sebuah link menuju: arahkan kursor ke link, atau fokuskan
 dengan keyboard, dan kartu berisi gambar, judul, dan satu baris teks terbuka di sampingnya. Trigger

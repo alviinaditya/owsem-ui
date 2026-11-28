@@ -21,19 +21,20 @@ export function ShareDrawer() {
   return (
     <Drawer.Root>
       <Drawer.Trigger render={<Button variant="outline" />}>Open drawer</Drawer.Trigger>
-      <Drawer.Portal>
-        <Drawer.Popup>
-          <Drawer.Title>Share the draft</Drawer.Title>
-          <Drawer.Description>Anyone with the link can read it.</Drawer.Description>
-          <div className="actions">
-            <Drawer.Close render={<Button />}>Done</Drawer.Close>
-          </div>
-        </Drawer.Popup>
-      </Drawer.Portal>
+      <Drawer.Popup>
+        <Drawer.Title>Share the draft</Drawer.Title>
+        <Drawer.Description>Anyone with the link can read it.</Drawer.Description>
+        <div className="actions">
+          <Drawer.Close render={<Button />}>Done</Drawer.Close>
+        </div>
+      </Drawer.Popup>
     </Drawer.Root>
   );
 }
 ```
+
+`Drawer.Popup` draws its own Portal, with the scrim, and the Viewport. Write `Drawer.Portal` out to set
+`container` or to turn the scrim off; the written-out form works as it always did.
 
 Drawer is a sheet that slides in from an edge and follows the finger when it is swiped away. It is a
 bottom sheet by default; `swipeDirection` on the Root moves it to another edge. It sits on the raised

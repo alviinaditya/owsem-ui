@@ -21,17 +21,19 @@ export function ShareDialog() {
   return (
     <Dialog.Root>
       <Dialog.Trigger render={<Button />}>Share</Dialog.Trigger>
-      <Dialog.Portal>
-        <Dialog.Popup>
-          <Dialog.Title>Share the draft</Dialog.Title>
-          <Dialog.Description>Anyone with the link can read it.</Dialog.Description>
-          <Dialog.Close render={<Button />}>Done</Dialog.Close>
-        </Dialog.Popup>
-      </Dialog.Portal>
+      <Dialog.Popup>
+        <Dialog.Title>Share the draft</Dialog.Title>
+        <Dialog.Description>Anyone with the link can read it.</Dialog.Description>
+        <Dialog.Close render={<Button />}>Done</Dialog.Close>
+      </Dialog.Popup>
     </Dialog.Root>
   );
 }
 ```
+
+`Dialog.Popup` draws its own Portal, with the scrim. Write `Dialog.Portal` out to set `container`, to
+turn the scrim off, or to put a `Dialog.Viewport` around the Popup; the written-out form works as it
+always did.
 
 Dialog opens a window over the page: a title, a line or two, and whatever the task needs, centered on
 the raised material over a scrim. Base UI keeps focus inside, holds the page's scroll, and handles

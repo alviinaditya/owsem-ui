@@ -33,7 +33,7 @@ export function SiteNavigation() {
           <NavigationMenu.Link href="/pricing">Harga</NavigationMenu.Link>
         </NavigationMenu.Item>
       </NavigationMenu.List>
-      <NavigationMenu.Portal />
+      <NavigationMenu.Popup />
     </NavigationMenu.Root>
   );
 }
@@ -46,8 +46,10 @@ dari sisi asal Anda, sehingga bergerak di sepanjang baris terasa sebagai satu ge
 konten berupa kartu, judul dan satu baris teks, dan Glide menyalakan yang ada di bawah pointer atau
 tombol.
 
-`NavigationMenu.Portal` kosong menggambar Positioner, Popup, dan Viewport untuk Anda; tulis sendiri bila
-ingin menambah Arrow atau mengubah salah satunya.
+`NavigationMenu.Popup` polos, seperti di atas, menggambar Portal dan Positioner sendiri, dan Viewport di
+dalamnya, seperti Popup Select; `NavigationMenu.Portal` kosong melakukan hal yang sama dari atas. Tulis
+sendiri bila ingin menambah Arrow atau mengubah salah satunya; bentuk yang ditulis lengkap tetap bekerja
+seperti biasa.
 
 Di ponsel, list membungkus alih-alih menggulir, ketukan membuka panel di bawahnya, dan mengetuk trigger
 lain menukar panelnya. Panel tidak pernah lebih lebar dari jendela dikurangi 16px di tiap sisi, dan
@@ -77,7 +79,7 @@ dan membawa arah teks ke dalam portal. Item dan Portal tidak menambah tampilan.
 | Backdrop | `div.ow-navigation-menu__backdrop` | Opsional: bening, di bawah panel |
 | Portal | `div` | Memindahkan panel ke akhir body, atau ke `container`; kosong, ia menggambar Positioner |
 | Positioner | `div.ow-navigation-menu__positioner` | 8px di bawah list, 16px di dalam jendela, tidak dibalik; berpindah antar trigger |
-| <Part name="Popup" /> | `div.ow-navigation-menu__popup` | Panel bersama; `data-size`, `data-instant`; kosong, ia menggambar Viewport |
+| <Part name="Popup" /> | `div.ow-navigation-menu__popup` | Panel bersama; `data-size`, `data-instant`; kosong, ia menggambar Viewport; tanpa Positioner di sekitarnya, ia menggambar Portal dan Positioner |
 | <Part name="Arrow" /> | `div.ow-navigation-menu__arrow` | Opsional, di Popup sebelum Viewport; mengikuti trigger yang terbuka |
 | <Part name="Viewport" /> | `div.ow-navigation-menu__viewport` | Memotong konten saat meluncur |
 

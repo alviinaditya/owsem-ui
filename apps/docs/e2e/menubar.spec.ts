@@ -2,7 +2,7 @@ import { expect, type Page, test } from "@playwright/test";
 import { demo, pageTests, pick, specimen, visit } from "./example-page.ts";
 
 pageTests("menubar", {
-  examples: ["Default", "Sizes"],
+  examples: ["Default", "Sizes", "Choices"],
   parts: ["Root", "Trigger", "Popup", "Item", "CheckboxItem"],
   specimen: ".ow-menubar .ow-menubar__trigger",
 });

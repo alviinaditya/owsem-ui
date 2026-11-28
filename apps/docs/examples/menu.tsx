@@ -68,11 +68,11 @@ function Dropdown({
   children: ReactNode;
 }) {
   return (
-    <Menu.Root>
+    <Menu.Root {...(size ? { size } : {})}>
       <Menu.Trigger render={trigger(label, size)} data-demo={demo} />
       <Menu.Portal>
         <Menu.Positioner align="start">
-          <Menu.Popup {...(size ? { size } : {})}>{children}</Menu.Popup>
+          <Menu.Popup>{children}</Menu.Popup>
         </Menu.Positioner>
       </Menu.Portal>
     </Menu.Root>
@@ -245,13 +245,13 @@ const imports = (setup: TokenSetup, icons: string[]) => [
 const dropdown = (label: string, items: string[], size?: MenuSize) => {
   const prop = size ? ` size="${size}"` : "";
   return [
-    "<Menu.Root>",
+    `<Menu.Root${prop}>`,
     `  <Menu.Trigger render={<Button variant="outline"${prop} endIcon={<ChevronDown />} />}>`,
     `    ${label}`,
     "  </Menu.Trigger>",
     "  <Menu.Portal>",
     '    <Menu.Positioner align="start">',
-    `      <Menu.Popup${prop}>`,
+    "      <Menu.Popup>",
     ...items.map((l) => `        ${l}`),
     "      </Menu.Popup>",
     "    </Menu.Positioner>",
@@ -403,8 +403,8 @@ export const menuDefinition = defineComponent({
       id: "sizes",
       title: { id: "Ukuran", en: "Sizes" },
       description: {
-        id: "size di Popup mengatur font dan tinggi item: 13, 14, atau 16px, dengan aturan --py milik Button.",
-        en: "size on the Popup sets the items' type scale and height: 13, 14, or 16px, on Button's --py rule.",
+        id: "size di Root mengatur font dan tinggi item popup dan submenunya: 13, 14, atau 16px, dengan aturan --py milik Button.",
+        en: "size on the Root sets the type scale and height of the items in the popup and its submenus: 13, 14, or 16px, on Button's --py rule.",
       },
       uses: ["Menu", "Button"],
       demo: (lang) => <Sizes lang={lang} />,

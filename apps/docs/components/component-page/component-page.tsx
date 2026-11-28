@@ -658,7 +658,11 @@ export function ComponentPage({
             </Tooltip.Provider>
           </div>
 
-          <div ref={bodyRef} className="cp-body" data-inspect={inspecting ? "" : undefined}>
+          <div
+            ref={bodyRef}
+            className="cp-body"
+            data-inspect={inspectShown && inspectable ? "" : undefined}
+          >
             <div ref={fitRef} className="cp-fit">
               <div ref={demoRef} className="cp-stage">
                 <Fragment key={shown?.id}>

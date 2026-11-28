@@ -121,14 +121,12 @@ test("the example picker switches the demo, and the docs' code follows the examp
   await expect(docs(page).locator("#example-controlled")).toContainText("onCheckedChange={setOn}");
 });
 
-test("a new example scales in, a plain fade under reduced motion, and the stage keeps its size", async ({
-  page,
-}) => {
+test("a new example fades in, with no scale, and the stage keeps its size", async ({ page }) => {
   await visit(page, "/en/button");
   const size = () => preview(page).evaluate((el) => el.getBoundingClientRect().height);
   const stage = await size();
   await pick(page, "Sizes");
-  await expect(demo(page).locator(".cp-demo")).toHaveCSS("animation-name", "cp-in");
+  await expect(demo(page).locator(".cp-demo")).toHaveCSS("animation-name", "cp-fade");
   expect(await size()).toBe(stage);
   await page.emulateMedia({ reducedMotion: "reduce" });
   await pick(page, "Icons");
@@ -258,70 +256,68 @@ test("Inspect magnifies a complete specimen into a spec sheet and never reflows 
     .getByRole("button", { name: "Default" })
     .click();
 
-  // Off: the specimen glides home and the demo is back, with the layout as it was.
+  // Off: the specimen fades out and the demo is back, with the layout as it was.
   await page.keyboard.press("i");
   await expect(preview(page).locator(".cp-body")).not.toHaveAttribute("data-inspect");
-  await page.waitForTimeout(700);
   await expect(sheet(page)).toHaveCount(0);
   await expect(second).toBeVisible();
   await expect(demo(page).locator(".cp-demo")).toHaveCSS("opacity", "1");
   expect(await layoutBoxes(page)).toEqual(before);
 });
 
-test("Inspect opens as a morph from the demo's instance, with no snap", async ({
+/** Samples the demo's and the specimen's opacity and the specimen's scale on every frame. */
+const sampleFrames = (page: Page) =>
+  page.evaluate(() => {
+    const w = window as unknown as { frames: [number, number, string][]; sampling: boolean };
+    w.frames = [];
+    w.sampling = true;
+    const sample = () => {
+      const demo = document.querySelector(".cp-demo");
+      const spec = document.querySelector(".sp-specimen");
+      if (demo && spec) {
+        const s = getComputedStyle(spec);
+        w.frames.push([Number(getComputedStyle(demo).opacity), Number(s.opacity), s.scale]);
+      }
+      if (w.sampling) requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+  });
+
+const stopFrames = (page: Page) =>
+  page.evaluate(() => {
+    const w = window as unknown as { frames: [number, number, string][]; sampling: boolean };
+    w.sampling = false;
+    return w.frames;
+  });
+
+test("Inspect fades through: the demo out, then the specimen in at its place, never both", async ({
   page,
 }, testInfo) => {
   test.skip(desktopOnly(testInfo), "the full sheet needs a wide preview");
   await visit(page, "/en/button");
-  const origin = await demo(page).locator(".ow-button").first().boundingBox();
-  if (!origin) throw new Error("no origin");
-  // Rects of the specimen's button on every frame from the key press.
-  await page.evaluate(() => {
-    const w = window as unknown as { frames: [number, number, number][] };
-    w.frames = [];
-    const sample = () => {
-      const el = document.querySelector(".sp-specimen .ow-button");
-      if (el) {
-        const r = el.getBoundingClientRect();
-        w.frames.push([r.left + r.width / 2, r.top + r.height / 2, r.height]);
-      }
-      if (w.frames.length < 40) requestAnimationFrame(sample);
-    };
-    document.addEventListener("keydown", () => requestAnimationFrame(sample), { once: true });
-  });
+  await sampleFrames(page);
   await page.keyboard.press("i");
-  await page.waitForTimeout(900);
-  const frames = await page.evaluate(
-    () => (window as unknown as { frames: [number, number, number][] }).frames,
-  );
-  const [first, ...rest] = frames;
-  if (!first) throw new Error("no frames");
-  // The first painted frame sits on the origin: same centre, and no taller (it fits inside).
-  expect(Math.abs(first[0] - (origin.x + origin.width / 2))).toBeLessThan(4);
-  expect(Math.abs(first[1] - (origin.y + origin.height / 2))).toBeLessThan(4);
-  expect(first[2]).toBeLessThan(origin.height + 4);
-  expect(first[2]).toBeGreaterThan(origin.height * 0.7);
-  // It grows from there to the middle of the preview, over several frames.
-  const last = frames[frames.length - 1] as [number, number, number];
-  expect(last[2]).toBeGreaterThan(origin.height * 2);
-  expect(rest.filter((f) => f[2] > first[2] + 2 && f[2] < last[2] - 2).length).toBeGreaterThan(3);
-  const body = await preview(page).locator(".cp-body").boundingBox();
-  if (!body) throw new Error("no body");
-  expect(Math.abs(last[1] - (body.y + 60 + (body.height - 124) / 2))).toBeLessThan(40);
+  await expect(sheet(page).locator(".sp-label").first()).toBeVisible();
+  await expect(demo(page).locator(".cp-demo")).toHaveCSS("opacity", "0");
+  await expect(specimen(page)).toHaveCSS("opacity", "0.5");
+  const on = await stopFrames(page);
+  expect(on.length).toBeGreaterThan(2);
+  // Never both on screen, and the specimen is already at its scale from its first frame.
+  expect(on.filter(([d, s]) => d > 0.05 && s > 0.05)).toEqual([]);
+  expect(new Set(on.map((f) => f[2])).size).toBe(1);
+  expect(Number.parseFloat(on[0]?.[2] ?? "1")).toBeGreaterThan(1);
+
+  await sampleFrames(page);
+  await page.keyboard.press("i");
+  await expect(sheet(page)).toHaveCount(0);
+  await expect(demo(page).locator(".cp-demo")).toHaveCSS("opacity", "1");
+  const off = await stopFrames(page);
+  expect(off.filter(([d, s]) => d > 0.05 && s > 0.05)).toEqual([]);
 });
 
-// The root part's selector when the demo has an instance of it, else the demo's whole content.
-const EXITS: [string, string | null][] = [
-  ["input", null],
-  ["form", ".ow-form"],
-  ["popover", null],
-  ["select", null],
-  ["tooltip", null],
-  ["otp-field", ".ow-otp-field"],
-];
-
-for (const [slug, root] of EXITS) {
-  test(`${slug}: turning Inspect off lands the specimen on the demo and leaves nothing behind`, async ({
+// Turning Inspect off leaves nothing behind, whatever the example's demo shows.
+for (const slug of ["input", "form", "popover", "select", "tooltip", "otp-field"]) {
+  test(`${slug}: turning Inspect off brings the demo back and leaves nothing behind`, async ({
     page,
   }, testInfo) => {
     test.skip(desktopOnly(testInfo), "the full sheet needs a wide preview");
@@ -329,70 +325,16 @@ for (const [slug, root] of EXITS) {
     const before = await layoutBoxes(page);
     await page.keyboard.press("i");
     await expect(sheet(page).locator(".sp-label").first()).toBeVisible();
-    await page.evaluate(async () => {
-      await Promise.all(document.getAnimations().map((a) => a.finished.catch(() => {})));
-    });
-    // Measure where the glide lands as soon as it starts, before the overlay unmounts (340 ms),
-    // however slow the machine: the glide's end is set at once, so finishing it shows it.
-    await page.evaluate((selector) => {
-      const w = window as unknown as { landed?: unknown };
-      const animate = Element.prototype.animate;
-      Element.prototype.animate = function (this: Element, ...args) {
-        const a = animate.apply(this, args);
-        queueMicrotask(() => {
-          if (a.id !== "sp-glide" || w.landed !== undefined) return;
-          a.finish();
-          const root = selector
-            ? document.querySelector(`.sp-specimen ${selector}`)
-            : document.querySelector(".sp-specimen")?.firstElementChild;
-          const kids = selector
-            ? [...document.querySelectorAll(`.cp-demo ${selector}`)].slice(0, 1)
-            : [...(document.querySelector(".cp-demo")?.children ?? [])];
-          const rects = kids.map((el) => el.getBoundingClientRect()).filter((r) => r.width > 0);
-          if (!root || !rects.length) {
-            w.landed = null;
-            return;
-          }
-          const r = root.getBoundingClientRect();
-          const left = Math.min(...rects.map((x) => x.left));
-          const right = Math.max(...rects.map((x) => x.right));
-          const top = Math.min(...rects.map((x) => x.top));
-          const bottom = Math.max(...rects.map((x) => x.bottom));
-          w.landed = {
-            dx: r.left + r.width / 2 - (left + right) / 2,
-            dy: r.top + r.height / 2 - (top + bottom) / 2,
-            grow: [r.width - (right - left), r.height - (bottom - top)],
-          };
-        });
-        return a;
-      };
-    }, root);
     await page.keyboard.press("i");
-    await page.waitForFunction(
-      () => (window as unknown as { landed?: unknown }).landed !== undefined,
-    );
-    const landed = (await page.evaluate(
-      () => (window as unknown as { landed?: unknown }).landed,
-    )) as { dx: number; dy: number; grow: number[] } | null;
-    if (!landed) throw new Error("nothing to compare");
-    // On the demo's box: same centre, and never larger than it.
-    expect(Math.abs(landed.dx)).toBeLessThan(2);
-    expect(Math.abs(landed.dy)).toBeLessThan(2);
-    expect(Math.max(...landed.grow)).toBeLessThan(2);
-
-    // Finish everything: the overlay is gone, the demo is where it was, nothing still runs.
-    await page.evaluate(() => {
-      for (const a of document.getAnimations())
-        if (a.effect?.getTiming().iterations !== Infinity) a.finish();
-    });
     await expect(sheet(page)).toHaveCount(0);
     await expect(specimen(page)).toHaveCount(0);
     await expect(demo(page).locator(".cp-demo")).toHaveCSS("opacity", "1");
+    await expect
+      .poll(() =>
+        page.evaluate(() => document.getAnimations().filter((a) => a.id.startsWith("sp-")).length),
+      )
+      .toBe(0);
     expect(await layoutBoxes(page)).toEqual(before);
-    const left = await page.evaluate(
-      () => document.getAnimations().filter((a) => a.id.startsWith("sp-")).length,
-    );
-    expect(left).toBe(0);
   });
 }
 

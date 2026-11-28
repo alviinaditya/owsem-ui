@@ -1851,9 +1851,9 @@ body {
   }
 }
 
+/* No transition: a scale in motion keeps its text soft (and a new example's fit is hidden anyway). */
 .cp-fit {
   transform-origin: center;
-  transition: transform 0.35s var(--ease);
 }
 
 /* A part's name in the anatomy table: it outlines the part on the stage. */
@@ -2165,6 +2165,12 @@ body {
 
 .demo-muted {
   color: var(--ow-muted);
+  font-size: var(--docs-text-small);
+}
+
+/* A validation message under a field that is invalid. */
+.demo-error {
+  color: var(--ow-critical);
   font-size: var(--docs-text-small);
 }
 
@@ -3586,27 +3592,14 @@ body {
   overflow: clip;
 }
 
-/* A new example fades in with a small rise of scale; under reduced motion, a plain fade. */
+/* A new example fades in; opacity only, as a scale would leave its text soft until it ends. */
 .cp-demo {
   animation: cp-fade var(--docs-dur-in) var(--ease);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .cp-demo {
-    animation-name: cp-in;
-  }
 }
 
 @keyframes cp-fade {
   from {
     opacity: 0;
-  }
-}
-
-@keyframes cp-in {
-  from {
-    opacity: 0;
-    scale: 0.98;
   }
 }
 
@@ -3616,23 +3609,24 @@ body {
  * recedes, outlines and lines draw in, then the names and numbers rise in a tiny stagger.
  */
 /*
- * The demo fades out as Inspect opens and back in as the specimen lands on it (the delay), by
- * opacity only: its layout never changes.
+ * A fade-through, by opacity only so text stays crisp and the two never show at once: opening,
+ * the demo fades out, then the specimen fades in (anatomy.tsx) at its place; closing, the
+ * specimen fades out, then the demo fades back (data-inspect stays until it is gone). The demo's
+ * layout never changes.
  */
 .cp-body .cp-stage .cp-demo {
-  transition: opacity 0.15s ease 0.17s;
+  transition: opacity 0.15s ease;
 }
 
 .cp-body[data-inspect] .cp-stage .cp-demo {
   animation: none;
   opacity: 0;
   pointer-events: none;
-  transition-delay: 0s;
 }
 
 .sp {
-  /* The sheet starts drawing as the specimen nears the middle. */
-  --sp-start: 220ms;
+  /* The sheet starts drawing once the demo is gone and the specimen is in. */
+  --sp-start: 300ms;
   position: absolute;
   inset: 0;
   z-index: 3;
@@ -3649,6 +3643,7 @@ body {
   transform-origin: center;
   opacity: 0.5;
   filter: grayscale(1);
+  transition: opacity 0.15s ease;
   pointer-events: none;
 }
 
@@ -3662,8 +3657,12 @@ body {
   opacity: 0;
 }
 
-/* The specimen moves to a new place (the Docs panel); the sheet waits for it. */
+/* The specimen moves to a new place (the Docs panel): it and the sheet fade out, move, fade in. */
 .sp[data-settling] .sp-ui {
+  opacity: 0;
+}
+
+.sp[data-settling] .sp-specimen {
   opacity: 0;
 }
 

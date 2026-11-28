@@ -18,8 +18,10 @@ import { useTokenSetup } from "../token-setup";
 import { readable } from "./readable";
 import type { Part } from "./types";
 
-/** How long the overlay stays after Inspect is turned off: the specimen's glide back. */
-export const ANATOMY_LEAVE_MS = 340;
+/** One fade of the demo or the specimen; Inspect fades one out, then the other in. */
+const FADE_MS = 150;
+/** How long the overlay stays after Inspect is turned off: the specimen fades out, and only then does the demo fade in. */
+export const ANATOMY_LEAVE_MS = FADE_MS + 30;
 
 /** Below this preview width the sheet keeps part names, height, and padding only. */
 const NARROW_WIDTH = 768;
@@ -37,12 +39,6 @@ const ROW = 32;
 const HEADER_H = 44;
 /** The sheet draws in once. */
 const REVEAL_MS = 1000;
-/** The specimen's glide between the demo's instance and the middle, both ways. */
-const GLIDE_MS = 320;
-/** The cross-fade between the demo's instance and the specimen. */
-const FADE_MS = 150;
-/** Where the specimen starts or ends when the example has no instance to come from. */
-const POP = 0.85;
 const MAX_ZOOM = 4;
 
 interface R {
@@ -198,7 +194,7 @@ interface Model {
   values: string[];
 }
 
-/** Where the specimen goes: a translate and scale (the CSS properties, not transform). */
+/** Where the specimen sits: a translate and scale (the CSS properties, not transform). */
 interface Plan {
   tx: number;
   ty: number;
@@ -211,7 +207,6 @@ const px = (value: string): number => Number.parseFloat(value) || 0;
 const crisp = (n: number): number => Math.round(n) + 0.5;
 const hit = (a: R, b: R, pad = 0): boolean =>
   a.x < b.x + b.w + pad && a.x + a.w + pad > b.x && a.y < b.y + b.h + pad && a.y + a.h + pad > b.y;
-const reduced = (): boolean => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /** A corner radius in CSS px: a length, or a share of the box. */
 function radiusOf(style: CSSStyleDeclaration, w: number, h: number): number {
@@ -221,13 +216,6 @@ function radiusOf(style: CSSStyleDeclaration, w: number, h: number): number {
   return Math.min(r, w / 2, h / 2);
 }
 
-function easingOf(body: HTMLElement): string {
-  return (
-    getComputedStyle(body).getPropertyValue("--ow-spring-glide").trim() ||
-    "cubic-bezier(0.2, 0.7, 0.2, 1)"
-  );
-}
-
 const pairOf = (value: string): number[] =>
   value === "none" ? [] : value.split(" ").map((v) => Number.parseFloat(v));
 
@@ -235,46 +223,29 @@ const cancelAll = (el: HTMLElement, id: string) => {
   for (const animation of el.getAnimations()) if (animation.id === id) animation.cancel();
 };
 
-/** Moves the specimen to a plan from where it is now: the `translate` and `scale` properties. */
-function glideTo(el: HTMLElement, plan: Plan, ms: number, easing: string) {
-  const style = getComputedStyle(el);
-  const from = { translate: style.translate, scale: style.scale };
-  cancelAll(el, "sp-glide");
-  const to = {
-    translate: `${plan.tx.toFixed(2)}px ${plan.ty.toFixed(2)}px`,
-    scale: String(plan.k),
-  };
-  el.style.translate = to.translate;
-  el.style.scale = to.scale;
-  if (ms <= 0 || reduced()) return;
-  el.animate([from, to], { duration: ms, easing }).id = "sp-glide";
-}
-
-/** Sets the plan with no motion, before the first paint. */
+/** Sets the plan with no motion: the `translate` and `scale` properties. */
 function place(el: HTMLElement, plan: Plan) {
-  cancelAll(el, "sp-glide");
   el.style.translate = `${plan.tx.toFixed(2)}px ${plan.ty.toFixed(2)}px`;
   el.style.scale = String(plan.k);
 }
 
-/** Cross-fades the specimen in (a faint grey wireframe) or out (back to colour as it lands). */
-function fade(
-  el: HTMLElement,
-  to: "in" | "out",
-  delay = 0,
-  from?: { opacity: string; filter: string },
-) {
-  const style = getComputedStyle(el);
-  const start = from ?? { opacity: style.opacity, filter: style.filter };
+/**
+ * Fades the specimen in after the demo has gone, or out before the demo returns. Opacity only, so
+ * its text stays crisp, and the two are never both on screen.
+ */
+function fade(el: HTMLElement, to: "in" | "out", delay = 0) {
+  // Out starts from where an unfinished fade-in is; in ends at the resting opacity.
+  const from = to === "out" ? getComputedStyle(el).opacity : "";
   cancelAll(el, "sp-fade");
-  const end =
-    to === "in"
-      ? { opacity: "0.5", filter: "grayscale(1)" }
-      : { opacity: "0", filter: "grayscale(0)" };
-  el.style.opacity = end.opacity;
-  el.style.filter = end.filter;
-  el.animate([start, end], { duration: FADE_MS, delay, easing: "ease", fill: "backwards" }).id =
-    "sp-fade";
+  const rest = getComputedStyle(el).opacity;
+  const frames =
+    to === "in" ? [{ opacity: "0" }, { opacity: rest }] : [{ opacity: from }, { opacity: "0" }];
+  el.animate(frames, {
+    duration: FADE_MS,
+    delay,
+    easing: "ease",
+    fill: to === "in" ? "backwards" : "forwards",
+  }).id = "sp-fade";
 }
 
 const scaleOf = (el: HTMLElement): number => pairOf(getComputedStyle(el).scale)[0] ?? 1;
@@ -294,45 +265,6 @@ function planAt(wrap: HTMLElement, root: HTMLElement, point: { x: number; y: num
     ty: point.y - (wrap.offsetTop + wrap.offsetHeight / 2) - dy * k,
     k,
   };
-}
-
-/**
- * The box the specimen leaves and returns to: the demo's first instance of the root part, else
- * (the demo shows only a trigger, or no wrapper) what the demo shows, so it always lands on
- * something real.
- */
-function originOf(demo: HTMLElement, body: HTMLElement, selector: string) {
-  const box = body.getBoundingClientRect();
-  const found = (r: DOMRect) => ({
-    x: r.left - box.left + r.width / 2,
-    y: r.top - box.top + r.height / 2,
-    w: r.width,
-    h: r.height,
-  });
-  for (const el of demo.querySelectorAll<HTMLElement>(selector)) {
-    const r = el.getBoundingClientRect();
-    if (r.width > 0 && r.height > 0) return found(r);
-  }
-  let left = Number.POSITIVE_INFINITY;
-  let top = left;
-  let right = Number.NEGATIVE_INFINITY;
-  let bottom = right;
-  const stack = [...(demo.querySelector(".cp-demo")?.children ?? [])];
-  for (const el of stack) {
-    const r = el.getBoundingClientRect();
-    if (r.width > 0 && r.height > 0) {
-      left = Math.min(left, r.left);
-      top = Math.min(top, r.top);
-      right = Math.max(right, r.right);
-      bottom = Math.max(bottom, r.bottom);
-    } else stack.push(...el.children);
-  }
-  return right > left ? found(new DOMRect(left, top, right - left, bottom - top)) : null;
-}
-
-/** The scale at which the specimen's root fits inside the origin box (never larger than it). */
-function fitScale(origin: { w: number; h: number }, root: DOMRect, k0: number) {
-  return Math.min(origin.w / (root.width / k0), origin.h / (root.height / k0));
 }
 
 interface Env {
@@ -1328,33 +1260,14 @@ export function Anatomy({
     const sheet = rootRef.current;
     const rootPart = latest.current.parts[0];
     if (!body || !demo || !wrap || !mark || !sheet || !rootPart) return;
-    const easing = easingOf(body);
     const now = latest.current;
-    const specimenRoot = wrap.querySelector<HTMLElement>(rootPart.selector);
 
     if (now.leaving) {
-      if (phase.current === "off" || !specimenRoot) return;
+      // The mirror of the open: the specimen fades out where it is, then the demo fades in.
+      if (phase.current === "off") return;
       phase.current = "off";
       applied.current = null;
-      // The mirror of the open: glide and shrink onto the demo's instance, crossing into it.
-      const origin = originOf(demo, body, rootPart.selector);
-      const k0 = scaleOf(wrap);
-      const root0 = specimenRoot.getBoundingClientRect();
-      const bodyBox = body.getBoundingClientRect();
-      const here = specimenRoot.getBoundingClientRect();
-      const plan = origin
-        ? planAt(wrap, specimenRoot, origin, fitScale(origin, root0, k0))
-        : planAt(
-            wrap,
-            specimenRoot,
-            {
-              x: here.left - bodyBox.left + here.width / 2,
-              y: here.top - bodyBox.top + here.height / 2,
-            },
-            k0 * POP,
-          );
-      glideTo(wrap, plan, GLIDE_MS, easing);
-      fade(wrap, "out", Math.max(0, GLIDE_MS - FADE_MS));
+      fade(wrap, "out");
       return;
     }
 
@@ -1366,7 +1279,7 @@ export function Anatomy({
       probe: mark,
     });
     if (!result) return;
-    const { plan, goal } = result;
+    const { plan } = result;
 
     const was = applied.current;
     const same =
@@ -1377,39 +1290,28 @@ export function Anatomy({
     if (!same) {
       applied.current = plan;
       if (phase.current === "new") {
-        // Mount: sit exactly over the demo's instance before the first paint, then grow to the
-        // middle. Without an instance to come from, pop in from the middle.
+        // Mount: already in its place, it fades in once the demo has faded out.
         phase.current = "on";
         glide.current = false;
-        if (!reduced()) {
-          const origin = originOf(demo, body, rootPart.selector);
-          const r0 = specimenRoot?.getBoundingClientRect();
-          if (origin && specimenRoot && r0?.height) {
-            place(wrap, planAt(wrap, specimenRoot, origin, fitScale(origin, r0, scaleOf(wrap))));
-          } else if (specimenRoot) {
-            place(wrap, planAt(wrap, specimenRoot, goal, plan.k * POP));
-          }
-        }
-        wrap.style.opacity = "0";
-        fade(wrap, "in", 0, { opacity: "0", filter: "grayscale(0)" });
-        glideTo(wrap, plan, GLIDE_MS, easing);
+        place(wrap, plan);
+        fade(wrap, "in", FADE_MS);
       } else if (phase.current === "off") {
         phase.current = "on";
-        fade(wrap, "in");
-        glideTo(wrap, plan, GLIDE_MS, easing);
-      } else {
-        // The layout moved (the Docs panel): glide, with the sheet waiting.
-        const ms = glide.current ? GLIDE_MS : 0;
+        place(wrap, plan);
+        fade(wrap, "in", FADE_MS);
+      } else if (glide.current) {
+        // The layout moved (the Docs panel): the specimen and the sheet fade out, move while
+        // hidden, and fade back in.
         glide.current = false;
-        glideTo(wrap, plan, ms, easing);
-        if (ms) {
-          sheet.dataset.settling = "";
-          clearTimeout(settle.current);
-          settle.current = window.setTimeout(() => {
-            delete sheet.dataset.settling;
-            compute.current();
-          }, ms);
-        }
+        sheet.dataset.settling = "";
+        clearTimeout(settle.current);
+        settle.current = window.setTimeout(() => {
+          if (applied.current) place(wrap, applied.current);
+          delete sheet.dataset.settling;
+          compute.current();
+        }, FADE_MS);
+      } else if (!sheet.dataset.settling) {
+        place(wrap, plan);
       }
     }
 

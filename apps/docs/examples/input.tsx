@@ -1,7 +1,7 @@
 "use client";
 
 import { Input, type InputSize } from "owsem-ui/base";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { ComponentPage, type ExamplePageProps } from "@/components/component-page/component-page";
 import { Icon } from "@/components/icons/icon";
 import { defineComponent, exampleFile, importPath } from "@/lib/examples";
@@ -80,16 +80,20 @@ function Validation({ lang }: { lang: Lang }) {
   const t = TEXT[lang];
   const [value, setValue] = useState("");
   const valid = looksLikeEmail(value);
+  const messageId = useId();
   return (
     <div className="demo-input demo-col">
       <Input
         aria-label={t.email}
         aria-invalid={!valid || undefined}
+        aria-describedby={messageId}
         placeholder={t.placeholder}
         value={value}
         onValueChange={setValue}
       />
-      <p className="demo-muted">{valid ? t.hint : t.error}</p>
+      <p id={messageId} className={valid ? "demo-muted" : "demo-error"}>
+        {valid ? t.hint : t.error}
+      </p>
     </div>
   );
 }
@@ -197,11 +201,14 @@ export const inputDefinition = defineComponent({
               "<Input",
               `  aria-label="${t.email}"`,
               "  aria-invalid={!valid || undefined}",
+              '  aria-describedby="email-message"',
               `  placeholder="${t.placeholder}"`,
               "  value={value}",
               "  onValueChange={setValue}",
               "/>",
-              `<p>{valid ? "${t.hint}" : "${t.error}"}</p>`,
+              '<p id="email-message" style={{ color: valid ? "var(--ow-muted)" : "var(--ow-critical)" }}>',
+              `  {valid ? "${t.hint}" : "${t.error}"}`,
+              "</p>",
             ],
             [
               '  const [value, setValue] = useState("");',

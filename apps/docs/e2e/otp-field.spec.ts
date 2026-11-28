@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { demo, pageTests, pick, visit } from "./example-page.ts";
 
 pageTests("otp-field", {
-  examples: ["Default", "Sizes", "Grouped", "With an error", "Masked"],
+  examples: ["Default", "Sizes", "Grouped", "States", "Masked"],
   parts: ["Root", "Input"],
   specimen: ".ow-otp-field",
 });
@@ -72,7 +72,7 @@ test("the grouped example has a dash between two groups of three", async ({ page
 
 test("a wrong complete code shows the error, and the right one clears it", async ({ page }) => {
   await visit(page, "/en/otp-field");
-  await pick(page, "With an error");
+  await pick(page, "States");
   const slots = demo(page).getByRole("textbox", { name: "Verification code" });
   await slots.first().click();
   await page.keyboard.type("654321");

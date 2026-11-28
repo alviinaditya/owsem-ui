@@ -17,6 +17,8 @@ const TEXT = {
     pin: "PIN",
     help: "Kami mengirim 6 angka ke ponsel Anda. Kodenya 123456.",
     error: "Kode salah. Coba lagi.",
+    disabled: "Nonaktif",
+    readOnly: "Hanya baca",
   },
   en: {
     code: "Verification code",
@@ -27,6 +29,8 @@ const TEXT = {
     pin: "PIN",
     help: "We texted 6 digits to your phone. The code is 123456.",
     error: "That code is wrong. Try again.",
+    disabled: "Disabled",
+    readOnly: "Read-only",
   },
 } satisfies Record<Lang, Record<string, string>>;
 
@@ -70,17 +74,21 @@ function Grouped({ lang }: { lang: Lang }) {
   );
 }
 
-function WithError({ lang }: { lang: Lang }) {
+function States({ lang }: { lang: Lang }) {
   const t = TEXT[lang];
   const [code, setCode] = useState("");
   const invalid = code.length === 6 && code !== "123456";
   return (
-    <Field.Root name="code" invalid={invalid} className="demo-otp">
-      <Field.Label>{t.code}</Field.Label>
-      <OTPField.Root length={6} value={code} onValueChange={setCode} />
-      <Field.Description>{t.help}</Field.Description>
-      <Field.Error match={invalid}>{t.error}</Field.Error>
-    </Field.Root>
+    <div className="demo-col demo-otp">
+      <Field.Root name="code" invalid={invalid}>
+        <Field.Label>{t.code}</Field.Label>
+        <OTPField.Root length={6} value={code} onValueChange={setCode} />
+        <Field.Description>{t.help}</Field.Description>
+        <Field.Error match={invalid}>{t.error}</Field.Error>
+      </Field.Root>
+      <OTPField.Root length={6} disabled defaultValue="123" aria-label={t.disabled} />
+      <OTPField.Root length={6} readOnly defaultValue="123456" aria-label={t.readOnly} />
+    </div>
   );
 }
 
@@ -167,14 +175,14 @@ export const otpFieldDefinition = defineComponent({
       ],
     },
     {
-      id: "error",
-      title: { id: "Dengan error", en: "With an error" },
+      id: "states",
+      title: { id: "Status", en: "States" },
       description: {
-        id: "Saat kode lengkap tapi salah, Field menandainya invalid: slot jadi critical dan seluruh baris bergetar sekali. Ketik 123456 untuk menghapusnya.",
-        en: "When the code is complete but wrong, Field marks it invalid: the slots turn critical and the whole row shakes once. Type 123456 to clear it.",
+        id: "Saat kode lengkap tapi salah, Field menandainya invalid: slot jadi critical dan seluruh baris bergetar sekali. Ketik 123456 untuk menghapusnya. disabled meredupkan dan readOnly menyimpan kodenya.",
+        en: "When the code is complete but wrong, Field marks it invalid: the slots turn critical and the whole row shakes once. Type 123456 to clear it. disabled dims it and readOnly keeps the code.",
       },
       uses: ["OTPField", "Field"],
-      demo: (lang) => <WithError lang={lang} />,
+      demo: (lang) => <States lang={lang} />,
       code: (setup, lang) => {
         const t = TEXT[lang];
         return [
@@ -188,6 +196,8 @@ export const otpFieldDefinition = defineComponent({
               `  <Field.Description>${t.help}</Field.Description>`,
               `  <Field.Error match={invalid}>${t.error}</Field.Error>`,
               "</Field.Root>",
+              `<OTPField.Root length={6} disabled defaultValue="123" aria-label="${t.disabled}" />`,
+              `<OTPField.Root length={6} readOnly defaultValue="123456" aria-label="${t.readOnly}" />`,
             ],
             [
               '  const [code, setCode] = useState("");',

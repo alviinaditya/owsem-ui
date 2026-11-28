@@ -387,8 +387,8 @@ export const commandMenuDefinition = defineComponent({
       code: (setup, lang) => [file(setup, lang)],
     },
     {
-      id: "large",
-      title: { id: "Besar", en: "Large" },
+      id: "sizes",
+      title: { id: "Ukuran", en: "Sizes" },
       description: {
         id: 'size="lg" di Popup dan Trigger: teks 16px dan baris yang lebih tinggi.',
         en: 'size="lg" on the Popup and the Trigger: 16px text and taller rows.',

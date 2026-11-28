@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { demo, pageTests, pick, visit } from "./example-page.ts";
 
 pageTests("number-field", {
-  examples: ["Default", "Sizes", "Format", "Scrub", "With a field and an error"],
+  examples: ["Default", "Sizes", "Format", "Scrub", "States"],
   parts: ["Root", "ScrubArea", "Group", "Decrement", "Input", "Increment"],
   specimen: ".ow-number-field",
 });
@@ -48,13 +48,13 @@ test("a value over ten marks the field invalid with its error, and stepping down
   page,
 }) => {
   await visit(page, "/en/number-field");
-  await pick(page, "With a field and an error");
+  await pick(page, "States");
   const input = demo(page).getByRole("textbox", { name: "Seats" });
   await expect(input).toHaveValue("12");
   await expect(input).toHaveAttribute("aria-invalid", "true");
   await expect(demo(page).getByText("Choose 10 seats or fewer.")).toBeVisible();
-  await demo(page).getByRole("button", { name: "Decrease" }).click();
-  await demo(page).getByRole("button", { name: "Decrease" }).click();
+  await demo(page).getByRole("button", { name: "Decrease" }).first().click();
+  await demo(page).getByRole("button", { name: "Decrease" }).first().click();
   await expect(input).toHaveValue("10");
   await expect(demo(page).getByText("Choose 10 seats or fewer.")).toHaveCount(0);
 });

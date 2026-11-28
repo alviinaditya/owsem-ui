@@ -2,7 +2,7 @@ import { expect, type Page, test } from "@playwright/test";
 import { demo, pageTests, pick, specimen, visit } from "./example-page.ts";
 
 pageTests("command-menu", {
-  examples: ["Default", "Large", "Blur backdrop", "Solid", "Empty"],
+  examples: ["Default", "Sizes", "Blur backdrop", "Solid", "Empty"],
   parts: ["Root", "Trigger", "Popup", "Input", "List", "GroupLabel", "Item", "Shortcut", "Footer"],
   specimen: ".ow-command-menu__popup .ow-command-menu__item",
 });
@@ -82,7 +82,7 @@ test("the examples set the size, the backdrop, and the surface", async ({ page }
   const popup = demo(page).locator(".ow-command-menu__popup");
   await expect(popup).toHaveAttribute("data-size", "md");
   await expect(demo(page).locator(".ow-command-menu__backdrop")).not.toHaveAttribute("data-blur");
-  await pick(page, "Large");
+  await pick(page, "Sizes");
   await expect(popup).toHaveAttribute("data-size", "lg");
   await pick(page, "Blur backdrop");
   await expect(demo(page).locator(".ow-command-menu__backdrop")).toHaveAttribute("data-blur", "");

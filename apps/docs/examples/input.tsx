@@ -76,7 +76,7 @@ function Icons({ lang }: { lang: Lang }) {
   );
 }
 
-function Validation({ lang }: { lang: Lang }) {
+function States({ lang }: { lang: Lang }) {
   const t = TEXT[lang];
   const [value, setValue] = useState("");
   const valid = looksLikeEmail(value);
@@ -94,14 +94,6 @@ function Validation({ lang }: { lang: Lang }) {
       <p id={messageId} className={valid ? "demo-muted" : "demo-error"}>
         {valid ? t.hint : t.error}
       </p>
-    </div>
-  );
-}
-
-function Locked({ lang }: { lang: Lang }) {
-  const t = TEXT[lang];
-  return (
-    <div className="demo-input demo-col">
       <Input aria-label={t.disabled} disabled defaultValue="ana@owsem.dev" />
       <Input aria-label={t.readOnly} readOnly defaultValue="ana@owsem.dev" />
     </div>
@@ -183,14 +175,14 @@ export const inputDefinition = defineComponent({
       },
     },
     {
-      id: "validation",
-      title: { id: "Validasi", en: "Validation" },
+      id: "states",
+      title: { id: "Status", en: "States" },
       description: {
-        id: "aria-invalid mewarnai kolom critical dan menggetarkannya sekali; di dalam Field, Base UI yang mengaturnya.",
-        en: "aria-invalid gives it the critical tint and one shake; inside a Field, Base UI sets it for you.",
+        id: "aria-invalid mewarnai kolom critical dan menggetarkannya sekali; di dalam Field, Base UI yang mengaturnya. disabled meredupkan dan melepas fokus; readOnly tetap fokus dan tampil biasa.",
+        en: "aria-invalid gives it the critical tint and one shake; inside a Field, Base UI sets it for you. disabled dims it and drops focus; readOnly keeps focus and the normal look.",
       },
       uses: ["Input"],
-      demo: (lang) => <Validation lang={lang} />,
+      demo: (lang) => <States lang={lang} />,
       code: (setup, lang) => {
         const t = TEXT[lang];
         return [
@@ -209,33 +201,12 @@ export const inputDefinition = defineComponent({
               '<p id="email-message" style={{ color: valid ? "var(--ow-muted)" : "var(--ow-critical)" }}>',
               `  {valid ? "${t.hint}" : "${t.error}"}`,
               "</p>",
+              `<Input aria-label="${t.disabled}" disabled defaultValue="ana@owsem.dev" />`,
+              `<Input aria-label="${t.readOnly}" readOnly defaultValue="ana@owsem.dev" />`,
             ],
             [
               '  const [value, setValue] = useState("");',
               '  const valid = value === "" || /^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(value);',
-            ],
-          ),
-        ];
-      },
-    },
-    {
-      id: "disabled",
-      title: { id: "Nonaktif", en: "Disabled" },
-      description: {
-        id: "disabled meredupkan dan melepas fokus; readOnly tetap fokus dan tampil biasa.",
-        en: "disabled dims it and drops focus; readOnly keeps focus and the normal look.",
-      },
-      uses: ["Input"],
-      demo: (lang) => <Locked lang={lang} />,
-      code: (setup, lang) => {
-        const t = TEXT[lang];
-        return [
-          exampleFile(
-            "Locked",
-            [imp(setup)],
-            [
-              `<Input aria-label="${t.disabled}" disabled defaultValue="ana@owsem.dev" />`,
-              `<Input aria-label="${t.readOnly}" readOnly defaultValue="ana@owsem.dev" />`,
             ],
           ),
         ];

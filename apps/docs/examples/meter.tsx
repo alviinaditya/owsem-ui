@@ -165,6 +165,29 @@ export const meterDefinition = defineComponent({
   imports: ["Meter"],
   examples: [
     {
+      id: "default",
+      title: { id: "Dasar", en: "Default" },
+      description: {
+        id: "Nilai dalam rentang 0 sampai 100, dengan label di awal dan nilai di akhir.",
+        en: "A value in a range of 0 to 100, with the label at the start and the value at the end.",
+      },
+      uses: ["Meter", "Meter.Label", "Meter.Value"],
+      demo: (lang) => <Default lang={lang} />,
+      code: (setup, lang) => [
+        exampleFile(
+          "StorageMeter",
+          [`import { Meter } from "${importPath(setup, "meter")}";`],
+          [
+            "<Meter.Root value={62}>",
+            `  <Meter.Label>${TEXT[lang].storage}</Meter.Label>`,
+            "  <Meter.Value />",
+            "  <Meter.Track />",
+            "</Meter.Root>",
+          ],
+        ),
+      ],
+    },
+    {
       id: "breakdown",
       title: { id: "Rincian", en: "Breakdown" },
       description: {
@@ -235,29 +258,6 @@ export const meterDefinition = defineComponent({
           ),
         ];
       },
-    },
-    {
-      id: "default",
-      title: { id: "Dasar", en: "Default" },
-      description: {
-        id: "Nilai dalam rentang 0 sampai 100, dengan label di awal dan nilai di akhir.",
-        en: "A value in a range of 0 to 100, with the label at the start and the value at the end.",
-      },
-      uses: ["Meter", "Meter.Label", "Meter.Value"],
-      demo: (lang) => <Default lang={lang} />,
-      code: (setup, lang) => [
-        exampleFile(
-          "StorageMeter",
-          [`import { Meter } from "${importPath(setup, "meter")}";`],
-          [
-            "<Meter.Root value={62}>",
-            `  <Meter.Label>${TEXT[lang].storage}</Meter.Label>`,
-            "  <Meter.Value />",
-            "  <Meter.Track />",
-            "</Meter.Root>",
-          ],
-        ),
-      ],
     },
     {
       id: "sizes",

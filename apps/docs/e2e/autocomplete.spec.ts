@@ -2,7 +2,7 @@ import { expect, type Page, test } from "@playwright/test";
 import { demo, pageTests, pick, specimen, visit } from "./example-page.ts";
 
 pageTests("autocomplete", {
-  examples: ["Default", "Sizes", "Inline", "Grouped", "Buttons"],
+  examples: ["Default", "Sizes", "Inline", "Groups", "Buttons", "States"],
   parts: [
     "Root",
     "InputGroup",

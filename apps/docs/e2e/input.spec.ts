@@ -2,14 +2,14 @@ import { expect, test } from "@playwright/test";
 import { demo, pageTests, pick, visit } from "./example-page.ts";
 
 pageTests("input", {
-  examples: ["Default", "Sizes", "Icons", "Validation", "Disabled", "Textarea"],
+  examples: ["Default", "Sizes", "Icons", "States", "Textarea"],
   parts: ["Wrapper", "Input", "Icon"],
   specimen: ".ow-input__icon",
 });
 
 test("typing an address turns the input invalid, and back once it is one", async ({ page }) => {
   await visit(page, "/en/input");
-  await pick(page, "Validation");
+  await pick(page, "States");
   const email = demo(page).getByRole("textbox", { name: "Email" });
   await expect(email).toHaveValue("");
   await email.pressSequentially("ana@");

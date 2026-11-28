@@ -2,7 +2,7 @@ import { expect, type Page, test } from "@playwright/test";
 import { demo, pageTests, pick, specimen, visit } from "./example-page.ts";
 
 pageTests("combobox", {
-  examples: ["Default", "Sizes", "Multiple", "Grouped", "Async", "States"],
+  examples: ["Default", "Sizes", "Multiple", "Groups", "Async", "States"],
   parts: [
     "Root",
     "InputGroup",

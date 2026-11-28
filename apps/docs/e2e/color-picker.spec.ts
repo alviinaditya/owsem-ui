@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { demo, pageTests, pick, visit } from "./example-page.ts";
 
 pageTests("color-picker", {
-  examples: ["Default", "Callbacks", "Format", "Popover", "Themes"],
+  examples: ["Default", "Callbacks", "Format", "Popover", "Sizes", "Themes"],
   parts: ["Root", "Area", "Hue", "Alpha", "EyeDropper", "Preview", "Format", "Field", "Swatches"],
   specimen: ".ow-color-picker__area .ow-color-picker__thumb",
 });

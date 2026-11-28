@@ -20,6 +20,8 @@ const TEXT = {
     seats: "Kursi",
     seatsHelp: "Paling banyak 10 kursi per pesanan.",
     seatsError: "Pilih 10 kursi atau kurang.",
+    disabled: "Nonaktif",
+    readOnly: "Hanya baca",
     locale: "id-ID",
     currency: "IDR",
   },
@@ -35,6 +37,8 @@ const TEXT = {
     seats: "Seats",
     seatsHelp: "At most 10 seats per order.",
     seatsError: "Choose 10 seats or fewer.",
+    disabled: "Disabled",
+    readOnly: "Read-only",
     locale: "en-US",
     currency: "USD",
   },
@@ -121,17 +125,25 @@ function Scrub({ lang }: { lang: Lang }) {
   );
 }
 
-function WithError({ lang }: { lang: Lang }) {
+function States({ lang }: { lang: Lang }) {
   const t = TEXT[lang];
   const [seats, setSeats] = useState<number | null>(12);
   const invalid = seats !== null && seats > 10;
   return (
-    <Field.Root name="seats" invalid={invalid} className="demo-number-field">
-      <Field.Label>{t.seats}</Field.Label>
-      <NumberField.Root value={seats} onValueChange={setSeats} min={1} />
-      <Field.Description>{t.seatsHelp}</Field.Description>
-      <Field.Error match={invalid}>{t.seatsError}</Field.Error>
-    </Field.Root>
+    <div className="demo-col">
+      <Field.Root name="seats" invalid={invalid} className="demo-number-field">
+        <Field.Label>{t.seats}</Field.Label>
+        <NumberField.Root value={seats} onValueChange={setSeats} min={1} />
+        <Field.Description>{t.seatsHelp}</Field.Description>
+        <Field.Error match={invalid}>{t.seatsError}</Field.Error>
+      </Field.Root>
+      <div className="demo-number-field">
+        <NumberField.Root disabled defaultValue={4} aria-label={t.disabled} />
+      </div>
+      <div className="demo-number-field">
+        <NumberField.Root readOnly defaultValue={4} aria-label={t.readOnly} />
+      </div>
+    </div>
   );
 }
 
@@ -268,14 +280,14 @@ export const numberFieldDefinition = defineComponent({
       ],
     },
     {
-      id: "error",
-      title: { id: "Dengan field dan error", en: "With a field and an error" },
+      id: "states",
+      title: { id: "Status", en: "States" },
       description: {
-        id: "Field memberi label, deskripsi, dan error; invalid mewarnai field jadi critical. Coba kurangi sampai 10.",
-        en: "Field gives it a label, a description, and an error; invalid turns the field critical. Step down to 10 to clear it.",
+        id: "Field memberi label, deskripsi, dan error; invalid mewarnai field jadi critical. Coba kurangi sampai 10. disabled meredupkan dan readOnly menyimpan nilainya.",
+        en: "Field gives it a label, a description, and an error; invalid turns the field critical. Step down to 10 to clear it. disabled dims it and readOnly keeps the value.",
       },
       uses: ["NumberField", "Field"],
-      demo: (lang) => <WithError lang={lang} />,
+      demo: (lang) => <States lang={lang} />,
       code: (setup, lang) => {
         const t = TEXT[lang];
         return [
@@ -289,6 +301,8 @@ export const numberFieldDefinition = defineComponent({
               `  <Field.Description>${t.seatsHelp}</Field.Description>`,
               `  <Field.Error match={invalid}>${t.seatsError}</Field.Error>`,
               "</Field.Root>",
+              `<NumberField.Root disabled defaultValue={4} aria-label="${t.disabled}" />`,
+              `<NumberField.Root readOnly defaultValue={4} aria-label="${t.readOnly}" />`,
             ],
             [
               "  const [seats, setSeats] = useState<number | null>(12);",

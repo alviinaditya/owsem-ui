@@ -1,6 +1,11 @@
 "use client";
 
-import { type ColorFormat, ColorPicker, ColorPickerPopover } from "owsem-ui/owsem";
+import {
+  type ColorFormat,
+  ColorPicker,
+  ColorPickerPopover,
+  type ColorPickerSize,
+} from "owsem-ui/owsem";
 import { useState } from "react";
 import { ComponentPage, type ExamplePageProps } from "@/components/component-page/component-page";
 import { getDictionary } from "@/lib/dictionaries";
@@ -110,6 +115,34 @@ function Popover({ lang }: { lang: Lang }) {
         swatches={swatches(lang)}
         labels={labels}
       />
+    </div>
+  );
+}
+
+const SIZES: readonly ColorPickerSize[] = ["sm", "md", "lg"];
+
+/** The popover's trigger at each size, as a field and as a swatch. */
+function Sizes({ lang }: { lang: Lang }) {
+  const labels = labelsOf(lang);
+  return (
+    <div className="demo-color-sizes">
+      {SIZES.map((size) => (
+        <div key={size} className="demo-color-row">
+          <ColorPickerPopover
+            size={size}
+            aria-label={`${TEXT[lang].brand}, ${size}`}
+            defaultValue={START}
+            labels={labels}
+          />
+          <ColorPickerPopover
+            size={size}
+            variant="swatch"
+            aria-label={`${TEXT[lang].brand}, ${size}`}
+            defaultValue={START}
+            labels={labels}
+          />
+        </div>
+      ))}
     </div>
   );
 }
@@ -264,6 +297,29 @@ export const colorPickerDefinition = defineComponent({
           `  defaultValue="${START}"`,
           "/>",
         ]),
+      ],
+    },
+    {
+      id: "sizes",
+      title: { id: "Ukuran", en: "Sizes" },
+      description: {
+        id: "size di ColorPickerPopover mengatur tinggi dan teks trigger: 13, 14, atau 16px, sebagai kolom maupun persegi warna.",
+        en: "size on ColorPickerPopover sets the trigger's height and type: 13, 14, or 16px, as a field or as a square of the color.",
+      },
+      uses: ["ColorPickerPopover"],
+      demo: (lang) => <Sizes lang={lang} />,
+      code: (setup, lang) => [
+        clientFile(
+          "BrandSizes",
+          imp(setup, "ColorPickerPopover"),
+          SIZES.flatMap((size) => [
+            "<ColorPickerPopover",
+            `  size="${size}"`,
+            `  aria-label="${TEXT[lang].brand}, ${size}"`,
+            `  defaultValue="${START}"`,
+            "/>",
+          ]),
+        ),
       ],
     },
     {

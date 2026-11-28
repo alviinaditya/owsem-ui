@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { demo, pageTests, pick, visit } from "./example-page.ts";
 
 pageTests("meter", {
-  examples: ["Breakdown", "Default", "Sizes", "Tones", "Custom format"],
+  examples: ["Default", "Breakdown", "Sizes", "Tones", "Custom format"],
   parts: [
     "Root",
     "Label",
@@ -42,6 +42,7 @@ test("a breakdown: the week is a meter of 32 of 40 hours, its parts a legend out
   page,
 }) => {
   await visit(page, "/en/meter");
+  await pick(page, "Breakdown");
   const meter = demo(page).getByRole("meter", { name: "Working week" });
   await expect(meter).toHaveAttribute("aria-valuenow", "32");
   await expect(meter).toHaveAttribute("aria-valuemax", "40");
@@ -60,6 +61,7 @@ test("a breakdown starts on Focus; pressing a part picks it, pressing again clea
   page,
 }) => {
   await visit(page, "/en/meter");
+  await pick(page, "Breakdown");
   const meter = demo(page).getByRole("meter", { name: "Working week" });
   const items = demo(page)
     .getByRole("group", { name: "Parts of the working week" })
@@ -85,6 +87,7 @@ test("hovering a legend item or a part shows it for as long as the pointer is th
   page,
 }) => {
   await visit(page, "/en/meter");
+  await pick(page, "Breakdown");
   const meter = demo(page).getByRole("meter", { name: "Working week" });
   const items = demo(page)
     .getByRole("group", { name: "Parts of the working week" })
@@ -100,6 +103,7 @@ test("hovering a legend item or a part shows it for as long as the pointer is th
 
 test("the keyboard walks the legend and Space and Enter press an item", async ({ page }) => {
   await visit(page, "/en/meter");
+  await pick(page, "Breakdown");
   const items = demo(page)
     .getByRole("group", { name: "Parts of the working week" })
     .getByRole("button");
@@ -116,6 +120,7 @@ test("the keyboard walks the legend and Space and Enter press an item", async ({
 
 test("the parts and the rest add up to the track, all the bar's height", async ({ page }) => {
   await visit(page, "/en/meter");
+  await pick(page, "Breakdown");
   const meter = demo(page).getByRole("meter", { name: "Working week" });
   const shares = await meter.evaluate((el) => {
     const track = el.querySelector(".ow-meter__track") as HTMLElement;

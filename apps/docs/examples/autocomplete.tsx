@@ -16,6 +16,11 @@ const TEXT = {
     type: "Jenis",
     area: "Area",
     suggestions: "Saran",
+    disabled: "Nonaktif",
+    readOnly: "Hanya baca",
+    invalid: "Label wajib",
+    help: "Pilih satu label dari saran.",
+    error: "Label ini belum ada.",
     tags: [
       "fitur",
       "perbaikan",
@@ -37,6 +42,11 @@ const TEXT = {
     type: "Type",
     area: "Area",
     suggestions: "Suggestions",
+    disabled: "Disabled",
+    readOnly: "Read-only",
+    invalid: "Required tag",
+    help: "Pick one tag from the suggestions.",
+    error: "That tag does not exist yet.",
     tags: ["feature", "fix", "bug", "docs", "internal", "mobile", "accessibility", "performance"],
     types: ["feature", "fix", "bug"],
     areas: ["button", "dialog", "form", "navigation"],
@@ -58,15 +68,19 @@ function Tags({
   size,
   mode,
   label,
+  ...state
 }: {
   lang: Lang;
   size?: AutocompleteSize;
   mode?: "both" | "inline";
   label?: string;
+  disabled?: boolean;
+  readOnly?: boolean;
+  defaultValue?: string;
 }) {
   const t = TEXT[lang];
   return (
-    <Autocomplete.Root items={t.tags} size={size} mode={mode}>
+    <Autocomplete.Root items={t.tags} size={size} mode={mode} {...state}>
       <Autocomplete.Input aria-label={label} placeholder={t.placeholder} />
       <Autocomplete.Popup>
         <Autocomplete.Empty>{t.none}</Autocomplete.Empty>
@@ -205,6 +219,27 @@ function Specimen({ lang }: { lang: Lang }) {
           </Autocomplete.Positioner>
         </Autocomplete.Portal>
       </Autocomplete.Root>
+    </div>
+  );
+}
+
+/** A disabled and a read-only input holding a tag, and one in an invalid Field. */
+function States({ lang }: { lang: Lang }) {
+  const t = TEXT[lang];
+  return (
+    <div className="demo-col">
+      <div className="demo-combobox-field">
+        <Tags lang={lang} disabled defaultValue={t.tags[0] as string} label={t.disabled} />
+      </div>
+      <div className="demo-combobox-field">
+        <Tags lang={lang} readOnly defaultValue={t.tags[0] as string} label={t.readOnly} />
+      </div>
+      <Field.Root name="invalid" invalid className="demo-combobox-field">
+        <Field.Label>{t.invalid}</Field.Label>
+        <Tags lang={lang} />
+        <Field.Description>{t.help}</Field.Description>
+        <Field.Error match>{t.error}</Field.Error>
+      </Field.Root>
     </div>
   );
 }
@@ -376,6 +411,38 @@ export const autocompleteDefinition = defineComponent({
             ...indent(popup(lang)),
             "</Autocomplete.Root>",
           ]),
+          [`  const tags = ${list(lang)};`],
+        ),
+        FIELD_CSS,
+      ],
+    },
+    {
+      id: "states",
+      title: { id: "Status", en: "States" },
+      description: {
+        id: "Nonaktif meredupkan input dan tidak membuka apa pun; hanya baca menyimpan teksnya; di dalam Field yang invalid, input menjadi critical dan menggetar sekali.",
+        en: "Disabled dims the input and opens nothing; read only keeps the text; in an invalid Field it turns critical and shakes once.",
+      },
+      uses: ["Autocomplete", "Field"],
+      demo: (lang) => <States lang={lang} />,
+      code: (setup, lang) => [
+        exampleFile(
+          "States",
+          imp(setup, ["Field"]),
+          [
+            `<Autocomplete.Root items={tags} disabled defaultValue="${TEXT[lang].tags[0]}">`,
+            "  {/* …the same parts */}",
+            "</Autocomplete.Root>",
+            `<Autocomplete.Root items={tags} readOnly defaultValue="${TEXT[lang].tags[0]}">`,
+            "  {/* … */}",
+            "</Autocomplete.Root>",
+            '<Field.Root name="invalid" invalid>',
+            `  <Field.Label>${TEXT[lang].invalid}</Field.Label>`,
+            "  <Autocomplete.Root items={tags}>{/* … */}</Autocomplete.Root>",
+            `  <Field.Description>${TEXT[lang].help}</Field.Description>`,
+            `  <Field.Error match>${TEXT[lang].error}</Field.Error>`,
+            "</Field.Root>",
+          ],
           [`  const tags = ${list(lang)};`],
         ),
         FIELD_CSS,

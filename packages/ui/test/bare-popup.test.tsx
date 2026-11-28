@@ -275,11 +275,27 @@ async function rectOf(view: ReactElement, slot: string) {
   const screen = await render(view);
   await expect.poll(() => popupOf(slot)).not.toBeNull();
   const popup = popupOf(slot) as HTMLElement;
-  // Past the first frame, where the popup still sits at its starting style.
+  // Base UI drops the starting style a frame after mount; only then does the transition start.
+  await expect.poll(() => popup.hasAttribute("data-starting-style")).toBe(false);
+  for (const animation of document.getAnimations()) animation.finish();
   await expect.poll(() => popup.getAnimations().length).toBe(0);
-  const { x, y, width, height } = popup.getBoundingClientRect();
+  // Placed: the positioner may still be at the origin on a slow machine, so wait until it has moved
+  // there and stays.
+  const read = () => {
+    const { x, y, width, height } = popup.getBoundingClientRect();
+    return { x, y, width, height };
+  };
+  let last = read();
+  await expect
+    .poll(() => {
+      const now = read();
+      const still = JSON.stringify(now) === JSON.stringify(last);
+      last = now;
+      return still && (now.x !== 0 || now.y !== 0);
+    })
+    .toBe(true);
   await screen.unmount();
-  return { x, y, width, height };
+  return last;
 }
 
 describe("a Popup with no Portal or Positioner around it", () => {

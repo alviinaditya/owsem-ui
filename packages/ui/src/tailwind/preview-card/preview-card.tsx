@@ -5,6 +5,7 @@ import { useDirection } from "@base-ui/react/direction-provider";
 import { PreviewCard as BasePreviewCard } from "@base-ui/react/preview-card";
 import type { ReactElement } from "react";
 import { cn } from "../lib/cn";
+import { Placed, Placement, Unplaced } from "../lib/placed";
 import { previewCardSlots } from "./preview-card-variants";
 
 // Parts without a look of their own come straight from Base UI.
@@ -61,14 +62,16 @@ export function PreviewCardPositioner({
 }: PreviewCardPositionerProps): ReactElement {
   const direction = useDirection();
   return (
-    <BasePreviewCard.Positioner
-      data-slot="preview-card-positioner"
-      dir={direction}
-      {...props}
-      className={cn(previewCardSlots.positioner, className)}
-      sideOffset={sideOffset}
-      arrowPadding={arrowPadding}
-    />
+    <Placed>
+      <BasePreviewCard.Positioner
+        data-slot="preview-card-positioner"
+        dir={direction}
+        {...props}
+        className={cn(previewCardSlots.positioner, className)}
+        sideOffset={sideOffset}
+        arrowPadding={arrowPadding}
+      />
+    </Placed>
   );
 }
 
@@ -76,14 +79,25 @@ export interface PreviewCardPopupProps extends Omit<BasePreviewCard.Popup.Props,
   className?: string | undefined;
 }
 
-/** The card: the panel material with the popup shadow, for plain content such as an image and text. */
-export function PreviewCardPopup({ className, ...props }: PreviewCardPopupProps): ReactElement {
+/**
+ * The card: the panel material with the popup shadow, for plain content such as an image and text.
+ * Without a Positioner around it, it draws a Portal and a Positioner.
+ */
+export function PreviewCardPopup({
+  className,
+  children,
+  ...props
+}: PreviewCardPopupProps): ReactElement {
   return (
-    <BasePreviewCard.Popup
-      data-slot="preview-card-popup"
-      {...props}
-      className={cn(previewCardSlots.popup, className)}
-    />
+    <Placement portal={PreviewCardPortal} positioner={PreviewCardPositioner}>
+      <BasePreviewCard.Popup
+        data-slot="preview-card-popup"
+        {...props}
+        className={cn(previewCardSlots.popup, className)}
+      >
+        <Unplaced>{children}</Unplaced>
+      </BasePreviewCard.Popup>
+    </Placement>
   );
 }
 

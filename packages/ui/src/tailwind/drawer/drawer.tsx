@@ -6,6 +6,7 @@ import { Drawer as BaseDrawer } from "@base-ui/react/drawer";
 import { createContext, type ReactElement, useContext, useState } from "react";
 import { cn } from "../lib/cn";
 import { useMergedRefs } from "../lib/merge-refs";
+import { Placed, Placement, Unplaced } from "../lib/placed";
 import { useOpenState, useScrollLock } from "../lib/scroll-lock";
 import { drawerSlots } from "./drawer-variants";
 
@@ -94,7 +95,9 @@ export function DrawerPortal({
     <BaseDrawer.Portal data-slot="drawer-portal" {...props}>
       {backdrop ? <DrawerBackdrop /> : null}
       {/* A drawer nested in this one is not in a viewport yet. */}
-      <ViewportContext.Provider value={false}>{children}</ViewportContext.Provider>
+      <ViewportContext.Provider value={false}>
+        <Placed>{children}</Placed>
+      </ViewportContext.Provider>
     </BaseDrawer.Portal>
   );
 }
@@ -125,10 +128,16 @@ export interface DrawerPopupProps extends Omit<BaseDrawer.Popup.Props, "classNam
 
 /**
  * The sheet: the panel material with the popup shadow, at the edge the swipe direction names,
- * with the radius on the corners that face the page. It follows the finger while swiped. It takes
- * the text direction from DirectionProvider, since the portal leaves the subtree that sets `dir`.
+ * with the radius on the corners that face the page. It follows the finger while swiped. Without a
+ * Portal around it, it draws one, with the scrim. It takes the text direction from
+ * DirectionProvider, since the portal leaves the subtree that sets `dir`.
  */
-export function DrawerPopup({ className, ref, ...props }: DrawerPopupProps): ReactElement {
+export function DrawerPopup({
+  className,
+  children,
+  ref,
+  ...props
+}: DrawerPopupProps): ReactElement {
   const direction = useDirection();
   const [self, setSelf] = useState<HTMLDivElement | null>(null);
   useScrollLock(self, useContext(LockContext));
@@ -141,9 +150,15 @@ export function DrawerPopup({ className, ref, ...props }: DrawerPopupProps): Rea
       {...props}
       ref={merged}
       className={cn(drawerSlots.popup, className)}
-    />
+    >
+      <Unplaced>{children}</Unplaced>
+    </BaseDrawer.Popup>
   );
-  return inViewport ? popup : <DrawerViewport>{popup}</DrawerViewport>;
+  return (
+    <Placement portal={DrawerPortal}>
+      {inViewport ? popup : <DrawerViewport>{popup}</DrawerViewport>}
+    </Placement>
+  );
 }
 
 export interface DrawerContentProps extends Omit<BaseDrawer.Content.Props, "className"> {

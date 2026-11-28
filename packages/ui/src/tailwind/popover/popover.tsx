@@ -6,6 +6,7 @@ import { Popover as BasePopover } from "@base-ui/react/popover";
 import { createContext, type ReactElement, useContext, useState } from "react";
 import { cn } from "../lib/cn";
 import { useMergedRefs } from "../lib/merge-refs";
+import { Placed, Placement, Unplaced } from "../lib/placed";
 import { useRestingAnchor } from "../lib/resting-anchor";
 import { useOpenState, useScrollLock } from "../lib/scroll-lock";
 import { popoverSlots } from "./popover-variants";
@@ -71,16 +72,18 @@ export function PopoverPositioner({
   const direction = useDirection();
   const resting = useRestingAnchor(ref);
   return (
-    <BasePopover.Positioner
-      data-slot="popover-positioner"
-      dir={direction}
-      anchor={resting.anchor}
-      {...props}
-      ref={resting.ref}
-      className={cn(popoverSlots.positioner, className)}
-      sideOffset={sideOffset}
-      arrowPadding={arrowPadding}
-    />
+    <Placed>
+      <BasePopover.Positioner
+        data-slot="popover-positioner"
+        dir={direction}
+        anchor={resting.anchor}
+        {...props}
+        ref={resting.ref}
+        className={cn(popoverSlots.positioner, className)}
+        sideOffset={sideOffset}
+        arrowPadding={arrowPadding}
+      />
+    </Placed>
   );
 }
 
@@ -88,18 +91,30 @@ export interface PopoverPopupProps extends Omit<BasePopover.Popup.Props, "classN
   className?: string | undefined;
 }
 
-/** The panel: the panel material with the popup shadow. */
-export function PopoverPopup({ className, ref, ...props }: PopoverPopupProps): ReactElement {
+/**
+ * The panel: the panel material with the popup shadow. Without a Positioner around it, it draws a
+ * Portal and a Positioner.
+ */
+export function PopoverPopup({
+  className,
+  children,
+  ref,
+  ...props
+}: PopoverPopupProps): ReactElement {
   const [self, setSelf] = useState<HTMLDivElement | null>(null);
   useScrollLock(self, useContext(LockContext));
   const merged = useMergedRefs(setSelf, ref);
   return (
-    <BasePopover.Popup
-      data-slot="popover-popup"
-      {...props}
-      ref={merged}
-      className={cn(popoverSlots.popup, className)}
-    />
+    <Placement portal={PopoverPortal} positioner={PopoverPositioner}>
+      <BasePopover.Popup
+        data-slot="popover-popup"
+        {...props}
+        ref={merged}
+        className={cn(popoverSlots.popup, className)}
+      >
+        <Unplaced>{children}</Unplaced>
+      </BasePopover.Popup>
+    </Placement>
   );
 }
 

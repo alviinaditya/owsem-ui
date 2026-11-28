@@ -61,6 +61,7 @@ describe("src/tailwind (generated)", () => {
       "lib/glide/glide.ts",
       "lib/glide/use-glide.tsx",
       "lib/merge-refs.ts",
+      "lib/placed.tsx",
       "lib/reduced-motion.ts",
       "lib/resting-anchor.ts",
       "lib/scroll-lock.ts",

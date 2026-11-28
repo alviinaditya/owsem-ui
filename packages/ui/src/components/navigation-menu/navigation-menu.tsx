@@ -6,6 +6,7 @@ import { createContext, type ReactElement, type ReactNode, useContext } from "re
 import { cn } from "../../core/cn";
 import { GlideHighlight, useGlide } from "../../core/glide/use-glide";
 import { useMergedRefs } from "../../core/merge-refs";
+import { Placed, Placement, Unplaced } from "../../core/placed";
 import {
   type NavigationMenuSize,
   type NavigationMenuVariantProps,
@@ -247,17 +248,19 @@ export function NavigationMenuPositioner({
 }: NavigationMenuPositionerProps): ReactElement {
   const direction = useDirection();
   return (
-    <BaseNavigationMenu.Positioner
-      data-slot="navigation-menu-positioner"
-      dir={direction}
-      {...props}
-      className={cn(navigationMenuSlots.positioner, className)}
-      sideOffset={sideOffset}
-      collisionPadding={collisionPadding}
-      collisionAvoidance={collisionAvoidance}
-    >
-      {children ?? <NavigationMenuPopup />}
-    </BaseNavigationMenu.Positioner>
+    <Placed>
+      <BaseNavigationMenu.Positioner
+        data-slot="navigation-menu-positioner"
+        dir={direction}
+        {...props}
+        className={cn(navigationMenuSlots.positioner, className)}
+        sideOffset={sideOffset}
+        collisionPadding={collisionPadding}
+        collisionAvoidance={collisionAvoidance}
+      >
+        {children ?? <NavigationMenuPopup />}
+      </BaseNavigationMenu.Positioner>
+    </Placed>
   );
 }
 
@@ -266,7 +269,10 @@ export interface NavigationMenuPopupProps
   className?: string | undefined;
 }
 
-/** The panel with the popup shadow. It takes the Root's `size`. Without children it draws the Viewport. */
+/**
+ * The panel with the popup shadow. It takes the Root's `size`. Without children it draws the
+ * Viewport; without a Positioner around it, a Portal and a Positioner.
+ */
 export function NavigationMenuPopup({
   className,
   children,
@@ -274,14 +280,16 @@ export function NavigationMenuPopup({
 }: NavigationMenuPopupProps): ReactElement {
   const size = useContext(SizeContext);
   return (
-    <BaseNavigationMenu.Popup
-      data-slot="navigation-menu-popup"
-      data-size={size}
-      {...props}
-      className={cn(navigationMenuPopupVariants({ size }), className)}
-    >
-      {children ?? <NavigationMenuViewport />}
-    </BaseNavigationMenu.Popup>
+    <Placement portal={NavigationMenuPortal} positioner={NavigationMenuPositioner}>
+      <BaseNavigationMenu.Popup
+        data-slot="navigation-menu-popup"
+        data-size={size}
+        {...props}
+        className={cn(navigationMenuPopupVariants({ size }), className)}
+      >
+        <Unplaced>{children ?? <NavigationMenuViewport />}</Unplaced>
+      </BaseNavigationMenu.Popup>
+    </Placement>
   );
 }
 

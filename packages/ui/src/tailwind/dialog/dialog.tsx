@@ -6,6 +6,7 @@ import { useDirection } from "@base-ui/react/direction-provider";
 import { createContext, type ReactElement, useCallback, useContext, useRef, useState } from "react";
 import { cn } from "../lib/cn";
 import { useMergedRefs } from "../lib/merge-refs";
+import { Placed, Placement, Unplaced } from "../lib/placed";
 import { useOpenState, useScrollLock } from "../lib/scroll-lock";
 import { dialogSlots } from "./dialog-variants";
 
@@ -80,7 +81,7 @@ export function DialogPortal({
   return (
     <BaseDialog.Portal data-slot="dialog-portal" {...props}>
       {backdrop ? <DialogBackdrop /> : null}
-      {children}
+      <Placed>{children}</Placed>
     </BaseDialog.Portal>
   );
 }
@@ -106,13 +107,15 @@ export interface DialogPopupProps extends Omit<BaseDialog.Popup.Props, "classNam
 }
 
 /**
- * The panel: the panel material with the popup shadow. It takes the text direction from
+ * The panel: the panel material with the popup shadow. Without a Portal around it, it draws one,
+ * with the scrim. It takes the text direction from
  * DirectionProvider, since the portal leaves the subtree that sets `dir`. A dialog too long to
  * show whole takes focus itself, so it opens at its start, not scrolled to a button at its end.
  */
 export function DialogPopup({
   className,
   initialFocus,
+  children,
   ref,
   ...props
 }: DialogPopupProps): ReactElement {
@@ -126,21 +129,25 @@ export function DialogPopup({
   }, []);
   const merged = useMergedRefs(track, ref);
   return (
-    <BaseDialog.Popup
-      data-slot="dialog-popup"
-      dir={direction}
-      {...props}
-      ref={merged}
-      className={cn(dialogSlots.popup, className)}
-      initialFocus={
-        initialFocus ??
-        (() => {
-          const el = popup.current;
-          const scroller = el?.closest('[data-slot="dialog-viewport"]') ?? el;
-          return scroller && scroller.scrollHeight > scroller.clientHeight ? el : true;
-        })
-      }
-    />
+    <Placement portal={DialogPortal}>
+      <BaseDialog.Popup
+        data-slot="dialog-popup"
+        dir={direction}
+        {...props}
+        ref={merged}
+        className={cn(dialogSlots.popup, className)}
+        initialFocus={
+          initialFocus ??
+          (() => {
+            const el = popup.current;
+            const scroller = el?.closest('[data-slot="dialog-viewport"]') ?? el;
+            return scroller && scroller.scrollHeight > scroller.clientHeight ? el : true;
+          })
+        }
+      >
+        <Unplaced>{children}</Unplaced>
+      </BaseDialog.Popup>
+    </Placement>
   );
 }
 

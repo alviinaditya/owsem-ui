@@ -4,6 +4,7 @@ import { useDirection } from "@base-ui/react/direction-provider";
 import { Tooltip as BaseTooltip } from "@base-ui/react/tooltip";
 import type { ReactElement } from "react";
 import { cn } from "../../core/cn";
+import { Placed, Placement, Unplaced } from "../../core/placed";
 import { tooltipSlots } from "./tooltip-variants";
 import "./tooltip.css";
 
@@ -39,13 +40,15 @@ export function TooltipPositioner({
 }: TooltipPositionerProps): ReactElement {
   const direction = useDirection();
   return (
-    <BaseTooltip.Positioner
-      data-slot="tooltip-positioner"
-      dir={direction}
-      {...props}
-      className={cn(tooltipSlots.positioner, className)}
-      sideOffset={sideOffset}
-    />
+    <Placed>
+      <BaseTooltip.Positioner
+        data-slot="tooltip-positioner"
+        dir={direction}
+        {...props}
+        className={cn(tooltipSlots.positioner, className)}
+        sideOffset={sideOffset}
+      />
+    </Placed>
   );
 }
 
@@ -53,14 +56,21 @@ export interface TooltipPopupProps extends Omit<BaseTooltip.Popup.Props, "classN
   className?: string | undefined;
 }
 
-/** The label: a solid dark surface, with no material. A `kbd` inside reads as its shortcut. */
-export function TooltipPopup({ className, ...props }: TooltipPopupProps): ReactElement {
+/**
+ * The label: a solid dark surface, with no material. A `kbd` inside reads as its shortcut. Without
+ * a Positioner around it, it draws a Portal and a Positioner.
+ */
+export function TooltipPopup({ className, children, ...props }: TooltipPopupProps): ReactElement {
   return (
-    <BaseTooltip.Popup
-      data-slot="tooltip-popup"
-      {...props}
-      className={cn(tooltipSlots.popup, className)}
-    />
+    <Placement portal={TooltipPortal} positioner={TooltipPositioner}>
+      <BaseTooltip.Popup
+        data-slot="tooltip-popup"
+        {...props}
+        className={cn(tooltipSlots.popup, className)}
+      >
+        <Unplaced>{children}</Unplaced>
+      </BaseTooltip.Popup>
+    </Placement>
   );
 }
 

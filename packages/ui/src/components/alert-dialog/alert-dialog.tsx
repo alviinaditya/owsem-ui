@@ -5,6 +5,7 @@ import { useDirection } from "@base-ui/react/direction-provider";
 import { createContext, type ReactElement, useCallback, useContext, useRef, useState } from "react";
 import { cn } from "../../core/cn";
 import { useMergedRefs } from "../../core/merge-refs";
+import { Placed, Placement, Unplaced } from "../../core/placed";
 import { useOpenState, useScrollLock } from "../../core/scroll-lock";
 import { alertDialogSlots } from "./alert-dialog-variants";
 import "./alert-dialog.css";
@@ -99,7 +100,7 @@ export function AlertDialogPortal({
   return (
     <BaseAlertDialog.Portal data-slot="alert-dialog-portal" {...props}>
       {backdrop ? <AlertDialogBackdrop /> : null}
-      {children}
+      <Placed>{children}</Placed>
     </BaseAlertDialog.Portal>
   );
 }
@@ -129,7 +130,8 @@ export interface AlertDialogPopupProps extends Omit<BaseAlertDialog.Popup.Props,
 }
 
 /**
- * The panel: the panel material with the popup shadow. It takes the text direction from
+ * The panel: the panel material with the popup shadow. Without a Portal around it, it draws one,
+ * with the scrim. It takes the text direction from
  * DirectionProvider, since the portal leaves the subtree that sets `dir`. The first focus goes to
  * the first `AlertDialog.Close` in it, the safe answer, wherever it sits in the markup; with none,
  * to the first control, as Base UI does. An alert too long to show whole takes focus itself, so it
@@ -138,6 +140,7 @@ export interface AlertDialogPopupProps extends Omit<BaseAlertDialog.Popup.Props,
 export function AlertDialogPopup({
   className,
   initialFocus,
+  children,
   ref,
   ...props
 }: AlertDialogPopupProps): ReactElement {
@@ -151,22 +154,26 @@ export function AlertDialogPopup({
   }, []);
   const merged = useMergedRefs(track, ref);
   return (
-    <BaseAlertDialog.Popup
-      data-slot="alert-dialog-popup"
-      dir={direction}
-      {...props}
-      ref={merged}
-      className={cn(alertDialogSlots.popup, className)}
-      initialFocus={
-        initialFocus ??
-        (() => {
-          const el = popup.current;
-          const scroller = el?.closest('[data-slot="alert-dialog-viewport"]') ?? el;
-          if (scroller && scroller.scrollHeight > scroller.clientHeight) return el;
-          return el?.querySelector<HTMLElement>('[data-slot="alert-dialog-close"]') ?? true;
-        })
-      }
-    />
+    <Placement portal={AlertDialogPortal}>
+      <BaseAlertDialog.Popup
+        data-slot="alert-dialog-popup"
+        dir={direction}
+        {...props}
+        ref={merged}
+        className={cn(alertDialogSlots.popup, className)}
+        initialFocus={
+          initialFocus ??
+          (() => {
+            const el = popup.current;
+            const scroller = el?.closest('[data-slot="alert-dialog-viewport"]') ?? el;
+            if (scroller && scroller.scrollHeight > scroller.clientHeight) return el;
+            return el?.querySelector<HTMLElement>('[data-slot="alert-dialog-close"]') ?? true;
+          })
+        }
+      >
+        <Unplaced>{children}</Unplaced>
+      </BaseAlertDialog.Popup>
+    </Placement>
   );
 }
 

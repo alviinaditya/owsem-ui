@@ -147,7 +147,6 @@ export function TabsList({
   className,
   onClick,
   children,
-  ref,
   ...props
 }: TabsListProps): ReactElement {
   const orientation = useContext(OrientationContext);
@@ -186,7 +185,6 @@ export function TabsList({
     <Tabs.List
       data-slot="tabs-list"
       {...props}
-      ref={ref}
       className={cn(tabsListVariants({ size }), className)}
       data-size={size}
       onClick={(event) => {

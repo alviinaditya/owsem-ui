@@ -48,19 +48,13 @@ export interface ToastViewportProps extends Omit<BaseToast.Viewport.Props, "clas
  * children to draw them your way. It takes the text direction from DirectionProvider, since the
  * portal leaves the subtree that sets `dir`.
  */
-export function ToastViewport({
-  className,
-  children,
-  ref,
-  ...props
-}: ToastViewportProps): ReactElement {
+export function ToastViewport({ className, children, ...props }: ToastViewportProps): ReactElement {
   const direction = useDirection();
   return (
     <BaseToast.Viewport
       data-slot="toast-viewport"
       dir={direction}
       {...props}
-      ref={ref}
       className={cn(toastSlots.viewport, className)}
     >
       {children ?? <ToastList />}
@@ -120,7 +114,6 @@ export function ToastRoot({
   children,
   toast,
   swipeDirection,
-  ref,
   ...props
 }: ToastRootProps): ReactElement {
   const direction = useDirection();
@@ -130,7 +123,6 @@ export function ToastRoot({
       <BaseToast.Root
         data-slot="toast"
         {...props}
-        ref={ref}
         toast={toast}
         swipeDirection={swipeDirection ?? ["down", direction === "rtl" ? "left" : "right"]}
         data-anchored={anchored ? "" : undefined}
@@ -198,7 +190,7 @@ export interface ToastMarkProps extends ComponentPropsWithRef<"span"> {
  * A small mark for the toast's `type` (success, error, warning, info, or loading) in its tone;
  * loading is a quiet spinner. Any other type draws nothing. Read out by the title, not by itself.
  */
-export function ToastMark({ className, ref, ...props }: ToastMarkProps): ReactElement | null {
+export function ToastMark({ className, ...props }: ToastMarkProps): ReactElement | null {
   const type = useContext(ToastContext)?.type;
   if (!type || !Object.hasOwn(MARKS, type)) return null;
   return (
@@ -206,7 +198,6 @@ export function ToastMark({ className, ref, ...props }: ToastMarkProps): ReactEl
       data-slot="toast-mark"
       aria-hidden="true"
       {...props}
-      ref={ref}
       className={cn(toastSlots.mark, className)}
     >
       <svg
@@ -328,7 +319,6 @@ export function ToastPositioner({
   children,
   sideOffset = 10,
   arrowPadding = 12,
-  ref,
   ...props
 }: ToastPositionerProps): ReactElement {
   const direction = useDirection();
@@ -337,7 +327,6 @@ export function ToastPositioner({
       data-slot="toast-positioner"
       dir={direction}
       {...props}
-      ref={ref}
       className={cn(toastSlots.positioner, className)}
       sideOffset={sideOffset}
       arrowPadding={arrowPadding}

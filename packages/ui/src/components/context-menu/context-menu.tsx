@@ -94,27 +94,18 @@ export interface ContextMenuPositionerProps
  */
 export function ContextMenuPositioner({
   className,
-  ref,
   ...props
 }: ContextMenuPositionerProps): ReactElement {
   const direction = useDirection();
   const submenu = useContext(SubmenuContext);
   if (submenu) {
-    return (
-      <MenuPositioner
-        data-slot="context-menu-positioner"
-        {...props}
-        ref={ref}
-        className={className}
-      />
-    );
+    return <MenuPositioner data-slot="context-menu-positioner" {...props} className={className} />;
   }
   return (
     <BaseContextMenu.Positioner
       data-slot="context-menu-positioner"
       dir={direction}
       {...props}
-      ref={ref}
       className={cn(menuSlots.positioner, className)}
     />
   );

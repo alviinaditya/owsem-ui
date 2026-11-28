@@ -6,10 +6,49 @@ test("serves the registry at /r without a language prefix (DS-7)", async ({ requ
   expect(catalog.ok()).toBe(true);
   expect(catalog.headers()["access-control-allow-origin"]).toBe("*");
 
-  for (const name of ["core", "button", "separator", "toggle-group"]) {
+  for (const name of [
+    "core",
+    "core-cn",
+    "tokens",
+    "button",
+    "button-tailwind",
+    "separator",
+    "toggle-group",
+  ]) {
     const item = await request.get(`/r/${name}.json`, { maxRedirects: 0 });
     expect(item.ok()).toBe(true);
     expect((await item.json()).name).toBe(name);
+  }
+});
+
+test("a registry item brings only what it imports, and the flavors stay apart", async ({
+  request,
+}) => {
+  const item = async (name: string) => (await request.get(`/r/${name}.json`)).json();
+  const paths = (entry: { files?: { path: string }[] }) => (entry.files ?? []).map((f) => f.path);
+
+  // Core is split per module; no component depends on the whole of it.
+  const separator = await item("separator");
+  expect(separator.registryDependencies).toEqual(["@owsem/core-cn", "@owsem/tokens"]);
+  const button = await item("button");
+  expect(button.registryDependencies).not.toContain("@owsem/core");
+  expect(button.registryDependencies).not.toContain("@owsem/tailwind-setup");
+
+  // The Tailwind flavor has its own set, its own setup, and the packages it needs.
+  const tailwind = await item("button-tailwind");
+  expect(tailwind.registryDependencies).toContain("@owsem/tailwind-setup");
+  expect(tailwind.registryDependencies).toContain("@owsem/core-cn-tailwind");
+  expect(tailwind.dependencies).toContain("class-variance-authority");
+  expect(paths(tailwind).some((path) => path.endsWith(".css"))).toBe(false);
+  expect(paths(await item("tailwind-setup"))).toEqual(["src/tailwind-setup/tailwind.css"]);
+
+  // Nothing in the registry carries the repo's lint pragmas or PRD ids.
+  for (const name of ["button", "tokens", "core-glide", "combobox-tailwind"]) {
+    for (const file of (await item(name)).files) {
+      expect(file.content, `${name}/${file.path}`).not.toMatch(
+        /biome-ignore|\b(?:NF|FR|TK|DP|DS|CLI|DX)-\d+/,
+      );
+    }
   }
 });
 

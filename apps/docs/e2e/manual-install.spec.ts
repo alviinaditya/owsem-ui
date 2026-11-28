@@ -73,9 +73,10 @@ test("every component page's Manual offers the Tailwind choice", async ({ reques
       data.tailwind.files.filter((file: { path: string }) => file.path.endsWith(".css")),
       name,
     ).toEqual([]);
-    // Comments for this repo are not for a copied file.
+    // Comments for this repo are not for a copied file: no lint pragmas, no PRD ids.
     for (const { path, code } of [...data.css.files, ...data.tailwind.files]) {
       expect(code, path).not.toMatch(/Generated from|Tailwind CSS v4 twin/);
+      expect(code, path).not.toMatch(/biome-ignore|\b(?:NF|FR|TK|DP|DS|CLI|DX)-\d+/);
     }
   }
 });

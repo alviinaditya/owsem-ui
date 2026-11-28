@@ -18,14 +18,35 @@ export const baseUiVersion = (uiSrc = defaultUiSrc): string =>
 export const isSource = (file: string): boolean =>
   /\.(tsx?|css)$/.test(file) && !/\.(test|tailwind)\.tsx?$/.test(file);
 
+/** A requirement id from the repo's PRD: NF-8, FR-20, TK-9, DP-4. */
+const ID = "(?:NF|FR|TK|DP|DS|CLI|DX)-\\d+[a-z]?";
+const ID_LIST = `${ID}(?:\\s*(?:,|and|to|/)\\s*${ID})*`;
+
 /**
- * Comments for this repo, not for a copied file: the generator's "do not edit" header, and the
- * first paragraph of a Tailwind class map, which says whose twin it is.
+ * Comments for this repo, not for a copied file: the generator's "do not edit" header, the first
+ * paragraph of a Tailwind class map (which says whose twin it is), lint pragmas for the repo's own
+ * linter, and requirement ids such as `(NF-8)` or `FR-20:` that point into a PRD the reader
+ * does not have. The sentence around an id stays.
  */
 export const stripRepoHeader = (code: string): string =>
   code
     .replace(/^\/\/ Generated from [^\n]*\n/, "")
-    .replace(/^\/\/ The Tailwind CSS v4 twin of (?:[^\n]+\n)(?:\/\/ [^\n]+\n)*(?:\/\/)?\n/, "");
+    .replace(/^\/\/ The Tailwind CSS v4 twin of (?:[^\n]+\n)(?:\/\/ [^\n]+\n)*(?:\/\/)?\n/, "")
+    // A whole line that is only a biome-ignore comment.
+    .replace(/^[ \t]*(?:\/\/|\/\*|\{\/\*)\s*biome-ignore[^\n]*\n/gm, "")
+    // "(NF-8)", "(FR-20 and FR-22)": the parenthesis goes with the space before it.
+    .replace(new RegExp(`[ \\t]*\\(\\s*${ID_LIST}\\s*\\)`, "g"), "")
+    // A comment that starts with an id: "/* FR-20: it fades" becomes "/* It fades".
+    .replace(
+      new RegExp(
+        `(\\/\\*\\*?[ \\t]*|\\/\\/[ \\t]*|^[ \\t]*\\*[ \\t]+)${ID_LIST}[:,][ \\t]*([a-z])`,
+        "gm",
+      ),
+      (_, lead: string, letter: string) => lead + letter.toUpperCase(),
+    )
+    // An id mid-sentence: "DP-4: the thumb" or "per TK-9," where only the id goes.
+    .replace(new RegExp(`\\b${ID_LIST}:[ \\t]*`, "g"), "")
+    .replace(new RegExp(`[ \\t]+${ID_LIST}\\b`, "g"), "");
 
 /** Packages the app provides itself, so they are not installed with a component. */
 const PEERS = new Set(["react", "react-dom"]);

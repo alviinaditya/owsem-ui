@@ -139,7 +139,11 @@ items.push(
     description: "Theme tokens with the --ow- prefix and the OwsemUI @layer order.",
     files: [
       {
-        path: stage("tokens", "tokens.css", read(join(uiSrc, "core/tokens/tokens.css"))),
+        path: stage(
+          "tokens",
+          "tokens.css",
+          stripRepoHeader(read(join(uiSrc, "core/tokens/tokens.css"))),
+        ),
         type: "registry:file",
         target: "@lib/owsem/tokens.css",
       },
@@ -156,7 +160,11 @@ items.push(
     // CLI-7: a plain file, not the item's cssVars or tailwind fields.
     files: [
       {
-        path: stage("tailwind-setup", "tailwind.css", read(join(uiSrc, "tailwind.css"))),
+        path: stage(
+          "tailwind-setup",
+          "tailwind.css",
+          stripRepoHeader(read(join(uiSrc, "tailwind.css"))),
+        ),
         type: "registry:file",
         target: "@lib/owsem/tailwind.css",
       },

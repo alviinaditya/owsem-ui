@@ -17,7 +17,21 @@ const backdrop = [
 
 // The layer that takes the swipe; the sheet is placed against it. Base UI hides it with the
 // attribute while keepMounted keeps it.
-const viewport = ["fixed inset-0 overflow-hidden overscroll-contain", "[&[hidden]]:hidden"];
+const viewport = [
+  "fixed inset-0 overflow-hidden overscroll-contain",
+  "[&[hidden]]:hidden",
+  // While a swipe runs, the whole screen shows the grip.
+  "has-[[data-slot=drawer-popup][data-swiping]]:cursor-grabbing",
+];
+
+// The sheet's fill runs on past the edge it is attached to, as copies of the box shifted that way
+// (a shadow is not clipped by the popup's own scrolling), so no gap shows when it is dragged off
+// the edge. Underscores are spaces in a class.
+const bleed = (axis: "x" | "y", sign: 1 | -1) =>
+  Array.from({ length: 8 }, (_, i) => {
+    const step = `${sign * 56 * (i + 1)}px`;
+    return axis === "y" ? `0_${step}_0_0_var(--_bg)` : `${step}_0_0_0_var(--_bg)`;
+  }).join(",");
 
 // The sheet at the edge the swipe direction names, with the radius on the corners facing the page.
 // It follows the finger through Base UI's swipe variables, then settles or leaves on the Core
@@ -32,7 +46,7 @@ const popup = [
   // How far a drawer nested in it steps it back, in the direction of its own edge.
   "[--_step:translateY(calc(var(--nested-drawers)_*_-28px))]",
   // Box.
-  "fixed flex flex-col box-border p-(--_p) bg-(color:--_bg) shadow-(shadow:--_shadow)",
+  "fixed flex flex-col box-border p-(--_p) bg-(color:--_bg) [box-shadow:var(--_bleed),var(--_shadow)]",
   // Invisible until forced colors draw it as the edge.
   "outline-1 -outline-offset-1 outline-transparent",
   // Type.
@@ -50,6 +64,7 @@ const popup = [
   "data-[swipe-direction=down]:pb-[calc(var(--_p)_+_env(safe-area-inset-bottom))]",
   "data-[swipe-direction=down]:[border-radius:var(--_r)_var(--_r)_0_0]",
   "data-[swipe-direction=down]:origin-[50%_100%]",
+  `data-[swipe-direction=down]:[--_bleed:${bleed("y", 1)}]`,
   // Top: swiped up to leave.
   "data-[swipe-direction=up]:[--_out:translateY(calc(-100%_-_32px))]",
   "data-[swipe-direction=up]:[--_step:translateY(calc(var(--nested-drawers)_*_28px))]",
@@ -60,6 +75,7 @@ const popup = [
   "data-[swipe-direction=up]:pb-[calc(var(--_p)_+_12px)]",
   "data-[swipe-direction=up]:[border-radius:0_0_var(--_r)_var(--_r)]",
   "data-[swipe-direction=up]:origin-[50%_0]",
+  `data-[swipe-direction=up]:[--_bleed:${bleed("y", -1)}]`,
   // Left and right are the screen's edges, in either text direction, as the swipe is.
   "data-[swipe-direction=left]:[--_out:translateX(calc(-100%_-_32px))]",
   "data-[swipe-direction=left]:[--_step:translateX(calc(var(--nested-drawers)_*_28px))]",
@@ -67,12 +83,14 @@ const popup = [
   "data-[swipe-direction=left]:w-[24rem] data-[swipe-direction=left]:max-w-[calc(100%_-_var(--_gap))]",
   "data-[swipe-direction=left]:[border-radius:0_var(--_r)_var(--_r)_0]",
   "data-[swipe-direction=left]:origin-[0_50%]",
+  `data-[swipe-direction=left]:[--_bleed:${bleed("x", -1)}]`,
   "data-[swipe-direction=right]:[--_out:translateX(calc(100%_+_32px))]",
   "data-[swipe-direction=right]:[--_step:translateX(calc(var(--nested-drawers)_*_-28px))]",
   "data-[swipe-direction=right]:inset-y-0 data-[swipe-direction=right]:right-0",
   "data-[swipe-direction=right]:w-[24rem] data-[swipe-direction=right]:max-w-[calc(100%_-_var(--_gap))]",
   "data-[swipe-direction=right]:[border-radius:var(--_r)_0_0_var(--_r)]",
   "data-[swipe-direction=right]:origin-[100%_50%]",
+  `data-[swipe-direction=right]:[--_bleed:${bleed("x", 1)}]`,
   // The grabber: a short bar at the edge facing the page. Decoration, never read out.
   "[&:is([data-swipe-direction=down],[data-swipe-direction=up])]:before:content-['']",
   "[&:is([data-swipe-direction=down],[data-swipe-direction=up])]:before:absolute",
@@ -84,6 +102,16 @@ const popup = [
   "[&:is([data-swipe-direction=down],[data-swipe-direction=up])]:before:bg-[color-mix(in_oklab,var(--_fg)_25%,transparent)]",
   "data-[swipe-direction=down]:before:top-[8px] data-[swipe-direction=up]:before:bottom-[8px]",
   "[&:is([data-swipe-direction=down],[data-swipe-direction=up])]:forced-colors:before:bg-[CanvasText]",
+  // A comfortable target around the grabber, 72 × 24px with the bar in its upper part, and the only
+  // place that shows a grab cursor: the rest of the sheet holds text and controls.
+  "[&:is([data-swipe-direction=down],[data-swipe-direction=up])]:after:content-['']",
+  "[&:is([data-swipe-direction=down],[data-swipe-direction=up])]:after:absolute",
+  "[&:is([data-swipe-direction=down],[data-swipe-direction=up])]:after:inset-x-0",
+  "[&:is([data-swipe-direction=down],[data-swipe-direction=up])]:after:mx-auto",
+  "[&:is([data-swipe-direction=down],[data-swipe-direction=up])]:after:w-[72px]",
+  "[&:is([data-swipe-direction=down],[data-swipe-direction=up])]:after:h-[24px]",
+  "[&:is([data-swipe-direction=down],[data-swipe-direction=up])]:after:cursor-grab",
+  "data-[swipe-direction=down]:after:top-0 data-[swipe-direction=up]:after:bottom-0",
   // Focused itself, as Base UI does on opening, or when `initialFocus` says so.
   "focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(color:--ow-focus)",
   // Its own layer, so it lands without a pixel jump.
@@ -94,6 +122,9 @@ const popup = [
   // Leaving is quicker than arriving, and quicker still after a fast swipe.
   "data-ending-style:duration-[calc(var(--drawer-swipe-strength,1)_*_300ms)]",
   "data-swiping:select-none",
+  // While a swipe runs, the whole screen shows the grip, wherever the pointer has got to.
+  "data-swiping:cursor-grabbing data-swiping:*:cursor-grabbing",
+  "[&:is([data-swipe-direction=down],[data-swipe-direction=up])]:data-swiping:after:cursor-grabbing",
   // More contrast asked for: a ring around the sheet.
   "contrast-more:[--_shadow:var(--ow-popup-shadow),0_0_0_1px_var(--ow-edge)]",
   // No slide, no step back: it fades, wherever the finger left it.

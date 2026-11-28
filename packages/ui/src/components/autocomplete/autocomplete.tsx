@@ -1,7 +1,7 @@
 "use client";
 
 import { Autocomplete as BaseAutocomplete } from "@base-ui/react/autocomplete";
-import { type ReactElement, useContext } from "react";
+import { type ReactElement, useContext, useMemo, useRef, useState } from "react";
 import {
   ComboboxArrow,
   type ComboboxArrowProps,
@@ -66,13 +66,57 @@ export function AutocompleteRoot<ItemValue>(
 ): ReactElement;
 export function AutocompleteRoot({
   size = "md",
+  filter,
+  locale,
+  value,
+  onValueChange,
+  onOpenChange,
+  onOpenChangeComplete,
   ...props
 }: Omit<AutocompleteRootProps<unknown>, "items"> & {
   items?: readonly unknown[] | undefined;
 }): ReactElement {
+  const { contains } = BaseAutocomplete.useFilter({ locale });
+  // Picking fills the input with the item's text, which would filter the list down to that item
+  // while the popup closes. The query the list showed is kept until the popup is gone.
+  const [held, setHeld] = useState<string | null>(null);
+  const latest = useRef(props.defaultValue ?? "");
+  const base = filter === undefined ? contains : filter;
+  const holding = useMemo(
+    () =>
+      base && held !== null
+        ? (item: unknown, _query: string, label?: (item: unknown) => string) =>
+            base(item, held, label)
+        : base,
+    [base, held],
+  );
   return (
     <ComboboxSizeContext.Provider value={size}>
-      <BaseAutocomplete.Root {...props} />
+      <BaseAutocomplete.Root
+        {...props}
+        filter={holding}
+        locale={locale}
+        value={value}
+        onValueChange={(next, details) => {
+          if (details.reason === "item-press") {
+            setHeld(String(value ?? latest.current));
+          }
+          latest.current = next;
+          onValueChange?.(next, details);
+        }}
+        onOpenChange={(open, details) => {
+          if (open) {
+            setHeld(null);
+          }
+          onOpenChange?.(open, details);
+        }}
+        onOpenChangeComplete={(open) => {
+          if (!open) {
+            setHeld(null);
+          }
+          onOpenChangeComplete?.(open);
+        }}
+      />
     </ComboboxSizeContext.Provider>
   );
 }

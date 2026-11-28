@@ -236,6 +236,11 @@
    * A content takes the size of what it holds, up to the window's width. It slides in from the side
    * of the trigger it came from and out toward the other, on transform and opacity; the one that
    * leaves is the one that was open. Where it is too tall for the window, it scrolls.
+   *
+   * The slide is meant to be read, so it keeps pace with the panel's own 320 ms move: both contents
+   * travel the whole 320 ms over 40% of their width on a symmetric curve. ease-out had done most of
+   * its distance before the eye caught it, and faded the content out within 50 ms. The one leaving
+   * fades on ease-in, so it is still there as it moves; the one arriving fades in after 60 ms.
    */
   .ow-navigation-menu__content {
     box-sizing: border-box;
@@ -245,11 +250,18 @@
     padding: var(--_pad);
     overflow-y: auto;
     overscroll-behavior: contain;
+    --_slide: cubic-bezier(0.4, 0, 0.2, 1);
     transition:
-      opacity 240ms var(--ow-ease-out),
-      translate 320ms var(--ow-ease-out);
+      opacity 200ms ease-out 60ms,
+      translate 320ms var(--_slide);
     /* Its own layer, so it lands without a pixel jump (NF-8). */
     will-change: translate;
+  }
+
+  .ow-navigation-menu__content:where([data-ending-style]) {
+    transition:
+      opacity 140ms ease-in,
+      translate 320ms var(--_slide);
   }
 
   .ow-navigation-menu__content:is([data-starting-style], [data-ending-style]) {
@@ -258,22 +270,22 @@
 
   .ow-navigation-menu__content[data-starting-style][data-activation-direction="left"],
   .ow-navigation-menu__content[data-ending-style][data-activation-direction="right"] {
-    translate: -50% 0;
+    translate: -40% 0;
   }
 
   .ow-navigation-menu__content[data-starting-style][data-activation-direction="right"],
   .ow-navigation-menu__content[data-ending-style][data-activation-direction="left"] {
-    translate: 50% 0;
+    translate: 40% 0;
   }
 
   .ow-navigation-menu__content[data-starting-style][data-activation-direction="up"],
   .ow-navigation-menu__content[data-ending-style][data-activation-direction="down"] {
-    translate: 0 -50%;
+    translate: 0 -40%;
   }
 
   .ow-navigation-menu__content[data-starting-style][data-activation-direction="down"],
   .ow-navigation-menu__content[data-ending-style][data-activation-direction="up"] {
-    translate: 0 50%;
+    translate: 0 40%;
   }
 
   /* Glide's highlight takes the links' corners. */

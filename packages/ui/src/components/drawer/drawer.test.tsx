@@ -828,7 +828,7 @@ describe("Drawer", () => {
       root.dataset.theme = theme;
       const style = getComputedStyle(surface);
       expect(style.backgroundColor).toBe(resolve("color", "var(--ow-raised-bg)"));
-      expect(style.boxShadow).toBe(resolve("box-shadow", "var(--ow-popup-shadow)"));
+      expect(style.boxShadow.endsWith(resolve("box-shadow", "var(--ow-popup-shadow)"))).toBe(true);
       expect(style.color).toBe(resolve("color", "var(--ow-fg)"));
       expect(
         getComputedStyle(document.querySelector(".ow-drawer__description") as Element).color,
@@ -879,6 +879,96 @@ describe("Drawer", () => {
     await commands.setContrast("more");
     const ring = resolve("box-shadow", "0 0 0 1px var(--ow-edge)");
     expect(getComputedStyle(surface).boxShadow).toBe(`${shadow}, ${ring}`);
+  });
+
+  describe("past its edge", () => {
+    // The fill continues past the attached edge as copies of the box, so dragging the sheet the
+    // wrong way leaves no gap; a shadow is not clipped by the sheet's own scrolling.
+    const OFFSETS: Record<Direction, [x: number, y: number]> = {
+      down: [0, 1],
+      up: [0, -1],
+      left: [-1, 0],
+      right: [1, 0],
+    };
+
+    test.each(Object.keys(OFFSETS) as Direction[])(
+      "%s: the fill runs on beyond the edge it is attached to",
+      async (direction) => {
+        await render(<Share open swipeDirection={direction} />);
+        await expect.poll(popup).not.toBeNull();
+        const sheet = popup() as HTMLElement;
+        const fill = getComputedStyle(sheet).backgroundColor;
+        const copies = getComputedStyle(sheet)
+          .boxShadow.split(/,(?![^(]*\))/)
+          .map((part) => part.trim())
+          .filter((part) => part.startsWith(fill));
+        const [dx, dy] = OFFSETS[direction];
+        const steps = copies.map((part) => {
+          const [x, y] = part.slice(fill.length).trim().split(/\s+/).map(Number.parseFloat);
+          return [
+            Math.sign(x as number),
+            Math.sign(y as number),
+            Math.abs((x as number) + (y as number)),
+          ];
+        });
+        // Every copy goes the one way, farther each time, and they reach at least 400px.
+        expect(steps.length).toBeGreaterThanOrEqual(2);
+        for (const [sx, sy] of steps) expect([sx, sy]).toEqual([dx, dy]);
+        const reach = steps.map(([, , distance]) => distance as number);
+        expect(Math.max(...reach)).toBeGreaterThanOrEqual(400);
+        // Each copy overlaps the one before it, even on a short sheet.
+        const sorted = [...reach].sort((a, b) => a - b);
+        const size =
+          direction === "down" || direction === "up" ? sheet.offsetHeight : sheet.offsetWidth;
+        sorted.forEach((distance, i) => {
+          expect(distance - (sorted[i - 1] ?? 0)).toBeLessThanOrEqual(Math.min(size, 56));
+        });
+      },
+    );
+  });
+
+  describe("cursors", () => {
+    test("the grabber shows a grab cursor, and the sheet itself does not", async () => {
+      await render(<Share open />);
+      await expect.poll(popup).not.toBeNull();
+      const sheet = popup() as HTMLElement;
+      const target = getComputedStyle(sheet, "::after");
+      expect(target.cursor).toBe("grab");
+      // Big enough to hit, and over the bar it stands for.
+      expect(Number.parseFloat(target.width)).toBeGreaterThanOrEqual(48);
+      expect(Number.parseFloat(target.height)).toBeGreaterThanOrEqual(24);
+      expect(getComputedStyle(sheet).cursor).toBe("auto");
+      expect(getComputedStyle(sheet.querySelector("p") as Element).cursor).toBe("auto");
+      // The bar's look is unchanged.
+      const bar = getComputedStyle(sheet, "::before");
+      expect([bar.width, bar.height]).toEqual(["36px", "4px"]);
+    });
+
+    test("a side drawer has no grabber to grab", async () => {
+      await render(<Share open swipeDirection="right" />);
+      await expect.poll(popup).not.toBeNull();
+      expect(getComputedStyle(popup() as HTMLElement, "::after").content).toBe("none");
+    });
+
+    test("while a swipe runs the sheet and what is in it show grabbing", async () => {
+      await render(<Share open />);
+      await expect.poll(popup).not.toBeNull();
+      await arrived();
+      const sheet = popup() as HTMLElement;
+      const swipe = drag(sheet, [
+        [0, 20],
+        [0, 20],
+        [0, 20],
+      ]);
+      await expect.poll(() => sheet.hasAttribute("data-swiping")).toBe(true);
+      expect(getComputedStyle(sheet).cursor).toBe("grabbing");
+      expect(getComputedStyle(sheet, "::after").cursor).toBe("grabbing");
+      expect(getComputedStyle(sheet.querySelector("button") as Element).cursor).toBe("grabbing");
+      swipe.move(0, -60);
+      swipe.release();
+      await expect.poll(() => sheet.hasAttribute("data-swiping")).toBe(false);
+      expect(getComputedStyle(sheet, "::after").cursor).toBe("grab");
+    });
   });
 
   test("keeps its edge and the grabber in forced colors", async () => {

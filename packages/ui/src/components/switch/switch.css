@@ -121,7 +121,8 @@
   .ow-switch__thumb {
     --_key: var(--ow-on-accent);
     --_key-shadow: var(--ow-surface-shadow);
-    --_ink: var(--ow-fg);
+    /* The key is white in both themes, so the ink is a 3:1 edge tone off and the accent on. */
+    --_ink: var(--ow-edge);
     --_side: 1;
     --_end: 0;
     /* How far it stretches at most, and how far a hold widens and squashes it. */
@@ -189,6 +190,7 @@
   .ow-switch__thumb:where([data-checked]) {
     --_end: 1;
     --_switch-travel: 1;
+    --_ink: var(--_accent);
     margin-inline-start: auto;
   }
 

@@ -111,19 +111,21 @@ const radio = [
 // The circle's own box, so whatever it holds is centered in it at any zoom.
 const indicator = [
   "[--_dot:var(--ow-on-accent)]",
-  // Where the dot scales in from. A mark, not a surface, so it may start small.
-  "[--_from:calc(1_-_0.5_*_var(--ow-motion-scale))]",
+  // Where the mark scales in from, as Select's check. A mark, not a surface, so it may start small.
+  "[--_from:calc(1_-_0.4_*_var(--ow-motion-scale))]",
   "absolute inset-0 grid place-items-center rounded-[inherit] text-(color:--_dot)",
   // Its own layer, so it lands without a pixel jump.
   "will-change-transform transition-[transform,opacity]",
-  "duration-[var(--ow-spring-settle-duration),100ms]",
+  "duration-[var(--ow-spring-settle-duration),120ms]",
   "ease-[var(--ow-spring-settle),var(--ow-ease-out)]",
   // The dot: a clear border inside the circle's box. The border widths round alike, so the dot
   // sits as far from the circle's edge on every side at a fractional zoom.
   "empty:box-border empty:border-[length:calc(var(--icon)_*_0.29)] empty:border-solid",
   "empty:border-transparent empty:bg-clip-padding empty:bg-current",
-  // A glyph takes 75% of the circle, as Checkbox's padded check does in its box.
-  "[&>:where(svg,img)]:block [&>:where(svg,img)]:size-3/4",
+  // A glyph is 80% of the circle: an icon the size Select's check is, with its stroke too.
+  "[&>:where(svg,img)]:block [&>:where(svg,img)]:size-4/5",
+  // The stroke of a 24-unit icon, as Select's check, so a glyph weighs the same wherever it is.
+  "[&>svg]:[stroke-width:2]",
   "data-starting-style:opacity-0 data-starting-style:transform-[scale(var(--_from))]",
   "data-unchecked:opacity-0 data-unchecked:transform-[scale(var(--_from))]",
   // Gone with the fill, since a light dot does not belong on the well.

@@ -19,7 +19,7 @@
     --_radius: calc(var(--ow-radius) / 2);
     --_held: color-mix(in oklab, var(--ow-fg) 16%, transparent);
     --_press: calc(1 - 0.03 * var(--ow-motion-scale));
-    --_glyph-out: calc(1 - 0.2 * var(--ow-motion-scale));
+    --_glyph-out: calc(1 - 0.4 * var(--ow-motion-scale));
     /* The minus grows from nothing to its width. */
     --_minus-out: calc(1 - var(--ow-motion-scale));
     --icon: calc(1em + 6px);

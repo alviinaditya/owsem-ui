@@ -13,14 +13,14 @@ import {
 } from "./checkbox-variants";
 
 // Icons from Lucide (https://lucide.dev), ISC License: check and minus. The viewBox is padded so
-// the glyph is about 62% of the box.
+// the glyph is about 62% of the box, and 2.13 units there draw the stroke of Select's check.
 const glyph = (name: "check" | "minus", path: string) => (
   <svg
     data-glyph={name}
     viewBox="-4 -4 32 32"
     fill="none"
     stroke="currentColor"
-    strokeWidth="3.25"
+    strokeWidth="2.13"
     strokeLinecap="round"
     strokeLinejoin="round"
     aria-hidden="true"

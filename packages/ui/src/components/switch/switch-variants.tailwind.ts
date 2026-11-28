@@ -76,7 +76,8 @@ const thumb = [
   // Box.
   "relative isolate grid flex-none place-items-center box-border h-full aspect-square",
   "border-(length:--_inset) border-solid border-transparent rounded-[inherit] bg-clip-padding",
-  "bg-(color:--ow-on-accent) text-(color:--ow-fg)",
+  // The key is white in both themes, so the ink is a 3:1 edge tone off and the accent on.
+  "bg-(color:--ow-on-accent) text-(color:--ow-edge) data-checked:text-(color:--ow-accent)",
   // How far it stretches at most, and how far a hold widens and squashes it.
   "[--_stretch:calc(0.15_*_var(--ow-motion-scale))] [--_widen:calc(0.18_*_var(--ow-motion-scale))]",
   "[--_squash:calc(0.06_*_var(--ow-motion-scale))]",

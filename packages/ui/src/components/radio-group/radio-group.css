@@ -150,8 +150,9 @@
   /* The circle's own box, so whatever it holds is centered in it at any zoom. */
   .ow-radio-group__indicator {
     --_dot: var(--ow-on-accent);
-    /* Where the dot scales in from. A mark, not a surface, so it may start small (FR-18). */
-    --_from: calc(1 - 0.5 * var(--ow-motion-scale));
+    /* Where the mark scales in from, as Select's check. A mark, not a surface, so it may start
+     * small (FR-18). */
+    --_from: calc(1 - 0.4 * var(--ow-motion-scale));
     position: absolute;
     inset: 0;
     display: grid;
@@ -162,7 +163,7 @@
     will-change: transform;
     transition:
       transform var(--ow-spring-settle-duration) var(--ow-spring-settle),
-      opacity 100ms var(--ow-ease-out);
+      opacity 120ms var(--ow-ease-out);
   }
 
   /*
@@ -176,11 +177,16 @@
     background-color: currentcolor;
   }
 
-  /* A glyph takes 75% of the circle, as Checkbox's padded check does in its box. */
+  /* A glyph is 80% of the circle: an icon the size Select's check is, with its stroke too. */
   .ow-radio-group__indicator > :where(svg, img) {
     display: block;
-    inline-size: 75%;
-    block-size: 75%;
+    inline-size: 80%;
+    block-size: 80%;
+  }
+
+  /* The stroke of a 24-unit icon, as Select's check, so a glyph weighs the same wherever it is. */
+  .ow-radio-group__indicator > :where(svg) {
+    stroke-width: 2;
   }
 
   .ow-radio-group__indicator:where([data-starting-style], [data-unchecked]) {

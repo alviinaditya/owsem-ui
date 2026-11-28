@@ -76,7 +76,7 @@
     outline: 1px solid transparent;
     outline-offset: -1px;
     background-color: var(--_bg);
-    box-shadow: var(--_shadow);
+    box-shadow: var(--_bleed), var(--_shadow);
     color: var(--_fg);
     font-size: 0.875rem;
     line-height: 1.5;
@@ -99,6 +99,18 @@
 
   /* Bottom: swiped down to leave. Full width up to 32rem, centered. */
   .ow-drawer__popup:where([data-swipe-direction="down"]) {
+    /* Its fill runs on past the edge it is attached to, as copies of the box shifted that way (a
+     * shadow is not clipped by the popup's own scrolling), so no gap shows when it is dragged off
+     * the edge. */
+    --_bleed:
+      0 56px 0 0 var(--_bg),
+      0 112px 0 0 var(--_bg),
+      0 168px 0 0 var(--_bg),
+      0 224px 0 0 var(--_bg),
+      0 280px 0 0 var(--_bg),
+      0 336px 0 0 var(--_bg),
+      0 392px 0 0 var(--_bg),
+      0 448px 0 0 var(--_bg);
     inset-block: auto 0;
     inset-inline: 0;
     inline-size: 100%;
@@ -114,6 +126,15 @@
   .ow-drawer__popup:where([data-swipe-direction="up"]) {
     --_out: translateY(calc(-100% - 32px));
     --_step: translateY(calc(var(--nested-drawers) * 28px));
+    --_bleed:
+      0 -56px 0 0 var(--_bg),
+      0 -112px 0 0 var(--_bg),
+      0 -168px 0 0 var(--_bg),
+      0 -224px 0 0 var(--_bg),
+      0 -280px 0 0 var(--_bg),
+      0 -336px 0 0 var(--_bg),
+      0 -392px 0 0 var(--_bg),
+      0 -448px 0 0 var(--_bg);
     inset-block: 0 auto;
     inset-inline: 0;
     inline-size: 100%;
@@ -129,6 +150,15 @@
   .ow-drawer__popup:where([data-swipe-direction="left"]) {
     --_out: translateX(calc(-100% - 32px));
     --_step: translateX(calc(var(--nested-drawers) * 28px));
+    --_bleed:
+      -56px 0 0 0 var(--_bg),
+      -112px 0 0 0 var(--_bg),
+      -168px 0 0 0 var(--_bg),
+      -224px 0 0 0 var(--_bg),
+      -280px 0 0 0 var(--_bg),
+      -336px 0 0 0 var(--_bg),
+      -392px 0 0 0 var(--_bg),
+      -448px 0 0 0 var(--_bg);
     inset-block: 0;
     /* biome-ignore lint/nursery/useLogicalProperties: the edges are the screen's, as the swipe is */
     left: 0;
@@ -141,6 +171,15 @@
   .ow-drawer__popup:where([data-swipe-direction="right"]) {
     --_out: translateX(calc(100% + 32px));
     --_step: translateX(calc(var(--nested-drawers) * -28px));
+    --_bleed:
+      56px 0 0 0 var(--_bg),
+      112px 0 0 0 var(--_bg),
+      168px 0 0 0 var(--_bg),
+      224px 0 0 0 var(--_bg),
+      280px 0 0 0 var(--_bg),
+      336px 0 0 0 var(--_bg),
+      392px 0 0 0 var(--_bg),
+      448px 0 0 0 var(--_bg);
     inset-block: 0;
     /* biome-ignore lint/nursery/useLogicalProperties: the edges are the screen's, as the swipe is */
     right: 0;
@@ -170,6 +209,29 @@
     inset-block-end: 8px;
   }
 
+  /*
+   * A comfortable target around the grabber, 72 × 24px with the bar in its upper part, and the
+   * only place that shows a grab cursor: the rest of the sheet holds text and controls, and a swipe
+   * that starts in Content does not take a mouse anyway.
+   */
+  .ow-drawer__popup:where([data-swipe-direction="down"], [data-swipe-direction="up"])::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    margin-inline: auto;
+    inline-size: 72px;
+    block-size: 24px;
+    cursor: grab;
+  }
+
+  .ow-drawer__popup:where([data-swipe-direction="down"])::after {
+    inset-block-start: 0;
+  }
+
+  .ow-drawer__popup:where([data-swipe-direction="up"])::after {
+    inset-block-end: 0;
+  }
+
   /* Focused itself, as Base UI does on opening, or when `initialFocus` says so. */
   .ow-drawer__popup:where(:focus-visible) {
     outline: 2px solid var(--ow-focus);
@@ -193,6 +255,14 @@
   .ow-drawer__popup:where([data-swiping]) {
     /* biome-ignore lint/nursery/useBaseline: progressive enhancement */
     user-select: none;
+  }
+
+  /* While a swipe runs, the whole screen shows the grip, wherever the pointer has got to. */
+  .ow-drawer__popup:where([data-swiping]),
+  .ow-drawer__popup:where([data-swiping]) *,
+  .ow-drawer__popup:where([data-swiping])::after,
+  .ow-drawer__viewport:where(:has(.ow-drawer__popup[data-swiping])) {
+    cursor: grabbing;
   }
 
   /* It scrolls on its own; the popup then stays put and the title and buttons stay in view. */

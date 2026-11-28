@@ -100,10 +100,17 @@ const item = [
   "forced-colors:data-disabled:text-[GrayText] forced-colors:data-disabled:opacity-100",
 ];
 
-// Unchecked, it keeps its room, so the labels stay in line.
+// Unchecked, it keeps its room, so the labels stay in line. A check pops in on the settle spring,
+// as Select's.
 const indicator = [
   "inline-flex flex-none size-(--icon) first:ms-[calc((1cap_-_var(--icon))_/_2)]",
-  "[&>svg]:size-full data-unchecked:invisible",
+  "[&>svg]:size-full",
+  "[&>*]:will-change-transform [&>*]:transition-[opacity,transform]",
+  "[&>*]:duration-[120ms,var(--ow-spring-settle-duration)]",
+  "[&>*]:ease-[var(--ow-ease-out),var(--ow-spring-settle)]",
+  "data-unchecked:[&>*]:opacity-0",
+  "data-unchecked:[&>*]:transform-[scale(calc(1_-_0.4_*_var(--ow-motion-scale)))]",
+  "motion-reduce:data-unchecked:[&>*]:transform-none",
 ];
 
 // The submenu's chevron, muted, at the end.

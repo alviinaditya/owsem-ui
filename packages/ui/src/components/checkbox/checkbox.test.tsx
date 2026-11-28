@@ -374,7 +374,7 @@ describe("Checkbox", () => {
     await expect.poll(() => getComputedStyle(minus).opacity).toBe("1");
     await expect.poll(() => getComputedStyle(minus).transform).toBe("none");
     await expect.poll(() => getComputedStyle(check).opacity).toBe("0");
-    await expect.poll(() => getComputedStyle(check).transform).toBe("matrix(0.8, 0, 0, 0.8, 0, 0)");
+    await expect.poll(() => getComputedStyle(check).transform).toBe("matrix(0.6, 0, 0, 0.6, 0, 0)");
     await expect.poll(() => getComputedStyle(path).strokeDashoffset).toBe("-1px");
     await userEvent.click(screen.getByRole("button"));
     await expect.poll(() => getComputedStyle(check).opacity).toBe("1");

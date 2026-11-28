@@ -1,4 +1,4 @@
-import { createRef } from "react";
+import { createRef, useState } from "react";
 import { renderToString } from "react-dom/server";
 import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { commands, userEvent } from "vitest/browser";
@@ -67,6 +67,69 @@ describe("Autocomplete", () => {
     await userEvent.clear(input());
     await userEvent.type(input(), "something else");
     expect(input().value).toBe("something else");
+  });
+
+  describe("closing after a pick", () => {
+    /** What the list shows each time it changes while the popup is leaving. */
+    function watchLeaving() {
+      const seen: string[][] = [];
+      const record = () => {
+        if (popup()?.hasAttribute("data-ending-style")) seen.push(options() as string[]);
+      };
+      const observer = new MutationObserver(record);
+      observer.observe(document.body, { subtree: true, childList: true, attributes: true });
+      onTestFinished(() => observer.disconnect());
+      return seen;
+    }
+
+    test("the list keeps what it showed until the popup has gone (a press)", async () => {
+      await render(<Tags />);
+      await userEvent.type(input(), "f");
+      await expect.poll(options).toEqual(["feature", "fix"]);
+      await land();
+      const seen = watchLeaving();
+      await userEvent.click(all('[role="option"]')[1] as HTMLElement);
+      await expect.poll(() => input().value).toBe("fix");
+      await expect.poll(() => popup()).toBeNull();
+      expect(seen.length).toBeGreaterThan(0);
+      for (const shown of seen) expect(shown).toEqual(["feature", "fix"]);
+      // Once it is gone the input's text filters again.
+      await userEvent.keyboard("{ArrowDown}");
+      await expect.poll(options).toEqual(["fix"]);
+    });
+
+    test("the same from the keyboard", async () => {
+      await render(<Tags />);
+      await userEvent.type(input(), "f");
+      await expect.poll(options).toEqual(["feature", "fix"]);
+      await land();
+      const seen = watchLeaving();
+      await userEvent.keyboard("{ArrowDown}{ArrowDown}{Enter}");
+      await expect.poll(() => input().value).toBe("fix");
+      await expect.poll(() => popup()).toBeNull();
+      expect(seen.length).toBeGreaterThan(0);
+      for (const shown of seen) expect(shown).toEqual(["feature", "fix"]);
+    });
+
+    test("controlled, and with the popup closed another way, it filters as the text says", async () => {
+      function Controlled() {
+        const [value, setValue] = useState("");
+        return <Tags value={value} onValueChange={setValue} />;
+      }
+      await render(<Controlled />);
+      await userEvent.type(input(), "f");
+      await expect.poll(options).toEqual(["feature", "fix"]);
+      await land();
+      const seen = watchLeaving();
+      await userEvent.click(all('[role="option"]')[0] as HTMLElement);
+      await expect.poll(() => input().value).toBe("feature");
+      await expect.poll(() => popup()).toBeNull();
+      for (const shown of seen) expect(shown).toEqual(["feature", "fix"]);
+      // Typing again filters at once: nothing is held over.
+      await userEvent.clear(input());
+      await userEvent.type(input(), "mo");
+      await expect.poll(options).toEqual(["mobile"]);
+    });
   });
 
   test("Empty shows its text when nothing matches; with no text the popup is hidden", async () => {

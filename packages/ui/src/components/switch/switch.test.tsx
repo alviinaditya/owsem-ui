@@ -306,6 +306,33 @@ describe("Switch", () => {
     }
   });
 
+  test("an icon in the thumb has 3:1 against the key, off and on, in both themes", async () => {
+    onTestFinished(() => {
+      delete root.dataset.theme;
+    });
+    const track = await one(
+      <Switch.Root aria-label="Dark mode">
+        <Switch.Thumb>
+          <Star />
+        </Switch.Thumb>
+      </Switch.Root>,
+    );
+    const thumb = thumbOf(track);
+    for (const checked of [false, true]) {
+      if (track.hasAttribute("data-checked") !== checked) track.click();
+      await expect.poll(() => thumb.hasAttribute("data-checked")).toBe(checked);
+      for (const theme of ["light", "dark"]) {
+        root.dataset.theme = theme;
+        const style = getComputedStyle(thumb);
+        const key = composite(style.backgroundColor);
+        expect(contrast(composite(style.color), key)).toBeGreaterThanOrEqual(3);
+        // The ink is a theme token, never the text color that turns near-white in dark.
+        const ink = resolve("color", checked ? "var(--ow-accent)" : "var(--ow-edge)");
+        expect(style.color).toBe(ink);
+      }
+    }
+  });
+
   test("the fill changes at once, while the thumb travels on the spring and rests on layout", async () => {
     const track = await one(<Switch.Root aria-label="Wi-Fi" />);
     const thumb = thumbOf(track);

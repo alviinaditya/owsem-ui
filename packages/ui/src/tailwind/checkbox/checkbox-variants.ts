@@ -21,7 +21,7 @@ const root = [
   "relative box-border inline-flex flex-none size-(--icon) rounded-[calc(var(--ow-radius)_/_2)]",
   "[--icon:calc(1em_+_6px)]",
   // The motion scale decides how far a press, a glyph leaving, and the minus move.
-  "[--_press:calc(1_-_0.03_*_var(--ow-motion-scale))] [--_glyph-out:calc(1_-_0.2_*_var(--ow-motion-scale))]",
+  "[--_press:calc(1_-_0.03_*_var(--ow-motion-scale))] [--_glyph-out:calc(1_-_0.4_*_var(--ow-motion-scale))]",
   // The minus grows from nothing to its width.
   "[--_minus-out:calc(1_-_var(--ow-motion-scale))]",
   // Invisible until forced colors draw it as the edge.

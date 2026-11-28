@@ -225,12 +225,27 @@ describe("Menu", () => {
     const wrap = item("Word wrap");
     const check = wrap.querySelector<HTMLElement>(".ow-menu__indicator");
     expect(wrap.getAttribute("aria-checked")).toBe("true");
-    expect(getComputedStyle(check as HTMLElement).visibility).toBe("visible");
+    const glyph = check?.firstElementChild as SVGElement;
+    expect(getComputedStyle(glyph).opacity).toBe("1");
+    // Pops as Select's check: opacity in 120 ms, scale on the settle spring.
+    const pop = getComputedStyle(glyph);
+    expect(pop.transitionProperty).toBe("opacity, transform");
+    expect(pop.transitionDuration).toBe("0.12s, 0.573s");
+    // Drawn as Select's check: a 24-unit icon at the item's icon size, stroke 2.
+    expect(glyph.getBoundingClientRect().width).toBeCloseTo(16, 0);
+    expect(glyph.getAttribute("stroke-width")).toBe("2");
     await userEvent.click(wrap);
     expect(wrap.getAttribute("aria-checked")).toBe("false");
-    // Base UI keeps the menu open for checkbox items; the check stays in the layout, hidden.
+    // Base UI keeps the menu open for checkbox items; the check stays in the layout, scaled
+    // down and faded out, and it fades and shrinks rather than vanishing.
     expect(check?.isConnected).toBe(true);
-    expect(getComputedStyle(check as HTMLElement).visibility).toBe("hidden");
+    expect(getComputedStyle(check as HTMLElement).visibility).toBe("visible");
+    await expect.poll(() => getComputedStyle(glyph).opacity).toBe("0");
+    await expect.poll(() => getComputedStyle(glyph).transform).toBe("matrix(0.6, 0, 0, 0.6, 0, 0)");
+    await userEvent.click(wrap);
+    await expect.poll(() => getComputedStyle(glyph).opacity).toBe("1");
+    await expect.poll(() => getComputedStyle(glyph).transform).toBe("none");
+    await userEvent.click(wrap);
     const dark = item("Dark");
     await userEvent.click(dark);
     expect(dark.getAttribute("aria-checked")).toBe("true");

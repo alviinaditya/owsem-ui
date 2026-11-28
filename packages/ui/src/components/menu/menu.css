@@ -120,9 +120,18 @@
     block-size: 100%;
   }
 
-  /* Unchecked, the indicator keeps its room, so the labels stay in line. */
-  .ow-menu__indicator[data-unchecked] {
-    visibility: hidden;
+  /* Unchecked, the indicator keeps its room, so the labels stay in line. A check pops in on the
+   * settle spring, as Select's. */
+  .ow-menu__indicator > * {
+    will-change: transform;
+    transition:
+      opacity 120ms var(--ow-ease-out),
+      transform var(--ow-spring-settle-duration) var(--ow-spring-settle);
+  }
+
+  .ow-menu__indicator:where([data-unchecked]) > * {
+    opacity: 0;
+    transform: scale(calc(1 - 0.4 * var(--ow-motion-scale)));
   }
 
   /* A shortcut (<kbd>) or the submenu chevron at the end, muted. */
@@ -198,6 +207,10 @@
   /* FR-20: it fades, without growing. */
   @media (prefers-reduced-motion: reduce) {
     .ow-menu__popup:is([data-starting-style], [data-ending-style]) {
+      transform: none;
+    }
+
+    .ow-menu__indicator:where([data-unchecked]) > * {
       transform: none;
     }
   }

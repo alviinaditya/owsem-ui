@@ -101,7 +101,7 @@ describe("Radio Group", () => {
         </Radio.Root>
         <Radio.Root value="a" aria-label="Own glyph">
           <Radio.Indicator className="glyph">
-            <svg viewBox="0 0 24 24" aria-hidden="true" />
+            <svg viewBox="0 0 24 24" strokeWidth="1.8" aria-hidden="true" />
           </Radio.Indicator>
         </Radio.Root>
         <Radio.Root value="b" aria-label="Off" />
@@ -119,11 +119,13 @@ describe("Radio Group", () => {
     expect(getComputedStyle(mark).backgroundColor).toBe("rgba(0, 0, 0, 0)");
     expect(getComputedStyle(mark).borderTopWidth).toBe("0px");
     const svg = mark.querySelector("svg") as SVGElement;
-    // 75% of the circle, as Checkbox's padded check is of its box.
+    // 80% of the circle: 16px at the default size, as Select's check, and with its stroke.
     expect(svg.getBoundingClientRect().width).toBeCloseTo(
-      mark.getBoundingClientRect().width * 0.75,
+      mark.getBoundingClientRect().width * 0.8,
       0,
     );
+    expect(svg.getBoundingClientRect().width).toBeCloseTo(16, 0);
+    expect(getComputedStyle(svg).strokeWidth).toBe("2px");
   });
 
   test("a press on the radio or on the row's text picks it, once", async () => {
@@ -357,7 +359,7 @@ describe("Radio Group", () => {
     const arriving = dot("Pickup") as HTMLElement;
     const style = getComputedStyle(arriving);
     expect(style.transitionProperty).toBe("transform, opacity");
-    expect(style.transitionDuration.split(", ")[0]).toBe("0.573s");
+    expect(style.transitionDuration).toBe("0.573s, 0.12s");
     await expect
       .poll(() =>
         arriving
@@ -383,7 +385,7 @@ describe("Radio Group", () => {
     const [on, off] = group.querySelectorAll(".ow-radio-group__indicator");
     expect(getComputedStyle(on as Element).opacity).toBe("1");
     expect(getComputedStyle(off as Element).opacity).toBe("0");
-    expect(getComputedStyle(off as Element).transform).toBe("matrix(0.5, 0, 0, 0.5, 0, 0)");
+    expect(getComputedStyle(off as Element).transform).toBe("matrix(0.6, 0, 0, 0.6, 0, 0)");
   });
 
   test("Glide lights the row under the pointer, and no other", async () => {

@@ -266,8 +266,8 @@ const glyph = (shape: "check" | "dot" | "chevron") => (
     strokeLinejoin="round"
     aria-hidden="true"
   >
-    {shape === "check" ? <path d="M5 12.5 9.5 17 19 7.5" /> : null}
-    {shape === "dot" ? <circle cx="12" cy="12" r="4" fill="currentColor" stroke="none" /> : null}
+    {shape === "check" ? <path d="M20 6 9 17l-5-5" /> : null}
+    {shape === "dot" ? <circle cx="12" cy="12" r="5" fill="currentColor" stroke="none" /> : null}
     {shape === "chevron" ? <path d="m9.5 6 6 6-6 6" /> : null}
   </svg>
 );

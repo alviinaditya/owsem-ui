@@ -189,7 +189,7 @@ describe("Radio Group geometry", () => {
     close(gap.top, gap.left);
   });
 
-  test("a glyph in the indicator is 75% of the circle, centered, like Checkbox's check", async () => {
+  test("a glyph in the indicator is 80% of the circle, centered, the size of Select's check", async () => {
     const { groups, radioOf } = await mount(
       <RadioGroup aria-label="Glyph" defaultValue="a">
         <label>
@@ -206,7 +206,7 @@ describe("Radio Group geometry", () => {
     );
     const radio = radioOf(groups[0] as Element);
     const svg = radio.querySelector("svg") as SVGElement;
-    close(rect(svg).width, rect(radio).width * 0.75);
+    close(rect(svg).width, rect(radio).width * 0.8);
     const gap = insets(radio, svg);
     close(gap.left, gap.right);
     close(gap.top, gap.bottom);

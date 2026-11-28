@@ -204,6 +204,41 @@ describe("NavigationMenu", () => {
     await settle();
   });
 
+  test("the slide is read at the panel's pace: the whole 320 ms, 40% of the way, the leaving one fades first", async () => {
+    await render(<Nav open="products" />);
+    await expect.poll(popup).not.toBeNull();
+    await settle();
+    const content = document.querySelector<HTMLElement>(
+      '[data-slot="navigation-menu-content"]',
+    ) as HTMLElement;
+    // The one arriving: it travels the panel's 320 ms and fades in a little later, after the old
+    // content has gone; the one leaving fades on ease-in and quicker, still there as it moves.
+    const arriving = getComputedStyle(content);
+    expect(arriving.transitionDuration.split(", ")).toEqual(["0.2s", "0.32s"]);
+    expect(arriving.transitionDelay.split(", ")).toEqual(["0.06s", "0s"]);
+    content.setAttribute("data-ending-style", "");
+    const leaving = getComputedStyle(content);
+    expect(leaving.transitionDuration.split(", ")).toEqual(["0.14s", "0.32s"]);
+    expect(leaving.transitionDelay.split(", ")).toEqual(["0s", "0s"]);
+    expect(leaving.transitionTimingFunction.split(/, (?=ease|cubic)/)[0]).toBe("ease-in");
+    // Both travel on a symmetric curve, steadier than the ease-out they had.
+    const curve = "cubic-bezier(0.4, 0, 0.2, 1)";
+    expect(arriving.transitionTimingFunction.endsWith(curve)).toBe(true);
+    expect(leaving.transitionTimingFunction.endsWith(curve)).toBe(true);
+    // Frozen, so what is read is the end of the transition, not a frame of it.
+    content.style.transition = "none";
+    // Toward the side the pointer came from and away from the other one, 40% of its own width.
+    content.setAttribute("data-activation-direction", "right");
+    expect(getComputedStyle(content).translate).toMatch(/^-40%( 0px)?$/);
+    content.setAttribute("data-activation-direction", "left");
+    expect(getComputedStyle(content).translate).toMatch(/^40%( 0px)?$/);
+    content.removeAttribute("data-ending-style");
+    content.setAttribute("data-starting-style", "");
+    expect(getComputedStyle(content).translate).toMatch(/^-40%( 0px)?$/);
+    content.removeAttribute("data-starting-style");
+    content.removeAttribute("data-activation-direction");
+  });
+
   test("links in a content are cards lit by Glide; the current page keeps a tint", async () => {
     await render(<Nav open="products" />);
     await expect.poll(popup).not.toBeNull();

@@ -822,6 +822,17 @@ body {
   background-color: var(--docs-well);
 }
 
+.component-preview-sidebar {
+  inline-size: 170px;
+  block-size: 124px;
+  font-size: var(--docs-text-small);
+}
+
+.component-preview-table {
+  inline-size: 220px;
+  font-size: var(--docs-text-small);
+}
+
 .component-preview-tree {
   inline-size: 190px;
   font-size: var(--docs-text-small);
@@ -2137,12 +2148,17 @@ body {
 
 /* Triggers side by side, and by theme: each on that theme's own background. */
 .demo-color-row,
+.demo-color-sizes,
 .demo-color-themes {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 12px;
+}
+
+.demo-color-sizes {
+  flex-direction: column;
 }
 
 .demo-color-cell {
@@ -2728,6 +2744,12 @@ body {
 
 .demo-context-menu-area[data-popup-open] {
   background-color: color-mix(in oklab, var(--ow-fg) 9%, transparent);
+}
+
+.demo-context-menu-sizes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
 .demo-context-menu-area--small {

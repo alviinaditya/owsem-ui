@@ -107,6 +107,22 @@ test("the index shows Base, then Owsem, and filters by family", async ({ page })
   await expect(main.getByRole("link", { name: "Button", exact: true })).toBeVisible();
 });
 
+test("only the planned components are sketches on the index; the built ones are live", async ({
+  page,
+}) => {
+  await page.goto("/en");
+  const main = page.getByRole("main");
+  await expect(main.locator(".component-preview-soon")).toHaveText([
+    "Coming soon",
+    "Coming soon",
+    "Coming soon",
+  ]);
+  await expect(main.locator(".component-preview-sketch")).toHaveCount(3);
+  for (const name of ["sidebar", "table"]) {
+    await expect(main.locator(`.component-preview-live[data-preview="${name}"]`)).toHaveCount(1);
+  }
+});
+
 test("the index shows a grid or a list, and keeps the choice", async ({ page }) => {
   await page.goto("/en");
   const main = page.getByRole("main");

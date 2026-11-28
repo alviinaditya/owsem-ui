@@ -43,6 +43,8 @@ import {
   ColorPicker,
   CommandMenu,
   CopyButton,
+  Sidebar,
+  Table,
   TableOfContents,
   TreeRailNav,
 } from "owsem-ui/owsem";
@@ -126,6 +128,15 @@ const TEXT = {
     toastSavedBody: "Draf sudah diperbarui.",
     fruit: "Buah",
     fruitNames: ["Apel", "Pisang", "Ceri"],
+    nav: "Navigasi",
+    pages: ["Instalasi", "Tema", "Tombol"],
+    invoices: "Tagihan",
+    invoiceHead: ["Tagihan", "Status", "Jumlah"],
+    invoiceRows: [
+      ["INV-001", "Lunas", "$250"],
+      ["INV-002", "Menunggu", "$150"],
+      ["INV-003", "Lunas", "$350"],
+    ],
   },
   en: {
     create: "New",
@@ -200,6 +211,15 @@ const TEXT = {
     toastSavedBody: "The draft is up to date.",
     fruit: "Fruit",
     fruitNames: ["Apple", "Banana", "Cherry"],
+    nav: "Navigation",
+    pages: ["Install", "Theming", "Button"],
+    invoices: "Invoices",
+    invoiceHead: ["Invoice", "Status", "Amount"],
+    invoiceRows: [
+      ["INV-001", "Paid", "$250"],
+      ["INV-002", "Pending", "$150"],
+      ["INV-003", "Paid", "$350"],
+    ],
   },
 };
 
@@ -989,6 +1009,45 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
         </TreeRailNav.Node>
       </TreeRailNav.List>
     </TreeRailNav.Root>
+  ),
+  sidebar: (t) => (
+    // No query matches, so it stays a column; the shortcut is off so a card does not take the key.
+    <Sidebar.Provider shortcut={false} mobileQuery="(max-width: 0px)">
+      <Sidebar.Root aria-label={t.nav} className="component-preview-sidebar">
+        <Sidebar.Content>
+          <Sidebar.Group>
+            <Sidebar.GroupLabel>{t.components}</Sidebar.GroupLabel>
+            <Sidebar.List>
+              {t.pages.map((page, i) => (
+                <Sidebar.Item key={page} href="#" active={i === 1}>
+                  {page}
+                </Sidebar.Item>
+              ))}
+            </Sidebar.List>
+          </Sidebar.Group>
+        </Sidebar.Content>
+      </Sidebar.Root>
+    </Sidebar.Provider>
+  ),
+  table: (t) => (
+    <Table.Root size="sm" aria-label={t.invoices} className="component-preview-table">
+      <Table.Header>
+        <Table.Row>
+          {t.invoiceHead.map((name) => (
+            <Table.Head key={name}>{name}</Table.Head>
+          ))}
+        </Table.Row>
+      </Table.Header>
+      <Table.Body>
+        {t.invoiceRows.map((row) => (
+          <Table.Row key={row[0]}>
+            {row.map((value) => (
+              <Table.Cell key={value}>{value}</Table.Cell>
+            ))}
+          </Table.Row>
+        ))}
+      </Table.Body>
+    </Table.Root>
   ),
   "command-menu": (t) => <CommandMenuPreview t={t} />,
   "table-of-contents": (t) => <TableOfContentsPreview t={t} />,

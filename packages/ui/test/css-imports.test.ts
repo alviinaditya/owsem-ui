@@ -26,11 +26,17 @@ for (const path of Object.keys(sheets)) {
   cssByFolder.set(folder, [...(cssByFolder.get(folder) ?? []), path]);
 }
 
-/** Folders a file imports code from (type-only imports draw nothing). */
+/**
+ * Folders a file imports a component or its classes from (type-only imports draw nothing). A plain
+ * helper such as toggle-group/thumb.ts has no classes, so it needs no CSS.
+ */
 function siblingsUsed(code: string): Set<string> {
   const found = new Set<string>();
-  const pattern = /^(?:import|export)\s+(?!type\b)[^;]*?from\s+["']\.\.\/([a-z0-9-]+)\//gm;
-  for (const [, folder = ""] of code.matchAll(pattern)) found.add(folder);
+  const pattern =
+    /^(?:import|export)\s+(?!type\b)[^;]*?from\s+["']\.\.\/([a-z0-9-]+)\/([a-z0-9.-]+)["']/gm;
+  for (const [, folder = "", file = ""] of code.matchAll(pattern)) {
+    if (file === folder || file === "index" || file.endsWith("-variants")) found.add(folder);
+  }
   return found;
 }
 

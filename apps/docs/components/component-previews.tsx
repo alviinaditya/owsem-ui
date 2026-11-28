@@ -1030,7 +1030,12 @@ const LIVE: Partial<Record<ComponentName, (t: Text) => ReactNode>> = {
     </Sidebar.Provider>
   ),
   table: (t) => (
-    <Table.Root size="sm" aria-label={t.invoices} className="component-preview-table">
+    <Table.Root
+      size="sm"
+      layout="table"
+      aria-label={t.invoices}
+      className="component-preview-table"
+    >
       <Table.Header>
         <Table.Row>
           {t.invoiceHead.map((name) => (

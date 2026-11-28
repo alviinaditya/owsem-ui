@@ -220,7 +220,7 @@ tokennya di `:root`, atau di Popup itu sendiri lewat `className` atau `style`.
 | `--ow-popup-shadow` | Bayangan panel |
 | `--ow-backdrop` | Scrim di atas halaman, yang ikut diburamkan oleh `backdrop="blur"` |
 | `--ow-fg` | Teks, dan ikon item yang menyala; juga tint Trigger, 6% (9% saat hover), dan 9% keycap |
-| `--ow-muted` | Teks Trigger, nama grup, deskripsi, ikon, keycap, dan item nonaktif |
+| `--ow-muted` | Teks Trigger, nama grup, deskripsi, ikon, dan keycap |
 | `--ow-focus` | Cincin fokus Trigger |
 | `--ow-hover` | Highlight (Glide) |
 | `--ow-radius` | Sudut panel dan Trigger; item, tombol tutup, dan Glide memakainya dikurangi 6px, dan keycap setengahnya |
@@ -241,7 +241,7 @@ Popup.
 
 ## Gerak [#motion]
 
-Panel terbuka dan tertutup seketika: palet yang dibuka dari keyboard berkali-kali sehari tidak
-beranimasi. Highlight meluncur dari item ke item dengan spring Glide. Dengan
-`prefers-reduced-motion`, highlight memudar, bukan meluncur; tidak ada yang lain bergerak. Dengan
+Panel terbuka dan tertutup seperti Dialog: memudar dan membesar sedikit dari tengahnya, 250 ms
+masuk dan 200 ms keluar. Highlight meluncur dari item ke item dengan spring Glide. Dengan
+`prefers-reduced-motion`, panel hanya memudar dan highlight memudar, bukan meluncur. Dengan
 `prefers-reduced-transparency`, panel tidak tembus pandang dan halaman tidak diburamkan.

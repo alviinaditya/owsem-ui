@@ -100,6 +100,8 @@ Switch membaca token tema ini. Setel salah satunya pada switch, atau pada elemen
 | `--ow-edge` | Ikon di thumb saat mati: tombolnya putih, jadi ikon butuh warna dengan kontras 3:1 di atasnya |
 | `--ow-accent` | Track saat menyala, dan ikon di thumb saat menyala |
 | `--ow-primary-shadow` | Sorot atas track saat menyala |
+| `--ow-critical` | Tint track saat invalid (14%) |
+| `--ow-critical-solid` | Track saat invalid dan menyala |
 | `--ow-on-accent` | Thumb |
 | `--ow-surface-shadow` | Bayangan kecil thumb |
 | `--ow-radius` | Sudut track |
@@ -122,3 +124,6 @@ dari posisinya. Saat bergerak ia memanjang dari sisi depannya, paling panjang di
 ditahan, ia melebar ke arah tengah track dan sedikit memendek dalam 90 ms, lalu kembali dengan
 spring settle. Dengan `prefers-reduced-motion`, ia langsung ke tempatnya tanpa perjalanan,
 peregangan, atau penyempitan.
+
+Switch yang invalid (Field yang invalid, atau `aria-invalid`) bergetar sekali saat menjadi invalid, dan
+berkedip bila gerak dikurangi.

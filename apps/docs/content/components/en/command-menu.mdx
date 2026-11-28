@@ -218,7 +218,7 @@ them on `:root`, or on the Popup itself through `className` or `style`.
 | `--ow-popup-shadow` | The panel's shadow |
 | `--ow-backdrop` | The scrim over the page, which `backdrop="blur"` also blurs |
 | `--ow-fg` | Text, and the lit item's icon; also the Trigger's tint, 6% (9% on hover), and the keycaps' 9% |
-| `--ow-muted` | The Trigger's text, group names, descriptions, icons, keys, and disabled items |
+| `--ow-muted` | The Trigger's text, group names, descriptions, icons, and keys |
 | `--ow-focus` | The Trigger's ring |
 | `--ow-hover` | The highlight (Glide) |
 | `--ow-radius` | The panel's and the Trigger's corners; items, the close button, and Glide take it less 6px, and keys half |
@@ -239,7 +239,7 @@ Popup's `className`.
 
 ## Motion [#motion]
 
-The panel opens and closes at once: a palette opened from the keyboard many times a day does not
-animate. The highlight slides from item to item on the Glide spring. With `prefers-reduced-motion`,
-the highlight fades instead of sliding; nothing else moves. With `prefers-reduced-transparency`, the
+The panel opens and closes as a Dialog does: it fades and grows a little from its middle, 250 ms in
+and 200 ms out. The highlight slides from item to item on the Glide spring. With
+`prefers-reduced-motion`, the panel only fades and the highlight fades instead of sliding. With `prefers-reduced-transparency`, the
 panel is opaque and the page is not blurred.

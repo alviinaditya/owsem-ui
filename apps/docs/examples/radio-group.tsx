@@ -21,6 +21,7 @@ const TEXT = {
     pickup: "Ambil di toko",
     disabled: "Nonaktif",
     readOnly: "Hanya baca",
+    invalid: "Invalid",
     arrives: {
       standard: "Tiba dalam 3 sampai 5 hari.",
       express: "Tiba besok pagi.",
@@ -34,6 +35,7 @@ const TEXT = {
     pickup: "Pick up in store",
     disabled: "Disabled",
     readOnly: "Read-only",
+    invalid: "Invalid",
     arrives: {
       standard: "Arrives in 3 to 5 days.",
       express: "Arrives tomorrow morning.",
@@ -47,14 +49,16 @@ function Rows({
   lang,
   options = OPTIONS,
   check,
+  invalid,
 }: {
   lang: Lang;
   options?: readonly Option[];
   check?: boolean;
+  invalid?: boolean;
 }) {
   return options.map((value) => (
     <label key={value}>
-      <Radio.Root value={value}>
+      <Radio.Root value={value} aria-invalid={invalid || undefined}>
         {check ? (
           <Radio.Indicator>
             <Icon name="check" />
@@ -138,6 +142,14 @@ function Locked({ lang }: { lang: Lang }) {
   );
 }
 
+function Invalid({ lang }: { lang: Lang }) {
+  return (
+    <RadioGroup aria-label={TEXT[lang].invalid} defaultValue="standard">
+      <Rows lang={lang} options={PAIR} invalid />
+    </RadioGroup>
+  );
+}
+
 const imp = (setup: TokenSetup, ...extra: string[]) => [
   ...extra,
   `import { Radio, RadioGroup } from "${importPath(setup, "radio-group")}";`,
@@ -146,7 +158,7 @@ const imp = (setup: TokenSetup, ...extra: string[]) => [
 const cap = (lang: Lang, value: Option) => TEXT[lang][value];
 
 /** The rows' JSX, one `<label>` per option. */
-const rows = (lang: Lang, options: readonly Option[] = OPTIONS, check = false) =>
+const rows = (lang: Lang, options: readonly Option[] = OPTIONS, check = false, invalid = false) =>
   options.flatMap((value) => [
     "<label>",
     ...(check
@@ -157,7 +169,7 @@ const rows = (lang: Lang, options: readonly Option[] = OPTIONS, check = false) =
           "    </Radio.Indicator>",
           "  </Radio.Root>",
         ]
-      : [`  <Radio.Root value="${value}" />`]),
+      : [`  <Radio.Root value="${value}"${invalid ? " aria-invalid" : ""} />`]),
     `  ${cap(lang, value)}`,
     "</label>",
   ]);
@@ -321,6 +333,26 @@ export const radioGroupDefinition = defineComponent({
           ]),
         ];
       },
+    },
+    {
+      id: "invalid",
+      title: { id: "Invalid", en: "Invalid" },
+      description: {
+        id: "Di dalam Field yang invalid, atau dengan aria-invalid pada radionya: lingkaran menjadi critical dan bergetar sekali; terpilih, ia critical solid.",
+        en: "In an invalid Field, or with aria-invalid on the radios: the circle turns critical and shakes once; selected, it is the solid critical.",
+      },
+      uses: ["RadioGroup", "Radio"],
+      demo: (lang) => <Invalid lang={lang} />,
+      code: (setup, lang) => [
+        exampleFile(
+          "Invalid",
+          imp(setup),
+          group(
+            [`aria-label="${TEXT[lang].invalid}"`, 'defaultValue="standard"'],
+            rows(lang, PAIR, false, true),
+          ),
+        ),
+      ],
     },
   ],
   anatomy: {

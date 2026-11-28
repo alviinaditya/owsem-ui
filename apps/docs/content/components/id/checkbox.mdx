@@ -114,6 +114,8 @@ Checkbox membaca token tema ini. Setel salah satunya pada kotak, atau pada eleme
 | --- | --- |
 | `--ow-fg` | Tint saat mati (10%, 13% saat hover, 16% saat ditahan) |
 | `--ow-accent` | Isian saat dicentang atau indeterminate |
+| `--ow-critical` | Tint saat invalid (14%, 20% saat hover) |
+| `--ow-critical-solid` | Isian saat invalid dan dicentang atau indeterminate |
 | `--ow-primary-shadow` | Sorot atas saat dicentang atau indeterminate |
 | `--ow-on-accent` | Glyph |
 | `--ow-radius` | Sudut, separuh nilainya |
@@ -135,3 +137,6 @@ Isiannya berubah seketika; glyph-lah yang bergerak. Ia memudar masuk dalam 120 m
 spring settle; centang menggambar goresannya dalam 260 ms dan minus tumbuh dari tengahnya. Kedua glyph
 berbagi satu sel, jadi kotak induk tidak pernah melompat. Tekanan menyusutkan kotak ke 0,97 dalam 90 ms.
 Dengan `prefers-reduced-motion`, tidak ada yang menggambar atau tumbuh: glyph hanya memudar.
+
+Kotak yang invalid (Field yang invalid, atau `aria-invalid`) bergetar sekali saat menjadi invalid, dan
+berkedip bila gerak dikurangi.

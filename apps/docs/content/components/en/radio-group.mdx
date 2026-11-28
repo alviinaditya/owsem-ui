@@ -130,9 +130,10 @@ Radio Group reads these theme tokens. Set one on a radio, on the group, or on an
 | --- | --- |
 | `--ow-fg` | Labels, and the circle's tint while off: 10%, 13% on hover, 16% held |
 | `--ow-accent` | The circle while on |
+| `--ow-critical` | The circle's tint while invalid (14%) |
+| `--ow-critical-solid` | The circle while invalid and on |
 | `--ow-primary-shadow` | Its top highlight while on |
 | `--ow-on-accent` | The dot, or a glyph of your own |
-| `--ow-muted` | Disabled labels |
 | `--ow-focus` | The keyboard focus ring |
 | `--ow-hover` | The hover highlight (Glide) |
 | `--ow-radius` | The highlight's corners |
@@ -164,3 +165,6 @@ The fill changes at once, with the state. Only the mark moves, on the settle spr
 scaling in from 0.6 of its size while it fades in over 120 ms, as Select's check does, and it leaves with the fill. Holding a row presses its circle in to 0.97
 within 90 ms, and it lets go on the spring. `--ow-motion-scale` sets how far a press goes (0 turns it off).
 With `prefers-reduced-motion`, nothing moves: a held circle only changes its fill, and the mark fades in.
+
+An invalid radio (an invalid Field, or `aria-invalid`) shakes once when it becomes invalid, and blinks
+instead when motion is reduced.

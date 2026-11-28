@@ -132,8 +132,9 @@ Radio Group membaca token tema ini. Pasang satu pada radio, pada grup, atau pada
 | `--ow-fg` | Label, dan tint lingkaran saat mati: 10%, 13% saat hover, 16% saat ditekan |
 | `--ow-accent` | Lingkaran saat aktif |
 | `--ow-primary-shadow` | Highlight atasnya saat aktif |
+| `--ow-critical` | Tint lingkaran saat invalid (14%) |
+| `--ow-critical-solid` | Lingkaran saat invalid dan aktif |
 | `--ow-on-accent` | Titik, atau glyph Anda sendiri |
-| `--ow-muted` | Label nonaktif |
 | `--ow-focus` | Cincin fokus keyboard |
 | `--ow-hover` | Highlight hover (Glide) |
 | `--ow-radius` | Sudut highlight |
@@ -166,3 +167,6 @@ Isiannya berubah seketika, bersama state. Hanya tanda yang bergerak, dengan spri
 menekan lingkarannya ke 0,97 dalam 90 ms, lalu melepasnya dengan spring. `--ow-motion-scale` mengatur
 seberapa jauh tekanan (0 mematikannya). Dengan `prefers-reduced-motion`, tidak ada yang bergerak:
 lingkaran yang ditahan hanya berganti isian, dan tanda memudar masuk.
+
+Radio yang invalid (Field yang invalid, atau `aria-invalid`) bergetar sekali saat menjadi invalid, dan
+berkedip bila gerak dikurangi.

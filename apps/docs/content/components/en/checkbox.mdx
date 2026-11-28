@@ -113,6 +113,8 @@ Checkbox reads these theme tokens. Set one on a box, or on anything around it.
 | --- | --- |
 | `--ow-fg` | Tint while off (10%, 13% on hover, 16% held) |
 | `--ow-accent` | Fill while checked or indeterminate (5% black deeper on hover) |
+| `--ow-critical` | Tint while invalid (14%, 20% on hover) |
+| `--ow-critical-solid` | Fill while invalid and checked or indeterminate |
 | `--ow-primary-shadow` | Top highlight while checked or indeterminate |
 | `--ow-on-accent` | Glyph |
 | `--ow-radius` | Corners, at half its value |
@@ -134,3 +136,6 @@ The fill changes at once; the glyph is what moves. It fades in within 120 ms, gr
 settle spring; the check draws its stroke in over 260 ms and the minus grows from its middle. The two
 glyphs share one cell, so a parent box never jumps. A press shrinks the box to 0.97 within 90 ms.
 With `prefers-reduced-motion`, nothing draws or grows: the glyphs only fade.
+
+An invalid box (an invalid Field, or `aria-invalid`) shakes once when it becomes invalid, and blinks
+instead when motion is reduced.

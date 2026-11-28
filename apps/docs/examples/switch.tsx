@@ -18,6 +18,7 @@ const TEXT = {
     on: "Menyala",
     disabled: "Nonaktif",
     readOnly: "Hanya baca",
+    invalid: "Invalid",
     state: (on: boolean) => `Mode gelap ${on ? "menyala" : "mati"}`,
   },
   en: {
@@ -30,6 +31,7 @@ const TEXT = {
     on: "On",
     disabled: "Disabled",
     readOnly: "Read-only",
+    invalid: "Invalid",
     state: (on: boolean) => `Dark mode is ${on ? "on" : "off"}`,
   },
 } satisfies Record<Lang, unknown>;
@@ -100,6 +102,20 @@ function Locked({ lang }: { lang: Lang }) {
       </Row>
       <Row text={t.readOnly}>
         <Switch.Root readOnly defaultChecked />
+      </Row>
+    </Stack>
+  );
+}
+
+function Invalid({ lang }: { lang: Lang }) {
+  const t = TEXT[lang];
+  return (
+    <Stack>
+      <Row text={t.invalid}>
+        <Switch.Root aria-invalid />
+      </Row>
+      <Row text={`${t.invalid}, ${t.on.toLowerCase()}`}>
+        <Switch.Root aria-invalid defaultChecked />
       </Row>
     </Stack>
   );
@@ -213,6 +229,32 @@ export const switchDefinition = defineComponent({
                 "<Switch.Root disabled defaultChecked />",
               ),
               ...label(t.readOnly, "<Switch.Root readOnly defaultChecked />"),
+            ],
+          ),
+        ];
+      },
+    },
+    {
+      id: "invalid",
+      title: { id: "Invalid", en: "Invalid" },
+      description: {
+        id: "Di dalam Field yang invalid, atau dengan aria-invalid: track menjadi critical dan bergetar sekali; menyala, ia critical solid.",
+        en: "In an invalid Field, or with aria-invalid: the track turns critical and shakes once; on, it is the solid critical.",
+      },
+      uses: ["Switch"],
+      demo: (lang) => <Invalid lang={lang} />,
+      code: (setup, lang) => {
+        const t = TEXT[lang];
+        return [
+          exampleFile(
+            "Invalid",
+            [`import { Switch } from "${importPath(setup, "switch")}";`],
+            [
+              ...label(t.invalid, "<Switch.Root aria-invalid />"),
+              ...label(
+                `${t.invalid}, ${t.on.toLowerCase()}`,
+                "<Switch.Root aria-invalid defaultChecked />",
+              ),
             ],
           ),
         ];

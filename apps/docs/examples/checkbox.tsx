@@ -24,6 +24,8 @@ const TEXT = {
     disabled: "Nonaktif",
     disabledOn: "Nonaktif, dicentang",
     readOnly: "Hanya baca",
+    invalid: "Invalid",
+    invalidOn: "Invalid, dicentang",
   },
   en: {
     updates: "Tell me about new releases",
@@ -41,6 +43,8 @@ const TEXT = {
     disabled: "Disabled",
     disabledOn: "Disabled, checked",
     readOnly: "Read-only",
+    invalid: "Invalid",
+    invalidOn: "Invalid, checked",
   },
 } satisfies Record<Lang, Record<string, string>>;
 
@@ -134,6 +138,22 @@ function Locked({ lang }: { lang: Lang }) {
       <label className="demo-checkbox-label">
         <Checkbox.Root readOnly defaultChecked />
         {t.readOnly}
+      </label>
+    </div>
+  );
+}
+
+function Invalid({ lang }: { lang: Lang }) {
+  const t = TEXT[lang];
+  return (
+    <div className="demo-col">
+      <label className="demo-checkbox-label">
+        <Checkbox.Root aria-invalid />
+        {t.invalid}
+      </label>
+      <label className="demo-checkbox-label">
+        <Checkbox.Root aria-invalid defaultChecked />
+        {t.invalidOn}
       </label>
     </div>
   );
@@ -281,6 +301,26 @@ export const checkboxDefinition = defineComponent({
             ...label(t.disabled, "<Checkbox.Root disabled />"),
             ...label(t.disabledOn, "<Checkbox.Root disabled defaultChecked />"),
             ...label(t.readOnly, "<Checkbox.Root readOnly defaultChecked />"),
+          ]),
+          TASK_CSS,
+        ];
+      },
+    },
+    {
+      id: "invalid",
+      title: { id: "Invalid", en: "Invalid" },
+      description: {
+        id: "Di dalam Field yang invalid, atau dengan aria-invalid: kotak menjadi critical dan bergetar sekali; dicentang, isiannya critical solid.",
+        en: "In an invalid Field, or with aria-invalid: the box turns critical and shakes once; checked, its fill is the solid critical.",
+      },
+      uses: ["Checkbox"],
+      demo: (lang) => <Invalid lang={lang} />,
+      code: (setup, lang) => {
+        const t = TEXT[lang];
+        return [
+          exampleFile("Invalid", imp(setup), [
+            ...label(t.invalid, "<Checkbox.Root aria-invalid />"),
+            ...label(t.invalidOn, "<Checkbox.Root aria-invalid defaultChecked />"),
           ]),
           TASK_CSS,
         ];

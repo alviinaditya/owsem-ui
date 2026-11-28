@@ -20,6 +20,7 @@ const TEXT = {
     placeholder: "Placeholder",
     disabled: "Nonaktif",
     invalid: "Invalid",
+    readOnly: "Hanya baca",
     count: (n: number) => `${n} buah`,
     names: {
       apple: "Apel",
@@ -43,6 +44,7 @@ const TEXT = {
     placeholder: "Placeholder",
     disabled: "Disabled",
     invalid: "Invalid",
+    readOnly: "Read only",
     count: (n: number) => `${n} fruits`,
     names: {
       apple: "Apple",
@@ -155,6 +157,12 @@ function States({ lang }: { lang: Lang }) {
       <div className="demo-select-field">
         <Select.Root disabled defaultValue={fruit(lang, "cherry")}>
           <Select.Trigger aria-label={t.disabled} />
+          <Select.Popup>{items(lang, SHORT)}</Select.Popup>
+        </Select.Root>
+      </div>
+      <div className="demo-select-field">
+        <Select.Root readOnly defaultValue={fruit(lang, "cherry")}>
+          <Select.Trigger aria-label={t.readOnly} />
           <Select.Popup>{items(lang, SHORT)}</Select.Popup>
         </Select.Root>
       </div>
@@ -378,8 +386,8 @@ export const selectDefinition = defineComponent({
       id: "states",
       title: { id: "State", en: "States" },
       description: {
-        id: "Placeholder muted, nonaktif memudar, dan invalid memberi tint critical dan satu getaran.",
-        en: "A muted placeholder, a faded disabled field, and invalid, a critical tint with one shake.",
+        id: "Placeholder muted, nonaktif memudar, hanya baca tampil biasa, dan invalid memberi tint critical dan satu getaran.",
+        en: "A muted placeholder, a faded disabled field, a read-only one that looks normal, and invalid, a critical tint with one shake.",
       },
       uses: ["Select"],
       demo: (lang) => <States lang={lang} />,
@@ -397,6 +405,12 @@ export const selectDefinition = defineComponent({
             ...field([
               `<Select.Root disabled defaultValue="${cherry}">`,
               `  <Select.Trigger aria-label="${t.disabled}" />`,
+              ...popup(lang, SHORT).map((l) => `  ${l}`),
+              "</Select.Root>",
+            ]),
+            ...field([
+              `<Select.Root readOnly defaultValue="${cherry}">`,
+              `  <Select.Trigger aria-label="${t.readOnly}" />`,
               ...popup(lang, SHORT).map((l) => `  ${l}`),
               "</Select.Root>",
             ]),

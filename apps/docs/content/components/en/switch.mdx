@@ -99,6 +99,8 @@ Switch reads these theme tokens. Set one on a switch, or on anything around it.
 | `--ow-fg` | Track tint while off (10%, 13% on hover) |
 | `--ow-edge` | An icon in the thumb while off: the key is white, so it needs a tone with 3:1 on it |
 | `--ow-accent` | Track while on, and an icon in the thumb while on |
+| `--ow-critical` | Track tint while invalid (14%) |
+| `--ow-critical-solid` | Track while invalid and on |
 | `--ow-primary-shadow` | Track's top highlight while on |
 | `--ow-on-accent` | Thumb |
 | `--ow-surface-shadow` | Thumb's small shadow |
@@ -121,3 +123,6 @@ The thumb moves with `translate` on the travel spring; change your mind halfway 
 from where it is. While travelling it stretches from its leading edge, most at mid-travel. Held down, it widens
 toward the middle of the track and squashes a little in height within 90 ms, and settles back on the
 settle spring. With `prefers-reduced-motion`, it goes to its place with no travel, stretch, or squash.
+
+An invalid switch (an invalid Field, or `aria-invalid`) shakes once when it becomes invalid, and blinks
+instead when motion is reduced.

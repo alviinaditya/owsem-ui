@@ -1,3 +1,7 @@
+@import "../button/button.css";
+@import "../icon-morph/icon-morph.css";
+@import "../tooltip/tooltip.css";
+
 @layer owsem.tokens, owsem.components;
 
 /*

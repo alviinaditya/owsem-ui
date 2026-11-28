@@ -113,6 +113,27 @@ Planned with later components: 3:1 boundary checks and hit-area measurements in 
 and WebKit; a contrast test for text over depth gradients, against both ends of the gradient; and
 checks that visually hidden text stays readable for screen readers.
 
+## Labels and translation
+
+Most text on a component is yours: the children you write. The few strings a component draws
+itself are the names of buttons that show only an icon, so a screen reader has something to say.
+They are in English, and each has a prop that replaces it. Pass your language's text wherever you
+translate the rest of the page.
+
+| Component | Default text | Change it with |
+| --- | --- | --- |
+| Combobox, Autocomplete | `Open` (Trigger), `Clear` (Clear), `Remove` (ChipRemove) | `aria-label` on that part |
+| Toast | `Close` (Close) | `aria-label` on `Toast.Close` |
+| Command Menu | `Close` (the close button on a touch screen) | `closeLabel` on `CommandMenu.Popup` |
+| Copy Button | `Copy`, `Copied` (the tooltip, and the button's name) | `labels={{ copy, copied }}` |
+| Color Picker, Color Picker Popover | `Color picker`, `Saturation and brightness`, `Saturation`, `Brightness`, `Hue`, `Opacity`, `Pick a color from the screen`, `Format`, `Hex`, `Red`, `Green`, `Blue`, `Lightness`, `Swatches` | `labels`, an object with any of those keys |
+| Sidebar | `Sidebar` (Root's `nav`), `Toggle sidebar` (Trigger with no children) | `aria-label` on the Root or the Trigger |
+| Number Field | `Decrease`, `Increase` (the steppers, from Base UI) | `aria-label` on each stepper |
+
+A part you give your own children, such as a Trigger with a visible word, takes its name from them.
+The `labels` of Color Picker also name the sliders and fields inside it, so give it all of them
+when you ship in another language.
+
 ## What stays your app's job
 
 The components take care of their own parts. The page around them is yours:

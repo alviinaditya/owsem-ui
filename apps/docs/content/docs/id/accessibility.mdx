@@ -115,6 +115,27 @@ Chromium, Firefox, dan WebKit; test kontras untuk teks di atas gradien material 
 kedua ujung gradiennya; serta pengecekan bahwa teks yang disembunyikan secara visual tetap terbaca
 screen reader.
 
+## Label dan terjemahan
+
+Sebagian besar teks pada komponen adalah milik Anda: children yang Anda tulis. Beberapa string yang
+digambar komponen sendiri adalah nama tombol yang hanya menampilkan ikon, supaya pembaca layar punya
+sesuatu untuk diucapkan. Semuanya berbahasa Inggris, dan masing-masing punya prop yang menggantinya.
+Berikan teks bahasa Anda di tempat Anda menerjemahkan bagian halaman lainnya.
+
+| Komponen | Teks bawaan | Ubah dengan |
+| --- | --- | --- |
+| Combobox, Autocomplete | `Open` (Trigger), `Clear` (Clear), `Remove` (ChipRemove) | `aria-label` pada bagian itu |
+| Toast | `Close` (Close) | `aria-label` pada `Toast.Close` |
+| Command Menu | `Close` (tombol tutup di layar sentuh) | `closeLabel` pada `CommandMenu.Popup` |
+| Copy Button | `Copy`, `Copied` (tooltip, dan nama tombol) | `labels={{ copy, copied }}` |
+| Color Picker, Color Picker Popover | `Color picker`, `Saturation and brightness`, `Saturation`, `Brightness`, `Hue`, `Opacity`, `Pick a color from the screen`, `Format`, `Hex`, `Red`, `Green`, `Blue`, `Lightness`, `Swatches` | `labels`, objek dengan salah satu kunci itu |
+| Sidebar | `Sidebar` (`nav` milik Root), `Toggle sidebar` (Trigger tanpa children) | `aria-label` pada Root atau Trigger |
+| Number Field | `Decrease`, `Increase` (tombol stepper, dari Base UI) | `aria-label` pada tiap stepper |
+
+Bagian yang Anda beri children sendiri, seperti Trigger dengan kata yang terlihat, mengambil namanya
+dari children itu. `labels` milik Color Picker juga menamai slider dan kolom di dalamnya, jadi isi
+semuanya bila Anda merilis dalam bahasa lain.
+
 ## Yang tetap menjadi tugas app
 
 Komponen mengurus bagiannya sendiri. Halaman di sekitarnya adalah tugas Anda:

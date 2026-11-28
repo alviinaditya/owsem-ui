@@ -95,9 +95,8 @@ const tab = [
   "data-held:scale-(--_press) data-held:duration-[150ms,90ms] data-held:ease-[var(--ow-ease-out),var(--ow-ease-out)]",
   // Inside, so the scrolling list never cuts it.
   "focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(color:--_focus)",
-  "disabled:text-[color-mix(in_oklab,var(--_muted)_50%,transparent)] disabled:cursor-not-allowed",
-  "disabled:data-glide-active:text-[color-mix(in_oklab,var(--_muted)_50%,transparent)]",
-  "disabled:data-active:text-[color-mix(in_oklab,var(--_muted)_50%,transparent)]",
+  "disabled:opacity-50 disabled:cursor-not-allowed",
+  "forced-colors:disabled:text-[GrayText] forced-colors:disabled:opacity-100",
   // No pressing in; the material still changes.
   "motion-reduce:scale-none motion-reduce:data-held:scale-none",
   "motion-reduce:transition-[color] motion-reduce:duration-150 motion-reduce:ease-(--ow-ease-out)",

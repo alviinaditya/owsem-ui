@@ -6,7 +6,8 @@ Visual consistency across the library.
 
 - Disabled is one look: `opacity: 0.5` on every control and item (it was 0.45 on fields, menu and
   select items, Toggle, Toolbar, Menubar, and Navigation Menu, and a muted text color on Tabs, Toggle
-  Group, Command Menu, and Radio labels). A disabled Radio dims once, with its label.
+  Group, Command Menu, Code Block tabs, and Radio and Checkbox Group rows). A disabled row dims once,
+  its box or circle with it.
 - Read-only fields (Input, OTP Field, Select, Combobox, Autocomplete, Number Field) keep their tint on
   hover; the Select and Combobox triggers show the default cursor.
 - Menu's viewport and the Combobox and Autocomplete lists scroll with the thin, quiet scrollbar of

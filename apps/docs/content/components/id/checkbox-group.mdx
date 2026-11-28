@@ -108,8 +108,8 @@ Grup tidak menetapkan lebar atau margin: ia muat pada barisnya, dan ia kolom fle
   dikendalikannya, dan terbaca campuran bila sebagian tercentang.
 - Menekan di mana saja pada baris mengubahnya. Tekan pointer memindahkan fokus ke kotak tanpa menampilkan
   cincin; fokus keyboard menggambar cincin 2 px, 2 px di luar.
-- `disabled` pada grup mematikan semua kotak, dan barisnya menjadi abu-abu. Satu kotak juga bisa nonaktif
-  sendiri.
+- `disabled` pada grup mematikan semua kotak, dan setiap baris meredup ke opacity setengah, bersama
+  kotaknya. Satu kotak juga bisa nonaktif sendiri.
 - Dengan `prefers-contrast: more` kotak mendapat tepi 1 px dalam `--ow-edge`. Pada forced colors kotak
   tercentang adalah `Highlight` dan baris nonaktif `GrayText`. Kanan ke kiri, kotak ada di kanan.
 - Dalam form, setiap kotak dengan `name` dan `value` mengirim nilainya saat tercentang.
@@ -124,7 +124,6 @@ pada grup, atau pada apa pun di sekitarnya.
 | Token tema | Fungsi |
 | --- | --- |
 | `--ow-fg` | Teks baris |
-| `--ow-muted` | Baris nonaktif, yang menjadi setengahnya |
 | `--ow-hover` | Sorotan hover (Glide) |
 | `--ow-radius` | Sudut sorotan |
 

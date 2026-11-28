@@ -29,10 +29,13 @@ const row = [
   "[&_:where(label:has([role=checkbox]))]:touch-manipulation",
   "[&_:where(label:has([role=checkbox]))]:[-webkit-tap-highlight-color:transparent]",
   "[&_:where(label:has([role=checkbox][data-readonly]))]:cursor-default",
-  "[&_:where(label:has([role=checkbox][data-disabled]))]:text-[color-mix(in_oklab,var(--_muted)_50%,transparent)]",
+  // A disabled row dims as one, its box with it, so the box does not dim a second time.
+  "[&_:where(label:has([role=checkbox][data-disabled]))]:opacity-50",
   "[&_:where(label:has([role=checkbox][data-disabled]))]:cursor-not-allowed",
+  "[&_:where(label)_[role=checkbox][data-disabled]]:opacity-100",
   // The label turns gray with the system's disabled color.
   "forced-colors:[&_:where(label:has([role=checkbox][data-disabled]))]:text-[GrayText]",
+  "forced-colors:[&_:where(label:has([role=checkbox][data-disabled]))]:opacity-100",
   // In a row: on the first line of a label that wraps, and as far from the start as from the top.
   "[&_:where(label>[role=checkbox])]:my-[calc((1lh_-_var(--icon))_/_2)]",
   "[&_:where(label>[role=checkbox]:first-child)]:ms-[calc((1cap_-_var(--icon))_/_2)]",
@@ -41,7 +44,7 @@ const row = [
 // The group sets no width: it fits its rows, and a rule on className lays them out in a row or a
 // grid. Glide's container, so it holds the highlight behind the rows.
 const root = [
-  "[--_fg:var(--ow-fg)] [--_muted:var(--ow-muted)]",
+  "[--_fg:var(--ow-fg)]",
   "relative isolate inline-flex flex-col align-top",
   "text-(color:--_fg)",
   ...row,

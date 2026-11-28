@@ -152,14 +152,13 @@ describe("Checkbox Group", () => {
     expect(group.hasAttribute("data-disabled")).toBe(true);
     for (const name of TOPPINGS) {
       expect(box(name).hasAttribute("data-disabled")).toBe(true);
-      expect(getComputedStyle(box(name)).opacity).toBe("0.5");
+      // The row dims once, with its box in it.
+      expect(getComputedStyle(row(name)).opacity).toBe("0.5");
+      expect(getComputedStyle(box(name)).opacity).toBe("1");
       expect(getComputedStyle(row(name)).cursor).toBe("not-allowed");
     }
     await userEvent.click(row("Cheese"), { force: true });
     expect(checked(box("Cheese"))).toBe("false");
-    expect(getComputedStyle(row("Cheese")).color).not.toBe(
-      getComputedStyle(row("Cheese").parentElement as Element).color,
-    );
   });
 
   test("a read-only box keeps its look and its row's default cursor", async () => {

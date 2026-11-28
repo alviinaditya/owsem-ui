@@ -107,7 +107,8 @@ The group sets no width and no margin: it fits its rows, and it is a flex column
   controls, and reads as mixed when some are ticked.
 - A press anywhere on a row toggles it. A pointer press moves focus to the box without showing the ring;
   keyboard focus draws a 2 px ring, 2 px out.
-- `disabled` on the group turns off every box, and the rows turn gray. A box can be disabled alone.
+- `disabled` on the group turns off every box, and each row dims to half opacity, its box with it. A box
+  can be disabled alone.
 - With `prefers-contrast: more` the boxes get a 1 px edge in `--ow-edge`. In forced colors a ticked box is
   `Highlight` and a disabled row is `GrayText`. Right to left, the box sits on the right.
 - In a form, every box with a `name` and a `value` submits its value when ticked.
@@ -122,7 +123,6 @@ or on anything around it.
 | Theme token | Purpose |
 | --- | --- |
 | `--ow-fg` | The rows' text |
-| `--ow-muted` | Disabled rows, which turn to half of it |
 | `--ow-hover` | The hover highlight (Glide) |
 | `--ow-radius` | The highlight's corners |
 

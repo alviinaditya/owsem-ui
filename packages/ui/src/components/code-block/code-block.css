@@ -191,7 +191,7 @@
   }
 
   .ow-code-block__tab:disabled {
-    color: color-mix(in oklab, var(--_muted) 50%, transparent);
+    opacity: 0.5;
     cursor: not-allowed;
   }
 
@@ -300,6 +300,11 @@
     .ow-code-block__tab[data-active] {
       forced-color-adjust: none;
       color: HighlightText;
+    }
+
+    .ow-code-block__tab:disabled {
+      color: GrayText;
+      opacity: 1;
     }
 
     /* The label turns as the fill arrives, so the fill does not travel. */

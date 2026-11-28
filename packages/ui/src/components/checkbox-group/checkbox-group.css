@@ -10,7 +10,6 @@
   .ow-checkbox-group {
     --py: 0.8036em;
     --_fg: var(--ow-fg);
-    --_muted: var(--ow-muted);
     display: inline-flex;
     flex-direction: column;
     color: var(--_fg);
@@ -47,9 +46,14 @@
     cursor: default;
   }
 
+  /* A disabled row dims as one, its box with it, so the box does not dim a second time. */
   .ow-checkbox-group :where(label:has([role="checkbox"][data-disabled])) {
-    color: color-mix(in oklab, var(--_muted) 50%, transparent);
+    opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  .ow-checkbox-group :where(label) [role="checkbox"][data-disabled] {
+    opacity: 1;
   }
 
   /* In a row: on the first line of a label that wraps, and as far from the start as from the top. */
@@ -65,6 +69,7 @@
   @media (forced-colors: active) {
     .ow-checkbox-group :where(label:has([role="checkbox"][data-disabled])) {
       color: GrayText;
+      opacity: 1;
     }
   }
 }

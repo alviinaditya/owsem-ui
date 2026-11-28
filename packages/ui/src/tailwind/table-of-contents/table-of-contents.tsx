@@ -3,23 +3,12 @@
 
 import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
-import {
-  type ComponentProps,
-  createContext,
-  type ReactElement,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-} from "react";
+import { type ComponentProps, createContext, type ReactElement, useContext, useRef } from "react";
 import { cn } from "../lib/cn";
 import { useMergedRefs } from "../lib/merge-refs";
+import { useBeforePaint } from "../lib/use-before-paint";
 import { tableOfContentsSlots } from "./table-of-contents-variants";
 import { createTracker } from "./tracker";
-
-// Placing the marker before the first paint keeps a nav mounted on the client (a route change)
-// from showing a frame without it; the server has no layout, so it falls back to an effect there.
-const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 // The level of the list a link is in: 1 for the top list.
 const DepthContext = createContext(0);
@@ -42,6 +31,7 @@ export function TableOfContentsRoot({
   const rail = useRef<SVGSVGElement>(null);
   const merged = useMergedRefs(root, ref);
 
+  // Before the first paint, so a nav a route change mounts never shows a frame without its marker.
   useBeforePaint(() => {
     if (!root.current || !rail.current) return;
     const tracker = createTracker(root.current, rail.current);

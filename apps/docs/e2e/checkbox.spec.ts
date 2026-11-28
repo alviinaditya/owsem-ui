@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { demo, pageTests, pick, visit } from "./example-page.ts";
 
 pageTests("checkbox", {
-  examples: ["Default", "Sizes", "Indeterminate", "Group", "Disabled"],
+  examples: ["Default", "Sizes", "Indeterminate", "Group", "Disabled", "Invalid"],
   parts: ["Root", "Indicator", "Glyph"],
   specimen: '.ow-checkbox[data-indeterminate] [data-glyph="minus"]',
 });

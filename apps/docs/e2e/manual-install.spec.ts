@@ -352,14 +352,17 @@ test("Tailwind Switch: its class map and only the bridge parts it uses, no CSS f
   await expect(dependencies).toContainText("class-variance-authority");
   await expect(dependencies).toContainText("Tailwind CSS v4.1 or newer");
   const bridge = await copyVisibleFile(page, "lib/owsem/tailwind.css");
-  // The thumb's registered properties and its two variants, and nothing of Input's or Button's.
+  // The thumb's registered properties, its variants, and its own shake when invalid, and nothing
+  // of Input's, Checkbox's, or Button's.
   expect(bridge).toContain("@property --_switch-travel");
   expect(bridge).toContain("@property --_switch-held");
   expect(bridge).toContain("@custom-variant ow-label-hover");
   expect(bridge).toContain("@custom-variant ow-switch-held");
+  expect(bridge).toContain("@custom-variant ow-input-invalid");
+  expect(bridge).toContain("@keyframes ow-switch-shake");
   expect(bridge).not.toContain("@custom-variant held ");
-  expect(bridge).not.toContain("ow-input-invalid");
-  expect(bridge).not.toContain("@keyframes");
+  expect(bridge).not.toContain("@keyframes ow-input-shake");
+  expect(bridge).not.toContain("@keyframes ow-checkbox-shake");
   const classes = await copyVisibleFile(page, "switch/switch-variants.ts");
   expect(classes).toContain("group/ow-switch");
   expect(classes).not.toMatch(/import .*\.css/);

@@ -55,7 +55,7 @@ test("the page opens on the preview alone: title, family, tools, and the example
   await expect(docs(page)).toBeHidden();
   await expect(tools(page).getByRole("button", { name: "Code", exact: true })).toHaveCount(0);
   const picker = page.getByRole("group", { name: "Examples" });
-  await expect(picker.getByRole("button")).toHaveCount(5);
+  await expect(picker.getByRole("button")).toHaveCount(6);
   await expect(picker.getByRole("button", { name: "Default" })).toHaveAttribute(
     "aria-pressed",
     "true",

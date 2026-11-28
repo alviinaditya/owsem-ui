@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { demo, pageTests, pick, visit } from "./example-page.ts";
 
 pageTests("radio-group", {
-  examples: ["Default", "Sizes", "Row", "Controlled", "Mark", "Disabled"],
+  examples: ["Default", "Sizes", "Row", "Controlled", "Mark", "Disabled", "Invalid"],
   parts: ["Group", "Row", "Radio", "Indicator"],
   specimen: ".ow-radio-group__radio[data-checked] .ow-radio-group__indicator",
 });

@@ -100,14 +100,16 @@ export function TableRoot({
   }, []);
   const context = useMemo(() => ({ stacked, labels, setLabel }), [stacked, labels, setLabel]);
 
-  // The Root's own width decides `auto`. Stacked rows do not change it, so it cannot flip back.
+  // The Root's own width decides `auto`. Stacked rows do not change it, so it cannot flip back. It is
+  // the layout width, not the box on screen, so a scaled ancestor (a zoom, a fitted preview) does not
+  // stack a table that has room.
   useLayoutEffect(() => {
     const el = own.current;
     if (!el || layout !== "auto") return;
     // A table of one or two columns fits at any width, so it never stacks.
     const update = () => {
       const columns = el.querySelector("tr")?.children.length ?? 0;
-      setNarrow(columns > 2 && el.getBoundingClientRect().width < stackBelow);
+      setNarrow(columns > 2 && el.offsetWidth < stackBelow);
     };
     update();
     const observer = new ResizeObserver(update);

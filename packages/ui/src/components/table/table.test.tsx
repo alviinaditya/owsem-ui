@@ -325,6 +325,16 @@ describe("Table layout", () => {
     await expect.poll(stacked).toBe(false);
   });
 
+  test("auto reads the Root's layout width, so a scaled ancestor does not stack it", async () => {
+    await render(
+      <div style={{ scale: "0.5", transformOrigin: "0 0" }}>
+        <Plain width={600} />
+      </div>,
+    );
+    expect(q(".ow-table").getBoundingClientRect().width).toBeLessThan(480);
+    expect(stacked()).toBe(false);
+  });
+
   test("auto never stacks a table of two columns", async () => {
     await render(
       <Table.Root style={{ inlineSize: 200 }}>

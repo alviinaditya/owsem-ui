@@ -1,2 +1,2 @@
-/* An Autocomplete looks as a Combobox does: the same field, popup, and list. */
-@import "../combobox/combobox.css";
+/* An Autocomplete looks as a Combobox does: the same field, popup, and list; it has no chips. */
+@import "../combobox/combobox-field.css";

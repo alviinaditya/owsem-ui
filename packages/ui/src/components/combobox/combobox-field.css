@@ -1,0 +1,273 @@
+@import "../input/input.css";
+@import "../select/select-popup.css";
+
+@layer owsem.tokens, owsem.components;
+
+/*
+ * An input that filters a list. The input group is the field, drawn as Input is: a 6% tint of the
+ * text color, 9% on hover, a ring while the input has focus, critical when invalid, dim when
+ * disabled. It is as tall as an Input of the size; the buttons are flat squares inset 4px from its
+ * ends, as Number Field's steppers. The popup, items, groups, and separators are Select's (their
+ * classes come from select-popup.css); this file adds what a Combobox has more. This is the part
+ * Autocomplete shares; the chips of a multiple Combobox are in combobox.css.
+ */
+@layer owsem.components {
+  .ow-combobox__input-group {
+    --py: 0.8036em;
+    --_bg: color-mix(in oklab, var(--ow-fg) 6%, transparent);
+    --_fg: var(--ow-fg);
+    --_focus: var(--ow-focus);
+    --_py: max(var(--py), (24px - 1lh) / 2);
+    --px: calc(var(--_py) + (1lh - 1cap) / 2);
+    --icon: calc(1em + 2px);
+    --_inset: 4px;
+    /* Input's height, and the buttons' side: that less the inset on both sides. */
+    --_height: calc(2 * var(--_py) + 1lh);
+    --_stepper: calc(var(--_height) - 2 * var(--_inset));
+    display: flex;
+    align-items: flex-start;
+    box-sizing: border-box;
+    inline-size: 100%;
+    min-inline-size: 0;
+    min-block-size: var(--_height);
+    padding: var(--_inset);
+    border-radius: var(--ow-radius);
+    /* Invisible until forced colors draw it as the edge. */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: var(--_bg);
+    color: var(--_fg);
+    font-size: 0.875rem;
+    line-height: 1.25;
+    cursor: text;
+  }
+
+  .ow-combobox__input-group--sm {
+    --py: 0.6058em;
+    font-size: 0.8125rem;
+  }
+
+  .ow-combobox__input-group--lg {
+    --py: 0.875em;
+    font-size: 1rem;
+  }
+
+  /* The tint deepens on hover. */
+  @media (hover: hover) and (pointer: fine) {
+    .ow-combobox__input-group:where(:hover):where(:not([data-disabled])) {
+      --_bg: color-mix(in oklab, var(--ow-fg) 9%, transparent);
+    }
+  }
+
+  .ow-combobox__input-group:where([data-invalid], [aria-invalid="true"]) {
+    --_bg: color-mix(in oklab, var(--ow-critical) 14%, transparent);
+  }
+
+  /*
+   * Rejects once when it becomes invalid, as Input does (its keyframes). data-armed is set while it
+   * is valid (core/shake.ts), so a field invalid from the start stays still.
+   */
+  .ow-combobox__input-group:where([data-invalid], [aria-invalid="true"])[data-armed]:not(
+    [data-shake="off"]
+  ) {
+    will-change: transform;
+    animation: ow-input-shake 320ms var(--ow-ease-out);
+  }
+
+  /* The ring is the group's, while the input has focus. */
+  .ow-combobox__input-group:where(:has(input:focus-visible)) {
+    outline: 2px solid var(--_focus);
+    outline-offset: 2px;
+  }
+
+  .ow-combobox__input-group:where([data-disabled]) {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
+  /* The group draws the field, so the input is bare; it measures in the group's font. */
+  .ow-combobox__input {
+    --_muted: var(--ow-muted);
+    flex: 1 1 0;
+    box-sizing: border-box;
+    min-inline-size: 0;
+    block-size: var(--_stepper);
+    margin: 0;
+    padding: 0 calc(var(--px) - var(--_inset));
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-overflow: ellipsis;
+    /* The group draws the ring. */
+    outline: none;
+  }
+
+  .ow-combobox__input::placeholder {
+    color: var(--_muted);
+    opacity: 1;
+  }
+
+  .ow-combobox__input:where([data-disabled], :disabled) {
+    cursor: not-allowed;
+  }
+
+  .ow-combobox__trigger,
+  .ow-combobox__clear {
+    --_muted: var(--ow-muted);
+    --_focus: var(--ow-focus);
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    /* Invisible until forced colors draw it as the edge. */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background-color: transparent;
+    color: var(--_muted);
+    font: inherit;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* The field's radius less the inset (as Toggle Group's items). */
+  .ow-combobox__trigger,
+  .ow-combobox__clear {
+    --_radius: max(0px, var(--ow-radius) - var(--_inset));
+    inline-size: var(--_stepper);
+    block-size: var(--_stepper);
+    border-radius: var(--_radius);
+  }
+
+  @media (hover: hover) {
+    .ow-combobox__trigger:where(:hover):where(:not([data-disabled], :disabled, [data-readonly])),
+    .ow-combobox__clear:where(:hover):where(:not([data-disabled], :disabled, [data-readonly])) {
+      background-color: var(--ow-hover);
+      color: var(--ow-fg);
+    }
+  }
+
+  .ow-combobox__trigger:where(:active):where(:not([data-disabled], :disabled, [data-readonly])),
+  .ow-combobox__clear:where(:active):where(:not([data-disabled], :disabled, [data-readonly])) {
+    background-color: var(--ow-pressed-bg);
+    color: var(--ow-fg);
+  }
+
+  .ow-combobox__trigger:where([data-popup-open]) {
+    color: var(--ow-fg);
+  }
+
+  .ow-combobox__trigger:where(:focus-visible),
+  .ow-combobox__clear:where(:focus-visible) {
+    outline: 2px solid var(--_focus);
+    outline-offset: 2px;
+  }
+
+  .ow-combobox__trigger:where([data-disabled], :disabled),
+  .ow-combobox__clear:where([data-disabled], :disabled) {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
+  /* It fades in and out as the selection comes and goes. */
+  .ow-combobox__clear {
+    transition: opacity 120ms var(--ow-ease-out);
+  }
+
+  .ow-combobox__clear:where([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+  }
+
+  .ow-combobox__trigger > :where(svg),
+  .ow-combobox__clear > :where(svg),
+  .ow-combobox__icon,
+  .ow-combobox__icon > :where(svg) {
+    inline-size: var(--icon);
+    block-size: var(--icon);
+  }
+
+  .ow-combobox__icon {
+    display: inline-flex;
+    flex: none;
+  }
+
+  /* The popup is Select's panel; this keeps it from being taller than the room. */
+  .ow-combobox__popup {
+    max-block-size: var(--available-height);
+  }
+
+  /* Nothing to say and nothing to pick: no empty panel. */
+  .ow-combobox__popup:where([data-empty]):not(:has(> [role="status"]:not(:empty))) {
+    display: none;
+  }
+
+  .ow-combobox__list:where([data-empty]) {
+    display: none;
+  }
+
+  /* Positioned, so axe reads its text over Glide's highlight. */
+  .ow-combobox__item {
+    position: relative;
+  }
+
+  /* The checks sit at the end, where the field's chevron is; more specific than Select's own
+   * margin for a first child, which styles.css may put after this file. */
+  .ow-combobox__item > .ow-select__item-indicator {
+    margin-inline-start: auto;
+  }
+
+  /* A line of text over the list: loading, or no match. It shows only when it has text. */
+  .ow-combobox__status,
+  .ow-combobox__empty {
+    --_muted: var(--ow-muted);
+    box-sizing: border-box;
+    padding: 1em;
+    color: var(--_muted);
+    text-align: center;
+  }
+
+  .ow-combobox__status:where(:empty),
+  .ow-combobox__empty:where(:empty) {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ow-combobox__input-group:where([data-invalid], [aria-invalid="true"])[data-armed]:not(
+        [data-shake="off"]
+      ) {
+      animation: ow-input-blink 160ms var(--ow-ease-out);
+    }
+  }
+
+  /* More contrast asked for: the field's edge comes back at 3:1. */
+  @media (prefers-contrast: more) {
+    .ow-combobox__input-group {
+      box-shadow: inset 0 0 0 1px var(--ow-edge);
+    }
+  }
+
+  /* The transparent outline is the edge; invalid thickens it, since its color is gone. */
+  @media (forced-colors: active) {
+    .ow-combobox__input-group:where([data-invalid], [aria-invalid="true"]) {
+      outline-width: 2px;
+      outline-offset: -2px;
+    }
+
+    .ow-combobox__input-group:where(:has(input:focus-visible)),
+    .ow-combobox__trigger:where(:focus-visible),
+    .ow-combobox__clear:where(:focus-visible) {
+      outline-color: Highlight;
+    }
+
+    .ow-combobox__input-group:where([data-disabled]),
+    .ow-combobox__trigger:where([data-disabled], :disabled),
+    .ow-combobox__clear:where([data-disabled], :disabled) {
+      color: GrayText;
+      opacity: 1;
+    }
+  }
+}

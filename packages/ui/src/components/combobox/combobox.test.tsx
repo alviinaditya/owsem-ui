@@ -8,7 +8,8 @@ import { axeReport } from "../../../test/a11y.ts";
 import { composite, contrast } from "../../../test/contrast.ts";
 import { measureIdle, settle } from "../../../test/raf-counter.ts";
 import { Field } from "../field";
-import css from "./combobox.css?raw";
+import chipsCss from "./combobox.css?raw";
+import fieldCss from "./combobox-field.css?raw";
 import { Combobox } from "./index";
 
 const root = document.documentElement;
@@ -472,6 +473,7 @@ describe("Combobox, drawn", () => {
   });
 
   test("every hover rule is behind (hover: hover), so touch never sticks one", () => {
+    const css = `${fieldCss}\n${chipsCss}`;
     const sheet = new CSSStyleSheet();
     sheet.replaceSync(css.replace(/@import[^;]*;/g, ""));
     const hovered: string[] = [];

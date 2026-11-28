@@ -1,14 +1,8 @@
 "use client";
 
-import {
-  type ReactElement,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { type ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "../../core/cn";
+import { useBeforePaint } from "../../core/use-before-paint";
 import { Button, type ButtonProps } from "../button/button";
 import { IconMorph } from "../icon-morph/icon-morph";
 import {
@@ -77,9 +71,6 @@ const CHECK = (
     <path d="M20 6 9 17l-5-5" pathLength={1} />
   </svg>
 );
-
-// The popup is mounted only while open; layout effects are skipped on the server.
-const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 /**
  * Sizes the Tooltip's words to the one on show, so the popup's width follows it (and eases, in

@@ -1,22 +1,11 @@
 "use client";
 
-import {
-  type ComponentProps,
-  isValidElement,
-  type ReactElement,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { type ComponentProps, isValidElement, type ReactElement, useRef, useState } from "react";
 import { cn } from "../../core/cn";
 import { useMergedRefs } from "../../core/merge-refs";
+import { useBeforePaint } from "../../core/use-before-paint";
 import { iconMorphSlots } from "./icon-morph-variants";
 import "./icon-morph.css";
-
-// Before the first paint, so an icon is never drawn in the wrong state; the server has no layout,
-// so it falls back to an effect there.
-const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 export interface IconMorphProps extends Omit<ComponentProps<"span">, "children" | "className"> {
   className?: string | undefined;

@@ -61,9 +61,11 @@ describe("src/tailwind (generated)", () => {
       "lib/glide/glide.ts",
       "lib/glide/use-glide.tsx",
       "lib/merge-refs.ts",
+      "lib/reduced-motion.ts",
       "lib/resting-anchor.ts",
       "lib/scroll-lock.ts",
       "lib/shake.ts",
+      "lib/use-before-paint.ts",
       "lib/use-ripple.ts",
     ]);
     expect(actual["lib/shake.ts"]).toContain('from "./merge-refs"');

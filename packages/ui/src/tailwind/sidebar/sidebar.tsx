@@ -25,6 +25,7 @@ import {
 import { cn } from "../lib/cn";
 import { GlideHighlight, useGlide } from "../lib/glide/use-glide";
 import { useMergedRefs } from "../lib/merge-refs";
+import { prefersReducedMotion } from "../lib/reduced-motion";
 import { trackPointerType, useScrollLock } from "../lib/scroll-lock";
 import { createIndicator } from "./sidebar.indicator";
 import { sidebarSlots } from "./sidebar-variants";
@@ -568,7 +569,7 @@ function reveal(scroller: HTMLElement, el: HTMLElement, smooth: boolean): void {
   if (rect.top < box.top + pad) delta = rect.top - box.top - pad;
   else if (rect.bottom > box.bottom - pad) delta = rect.bottom - box.bottom + pad;
   if (!delta) return;
-  const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const still = prefersReducedMotion();
   scroller.scrollTo({
     top: scroller.scrollTop + delta,
     behavior: smooth && !still ? "smooth" : "auto",

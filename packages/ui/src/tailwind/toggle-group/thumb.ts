@@ -18,6 +18,8 @@
  *   the one it sits under. Keys press without it: a keyboard change needs no motion to be felt.
  */
 
+import { prefersReducedMotion } from "../lib/reduced-motion";
+
 export interface Thumb {
   destroy(): void;
 }
@@ -117,7 +119,7 @@ export function createThumb(
   /** Stretches the key along the way from `from` to `to`, scaled from its leading edge. */
   function stretch(from: Box, to: Box): void {
     if (typeof thumb.animate !== "function") return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (prefersReducedMotion()) return;
     const scale = Number.parseFloat(getComputedStyle(thumb).getPropertyValue("--ow-motion-scale"));
     const motion = Number.isFinite(scale) ? scale : 1;
     const dx = to.x - from.x;

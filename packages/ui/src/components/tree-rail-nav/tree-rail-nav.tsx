@@ -13,13 +13,14 @@ import {
   useContext,
   useEffect,
   useId,
-  useLayoutEffect,
   useRef,
   useState,
 } from "react";
 import { cn } from "../../core/cn";
 import { GlideHighlight, useGlide } from "../../core/glide/use-glide";
 import { useMergedRefs } from "../../core/merge-refs";
+import { reducedMotionQuery } from "../../core/reduced-motion";
+import { useBeforePaint } from "../../core/use-before-paint";
 import { createTreeRail, PANEL, ROW } from "./tree-rail";
 import { treeRailNavSlots } from "./tree-rail-nav-variants";
 import "./tree-rail-nav.css";
@@ -27,10 +28,6 @@ import "./tree-rail-nav.css";
 // Marquee: px between the two copies of a label, and how fast they travel (px per second).
 const MARQUEE_GAP = 32;
 const MARQUEE_SPEED = 40;
-
-// Drawing before the first paint keeps a nav mounted on the client (a route change) from showing
-// a frame without its trail; the server has no layout, so it falls back to an effect there.
-const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 // The level of the list a row is in: 1 for the top list. Panels pass their row's level on.
 const DepthContext = createContext(0);
@@ -313,7 +310,7 @@ export function TreeRailNavLabel({
   useEffect(() => {
     const el = outer.current;
     if (!el) return;
-    const reduce = matchMedia("(prefers-reduced-motion: reduce)");
+    const reduce = reducedMotionQuery();
     const tooltip = () => {
       const text = (el.firstElementChild as HTMLElement | null)?.textContent ?? "";
       if (overflow && reduce.matches) el.title = text;

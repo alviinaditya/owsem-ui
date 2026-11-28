@@ -6,6 +6,8 @@
  * motion scale is 0.
  */
 
+import { prefersReducedMotion } from "../../core/reduced-motion";
+
 export interface HeightGlide {
   /** Call after the DOM shows the new snippet, before paint. */
   change(): void;
@@ -51,7 +53,7 @@ export function createHeightGlide(root: HTMLElement, shown: () => HTMLElement | 
       const scale = Number.parseFloat(style.getPropertyValue("--ow-motion-scale"));
       const motion = Number.isFinite(scale) ? scale : 1;
       if (motion <= 0) return;
-      const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const still = prefersReducedMotion();
       const next = shown();
       if (next) {
         const mine = next.animate(

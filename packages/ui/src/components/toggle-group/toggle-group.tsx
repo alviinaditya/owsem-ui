@@ -2,10 +2,11 @@
 
 import { Toggle } from "@base-ui/react/toggle";
 import { ToggleGroup as BaseToggleGroup } from "@base-ui/react/toggle-group";
-import { Children, type ReactElement, useEffect, useLayoutEffect, useRef } from "react";
+import { Children, type ReactElement, useRef } from "react";
 import { cn } from "../../core/cn";
 import { GlideHighlight, useGlide } from "../../core/glide/use-glide";
 import { useMergedRefs } from "../../core/merge-refs";
+import { useBeforePaint } from "../../core/use-before-paint";
 import { createThumb } from "./thumb";
 import {
   type ToggleGroupVariantProps,
@@ -16,10 +17,6 @@ import "./toggle-group.css";
 
 // Base UI's Toggle always sets aria-pressed, also when another element renders it.
 const ITEM = "[aria-pressed]";
-
-// The thumb is placed before the first paint; the server has no layout, so it falls back
-// to an effect there (and the pressed item draws its own key until then).
-const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 export interface ToggleGroupRootProps<Value extends string = string>
   extends Omit<BaseToggleGroup.Props<Value>, "className">,

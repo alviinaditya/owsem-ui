@@ -10,6 +10,7 @@
  * is mirrored in CSS for right-to-left text, so x is always measured from the left.
  */
 
+import { prefersReducedMotion } from "../../core/reduced-motion";
 import { treeRailNavSlots } from "./tree-rail-nav-variants";
 
 export interface TreeRail {
@@ -38,7 +39,6 @@ const curve = (x0: number, y0: number, x1: number, y1: number) => {
   const k = (y1 - y0) / 2;
   return `C${round(x0)} ${round(y0 + k)} ${round(x1)} ${round(y1 - k)} ${round(x1)} ${round(y1)}`;
 };
-const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 const disabled = (row: Element) =>
   row.matches(':disabled, [aria-disabled="true"], [data-disabled]');
 
@@ -413,7 +413,7 @@ export function createTreeRail(tree: HTMLElement, svg: SVGSVGElement): TreeRail 
   }
 
   function land(): void {
-    if (reduced()) return;
+    if (prefersReducedMotion()) return;
     dot.animate([{ transform: "scale(1.7)" }, { transform: "scale(1)" }], {
       duration: 460,
       easing: "cubic-bezier(.34,1.56,.64,1)",
@@ -545,7 +545,7 @@ export function createTreeRail(tree: HTMLElement, svg: SVGSVGElement): TreeRail 
     }
     locate();
     const to = route(row);
-    if (first || reduced()) {
+    if (first || prefersReducedMotion()) {
       anim = null;
       cancelAnimationFrame(frame);
       current = { row, length: Number.POSITIVE_INFINITY };

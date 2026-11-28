@@ -12,7 +12,6 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -21,6 +20,7 @@ import { createGlide } from "../lib/glide/glide";
 import { GlideHighlight } from "../lib/glide/use-glide";
 import { useMergedRefs } from "../lib/merge-refs";
 import { useOpenState, useScrollLock } from "../lib/scroll-lock";
+import { useBeforePaint } from "../lib/use-before-paint";
 import { Kbd } from "../kbd/kbd";
 import {
   type CommandMenuSize,
@@ -28,10 +28,6 @@ import {
   commandMenuSlots,
   commandMenuTriggerVariants,
 } from "./command-menu-variants";
-
-// Before the first paint, so the list never shows a frame unfaded; the server has no layout, so
-// it falls back to an effect there.
-const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 // Icons from Lucide (https://lucide.dev), ISC License: search and x.
 function SearchIcon({ className }: { className: string }): ReactElement {

@@ -17,7 +17,6 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -25,6 +24,7 @@ import {
 import { cn } from "../lib/cn";
 import { useMergedRefs } from "../lib/merge-refs";
 import { steadyRect } from "../lib/resting-anchor";
+import { useBeforePaint } from "../lib/use-before-paint";
 import {
   type ColorFormat,
   type ColorResult,
@@ -111,9 +111,6 @@ const SWATCHES: readonly ColorSwatch[] = [
 const FORMATS: readonly ColorFormat[] = ["hex", "rgb", "hsl"];
 const DEFAULT_COLOR = "#7c6ab8";
 const BLACK: HSVA = { h: 0, s: 0, v: 0, a: 1 };
-
-// Layout effects run before paint on the client; the server has no layout.
-const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 /** The element CSS colors resolve against (a popover's trigger), when not the picker itself. */
 const ScopeContext = createContext<Element | null>(null);

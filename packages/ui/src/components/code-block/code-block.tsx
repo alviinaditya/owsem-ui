@@ -12,13 +12,13 @@ import {
   useContext,
   useEffect,
   useId,
-  useLayoutEffect,
   useRef,
   useState,
 } from "react";
 import { cn } from "../../core/cn";
 import { GlideHighlight, useGlide } from "../../core/glide/use-glide";
 import { useMergedRefs } from "../../core/merge-refs";
+import { useBeforePaint } from "../../core/use-before-paint";
 import { CopyButton, type CopyButtonProps } from "../copy-button/copy-button";
 import { IconMorph } from "../icon-morph/icon-morph";
 import { createThumb } from "../toggle-group/thumb";
@@ -32,10 +32,6 @@ const ROOT = '[data-slot="code-block"]';
 const PANEL = '[data-slot="code-block-panel"]';
 const TITLE = '[data-slot="code-block-title"]';
 const TAB = '[role="tab"]';
-
-// The thumb is placed before the first paint; the server has no layout, so it falls back
-// to an effect there (and the active tab draws its own key until then).
-const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 const RootContext = createContext<{
   root: RefObject<HTMLDivElement | null>;

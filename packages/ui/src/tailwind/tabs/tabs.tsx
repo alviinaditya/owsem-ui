@@ -2,27 +2,17 @@
 "use client";
 
 import { Tabs } from "@base-ui/react/tabs";
-import {
-  Children,
-  createContext,
-  type ReactElement,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-} from "react";
+import { Children, createContext, type ReactElement, useContext, useEffect, useRef } from "react";
 import { cn } from "../lib/cn";
 import { GlideHighlight, useGlide } from "../lib/glide/use-glide";
 import { useMergedRefs } from "../lib/merge-refs";
+import { prefersReducedMotion } from "../lib/reduced-motion";
+import { useBeforePaint } from "../lib/use-before-paint";
 import { createThumb } from "../toggle-group/thumb";
 import { type TabsListVariantProps, tabsListVariants, tabsSlots } from "./tabs-variants";
 
 // Base UI gives every tab this role, also when another element renders it.
 const TAB = '[role="tab"]';
-
-// The indicator is placed before the first paint; the server has no layout, so it falls back
-// to an effect there (and the active tab draws its own key until then).
-const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 // For the List's Glide axis.
 const OrientationContext = createContext<Tabs.Root.Orientation>("horizontal");
@@ -66,8 +56,6 @@ const CHEVRON = {
 // A wheel that counts lines, not pixels.
 const lines = (event: WheelEvent) => (event.deltaMode === 1 ? 16 : 1);
 
-const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
 /**
  * Keeps the track's overflow honest: `data-overflow-start` and `-end` say which sides have more
  * tabs, a vertical wheel scrolls a horizontal track, and the active tab is brought into view.
@@ -102,7 +90,7 @@ function useTrack(track: { current: HTMLElement | null }, vertical: boolean): vo
         : box.right - at.right - Number.parseFloat(style.scrollPaddingRight);
       const by = before < 0 ? before : after < 0 ? -after : 0;
       if (!by) return;
-      const behavior = smooth && !reduced() ? "smooth" : "instant";
+      const behavior = smooth && !prefersReducedMotion() ? "smooth" : "instant";
       el.scrollBy(vertical ? { top: by, behavior } : { left: by, behavior });
     };
 
@@ -189,7 +177,7 @@ export function TabsList({
     const one = tab ? (vertical ? tab.offsetHeight : tab.offsetWidth) : 0;
     const by = Math.max(view / 2, view - one) * toward;
     const flip = !vertical && getComputedStyle(el).direction === "rtl" ? -1 : 1;
-    const behavior = reduced() ? "instant" : "smooth";
+    const behavior = prefersReducedMotion() ? "instant" : "smooth";
     el.scrollBy(vertical ? { top: by, behavior } : { left: by * flip, behavior });
   };
   const shape = vertical ? (["up", "down"] as const) : (["left", "right"] as const);

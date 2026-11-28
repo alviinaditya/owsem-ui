@@ -19,6 +19,7 @@
  *   arrives, on a new click, or before the revert.
  */
 
+import { prefersReducedMotion } from "../../core/reduced-motion";
 import { sidebarSlots } from "./sidebar-variants";
 
 export interface Indicator {
@@ -165,7 +166,6 @@ export function createIndicator(root: HTMLElement, pill: HTMLElement): Indicator
   let pending: HTMLElement | null = null;
   let timer = 0;
 
-  const still = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   /** The time multiplier: --ow-motion-scale, 0 for none. */
   const motion = () => {
     const scale = Number.parseFloat(getComputedStyle(pill).getPropertyValue("--ow-motion-scale"));
@@ -421,7 +421,7 @@ export function createIndicator(root: HTMLElement, pill: HTMLElement): Indicator
       return;
     }
     pill.setAttribute("data-visible", "");
-    if (!at || still() || motion() <= 0) {
+    if (!at || prefersReducedMotion() || motion() <= 0) {
       rest(item, place);
       return;
     }
